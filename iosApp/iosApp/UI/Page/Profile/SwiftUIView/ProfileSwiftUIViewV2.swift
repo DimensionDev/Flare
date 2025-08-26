@@ -51,18 +51,22 @@ struct ProfileSwiftUIViewV2: View {
                                 .id("tabbar")
                             }
 
-                            // Content
+
                             if let currentTabViewModel = presenterWrapper.currentTabViewModel {
+                                let isCurrentTab = presenterWrapper.isCurrentTabActive
+
                                 if currentTabViewModel.isMediaTab {
                                     ProfileWaterfallContentView(
                                         timelineViewModel: currentTabViewModel.timelineViewModel,
-                                        selectedTabKey: presenterWrapper.selectedTabKey
+                                        selectedTabKey: presenterWrapper.selectedTabKey,
+                                        isCurrentTab: isCurrentTab
                                     )
                                     .listRowInsets(EdgeInsets())
                                     .listRowSeparator(.hidden)
                                 } else {
                                     ProfileTimelineContentView(
-                                        timelineViewModel: currentTabViewModel.timelineViewModel
+                                        timelineViewModel: currentTabViewModel.timelineViewModel,
+                                        isCurrentTab: isCurrentTab
                                     )
                                     .listRowInsets(EdgeInsets())
                                     .listRowSeparator(.hidden)
@@ -80,7 +84,14 @@ struct ProfileSwiftUIViewV2: View {
                             handleProfileScrollChange(newValue.contentOffset.y)
                         }
                         .onChange(of: timelineState.scrollToTopTrigger) { _, _ in
-                            FlareLog.debug("🔝 [ProfileSwiftUIViewV2] 返回顶部触发")
+
+                            let isCurrentTab = presenterWrapper.isCurrentTabActive
+                            guard isCurrentTab else {
+                                FlareLog.debug("⏸️ [ProfileSwiftUIViewV2] Skipping scroll to top - not current tab")
+                                return
+                            }
+
+                            FlareLog.debug("🔝 [ProfileSwiftUIViewV2] 返回顶部触发 - isCurrentTab: \(isCurrentTab)")
                             withAnimation(.easeInOut(duration: 0.5)) {
                                 proxy.scrollTo("profile-top", anchor: .top)
                             }
@@ -109,12 +120,27 @@ struct ProfileSwiftUIViewV2: View {
         .task(id: userKey?.description) {
             await presenterWrapper.setup()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .timelineItemUpdated)) { _ in
+            // 🔑 只有当前Tab才响应通知刷新
+            let isCurrentTab = presenterWrapper.isCurrentTabActive
+            guard isCurrentTab else {
+                FlareLog.debug("⏸️ [ProfileSwiftUIViewV2] Skipping refresh - not current tab")
+                return
+            }
+
+            FlareLog.debug("📬 [ProfileSwiftUIViewV2] Received timelineItemUpdated notification - isCurrentTab: \(isCurrentTab)")
+
+            // 刷新当前Tab
+            Task {
+                await presenterWrapper.refreshCurrentTab()
+            }
+        }
         .onAppear {
             presenterWrapper.resumeCurrentViewModel()
         }
         .onDisappear {
             timelineState.tabBarOffset = 0
-            presenterWrapper.clearAllViewModels()
+            presenterWrapper.pauseAllViewModels()
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -131,7 +157,7 @@ struct ProfileSwiftUIViewV2: View {
 
 extension ProfileSwiftUIViewV2 {
     private func handleProfileScrollChange(_ offsetY: CGFloat) {
-        FlareLog.debug("📜 [ProfileSwiftUIViewV2] Profile滚动检测 - offsetY: \(offsetY), tabBarOffset: \(timelineState.tabBarOffset)")
+        //FlareLog.debug("📜 [ProfileSwiftUIViewV2] Profile滚动检测 - offsetY: \(offsetY), tabBarOffset: \(timelineState.tabBarOffset)")
 
         if let currentTabViewModel = presenterWrapper.currentTabViewModel {
             currentTabViewModel.timelineViewModel.handleScrollOffsetChange(

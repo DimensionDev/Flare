@@ -5,7 +5,7 @@ import SwiftUI
 struct TimelineViewSwiftUIV4: View {
     let tab: FLTabItem
     @ObservedObject var store: AppBarTabSettingStore
-    let isCurrentTab: Bool
+    let isCurrentAppBarTabSelected: Bool
     @Environment(FlareTheme.self) private var theme
     @Environment(\.shouldShowVersionBanner) private var shouldShowVersionBanner
     @EnvironmentObject private var timelineState: TimelineExtState
@@ -13,11 +13,11 @@ struct TimelineViewSwiftUIV4: View {
     @State private var timeLineViewModel = TimelineViewModel()
     @State private var isInitialized: Bool = false
 
-    init(tab: FLTabItem, store: AppBarTabSettingStore, isCurrentTab: Bool) {
+    init(tab: FLTabItem, store: AppBarTabSettingStore, isCurrentAppBarTabSelected: Bool) {
         self.tab = tab
         self.store = store
-        self.isCurrentTab = isCurrentTab
-        FlareLog.debug("🔍 [TimelineV4] 视图初始化 for tab: '\(tab.key)', received isCurrentTab: \(isCurrentTab)")
+        self.isCurrentAppBarTabSelected = isCurrentAppBarTabSelected
+        FlareLog.debug("🔍 [TimelineV4] 视图初始化 for tab: '\(tab.key)', received isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected)")
     }
 
     @State private var refreshDebounceTimer: Timer?
@@ -102,7 +102,7 @@ struct TimelineViewSwiftUIV4: View {
                         newValue.contentOffset.y,
                         showFloatingButton: $timelineState.showFloatingButton,
                         timelineState: timelineState,
-                        isHomeTab: isCurrentTab
+                        isHomeTab: isCurrentAppBarTabSelected
                     )
                 }
                 .refreshable {
@@ -113,7 +113,7 @@ struct TimelineViewSwiftUIV4: View {
                 }
             }
             .onChange(of: timelineState.scrollToTopTrigger) { _, _ in
-                guard isCurrentTab else { return }
+                guard isCurrentAppBarTabSelected else { return }
 
                 withAnimation(.easeInOut(duration: 0.5)) {
                     proxy.scrollTo("timeline-top-v4", anchor: .center)
@@ -151,7 +151,7 @@ struct TimelineViewSwiftUIV4: View {
 //                    }
             }
             .task(id: tab.key) {
-                FlareLog.debug("📱 [TimelineV4] .task(id: \(tab.key)) triggered - isCurrentTab: \(isCurrentTab) ")
+                FlareLog.debug("📱 [TimelineV4] .task(id: \(tab.key)) triggered - isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected) ")
 
                 if !isInitialized {
                     isInitialized = true
@@ -163,27 +163,27 @@ struct TimelineViewSwiftUIV4: View {
                 }
             }
             .onAppear {
-                FlareLog.debug("👁️ [TimelineV4] onAppear - tab: \(tab.key), isCurrentTab: \(isCurrentTab) ")
+                FlareLog.debug("👁️ [TimelineV4] onAppear - tab: \(tab.key), isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected) ")
 
                 timeLineViewModel.resume()
             }
             .onDisappear {
                 timelineState.tabBarOffset = 0
 
-                FlareLog.debug("👋 [TimelineV4] onDisappear - tab: \(tab.key), isCurrentTab: \(isCurrentTab) ")
+                FlareLog.debug("👋 [TimelineV4] onDisappear - tab: \(tab.key), isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected) ")
 
                 timeLineViewModel.pause()
             }
             .onReceive(NotificationCenter.default.publisher(for: .timelineItemUpdated)) { _ in
-                FlareLog.debug("📬 [TimelineV4] Received timelineItemUpdated notification - tab: \(tab.key), isCurrentTab: \(isCurrentTab) ")
+                FlareLog.debug("📬 [TimelineV4] Received timelineItemUpdated notification - tab: \(tab.key), isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected) ")
 
                 refreshDebounceTimer?.invalidate()
-                FlareLog.debug("⏰ [TimelineV4] Setting refresh debounce timer - tab: \(tab.key), isCurrentTab: \(isCurrentTab)")
+                FlareLog.debug("⏰ [TimelineV4] Setting refresh debounce timer - tab: \(tab.key), isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected)")
 
                 refreshDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-                    FlareLog.debug("⏱️ [TimelineV4] Debounce timer fired - tab: \(tab.key), isCurrentTab: \(isCurrentTab) ")
+                    FlareLog.debug("⏱️ [TimelineV4] Debounce timer fired - tab: \(tab.key), isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected) ")
 
-                    guard isCurrentTab else {
+                    guard isCurrentAppBarTabSelected else {
                         FlareLog.debug("⏸️ [TimelineV4] Skipping refresh - not current tab: \(tab.key)")
                         return
                     }

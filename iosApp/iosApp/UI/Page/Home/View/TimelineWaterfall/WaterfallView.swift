@@ -5,7 +5,7 @@ import WaterfallGrid
 struct WaterfallView: View {
     let tab: FLTabItem
     @ObservedObject var store: AppBarTabSettingStore
-    let isCurrentTab: Bool
+    let isCurrentAppBarTabSelected: Bool
     let displayType: TimelineDisplayType
 
     @Environment(FlareTheme.self) private var theme
@@ -15,12 +15,12 @@ struct WaterfallView: View {
     @State private var isInitialized: Bool = false
     @State private var refreshDebounceTimer: Timer?
 
-    init(tab: FLTabItem, store: AppBarTabSettingStore, isCurrentTab: Bool, displayType: TimelineDisplayType) {
+    init(tab: FLTabItem, store: AppBarTabSettingStore, isCurrentAppBarTabSelected: Bool, displayType: TimelineDisplayType) {
         self.tab = tab
         self.store = store
-        self.isCurrentTab = isCurrentTab
+        self.isCurrentAppBarTabSelected = isCurrentAppBarTabSelected
         self.displayType = displayType
-        FlareLog.debug("🔍 [WaterfallView] 视图初始化 for tab: '\(tab.key)', received isCurrentTab: \(isCurrentTab)")
+        FlareLog.debug("🔍 [WaterfallView] 视图初始化 for tab: '\(tab.key)', received isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected)")
     }
 
     var body: some View {
@@ -36,7 +36,7 @@ struct WaterfallView: View {
                     hasMore: hasMore,
                     onError: viewModel.handleError,
                     scrolledID: $scrolledID,
-                    isCurrentTab: isCurrentTab,
+                    isCurrentAppBarTabSelected: isCurrentAppBarTabSelected,
                     viewModel: viewModel
                 )
 
@@ -52,7 +52,7 @@ struct WaterfallView: View {
             }
         }
         .task(id: tab.key) {
-            FlareLog.debug("📱 [WaterfallView] .task(id: \(tab.key)) triggered - isCurrentTab: \(isCurrentTab) ")
+            FlareLog.debug("📱 [WaterfallView] .task(id: \(tab.key)) triggered - isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected) ")
 
             if !isInitialized {
                 isInitialized = true
@@ -64,9 +64,9 @@ struct WaterfallView: View {
             }
         }
         .onAppear {
-            // FlareLog.debug("👁️ [WaterfallView] onAppear - tab: \(tab.key), isCurrentTab: \(isCurrentTab) ")
+            // FlareLog.debug("👁️ [WaterfallView] onAppear - tab: \(tab.key), isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected) ")
 
-//            if isCurrentTab {
+//            if isCurrentAppBarTabSelected {
             //  FlareLog.debug("✅ [WaterfallView] Current tab, calling resume - tab: \(tab.key)")
             viewModel.resume()
 //            } else {
@@ -74,27 +74,27 @@ struct WaterfallView: View {
 //            }
         }
         .onDisappear {
-            FlareLog.debug("👋 [WaterfallView] onDisappear - tab: \(tab.key), isCurrentTab: \(isCurrentTab)")
+            FlareLog.debug("👋 [WaterfallView] onDisappear - tab: \(tab.key), isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected)")
 
-            // 无论isCurrentTab值如何，都尝试暂停，让ViewModel内部判断
+            // 无论isCurrentAppBarTabSelected值如何，都尝试暂停，让ViewModel内部判断
             FlareLog.debug("⏸️ [WaterfallView] Calling pause for tab: \(tab.key)")
             viewModel.pause()
         }
         .onReceive(NotificationCenter.default.publisher(for: .timelineItemUpdated)) { _ in
-            FlareLog.debug("📬 [WaterfallView] Received timelineItemUpdated notification - tab: \(tab.key), isCurrentTab: \(isCurrentTab) ")
+            FlareLog.debug("📬 [WaterfallView] Received timelineItemUpdated notification - tab: \(tab.key), isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected) ")
 
             refreshDebounceTimer?.invalidate()
-            FlareLog.debug("⏰ [WaterfallView] Setting refresh debounce timer - tab: \(tab.key), isCurrentTab: \(isCurrentTab)")
+            FlareLog.debug("⏰ [WaterfallView] Setting refresh debounce timer - tab: \(tab.key), isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected)")
 
             refreshDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-                FlareLog.debug("⏱️ [WaterfallView] Debounce timer fired - tab: \(tab.key), isCurrentTab: \(isCurrentTab),  ")
+                FlareLog.debug("⏱️ [WaterfallView] Debounce timer fired - tab: \(tab.key), isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected),  ")
 
-                guard isCurrentTab else {
-                    FlareLog.debug("⏸️ [WaterfallView] Skipping refresh - not current tab: \(tab.key), isCurrentTab: \(isCurrentTab)")
+                guard isCurrentAppBarTabSelected else {
+                    FlareLog.debug("⏸️ [WaterfallView] Skipping refresh - not current tab: \(tab.key), isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected)")
                     return
                 }
 
-                FlareLog.debug("🔄 [WaterfallView] Starting handleRefresh - tab: \(tab.key), isCurrentTab: \(isCurrentTab)")
+                FlareLog.debug("🔄 [WaterfallView] Starting handleRefresh - tab: \(tab.key), isCurrentAppBarTabSelected: \(isCurrentAppBarTabSelected)")
                 Task {
                     await viewModel.handleRefresh()
                     await MainActor.run {

@@ -5,6 +5,7 @@ import SwiftUI
 struct ProfileWaterfallContentView: View {
     let timelineViewModel: TimelineViewModel
     let selectedTabKey: String?
+    let isCurrentTab: Bool
 
     @EnvironmentObject private var timelineState: TimelineExtState
     @Environment(FlareTheme.self) private var theme
@@ -23,7 +24,7 @@ struct ProfileWaterfallContentView: View {
                     hasMore: hasMore,
                     onError: timelineViewModel.handleError,
                     scrolledID: .constant(nil),
-                    isCurrentTab: true,
+                    isCurrentAppBarTabSelected: isCurrentTab,
                     viewModel: timelineViewModel
                 )
                 .listRowBackground(theme.primaryBackgroundColor)
@@ -35,7 +36,7 @@ struct ProfileWaterfallContentView: View {
                         newValue.contentOffset.y,
                         showFloatingButton: $timelineState.showFloatingButton,
                         timelineState: timelineState,
-                        isHomeTab: true
+                        isHomeTab: isCurrentTab
                     )
                 }
 

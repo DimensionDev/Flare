@@ -4,6 +4,7 @@ import SwiftUI
 
 struct ProfileTimelineContentView: View {
     let timelineViewModel: TimelineViewModel
+    let isCurrentTab: Bool
 
     @EnvironmentObject private var timelineState: TimelineExtState
     @Environment(FlareTheme.self) private var theme
@@ -29,7 +30,7 @@ struct ProfileTimelineContentView: View {
                         newValue.contentOffset.y,
                         showFloatingButton: $timelineState.showFloatingButton,
                         timelineState: timelineState,
-                        isHomeTab: true
+                        isHomeTab: isCurrentTab
                     )
                 }
 

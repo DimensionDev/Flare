@@ -98,7 +98,8 @@ struct ProfileSwiftUIViewV2: View {
 
             // 🔥 添加浮动按钮
             if presenterWrapper.isInitialized,
-               !appSettings.appearanceSettings.hideScrollToTopButton {
+               !appSettings.appearanceSettings.hideScrollToTopButton
+            {
                 VStack(spacing: 12) {
                     FloatingScrollToTopButton()
                 }
@@ -119,7 +120,7 @@ struct ProfileSwiftUIViewV2: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if let userKey = userKey {
+                if let userKey {
                     ProfileMoreButtonView(
                         presenter: presenterWrapper.profilePresenter,
                         userKey: userKey
@@ -131,6 +132,7 @@ struct ProfileSwiftUIViewV2: View {
 }
 
 // MARK: - Profile Scroll Handling
+
 extension ProfileSwiftUIViewV2 {
     /// 处理Profile页面滚动变化（复用Home架构）
     /// 包含浮动按钮控制和TabBar自动隐藏显示
@@ -145,7 +147,7 @@ extension ProfileSwiftUIViewV2 {
                 offsetY,
                 showFloatingButton: $timelineState.showFloatingButton,
                 timelineState: timelineState,
-                isHomeTab: true  // Profile页面总是被视为当前Tab
+                isHomeTab: true // Profile页面总是被视为当前Tab
             )
         } else {
             // 如果没有TimelineViewModel，直接调用TabBar更新逻辑

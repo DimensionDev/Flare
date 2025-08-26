@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 import shared
 import SwiftUI
 
@@ -8,9 +8,9 @@ struct ProfileTabViewModel {
     let tabKey: String
     let tabItem: FLTabItem
     let timelineViewModel: TimelineViewModel
-    let timelinePresenter: TimelinePresenter  // 🔥 所有Tab都有TimelinePresenter，不再可选
-    let mediaPresenter: ProfileMediaPresenter?  // 只有Media Tab才有
-    
+    let timelinePresenter: TimelinePresenter // 🔥 所有Tab都有TimelinePresenter，不再可选
+    let mediaPresenter: ProfileMediaPresenter? // 只有Media Tab才有
+
     var isMediaTab: Bool { mediaPresenter != nil }
 }
 
@@ -26,54 +26,55 @@ class ProfilePresenterWrapper: ObservableObject {
             }
         }
     }
+
     @Published var availableTabs: [FLTabItem] = []
     @Published private(set) var currentTabViewModel: ProfileTabViewModel?
     @Published private(set) var isInitialized: Bool = false
-    
+
     // 🔥 内部管理
     private var tabViewModels: [String: ProfileTabViewModel] = [:]
     let profilePresenter: ProfilePresenter
-    
+
     private let accountType: AccountType
     private let userKey: MicroBlogKey?
-    
+
     init(accountType: AccountType, userKey: MicroBlogKey?) {
         self.accountType = accountType
         self.userKey = userKey
-        self.profilePresenter = ProfilePresenter(accountType: accountType, userKey: userKey)
-        
+        profilePresenter = ProfilePresenter(accountType: accountType, userKey: userKey)
+
         FlareLog.debug("🏗️ [ProfilePresenterWrapper] 初始化开始")
     }
-    
+
     // 🔥 异步完整初始化
     @MainActor
     func setup() async {
         do {
             FlareLog.debug("🚀 [ProfilePresenterWrapper] 开始setup")
-            
+
             // 1. 获取用户信息
             let user = getUserForInitialization()
-            
+
             // 2. 根据登录状态筛选availableTabs
             availableTabs = createAvailableTabs(user: user, userKey: userKey)
             FlareLog.debug("📋 [ProfilePresenterWrapper] 创建了\(availableTabs.count)个Tab")
-            
+
             // 3. 为每个Tab创建ProfileTabViewModel
             await createAllTabViewModels()
-            
+
             // 4. 设置默认selectedTabKey（这会触发didSet，自动切换到第一个Tab）
             if let firstTab = availableTabs.first {
                 selectedTabKey = firstTab.key
             }
-            
+
             isInitialized = true
             FlareLog.debug("✅ [ProfilePresenterWrapper] 初始化完成")
-            
+
         } catch {
             FlareLog.error("💥 [ProfilePresenterWrapper] 初始化失败: \(error)")
         }
     }
-    
+
     // 🔥 Tab切换核心逻辑（私有方法，由selectedTabKey的didSet触发）
     @MainActor
     private func switchToTab(_ tabKey: String) async {
@@ -81,38 +82,38 @@ class ProfilePresenterWrapper: ObservableObject {
             FlareLog.error("⚠️ [ProfilePresenterWrapper] Tab未找到: \(tabKey)")
             return
         }
-        
+
         FlareLog.debug("🔄 [ProfilePresenterWrapper] 切换到Tab: \(tabKey)")
-        
+
         // 暂停当前的ViewModel
         currentTabViewModel?.timelineViewModel.pause()
-        
+
         // 激活新的ViewModel
         tabViewModel.timelineViewModel.resume()
-        
+
         // 更新状态
         currentTabViewModel = tabViewModel
-        
+
         FlareLog.debug("✅ [ProfilePresenterWrapper] Tab切换完成: \(tabKey)")
     }
-    
+
     // 🔥 创建所有TabViewModel
     @MainActor
     private func createAllTabViewModels() async {
         for tab in availableTabs {
             let timelineViewModel = TimelineViewModel()
-            
+
             if tab is FLProfileMediaTabItem {
                 // 🔥 Media Tab：从ProfileMediaPresenter获取内部的TimelinePresenter
                 let mediaPresenter = createMediaPresenter(for: tab)
-                let timelinePresenter = mediaPresenter.getMediaTimelinePresenter()  // 🔥 使用新的方法获取内部实例
+                let timelinePresenter = mediaPresenter.getMediaTimelinePresenter() // 🔥 使用新的方法获取内部实例
                 await timelineViewModel.setupDataSource(presenter: timelinePresenter)
 
                 let tabViewModel = ProfileTabViewModel(
                     tabKey: tab.key,
                     tabItem: tab,
                     timelineViewModel: timelineViewModel,
-                    timelinePresenter: timelinePresenter,  // 使用从ProfileMediaPresenter获取的实例
+                    timelinePresenter: timelinePresenter, // 使用从ProfileMediaPresenter获取的实例
                     mediaPresenter: mediaPresenter
                 )
                 tabViewModels[tab.key] = tabViewModel
@@ -208,7 +209,7 @@ class ProfilePresenterWrapper: ObservableObject {
         FlareLog.debug("🧹 [ProfilePresenterWrapper] 开始清理所有ViewModel")
 
         // 暂停所有ViewModel
-        tabViewModels.values.forEach { tabViewModel in
+        for tabViewModel in tabViewModels.values {
             tabViewModel.timelineViewModel.pause()
         }
 

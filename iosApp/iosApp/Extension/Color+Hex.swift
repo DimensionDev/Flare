@@ -30,7 +30,7 @@ func swiftUIColorToUInt64(_ swiftUIColor: SwiftUI.Color) -> UInt64 {
     return intAlpha | intRed | intGreen | intBlue
 }
 
-//public extension Color {
+// public extension Color {
 //    static var brand: Color {
 //        Color(red: 187 / 255, green: 59 / 255, blue: 226 / 255)
 //    }
@@ -46,7 +46,7 @@ func swiftUIColorToUInt64(_ swiftUIColor: SwiftUI.Color) -> UInt64 {
 //    //  public static var label: Color {
 ////    Color(.label)
 //    //  }
-//}
+// }
 //
 extension Color: @retroactive RawRepresentable {
     public init?(rawValue: Int) {

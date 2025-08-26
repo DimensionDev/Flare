@@ -1,4 +1,3 @@
-import Generated
 import Kingfisher
 import shared
 import SwiftUI

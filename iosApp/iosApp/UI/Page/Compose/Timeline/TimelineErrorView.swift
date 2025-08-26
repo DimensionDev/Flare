@@ -4,12 +4,10 @@ struct TimelineErrorView: View {
     let message: String
     let onRetry: () -> Void
 
-
     init(message: String = "Failed to load", onRetry: @escaping () -> Void) {
         self.message = message
         self.onRetry = onRetry
     }
-
 
     init(error: FlareError, onRetry: @escaping () -> Void) {
         message = error.localizedDescription

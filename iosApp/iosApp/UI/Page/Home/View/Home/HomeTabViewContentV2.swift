@@ -1,6 +1,5 @@
 import Awesome
 import FontAwesomeSwiftUI
-import Generated
 import os
 import os.log
 import shared

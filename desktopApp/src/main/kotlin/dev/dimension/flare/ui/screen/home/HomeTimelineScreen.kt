@@ -10,7 +10,6 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.RegisterTabCallback
-import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.TabIcon
@@ -22,7 +21,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import io.github.composefluent.component.LiteFilter
 import io.github.composefluent.component.PillButton
 import moe.tlaster.precompose.molecule.producePresenter
-import org.koin.compose.koinInject
 
 @Composable
 internal fun HomeTimelineScreen(
@@ -62,16 +60,18 @@ internal fun HomeTimelineScreen(
                                 )
                             }
                         }
-                        PillButton(
-                            selected = false,
-                            onSelectedChanged = {
-                                onAddTab.invoke()
-                            },
-                        ) {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.Plus,
-                                contentDescription = null,
-                            )
+                        if (accountType !is AccountType.Guest) {
+                            PillButton(
+                                selected = false,
+                                onSelectedChanged = {
+                                    onAddTab.invoke()
+                                },
+                            ) {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.Plus,
+                                    contentDescription = null,
+                                )
+                            }
                         }
                     }
                 },
@@ -81,34 +81,32 @@ internal fun HomeTimelineScreen(
 }
 
 @Composable
-private fun presenter(
-    accountType: AccountType,
-    settingsRepository: SettingsRepository = koinInject(),
-) = run {
-    val state = remember(accountType) { HomeTimelineWithTabsPresenter(accountType) }.invoke()
-    var selectedIndex by remember {
-        mutableStateOf(0)
-    }
-
-    state.tabState.onSuccess {
-        LaunchedEffect(it.size) {
-            selectedIndex = 0
-        }
-    }
-
-    val selectedTab =
-        remember(
-            state.tabState,
-            selectedIndex,
-        ) {
-            state.tabState.map { it.elementAt(selectedIndex) }
+private fun presenter(accountType: AccountType) =
+    run {
+        val state = remember(accountType) { HomeTimelineWithTabsPresenter(accountType) }.invoke()
+        var selectedIndex by remember {
+            mutableStateOf(0)
         }
 
-    object : HomeTimelineWithTabsPresenter.State by state {
-        val selectedTab = selectedTab
+        state.tabState.onSuccess {
+            LaunchedEffect(it.size) {
+                selectedIndex = 0
+            }
+        }
 
-        fun setSelectedIndex(index: Int) {
-            selectedIndex = index
+        val selectedTab =
+            remember(
+                state.tabState,
+                selectedIndex,
+            ) {
+                state.tabState.map { it.elementAt(selectedIndex) }
+            }
+
+        object : HomeTimelineWithTabsPresenter.State by state {
+            val selectedTab = selectedTab
+
+            fun setSelectedIndex(index: Int) {
+                selectedIndex = index
+            }
         }
     }
-}

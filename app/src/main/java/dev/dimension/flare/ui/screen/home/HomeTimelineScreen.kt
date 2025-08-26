@@ -173,15 +173,17 @@ internal fun HomeTimelineScreen(
                                             )
                                         }
                                     }
-                                    IconButton(
-                                        onClick = {
-                                            toTabSettings.invoke()
-                                        },
-                                    ) {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.Plus,
-                                            contentDescription = null,
-                                        )
+                                    if (accountType !is AccountType.Guest) {
+                                        IconButton(
+                                            onClick = {
+                                                toTabSettings.invoke()
+                                            },
+                                        ) {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Plus,
+                                                contentDescription = null,
+                                            )
+                                        }
                                     }
                                 }
                             }

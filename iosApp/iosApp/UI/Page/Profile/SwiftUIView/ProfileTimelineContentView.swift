@@ -24,7 +24,6 @@ struct ProfileTimelineContentView: View {
                 .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
                     geometry
                 } action: { _, newValue in
-               
                     FlareLog.debug("📜 [ProfileTimelineContentView] Timeline滚动检测 - offsetY: \(newValue.contentOffset.y)")
                     timelineViewModel.handleScrollOffsetChange(
                         newValue.contentOffset.y,

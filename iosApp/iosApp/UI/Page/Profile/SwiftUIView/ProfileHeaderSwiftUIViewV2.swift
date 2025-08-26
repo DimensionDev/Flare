@@ -3,51 +3,40 @@ import MarkdownUI
 import shared
 import SwiftUI
 
- 
 struct ProfileHeaderSwiftUIViewV2: View {
-  
     let userInfo: ProfileUserInfo
-     
+
     let scrollProxy: ScrollViewProxy?
-     
+
     let presenter: ProfilePresenter?
 
-   
     @Environment(FlareTheme.self) private var theme
-
-    
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-          
             backgroundImageSection
- 
+
             userInfoSection
- 
+
             userDetailsSection
         }
         .background(theme.primaryBackgroundColor)
     }
 }
 
- 
-
 extension ProfileHeaderSwiftUIViewV2 {
- 
     private var backgroundImageSection: some View {
         ZStack(alignment: .bottomTrailing) {
             Rectangle()
                 .frame(height: 150)
                 .overlay {
                     if let bannerUrl = userInfo.profile.banner, !bannerUrl.isEmpty {
-                     
                         KFImage(URL(string: bannerUrl))
                             .setProcessor(DownsamplingImageProcessor(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 300)))
                             .scaleFactor(UIScreen.main.scale)
                             .memoryCacheExpiration(.seconds(180))
                             .diskCacheExpiration(.days(3))
                             .placeholder {
-                               
                                 LinearGradient(
                                     colors: [theme.tintColor.opacity(0.3), theme.tintColor.opacity(0.1)],
                                     startPoint: .topLeading,
@@ -57,7 +46,6 @@ extension ProfileHeaderSwiftUIViewV2 {
                             .resizable()
                             .scaledToFill()
                             .overlay {
-                                
                                 LinearGradient(
                                     colors: [
                                         .black.opacity(0.2),
@@ -68,7 +56,6 @@ extension ProfileHeaderSwiftUIViewV2 {
                                 )
                             }
                     } else {
-                       
                         LinearGradient(
                             colors: [theme.tintColor.opacity(0.3), theme.tintColor.opacity(0.1)],
                             startPoint: .topLeading,
@@ -78,7 +65,6 @@ extension ProfileHeaderSwiftUIViewV2 {
                 }
                 .clipped()
 
-           
             if let relation = userInfo.relation {
                 relationshipStatusLabel(relation)
                     .padding(8)
@@ -86,22 +72,18 @@ extension ProfileHeaderSwiftUIViewV2 {
         }
     }
 
- 
     private var userInfoSection: some View {
         HStack(alignment: .top, spacing: 12) {
-       
             avatarView
                 .offset(y: -40)
 
             Spacer()
 
             VStack(alignment: .trailing, spacing: 8) {
-               
                 if !userInfo.isMe {
                     followButtonView
                 }
 
-               
                 statisticsView
             }
             .padding(.top, 8)
@@ -109,27 +91,22 @@ extension ProfileHeaderSwiftUIViewV2 {
         .padding(.horizontal, 16)
     }
 
- 
     private var userDetailsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-             
             Markdown(userInfo.profile.name.markdown)
                 .markdownInlineImageProvider(.emoji)
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(theme.labelColor)
 
-            
             HStack(spacing: 8) {
                 Text("@\(userInfo.profile.handleWithoutFirstAt)")
                     .font(.subheadline)
                     .foregroundColor(theme.labelColor.opacity(0.6))
 
-              
                 userMarksView
             }
 
-            
             if let description = userInfo.profile.description_?.markdown, !description.isEmpty {
                 Markdown(description)
                     .markdownInlineImageProvider(.emoji)
@@ -137,7 +114,6 @@ extension ProfileHeaderSwiftUIViewV2 {
                     .foregroundColor(theme.labelColor)
             }
 
-           
             if !userInfo.fields.isEmpty {
                 customFieldsView
             }
@@ -147,7 +123,6 @@ extension ProfileHeaderSwiftUIViewV2 {
         .padding(.bottom, 16)
     }
 
-    
     private var avatarView: some View {
         KFImage(URL(string: userInfo.profile.avatar))
             .setProcessor(DownsamplingImageProcessor(size: CGSize(width: 160, height: 160)))
@@ -176,7 +151,6 @@ extension ProfileHeaderSwiftUIViewV2 {
             )
     }
 
- 
     private var followButtonView: some View {
         FollowButtonView(
             presenter: presenter,
@@ -185,18 +159,15 @@ extension ProfileHeaderSwiftUIViewV2 {
         .frame(width: 80, height: 30)
     }
 
- 
     private var statisticsView: some View {
         HStack(spacing: 20) {
             StatisticButton(
                 title: "Posts",
                 count: Int(userInfo.profile.matrices.statusesCount)
             ) {
-                
                 scrollToTabBar()
             }
 
-            
             VStack(spacing: 2) {
                 Text(userInfo.followCount)
                     .font(.headline)
@@ -207,7 +178,7 @@ extension ProfileHeaderSwiftUIViewV2 {
                     .foregroundColor(theme.labelColor.opacity(0.6))
             }
             .onTapGesture {
-                 FlareLog.debug("📱 [ProfileHeaderV2] 点击Following")
+                FlareLog.debug("📱 [ProfileHeaderV2] 点击Following")
             }
 
             VStack(spacing: 2) {
@@ -220,12 +191,11 @@ extension ProfileHeaderSwiftUIViewV2 {
                     .foregroundColor(theme.labelColor.opacity(0.6))
             }
             .onTapGesture {
-                 FlareLog.debug("📱 [ProfileHeaderV2] 点击Followers")
+                FlareLog.debug("📱 [ProfileHeaderV2] 点击Followers")
             }
         }
     }
 
- 
     private var userMarksView: some View {
         HStack(spacing: 4) {
             ForEach(userInfo.profile.mark, id: \.self) { mark in
@@ -237,7 +207,6 @@ extension ProfileHeaderSwiftUIViewV2 {
         }
     }
 
- 
     private func markIcon(for mark: UiProfile.Mark) -> String {
         switch mark {
         case .verified:
@@ -251,7 +220,6 @@ extension ProfileHeaderSwiftUIViewV2 {
         }
     }
 
- 
     private var customFieldsView: some View {
         VStack(alignment: .leading, spacing: 4) {
             ForEach(Array(userInfo.fields.keys).sorted(), id: \.self) { (key: String) in
@@ -274,9 +242,7 @@ extension ProfileHeaderSwiftUIViewV2 {
         .padding(.top, 8)
     }
 
- 
     private func relationshipStatusLabel(_ relation: UiRelation) -> some View {
- 
         let statusText = getRelationshipStatusText(relation)
 
         return Text(statusText)
@@ -288,13 +254,10 @@ extension ProfileHeaderSwiftUIViewV2 {
             .cornerRadius(4)
     }
 
-  
     private func getRelationshipStatusText(_: UiRelation) -> String {
-        
         "Relationship Status"
     }
 
- 
     private func scrollToTabBar() {
         guard let proxy = scrollProxy else { return }
 
@@ -306,7 +269,6 @@ extension ProfileHeaderSwiftUIViewV2 {
     }
 }
 
- 
 struct StatisticButton: View {
     let title: String
     let count: Int
@@ -330,7 +292,6 @@ struct StatisticButton: View {
         .buttonStyle(.plain)
     }
 
-    
     private func formatCount(_ count: Int) -> String {
         if count >= 1_000_000 {
             String(format: "%.1fM", Double(count) / 1_000_000.0)

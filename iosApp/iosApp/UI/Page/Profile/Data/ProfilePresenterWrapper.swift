@@ -3,7 +3,6 @@ import Foundation
 import shared
 import SwiftUI
 
- 
 struct ProfileTabViewModel {
     let tabKey: String
     let tabItem: FLTabItem
@@ -15,10 +14,8 @@ struct ProfileTabViewModel {
 }
 
 class ProfilePresenterWrapper: ObservableObject {
-    
     @Published var selectedTabKey: String? {
         didSet {
-            
             if let tabKey = selectedTabKey {
                 Task { @MainActor in
                     await switchToTab(tabKey)
@@ -31,7 +28,6 @@ class ProfilePresenterWrapper: ObservableObject {
     @Published private(set) var currentTabViewModel: ProfileTabViewModel?
     @Published private(set) var isInitialized: Bool = false
 
-    
     private var tabViewModels: [String: ProfileTabViewModel] = [:]
     let profilePresenter: ProfilePresenter
 
@@ -46,23 +42,18 @@ class ProfilePresenterWrapper: ObservableObject {
         FlareLog.debug("🏗️ [ProfilePresenterWrapper] 初始化开始")
     }
 
-     
     @MainActor
     func setup() async {
         do {
             FlareLog.debug("🚀 [ProfilePresenterWrapper] 开始setup")
 
-            
             let user = getUserForInitialization()
 
-         
             availableTabs = createAvailableTabs(user: user, userKey: userKey)
             FlareLog.debug("📋 [ProfilePresenterWrapper] 创建了\(availableTabs.count)个Tab")
 
-           
             await createAllTabViewModels()
 
-          
             if let firstTab = availableTabs.first {
                 selectedTabKey = firstTab.key
             }
@@ -75,7 +66,6 @@ class ProfilePresenterWrapper: ObservableObject {
         }
     }
 
-   
     @MainActor
     private func switchToTab(_ tabKey: String) async {
         guard let tabViewModel = tabViewModels[tabKey] else {
@@ -85,26 +75,21 @@ class ProfilePresenterWrapper: ObservableObject {
 
         FlareLog.debug("🔄 [ProfilePresenterWrapper] 切换到Tab: \(tabKey)")
 
-       
         currentTabViewModel?.timelineViewModel.pause()
 
-     
         tabViewModel.timelineViewModel.resume()
 
-        
         currentTabViewModel = tabViewModel
 
         FlareLog.debug("✅ [ProfilePresenterWrapper] Tab切换完成: \(tabKey)")
     }
 
-    
     @MainActor
     private func createAllTabViewModels() async {
         for tab in availableTabs {
             let timelineViewModel = TimelineViewModel()
 
             if tab is FLProfileMediaTabItem {
-              
                 let mediaPresenter = createMediaPresenter(for: tab)
                 let timelinePresenter = mediaPresenter.getMediaTimelinePresenter()
                 await timelineViewModel.setupDataSource(presenter: timelinePresenter)
@@ -119,7 +104,6 @@ class ProfilePresenterWrapper: ObservableObject {
                 tabViewModels[tab.key] = tabViewModel
 
             } else {
-                
                 let timelinePresenter = createTimelinePresenter(for: tab)
                 await timelineViewModel.setupDataSource(presenter: timelinePresenter)
 
@@ -137,12 +121,10 @@ class ProfilePresenterWrapper: ObservableObject {
         }
     }
 
-     
     private func createAvailableTabs(user: UiUserV2, userKey: MicroBlogKey?) -> [FLTabItem] {
         let isGuestMode = user.key is AccountTypeGuest || UserManager.shared.getCurrentUser().0 == nil
         let isOwnProfile = userKey == nil
 
-        
         let mediaTab = FLProfileMediaTabItem(
             metaData: FLTabMetaData(
                 title: .localized(.profileMedia),
@@ -156,17 +138,14 @@ class ProfilePresenterWrapper: ObservableObject {
             // 访客模式只显示media标签
             return [mediaTab]
         } else {
-           
             var tabs = FLTabSettings.defaultThree(user: user, userKey: userKey)
 
-            
             if tabs.isEmpty {
                 tabs.append(mediaTab)
             } else {
                 tabs.insert(mediaTab, at: max(0, tabs.count - 1))
             }
 
-          
             if !isOwnProfile {
                 tabs = tabs.filter { !$0.key.contains("likes") }
             }
@@ -175,7 +154,6 @@ class ProfilePresenterWrapper: ObservableObject {
         }
     }
 
-  
     private func createTimelinePresenter(for tab: FLTabItem) -> TimelinePresenter {
         guard let timelineItem = tab as? FLTimelineTabItem else {
             fatalError("Invalid timeline tab")
@@ -190,7 +168,6 @@ class ProfilePresenterWrapper: ObservableObject {
         return ProfileMediaPresenter(accountType: mediaTab.account, userKey: mediaTab.userKey)
     }
 
- 
     private func getUserForInitialization() -> UiUserV2 {
         let result = UserManager.shared.getCurrentUser()
         if let user = result.0 {
@@ -203,17 +180,14 @@ class ProfilePresenterWrapper: ObservableObject {
         }
     }
 
-    
     @MainActor
     func clearAllViewModels() {
         FlareLog.debug("🧹 [ProfilePresenterWrapper] 开始清理所有ViewModel")
 
-        
         for tabViewModel in tabViewModels.values {
             tabViewModel.timelineViewModel.pause()
         }
 
-       
         tabViewModels.removeAll()
         currentTabViewModel = nil
         selectedTabKey = nil
@@ -227,7 +201,6 @@ class ProfilePresenterWrapper: ObservableObject {
         FlareLog.debug("▶️ [ProfilePresenterWrapper] 恢复当前ViewModel")
     }
 
-  
     @MainActor
     func refreshCurrentTab() async {
         if let currentViewModel = currentTabViewModel?.timelineViewModel {
@@ -235,7 +208,6 @@ class ProfilePresenterWrapper: ObservableObject {
         }
     }
 
-   
     var tabCount: Int { availableTabs.count }
     var selectedIndex: Int {
         guard let selectedTabKey else { return 0 }

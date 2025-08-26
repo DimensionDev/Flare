@@ -88,7 +88,6 @@ struct ProfileSwiftUIViewV2: View {
                     }
                 }
             } else {
-                
                 VStack(spacing: 16) {
                     ProgressView()
                     Text("Initializing Profile...")
@@ -96,7 +95,6 @@ struct ProfileSwiftUIViewV2: View {
                 }
             }
 
-           
             if presenterWrapper.isInitialized,
                !appSettings.appearanceSettings.hideScrollToTopButton
             {
@@ -131,14 +129,10 @@ struct ProfileSwiftUIViewV2: View {
     }
 }
 
- 
 extension ProfileSwiftUIViewV2 {
- 
     private func handleProfileScrollChange(_ offsetY: CGFloat) {
-    
         FlareLog.debug("📜 [ProfileSwiftUIViewV2] Profile滚动检测 - offsetY: \(offsetY), tabBarOffset: \(timelineState.tabBarOffset)")
 
-        
         if let currentTabViewModel = presenterWrapper.currentTabViewModel {
             currentTabViewModel.timelineViewModel.handleScrollOffsetChange(
                 offsetY,
@@ -147,11 +141,9 @@ extension ProfileSwiftUIViewV2 {
                 isHomeTab: true
             )
         } else {
-           
             FlareLog.debug("📜 [ProfileSwiftUIViewV2] 直接调用TabBar更新逻辑")
             timelineState.updateTabBarOffset(currentOffset: offsetY, isHomeTab: true)
 
-          
             let shouldShowFloatingButton = offsetY > 50
             if timelineState.showFloatingButton != shouldShowFloatingButton {
                 timelineState.showFloatingButton = shouldShowFloatingButton

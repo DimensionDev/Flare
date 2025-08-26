@@ -4,7 +4,6 @@ import os.log
 import shared
 import SwiftUI
 
- 
 struct ProfileWithUserNameScreen: View {
     @State private var presenter: ProfileWithUserNameAndHostPresenter
     private let accountType: AccountType

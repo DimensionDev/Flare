@@ -24,7 +24,7 @@ struct ProfileTimelineContentView: View {
                 .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
                     geometry
                 } action: { _, newValue in
-                    // Timeline Tab的滚动也要影响TabBar
+               
                     FlareLog.debug("📜 [ProfileTimelineContentView] Timeline滚动检测 - offsetY: \(newValue.contentOffset.y)")
                     timelineViewModel.handleScrollOffsetChange(
                         newValue.contentOffset.y,

@@ -5,7 +5,7 @@ import SwiftUI
 struct ProfileWaterfallContentView: View {
     let timelineViewModel: TimelineViewModel
     let selectedTabKey: String?
-    // ✅ 删除tabStore参数
+  
 
     @EnvironmentObject private var timelineState: TimelineExtState
     @Environment(FlareTheme.self) private var theme
@@ -31,7 +31,7 @@ struct ProfileWaterfallContentView: View {
                 .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
                     geometry
                 } action: { _, newValue in
-                    // Media Tab的滚动也要影响TabBar
+                    
                     FlareLog.debug("📜 [ProfileWaterfallContentView] Media滚动检测 - offsetY: \(newValue.contentOffset.y)")
                     timelineViewModel.handleScrollOffsetChange(
                         newValue.contentOffset.y,

@@ -31,7 +31,6 @@ public class ProfileMediaPresenter(
     private val userKey: MicroBlogKey?,
 ) : PresenterBase<ProfileMediaState>(),
     KoinComponent {
-
     private val mediaTimelinePresenter = MediaTimelinePresenter(accountType, userKey)
 
     @Composable
@@ -47,10 +46,7 @@ public class ProfileMediaPresenter(
         }
     }
 
-
-    public fun getMediaTimelinePresenter(): TimelinePresenter {
-        return mediaTimelinePresenter
-    }
+    public fun getMediaTimelinePresenter(): TimelinePresenter = mediaTimelinePresenter
 }
 
 private class MediaTimelinePresenter(

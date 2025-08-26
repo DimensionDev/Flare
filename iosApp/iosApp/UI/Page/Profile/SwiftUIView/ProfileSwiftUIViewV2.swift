@@ -88,7 +88,7 @@ struct ProfileSwiftUIViewV2: View {
                     }
                 }
             } else {
-                // 加载状态
+                
                 VStack(spacing: 16) {
                     ProgressView()
                     Text("Initializing Profile...")
@@ -96,7 +96,7 @@ struct ProfileSwiftUIViewV2: View {
                 }
             }
 
-            // 🔥 添加浮动按钮
+           
             if presenterWrapper.isInitialized,
                !appSettings.appearanceSettings.hideScrollToTopButton
             {
@@ -131,30 +131,27 @@ struct ProfileSwiftUIViewV2: View {
     }
 }
 
-// MARK: - Profile Scroll Handling
-
+ 
 extension ProfileSwiftUIViewV2 {
-    /// 处理Profile页面滚动变化（复用Home架构）
-    /// 包含浮动按钮控制和TabBar自动隐藏显示
-    /// - Parameter offsetY: 滚动偏移量
+ 
     private func handleProfileScrollChange(_ offsetY: CGFloat) {
-        // 添加Profile专用日志
+    
         FlareLog.debug("📜 [ProfileSwiftUIViewV2] Profile滚动检测 - offsetY: \(offsetY), tabBarOffset: \(timelineState.tabBarOffset)")
 
-        // 🔥 使用当前Tab的TimelineViewModel处理滚动
+        
         if let currentTabViewModel = presenterWrapper.currentTabViewModel {
             currentTabViewModel.timelineViewModel.handleScrollOffsetChange(
                 offsetY,
                 showFloatingButton: $timelineState.showFloatingButton,
                 timelineState: timelineState,
-                isHomeTab: true // Profile页面总是被视为当前Tab
+                isHomeTab: true
             )
         } else {
-            // 如果没有TimelineViewModel，直接调用TabBar更新逻辑
+           
             FlareLog.debug("📜 [ProfileSwiftUIViewV2] 直接调用TabBar更新逻辑")
             timelineState.updateTabBarOffset(currentOffset: offsetY, isHomeTab: true)
 
-            // 手动处理浮动按钮显示
+          
             let shouldShowFloatingButton = offsetY > 50
             if timelineState.showFloatingButton != shouldShowFloatingButton {
                 timelineState.showFloatingButton = shouldShowFloatingButton

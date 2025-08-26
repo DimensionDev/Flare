@@ -1,70 +1,53 @@
-//
-//  ProfileHeaderSwiftUIViewV2.swift
-//  iosApp
-//
-//  Created by Flare Team on 2025-08-22.
-//  Profile SwiftUI重构 - Header组件
-//  借鉴IceCubesApp的Header设计，保持Flare现有数据结构
-//
-
 import Kingfisher
 import MarkdownUI
 import shared
 import SwiftUI
 
-/// Profile Header组件V2
-/// 借鉴IceCubesApp的AccountDetailHeaderView设计
-/// 使用Flare现有的ProfileUserInfo数据结构
+ 
 struct ProfileHeaderSwiftUIViewV2: View {
-    // MARK: - Properties
-
-    /// 用户信息（使用现有ProfileUserInfo结构）
+  
     let userInfo: ProfileUserInfo
-    /// 滚动代理，用于滚动到TabBar
+     
     let scrollProxy: ScrollViewProxy?
-    /// Profile Presenter，用于关注按钮等交互
+     
     let presenter: ProfilePresenter?
 
-    // MARK: - Environment
-
-    /// Flare主题系统
+   
     @Environment(FlareTheme.self) private var theme
 
-    // MARK: - Body
+    
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // 背景图片区域
+          
             backgroundImageSection
-
-            // 用户信息区域
+ 
             userInfoSection
-
-            // 用户名和简介区域
+ 
             userDetailsSection
         }
         .background(theme.primaryBackgroundColor)
     }
 }
 
-// MARK: - View Components
+ 
 
 extension ProfileHeaderSwiftUIViewV2 {
-    /// 背景图片区域
+ 
     private var backgroundImageSection: some View {
         ZStack(alignment: .bottomTrailing) {
             Rectangle()
                 .frame(height: 150)
                 .overlay {
                     if let bannerUrl = userInfo.profile.banner, !bannerUrl.isEmpty {
-                        // 使用KFImage专业图片加载，配置与UIKit版本一致
+                     
                         KFImage(URL(string: bannerUrl))
                             .setProcessor(DownsamplingImageProcessor(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 300)))
                             .scaleFactor(UIScreen.main.scale)
                             .memoryCacheExpiration(.seconds(180))
                             .diskCacheExpiration(.days(3))
                             .placeholder {
-                                // 背景图片加载占位
+                               
                                 LinearGradient(
                                     colors: [theme.tintColor.opacity(0.3), theme.tintColor.opacity(0.1)],
                                     startPoint: .topLeading,
@@ -74,7 +57,7 @@ extension ProfileHeaderSwiftUIViewV2 {
                             .resizable()
                             .scaledToFill()
                             .overlay {
-                                // 添加渐变遮罩确保内容可读性
+                                
                                 LinearGradient(
                                     colors: [
                                         .black.opacity(0.2),
@@ -85,7 +68,7 @@ extension ProfileHeaderSwiftUIViewV2 {
                                 )
                             }
                     } else {
-                        // 默认渐变背景
+                       
                         LinearGradient(
                             colors: [theme.tintColor.opacity(0.3), theme.tintColor.opacity(0.1)],
                             startPoint: .topLeading,
@@ -95,7 +78,7 @@ extension ProfileHeaderSwiftUIViewV2 {
                 }
                 .clipped()
 
-            // 关系状态标签（如果有）
+           
             if let relation = userInfo.relation {
                 relationshipStatusLabel(relation)
                     .padding(8)
@@ -103,22 +86,22 @@ extension ProfileHeaderSwiftUIViewV2 {
         }
     }
 
-    /// 用户信息区域（头像 + 统计信息 + 关注按钮）
+ 
     private var userInfoSection: some View {
         HStack(alignment: .top, spacing: 12) {
-            // 头像
+       
             avatarView
                 .offset(y: -40)
 
             Spacer()
 
             VStack(alignment: .trailing, spacing: 8) {
-                // 关注按钮（仅非本人Profile显示）
+               
                 if !userInfo.isMe {
                     followButtonView
                 }
 
-                // 统计信息
+               
                 statisticsView
             }
             .padding(.top, 8)
@@ -126,27 +109,27 @@ extension ProfileHeaderSwiftUIViewV2 {
         .padding(.horizontal, 16)
     }
 
-    /// 用户名和简介区域
+ 
     private var userDetailsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // 显示名称（使用Markdown渲染）
+             
             Markdown(userInfo.profile.name.markdown)
                 .markdownInlineImageProvider(.emoji)
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(theme.labelColor)
 
-            // 用户名和标记
+            
             HStack(spacing: 8) {
                 Text("@\(userInfo.profile.handleWithoutFirstAt)")
                     .font(.subheadline)
                     .foregroundColor(theme.labelColor.opacity(0.6))
 
-                // 用户标记系统
+              
                 userMarksView
             }
 
-            // 用户简介（使用Markdown渲染）
+            
             if let description = userInfo.profile.description_?.markdown, !description.isEmpty {
                 Markdown(description)
                     .markdownInlineImageProvider(.emoji)
@@ -154,7 +137,7 @@ extension ProfileHeaderSwiftUIViewV2 {
                     .foregroundColor(theme.labelColor)
             }
 
-            // 自定义字段（如果有）
+           
             if !userInfo.fields.isEmpty {
                 customFieldsView
             }
@@ -164,7 +147,7 @@ extension ProfileHeaderSwiftUIViewV2 {
         .padding(.bottom, 16)
     }
 
-    /// 头像视图（使用KFImage专业缓存）
+    
     private var avatarView: some View {
         KFImage(URL(string: userInfo.profile.avatar))
             .setProcessor(DownsamplingImageProcessor(size: CGSize(width: 160, height: 160)))
@@ -193,7 +176,7 @@ extension ProfileHeaderSwiftUIViewV2 {
             )
     }
 
-    /// 关注按钮视图
+ 
     private var followButtonView: some View {
         FollowButtonView(
             presenter: presenter,
@@ -202,18 +185,18 @@ extension ProfileHeaderSwiftUIViewV2 {
         .frame(width: 80, height: 30)
     }
 
-    /// 统计信息视图
+ 
     private var statisticsView: some View {
         HStack(spacing: 20) {
             StatisticButton(
                 title: "Posts",
                 count: Int(userInfo.profile.matrices.statusesCount)
             ) {
-                // 点击滚动到TabBar位置
+                
                 scrollToTabBar()
             }
 
-            // 使用格式化的关注数和粉丝数
+            
             VStack(spacing: 2) {
                 Text(userInfo.followCount)
                     .font(.headline)
@@ -224,8 +207,7 @@ extension ProfileHeaderSwiftUIViewV2 {
                     .foregroundColor(theme.labelColor.opacity(0.6))
             }
             .onTapGesture {
-                // TODO: 导航到Following页面
-                FlareLog.debug("📱 [ProfileHeaderV2] 点击Following")
+                 FlareLog.debug("📱 [ProfileHeaderV2] 点击Following")
             }
 
             VStack(spacing: 2) {
@@ -238,13 +220,12 @@ extension ProfileHeaderSwiftUIViewV2 {
                     .foregroundColor(theme.labelColor.opacity(0.6))
             }
             .onTapGesture {
-                // TODO: 导航到Followers页面
-                FlareLog.debug("📱 [ProfileHeaderV2] 点击Followers")
+                 FlareLog.debug("📱 [ProfileHeaderV2] 点击Followers")
             }
         }
     }
 
-    /// 用户标记视图
+ 
     private var userMarksView: some View {
         HStack(spacing: 4) {
             ForEach(userInfo.profile.mark, id: \.self) { mark in
@@ -256,7 +237,7 @@ extension ProfileHeaderSwiftUIViewV2 {
         }
     }
 
-    /// 获取标记对应的图标
+ 
     private func markIcon(for mark: UiProfile.Mark) -> String {
         switch mark {
         case .verified:
@@ -270,7 +251,7 @@ extension ProfileHeaderSwiftUIViewV2 {
         }
     }
 
-    /// 自定义字段视图
+ 
     private var customFieldsView: some View {
         VStack(alignment: .leading, spacing: 4) {
             ForEach(Array(userInfo.fields.keys).sorted(), id: \.self) { (key: String) in
@@ -293,9 +274,9 @@ extension ProfileHeaderSwiftUIViewV2 {
         .padding(.top, 8)
     }
 
-    /// 关系状态标签
+ 
     private func relationshipStatusLabel(_ relation: UiRelation) -> some View {
-        // 根据关系状态显示不同的标签
+ 
         let statusText = getRelationshipStatusText(relation)
 
         return Text(statusText)
@@ -307,14 +288,13 @@ extension ProfileHeaderSwiftUIViewV2 {
             .cornerRadius(4)
     }
 
-    /// 获取关系状态文本
+  
     private func getRelationshipStatusText(_: UiRelation) -> String {
-        // 根据UiRelation的具体实现返回对应文本
-        // 这里需要根据实际的UiRelation结构来实现
-        "Relationship Status" // 占位文本
+        
+        "Relationship Status"
     }
 
-    /// 滚动到TabBar位置
+ 
     private func scrollToTabBar() {
         guard let proxy = scrollProxy else { return }
 
@@ -326,7 +306,7 @@ extension ProfileHeaderSwiftUIViewV2 {
     }
 }
 
-/// 统计信息按钮组件
+ 
 struct StatisticButton: View {
     let title: String
     let count: Int
@@ -350,7 +330,7 @@ struct StatisticButton: View {
         .buttonStyle(.plain)
     }
 
-    /// 格式化数字显示
+    
     private func formatCount(_ count: Int) -> String {
         if count >= 1_000_000 {
             String(format: "%.1fM", Double(count) / 1_000_000.0)

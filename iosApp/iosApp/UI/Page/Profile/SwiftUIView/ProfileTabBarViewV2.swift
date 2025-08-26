@@ -22,16 +22,16 @@ struct ProfileTabBarViewV2: View {
     }
 
     private var tabPickerView: some View {
-      //  FlareLog.debug("🎨 [ProfileTabBarV2] 渲染Picker - availableTabs数量: \(availableTabs.count)")
-       // for (index, tab) in availableTabs.enumerated() {
-            //let title = getTabTitle(tab.metaData.title)
+        //  FlareLog.debug("🎨 [ProfileTabBarV2] 渲染Picker - availableTabs数量: \(availableTabs.count)")
+        // for (index, tab) in availableTabs.enumerated() {
+        // let title = getTabTitle(tab.metaData.title)
         //    FlareLog.debug("🎨 [ProfileTabBarV2] Tab[\(index)]: key=\(tab.key), title=\(title)")
         // }
 
-        return Picker("Profile Tabs", selection: Binding(
+        Picker("Profile Tabs", selection: Binding(
             get: {
                 let current = selectedTabKey ?? availableTabs.first?.key ?? ""
-                //FlareLog.debug("🎯 [ProfileTabBarV2] 当前选中Tab: \(current)")
+                // FlareLog.debug("🎯 [ProfileTabBarV2] 当前选中Tab: \(current)")
                 return current
             },
             set: { newValue in

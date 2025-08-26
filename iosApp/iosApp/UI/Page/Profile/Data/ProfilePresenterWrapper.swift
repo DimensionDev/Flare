@@ -28,16 +28,17 @@ class ProfilePresenterWrapper: ObservableObject {
     @Published private(set) var currentTabViewModel: ProfileTabViewModel?
     @Published private(set) var isInitialized: Bool = false
 
-     var isCurrentTabActive: Bool {
-        guard let selectedTabKey = selectedTabKey,
-              let currentTabKey = currentTabViewModel?.tabItem.key else {
+    var isCurrentTabActive: Bool {
+        guard let selectedTabKey,
+              let currentTabKey = currentTabViewModel?.tabItem.key
+        else {
             return false
         }
         return selectedTabKey == currentTabKey
     }
 
-     func isTabCurrent(_ tabKey: String) -> Bool {
-        return selectedTabKey == tabKey
+    func isTabCurrent(_ tabKey: String) -> Bool {
+        selectedTabKey == tabKey
     }
 
     private var tabViewModels: [String: ProfileTabViewModel] = [:]
@@ -56,12 +57,11 @@ class ProfilePresenterWrapper: ObservableObject {
 
     @MainActor
     func setup() async {
-
         guard !isInitialized else {
             FlareLog.debug("⏭️ [ProfilePresenterWrapper] Already initialized, skipping setup")
             return
         }
-        
+
         do {
             FlareLog.debug("🚀 [ProfilePresenterWrapper] 开始setup")
 

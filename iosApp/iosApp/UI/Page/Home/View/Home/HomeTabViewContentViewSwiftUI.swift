@@ -10,12 +10,10 @@ struct HomeTabViewContentViewSwiftUI: View {
     var body: some View {
         let displayType: TimelineDisplayType = appSettings.appearanceSettings.timelineDisplayType
 
-       
         let _ = FlareLog.debug("🔍 [HomeTabView] Current selectedTab: '\(selectedTab)'")
 
         TabView(selection: $selectedTab) {
             ForEach(tabStore.availableAppBarTabsItems, id: \.key) { tab in
-                 
                 let isCurrentAppBarTabSelected = selectedTab == tab.key
                 let _ = FlareLog.debug("🔍 [HomeTabView] Tab '\(tab.key)': selectedTab==tab.key -> \(isCurrentAppBarTabSelected)")
 

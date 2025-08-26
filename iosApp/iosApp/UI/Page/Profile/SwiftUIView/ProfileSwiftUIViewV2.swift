@@ -51,7 +51,6 @@ struct ProfileSwiftUIViewV2: View {
                                 .id("tabbar")
                             }
 
-
                             if let currentTabViewModel = presenterWrapper.currentTabViewModel {
                                 let isCurrentTab = presenterWrapper.isCurrentTabActive
 
@@ -84,7 +83,6 @@ struct ProfileSwiftUIViewV2: View {
                             handleProfileScrollChange(newValue.contentOffset.y)
                         }
                         .onChange(of: timelineState.scrollToTopTrigger) { _, _ in
-
                             let isCurrentTab = presenterWrapper.isCurrentTabActive
                             guard isCurrentTab else {
                                 FlareLog.debug("⏸️ [ProfileSwiftUIViewV2] Skipping scroll to top - not current tab")
@@ -157,7 +155,7 @@ struct ProfileSwiftUIViewV2: View {
 
 extension ProfileSwiftUIViewV2 {
     private func handleProfileScrollChange(_ offsetY: CGFloat) {
-        //FlareLog.debug("📜 [ProfileSwiftUIViewV2] Profile滚动检测 - offsetY: \(offsetY), tabBarOffset: \(timelineState.tabBarOffset)")
+        // FlareLog.debug("📜 [ProfileSwiftUIViewV2] Profile滚动检测 - offsetY: \(offsetY), tabBarOffset: \(timelineState.tabBarOffset)")
 
         if let currentTabViewModel = presenterWrapper.currentTabViewModel {
             currentTabViewModel.timelineViewModel.handleScrollOffsetChange(

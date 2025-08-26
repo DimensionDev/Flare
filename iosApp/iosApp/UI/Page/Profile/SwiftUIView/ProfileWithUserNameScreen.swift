@@ -28,7 +28,7 @@ struct ProfileWithUserNameScreen: View {
                         }
                 case .loading:
                     List {
-                        CommonProfileHeader(
+                        ProfileHeaderSwiftUIViewV2(
                             userInfo: ProfileUserInfo(
                                 profile: createSampleUser(),
                                 relation: nil,
@@ -38,8 +38,8 @@ struct ProfileWithUserNameScreen: View {
                                 fields: [:],
                                 canSendMessage: false
                             ),
-                            state: nil,
-                            onFollowClick: { _ in }
+                            scrollProxy: nil,
+                            presenter: nil
                         )
                         .redacted(reason: .placeholder)
                         .listRowSeparator(.hidden)

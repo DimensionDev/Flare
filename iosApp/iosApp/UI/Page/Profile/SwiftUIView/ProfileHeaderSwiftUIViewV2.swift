@@ -11,6 +11,7 @@ struct ProfileHeaderSwiftUIViewV2: View {
     let presenter: ProfilePresenter?
 
     @Environment(FlareTheme.self) private var theme
+    @Environment(FlareRouter.self) private var router
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -65,10 +66,7 @@ extension ProfileHeaderSwiftUIViewV2 {
                 }
                 .clipped()
 
-            if let relation = userInfo.relation {
-                relationshipStatusLabel(relation)
-                    .padding(8)
-            }
+             
         }
     }
 
@@ -178,7 +176,13 @@ extension ProfileHeaderSwiftUIViewV2 {
                     .foregroundColor(theme.labelColor.opacity(0.6))
             }
             .onTapGesture {
-                FlareLog.debug("📱 [ProfileHeaderV2] 点击Following")
+                let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
+                router.navigate(to: .following(
+                    accountType: accountType,
+                    userKey: userInfo.profile.key,
+                    userName: userInfo.profile.name.raw
+                ))
+                FlareLog.debug("📱 [ProfileHeaderV2] 导航到Following列表")
             }
 
             VStack(spacing: 2) {
@@ -191,7 +195,13 @@ extension ProfileHeaderSwiftUIViewV2 {
                     .foregroundColor(theme.labelColor.opacity(0.6))
             }
             .onTapGesture {
-                FlareLog.debug("📱 [ProfileHeaderV2] 点击Followers")
+                let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
+                router.navigate(to: .followers(
+                    accountType: accountType,
+                    userKey: userInfo.profile.key,
+                    userName: userInfo.profile.name.raw
+                ))
+                FlareLog.debug("📱 [ProfileHeaderV2] 导航到Followers列表")
             }
         }
     }
@@ -241,22 +251,7 @@ extension ProfileHeaderSwiftUIViewV2 {
         }
         .padding(.top, 8)
     }
-
-    private func relationshipStatusLabel(_ relation: UiRelation) -> some View {
-        let statusText = getRelationshipStatusText(relation)
-
-        return Text(statusText)
-            .font(.caption)
-            .fontWeight(.semibold)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(.ultraThinMaterial)
-            .cornerRadius(4)
-    }
-
-    private func getRelationshipStatusText(_: UiRelation) -> String {
-        "Relationship Status"
-    }
+ 
 
     private func scrollToTabBar() {
         guard let proxy = scrollProxy else { return }

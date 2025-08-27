@@ -8,13 +8,12 @@
 
 import AVKit
 import Combine
-import os.log
+import shared
 import UIKit
 
 // import MaskCore
 
 final class MediaPreviewVideoViewModel {
-    let logger = Logger(subsystem: "MediaPreviewVideoViewModel", category: "ViewModel")
 
     var disposeBag = Set<AnyCancellable>()
 
@@ -82,7 +81,7 @@ final class MediaPreviewVideoViewModel {
                 case .gif: return
                 default: break
                 }
-//               self.logger.log(level: .debug, "\((#file as NSString).lastPathComponent, privacy: .public)[\(#line, privacy: .public)], \(#function, privacy: .public): player state: \(status.description)")
+//               FlareLog.debug("[MediaPreviewVideoViewModel] player state: \(status.description)")
 
                 switch status {
                 case .unknown, .buffering, .readyToPlay:

@@ -141,6 +141,22 @@ struct FlareDestinationView: View {
                     .environment(router)
                     .environment(menuState)
 
+            case let .following(accountType, userKey, userName):
+                FollowingListView(
+                    accountType: accountType,
+                    userKey: userKey,
+                    userName: userName
+                )
+                .environment(router)
+
+            case let .followers(accountType, userKey, userName):
+                FollowersListView(
+                    accountType: accountType,
+                    userKey: userKey,
+                    userName: userName
+                )
+                .environment(router)
+
             default:
                 Text("page not found for destination: \(String(describing: destination))")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -267,7 +283,7 @@ struct DeleteStatusView: View {
 
                         HStack(spacing: 16) {
                             Button(action: {
-                                // 关闭对话框
+                              
                                 router.dismissAll()
                             }) {
                                 Text("Cancel")

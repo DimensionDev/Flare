@@ -45,7 +45,7 @@ struct ProfileWaterfallContentView: View {
                     Task {
                         await timelineViewModel.handleRefresh()
                     }
-                }
+                }.listRowBackground(theme.primaryBackgroundColor)
 
             case .empty:
                 VStack(spacing: 16) {
@@ -58,6 +58,7 @@ struct ProfileWaterfallContentView: View {
                         .foregroundColor(theme.labelColor)
                 }
                 .frame(maxWidth: .infinity, minHeight: 200)
+                .listRowBackground(theme.primaryBackgroundColor)
             }
         }
     }

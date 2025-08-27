@@ -13,7 +13,7 @@ struct ProfileTimelineContentView: View {
         Group {
             switch timelineViewModel.timelineState {
             case .loading:
-                TimelineLoadingView()
+                TimelineLoadingView().padding(.horizontal, 16)
 
             case let .loaded(items, hasMore):
                 TimelineItemsView(
@@ -39,7 +39,7 @@ struct ProfileTimelineContentView: View {
                     Task {
                         await timelineViewModel.handleRefresh()
                     }
-                }
+                }.listRowBackground(theme.primaryBackgroundColor)
 
             case .empty:
                 VStack(spacing: 16) {
@@ -52,6 +52,7 @@ struct ProfileTimelineContentView: View {
                         .foregroundColor(theme.labelColor)
                 }
                 .frame(maxWidth: .infinity, minHeight: 200)
+                .listRowBackground(theme.primaryBackgroundColor)
             }
         }
     }

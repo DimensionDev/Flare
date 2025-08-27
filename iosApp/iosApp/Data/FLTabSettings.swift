@@ -307,7 +307,7 @@ public struct FLTabSettings {
         [
             FLHomeTimelineTabItem(
                 metaData: FLTabMetaData(
-                    title: .localized(.home),
+                    title: .localized(.forYou),
                     icon: .mixed(.home, userKey: accountKey)
                 ), account: AccountTypeSpecific(accountKey: accountKey)
             ),
@@ -338,7 +338,7 @@ public struct FLTabSettings {
         [
             FLXQTFeaturedTimelineTabItem(
                 metaData: FLTabMetaData(
-                    title: .localized(.featured),
+                    title: .localized(.following),
                     icon: .mixed(.featured, userKey: accountKey)
                 ), account: AccountTypeSpecific(accountKey: accountKey)
             ),
@@ -966,6 +966,8 @@ public enum FLLocalizedKey: String {
     case profileTimelineWithReply = "profile_tab_timeline_with_reply"
     case profileMedia = "profile_tab_media"
     case profileLikes = "profile_tab_likes"
+    case forYou = "home_tab_for_you_title"
+    case following = "home_tab_following_title"
 
     public var localizedString: String {
         NSLocalizedString(rawValue, comment: "")

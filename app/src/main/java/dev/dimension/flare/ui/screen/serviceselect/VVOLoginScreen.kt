@@ -26,7 +26,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 internal fun VVOLoginScreen(toHome: () -> Unit) {
     val state by producePresenter { presenter(toHome) }
-    val webViewState = rememberWebViewState("https://${UiApplication.VVo.host}/login?backURL=https://${UiApplication.VVo.host}/")
+    val webViewState = rememberWebViewState(UiApplication.VVo.loginUrl)
     LaunchedEffect(Unit) {
         while (true) {
             if (!state.loading) {

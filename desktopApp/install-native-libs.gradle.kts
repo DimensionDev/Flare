@@ -133,9 +133,11 @@ val jnaTask =
         destFile = nativeDestDir.resolve("libjnidispatch.dylib"),
     )
 
-val installNativeLibs =
-    tasks.register("installNativeLibs") {
-        group = "setup"
-        description = "Install sqliteJni + NativeVideoPlayer dylibs to $nativeDestDirPath"
+afterEvaluate {
+    tasks.named("compileKotlin").configure {
         dependsOn(sqliteTask, cmpTask, jnaTask)
     }
+    tasks.named("prepareAppResources").configure {
+        dependsOn(sqliteTask, cmpTask, jnaTask)
+    }
+}

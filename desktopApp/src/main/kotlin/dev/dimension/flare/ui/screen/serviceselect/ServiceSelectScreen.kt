@@ -41,6 +41,7 @@ import dev.dimension.flare.bluesky_login_password
 import dev.dimension.flare.bluesky_login_use_password_button
 import dev.dimension.flare.bluesky_login_username
 import dev.dimension.flare.common.OnDeepLink
+import dev.dimension.flare.common.WebViewBridge
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
@@ -57,6 +58,7 @@ import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
+import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
@@ -66,6 +68,8 @@ import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.ServiceSelectPresenter
 import dev.dimension.flare.ui.presenter.login.ServiceSelectState
+import dev.dimension.flare.ui.presenter.login.VVOLoginPresenter
+import dev.dimension.flare.ui.presenter.login.XQTLoginPresenter
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.ProgressBar
@@ -338,8 +342,28 @@ internal fun ServiceSelectScreen(
                             }
 
                             PlatformType.xQt -> {
+                                val loginState by producePresenter("xqtLoginState") {
+                                    remember {
+                                        XQTLoginPresenter(toHome = onBack)
+                                    }.invoke()
+                                }
                                 AccentButton(
-                                    onClick = onXQT,
+                                    onClick = {
+                                        WebViewBridge.openAndWaitCookies(
+                                            "https://${UiApplication.XQT.host}",
+                                            callback = { cookies ->
+                                                if (cookies.isNullOrEmpty()) {
+                                                    false
+                                                } else {
+                                                    loginState.checkChocolate(cookies).also {
+                                                        if (it) {
+                                                            loginState.login(cookies)
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                        )
+                                    },
                                     modifier = Modifier.width(300.dp),
                                 ) {
                                     Text(
@@ -349,8 +373,28 @@ internal fun ServiceSelectScreen(
                             }
 
                             PlatformType.VVo -> {
+                                val loginState by producePresenter("vvoLoginState") {
+                                    remember {
+                                        VVOLoginPresenter(toHome = onBack)
+                                    }.invoke()
+                                }
                                 AccentButton(
-                                    onClick = onVVO,
+                                    onClick = {
+                                        WebViewBridge.openAndWaitCookies(
+                                            UiApplication.VVo.loginUrl,
+                                            callback = { cookies ->
+                                                if (cookies.isNullOrEmpty()) {
+                                                    false
+                                                } else {
+                                                    loginState.checkChocolate(cookies).also {
+                                                        if (it) {
+                                                            loginState.login(cookies)
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                        )
+                                    },
                                     modifier = Modifier.width(300.dp),
                                 ) {
                                     Text(

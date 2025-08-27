@@ -37,6 +37,7 @@ public sealed interface UiApplication {
     @Immutable
     public data object VVo : UiApplication {
         override val host: String = vvoHost
+        val loginUrl: String = "https://$host/login?backURL=https://$host/"
     }
 
     public companion object {

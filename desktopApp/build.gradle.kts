@@ -1,5 +1,5 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import java.util.Properties
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.platformtools.darkmodedetector)
     implementation(libs.haze)
     implementation(libs.haze.materials)
+    implementation("net.java.dev.jna:jna:5.17.0")
 //    implementation(libs.bouncycastle.bcprov)
 //    implementation(libs.bouncycastle.bcpkix)
 }
@@ -145,3 +146,4 @@ extra["jnaVersion"] = "5.17.0"
 extra["nativeDestDir"] = "resources/macos-arm64"
 
 apply(from = File(projectDir, "install-native-libs.gradle.kts"))
+apply(from = File(projectDir, "build-swift.gradle.kts"))

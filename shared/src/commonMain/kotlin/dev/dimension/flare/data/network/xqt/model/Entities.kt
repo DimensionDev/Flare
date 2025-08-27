@@ -35,7 +35,7 @@ internal data class Entities(
     @SerialName(value = "symbols")
     val symbols: JsonElement? = null,
     @SerialName(value = "urls")
-    val urls: kotlin.collections.List<Url>? = null,
+    val urls: kotlin.collections.List<XqtUrl>? = null,
     @SerialName(value = "user_mentions")
     val userMentions: JsonElement? = null,
     @SerialName(value = "media")
@@ -49,5 +49,5 @@ internal data class Entities(
 @Serializable
 internal data class Description(
     @SerialName(value = "urls")
-    val urls: kotlin.collections.List<Url>? = null,
+    val urls: kotlin.collections.List<XqtUrl>? = null,
 )

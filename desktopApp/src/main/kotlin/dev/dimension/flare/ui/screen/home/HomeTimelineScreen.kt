@@ -26,7 +26,6 @@ import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.materials.FluentMaterials
 import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.LocalWindowPadding
-import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.TabIcon
@@ -56,13 +55,6 @@ internal fun HomeTimelineScreen(
 
     state.tabState.onSuccess { tabState ->
         state.selectedTab.onSuccess { currentTab ->
-            val lazyListState = currentTab.lazyListState
-            RegisterTabCallback(
-                lazyListState = lazyListState,
-                onRefresh = {
-                    currentTab.refreshSync()
-                },
-            )
             Box {
                 TimelineScreen(
                     tabItem = currentTab.timelineTabItem,
@@ -79,6 +71,9 @@ internal fun HomeTimelineScreen(
                                 },
                             ),
                     contentPadding = PaddingValues(top = 48.dp),
+                    onScrollToTop = {
+                        state.setTopBarExpanded(true)
+                    },
                 )
                 AnimatedVisibility(
                     visible = state.isTopBarExpanded,
@@ -98,8 +93,7 @@ internal fun HomeTimelineScreen(
                                             FluentTheme.colors.background.mica.base
                                                 .luminance() < 0.5f,
                                         ),
-                                )
-//                            .background(FluentTheme.colors.background.solid.base)
+                                ).fillMaxWidth()
                                 .padding(LocalWindowPadding.current)
                                 .padding(horizontal = screenHorizontalPadding),
                     ) {

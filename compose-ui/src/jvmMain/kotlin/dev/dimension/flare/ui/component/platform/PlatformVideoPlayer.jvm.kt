@@ -58,7 +58,7 @@ internal actual fun PlatformVideoPlayer(
                     if (autoPlay) {
                         play()
                     }
-                    volume = if (muted) 0f else 1f
+//                    volume = if (muted) 0f else 1f
                 }
         }
     DisposableEffect(uri) {
@@ -83,6 +83,11 @@ internal actual fun PlatformVideoPlayer(
                 null
             }
         }
+    LaunchedEffect(player.isPlaying) {
+        if (player.isPlaying) {
+            player.volume = 0f
+        }
+    }
     LaunchedEffect(player) {
         while (true) {
             val duration = player.metadata.duration
@@ -152,10 +157,17 @@ private fun Modifier.resizeWithContentScale(
                         val placeable =
                             measurable.measure(
                                 constraints.copy(
-                                    maxWidth = (srcSizePx.width * scaleFactor.scaleX).roundToInt(),
-                                    maxHeight = (srcSizePx.height * scaleFactor.scaleY).roundToInt(),
-                                    minWidth = (srcSizePx.width * scaleFactor.scaleX).roundToInt(),
-                                    minHeight = (srcSizePx.height * scaleFactor.scaleY).roundToInt(),
+                                    maxWidth =
+                                        (srcSizePx.width * scaleFactor.scaleX)
+                                            .takeIf { !it.isNaN() }
+                                            ?.roundToInt()
+                                            ?: constraints.maxWidth,
+                                    maxHeight =
+                                        (srcSizePx.height * scaleFactor.scaleY)
+                                            .takeIf { !it.isNaN() }
+                                            ?.roundToInt()
+                                            // or keep 16:9
+                                            ?: (constraints.maxWidth * 9 / 16),
                                 ),
                             )
                         layout(placeable.width, placeable.height) { placeable.place(0, 0) }
@@ -173,6 +185,7 @@ public class VideoPlayerPool {
             create = { uri ->
                 VideoPlayerState()
                     .apply {
+//                        volume = 0f
                         loop = true
                         openUri(uri)
                     }

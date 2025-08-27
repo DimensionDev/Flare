@@ -2,7 +2,7 @@
 clikt = "5.0.3"
 collection = "1.5.0"
 compileSdk = "36"
-composemediaplayer = "0.8.1"
+composemediaplayer = "0.8.2"
 haze = "1.6.10"
 lifecycleViewmodelComposeVersion = "2.9.2"
 minSdk = "23"
@@ -207,7 +207,7 @@ krypto = { module = "com.soywiz:korlibs-crypto", version = "6.0.1" }
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
-androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version = "1.0.0-SNAPSHOT" }
+androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version = "1.0.0-alpha01" }
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version = "2.10.0-alpha02" }
 
 bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }

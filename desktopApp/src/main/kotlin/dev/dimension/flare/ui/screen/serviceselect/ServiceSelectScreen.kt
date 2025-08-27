@@ -85,11 +85,7 @@ import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun ServiceSelectScreen(
-    onBack: () -> Unit,
-    onXQT: () -> Unit,
-    onVVO: () -> Unit,
-) {
+internal fun ServiceSelectScreen(onBack: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     var host by remember { mutableStateOf(TextFieldValue("")) }
     val state by producePresenter {

@@ -344,10 +344,6 @@ internal fun RouteContent(
         Route.ServiceSelect -> {
             ServiceSelectScreen(
                 onBack = onBack,
-                onVVO = {
-                },
-                onXQT = {
-                },
             )
         }
 

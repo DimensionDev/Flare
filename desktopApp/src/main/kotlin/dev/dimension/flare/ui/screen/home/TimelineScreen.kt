@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -50,6 +52,7 @@ internal fun TimelineScreen(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     header: @Composable (() -> Unit)? = null,
+    onScrollToTop: (() -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
     val state by producePresenter(
@@ -57,7 +60,20 @@ internal fun TimelineScreen(
     ) {
         presenter(tabItem)
     }
-    RegisterTabCallback(state.lazyListState, onRefresh = state::refreshSync)
+    RegisterTabCallback(
+        state.lazyListState,
+        onRefresh = state::refreshSync,
+    )
+    if (onScrollToTop != null) {
+        LaunchedEffect(state.lazyListState) {
+            snapshotFlow { state.lazyListState.firstVisibleItemIndex }
+                .collect {
+                    if (it == 0) {
+                        onScrollToTop()
+                    }
+                }
+        }
+    }
     Box(
         modifier =
             modifier

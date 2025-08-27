@@ -44,7 +44,7 @@ internal object WKWebviewBridge {
 
     fun openAndWaitCookies(
         url: String,
-        intervalMs: Int = 1000,
+        intervalMs: Int = 2000,
         decisionCallback: (cookies: String?) -> Boolean,
         windowClosedCallback: (id: Long, reason: Int) -> Unit,
     ) {

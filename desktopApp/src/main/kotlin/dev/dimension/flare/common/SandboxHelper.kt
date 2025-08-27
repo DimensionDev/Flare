@@ -8,6 +8,7 @@ object SandboxHelper {
             System.setProperty("androidx.sqlite.driver.bundled.path", resourcesPath)
             System.setProperty("jna.nounpack", "true")
             System.setProperty("jna.boot.library.path", resourcesPath)
+            System.setProperty("jna.library.path", resourcesPath)
         }
     }
 }

@@ -98,7 +98,8 @@ internal fun TimelineScreen(
                 modifier =
                     Modifier
                         .align(Alignment.TopCenter)
-                        .padding(LocalWindowPadding.current),
+                        .padding(LocalWindowPadding.current)
+                        .padding(contentPadding),
             ) {
                 AccentButton(
                     onClick = {

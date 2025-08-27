@@ -12,6 +12,8 @@ struct ProfileSwiftUIViewV2: View {
     @EnvironmentObject private var timelineState: TimelineExtState
     @Environment(\.appSettings) private var appSettings
 
+    @State private var showUserNameInNavBar = false
+
     init(accountType: AccountType, userKey: MicroBlogKey?, showBackButton: Bool = true) {
         self.accountType = accountType
         self.userKey = userKey
@@ -95,6 +97,8 @@ struct ProfileSwiftUIViewV2: View {
                             }
                         }
                     }
+                    .navigationTitle(showUserNameInNavBar ? (ProfileUserInfo.from(state: state)?.profile.name.markdown ?? "") : "")
+                    .navigationBarTitleDisplayMode(.inline)
                 }
             } else {
                 VStack(spacing: 16) {
@@ -173,5 +177,9 @@ extension ProfileSwiftUIViewV2 {
                 timelineState.showFloatingButton = shouldShowFloatingButton
             }
         }
+
+       
+        let shouldShow = offsetY > 100
+        if showUserNameInNavBar != shouldShow { showUserNameInNavBar = shouldShow }
     }
 }

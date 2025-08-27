@@ -35,7 +35,9 @@ dependencies {
     implementation(libs.zoomable)
     implementation(libs.datastore)
     implementation(libs.reorderable)
-    implementation("io.github.kdroidfilter:platformtools.darkmodedetector:0.5.0")
+    implementation(libs.platformtools.darkmodedetector)
+    implementation(libs.haze)
+    implementation(libs.haze.materials)
 //    implementation(libs.bouncycastle.bcprov)
 //    implementation(libs.bouncycastle.bcpkix)
 }
@@ -51,7 +53,7 @@ compose.desktop {
             macOS {
                 val file = project.file("signing.properties")
                 val hasSigningProps = file.exists()
-                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "15"
+                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "17"
                 bundleID = "dev.dimension.flare"
                 minimumSystemVersion = "12.0"
                 appStore = hasSigningProps
@@ -92,11 +94,11 @@ compose.desktop {
         buildTypes {
             release {
                 proguard {
-                    this.isEnabled.set(false)
-//                    version.set("7.7.0")
-//                    this.configurationFiles.from(
-//                        file("proguard-rules.pro")
-//                    )
+//                    this.isEnabled.set(false)
+                    version.set("7.7.0")
+                    this.configurationFiles.from(
+                        file("proguard-rules.pro")
+                    )
                 }
             }
         }

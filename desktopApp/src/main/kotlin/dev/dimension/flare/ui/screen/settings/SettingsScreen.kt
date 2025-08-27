@@ -53,6 +53,7 @@ import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.edit
 import dev.dimension.flare.home_login
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -122,13 +123,16 @@ import dev.dimension.flare.ui.presenter.settings.AccountsState
 import dev.dimension.flare.ui.presenter.settings.FlareServerProviderPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
+import io.github.composefluent.component.Button
 import io.github.composefluent.component.CardExpanderItem
 import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.DropDownButton
 import io.github.composefluent.component.Expander
 import io.github.composefluent.component.ExpanderItem
+import io.github.composefluent.component.ExpanderItemSeparator
 import io.github.composefluent.component.FlyoutPlacement
+import io.github.composefluent.component.HyperlinkButton
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.ProgressRing
@@ -413,7 +417,7 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                         )
                     },
                 )
-
+                ExpanderItemSeparator()
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_appearance_show_actions))
@@ -433,26 +437,30 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                         )
                     },
                 )
+                ExpanderItemSeparator()
                 AnimatedVisibility(LocalAppearanceSettings.current.showActions) {
-                    ExpanderItem(
-                        heading = {
-                            Text(stringResource(Res.string.settings_appearance_show_numbers))
-                        },
-                        caption = {
-                            Text(stringResource(Res.string.settings_appearance_show_numbers_description))
-                        },
-                        trailing = {
-                            Switcher(
-                                checked = LocalAppearanceSettings.current.showNumbers,
-                                {
-                                    state.appearanceState.updateSettings {
-                                        copy(showNumbers = it)
-                                    }
-                                },
-                                textBefore = true,
-                            )
-                        },
-                    )
+                    Column {
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.settings_appearance_show_numbers))
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.settings_appearance_show_numbers_description))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = LocalAppearanceSettings.current.showNumbers,
+                                    {
+                                        state.appearanceState.updateSettings {
+                                            copy(showNumbers = it)
+                                        }
+                                    },
+                                    textBefore = true,
+                                )
+                            },
+                        )
+                        ExpanderItemSeparator()
+                    }
                 }
                 ExpanderItem(
                     heading = {
@@ -473,26 +481,30 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                         )
                     },
                 )
+                ExpanderItemSeparator()
                 AnimatedVisibility(LocalAppearanceSettings.current.showLinkPreview) {
-                    ExpanderItem(
-                        heading = {
-                            Text(stringResource(Res.string.settings_appearance_compat_link_previews))
-                        },
-                        caption = {
-                            Text(stringResource(Res.string.settings_appearance_compat_link_previews_description))
-                        },
-                        trailing = {
-                            Switcher(
-                                checked = LocalAppearanceSettings.current.compatLinkPreview,
-                                {
-                                    state.appearanceState.updateSettings {
-                                        copy(compatLinkPreview = it)
-                                    }
-                                },
-                                textBefore = true,
-                            )
-                        },
-                    )
+                    Column {
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.settings_appearance_compat_link_previews))
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.settings_appearance_compat_link_previews_description))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = LocalAppearanceSettings.current.compatLinkPreview,
+                                    {
+                                        state.appearanceState.updateSettings {
+                                            copy(compatLinkPreview = it)
+                                        }
+                                    },
+                                    textBefore = true,
+                                )
+                            },
+                        )
+                        ExpanderItemSeparator()
+                    }
                 }
                 ExpanderItem(
                     heading = {
@@ -513,47 +525,54 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                         )
                     },
                 )
+                ExpanderItemSeparator()
                 AnimatedVisibility(LocalAppearanceSettings.current.showMedia) {
-                    ExpanderItem(
-                        heading = {
-                            Text(stringResource(Res.string.settings_appearance_show_cw_img))
-                        },
-                        caption = {
-                            Text(stringResource(Res.string.settings_appearance_show_cw_img_description))
-                        },
-                        trailing = {
-                            Switcher(
-                                checked = LocalAppearanceSettings.current.showSensitiveContent,
-                                {
-                                    state.appearanceState.updateSettings {
-                                        copy(showSensitiveContent = it)
-                                    }
-                                },
-                                textBefore = true,
-                            )
-                        },
-                    )
+                    Column {
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.settings_appearance_show_cw_img))
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.settings_appearance_show_cw_img_description))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = LocalAppearanceSettings.current.showSensitiveContent,
+                                    {
+                                        state.appearanceState.updateSettings {
+                                            copy(showSensitiveContent = it)
+                                        }
+                                    },
+                                    textBefore = true,
+                                )
+                            },
+                        )
+                        ExpanderItemSeparator()
+                    }
                 }
                 AnimatedVisibility(LocalAppearanceSettings.current.showMedia) {
-                    ExpanderItem(
-                        heading = {
-                            Text(stringResource(Res.string.settings_appearance_expand_media))
-                        },
-                        caption = {
-                            Text(stringResource(Res.string.settings_appearance_expand_media_description))
-                        },
-                        trailing = {
-                            Switcher(
-                                checked = LocalAppearanceSettings.current.expandMediaSize,
-                                {
-                                    state.appearanceState.updateSettings {
-                                        copy(expandMediaSize = it)
-                                    }
-                                },
-                                textBefore = true,
-                            )
-                        },
-                    )
+                    Column {
+                        ExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.settings_appearance_expand_media))
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.settings_appearance_expand_media_description))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = LocalAppearanceSettings.current.expandMediaSize,
+                                    {
+                                        state.appearanceState.updateSettings {
+                                            copy(expandMediaSize = it)
+                                        }
+                                    },
+                                    textBefore = true,
+                                )
+                            },
+                        )
+                        ExpanderItemSeparator()
+                    }
                 }
                 ExpanderItem(
                     heading = {
@@ -650,10 +669,10 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                 },
                 icon = null,
             ) {
-                CardExpanderItem(
-                    onClick = {
-                        state.aiConfigState.setShowServerDialog(true)
-                    },
+                ExpanderItem(
+//                    onClick = {
+//                        state.aiConfigState.setShowServerDialog(true)
+//                    },
                     heading = {
                         Text(stringResource(Res.string.settings_ai_config_server))
                     },
@@ -662,7 +681,17 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                             Text(it)
                         }
                     },
+                    trailing = {
+                        Button(
+                            onClick = {
+                                state.aiConfigState.setShowServerDialog(true)
+                            },
+                        ) {
+                            Text(stringResource(Res.string.edit))
+                        }
+                    },
                 )
+                ExpanderItemSeparator()
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_ai_config_entable_translation))
@@ -680,6 +709,7 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                         )
                     },
                 )
+                ExpanderItemSeparator()
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_ai_config_enable_tldr))
@@ -711,17 +741,19 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                 expanded = state.aboutExpanded,
                 onExpandedChanged = { state.setAboutExpanded(it) },
             ) {
-                CardExpanderItem(
+                ExpanderItem(
                     heading = {
                         Text(text = stringResource(resource = Res.string.settings_about_source_code))
                     },
-                    caption = {
-                        Text(
-                            text = "https://github.com/DimensionDev/Flare",
-                        )
-                    },
-                    onClick = {
-                        uriHandler.openUri("https://github.com/DimensionDev/Flare")
+                    trailing = {
+                        HyperlinkButton(
+                            "https://github.com/DimensionDev/Flare",
+                        ) {
+                            Text(
+                                text = "https://github.com/DimensionDev/Flare",
+                                maxLines = 1,
+                            )
+                        }
                     },
                     icon = {
                         FAIcon(
@@ -731,17 +763,23 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                         )
                     },
                 )
-                CardExpanderItem(
+                ExpanderItemSeparator()
+                ExpanderItem(
                     heading = {
                         Text(text = stringResource(resource = Res.string.settings_about_telegram))
                     },
                     caption = {
-                        Text(
-                            text = stringResource(resource = Res.string.settings_about_telegram_description),
-                        )
+                        Text(text = stringResource(resource = Res.string.settings_about_telegram_description))
                     },
-                    onClick = {
-                        uriHandler.openUri("https://t.me/+0UtcP6_qcDoyOWE1")
+                    trailing = {
+                        HyperlinkButton(
+                            "https://t.me/+0UtcP6_qcDoyOWE1",
+                        ) {
+                            Text(
+                                text = "https://t.me/+0UtcP6_qcDoyOWE1",
+                                maxLines = 1,
+                            )
+                        }
                     },
                     icon = {
                         FAIcon(
@@ -751,17 +789,23 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                         )
                     },
                 )
-                CardExpanderItem(
+                ExpanderItemSeparator()
+                ExpanderItem(
                     heading = {
                         Text(text = stringResource(resource = Res.string.settings_about_line))
                     },
                     caption = {
-                        Text(
-                            text = stringResource(resource = Res.string.settings_about_line_description),
-                        )
+                        Text(text = stringResource(resource = Res.string.settings_about_line_description))
                     },
-                    onClick = {
-                        uriHandler.openUri("https://line.me/ti/g/hf95HyGJ9k")
+                    trailing = {
+                        HyperlinkButton(
+                            "https://line.me/ti/g/hf95HyGJ9k",
+                        ) {
+                            Text(
+                                text = "https://line.me/ti/g/hf95HyGJ9k",
+                                maxLines = 1,
+                            )
+                        }
                     },
                     icon = {
                         FAIcon(
@@ -771,17 +815,23 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                         )
                     },
                 )
-                CardExpanderItem(
+                ExpanderItemSeparator()
+                ExpanderItem(
                     heading = {
                         Text(text = stringResource(resource = Res.string.settings_about_localization))
                     },
                     caption = {
-                        Text(
-                            text = stringResource(resource = Res.string.settings_about_localization_description),
-                        )
+                        Text(text = stringResource(resource = Res.string.settings_about_localization_description))
                     },
-                    onClick = {
-                        uriHandler.openUri("https://crowdin.com/project/flareapp")
+                    trailing = {
+                        HyperlinkButton(
+                            "https://crowdin.com/project/flareapp",
+                        ) {
+                            Text(
+                                text = "https://crowdin.com/project/flareapp",
+                                maxLines = 1,
+                            )
+                        }
                     },
                     icon = {
                         FAIcon(
@@ -791,17 +841,20 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                         )
                     },
                 )
-                CardExpanderItem(
+                ExpanderItemSeparator()
+                ExpanderItem(
                     heading = {
                         Text(text = stringResource(resource = Res.string.settings_privacy_policy))
                     },
-                    caption = {
-                        Text(
-                            text = "https://legal.mask.io/maskbook",
-                        )
-                    },
-                    onClick = {
-                        uriHandler.openUri("https://legal.mask.io/maskbook/")
+                    trailing = {
+                        HyperlinkButton(
+                            "https://legal.mask.io/maskbook",
+                        ) {
+                            Text(
+                                text = "https://legal.mask.io/maskbook",
+                                maxLines = 1,
+                            )
+                        }
                     },
                     icon = {
                         FAIcon(

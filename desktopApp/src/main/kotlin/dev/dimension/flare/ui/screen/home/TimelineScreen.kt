@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +31,7 @@ import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.home_timeline_new_toots
+import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
@@ -45,6 +47,8 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun TimelineScreen(
     tabItem: TimelineTabItem,
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     header: @Composable (() -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
@@ -56,11 +60,11 @@ internal fun TimelineScreen(
     RegisterTabCallback(state.lazyListState, onRefresh = state::refreshSync)
     Box(
         modifier =
-            Modifier
+            modifier
                 .fillMaxSize(),
     ) {
         LazyStatusVerticalStaggeredGrid(
-            contentPadding = LocalWindowPadding.current,
+            contentPadding = LocalWindowPadding.current + contentPadding,
             state = state.lazyListState,
         ) {
             if (header != null) {
@@ -72,11 +76,17 @@ internal fun TimelineScreen(
             }
             status(state.listState)
         }
-        if (state.listState.isRefreshing) {
+        AnimatedVisibility(
+            state.listState.isRefreshing,
+            enter = slideInVertically { -it },
+            exit = slideOutVertically { -it },
+            modifier =
+                Modifier
+                    .align(Alignment.TopCenter),
+        ) {
             ProgressBar(
                 modifier =
                     Modifier
-                        .align(Alignment.TopCenter)
                         .fillMaxWidth(),
             )
         }

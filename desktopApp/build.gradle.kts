@@ -54,7 +54,8 @@ compose.desktop {
             macOS {
                 val file = project.file("signing.properties")
                 val hasSigningProps = file.exists()
-                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "17"
+                println("hasSigningProps: ${hasSigningProps}")
+                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "18"
                 bundleID = "dev.dimension.flare"
                 minimumSystemVersion = "12.0"
                 appStore = hasSigningProps

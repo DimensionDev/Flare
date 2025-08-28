@@ -134,3 +134,4 @@
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 -keep class io.github.kdroidfilter.** { *; }
 -keep class de.jangassen.jfa.** { *; }
+-keep class dev.dimension.flare.common.macos.** { *; }

@@ -56,8 +56,8 @@ internal fun HomeTimelineScreen(
     state.tabState.onSuccess { tabState ->
         state.selectedTab.onSuccess { currentTab ->
             Box {
-                TimelineScreen(
-                    tabItem = currentTab.timelineTabItem,
+                TimelineContent(
+                    state = currentTab,
                     modifier =
                         Modifier
                             .hazeSource(hazeState)

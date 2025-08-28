@@ -30,7 +30,6 @@ import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.isRefreshing
-import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.home_timeline_new_toots
 import dev.dimension.flare.ui.common.plus
@@ -54,12 +53,29 @@ internal fun TimelineScreen(
     header: @Composable (() -> Unit)? = null,
     onScrollToTop: (() -> Unit)? = null,
 ) {
-    val scope = rememberCoroutineScope()
     val state by producePresenter(
         "timeline_$tabItem",
     ) {
         presenter(tabItem)
     }
+    TimelineContent(
+        state = state,
+        modifier = modifier,
+        contentPadding = contentPadding,
+        header = header,
+        onScrollToTop = onScrollToTop,
+    )
+}
+
+@Composable
+internal fun TimelineContent(
+    state: TimelineItemPresenter.State,
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    header: @Composable (() -> Unit)? = null,
+    onScrollToTop: (() -> Unit)? = null,
+) {
+    val scope = rememberCoroutineScope()
     RegisterTabCallback(
         state.lazyListState,
         onRefresh = state::refreshSync,
@@ -106,33 +122,31 @@ internal fun TimelineScreen(
                         .fillMaxWidth(),
             )
         }
-        state.listState.onSuccess {
-            AnimatedVisibility(
-                state.showNewToots,
-                enter = slideInVertically { -it } + fadeIn(),
-                exit = slideOutVertically { -it } + fadeOut(),
-                modifier =
-                    Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(LocalWindowPadding.current)
-                        .padding(contentPadding),
+        AnimatedVisibility(
+            state.showNewToots,
+            enter = slideInVertically { -it } + fadeIn(),
+            exit = slideOutVertically { -it } + fadeOut(),
+            modifier =
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(LocalWindowPadding.current)
+                    .padding(contentPadding),
+        ) {
+            AccentButton(
+                onClick = {
+                    state.onNewTootsShown()
+                    scope.launch {
+                        state.lazyListState.scrollToItem(0)
+                    }
+                },
             ) {
-                AccentButton(
-                    onClick = {
-                        state.onNewTootsShown()
-                        scope.launch {
-                            state.lazyListState.scrollToItem(0)
-                        }
-                    },
-                ) {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.AnglesUp,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = stringResource(Res.string.home_timeline_new_toots))
-                }
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.AnglesUp,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = stringResource(Res.string.home_timeline_new_toots))
             }
         }
     }

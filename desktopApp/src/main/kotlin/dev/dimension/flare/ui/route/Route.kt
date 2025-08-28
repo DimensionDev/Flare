@@ -238,6 +238,8 @@ internal sealed interface Route {
                         else -> null
                     }
 
+                "Login" -> Route.ServiceSelect
+
                 "Search" -> {
                     val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
                     val keyword = data.segments.getOrNull(0) ?: return null

@@ -1,5 +1,20 @@
 import Cocoa
 import WebKit
+import Foundation
+
+public typealias LogCB = @convention(c) (_ level: Int32, _ msg: UnsafePointer<CChar>?) -> Void
+private var gLog: LogCB?
+
+@_cdecl("wkb_set_log_callback")
+public func wkb_set_log_callback(_ cb: LogCB?) { gLog = cb }
+
+@inline(__always)
+func swiftLog(_ level: Int32, _ msg: String) {
+    if let cb = gLog {
+        msg.withCString { cb(level, $0) }
+    }
+    fputs("[wkb \(level)] \(msg)\n", stderr)
+}
 
 private var nextId: Int64 = 1
 
@@ -38,6 +53,17 @@ private func makeWindow(with web: WKWebView, title: String) -> NSWindow {
     return win
 }
 
+
+private func cookieHeaderString(from cookies: [HTTPCookie], for url: URL?) -> String {
+    let host = url?.host?.lowercased()
+    let filtered = cookies.filter { c in
+        guard let h = host else { return true }
+        let d = c.domain.lowercased()
+        return d == h || (d.hasPrefix(".") && (d.hasSuffix(h) || h.hasSuffix(d)))
+    }
+    return filtered.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
+}
+
 private func startCookiePolling(for ctrl: Controller, targetURL: URL?, intervalMs: Int32) {
     let q = DispatchQueue(label: "cookie.poller.\(ctrl.id)")
     let t = DispatchSource.makeTimerSource(queue: q)
@@ -51,11 +77,7 @@ private func startCookiePolling(for ctrl: Controller, targetURL: URL?, intervalM
         var header = ""
         DispatchQueue.main.async {
             store.getAllCookies { cookies in
-                var cookieString = ""
-                for cookie in cookies {
-                    cookieString += "\(cookie.name)=\(cookie.value); "
-                }
-                header = cookieString
+                header = cookieHeaderString(from: cookies, for: targetURL)
                 sem.signal()
             }
         }
@@ -148,4 +170,62 @@ public func wkb_close_window(_ id: Int64) {
 public func wkb_clear_persistent_storage() {
     let types = WKWebsiteDataStore.allWebsiteDataTypes()
     WKWebsiteDataStore.default().removeData(ofTypes: types, modifiedSince: .distantPast, completionHandler: {})
+}
+
+@_cdecl("wkb_open_webview_poll_with_ua")
+public func wkb_open_webview_poll_with_ua(_ urlCString: UnsafePointer<CChar>?,
+                                          _ intervalMs: Int32,
+                                          _ uaCString: UnsafePointer<CChar>?) -> Int64 {
+    let urlStr = urlCString.flatMap { String(cString: $0) } ?? "about:blank"
+    let targetURL = URL(string: urlStr)
+    let ua = uaCString.flatMap { String(cString: $0) }
+
+    var outId: Int64 = 0
+    DispatchQueue.main.sync {
+        if NSApp == nil { _ = NSApplication.shared }
+
+        let cfg = WKWebViewConfiguration()
+        cfg.websiteDataStore = .nonPersistent()
+        if #available(macOS 11.0, *) {
+            cfg.defaultWebpagePreferences.preferredContentMode = .mobile
+        }
+
+        let web = WKWebView(frame: .zero, configuration: cfg)
+        if let ua = ua {
+            web.customUserAgent = ua
+        }
+        if let u = targetURL { web.load(URLRequest(url: u)) }
+
+        let win = makeWindow(with: web, title: "WebView")
+        let id = nextId; nextId += 1
+        let ctrl = Controller(id: id, window: win, web: web)
+        ctrls[id] = ctrl
+
+        NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: win, queue: nil) { _ in
+            let reason = ctrl.closeReason
+            stopAndDispose(id: id)
+            if let cb = gOnClosed {
+                DispatchQueue.global(qos: .userInitiated).async { cb(id, reason) }
+            }
+        }
+
+        win.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+
+        startCookiePolling(for: ctrl, targetURL: targetURL, intervalMs: intervalMs)
+        outId = id
+    }
+    return outId
+}
+
+@_cdecl("wkb_set_user_agent")
+public func wkb_set_user_agent(_ id: Int64, _ uaCString: UnsafePointer<CChar>?, _ reload: Bool) {
+    DispatchQueue.main.async {
+        guard let ctrl = ctrls[id] else { return }
+        let ua = uaCString.flatMap { String(cString: $0) }
+        ctrl.web.customUserAgent = ua
+        if reload {
+            ctrl.web.reload()
+        }
+    }
 }

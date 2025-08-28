@@ -176,7 +176,6 @@ internal class StackManager(
                     savableStateHolder.removeState(id)
                     viewModelStoreProvider.clear(id)
                     lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-                    println("Entry $id is cleared and destroyed")
                 } else {
                     lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
                 }

@@ -6,6 +6,30 @@ import com.sun.jna.Native
 
 private interface WebviewBridge : Library {
     @Suppress("FunctionName")
+    fun wkb_set_log_callback(cb: LogCallback?)
+
+    fun interface LogCallback : Callback {
+        fun invoke(
+            level: Int,
+            msg: String?,
+        )
+    }
+
+    @Suppress("FunctionName")
+    fun wkb_open_webview_poll_with_ua(
+        url: String,
+        intervalMs: Int,
+        ua: String?,
+    ): Long
+
+    @Suppress("FunctionName")
+    fun wkb_set_user_agent(
+        id: Long,
+        ua: String?,
+        reload: Boolean,
+    )
+
+    @Suppress("FunctionName")
     fun wkb_set_decision_callback(cb: DecisionCallback?)
 
     @Suppress("FunctionName")
@@ -38,8 +62,19 @@ private interface WebviewBridge : Library {
 }
 
 internal object WKWebviewBridge {
+    private val iphoneUA =
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) " +
+            "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 " +
+            "Mobile/15E148 Safari/604.1"
+
     private val lib: WebviewBridge by lazy {
-        Native.load("WebviewBridge", WebviewBridge::class.java)
+        Native.load("WebviewBridge", WebviewBridge::class.java).apply {
+            wkb_set_log_callback(
+                WebviewBridge.LogCallback { level, msg ->
+                    println("WebviewBridge log [$level]: $msg")
+                },
+            )
+        }
     }
 
     fun openAndWaitCookies(

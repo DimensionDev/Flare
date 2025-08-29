@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowScope
 import dev.dimension.flare.common.OnDeepLink
 import dev.dimension.flare.data.model.Bluesky.FeedTabItem
 import dev.dimension.flare.data.model.IconType
@@ -57,7 +58,7 @@ import io.github.composefluent.component.Flyout
 import io.github.composefluent.component.Text
 
 @Composable
-internal fun Router(
+internal fun WindowScope.Router(
     manager: StackManager,
     onWindowRoute: (Route.WindowRoute) -> Unit,
     modifier: Modifier = Modifier,
@@ -104,7 +105,7 @@ internal fun Router(
 }
 
 @Composable
-internal fun RouteContent(
+internal fun WindowScope.RouteContent(
     route: Route,
     onBack: () -> Unit,
     navigate: (Route) -> Unit,

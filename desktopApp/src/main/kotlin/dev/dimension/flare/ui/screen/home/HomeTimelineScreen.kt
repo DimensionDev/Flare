@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -79,7 +80,10 @@ internal fun HomeTimelineScreen(
                     visible = state.isTopBarExpanded,
                     modifier =
                         Modifier
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .clickable {
+                                // prevent click through
+                            },
                     enter = slideInVertically { -it },
                     exit = slideOutVertically { -it },
                 ) {
@@ -101,7 +105,15 @@ internal fun HomeTimelineScreen(
                             PillButton(
                                 selected = tab.timelineTabItem.key == currentTab.timelineTabItem.key,
                                 onSelectedChanged = {
-                                    state.setSelectedIndex(index)
+                                    if (tab.timelineTabItem.key == currentTab.timelineTabItem.key) {
+                                        if (currentTab.lazyListState.firstVisibleItemIndex == 0) {
+                                            currentTab.refreshSync()
+                                        } else {
+                                            currentTab.lazyListState.requestScrollToItem(0)
+                                        }
+                                    } else {
+                                        state.setSelectedIndex(index)
+                                    }
                                 },
                             ) {
                                 TabIcon(

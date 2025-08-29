@@ -26,6 +26,7 @@ import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
+import androidx.compose.ui.window.WindowScope
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.data.model.AppSettings
 import dev.dimension.flare.data.model.AppearanceSettings
@@ -46,13 +47,13 @@ import org.apache.commons.lang3.SystemUtils
 import org.koin.compose.koinInject
 
 internal val LocalComposeWindow =
-    staticCompositionLocalOf<ComposeWindow> {
+    staticCompositionLocalOf<ComposeWindow?> {
         error("No ComposeWindow provided")
     }
 
 @OptIn(ExperimentalFluentApi::class)
 @Composable
-internal fun FrameWindowScope.FlareTheme(
+internal fun WindowScope.FlareTheme(
     isDarkTheme: Boolean = isDarkTheme(),
     content: @Composable () -> Unit,
 ) {
@@ -67,13 +68,22 @@ internal fun FrameWindowScope.FlareTheme(
     ) {
         if (SystemUtils.IS_OS_MAC) {
             LaunchedEffect(window) {
-                window.rootPane.apply {
-                    rootPane.putClientProperty("apple.awt.fullWindowContent", true)
-                    rootPane.putClientProperty("apple.awt.transparentTitleBar", true)
-                    rootPane.putClientProperty("apple.awt.windowTitleVisible", false)
-                }
+                window
+                    .let {
+                        it as? javax.swing.RootPaneContainer
+                    }?.let {
+                        it.rootPane.putClientProperty("apple.awt.fullWindowContent", true)
+                        it.rootPane.putClientProperty("apple.awt.transparentTitleBar", true)
+                        it.rootPane.putClientProperty("apple.awt.windowTitleVisible", false)
+                    }
             }
         }
+        val composeWindow =
+            if (this is FrameWindowScope) {
+                window
+            } else {
+                null
+            }
 
         CompositionLocalProvider(
             LocalIndication provides
@@ -92,7 +102,7 @@ internal fun FrameWindowScope.FlareTheme(
                 } else {
                     PaddingValues(vertical = 8.dp)
                 },
-            LocalComposeWindow provides window,
+            LocalComposeWindow provides composeWindow,
         ) {
             Box(
                 modifier =

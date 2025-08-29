@@ -87,12 +87,18 @@ fun main(args: Array<String>) {
             }
 
             extraWindowRoutes.forEach { (key, value) ->
+                val windowState =
+                    rememberWindowState(
+                        position = WindowPosition(Alignment.Center),
+                        size = DpSize(1200.dp, 800.dp),
+                    )
                 Window(
                     title = stringResource(Res.string.app_name),
                     icon = painterResource(Res.drawable.flare_logo),
                     onCloseRequest = {
                         extraWindowRoutes.remove(key)
                     },
+                    state = windowState,
                     onKeyEvent = {
                         if (it.key == Key.Escape) {
                             extraWindowRoutes.remove(key)

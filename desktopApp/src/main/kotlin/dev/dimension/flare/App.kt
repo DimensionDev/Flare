@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowScope
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Gear
@@ -89,7 +90,7 @@ import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
+internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
     val state by producePresenter { presenter() }
     val uriHandler = LocalUriHandler.current
 

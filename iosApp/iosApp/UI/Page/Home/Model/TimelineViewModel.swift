@@ -35,9 +35,6 @@ class TimelineViewModel {
         return false
     }
 
-
-
- 
     func updateItemOptimisticallyWithState(itemId: String, actionType: ActionType, targetState: Bool) {
         FlareLog.debug("🚀 [TimelineViewModel] 开始状态更新: itemId=\(itemId), actionType=\(actionType), targetState=\(targetState)")
 
@@ -448,17 +445,17 @@ class TimelineViewModel {
 //         case .like:
 //             item.isLiked.toggle()
 //             item.likeCount += item.isLiked ? 1 : -1
-// //            item.actions = updateActions(item.actions, actionType: ActionType.like, newState: item.isLiked, newCount: item.likeCount)
+    // //            item.actions = updateActions(item.actions, actionType: ActionType.like, newState: item.isLiked, newCount: item.likeCount)
 
 //         case .retweet:
 //             item.isRetweeted.toggle()
 //             item.retweetCount += item.isRetweeted ? 1 : -1
-// //            item.actions = updateActions(item.actions, actionType: ActionType.retweet, newState: item.isRetweeted, newCount: item.retweetCount)
+    // //            item.actions = updateActions(item.actions, actionType: ActionType.retweet, newState: item.isRetweeted, newCount: item.retweetCount)
 
 //         case .bookmark:
 //             item.isBookmarked.toggle()
 //             item.bookmarkCount += item.isBookmarked ? 1 : -1
-// //            item.actions = updateActions(item.actions, actionType: ActionType.bookmark, newState: item.isBookmarked, newCount: item.bookmarkCount)
+    // //            item.actions = updateActions(item.actions, actionType: ActionType.bookmark, newState: item.isBookmarked, newCount: item.bookmarkCount)
 //         }
 
 //         // 更新数组

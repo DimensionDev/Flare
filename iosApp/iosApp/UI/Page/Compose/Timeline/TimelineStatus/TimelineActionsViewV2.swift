@@ -29,7 +29,6 @@ struct TimelineActionsViewV2: View, Equatable {
             lhs.item.isBookmarked == rhs.item.isBookmarked
     }
 
-
     private var isBlueskyPlatform: Bool {
         item.platformType.lowercased() == "bluesky"
     }
@@ -135,14 +134,11 @@ struct TimelineActionsViewV2: View, Equatable {
         FlareLog.debug("🔥 [TimelineActionsViewV2] handleLikeAction called for item: \(item.id)")
         FlareLog.debug("🔍 [TimelineActionsViewV2] handleLikeAction called for item: isLiked=\(item.isLiked), likeCount=\(item.likeCount)")
 
-        
         let targetState = !item.isLiked
         timelineViewModel?.updateItemOptimisticallyWithState(itemId: item.id, actionType: .like, targetState: targetState)
 
-        
         let success = performKMPAction(actionType: .like, targetState: targetState)
 
-        
         if !success {
             FlareLog.debug("� [TimelineActionsViewV2] Like操作失败，回滚状态")
             timelineViewModel?.updateItemOptimisticallyWithState(itemId: item.id, actionType: .like, targetState: !targetState)
@@ -162,14 +158,11 @@ struct TimelineActionsViewV2: View, Equatable {
 
         FlareLog.debug("🔥 [TimelineActionsViewV2] performRetweetAction (repost) called for item: \(item.id)")
 
-        
         let targetState = !item.isRetweeted
         timelineViewModel?.updateItemOptimisticallyWithState(itemId: item.id, actionType: .retweet, targetState: targetState)
 
-        
         let success = performKMPAction(actionType: .repost, targetState: targetState)
 
-        
         if !success {
             FlareLog.debug("🔄 [TimelineActionsViewV2] Retweet操作失败，回滚状态")
             timelineViewModel?.updateItemOptimisticallyWithState(itemId: item.id, actionType: .retweet, targetState: !targetState)
@@ -183,14 +176,11 @@ struct TimelineActionsViewV2: View, Equatable {
     private func handleBookmarkAction() {
         FlareLog.debug("🔥 [TimelineActionsViewV2] handleBookmarkAction called for item: \(item.id)")
 
-        
         let targetState = !item.isBookmarked
         timelineViewModel?.updateItemOptimisticallyWithState(itemId: item.id, actionType: .bookmark, targetState: targetState)
 
-        
         let success = performKMPAction(actionType: .bookmark, targetState: targetState)
 
-        
         if !success {
             FlareLog.debug("🔄 [TimelineActionsViewV2] Bookmark操作失败，回滚状态")
             timelineViewModel?.updateItemOptimisticallyWithState(itemId: item.id, actionType: .bookmark, targetState: !targetState)
@@ -316,9 +306,6 @@ struct TimelineActionsViewV2: View, Equatable {
 
         return findAndExecuteAction(in: item.actions, actionType: actionType)
     }
-
-
-
 }
 
 private struct ActionButtonV2: View {
@@ -372,7 +359,6 @@ enum TimelineActionType {
 
 extension TimelineActionsViewV2 {
     private func fallbackToOriginalLikeMethod(_ likeAction: StatusActionItemLike) {
-
         let clickable = likeAction as StatusActionItemClickable
         let openURLAction = OpenURLAction { url in
             router.handleDeepLink(url)

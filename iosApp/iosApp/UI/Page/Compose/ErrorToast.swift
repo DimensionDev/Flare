@@ -1,6 +1,5 @@
 import SwiftUI
 
-
 class ErrorToastManager: ObservableObject {
     static let shared = ErrorToastManager()
 
@@ -27,8 +26,6 @@ class ErrorToastManager: ObservableObject {
         }
     }
 }
-
-
 
 struct ErrorToast: View {
     let message: String
@@ -68,8 +65,6 @@ struct ErrorToast: View {
     }
 }
 
-
-
 extension View {
     func errorToast() -> some View {
         overlay(
@@ -78,7 +73,6 @@ extension View {
         .environmentObject(ErrorToastManager.shared)
     }
 }
-
 
 struct ErrorToastOverlay: View {
     @ObservedObject private var toastManager = ErrorToastManager.shared
@@ -91,11 +85,6 @@ struct ErrorToastOverlay: View {
     }
 }
 
-
-
 func showErrorToast(message: String) {
     ErrorToastManager.shared.show(message: message)
 }
-
-
-

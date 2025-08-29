@@ -587,7 +587,6 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                                 LocalAppearanceSettings.current.videoAutoplay in
                                     listOf(
                                         VideoAutoplay.ALWAYS,
-                                        VideoAutoplay.WIFI,
                                     ),
                             {
                                 state.appearanceState.updateSettings {

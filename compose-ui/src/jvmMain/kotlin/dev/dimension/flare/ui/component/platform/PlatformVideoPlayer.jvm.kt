@@ -185,7 +185,6 @@ public class VideoPlayerPool {
             create = { uri ->
                 VideoPlayerState()
                     .apply {
-//                        volume = 0f
                         loop = true
                         openUri(uri)
                     }

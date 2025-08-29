@@ -87,7 +87,6 @@ kotlin {
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.fluent.ui)
                 implementation(libs.koin.compose)
-                implementation(compose("org.jetbrains.compose.material3:material3-window-size-class"))
                 implementation(libs.composemediaplayer)
                 implementation(libs.androidx.collection)
             }

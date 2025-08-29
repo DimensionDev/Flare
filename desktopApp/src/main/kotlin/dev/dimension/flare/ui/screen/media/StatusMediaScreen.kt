@@ -1,11 +1,8 @@
 package dev.dimension.flare.ui.screen.media
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,25 +25,15 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.WindowPlacement
 import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.size.Size
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Chalkboard
-import compose.icons.fontawesomeicons.solid.FloppyDisk
-import compose.icons.fontawesomeicons.solid.UpRightAndDownLeftFromCenter
-import dev.dimension.flare.Res
-import dev.dimension.flare.media_fullscreen
-import dev.dimension.flare.media_hide_thumbnail_list
-import dev.dimension.flare.media_save
-import dev.dimension.flare.media_show_thumbnail_list
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.ComponentAppearance
+import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.model.UiMedia
@@ -56,10 +44,8 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.presenter.status.StatusState
 import dev.dimension.flare.ui.theme.LocalComposeWindow
-import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.GridViewItem
 import io.github.composefluent.component.HorizontalFlipView
-import io.github.composefluent.component.SubtleButton
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import me.saket.telephoto.ExperimentalTelephotoApi
@@ -69,7 +55,6 @@ import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.spatial.CoordinateSpace
 import me.saket.telephoto.zoomable.zoomable
 import moe.tlaster.precompose.molecule.producePresenter
-import org.jetbrains.compose.resources.stringResource
 import javax.swing.JFileChooser
 
 @Composable
@@ -121,10 +106,19 @@ internal fun StatusMediaScreen(
                         )
 
                     else ->
-                        MediaItem(
-                            media = media,
-                            modifier = Modifier.fillMaxSize(),
-                        )
+                        CompositionLocalProvider(
+                            LocalComponentAppearance provides
+                                LocalComponentAppearance
+                                    .current
+                                    .copy(
+                                        videoAutoplay = ComponentAppearance.VideoAutoplay.ALWAYS,
+                                    ),
+                        ) {
+                            MediaItem(
+                                media = media,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
                 }
             }
             AnimatedVisibility(
@@ -172,63 +166,63 @@ internal fun StatusMediaScreen(
                     }
                 }
             }
-            Row(
-                modifier =
-                    Modifier
-                        .height(48.dp)
-                        .fillMaxWidth()
-                        .background(FluentTheme.colors.background.layer.default)
-                        .padding(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Spacer(modifier = Modifier.weight(1f))
-                if (medias.size > 1) {
-                    SubtleButton(
-                        onClick = {
-                            state.setShowThumbnailList(!state.showThumbnailList)
-                        },
-                        content = {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.Chalkboard,
-                                contentDescription =
-                                    if (state.showThumbnailList) {
-                                        stringResource(Res.string.media_hide_thumbnail_list)
-                                    } else {
-                                        stringResource(Res.string.media_show_thumbnail_list)
-                                    },
-                            )
-                        },
-                    )
-                }
-                SubtleButton(
-                    onClick = {
-                        val current = medias[pagerState.currentPage]
-                        state.save(current)
-                    },
-                    content = {
-                        FAIcon(
-                            FontAwesomeIcons.Solid.FloppyDisk,
-                            contentDescription = stringResource(Res.string.media_save),
-                        )
-                    },
-                )
-                SubtleButton(
-                    onClick = {
-                        val current = window.placement
-                        if (current == WindowPlacement.Fullscreen) {
-                            window.placement = WindowPlacement.Floating
-                        } else {
-                            window.placement = WindowPlacement.Fullscreen
-                        }
-                    },
-                    content = {
-                        FAIcon(
-                            FontAwesomeIcons.Solid.UpRightAndDownLeftFromCenter,
-                            contentDescription = stringResource(Res.string.media_fullscreen),
-                        )
-                    },
-                )
-            }
+//            Row(
+//                modifier =
+//                    Modifier
+//                        .height(48.dp)
+//                        .fillMaxWidth()
+//                        .background(FluentTheme.colors.background.layer.default)
+//                        .padding(8.dp),
+//                horizontalArrangement = Arrangement.spacedBy(8.dp),
+//            ) {
+//                Spacer(modifier = Modifier.weight(1f))
+//                if (medias.size > 1) {
+//                    SubtleButton(
+//                        onClick = {
+//                            state.setShowThumbnailList(!state.showThumbnailList)
+//                        },
+//                        content = {
+//                            FAIcon(
+//                                FontAwesomeIcons.Solid.Chalkboard,
+//                                contentDescription =
+//                                    if (state.showThumbnailList) {
+//                                        stringResource(Res.string.media_hide_thumbnail_list)
+//                                    } else {
+//                                        stringResource(Res.string.media_show_thumbnail_list)
+//                                    },
+//                            )
+//                        },
+//                    )
+//                }
+//                SubtleButton(
+//                    onClick = {
+//                        val current = medias[pagerState.currentPage]
+//                        state.save(current)
+//                    },
+//                    content = {
+//                        FAIcon(
+//                            FontAwesomeIcons.Solid.FloppyDisk,
+//                            contentDescription = stringResource(Res.string.media_save),
+//                        )
+//                    },
+//                )
+//                SubtleButton(
+//                    onClick = {
+//                        val current = window.placement
+//                        if (current == WindowPlacement.Fullscreen) {
+//                            window.placement = WindowPlacement.Floating
+//                        } else {
+//                            window.placement = WindowPlacement.Fullscreen
+//                        }
+//                    },
+//                    content = {
+//                        FAIcon(
+//                            FontAwesomeIcons.Solid.UpRightAndDownLeftFromCenter,
+//                            contentDescription = stringResource(Res.string.media_fullscreen),
+//                        )
+//                    },
+//                )
+//            }
         }
     }
 }

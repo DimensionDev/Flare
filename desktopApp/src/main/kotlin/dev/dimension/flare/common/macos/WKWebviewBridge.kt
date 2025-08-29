@@ -4,7 +4,7 @@ import com.sun.jna.Callback
 import com.sun.jna.Library
 import com.sun.jna.Native
 
-private interface WebviewBridge : Library {
+private interface MacOSBridge : Library {
     @Suppress("FunctionName")
     fun wkb_set_log_callback(cb: LogCallback?)
 
@@ -23,13 +23,6 @@ private interface WebviewBridge : Library {
     ): Long
 
     @Suppress("FunctionName")
-    fun wkb_set_user_agent(
-        id: Long,
-        ua: String?,
-        reload: Boolean,
-    )
-
-    @Suppress("FunctionName")
     fun wkb_set_decision_callback(cb: DecisionCallback?)
 
     @Suppress("FunctionName")
@@ -43,9 +36,6 @@ private interface WebviewBridge : Library {
 
     @Suppress("FunctionName")
     fun wkb_close_window(id: Long)
-
-    @Suppress("FunctionName")
-    fun wkb_clear_persistent_storage()
 
     fun interface DecisionCallback : Callback {
         // return 1 = close window, 0 = continue
@@ -67,10 +57,10 @@ internal object WKWebviewBridge {
             "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 " +
             "Mobile/15E148 Safari/604.1"
 
-    private val lib: WebviewBridge by lazy {
-        Native.load("WebviewBridge", WebviewBridge::class.java).apply {
+    private val lib: MacOSBridge by lazy {
+        Native.load("macosBridge", MacOSBridge::class.java).apply {
             wkb_set_log_callback(
-                WebviewBridge.LogCallback { level, msg ->
+                MacOSBridge.LogCallback { level, msg ->
                     println("WebviewBridge log [$level]: $msg")
                 },
             )
@@ -84,11 +74,11 @@ internal object WKWebviewBridge {
         windowClosedCallback: (id: Long, reason: Int) -> Unit,
     ) {
         val decisionCb =
-            WebviewBridge.DecisionCallback { cookies ->
+            MacOSBridge.DecisionCallback { cookies ->
                 if (decisionCallback(cookies)) 1 else 0
             }
         val closedCb =
-            WebviewBridge.WindowClosedCallback { id, reason ->
+            MacOSBridge.WindowClosedCallback { id, reason ->
                 windowClosedCallback(id, reason)
             }
         lib.wkb_set_decision_callback(decisionCb)

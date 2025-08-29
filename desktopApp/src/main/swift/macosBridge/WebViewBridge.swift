@@ -3,7 +3,7 @@ import WebKit
 import Foundation
 
 public typealias LogCB = @convention(c) (_ level: Int32, _ msg: UnsafePointer<CChar>?) -> Void
-private var gLog: LogCB?
+nonisolated(unsafe) private var gLog: LogCB?
 
 @_cdecl("wkb_set_log_callback")
 public func wkb_set_log_callback(_ cb: LogCB?) { gLog = cb }
@@ -16,7 +16,7 @@ func swiftLog(_ level: Int32, _ msg: String) {
     fputs("[wkb \(level)] \(msg)\n", stderr)
 }
 
-private var nextId: Int64 = 1
+nonisolated(unsafe) private var nextId: Int64 = 1
 
 private class Controller {
     let id: Int64
@@ -32,17 +32,19 @@ private class Controller {
         self.web = web
     }
 }
-private var ctrls: [Int64: Controller] = [:]
+nonisolated(unsafe) private var ctrls: [Int64: Controller] = [:]
 
 // when to close callback, return 1 to close, 0 to keep open
 public typealias DecisionCB = @convention(c) (_ cookies: UnsafePointer<CChar>?) -> Int32
-private var gDecision: DecisionCB?
+nonisolated(unsafe) private var gDecision: DecisionCB?
 
 // when window closed callback
 // reason: 0 = closed by user；1 = API call wkb_close_window；2 = decision callback
 public typealias WindowClosedCB = @convention(c) (_ id: Int64, _ reason: Int32) -> Void
-private var gOnClosed: WindowClosedCB?
+nonisolated(unsafe) private var gOnClosed: WindowClosedCB?
 
+
+@MainActor
 private func makeWindow(with web: WKWebView, title: String) -> NSWindow {
     let win = NSWindow(contentRect: NSRect(x: 200, y: 200, width: 1000, height: 700),
                        styleMask: [.titled, .closable, .resizable, .miniaturizable],
@@ -64,6 +66,7 @@ private func cookieHeaderString(from cookies: [HTTPCookie], for url: URL?) -> St
     return filtered.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
 }
 
+@MainActor
 private func startCookiePolling(for ctrl: Controller, targetURL: URL?, intervalMs: Int32) {
     let q = DispatchQueue(label: "cookie.poller.\(ctrl.id)")
     let t = DispatchSource.makeTimerSource(queue: q)
@@ -131,7 +134,7 @@ public func wkb_open_webview_poll(_ urlCString: UnsafePointer<CChar>?, _ interva
         let web = WKWebView(frame: .zero, configuration: cfg)
         if let u = targetURL { web.load(URLRequest(url: u)) }
 
-        let win = makeWindow(with: web, title: "WebView")
+        let win = makeWindow(with: web, title: "Login")
         let id = nextId; nextId += 1
         let ctrl = Controller(id: id, window: win, web: web)
         ctrls[id] = ctrl
@@ -166,12 +169,6 @@ public func wkb_close_window(_ id: Int64) {
     }
 }
 
-@_cdecl("wkb_clear_persistent_storage")
-public func wkb_clear_persistent_storage() {
-    let types = WKWebsiteDataStore.allWebsiteDataTypes()
-    WKWebsiteDataStore.default().removeData(ofTypes: types, modifiedSince: .distantPast, completionHandler: {})
-}
-
 @_cdecl("wkb_open_webview_poll_with_ua")
 public func wkb_open_webview_poll_with_ua(_ urlCString: UnsafePointer<CChar>?,
                                           _ intervalMs: Int32,
@@ -196,7 +193,7 @@ public func wkb_open_webview_poll_with_ua(_ urlCString: UnsafePointer<CChar>?,
         }
         if let u = targetURL { web.load(URLRequest(url: u)) }
 
-        let win = makeWindow(with: web, title: "WebView")
+        let win = makeWindow(with: web, title: "Login")
         let id = nextId; nextId += 1
         let ctrl = Controller(id: id, window: win, web: web)
         ctrls[id] = ctrl
@@ -216,16 +213,4 @@ public func wkb_open_webview_poll_with_ua(_ urlCString: UnsafePointer<CChar>?,
         outId = id
     }
     return outId
-}
-
-@_cdecl("wkb_set_user_agent")
-public func wkb_set_user_agent(_ id: Int64, _ uaCString: UnsafePointer<CChar>?, _ reload: Bool) {
-    DispatchQueue.main.async {
-        guard let ctrl = ctrls[id] else { return }
-        let ua = uaCString.flatMap { String(cString: $0) }
-        ctrl.web.customUserAgent = ua
-        if reload {
-            ctrl.web.reload()
-        }
-    }
 }

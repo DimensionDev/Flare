@@ -1,24 +1,32 @@
-val swiftSource = layout.projectDirectory.file("src/main/swift/WebviewBridge.swift")
-val targetLib = layout.projectDirectory.dir("resources/macos-arm64").file("libWebviewBridge.dylib").asFile
+import java.nio.file.Files
+
+val swiftSource = layout.projectDirectory.dir("src/main/swift/macosBridge.xcodeproj").asFile
+val buildOutput = layout.projectDirectory.file("src/main/swift/build/Release/libmacosBridge.dylib")
+val targetLib = layout.projectDirectory.dir("resources/macos-arm64").file("libmacosBridge.dylib").asFile
 val isMac = org.gradle.internal.os.OperatingSystem.current().isMacOsX
 
 tasks.register<Exec>("compileWebviewBridgeArm64") {
     onlyIf { isMac }
 
-    inputs.file(swiftSource)
+//    inputs.file(swiftSource)
     outputs.file(targetLib)
 
     doFirst {
         targetLib.parentFile.mkdirs()
     }
+
     commandLine(
-        "swiftc",
-        "-emit-library",
-        "-module-name", "WebviewBridge",
-        "-framework", "Cocoa",
-        "-target", "arm64-apple-macos12",
-        "-o", targetLib.absolutePath,
-        swiftSource.asFile.absolutePath
+        "xcodebuild",
+        "-project", swiftSource.absolutePath,
+        "-target", "macosBridge",
+        "-configuration", "Release",
+    )
+
+    // copy buildOutput to targetLib
+    Files.copy(
+        buildOutput.asFile.toPath(),
+        targetLib.toPath(),
+        java.nio.file.StandardCopyOption.REPLACE_EXISTING,
     )
 }
 

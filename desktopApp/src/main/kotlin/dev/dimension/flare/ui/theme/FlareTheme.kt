@@ -209,7 +209,7 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
                     videoAutoplay =
                         when (appearanceSettings.videoAutoplay) {
                             VideoAutoplay.ALWAYS -> ComponentAppearance.VideoAutoplay.ALWAYS
-                            VideoAutoplay.WIFI -> ComponentAppearance.VideoAutoplay.WIFI
+                            VideoAutoplay.WIFI -> ComponentAppearance.VideoAutoplay.NEVER
                             VideoAutoplay.NEVER -> ComponentAppearance.VideoAutoplay.NEVER
                         },
                     expandMediaSize = appearanceSettings.expandMediaSize,

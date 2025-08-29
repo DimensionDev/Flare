@@ -7,15 +7,15 @@ haze = "1.6.10"
 lifecycleViewmodelComposeVersion = "2.9.2"
 minSdk = "23"
 java = "21"
-agp = "8.12.1"
+agp = "8.12.2"
 kotlin = "2.2.10"
 core-ktx = "1.17.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.3.0"
 espresso-core = "3.7.0"
-lifecycle-runtime-ktx = "2.9.2"
+lifecycle-runtime-ktx = "2.9.3"
 activity-compose = "1.10.1"
-compose-bom = "2025.08.00"
+compose-bom = "2025.08.01"
 ksp = "2.2.10-2.0.2"
 openaiClient = "4.0.1"
 paging = "3.3.6"
@@ -45,15 +45,15 @@ koin = "4.1.0"
 composeIcons = "1.3.0"
 media3 = "1.8.0"
 desugar_jdk_libs = "2.1.5"
-firebase-bom = "34.1.0"
+firebase-bom = "34.2.0"
 google-services = "4.4.3"
 firebase-crashlytics = "3.0.6"
 materialKolor = "3.0.1"
 room = "2.7.2"
 sqlite = "2.5.2"
-compose-multiplatform = "1.8.2"
+compose-multiplatform = "1.9.0-rc01"
 logback = "1.5.18"
-navigation3 = "1.0.0-alpha07"
+navigation3 = "1.0.0-alpha08"
 zoomable = "0.16.0"
 bouncycastle = "1.81"
 
@@ -88,7 +88,7 @@ ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha02" }
+material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha03" }
 material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
 material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive" }
@@ -184,7 +184,7 @@ kotlin-codepoints-deluxe = { group = "de.cketti.unicode", name = "kotlin-codepoi
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics" }
-play-integrity = { group = "com.google.android.play", name = "integrity", version = "1.4.0" }
+play-integrity = { group = "com.google.android.play", name = "integrity", version = "1.5.0" }
 
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.1.2" }
@@ -208,7 +208,7 @@ krypto = { module = "com.soywiz:korlibs-crypto", version = "6.0.1" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version = "1.0.0-alpha01" }
-androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version = "2.10.0-alpha02" }
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version = "2.10.0-alpha03" }
 
 bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }

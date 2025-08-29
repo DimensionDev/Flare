@@ -1,13 +1,15 @@
 package dev.dimension.flare.ui.component.platform
 
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 public actual fun isBigScreen(): Boolean {
-    val windowInfo = calculateWindowSizeClass()
-    return windowInfo.widthSizeClass >= WindowWidthSizeClass.Medium
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
+    val size = with(density) { windowInfo.containerSize.toSize().toDpSize() }
+    return size.width >= 720.dp
 }

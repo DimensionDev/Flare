@@ -55,7 +55,7 @@ compose.desktop {
                 val file = project.file("signing.properties")
                 val hasSigningProps = file.exists()
                 println("hasSigningProps: ${hasSigningProps}")
-                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "18"
+                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "21"
                 bundleID = "dev.dimension.flare"
                 minimumSystemVersion = "12.0"
                 appStore = hasSigningProps
@@ -96,11 +96,11 @@ compose.desktop {
         buildTypes {
             release {
                 proguard {
-//                    this.isEnabled.set(false)
-                    version.set("7.7.0")
-                    this.configurationFiles.from(
-                        file("proguard-rules.pro")
-                    )
+                   this.isEnabled.set(false)
+                    // version.set("7.7.0")
+                    // this.configurationFiles.from(
+                        // file("proguard-rules.pro")
+                    // )
                 }
             }
         }

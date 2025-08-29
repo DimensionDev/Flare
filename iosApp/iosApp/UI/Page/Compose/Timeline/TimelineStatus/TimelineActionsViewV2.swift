@@ -29,6 +29,19 @@ struct TimelineActionsViewV2: View, Equatable {
             lhs.item.isBookmarked == rhs.item.isBookmarked
     }
 
+
+    private var isBlueskyPlatform: Bool {
+        item.platformType.lowercased() == "bluesky"
+    }
+
+    private var isMisskeyPlatform: Bool {
+        item.platformType.lowercased() == "misskey"
+    }
+
+    private var isVVOPlatform: Bool {
+        item.platformType.lowercased() == "vvo"
+    }
+
     var body: some View {
         HStack(spacing: 0) {
             ActionButtonV2(
@@ -42,53 +55,62 @@ struct TimelineActionsViewV2: View, Equatable {
             }
             .frame(maxWidth: .infinity)
 
-            ActionButtonV2(
-                iconImage: Image(asset: Asset.Image.Status.Toolbar.repeat),
-                count: item.retweetCount,
-                isActive: item.isRetweeted,
-                activeColor: .green
-            ) {
-                FlareHapticManager.shared.buttonPress()
-                handleRetweetAction()
-            }
-            .frame(maxWidth: .infinity)
-            .confirmationDialog("Retweet Options", isPresented: $showRetweetMenu) {
-                Button(item.isRetweeted ? "retweet_remove" : "Retweet") {
+            // VVO平台不支持retweet功能
+            if !isVVOPlatform {
+                ActionButtonV2(
+                    iconImage: Image(asset: Asset.Image.Status.Toolbar.repeat),
+                    count: item.retweetCount,
+                    isActive: item.isRetweeted,
+                    activeColor: .green
+                ) {
                     FlareHapticManager.shared.buttonPress()
-                    performRetweetAction(isQuote: false)
+                    handleRetweetAction()
                 }
-                Button("Quote Tweet") {
-                    FlareHapticManager.shared.buttonPress()
-                    performRetweetAction(isQuote: true)
+                .frame(maxWidth: .infinity)
+                .confirmationDialog("Retweet Options", isPresented: $showRetweetMenu) {
+                    Button(item.isRetweeted ? "retweet_remove" : "Retweet") {
+                        FlareHapticManager.shared.buttonPress()
+                        performRetweetAction(isQuote: false)
+                    }
+                    Button("Quote Tweet") {
+                        FlareHapticManager.shared.buttonPress()
+                        performRetweetAction(isQuote: true)
+                    }
+                    Button("Cancel", role: .cancel) {}
                 }
-                Button("Cancel", role: .cancel) {}
             }
 
-            ActionButtonV2(
-                iconImage: item.isLiked ?
-                    Image(asset: Asset.Image.Status.Toolbar.favorite) :
-                    Image(asset: Asset.Image.Status.Toolbar.favoriteBorder),
-                count: item.likeCount,
-                isActive: item.isLiked,
-                activeColor: .red
-            ) {
-                FlareHapticManager.shared.buttonPress()
-                handleLikeAction()
+            //  Misskey平台使用表情反应系统，
+            if !isMisskeyPlatform {
+                ActionButtonV2(
+                    iconImage: item.isLiked ?
+                        Image(asset: Asset.Image.Status.Toolbar.favorite) :
+                        Image(asset: Asset.Image.Status.Toolbar.favoriteBorder),
+                    count: item.likeCount,
+                    isActive: item.isLiked,
+                    activeColor: .red
+                ) {
+                    FlareHapticManager.shared.buttonPress()
+                    handleLikeAction()
+                }
+                .frame(maxWidth: .infinity)
             }
-            .frame(maxWidth: .infinity)
 
-            ActionButtonV2(
-                iconImage: item.isBookmarked ?
-                    Image(asset: Asset.Image.Status.Toolbar.bookmarkFilled) :
-                    Image(asset: Asset.Image.Status.Toolbar.bookmark),
-                count: item.bookmarkCount,
-                isActive: item.isBookmarked,
-                activeColor: .orange
-            ) {
-                FlareHapticManager.shared.buttonPress()
-                handleBookmarkAction()
+            // Bluesky和VVO平台不支持bookmark功能
+            if !isBlueskyPlatform, !isVVOPlatform {
+                ActionButtonV2(
+                    iconImage: item.isBookmarked ?
+                        Image(asset: Asset.Image.Status.Toolbar.bookmarkFilled) :
+                        Image(asset: Asset.Image.Status.Toolbar.bookmark),
+                    count: item.bookmarkCount,
+                    isActive: item.isBookmarked,
+                    activeColor: .orange
+                ) {
+                    FlareHapticManager.shared.buttonPress()
+                    handleBookmarkAction()
+                }
+                .frame(maxWidth: .infinity)
             }
-            .frame(maxWidth: .infinity)
 
             // ActionButtonV2(
             //     iconImage: Image(systemName: "character.bubble"),
@@ -113,18 +135,18 @@ struct TimelineActionsViewV2: View, Equatable {
         FlareLog.debug("🔥 [TimelineActionsViewV2] handleLikeAction called for item: \(item.id)")
         FlareLog.debug("🔍 [TimelineActionsViewV2] handleLikeAction called for item: isLiked=\(item.isLiked), likeCount=\(item.likeCount)")
 
-        // timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .like)
+        
+        let targetState = !item.isLiked
+        timelineViewModel?.updateItemOptimisticallyWithState(itemId: item.id, actionType: .like, targetState: targetState)
 
-//        for action in item.actions {
-//            let enumResult = onEnum(of: action)
-//            if case let .item(actionItem) = enumResult,
-//               let likeAction = actionItem as? StatusActionItemLike {
-//                FlareLog.debug("🔍 [DEBUG] KMP将使用的状态: liked=\(likeAction.liked), count=\(likeAction.count)")
-//                break
-//            }
-//        }
+        
+        let success = performKMPAction(actionType: .like, targetState: targetState)
 
-        performKMPAction(actionType: .like)
+        
+        if !success {
+            FlareLog.debug("� [TimelineActionsViewV2] Like操作失败，回滚状态")
+            timelineViewModel?.updateItemOptimisticallyWithState(itemId: item.id, actionType: .like, targetState: !targetState)
+        }
     }
 
     private func handleRetweetAction() {
@@ -134,44 +156,139 @@ struct TimelineActionsViewV2: View, Equatable {
     private func performRetweetAction(isQuote: Bool) {
         if isQuote {
             FlareLog.debug("🔥 [TimelineActionsViewV2] performRetweetAction (quote) called for item: \(item.id)")
-            performKMPAction(actionType: .quote)
+            let _ = performKMPAction(actionType: .quote, targetState: true)
             return
         }
 
         FlareLog.debug("🔥 [TimelineActionsViewV2] performRetweetAction (repost) called for item: \(item.id)")
 
-        // timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .retweet)
+        
+        let targetState = !item.isRetweeted
+        timelineViewModel?.updateItemOptimisticallyWithState(itemId: item.id, actionType: .retweet, targetState: targetState)
 
-        performKMPAction(actionType: .repost)
+        
+        let success = performKMPAction(actionType: .repost, targetState: targetState)
+
+        
+        if !success {
+            FlareLog.debug("🔄 [TimelineActionsViewV2] Retweet操作失败，回滚状态")
+            timelineViewModel?.updateItemOptimisticallyWithState(itemId: item.id, actionType: .retweet, targetState: !targetState)
+        }
     }
 
     private func handleReplyAction() {
-        performKMPAction(actionType: .reply)
+        let _ = performKMPAction(actionType: .reply, targetState: true)
     }
 
     private func handleBookmarkAction() {
         FlareLog.debug("🔥 [TimelineActionsViewV2] handleBookmarkAction called for item: \(item.id)")
 
-        // timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .bookmark)
+        
+        let targetState = !item.isBookmarked
+        timelineViewModel?.updateItemOptimisticallyWithState(itemId: item.id, actionType: .bookmark, targetState: targetState)
 
-        performKMPAction(actionType: .bookmark)
+        
+        let success = performKMPAction(actionType: .bookmark, targetState: targetState)
+
+        
+        if !success {
+            FlareLog.debug("🔄 [TimelineActionsViewV2] Bookmark操作失败，回滚状态")
+            timelineViewModel?.updateItemOptimisticallyWithState(itemId: item.id, actionType: .bookmark, targetState: !targetState)
+        }
     }
 
     private func handleTranslateAction() {
         onAction(.translate, item)
     }
 
-    private func performKMPAction(actionType: TimelineActionType) {
+    private func performKMPAction(actionType: TimelineActionType, targetState: Bool) -> Bool {
         FlareLog.debug("🔥 [TimelineActionsViewV2] performKMPAction called - actionType: \(actionType), item: \(item.id)")
         func findAndExecuteAction(in actions: [StatusAction], actionType: TimelineActionType) -> Bool {
             for (_, action) in actions.enumerated() {
                 let enumResult = onEnum(of: action)
 
                 if case let .item(actionItem) = enumResult,
-                   let clickable = actionItem as? StatusActionItemClickable
+                   let likeAction = actionItem as? StatusActionItemLike
+                {
+                    if actionType == .like {
+                        FlareLog.debug("🎯 [TimelineActionsViewV2] 执行Like操作: targetState=\(targetState)")
+
+                        if let onClickedWithState = likeAction.onClickedWithState {
+                            let result = onClickedWithState(KotlinBoolean(value: targetState))
+
+                            if result.success {
+                                FlareLog.debug("✅ [TimelineActionsViewV2] Like操作成功")
+                                FlareHapticManager.shared.buttonPress()
+                                return true
+                            } else {
+                                let errorMessage = result.errorMessage ?? "点赞操作失败，请重试"
+                                FlareLog.error("❌ [TimelineActionsViewV2] Like操作失败: \(errorMessage)")
+                                ErrorToastManager.shared.show(message: errorMessage)
+                                FlareHapticManager.shared.buttonPress()
+                                return false
+                            }
+                        } else {
+                            FlareLog.debug("🔄 [TimelineActionsViewV2] 使用原有Like方法")
+                            fallbackToOriginalLikeMethod(likeAction)
+                            return true
+                        }
+                    }
+                } else if case let .item(actionItem) = enumResult,
+                          let bookmarkAction = actionItem as? StatusActionItemBookmark
+                {
+                    if actionType == .bookmark {
+                        FlareLog.debug("🎯 [TimelineActionsViewV2] 执行Bookmark操作: targetState=\(targetState)")
+
+                        if let onClickedWithState = bookmarkAction.onClickedWithState {
+                            let result = onClickedWithState(KotlinBoolean(value: targetState))
+
+                            if result.success {
+                                FlareLog.debug("✅ [TimelineActionsViewV2] Bookmark操作成功")
+                                FlareHapticManager.shared.buttonPress()
+                                return true
+                            } else {
+                                let errorMessage = result.errorMessage ?? "书签操作失败，请重试"
+                                FlareLog.error("❌ [TimelineActionsViewV2] Bookmark操作失败: \(errorMessage)")
+                                ErrorToastManager.shared.show(message: errorMessage)
+                                FlareHapticManager.shared.buttonPress()
+                                return false
+                            }
+                        } else {
+                            FlareLog.debug("🔄 [TimelineActionsViewV2] 使用原有Bookmark方法")
+                            fallbackToOriginalBookmarkMethod(bookmarkAction)
+                            return true
+                        }
+                    }
+                } else if case let .item(actionItem) = enumResult,
+                          let retweetAction = actionItem as? StatusActionItemRetweet
+                {
+                    if actionType == .repost {
+                        FlareLog.debug("🎯 [TimelineActionsViewV2] 执行Retweet操作: targetState=\(targetState)")
+
+                        if let onClickedWithState = retweetAction.onClickedWithState {
+                            let result = onClickedWithState(KotlinBoolean(value: targetState))
+
+                            if result.success {
+                                FlareLog.debug("✅ [TimelineActionsViewV2] Retweet操作成功")
+                                FlareHapticManager.shared.buttonPress()
+                                return true
+                            } else {
+                                let errorMessage = result.errorMessage ?? "转发操作失败，请重试"
+                                FlareLog.error("❌ [TimelineActionsViewV2] Retweet操作失败: \(errorMessage)")
+                                ErrorToastManager.shared.show(message: errorMessage)
+                                FlareHapticManager.shared.buttonPress()
+                                return false
+                            }
+                        } else {
+                            FlareLog.debug("🔄 [TimelineActionsViewV2] 使用原有Retweet方法")
+                            fallbackToOriginalRetweetMethod(retweetAction)
+                            return true
+                        }
+                    }
+                } else if case let .item(actionItem) = enumResult,
+                          let clickable = actionItem as? StatusActionItemClickable
                 {
                     let shouldExecute = switch actionType {
-                    case .like: actionItem is StatusActionItemLike
                     case .repost: actionItem is StatusActionItemRetweet
                     case .reply: actionItem is StatusActionItemReply
                     case .bookmark: actionItem is StatusActionItemBookmark
@@ -197,8 +314,11 @@ struct TimelineActionsViewV2: View, Equatable {
             return false
         }
 
-        let _ = findAndExecuteAction(in: item.actions, actionType: actionType)
+        return findAndExecuteAction(in: item.actions, actionType: actionType)
     }
+
+
+
 }
 
 private struct ActionButtonV2: View {
@@ -248,4 +368,34 @@ enum TimelineActionType {
     case quote
     case share
     case translate
+}
+
+extension TimelineActionsViewV2 {
+    private func fallbackToOriginalLikeMethod(_ likeAction: StatusActionItemLike) {
+
+        let clickable = likeAction as StatusActionItemClickable
+        let openURLAction = OpenURLAction { url in
+            router.handleDeepLink(url)
+            return .handled
+        }
+        clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURLAction)))
+    }
+
+    private func fallbackToOriginalBookmarkMethod(_ bookmarkAction: StatusActionItemBookmark) {
+        let clickable = bookmarkAction as StatusActionItemClickable
+        let openURLAction = OpenURLAction { url in
+            router.handleDeepLink(url)
+            return .handled
+        }
+        clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURLAction)))
+    }
+
+    private func fallbackToOriginalRetweetMethod(_ retweetAction: StatusActionItemRetweet) {
+        let clickable = retweetAction as StatusActionItemClickable
+        let openURLAction = OpenURLAction { url in
+            router.handleDeepLink(url)
+            return .handled
+        }
+        clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURLAction)))
+    }
 }

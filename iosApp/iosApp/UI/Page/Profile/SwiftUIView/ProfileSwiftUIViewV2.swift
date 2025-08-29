@@ -178,7 +178,6 @@ extension ProfileSwiftUIViewV2 {
             }
         }
 
-       
         let shouldShow = offsetY > 100
         if showUserNameInNavBar != shouldShow { showUserNameInNavBar = shouldShow }
     }

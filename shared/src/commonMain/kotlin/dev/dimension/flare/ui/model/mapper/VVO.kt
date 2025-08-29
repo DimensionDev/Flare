@@ -198,6 +198,9 @@ internal fun Status.renderStatus(
                     onClicked = {
                         event.like(statusKey, favorited ?: false)
                     },
+                    onClickedWithState = { shouldLike ->
+                        event.likeWithResult(statusKey, shouldLike)
+                    },
                 ),
                 StatusAction.Group(
                     displayItem = StatusAction.Item.More,
@@ -414,6 +417,9 @@ internal fun Comment.renderStatus(
                     liked = liked ?: false,
                     onClicked = {
                         event.likeComment(statusKey, liked ?: false)
+                    },
+                    onClickedWithState = { shouldLike ->
+                        event.likeCommentWithResult(statusKey, shouldLike)
                     },
                 ),
                 StatusAction.Group(

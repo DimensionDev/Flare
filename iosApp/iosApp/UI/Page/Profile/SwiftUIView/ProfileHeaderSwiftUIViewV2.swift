@@ -65,8 +65,6 @@ extension ProfileHeaderSwiftUIViewV2 {
                     }
                 }
                 .clipped()
-
-             
         }
     }
 
@@ -251,7 +249,6 @@ extension ProfileHeaderSwiftUIViewV2 {
         }
         .padding(.top, 8)
     }
- 
 
     private func scrollToTabBar() {
         guard let proxy = scrollProxy else { return }

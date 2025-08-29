@@ -35,16 +35,19 @@ class TimelineViewModel {
         return false
     }
 
-    func updateItemOptimistically(itemId: String, actionType: ActionType) {
-        FlareLog.debug("🚀 [TimelineViewModel] 开始更新: itemId=\(itemId), actionType=\(actionType)")
+
+
+ 
+    func updateItemOptimisticallyWithState(itemId: String, actionType: ActionType, targetState: Bool) {
+        FlareLog.debug("🚀 [TimelineViewModel] 开始状态更新: itemId=\(itemId), actionType=\(actionType), targetState=\(targetState)")
 
         guard case let .loaded(items, hasMore) = timelineState else {
-            FlareLog.warning("⚠️ [TimelineViewModel] 更新失败: timelineState不是loaded状态")
+            FlareLog.warning("⚠️ [TimelineViewModel] 状态更新失败: timelineState不是loaded状态")
             return
         }
 
         guard let index = items.firstIndex(where: { $0.id == itemId }) else {
-            FlareLog.warning("⚠️ [TimelineViewModel] 更新失败: 未找到item \(itemId)")
+            FlareLog.warning("⚠️ [TimelineViewModel] 状态更新失败: 未找到item \(itemId)")
             return
         }
 
@@ -54,22 +57,22 @@ class TimelineViewModel {
         // 记录更新前的状态
         let beforeState = getItemState(item: item, actionType: actionType)
 
-        // 执行更新
+        // 执行精确状态更新
         switch actionType {
         case .like:
-            item.isLiked.toggle()
-            item.likeCount += item.isLiked ? 1 : -1
-//            item.actions = updateActions(item.actions, actionType: ActionType.like, newState: item.isLiked, newCount: item.likeCount)
+            item.isLiked = targetState
+            // 简化计数逻辑：直接根据targetState调整
+            item.likeCount += targetState ? 1 : -1
 
         case .retweet:
-            item.isRetweeted.toggle()
-            item.retweetCount += item.isRetweeted ? 1 : -1
-//            item.actions = updateActions(item.actions, actionType: ActionType.retweet, newState: item.isRetweeted, newCount: item.retweetCount)
+            item.isRetweeted = targetState
+            // 简化计数逻辑：直接根据targetState调整
+            item.retweetCount += targetState ? 1 : -1
 
         case .bookmark:
-            item.isBookmarked.toggle()
-            item.bookmarkCount += item.isBookmarked ? 1 : -1
-//            item.actions = updateActions(item.actions, actionType: ActionType.bookmark, newState: item.isBookmarked, newCount: item.bookmarkCount)
+            item.isBookmarked = targetState
+            // 简化计数逻辑：直接根据targetState调整
+            item.bookmarkCount += targetState ? 1 : -1
         }
 
         // 更新数组
@@ -84,8 +87,9 @@ class TimelineViewModel {
         // 记录更新后的状态
         let afterState = getItemState(item: item, actionType: actionType)
 
-        FlareLog.debug("✅ [TimelineViewModel] 更新完成: \(actionType) for \(itemId)")
+        FlareLog.debug("✅ [TimelineViewModel] 状态更新完成: \(actionType) for \(itemId)")
         FlareLog.debug("📊 [TimelineViewModel] 状态变化: \(beforeState) → \(afterState)")
+        FlareLog.debug("🎯 [TimelineViewModel] 目标状态已设置: \(targetState)")
         FlareLog.debug("🔧 [TimelineViewModel] Actions 数组已同步更新")
     }
 
@@ -419,6 +423,60 @@ class TimelineViewModel {
 //            }
 //        }
 //    }
+
+//     func updateItemOptimistically(itemId: String, actionType: ActionType) {
+//         FlareLog.debug("🚀 [TimelineViewModel] 开始更新: itemId=\(itemId), actionType=\(actionType)")
+
+//         guard case let .loaded(items, hasMore) = timelineState else {
+//             FlareLog.warning("⚠️ [TimelineViewModel] 更新失败: timelineState不是loaded状态")
+//             return
+//         }
+
+//         guard let index = items.firstIndex(where: { $0.id == itemId }) else {
+//             FlareLog.warning("⚠️ [TimelineViewModel] 更新失败: 未找到item \(itemId)")
+//             return
+//         }
+
+//         var updatedItems = items
+//         var item = updatedItems[index]
+
+//         // 记录更新前的状态
+//         let beforeState = getItemState(item: item, actionType: actionType)
+
+//         // 执行更新
+//         switch actionType {
+//         case .like:
+//             item.isLiked.toggle()
+//             item.likeCount += item.isLiked ? 1 : -1
+// //            item.actions = updateActions(item.actions, actionType: ActionType.like, newState: item.isLiked, newCount: item.likeCount)
+
+//         case .retweet:
+//             item.isRetweeted.toggle()
+//             item.retweetCount += item.isRetweeted ? 1 : -1
+// //            item.actions = updateActions(item.actions, actionType: ActionType.retweet, newState: item.isRetweeted, newCount: item.retweetCount)
+
+//         case .bookmark:
+//             item.isBookmarked.toggle()
+//             item.bookmarkCount += item.isBookmarked ? 1 : -1
+// //            item.actions = updateActions(item.actions, actionType: ActionType.bookmark, newState: item.isBookmarked, newCount: item.bookmarkCount)
+//         }
+
+//         // 更新数组
+//         updatedItems[index] = item
+
+//         // 更新timelineState
+//         timelineState = .loaded(items: updatedItems, hasMore: hasMore)
+
+//         // 更新 PagingStateConverter
+//         stateConverter.syncUpdateItem(itemId: itemId, updatedItem: item)
+
+//         // 记录更新后的状态
+//         let afterState = getItemState(item: item, actionType: actionType)
+
+//         FlareLog.debug("✅ [TimelineViewModel] 更新完成: \(actionType) for \(itemId)")
+//         FlareLog.debug("📊 [TimelineViewModel] 状态变化: \(beforeState) → \(afterState)")
+//         FlareLog.debug("🔧 [TimelineViewModel] Actions 数组已同步更新")
+//     }
 }
 
 func createSampleTimelineItem() -> TimelineItem {

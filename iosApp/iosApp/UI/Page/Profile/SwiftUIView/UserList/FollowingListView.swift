@@ -15,8 +15,7 @@ struct FollowingListView: View {
         self.userKey = userKey
         self.userName = userName
 
-        
-        self.presenter = UserListPresenterService.shared.getOrCreateFollowingPresenter(
+        presenter = UserListPresenterService.shared.getOrCreateFollowingPresenter(
             accountType: accountType,
             userKey: userKey
         )
@@ -30,7 +29,7 @@ struct FollowingListView: View {
 
     private func getNavigationTitle() -> String {
         let followingTitle = NSLocalizedString("following_title", comment: "")
-        if let userName = userName, !userName.isEmpty {
+        if let userName, !userName.isEmpty {
             // 英文格式：John's Following，中文格式：约翰 关注
             let currentLanguage = Locale.current.language.languageCode?.identifier ?? "en"
             if currentLanguage.hasPrefix("zh") {

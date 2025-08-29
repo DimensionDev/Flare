@@ -14,7 +14,6 @@ import UIKit
 // import MaskCore
 
 final class MediaPreviewVideoViewModel {
-
     var disposeBag = Set<AnyCancellable>()
 
     // input

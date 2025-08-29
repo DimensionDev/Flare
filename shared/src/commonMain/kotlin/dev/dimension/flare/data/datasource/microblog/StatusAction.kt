@@ -7,6 +7,27 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 
+public data class StatusActionResult(
+    public val success: Boolean,
+    public val errorMessage: String? = null,
+) {
+    public companion object {
+        public fun success(): StatusActionResult = StatusActionResult(success = true)
+
+        public fun failure(message: String): StatusActionResult =
+            StatusActionResult(
+                success = false,
+                errorMessage = message,
+            )
+
+        public fun failure(exception: Exception): StatusActionResult =
+            StatusActionResult(
+                success = false,
+                errorMessage = exception.message ?: "Operation failed, please try again",
+            )
+    }
+}
+
 public sealed interface StatusAction {
     public data class Group internal constructor(
         val displayItem: Item,
@@ -39,6 +60,7 @@ public sealed interface StatusAction {
             val count: Long,
             val liked: Boolean,
             override val onClicked: ClickContext.() -> Unit,
+            val onClickedWithState: ((Boolean) -> StatusActionResult)? = null,
         ) : Item,
             Clickable,
             Colorized {
@@ -65,6 +87,7 @@ public sealed interface StatusAction {
             val count: Long,
             val retweeted: Boolean,
             override val onClicked: ClickContext.() -> Unit,
+            val onClickedWithState: ((Boolean) -> StatusActionResult)? = null,
         ) : Item,
             Clickable,
             Colorized {
@@ -133,6 +156,7 @@ public sealed interface StatusAction {
             val count: Long,
             val bookmarked: Boolean,
             override val onClicked: ClickContext.() -> Unit,
+            val onClickedWithState: ((shouldBookmark: Boolean) -> StatusActionResult)? = null,
         ) : Item,
             Clickable {
             public val humanizedCount: String by lazy {

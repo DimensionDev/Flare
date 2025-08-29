@@ -24,6 +24,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.StatusActionResult
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
@@ -55,6 +56,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Clock
@@ -731,6 +733,100 @@ internal class VVODataSource(
                     },
                 )
             }.onSuccess {
+            }
+        }
+    }
+
+    override fun likeWithResult(
+        statusKey: MicroBlogKey,
+        shouldLike: Boolean,
+    ): StatusActionResult {
+        return runBlocking {
+            try {
+                val config = service.config()
+                if (config.data?.login != true) {
+                    return@runBlocking StatusActionResult.failure("登录已过期，请重新登录")
+                }
+                val st =
+                    config.data.st
+                        ?: return@runBlocking StatusActionResult.failure("认证信息无效")
+
+                if (shouldLike) {
+                    service.likeStatus(id = statusKey.id, st = st)
+                } else {
+                    service.unlikeStatus(id = statusKey.id, st = st)
+                }
+
+                updateStatusUseCase<StatusContent.VVO>(
+                    statusKey = statusKey,
+                    accountKey = accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    favorited = shouldLike,
+                                    attitudesCount =
+                                        if (shouldLike) {
+                                            it.data.attitudesCount?.plus(1)
+                                        } else {
+                                            it.data.attitudesCount?.minus(1)
+                                        },
+                                ),
+                        )
+                    },
+                )
+
+                StatusActionResult.success()
+            } catch (e: Exception) {
+                StatusActionResult.failure(e)
+            }
+        }
+    }
+
+    override fun likeCommentWithResult(
+        statusKey: MicroBlogKey,
+        shouldLike: Boolean,
+    ): StatusActionResult {
+        return runBlocking {
+            try {
+                val config = service.config()
+                if (config.data?.login != true) {
+                    return@runBlocking StatusActionResult.failure("登录已过期，请重新登录")
+                }
+                val st =
+                    config.data.st
+                        ?: return@runBlocking StatusActionResult.failure("认证信息无效")
+
+                if (shouldLike) {
+                    service.likesUpdate(id = statusKey.id, st = st)
+                } else {
+                    service.likesDestroy(id = statusKey.id, st = st)
+                }
+
+                updateStatusUseCase<StatusContent.VVOComment>(
+                    statusKey = statusKey,
+                    accountKey = accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    liked = shouldLike,
+                                    likeCount =
+                                        if (shouldLike) {
+                                            it.data.likeCount?.plus(1)
+                                        } else {
+                                            it.data.likeCount?.minus(1)
+                                        },
+                                ),
+                        )
+                    },
+                )
+
+                StatusActionResult.success()
+            } catch (e: Exception) {
+                StatusActionResult.failure(e)
             }
         }
     }

@@ -283,7 +283,6 @@ struct DeleteStatusView: View {
 
                         HStack(spacing: 16) {
                             Button(action: {
-                              
                                 router.dismissAll()
                             }) {
                                 Text("Cancel")

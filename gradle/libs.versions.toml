@@ -6,8 +6,8 @@ haze = "1.6.10"
 lifecycleViewmodelCompose = "2.9.1"
 minSdk = "23"
 java = "21"
-agp = "8.12.0"
-kotlin = "2.2.0"
+agp = "8.12.1"
+kotlin = "2.2.10"
 core-ktx = "1.17.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.3.0"
@@ -30,11 +30,11 @@ twitter-parser = "0.5.5"
 molecule = "2.1.0"
 accompanist = "0.37.3"
 compose-lint-checks = "1.4.2"
-ktlintPlugin = "13.0.0"
+ktlintPlugin = "13.1.0"
 apng-android = "3.0.5"
 ktlint = "1.5.0"
 okio = "3.16.0"
-skie = "0.10.5"
+skie = "0.10.6"
 ksoup = "0.2.0"
 versionUpdate = "0.52.0"
 bluesky = "0.3.3-SNAPSHOT"
@@ -158,7 +158,7 @@ molecule-runtime = { group = "app.cash.molecule", name = "molecule-runtime", ver
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
 
-material3-navigation = { group = "io.github.stefanoq21", name = "material3-navigation", version = "1.0.3" }
+material3-navigation = { group = "io.github.stefanoq21", name = "material3-navigation", version = "1.0.4" }
 
 compose-lint-checks = { group = "com.slack.lint.compose", name = "compose-lint-checks", version.ref = "compose-lint-checks" }
 
@@ -172,7 +172,7 @@ compose-placeholder-foundation = { group = "io.github.fornewid", name = "placeho
 
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
-kermit = { group = "co.touchlab", name = "kermit", version = "2.0.6" }
+kermit = { group = "co.touchlab", name = "kermit", version = "2.0.8" }
 kotlin-codepoints-deluxe = { group = "de.cketti.unicode", name = "kotlin-codepoints-deluxe", version = "0.11.0" }
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }

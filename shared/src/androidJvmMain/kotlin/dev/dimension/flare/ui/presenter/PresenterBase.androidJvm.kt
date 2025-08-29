@@ -12,7 +12,7 @@ public actual abstract class PresenterBase<Model : Any> {
     }
 
     @Composable
-    internal actual abstract fun body(): Model
+    public actual abstract fun body(): Model
 }
 
 @Composable

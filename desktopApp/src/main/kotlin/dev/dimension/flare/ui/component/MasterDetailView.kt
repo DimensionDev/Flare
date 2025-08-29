@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.FluentTheme
 import dev.dimension.flare.ui.component.platform.isBigScreen
+import io.github.composefluent.FluentTheme
 
 @Composable
 internal fun MasterDetailView(

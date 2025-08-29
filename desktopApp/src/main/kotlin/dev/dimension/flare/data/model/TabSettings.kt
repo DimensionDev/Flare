@@ -21,6 +21,7 @@ import compose.icons.fontawesomeicons.solid.SquareRss
 import compose.icons.fontawesomeicons.solid.Star
 import compose.icons.fontawesomeicons.solid.Users
 import dev.dimension.flare.Res
+import dev.dimension.flare.antenna_title
 import dev.dimension.flare.dm_list_title
 import dev.dimension.flare.home_tab_bookmarks_title
 import dev.dimension.flare.home_tab_discover_title
@@ -33,6 +34,7 @@ import dev.dimension.flare.home_tab_me_title
 import dev.dimension.flare.home_tab_notifications_title
 import dev.dimension.flare.mastodon_tab_local_title
 import dev.dimension.flare.mastodon_tab_public_title
+import dev.dimension.flare.mixed_timeline_title
 import dev.dimension.flare.rss_title
 import dev.dimension.flare.settings_title
 import dev.dimension.flare.social_title
@@ -57,6 +59,8 @@ internal val TitleType.Localized.res: StringResource
             TitleType.Localized.LocalizedKey.DirectMessage -> Res.string.dm_list_title
             TitleType.Localized.LocalizedKey.Rss -> Res.string.rss_title
             TitleType.Localized.LocalizedKey.Social -> Res.string.social_title
+            TitleType.Localized.LocalizedKey.Antenna -> Res.string.antenna_title
+            TitleType.Localized.LocalizedKey.MixedTimeline -> Res.string.mixed_timeline_title
         }
 
 internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =

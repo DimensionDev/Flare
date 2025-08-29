@@ -12,7 +12,6 @@ dependencyResolutionManagement {
         mavenCentral()
         maven("https://jitpack.io")
         maven("https://central.sonatype.com/repository/maven-snapshots/")
-        maven("https://androidx.dev/snapshots/builds/13932663/artifacts/repository")
     }
 }
 
@@ -20,7 +19,7 @@ rootProject.name = "Flare"
 include(":app")
 include(":shared")
 include(":shared:ui")
-include(":shared:ui:component")
+include(":compose-ui")
 include(":desktopApp")
 include(":server")
 include(":shared:api")

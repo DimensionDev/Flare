@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.component.Flyout
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.EmojiPicker
@@ -14,6 +13,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.AddReactionPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import io.github.composefluent.component.Flyout
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable

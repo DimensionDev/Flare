@@ -26,5 +26,5 @@ public actual abstract class PresenterBase<Model : Any> : AutoCloseable {
     @OptIn(ExperimentalObjCRefinement::class)
     @HiddenFromObjC
     @Composable
-    internal actual abstract fun body(): Model
+    public actual abstract fun body(): Model
 }

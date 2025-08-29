@@ -63,6 +63,7 @@ import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.toTabItem
 import dev.dimension.flare.ui.presenter.home.rss.RssSourcesPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter

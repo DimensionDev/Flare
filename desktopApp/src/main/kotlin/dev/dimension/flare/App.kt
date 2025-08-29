@@ -1,49 +1,40 @@
 package dev.dimension.flare
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import com.konyaco.fluent.FluentTheme
-import com.konyaco.fluent.component.Badge
-import com.konyaco.fluent.component.BadgeStatus
-import com.konyaco.fluent.component.Button
-import com.konyaco.fluent.component.Icon
-import com.konyaco.fluent.component.MenuItemSeparator
-import com.konyaco.fluent.component.NavigationDefaults
-import com.konyaco.fluent.component.NavigationDisplayMode
-import com.konyaco.fluent.component.NavigationView
-import com.konyaco.fluent.component.SubtleButton
-import com.konyaco.fluent.component.Text
-import com.konyaco.fluent.component.menuItem
-import com.konyaco.fluent.component.rememberNavigationState
+import androidx.compose.ui.window.WindowScope
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Gear
@@ -53,20 +44,19 @@ import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.DirectMessageTabItem
 import dev.dimension.flare.data.model.DiscoverTabItem
+import dev.dimension.flare.data.model.HomeTimelineTabItem
+import dev.dimension.flare.data.model.Misskey
 import dev.dimension.flare.data.model.NotificationTabItem
 import dev.dimension.flare.data.model.ProfileTabItem
 import dev.dimension.flare.data.model.RssTabItem
 import dev.dimension.flare.data.model.SettingsTabItem
 import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabTitle
-import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
@@ -75,163 +65,179 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
+import dev.dimension.flare.ui.route.Route.AllLists
+import dev.dimension.flare.ui.route.Route.BlueskyFeeds
+import dev.dimension.flare.ui.route.Route.Discover
+import dev.dimension.flare.ui.route.Route.MeRoute
+import dev.dimension.flare.ui.route.Route.Notification
+import dev.dimension.flare.ui.route.Route.Timeline
 import dev.dimension.flare.ui.route.Router
+import dev.dimension.flare.ui.route.StackManager
+import dev.dimension.flare.ui.route.rememberStackManager
+import io.github.composefluent.FluentTheme
+import io.github.composefluent.background.Layer
+import io.github.composefluent.component.Badge
+import io.github.composefluent.component.BadgeStatus
+import io.github.composefluent.component.Button
+import io.github.composefluent.component.Icon
+import io.github.composefluent.component.NavigationDefaults
+import io.github.composefluent.component.SubtleButton
+import io.github.composefluent.component.Text
 import io.ktor.http.Url
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
+import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun FlareApp(
-    onRawImage: (String) -> Unit,
-    onStatusMedia: (AccountType, MicroBlogKey, Int) -> Unit,
-    navController: NavHostController = rememberNavController(),
-) {
+internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
     val state by producePresenter { presenter() }
-    val bigScreen = isBigScreen()
-    val displayMode =
-        if (bigScreen) {
-            NavigationDisplayMode.Left
-        } else {
-            NavigationDisplayMode.LeftCompact
-        }
-    var selectedIndex by remember { mutableStateOf(0) }
-    val currentEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = currentEntry?.destination
     val uriHandler = LocalUriHandler.current
 
-    fun navigate(route: Route) {
-        navController.navigate(route) {
-//            popUpTo(navController.graph.findStartDestination().id) {
-//                saveState = true
-//            }
-            launchSingleTop = true
-//            restoreState = true
-        }
-    }
-    val canNavigateUp by remember(navController) {
-        navController.currentBackStack.map {
-            it.size > 1
-        }
-    }.collectAsState(false)
     state.tabs.onSuccess { tabs ->
-        LaunchedEffect(selectedIndex) {
-            val tab = tabs.all[selectedIndex]
-            navigate(getRoute(tab.tabItem))
+        val stackManager =
+            rememberStackManager(
+                startRoute = getRoute(tabs.primary.first().tabItem),
+                key = tabs,
+                topLevelRoutes = tabs.all.map { getRoute(it.tabItem) },
+            )
+
+        val currentRoute = stackManager.currentRoute
+
+        fun navigate(route: Route) {
+            if (route is Route.WindowRoute) {
+                onWindowRoute.invoke(route)
+            } else {
+                stackManager.push(route)
+            }
         }
-        val navigationState = rememberNavigationState()
-        LaunchedEffect(bigScreen) {
-            navigationState.expanded = bigScreen
+
+        fun goBack() {
+            stackManager.pop()
         }
-        NavigationView(
-            state = navigationState,
-            displayMode = displayMode,
-            backButton = {
-                NavigationDefaults.BackButton(
-                    onClick = {
-                        navController.navigateUp()
-                    },
-                    disabled = !canNavigateUp,
-                )
-            },
-            menuItems = {
+
+        Row {
+            Column(
+                modifier =
+                    Modifier
+                        .background(
+                            FluentTheme.colors.background.layerOnMicaBaseAlt.secondary,
+                        ).fillMaxHeight()
+                        .width(72.dp)
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = 16.dp)
+                        .let {
+                            if (SystemUtils.IS_OS_MAC) {
+                                it.padding(top = 24.dp)
+                            } else {
+                                it
+                            }
+                        },
+            ) {
                 state.user
                     .onSuccess { user ->
-                        item {
-                            SubtleButton(
-                                onClick = {
-                                },
+                        SubtleButton(
+                            onClick = {
+                                navigate(MeRoute(AccountType.Specific(user.key)))
+                            },
+                        ) {
+                            Column(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                Row(
+                                AvatarComponent(
+                                    data = user.avatar,
                                     modifier =
                                         Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    AvatarComponent(
-                                        data = user.avatar,
-                                        modifier =
-                                            Modifier
-                                                .aspectRatio(1f),
-                                    )
-                                    if (navigationState.expanded) {
-                                        Column {
-                                            RichText(user.name, maxLines = 1)
-                                            Text(user.handle, style = FluentTheme.typography.caption, maxLines = 1)
-                                        }
-                                    }
-                                }
+                                            .aspectRatio(1f),
+                                )
                             }
                         }
-                        item {
-                            Button(
-                                onClick = {},
-                                modifier =
-                                    Modifier
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                        .fillMaxWidth(),
-                            ) {
-                                Icon(
-                                    FontAwesomeIcons.Solid.Pen,
-                                    contentDescription = stringResource(Res.string.home_compose),
-                                    modifier = Modifier.size(16.dp),
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                navigate(
+                                    Route.Compose.New(
+                                        accountType = AccountType.Specific(user.key),
+                                    ),
                                 )
-                                if (navigationState.expanded) {
-                                    Text(stringResource(Res.string.home_compose), maxLines = 1)
-                                }
-                            }
+                            },
+                            modifier =
+                                Modifier
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    .fillMaxWidth(),
+                            iconOnly = true,
+                        ) {
+                            Icon(
+                                FontAwesomeIcons.Solid.Pen,
+                                contentDescription = stringResource(Res.string.home_compose),
+                                modifier = Modifier.size(16.dp),
+                            )
                         }
                     }.onError {
-                        item {
-                            Button(
-                                onClick = {
-                                    navigate(Route.ServiceSelect)
-                                },
+                        Button(
+                            onClick = {
+                                navigate(Route.ServiceSelect)
+                            },
+                            modifier =
+                                Modifier
+                                    .padding(vertical = 4.dp)
+                                    .fillMaxWidth(),
+                        ) {
+                            Column(
                                 modifier =
                                     Modifier
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                        .fillMaxWidth(),
+                                        .padding(vertical = 4.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
                                 Icon(
                                     FontAwesomeIcons.Solid.UserPlus,
                                     contentDescription = stringResource(Res.string.home_login),
                                     modifier = Modifier.size(16.dp),
                                 )
-                                if (navigationState.expanded) {
-                                    Text(stringResource(Res.string.home_login), maxLines = 1)
-                                }
+                                Text(stringResource(Res.string.home_login), maxLines = 1)
                             }
                         }
                     }
-                item {
-                    MenuItemSeparator()
-                }
 
-                fun buildMenuItem(
-                    tab: HomeTabsPresenter.State.HomeTabState.HomeTabItem,
-                    index: Int,
-                ) {
-                    menuItem(
-                        selected = currentDestination?.hierarchy?.any { it.hasRoute(getRoute(tab.tabItem)::class) } == true,
-                        onClick = {
-                            if (selectedIndex == index) {
-                                tab.tabState.onClick()
+                @Composable
+                fun buildMenuItem(tab: HomeTabsPresenter.State.HomeTabState.HomeTabItem) {
+                    val selected = currentRoute == getRoute(tab.tabItem)
+                    val color by animateColorAsState(
+                        targetValue =
+                            if (selected) {
+                                FluentTheme.colors.system.attention
                             } else {
-                                selectedIndex = index
+                                FluentTheme.colors.system.neutral
+                            },
+                    )
+                    NavigationItem(
+                        onClick = {
+                            if (selected) {
+                                state.scrollToTopRegistry.scrollToTop()
+                            } else {
+                                navigate(getRoute(tab.tabItem))
                             }
                         },
                         icon = {
                             TabIcon(
                                 tab.tabItem,
                                 iconOnly = tabs.secondaryIconOnly,
+                                color = color,
+                                modifier =
+                                    Modifier
+                                        .size(24.dp),
                             )
                         },
                         text = {
-                            TabTitle(tab.tabItem.metaData.title)
+                            TabTitle(
+                                tab.tabItem.metaData.title,
+                                color = color,
+                                style = FluentTheme.typography.caption,
+                            )
                         },
                         badge =
                             if (tab.badgeCountState.isSuccess) {
@@ -250,115 +256,189 @@ internal fun FlareApp(
                             },
                     )
                 }
-                tabs.primary.forEachIndexed { index, tab ->
-                    if (tab.tabItem !is SettingsTabItem) {
-                        buildMenuItem(tab, index)
-                    }
+                tabs.primary.forEachIndexed { _, tab ->
+                    buildMenuItem(tab)
                 }
                 if (tabs.secondary.any()) {
-                    item {
-                        MenuItemSeparator()
-                    }
-                    tabs.secondary.forEachIndexed { index, tab ->
-                        buildMenuItem(tab, index + tabs.primary.size)
+                    tabs.secondary.forEachIndexed { _, tab ->
+                        buildMenuItem(tab)
                     }
                 }
-            },
-            title = {
-                Text(stringResource(Res.string.app_name))
-            },
-            contentPadding = PaddingValues(top = 8.dp),
-            footerItems = {
-                menuItem(
-                    selected = currentDestination?.hierarchy?.any { it.hasRoute(Route.Settings::class) } == true,
-                    onClick = {
-                        navigate(Route.Settings)
-                    },
-                    icon = {
-                        Icon(
-                            FontAwesomeIcons.Solid.Gear,
-                            contentDescription = stringResource(Res.string.home_settings),
-                        )
-                    },
-                    text = {
-                        Text(stringResource(Res.string.home_settings))
-                    },
-                )
-            },
-        ) {
-            val currentTab =
-                remember(tabs, selectedIndex) {
-                    tabs.all.getOrNull(selectedIndex)
+
+                state.user.onSuccess {
+                    val selected = currentRoute == Route.Settings
+                    val color by animateColorAsState(
+                        targetValue =
+                            if (selected) {
+                                FluentTheme.colors.system.attention
+                            } else {
+                                FluentTheme.colors.system.neutral
+                            },
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    NavigationItem(
+                        icon = {
+                            Icon(
+                                FontAwesomeIcons.Solid.Gear,
+                                contentDescription = stringResource(Res.string.home_settings),
+                                modifier = Modifier.size(24.dp),
+                                tint = color,
+                            )
+                        },
+                        text = {
+                            Text(
+                                stringResource(Res.string.home_settings),
+                                maxLines = 1,
+                                style = FluentTheme.typography.caption,
+                                color = color,
+                            )
+                        },
+                        onClick = {
+                            navigate(Route.Settings)
+                        },
+                    )
                 }
+            }
             CompositionLocalProvider(
                 LocalUriHandler provides
-                    remember {
+                    remember(uriHandler, stackManager, onWindowRoute) {
                         ProxyUriHandler(
-                            navController = navController,
+                            stackManager = stackManager,
                             actualUriHandler = uriHandler,
-                            onRawImage = onRawImage,
-                            onStatusMedia = onStatusMedia,
+                            onWindowRoute = onWindowRoute,
                         )
                     },
-                LocalTabState provides currentTab?.tabState,
+                LocalScrollToTopRegistry provides state.scrollToTopRegistry,
             ) {
-                Router(
-                    startDestination = getRoute(tabs.primary.first().tabItem),
-                    navController = navController,
-                )
+                Layer(
+                    modifier = Modifier.fillMaxSize(),
+                    color = FluentTheme.colors.background.mica.base,
+                    shape = RoundedCornerShape(0),
+                    border = null,
+                ) {
+                    Box {
+                        Router(
+                            manager = stackManager,
+                            onWindowRoute = onWindowRoute,
+                        )
+                        if (stackManager.canGoBack) {
+                            NavigationDefaults.BackButton(
+                                onClick = {
+                                    goBack()
+                                },
+                                disabled = !stackManager.canGoBack,
+                                modifier = Modifier.align(Alignment.TopStart),
+                            )
+                        }
+                        InAppNotificationComponent(
+                            modifier =
+                                Modifier
+                                    .align(Alignment.TopCenter),
+                        )
+                    }
+                }
             }
         }
     }
 }
 
+@Composable
+private fun NavigationItem(
+    icon: @Composable () -> Unit,
+    text: @Composable () -> Unit,
+    badge: @Composable (() -> Unit)? = null,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    SubtleButton(
+        onClick = onClick,
+        modifier = modifier,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            NavigationItemIcon(
+                icon = icon,
+                badge = badge,
+            )
+            text.invoke()
+        }
+    }
+}
+
+@Composable
+private fun NavigationItemIcon(
+    icon: @Composable () -> Unit,
+    badge: (@Composable () -> Unit)? = null,
+) {
+    val iconContent = remember(icon) { movableContentOf(icon) }
+    if (badge != null) {
+        Box {
+            iconContent.invoke()
+            Badge(
+                status = BadgeStatus.Informational,
+                content = {
+                    badge.invoke()
+                },
+            )
+        }
+    } else {
+        iconContent.invoke()
+    }
+}
+
 private fun getRoute(tab: TabItem): Route =
     when (tab) {
-        is DiscoverTabItem -> Route.Discover(tab.account)
-        is ProfileTabItem -> Route.MeRoute(tab.account)
-        is TimelineTabItem -> Route.Timeline(tab)
-        is NotificationTabItem -> Route.Notification(tab.account)
+        is DiscoverTabItem -> Discover(tab.account)
+        is ProfileTabItem -> MeRoute(tab.account)
+        is HomeTimelineTabItem -> Route.Home(tab.account)
+        is TimelineTabItem -> Timeline(tab)
+        is NotificationTabItem -> Notification(tab.account)
         SettingsTabItem -> Route.Settings
-        is AllListTabItem -> Route.AllLists(tab.account)
-        is Bluesky.FeedsTabItem -> Route.BlueskyFeeds(tab.account)
-        is DirectMessageTabItem -> Route.DirectMessage(tab.account)
-        is RssTabItem -> Route.Rss
+        is AllListTabItem -> AllLists(tab.account)
+        is Bluesky.FeedsTabItem -> BlueskyFeeds(tab.account)
+        is DirectMessageTabItem -> Route.DmList(tab.account)
+        is RssTabItem -> Route.RssList
+        is Misskey.AntennasListTabItem -> Route.MisskeyAntennas(tab.account)
     }
 
 @Composable
 private fun presenter() =
     run {
         val accountState = remember { ActiveAccountPresenter() }.invoke()
-        val tabState = remember { HomeTabsPresenter(flowOf(TabSettings())) }.invoke()
+        val tabState = remember { HomeTabsPresenter() }.invoke()
+        val scrollToTopRegistry =
+            remember {
+                ScrollToTopRegistry()
+            }
         object : UserState by accountState, HomeTabsPresenter.State by tabState {
+            val scrollToTopRegistry = scrollToTopRegistry
         }
     }
 
 private class ProxyUriHandler(
-    private val navController: NavController,
+    private val stackManager: StackManager,
     private val actualUriHandler: UriHandler,
-    private val onRawImage: (String) -> Unit,
-    private val onStatusMedia: (AccountType, MicroBlogKey, Int) -> Unit,
+    private val onWindowRoute: (Route.WindowRoute) -> Unit,
 ) : UriHandler {
     override fun openUri(uri: String) {
         if (uri.startsWith("flare://")) {
             val data = Url(uri)
-            when (data.host) {
-                "RawImage" -> {
-                    val rawImage = data.segments.getOrNull(0)
-                    if (rawImage != null) {
-                        onRawImage(rawImage)
-                    }
+
+            Route.parse(uri)?.let {
+                if (it is Route.WindowRoute) {
+                    onWindowRoute.invoke(it)
+                } else if (it is Route.UrlRoute) {
+                    actualUriHandler.openUri(it.url)
+                } else {
+                    stackManager.push(it)
                 }
-                "StatusMedia" -> {
-                    val accountKey = data.parameters["accountKey"]?.let(MicroBlogKey::valueOf)
-                    val statusKey = data.segments.getOrNull(0)?.let(MicroBlogKey::valueOf)
-                    val index = data.segments.getOrNull(1)?.toIntOrNull()
-                    val accountType = accountKey?.let(AccountType::Specific) ?: AccountType.Guest
-                    if (statusKey != null && index != null) {
-                        onStatusMedia(accountType, statusKey, index)
-                    }
-                }
-                else -> navController.navigate(uri)
+            } ?: run {
+                // If the URI does not match any known route, we can handle it as a custom URI scheme
+                // For example, you might want to log it or show an error
+                println("Unhandled URI: $uri")
             }
         } else {
             actualUriHandler.openUri(uri)
@@ -366,8 +446,29 @@ private class ProxyUriHandler(
     }
 }
 
-private val LocalTabState =
-    androidx.compose.runtime.staticCompositionLocalOf<HomeTabsPresenter.State.HomeTabState.HomeTabItem.TabState?> {
+private class ScrollToTopRegistry {
+    private val callbacks = mutableSetOf<() -> Unit>()
+
+    fun registerCallback(callback: () -> Unit) {
+        callbacks.add(callback)
+    }
+
+    fun unregisterCallback(callback: () -> Unit) {
+        callbacks.remove(callback)
+    }
+
+    fun scrollToTop() {
+        callbacks.forEach { it.invoke() }
+    }
+}
+
+val LocalWindowPadding =
+    androidx.compose.runtime.staticCompositionLocalOf {
+        PaddingValues(0.dp)
+    }
+
+private val LocalScrollToTopRegistry =
+    androidx.compose.runtime.staticCompositionLocalOf<ScrollToTopRegistry?> {
         null
     }
 
@@ -376,18 +477,56 @@ internal fun RegisterTabCallback(
     lazyListState: LazyStaggeredGridState,
     onRefresh: () -> Unit,
 ) {
-    val tabState = LocalTabState.current
     val onRefreshState by rememberUpdatedState(onRefresh)
+    val tabState = LocalScrollToTopRegistry.current
     if (tabState != null) {
         val scope = rememberCoroutineScope()
         val callback: () -> Unit =
             remember(lazyListState, scope) {
                 {
-                    if (lazyListState.firstVisibleItemIndex == 0) {
-                        onRefreshState()
+                    if (lazyListState.firstVisibleItemIndex == 0 &&
+                        lazyListState.firstVisibleItemScrollOffset == 0
+                    ) {
+                        onRefreshState.invoke()
                     } else {
                         scope.launch {
-                            if (lazyListState.firstVisibleItemIndex > 40) {
+                            if (lazyListState.firstVisibleItemIndex > 20) {
+                                lazyListState.scrollToItem(0)
+                            } else {
+                                lazyListState.animateScrollToItem(0)
+                            }
+                        }
+                    }
+                }
+            }
+        DisposableEffect(tabState, callback, lazyListState) {
+            tabState.registerCallback(callback)
+            onDispose {
+                tabState.unregisterCallback(callback)
+            }
+        }
+    }
+}
+
+@Composable
+internal fun RegisterTabCallback(
+    lazyListState: LazyListState,
+    onRefresh: () -> Unit,
+) {
+    val onRefreshState by rememberUpdatedState(onRefresh)
+    val tabState = LocalScrollToTopRegistry.current
+    if (tabState != null) {
+        val scope = rememberCoroutineScope()
+        val callback: () -> Unit =
+            remember(lazyListState, scope) {
+                {
+                    if (lazyListState.firstVisibleItemIndex == 0 &&
+                        lazyListState.firstVisibleItemScrollOffset == 0
+                    ) {
+                        onRefreshState.invoke()
+                    } else {
+                        scope.launch {
+                            if (lazyListState.firstVisibleItemIndex > 20) {
                                 lazyListState.scrollToItem(0)
                             } else {
                                 lazyListState.animateScrollToItem(0)

@@ -17,6 +17,7 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.presenter.TimelineItemPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
@@ -75,7 +76,7 @@ internal fun TimelineScreen(
 @Composable
 private fun timelinePresenter(tabItem: TimelineTabItem) =
     run {
-        val state = timelineItemPresenter(tabItem)
+        val state = remember(tabItem.key) { TimelineItemPresenter(tabItem) }.invoke()
         val accountState =
             remember(tabItem.account) {
                 UserPresenter(
@@ -83,6 +84,6 @@ private fun timelinePresenter(tabItem: TimelineTabItem) =
                     userKey = null,
                 )
             }.invoke()
-        object : UserState by accountState, TimelineItemState by state {
+        object : UserState by accountState, TimelineItemPresenter.State by state {
         }
     }

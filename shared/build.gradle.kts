@@ -14,17 +14,33 @@ plugins {
     alias(libs.plugins.room)
 }
 
+android {
+    namespace = "dev.dimension.flare.shared"
+}
+
 kotlin {
+    applyDefaultHierarchyTemplate {
+        common {
+            group("apple") {
+                withMacos()
+                withIos()
+            }
+            group("androidJvm") {
+                withAndroidTarget()
+                withJvm()
+            }
+        }
+    }
     jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
-    applyDefaultHierarchyTemplate()
-    androidLibrary {
-        compileSdk = libs.versions.compileSdk.get().toInt()
-        namespace = "dev.dimension.flare.shared"
-        minSdk = libs.versions.minSdk.get().toInt()
-    }
+//    androidLibrary {
+//        compileSdk = libs.versions.compileSdk.get().toInt()
+//        namespace = "dev.dimension.flare.shared"
+//        minSdk = libs.versions.minSdk.get().toInt()
+//    }
 
 
+    androidTarget()
     jvm()
 
     listOf(
@@ -90,27 +106,21 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
-        val androidJvmMain by creating {
-            dependsOn(commonMain)
+        val androidJvmMain by getting {
             dependencies {
                 implementation(compose.foundation)
                 implementation(libs.ktor.client.okhttp)
             }
         }
         val androidMain by getting {
-            dependsOn(androidJvmMain)
             dependencies {
-                implementation(project.dependencies.platform(libs.compose.bom))
                 implementation(libs.core.ktx)
                 implementation(libs.koin.android)
             }
         }
         val jvmMain by getting {
-            dependsOn(androidJvmMain)
             dependencies {
                 implementation(libs.commons.lang3)
-                // TODO: workaround for https://issuetracker.google.com/issues/396148592
-                implementation("androidx.sqlite:sqlite-jvm:2.5.2")
             }
         }
         val appleMain by getting {
@@ -163,6 +173,4 @@ afterEvaluate {
             }
         }
     }
-
-
 }

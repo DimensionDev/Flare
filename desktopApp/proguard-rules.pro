@@ -4,7 +4,7 @@
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
 -dontwarn androidx.compose.runtime.**
-
+-dontnote **
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 
 -keep class app.bsky.** { *; }
@@ -27,19 +27,22 @@
     void traceEventEnd();
 }
 
--keep class kotlinx.coroutines.internal.MainDispatcherFactory { *; }
--keep class kotlinx.coroutines.swing.SwingDispatcherFactory { *; }
-
 -dontwarn javax.annotation.**
 -keep class * extends androidx.room.RoomDatabase { void <init>(); }
-
--keep @kotlinx.serialization.Serializable class * {*;}
 
 # Keep `Companion` object fields of serializable classes.
 # This avoids serializer lookup through `getDeclaredClasses` as done for named companion objects.
 -if @kotlinx.serialization.Serializable class **
 -keepclassmembers class <1> {
-    static <1>$Companion Companion;
+    static <1>$* Companion;
+}
+
+# Keep names for named companion object from obfuscation
+# Names of a class and of a field are important in lookup of named companion in runtime
+-keepnames @kotlinx.serialization.internal.NamedCompanion class *
+-if @kotlinx.serialization.internal.NamedCompanion class *
+-keepclassmembernames class * {
+    static <1> *;
 }
 
 # Keep `serializer()` on companion objects (both default and named) of serializable classes.
@@ -78,3 +81,57 @@
 }
 
 -keep class com.mayakapps.compose.** { *; }
+
+-dontwarn dev.dimension.flare.data.network.xqt.model.**
+-dontwarn com.jetbrains.**
+-dontwarn com.sun.jna.**
+
+-keep class dev.whyoleg.cryptography.*
+-keep class dev.whyoleg.cryptography.providers.jdk.*
+
+# ServiceLoader support
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+
+# Most of volatile fields are updated with AFU and should not be mangled
+-keepclassmembers class kotlinx.coroutines.** {
+    volatile <fields>;
+}
+
+-keep class io.ktor.serialization.** { *; }
+-keep class kotlinx.coroutines.** { *; }
+-keep class coil3.** { *; }
+-keep class okio.** { *; }
+-keep class io.ktor.serialization.** { *; }
+-keep @kotlinx.serialization.Serializable class * {*;}
+-keep class io.ktor.** { *; }
+-keep class kotlin.reflect.jvm.internal.** { *; }
+#-keep class kotlin.Metadata { *; }
+#-keepattributes Kotlin
+-keepattributes Annotation
+-keepattributes RuntimeVisibleAnnotations
+-keep class nl.adaptivity.xmlutil.** { *; }
+-keep class * extends coil3.util.DecoderServiceLoaderTarget { *; }
+-keep class * extends coil3.util.FetcherServiceLoaderTarget { *; }
+-keep class dev.dimension.flare.data.network.rss.model.** { *; }
+# Same story for the standard library's SafeContinuation that also uses AtomicReferenceFieldUpdater
+-keepclassmembers class kotlin.coroutines.SafeContinuation {
+    volatile <fields>;
+}
+
+# These classes are only required by kotlinx.coroutines.debug.internal.AgentPremain, which is only loaded when
+# kotlinx-coroutines-core is used as a Java agent, so these are not needed in contexts where ProGuard is used.
+-dontwarn java.lang.instrument.ClassFileTransformer
+-dontwarn sun.misc.SignalHandler
+-dontwarn java.lang.instrument.Instrumentation
+-dontwarn sun.misc.Signal
+
+# Only used in `kotlinx.coroutines.internal.ExceptionsConstructor`.
+# The case when it is not available is hidden in a `try`-`catch`, as well as a check for Android.
+-dontwarn java.lang.ClassValue
+
+# An annotation used for build tooling, won't be directly accessed.
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+-keep class io.github.kdroidfilter.** { *; }
+-keep class de.jangassen.jfa.** { *; }
+-keep class dev.dimension.flare.common.macos.** { *; }

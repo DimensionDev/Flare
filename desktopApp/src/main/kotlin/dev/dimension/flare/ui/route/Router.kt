@@ -1,36 +1,50 @@
 package dev.dimension.flare.ui.route
 
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavDeepLink
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.dialog
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
-import com.konyaco.fluent.component.Text
-import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.screen.feeds.FeedScreen
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowScope
+import dev.dimension.flare.common.OnDeepLink
+import dev.dimension.flare.data.model.Bluesky.FeedTabItem
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.IconType.Material
+import dev.dimension.flare.data.model.ListTimelineTabItem
+import dev.dimension.flare.data.model.Misskey
+import dev.dimension.flare.data.model.RssTimelineTabItem
+import dev.dimension.flare.data.model.TabMetaData
+import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.model.AccountType.Specific
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Quote
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Reply
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus.VVOComment
+import dev.dimension.flare.ui.route.Route.EditRssSource
+import dev.dimension.flare.ui.route.Route.Profile
+import dev.dimension.flare.ui.route.Route.RssTimeline
+import dev.dimension.flare.ui.route.Route.Search
+import dev.dimension.flare.ui.route.Route.Timeline
+import dev.dimension.flare.ui.screen.compose.ComposeDialog
+import dev.dimension.flare.ui.screen.dm.DmConversationScreen
+import dev.dimension.flare.ui.screen.dm.DmListScreen
+import dev.dimension.flare.ui.screen.dm.UserDMConversationScreen
+import dev.dimension.flare.ui.screen.feeds.FeedListScreen
 import dev.dimension.flare.ui.screen.home.DiscoverScreen
+import dev.dimension.flare.ui.screen.home.HomeTimelineScreen
 import dev.dimension.flare.ui.screen.home.NotificationScreen
 import dev.dimension.flare.ui.screen.home.ProfileScreen
+import dev.dimension.flare.ui.screen.home.ProfileWithUserNameAndHostDeeplinkRoute
+import dev.dimension.flare.ui.screen.home.SearchScreen
+import dev.dimension.flare.ui.screen.home.TabSettingScreen
 import dev.dimension.flare.ui.screen.home.TimelineScreen
-import dev.dimension.flare.ui.screen.list.ListScreen
+import dev.dimension.flare.ui.screen.list.AllListScreen
+import dev.dimension.flare.ui.screen.media.RawMediaScreen
+import dev.dimension.flare.ui.screen.media.StatusMediaScreen
+import dev.dimension.flare.ui.screen.misskey.AntennasListScreen
+import dev.dimension.flare.ui.screen.rss.EditRssSourceScreen
+import dev.dimension.flare.ui.screen.rss.RssListScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
+import dev.dimension.flare.ui.screen.settings.SettingsScreen
 import dev.dimension.flare.ui.screen.status.StatusScreen
 import dev.dimension.flare.ui.screen.status.VVOCommentScreen
 import dev.dimension.flare.ui.screen.status.VVOStatusScreen
@@ -39,290 +53,488 @@ import dev.dimension.flare.ui.screen.status.action.BlueskyReportStatusDialog
 import dev.dimension.flare.ui.screen.status.action.DeleteStatusConfirmDialog
 import dev.dimension.flare.ui.screen.status.action.MastodonReportDialog
 import dev.dimension.flare.ui.screen.status.action.MisskeyReportDialog
-import kotlinx.collections.immutable.persistentMapOf
-import kotlin.reflect.KType
-import kotlin.reflect.typeOf
+import io.github.composefluent.component.FluentDialog
+import io.github.composefluent.component.Flyout
+import io.github.composefluent.component.Text
 
-private val typeMaps =
-    persistentMapOf(
-        typeOf<MicroBlogKey>() to MicroblogKeyNavType,
-        typeOf<AccountType>() to JsonSerializableNavType(AccountType.serializer()),
-        typeOf<TimelineTabItem>() to JsonSerializableNavType(TimelineTabItem.serializer()),
-    )
-
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-internal fun Router(
-    startDestination: Route,
-    navController: NavHostController = rememberNavController(),
+internal fun WindowScope.Router(
+    manager: StackManager,
+    onWindowRoute: (Route.WindowRoute) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    NavHost(
-        navController = navController,
+    fun navigate(route: Route) {
+        if (route is Route.WindowRoute) {
+            onWindowRoute(route)
+        } else {
+            manager.push(route)
+        }
+    }
+
+    fun onBack() {
+        manager.pop()
+    }
+    OnDeepLink {
+        val route = Route.parse(it)
+        if (route != null) {
+            navigate(route)
+        }
+        route != null
+    }
+    AnimatedContent(
+        manager.currentScreenEntry,
         modifier = modifier,
-        startDestination = startDestination,
-        typeMap = typeMaps,
-    ) {
-        screen<Route.Timeline> { (_, args) ->
-            TimelineScreen(args.tabItem)
-        }
-        screen<Route.Discover> { (_, args) ->
-            DiscoverScreen(args.accountType)
-        }
-        screen<Route.Settings> {
-            Text("Settings")
-        }
-        screen<Route.Rss> {
-            Text("Rss")
-        }
-        screen<Route.Profile> { (_, args) ->
-            ProfileScreen(
-                accountType = args.accountType,
-                userKey = args.userKey,
+    ) { entry ->
+        entry.Content { route ->
+            RouteContent(
+                route = route,
+                onBack = ::onBack,
+                navigate = ::navigate,
             )
         }
-        composable(
-            AppDeepLink.Profile.ROUTE,
-        ) {
-            val userKey = it.arguments?.getString("userKey")?.let(MicroBlogKey::valueOf)
-            val accountKey =
-                it.arguments
-                    ?.getString("accountKey")
-                    ?.let(MicroBlogKey::valueOf)
-                    ?.let(AccountType::Specific) ?: AccountType.Guest
-            if (userKey != null) {
-                ProfileScreen(
-                    accountType = accountKey,
-                    userKey = userKey,
-                )
-            }
-        }
-        screen<Route.MeRoute> { (_, args) ->
-            ProfileScreen(
-                accountType = args.accountType,
-                userKey = null,
+    }
+    manager.currentFloatingEntry?.let { entry ->
+        entry.Content { route ->
+            RouteContent(
+                route = route,
+                onBack = ::onBack,
+                navigate = ::navigate,
             )
-        }
-        screen<Route.ServiceSelect> {
-            ServiceSelectScreen(
-                onBack = navController::navigateUp,
-                onVVO = {
-                },
-                onXQT = {
-                },
-            )
-        }
-        screen<Route.AllLists> { (_, args) ->
-            ListScreen(args.accountType)
-        }
-        screen<Route.BlueskyFeeds> { (_, args) ->
-            FeedScreen(args.accountType)
-        }
-        screen<Route.DirectMessage> {
-        }
-        screen<Route.Notification> { (_, args) ->
-            NotificationScreen(args.accountType)
-        }
-        dialog(AppDeepLink.Bluesky.ReportStatus.ROUTE) {
-            val accountType =
-                it.arguments
-                    ?.getString("accountKey")
-                    ?.let(MicroBlogKey::valueOf)
-                    ?.let(AccountType::Specific)
-            val statusKey =
-                it.arguments
-                    ?.getString("statusKey")
-                    ?.let(MicroBlogKey::valueOf)
-            if (accountType != null && statusKey != null) {
-                BlueskyReportStatusDialog(
-                    accountType = accountType,
-                    statusKey = statusKey,
-                    onBack = navController::navigateUp,
-                )
-            }
-        }
-        dialog(AppDeepLink.DeleteStatus.ROUTE) {
-            val accountType =
-                it.arguments
-                    ?.getString("accountKey")
-                    ?.let(MicroBlogKey::valueOf)
-                    ?.let(AccountType::Specific)
-            val statusKey =
-                it.arguments
-                    ?.getString("statusKey")
-                    ?.let(MicroBlogKey::valueOf)
-            if (accountType != null && statusKey != null) {
-                DeleteStatusConfirmDialog(
-                    accountType = accountType,
-                    statusKey = statusKey,
-                    onBack = navController::navigateUp,
-                )
-            }
-        }
-        dialog(AppDeepLink.Mastodon.ReportStatus.ROUTE) {
-            val accountType =
-                it.arguments
-                    ?.getString("accountKey")
-                    ?.let(MicroBlogKey::valueOf)
-                    ?.let(AccountType::Specific)
-            val statusKey =
-                it.arguments
-                    ?.getString("statusKey")
-                    ?.let(MicroBlogKey::valueOf)
-            val userKey =
-                it.arguments
-                    ?.getString("userKey")
-                    ?.let(MicroBlogKey::valueOf)
-            if (accountType != null && statusKey != null && userKey != null) {
-                MastodonReportDialog(
-                    accountType = accountType,
-                    statusKey = statusKey,
-                    userKey = userKey,
-                    onBack = navController::navigateUp,
-                )
-            }
-        }
-        dialog(AppDeepLink.Misskey.ReportStatus.ROUTE) {
-            val accountType =
-                it.arguments
-                    ?.getString("accountKey")
-                    ?.let(MicroBlogKey::valueOf)
-                    ?.let(AccountType::Specific)
-            val statusKey =
-                it.arguments
-                    ?.getString("statusKey")
-                    ?.let(MicroBlogKey::valueOf)
-            val userKey =
-                it.arguments
-                    ?.getString("userKey")
-                    ?.let(MicroBlogKey::valueOf)
-            if (accountType != null && statusKey != null && userKey != null) {
-                MisskeyReportDialog(
-                    accountType = accountType,
-                    statusKey = statusKey,
-                    userKey = userKey,
-                    onBack = navController::navigateUp,
-                )
-            }
-        }
-        composable(AppDeepLink.StatusDetail.ROUTE) {
-            val statusKey =
-                it.arguments
-                    ?.getString("statusKey")
-                    ?.let(MicroBlogKey::valueOf)
-            val accountKey =
-                it.arguments
-                    ?.getString("accountKey")
-                    ?.let(MicroBlogKey::valueOf)
-                    ?.let(AccountType::Specific)
-            if (statusKey != null && accountKey != null) {
-                StatusScreen(
-                    statusKey = statusKey,
-                    onBack = navController::navigateUp,
-                    accountType = accountKey,
-                )
-            }
-        }
-        composable(AppDeepLink.VVO.CommentDetail.ROUTE) {
-            val statusKey =
-                it.arguments
-                    ?.getString("statusKey")
-                    ?.let(MicroBlogKey::valueOf)
-            val accountKey =
-                it.arguments
-                    ?.getString("accountKey")
-                    ?.let(MicroBlogKey::valueOf)
-                    ?.let(AccountType::Specific)
-            if (statusKey != null && accountKey != null) {
-                VVOCommentScreen(
-                    commentKey = statusKey,
-                    onBack = navController::navigateUp,
-                    accountType = accountKey,
-                )
-            }
-        }
-        composable(AppDeepLink.VVO.StatusDetail.ROUTE) {
-            val statusKey =
-                it.arguments
-                    ?.getString("statusKey")
-                    ?.let(MicroBlogKey::valueOf)
-            val accountKey =
-                it.arguments
-                    ?.getString("accountKey")
-                    ?.let(MicroBlogKey::valueOf)
-                    ?.let(AccountType::Specific)
-            if (statusKey != null && accountKey != null) {
-                VVOStatusScreen(
-                    statusKey = statusKey,
-                    onBack = navController::navigateUp,
-                    accountType = accountKey,
-                )
-            }
-        }
-        dialog(AppDeepLink.AddReaction.ROUTE) {
-            val statusKey =
-                it.arguments
-                    ?.getString("statusKey")
-                    ?.let(MicroBlogKey::valueOf)
-            val accountKey =
-                it.arguments
-                    ?.getString("accountKey")
-                    ?.let(MicroBlogKey::valueOf)
-                    ?.let(AccountType::Specific)
-            if (statusKey != null && accountKey != null) {
-                AddReactionSheet(
-                    statusKey = statusKey,
-                    accountType = accountKey,
-                    onBack = navController::navigateUp,
-                )
-            }
         }
     }
 }
 
-private inline fun <reified T : Any> NavGraphBuilder.screen(
-    typeMap: Map<KType, NavType<*>> = typeMaps,
-    deepLinks: List<NavDeepLink> = emptyList(),
-    noinline enterTransition: (
-        AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-        EnterTransition?
-    )? =
-        null,
-    noinline exitTransition: (
-        AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-        ExitTransition?
-    )? =
-        null,
-    noinline popEnterTransition: (
-        AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-        EnterTransition?
-    )? =
-        enterTransition,
-    noinline popExitTransition: (
-        AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-        ExitTransition?
-    )? =
-        exitTransition,
-    noinline sizeTransform: (
-        AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards
-        SizeTransform?
-    )? =
-        null,
-    noinline content: @Composable AnimatedContentScope.(Pair<NavBackStackEntry, T>) -> Unit,
+@Composable
+internal fun WindowScope.RouteContent(
+    route: Route,
+    onBack: () -> Unit,
+    navigate: (Route) -> Unit,
 ) {
-    composable<T>(
-        typeMap = typeMap,
-        deepLinks = deepLinks,
-        enterTransition = enterTransition,
-        exitTransition = exitTransition,
-        popEnterTransition = popEnterTransition,
-        popExitTransition = popExitTransition,
-        sizeTransform = sizeTransform,
-    ) {
-        val args =
-            remember(it) {
-                it.toRoute<T>()
+    when (route) {
+        is Route.RssDetail -> Unit
+        is Route.AddReaction -> {
+            AddReactionSheet(
+                accountType = route.accountType,
+                statusKey = route.statusKey,
+                onBack = onBack,
+            )
+        }
+
+        is Route.BlueskyReport -> {
+            BlueskyReportStatusDialog(
+                accountType = route.accountType,
+                statusKey = route.statusKey,
+                onBack = onBack,
+            )
+        }
+
+        is Route.DeleteStatus -> {
+            DeleteStatusConfirmDialog(
+                accountType = route.accountType,
+                statusKey = route.statusKey,
+                onBack = onBack,
+            )
+        }
+
+        is Route.MastodonReport -> {
+            MastodonReportDialog(
+                accountType = route.accountType,
+                statusKey = route.statusKey,
+                onBack = onBack,
+                userKey = route.userKey,
+            )
+        }
+
+        is Route.MisskeyReport -> {
+            MisskeyReportDialog(
+                accountType = route.accountType,
+                statusKey = route.statusKey,
+                onBack = onBack,
+                userKey = route.userKey,
+            )
+        }
+
+        is Route.AltText -> {
+            Flyout(
+                visible = true,
+                onDismissRequest = {
+                    onBack()
+                },
+            ) {
+                Text(
+                    text = route.text,
+                    modifier = Modifier.padding(16.dp),
+                )
             }
-        content(it to args)
+        }
+
+        Route.CreateRssSource -> {
+            EditRssSourceScreen(
+                onDismissRequest = onBack,
+                id = null,
+            )
+        }
+
+        is Route.EditRssSource -> {
+            EditRssSourceScreen(
+                onDismissRequest = onBack,
+                id = route.id,
+            )
+        }
+        is Route.Compose.New ->
+            FluentDialog(
+                visible = true,
+            ) {
+                ComposeDialog(
+                    onBack = onBack,
+                    accountType = route.accountType,
+                )
+            }
+
+        is Route.Compose.Quote ->
+            FluentDialog(visible = true) {
+                ComposeDialog(
+                    onBack = onBack,
+                    status = Quote(route.statusKey),
+                    accountType = Specific(accountKey = route.accountKey),
+                )
+            }
+
+        is Route.Compose.Reply ->
+            FluentDialog(visible = true) {
+                ComposeDialog(
+                    onBack = onBack,
+                    status = Reply(route.statusKey),
+                    accountType = Specific(accountKey = route.accountKey),
+                )
+            }
+
+        is Route.Compose.VVOReplyComment ->
+            FluentDialog(visible = true) {
+                ComposeDialog(
+                    onBack = onBack,
+                    accountType = Specific(accountKey = route.accountKey),
+                    status = VVOComment(route.replyTo, route.rootId),
+                )
+            }
+
+        is Route.AllLists -> {
+            AllListScreen(
+                accountType = route.accountType,
+                onAddList = {
+                },
+                toList = {
+                    navigate(
+                        Timeline(
+                            ListTimelineTabItem(
+                                account = route.accountType,
+                                listId = it.id,
+                                metaData =
+                                    TabMetaData(
+                                        title = TitleType.Text(it.title),
+                                        icon = Material(Material.MaterialIcon.List),
+                                    ),
+                            ),
+                        ),
+                    )
+                },
+                editList = {
+                },
+                deleteList = {
+                },
+            )
+        }
+
+        is Route.BlueskyFeeds -> {
+            FeedListScreen(
+                accountType = route.accountType,
+                toFeed = {
+                    navigate(
+                        Timeline(
+                            FeedTabItem(
+                                account = route.accountType,
+                                uri = it.id,
+                                metaData =
+                                    TabMetaData(
+                                        title = TitleType.Text(it.title),
+                                        icon = Material(Material.MaterialIcon.Feeds),
+                                    ),
+                            ),
+                        ),
+                    )
+                },
+            )
+        }
+
+        is Route.Discover -> {
+            DiscoverScreen(
+                accountType = route.accountType,
+                toUser = {
+                    navigate(
+                        Profile(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
+                toSearch = {
+                    navigate(
+                        Search(
+                            accountType = route.accountType,
+                            keyword = it,
+                        ),
+                    )
+                },
+            )
+        }
+
+        is Search -> {
+            SearchScreen(
+                initialQuery = route.keyword,
+                accountType = route.accountType,
+                toUser = {
+                    navigate(
+                        Profile(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
+            )
+        }
+
+        is Route.MeRoute -> {
+            ProfileScreen(
+                accountType = route.accountType,
+                userKey = null,
+            )
+        }
+
+        is Route.Notification -> {
+            NotificationScreen(
+                accountType = route.accountType,
+            )
+        }
+
+        is Profile -> {
+            ProfileScreen(
+                accountType = route.accountType,
+                userKey = route.userKey,
+                toEditAccountList = {},
+                toSearchUserUsingAccount = { keyword, accountKey ->
+                    navigate(
+                        Search(
+                            accountType = Specific(accountKey),
+                            keyword = keyword,
+                        ),
+                    )
+                },
+                toStartMessage = {
+                    navigate(
+                        Route.DmUserConversation(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
+                onFollowListClick = {},
+                onFansListClick = {},
+            )
+        }
+
+        Route.ServiceSelect -> {
+            ServiceSelectScreen(
+                onBack = onBack,
+            )
+        }
+
+        Route.Settings -> {
+            SettingsScreen(
+                toLogin = {
+                    navigate(Route.ServiceSelect)
+                },
+            )
+        }
+
+        is Timeline -> {
+            TimelineScreen(
+                route.tabItem,
+            )
+        }
+
+        is Route.Home -> {
+            HomeTimelineScreen(
+                route.accountType,
+                onAddTab = {
+                    navigate(
+                        Route.TabSetting,
+                    )
+                },
+            )
+        }
+
+        Route.TabSetting -> {
+            TabSettingScreen(
+                toAddRssSource = {
+                    navigate(
+                        Route.CreateRssSource,
+                    )
+                },
+            )
+        }
+
+        is Route.StatusDetail -> {
+            StatusScreen(
+                statusKey = route.statusKey,
+                accountType = route.accountType,
+            )
+        }
+
+        is Route.VVO.CommentDetail -> {
+            VVOCommentScreen(
+                commentKey = route.statusKey,
+                accountType = route.accountType,
+            )
+        }
+
+        is Route.VVO.StatusDetail -> {
+            VVOStatusScreen(
+                statusKey = route.statusKey,
+                accountType = route.accountType,
+            )
+        }
+
+        is Route.ProfileWithNameAndHost -> {
+            ProfileWithUserNameAndHostDeeplinkRoute(
+                userName = route.userName,
+                host = route.host,
+                accountType = route.accountType,
+                onBack = onBack,
+                toEditAccountList = {},
+                toSearchUserUsingAccount = { keyword, accountKey ->
+                    navigate(
+                        Search(
+                            accountType = Specific(accountKey),
+                            keyword = keyword,
+                        ),
+                    )
+                },
+                toStartMessage = {
+                    navigate(
+                        Route.DmUserConversation(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
+                onFollowListClick = {},
+                onFansListClick = {},
+            )
+        }
+
+        Route.RssList ->
+            RssListScreen(
+                toItem = {
+                    navigate(
+                        RssTimeline(
+                            url = it.url,
+                            title = it.title,
+                            id = it.id,
+                        ),
+                    )
+                },
+                onEdit = {
+                    navigate(
+                        EditRssSource(
+                            id = it,
+                        ),
+                    )
+                },
+                onAdd = {
+                    navigate(Route.CreateRssSource)
+                },
+            )
+
+        is Route.RssTimeline -> {
+            TimelineScreen(
+                RssTimelineTabItem(
+                    feedUrl = route.url,
+                    title = route.title.orEmpty(),
+                ),
+            )
+        }
+
+        is Route.RawImage ->
+            RawMediaScreen(url = route.rawImage)
+        is Route.StatusMedia ->
+            StatusMediaScreen(
+                accountType = route.accountType,
+                statusKey = route.statusKey,
+                index = route.index,
+            )
+
+        is Route.DmList ->
+            DmListScreen(
+                accountType = route.accountType,
+                onItemClicked = {
+                    navigate(
+                        Route.DmConversation(
+                            accountType = route.accountType,
+                            roomKey = it,
+                        ),
+                    )
+                },
+            )
+
+        is Route.DmConversation ->
+            DmConversationScreen(
+                accountType = route.accountType,
+                roomKey = route.roomKey,
+                onBack = onBack,
+                toProfile = {
+                    navigate(
+                        Profile(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
+            )
+
+        is Route.DmUserConversation -> {
+            UserDMConversationScreen(
+                accountType = route.accountType,
+                userKey = route.userKey,
+                onBack = onBack,
+                toProfile = {
+                    navigate(
+                        Profile(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
+            )
+        }
+
+        is Route.MisskeyAntennas ->
+            AntennasListScreen(
+                accountType = route.accountType,
+                toTimeline = {
+                    navigate(
+                        Timeline(
+                            Misskey.AntennasTimelineTabItem(
+                                account = route.accountType,
+                                id = it.id,
+                                metaData =
+                                    TabMetaData(
+                                        title = TitleType.Text(it.title),
+                                        icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+                                    ),
+                            ),
+                        ),
+                    )
+                },
+            )
     }
 }

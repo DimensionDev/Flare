@@ -1,103 +1,107 @@
 package dev.dimension.flare.ui.screen.list
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.FluentTheme
-import com.konyaco.fluent.component.SubtleButton
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.EllipsisVertical
-import compose.icons.fontawesomeicons.solid.Plus
-import dev.dimension.flare.Res
-import dev.dimension.flare.list_add
+import dev.dimension.flare.LocalWindowPadding
+import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.more
-import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.uiListItemComponent
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.list.AllListPresenter
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import io.github.composefluent.component.ProgressBar
+import io.github.composefluent.component.ScrollbarContainer
 import moe.tlaster.precompose.molecule.producePresenter
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun AllListScreen(
     accountType: AccountType,
     onAddList: () -> Unit,
     toList: (UiList) -> Unit,
+    editList: (UiList) -> Unit,
+    deleteList: (UiList) -> Unit,
 ) {
     val state by producePresenter("AllListScreen_$accountType") {
         presenter(accountType)
     }
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(FluentTheme.colors.background.mica.base),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.End,
+    val listState = rememberLazyListState()
+    val scrollbarAdapter = rememberScrollbarAdapter(listState)
+    RegisterTabCallback(listState, onRefresh = state::refresh)
+
+    Box {
+        Column(
             modifier =
                 Modifier
-                    .background(FluentTheme.colors.background.layer.default)
-                    .padding(8.dp)
-                    .fillMaxWidth(),
+                    .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+//        Row(
+//            horizontalArrangement = Arrangement.End,
+//            modifier =
+//                Modifier
+//                    .background(FluentTheme.colors.background.layer.default)
+//                    .padding(8.dp)
+//                    .fillMaxWidth(),
+//        ) {
+// //            SubtleButton(
+// //                onClick = {
+// //                    state.refresh()
+// //                }
+// //            ) {
+// //                FAIcon(
+// //                    FontAwesomeIcons.Solid.ArrowsRotate,
+// //                    contentDescription = stringResource(Res.string.refresh),
+// //                )
+// //            }
 //            SubtleButton(
 //                onClick = {
-//                    state.refresh()
-//                }
+//                    onAddList.invoke()
+//                },
 //            ) {
 //                FAIcon(
-//                    FontAwesomeIcons.Solid.ArrowsRotate,
-//                    contentDescription = stringResource(Res.string.refresh),
+//                    FontAwesomeIcons.Solid.Plus,
+//                    contentDescription = stringResource(Res.string.list_add),
 //                )
 //            }
-            SubtleButton(
-                onClick = {
-                    onAddList.invoke()
-                },
+//        }
+            ScrollbarContainer(
+                adapter = scrollbarAdapter,
             ) {
-                FAIcon(
-                    FontAwesomeIcons.Solid.Plus,
-                    contentDescription = stringResource(Res.string.list_add),
-                )
+                LazyColumn(
+                    contentPadding = LocalWindowPadding.current,
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = screenHorizontalPadding),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    uiListWithTabs(
+                        state = state,
+                        toList = toList,
+                        editList = editList,
+                        deleteList = deleteList,
+                    )
+                }
             }
         }
-        LazyColumn(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(FluentTheme.colors.background.layer.default),
-        ) {
-            uiListItemComponent(
-                state.items,
-                onClicked = toList,
-                trailingContent = { item ->
-                    if (!item.readonly) {
-                        SubtleButton(
-                            onClick = {
-                            },
-                        ) {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.EllipsisVertical,
-                                contentDescription = stringResource(Res.string.more),
-                            )
-                        }
-                    }
-                },
+        if (state.isRefreshing) {
+            ProgressBar(
+                modifier =
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth(),
             )
         }
     }
@@ -107,6 +111,6 @@ internal fun AllListScreen(
 private fun presenter(accountType: AccountType) =
     run {
         remember(accountType) {
-            AllListPresenter(accountType)
+            AllListWithTabsPresenter(accountType)
         }.invoke()
     }

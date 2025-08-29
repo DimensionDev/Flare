@@ -65,6 +65,25 @@ public inline fun <T : Any, R : Any> UiState<T>.flatMap(
         is UiState.Loading -> UiState.Loading()
     }
 
+public inline fun <T1 : Any, T2 : Any, R : Any> zipState(
+    a: UiState<T1>,
+    b: UiState<T2>,
+    onError: (Throwable) -> UiState<R> = { UiState.Error(it) },
+    transform: (T1, T2) -> R,
+): UiState<R> =
+    when {
+        a is UiState.Loading || b is UiState.Loading -> UiState.Loading()
+        a is UiState.Error -> onError(a.throwable)
+        b is UiState.Error -> onError(b.throwable)
+        a is UiState.Success && b is UiState.Success ->
+            try {
+                UiState.Success(transform(a.data, b.data))
+            } catch (e: Throwable) {
+                UiState.Error(e)
+            }
+        else -> UiState.Error(IllegalStateException("Unreachable"))
+    }
+
 public fun <T : Any> List<UiState<T>>.merge(requireAllSuccess: Boolean = true): UiState<List<T>> {
     val success = filterIsInstance<UiState.Success<T>>().map { it.data }
     val error = filterIsInstance<UiState.Error<T>>().map { it.throwable }

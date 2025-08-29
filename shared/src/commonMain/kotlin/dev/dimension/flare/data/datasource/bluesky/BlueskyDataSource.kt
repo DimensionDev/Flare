@@ -427,13 +427,14 @@ internal class BlueskyDataSource(
                             )
                         },
             )
-        service.createRecord(
-            CreateRecordRequest(
-                repo = Did(did = data.account.accountKey.id),
-                collection = Nsid("app.bsky.feed.post"),
-                record = post.bskyJson(),
-            ),
-        )
+        service
+            .createRecord(
+                CreateRecordRequest(
+                    repo = Did(did = data.account.accountKey.id),
+                    collection = Nsid("app.bsky.feed.post"),
+                    record = post.bskyJson(),
+                ),
+            ).requireResponse()
     }
 
     suspend fun report(

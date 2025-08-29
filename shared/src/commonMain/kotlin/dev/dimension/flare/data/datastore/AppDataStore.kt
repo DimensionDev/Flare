@@ -7,12 +7,12 @@ import dev.dimension.flare.data.datastore.model.FlareConfig
 import dev.dimension.flare.data.datastore.model.FlareConfigSerializer
 import dev.dimension.flare.data.datastore.model.GuestData
 import dev.dimension.flare.data.datastore.model.GuestDataSerializer
+import dev.dimension.flare.data.io.PlatformPathProducer
 import okio.FileSystem
-import okio.Path.Companion.toPath
 import okio.SYSTEM
 
 internal class AppDataStore(
-    private val producePath: (fileName: String) -> String,
+    private val platformPathProducer: PlatformPathProducer,
 ) {
     val guestDataStore: DataStore<GuestData> by lazy {
         DataStoreFactory.create(
@@ -21,7 +21,7 @@ internal class AppDataStore(
                     fileSystem = FileSystem.SYSTEM,
                     serializer = GuestDataSerializer,
                     producePath = {
-                        producePath.invoke("guest_data.pb").toPath()
+                        platformPathProducer.dataStoreFile("guest_data.pb")
                     },
                 ),
         )
@@ -34,7 +34,7 @@ internal class AppDataStore(
                     fileSystem = FileSystem.SYSTEM,
                     serializer = FlareConfigSerializer,
                     producePath = {
-                        producePath.invoke("flare_config.pb").toPath()
+                        platformPathProducer.dataStoreFile("flare_config.pb")
                     },
                 ),
         )

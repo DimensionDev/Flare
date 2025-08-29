@@ -22,7 +22,6 @@
     <string name="home_tab_list_title">List</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Direct Messages</string>
-    <string name="rss_title">Rss</string>
     <string name="home_timeline_new_toots">New toots</string>
 
     <string name="navigate_back">Back</string>
@@ -116,4 +115,177 @@
     <string name="feeds_subscribe">Subscribe</string>
 
     <string name="social_title">Social</string>
+
+    <string name="antenna_title">Antenna</string>
+    <string name="mixed_timeline_title">Mixed</string>
+
+    <string name="bluesky_login_username">Username</string>
+    <string name="bluesky_login_password">Password</string>
+    <string name="bluesky_login_2fa">Two-factor authentication code</string>
+    <string name="bluesky_login_oauth_button">Login with OAuth</string>
+    <string name="bluesky_login_use_password_button">Use Password</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth might not stable enough, please use password login if you encounter any issues.</string>
+
+    <string name="login_expired">Login session expired</string>
+    <string name="login_expired_message">Click to login again</string>
+    <string name="login_expired_relogin">Login again</string>
+    <string name="account_item_error_title">Error</string>
+    <string name="account_item_error_message">Failed to load account</string>
+    <string name="add_account">Add account</string>
+    <string name="remove_account">Remove account</string>
+
+    <string name="settings_accounts_title">Account Management</string>
+    <string name="settings_appearance_title">Appearance</string>
+    <string name="settings_status_appearance_title">Status Appearance</string>
+    <string name="settings_status_appearance_subtitle">Customize the appearance of status</string>
+    <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
+    <string name="settings_storage_title">Storage</string>
+    <string name="settings_storage_subtitle">Manage Flare\'s storage</string>
+    <string name="settings_about_title">About</string>
+    <string name="settings_about_subtitle">Learn more about Flare</string>
+    <string name="settings_side_panel">Side Panel customization</string>
+    <string name="settings_side_panel_description">Customize the side panel</string>
+    <string name="settings_local_filter_title">Local filter</string>
+    <string name="settings_local_filter_description">Local filter settings for timeline</string>
+    <string name="settings_guest_setting_title">Guest Mode Host</string>
+    <string name="settings_guest_setting_description">Set the host for guest mode</string>
+    <string name="settings_local_history_title">Local history</string>
+    <string name="settings_local_history_description">View or search your browsing history</string>
+    <string name="settings_app_logging_title">App logging</string>
+    <string name="settings_app_logging_save">Save log</string>
+    <string name="settings_app_logging_clear">Clear log</string>
+    <string name="settings_app_logging_enable_network_logging">Enable network logging</string>
+    <string name="settings_ai_config_title">AI Configuration</string>
+    <string name="settings_ai_config_description">Configure AI settings</string>
+    <string name="settings_ai_config_server">Server URL</string>
+    <string name="settings_ai_config_server_hint">Enter the server URL</string>
+    <string name="settings_ai_config_server_self_host_description">You can use the official server or self-host your own server</string>
+    <string name="settings_ai_config_entable_translation">Enable AI translation</string>
+    <string name="settings_ai_config_translation_description">Replace Google Translate with AI translation, might take longer time</string>
+    <string name="settings_ai_config_enable_tldr">Enable AI Summarization</string>
+    <string name="settings_ai_config_tldr_description">Enable AI summarization for long posts, only available in post that longer than 500 characters</string>
+
+
+    <string name="settings_appearance_generic">Generic</string>
+
+    <string name="settings_appearance_show_actions">Show actions</string>
+    <string name="settings_appearance_show_actions_description">Show actions on the bottom of the status</string>
+    <string name="settings_appearance_show_media">Show media</string>
+    <string name="settings_appearance_show_media_description">Show media in the status</string>
+    <string name="settings_appearance_show_numbers">Show numbers</string>
+    <string name="settings_appearance_show_numbers_description">Show numbers on the bottom of the status</string>
+    <string name="settings_appearance_show_cw_img">Show sensitive content</string>
+    <string name="settings_appearance_show_cw_img_description">Always show sensitive content in the status</string>
+    <string name="settings_appearance_expand_media">Expand media to full size</string>
+    <string name="settings_appearance_expand_media_description">Keep the aspectradio of the media in timeline</string>
+    <string name="settings_appearance_video_autoplay">Video autoplay</string>
+    <string name="settings_appearance_video_autoplay_description">Automatically play videos in the status</string>
+    <string name="settings_appearance_video_autoplay_wifi">Wi-Fi only</string>
+    <string name="settings_appearance_video_autoplay_always">Always</string>
+    <string name="settings_appearance_video_autoplay_never">Never</string>
+    <string name="settings_appearance_avatar_shape">Avatar shape</string>
+    <string name="settings_appearance_avatar_shape_description">Change the shape of the avatar</string>
+    <string name="settings_appearance_avatar_shape_round">Round</string>
+    <string name="settings_appearance_avatar_shape_square">Square</string>
+    <string name="settings_appearance_theme">Theme</string>
+    <string name="settings_appearance_theme_description">Change the theme of the app</string>
+    <string name="settings_appearance_theme_light">Light</string>
+    <string name="settings_appearance_theme_dark">Dark</string>
+    <string name="settings_appearance_theme_auto">Auto</string>
+    <string name="settings_appearance_dynamic_theme">Dynamic theme</string>
+    <string name="settings_appearance_dynamic_theme_description">Change the theme of the app based on the device\'s wallpaper</string>
+    <string name="settings_appearance_show_link_previews">Show link previews</string>
+    <string name="settings_appearance_show_link_previews_description">Show link previews in the status</string>
+    <string name="settings_appearance_compat_link_previews">Simplify link previews</string>
+    <string name="settings_appearance_compat_link_previews_description">Show link previews in simplify mode in the status</string>
+    <string name="settings_appearance_theme_color">Theme color</string>
+    <string name="settings_appearance_theme_color_description">Change the theme color of the app</string>
+    <string name="settings_appearance_theme_pure_color">High contrast Mode</string>
+    <string name="settings_appearance_theme_pure_color_description">Increase contrast between background and text</string>
+
+    <string name="settings_about_source_code">Source code</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Join our Telegram group</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Join our Line group</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Help us translate Flare</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
+
+    <string name="users">Users</string>
+    <string name="hashtags">Hashtags</string>
+    <string name="statues">Statuses</string>
+
+
+    <string name="compose_title">Compose</string>
+    <string name="compose_hint">What\'s happening?</string>
+    <string name="compose_poll_option_hint">Option %1$s</string>
+    <string name="compose_poll_single_choice">Single choice</string>
+    <string name="compose_poll_multiple_choice">Multiple choice</string>
+    <string name="compose_poll_expiration_at">Expiration at: %1$s</string>
+    <string name="compose_poll_expiration_5_minutes">5 minutes</string>
+    <string name="compose_poll_expiration_30_minutes">30 minutes</string>
+    <string name="compose_poll_expiration_1_hour">1 hour</string>
+    <string name="compose_poll_expiration_6_hours">6 hours</string>
+    <string name="compose_poll_expiration_12_hours">12 hours</string>
+    <string name="compose_poll_expiration_1_day">1 day</string>
+    <string name="compose_poll_expiration_3_days">3 days</string>
+    <string name="compose_poll_expiration_7_days">7 days</string>
+    <string name="compose_content_warning_hint">Content warning</string>
+    <string name="compose_media_sensitive">Mark media as sensitive</string>
+    <string name="compose_notification_title">Sent successfully</string>
+
+    <string name="misskey_visibility_public">Public</string>
+    <string name="misskey_visibility_home">Home</string>
+    <string name="misskey_visibility_followers">Followers</string>
+    <string name="misskey_visibility_specified">Specified</string>
+    <string name="misskey_visibility_public_description">Anyone can see and boost this toot</string>
+    <string name="misskey_visibility_home_description">Only users on this instance can see this toot</string>
+    <string name="misskey_visibility_followers_description">Only followers can see this toot</string>
+    <string name="misskey_visibility_specified_description">Only mentioned users can see this toot</string>
+
+
+    <string name="rss_sources_title">Rss Sources</string>
+    <string name="add_rss_source">Add Rss Source</string>
+    <string name="edit_rss_source">Edit Rss Source</string>
+    <string name="delete_rss_source">Delete Rss Source</string>
+
+    <string name="rss_sources_title_label">Title</string>
+    <string name="rss_sources_url_label">Url</string>
+    <string name="rss_title">Rss</string>
+    <string name="empty_rss_sources">No rss sources</string>
+    <string name="rss_sources_rss_hub_host_label">RssHub Host</string>
+    <string name="rss_sources_rss_hub_host_hint">You need to set the RssHub host if you want to use RssHub, or select the public RssHub server</string>
+    <string name="rss_sources_discovered_rss_sources">Discovered Rss Sources</string>
+    <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
+
+    <string name="tab_settings_add">Add</string>
+    <string name="tab_settings_drag">Drag</string>
+    <string name="tab_settings_edit">Edit</string>
+    <string name="tab_settings_remove">Remove</string>
+    <string name="tab_settings_default">Default</string>
+    <string name="tab_settings_list">List</string>
+    <string name="tab_settings_feed">Feeds</string>
+
+    <string name="notification_login_expired">Login expired, please login again</string>
+
+    <string name="dm_list_empty">No direct messages</string>
+    <string name="dm_list_error">Failed to load direct messages</string>
+    <string name="send">Send</string>
+    <string name="dm_send_placeholder">Send a message</string>
+    <string name="dm_deleted">Deleted</string>
+    <string name="dm_conversation">Direct Message Room</string>
+    <string name="dm_sending">Sending</string>
+    <string name="dm_leave">Leave conversation</string>
+    <string name="dm_to_profile">Show profile</string>
+    <string name="tab_settings_mixed_timeline">Add mixed timeline tab</string>
+    <string name="tab_settings_mixed_timeline_desc">Mixed timeline will mix all tabs timeline result in one tab</string>
+
+    <string name="edit_tab_title">Edit tab</string>
+    <string name="edit_tab_name">Name</string>
+    <string name="edit_tab_name_placeholder">Tab name</string>
+    <string name="edit_tab_icon">Icon</string>
+    <string name="edit_tab_with_avatar">With avatar</string>
+
+    <string name="edit">Edit</string>
 </resources>

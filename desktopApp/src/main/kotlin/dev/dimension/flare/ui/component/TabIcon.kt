@@ -10,19 +10,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.FluentTheme
-import com.konyaco.fluent.component.Text
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.res
 import dev.dimension.flare.data.model.toIcon
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import io.github.composefluent.FluentTheme
+import io.github.composefluent.LocalContentColor
+import io.github.composefluent.LocalTextStyle
+import io.github.composefluent.component.Text
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
@@ -30,6 +36,9 @@ import org.jetbrains.compose.resources.stringResource
 fun TabTitle(
     title: TitleType,
     modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    style: TextStyle = LocalTextStyle.current,
 ) {
     Text(
         text =
@@ -38,6 +47,10 @@ fun TabTitle(
                 is TitleType.Text -> title.content
             },
         modifier = modifier,
+        color = color,
+        fontSize = fontSize,
+        style = style,
+        maxLines = 1,
     )
 }
 
@@ -46,10 +59,27 @@ fun TabIcon(
     tabItem: TabItem,
     modifier: Modifier = Modifier,
     iconOnly: Boolean = false,
+    color: Color = LocalContentColor.current,
 ) {
-    val accountType = tabItem.account
-    val icon = tabItem.metaData.icon
-    val title = tabItem.metaData.title
+    TabIcon(
+        accountType = tabItem.account,
+        icon = tabItem.metaData.icon,
+        title = tabItem.metaData.title,
+        modifier = modifier,
+        iconOnly = iconOnly,
+        color = color,
+    )
+}
+
+@Composable
+fun TabIcon(
+    accountType: AccountType,
+    icon: IconType,
+    title: TitleType,
+    modifier: Modifier = Modifier,
+    iconOnly: Boolean = false,
+    color: Color = LocalContentColor.current,
+) {
     when (icon) {
         is IconType.Avatar -> {
             val userState by producePresenter(key = "$accountType:${icon.userKey}") {
@@ -79,6 +109,7 @@ fun TabIcon(
                 modifier =
                     modifier
                         .size(24.dp),
+                tint = color,
             )
         }
 
@@ -94,6 +125,7 @@ fun TabIcon(
                     modifier =
                         modifier
                             .size(24.dp),
+                    tint = color,
                 )
             } else {
                 val userState by producePresenter(key = "$accountType:${icon.userKey}") {
@@ -133,6 +165,20 @@ fun TabIcon(
                     )
                 }
             }
+        }
+
+        is IconType.Url -> {
+            NetworkImage(
+                icon.url,
+                contentDescription =
+                    when (title) {
+                        is TitleType.Localized -> stringResource(title.res)
+                        is TitleType.Text -> title.content
+                    },
+                modifier =
+                    modifier
+                        .size(24.dp),
+            )
         }
     }
 }

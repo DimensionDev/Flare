@@ -30,21 +30,6 @@ fun AppContainer(afterInit: () -> Unit) {
 
 @Composable
 fun FlareApp(content: @Composable () -> Unit) {
-//    setSingletonImageLoaderFactory { context ->
-//        ImageLoader.Builder(context)
-//            .components {
-//                if (Build.VERSION.SDK_INT >= 28) {
-//                    add(AnimatedImageDecoder.Factory())
-//                } else {
-//                    add(GifDecoder.Factory())
-//                }
-//                add(AnimatedPngDecoder.Factory())
-//                add(SvgDecoder.Factory())
-//                add(AnimatedWebPDecoder.Factory())
-//            }
-//            .crossfade(true)
-//            .build()
-//    }
     val settingsRepository = koinInject<SettingsRepository>()
     val appearanceSettings by settingsRepository.appearanceSettings.collectAsState(
         AppearanceSettings(),

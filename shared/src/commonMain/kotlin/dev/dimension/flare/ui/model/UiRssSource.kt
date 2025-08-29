@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.model
 
 import dev.dimension.flare.ui.render.UiDateTime
 import io.ktor.http.Url
+import sh.christian.ozone.api.xrpc.BSKY_SOCIAL
 
 public data class UiRssSource internal constructor(
     val id: Int,
@@ -24,7 +25,11 @@ public data class UiRssSource internal constructor(
                 } else {
                     Url("https://$url")
                 }
-            return "https://${parsedUrl.host}/favicon.ico"
+            if (parsedUrl.host == BSKY_SOCIAL.host) {
+                return "https://web-cdn.bsky.app/static/apple-touch-icon.png"
+            } else {
+                return "https://${parsedUrl.host}/favicon.ico"
+            }
         }
     }
 }

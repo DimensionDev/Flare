@@ -30,13 +30,11 @@ import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.resId
-import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.model.UiRssSource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.CoroutineScope
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
@@ -159,8 +157,6 @@ internal fun EditTabDialog(
 private fun presenter(
     tabItem: TabItem,
     context: Context = koinInject(),
-    repository: SettingsRepository = koinInject(),
-    appScope: CoroutineScope = koinInject(),
 ) = run {
     val text = rememberTextFieldState()
     var icon: IconType by remember {

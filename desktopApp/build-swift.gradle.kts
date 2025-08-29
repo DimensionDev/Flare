@@ -23,11 +23,13 @@ tasks.register<Exec>("compileWebviewBridgeArm64") {
     )
 
     // copy buildOutput to targetLib
-    Files.copy(
-        buildOutput.asFile.toPath(),
-        targetLib.toPath(),
-        java.nio.file.StandardCopyOption.REPLACE_EXISTING,
-    )
+    if (isMac) {
+        Files.copy(
+            buildOutput.asFile.toPath(),
+            targetLib.toPath(),
+            java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+        )
+    }
 }
 
 afterEvaluate {

@@ -1,4 +1,3 @@
-import Generated
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers

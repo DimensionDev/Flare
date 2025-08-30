@@ -11,7 +11,7 @@ class ProfilePresenterService {
 
     private var presenterCache: [String: ProfilePresenterWrapper] = [:]
     private var mediaPresenterCache: [String: ProfileMediaPresenterWrapper] = [:]
-    private var tabStoreCache: [String: ProfileTabSettingStore] = [:]
+    // ❌ 已删除：tabStoreCache，因为ProfileTabSettingStore已被移除
 
     private init() {}
 
@@ -55,37 +55,9 @@ class ProfilePresenterService {
         return presenter
     }
 
-    func getOrCreateTabStore(userKey: MicroBlogKey?) -> ProfileTabSettingStore {
-        let key = userKey?.description ?? "self"
+    // ❌ 已删除：getOrCreateTabStore方法，因为ProfileTabSettingStore已被移除
 
-        cacheLock.lock()
-        defer { cacheLock.unlock() }
-
-        if let cached = tabStoreCache[key] {
-            logger.debug("🔄 使用缓存 ProfileTabSettingStore: \(key)")
-            return cached
-        }
-
-        let store = ProfileTabSettingStore(userKey: userKey)
-        tabStoreCache[key] = store
-        logger.debug("✨ 创建新 ProfileTabSettingStore: \(key)")
-        return store
-    }
-
-    // 新增：设置TimelineViewModel的方法，类似TimelineViewSwiftUIV4的setupDataSource
-    @MainActor
-    func setupTimelineViewModel(accountType: AccountType, userKey: MicroBlogKey?) async {
-        let presenterWrapper = getOrCreatePresenter(accountType: accountType, userKey: userKey)
-        let tabStore = getOrCreateTabStore(userKey: userKey)
-
-        os_log("[📔][ProfilePresenterService] 开始设置TimelineViewModel: accountType=%{public}@, userKey=%{public}@",
-               log: .default, type: .debug,
-               String(describing: accountType), userKey?.description ?? "nil")
-
-        await presenterWrapper.setupTimelineViewModel(with: tabStore)
-
-        os_log("[📔][ProfilePresenterService] TimelineViewModel设置完成", log: .default, type: .debug)
-    }
+    // ❌ 已删除：setupTimelineViewModel方法，因为ProfileTabSettingStore已被移除
 
     func clearCache() {
         cacheLock.lock()
@@ -93,25 +65,21 @@ class ProfilePresenterService {
 
         let presenterCount = presenterCache.count
         let mediaPresenterCount = mediaPresenterCache.count
-        let tabStoreCount = tabStoreCache.count
 
         presenterCache.removeAll()
         mediaPresenterCache.removeAll()
-        tabStoreCache.removeAll()
 
-        logger.debug("🧹 清除所有Profile缓存 - Presenter: \(presenterCount), MediaPresenter: \(mediaPresenterCount), TabStore: \(tabStoreCount)")
+        logger.debug("🧹 清除所有Profile缓存 - Presenter: \(presenterCount), MediaPresenter: \(mediaPresenterCount)")
     }
 
     func clearCache(for accountType: AccountType, userKey: MicroBlogKey?) {
         let key = getCacheKey(accountType: accountType, userKey: userKey)
-        let tabStoreKey = userKey?.description ?? "self"
 
         cacheLock.lock()
         defer { cacheLock.unlock() }
 
         presenterCache.removeValue(forKey: key)
         mediaPresenterCache.removeValue(forKey: key)
-        tabStoreCache.removeValue(forKey: tabStoreKey)
 
         logger.debug("🧹 清除特定Profile缓存: \(key)")
     }
@@ -120,6 +88,6 @@ class ProfilePresenterService {
         cacheLock.lock()
         defer { cacheLock.unlock() }
 
-        return "ProfilePresenterService缓存状态 - Presenter: \(presenterCache.count), MediaPresenter: \(mediaPresenterCache.count), TabStore: \(tabStoreCache.count)"
+        return "ProfilePresenterService缓存状态 - Presenter: \(presenterCache.count), MediaPresenter: \(mediaPresenterCache.count)"
     }
 }

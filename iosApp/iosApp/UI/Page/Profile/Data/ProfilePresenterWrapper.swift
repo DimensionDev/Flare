@@ -1,71 +1,234 @@
+import Combine
 import Foundation
-import os.log
 import shared
 import SwiftUI
 
-class ProfilePresenterWrapper: ObservableObject {
-    let presenter: ProfilePresenter
-    @Published var isShowAppBar: Bool? = nil // nil: 初始状态, true: 显示, false: 隐藏
+struct ProfileTabViewModel {
+    let tabKey: String
+    let tabItem: FLTabItem
+    let timelineViewModel: TimelineViewModel
+    let timelinePresenter: TimelinePresenter
+    let mediaPresenter: ProfileMediaPresenter?
 
-    // 新增：TimelineViewModel集成
-    private(set) var timelineViewModel: TimelineViewModel?
+    var isMediaTab: Bool { mediaPresenter != nil }
+}
+
+class ProfilePresenterWrapper: ObservableObject {
+    @Published var selectedTabKey: String? {
+        didSet {
+            if let tabKey = selectedTabKey {
+                Task { @MainActor in
+                    await switchToTab(tabKey)
+                }
+            }
+        }
+    }
+
+    @Published var availableTabs: [FLTabItem] = []
+    @Published private(set) var currentTabViewModel: ProfileTabViewModel?
+    @Published private(set) var isInitialized: Bool = false
+
+    var isCurrentTabActive: Bool {
+        guard let selectedTabKey,
+              let currentTabKey = currentTabViewModel?.tabItem.key
+        else {
+            return false
+        }
+        return selectedTabKey == currentTabKey
+    }
+
+    func isTabCurrent(_ tabKey: String) -> Bool {
+        selectedTabKey == tabKey
+    }
+
+    private var tabViewModels: [String: ProfileTabViewModel] = [:]
+    let profilePresenter: ProfilePresenter
+
     private let accountType: AccountType
     private let userKey: MicroBlogKey?
 
     init(accountType: AccountType, userKey: MicroBlogKey?) {
-        os_log("[📔][ProfilePresenterWrapper - init]初始化: accountType=%{public}@, userKey=%{public}@", log: .default, type: .debug, String(describing: accountType), userKey?.description ?? "nil")
-
         self.accountType = accountType
         self.userKey = userKey
-        presenter = .init(accountType: accountType, userKey: userKey)
+        profilePresenter = ProfilePresenter(accountType: accountType, userKey: userKey)
 
-        isShowAppBar = nil
+        FlareLog.debug("🏗️ [ProfilePresenterWrapper] 初始化开始")
     }
 
-    func updateNavigationState(showAppBar: Bool?) {
-        os_log("[📔][ProfilePresenterWrapper]更新导航栏状态: showAppBar=%{public}@", log: .default, type: .debug, String(describing: showAppBar))
-        Task { @MainActor in
-            isShowAppBar = showAppBar
-        }
-    }
-
-    // 新增：TimelineViewModel初始化方法
     @MainActor
-    func setupTimelineViewModel(with tabStore: ProfileTabSettingStore) async {
-        guard timelineViewModel == nil else {
-            os_log("[📔][ProfilePresenterWrapper]TimelineViewModel已存在，跳过初始化", log: .default, type: .debug)
+    func setup() async {
+        guard !isInitialized else {
+            FlareLog.debug("⏭️ [ProfilePresenterWrapper] Already initialized, skipping setup")
             return
         }
 
-        os_log("[📔][ProfilePresenterWrapper]开始初始化TimelineViewModel", log: .default, type: .debug)
+        do {
+            FlareLog.debug("🚀 [ProfilePresenterWrapper] 开始setup")
 
-        // 创建TimelineViewModel实例
-        let viewModel = TimelineViewModel()
-        timelineViewModel = viewModel
+            let user = getUserForInitialization()
 
-        // 从ProfileTabSettingStore获取当前的Timeline Presenter
-        if let timelinePresenter = tabStore.currentPresenter {
-            await viewModel.setupDataSource(presenter: timelinePresenter)
-            os_log("[📔][ProfilePresenterWrapper]TimelineViewModel初始化完成，使用TabStore的presenter", log: .default, type: .debug)
+            availableTabs = createAvailableTabs(user: user, userKey: userKey)
+            FlareLog.debug("📋 [ProfilePresenterWrapper] 创建了\(availableTabs.count)个Tab")
+
+            await createAllTabViewModels()
+
+            if let firstTab = availableTabs.first {
+                selectedTabKey = firstTab.key
+            }
+
+            isInitialized = true
+            FlareLog.debug("✅ [ProfilePresenterWrapper] 初始化完成")
+
+        } catch {
+            FlareLog.error("💥 [ProfilePresenterWrapper] 初始化失败: \(error)")
+        }
+    }
+
+    @MainActor
+    private func switchToTab(_ tabKey: String) async {
+        guard let tabViewModel = tabViewModels[tabKey] else {
+            FlareLog.error("⚠️ [ProfilePresenterWrapper] Tab未找到: \(tabKey)")
+            return
+        }
+
+        FlareLog.debug("🔄 [ProfilePresenterWrapper] 切换到Tab: \(tabKey)")
+
+        currentTabViewModel?.timelineViewModel.pause()
+
+        tabViewModel.timelineViewModel.resume()
+
+        currentTabViewModel = tabViewModel
+
+        FlareLog.debug("✅ [ProfilePresenterWrapper] Tab切换完成: \(tabKey)")
+    }
+
+    @MainActor
+    private func createAllTabViewModels() async {
+        for tab in availableTabs {
+            let timelineViewModel = TimelineViewModel()
+
+            if tab is FLProfileMediaTabItem {
+                let mediaPresenter = createMediaPresenter(for: tab)
+                let timelinePresenter = mediaPresenter.getMediaTimelinePresenter()
+                await timelineViewModel.setupDataSource(presenter: timelinePresenter)
+
+                let tabViewModel = ProfileTabViewModel(
+                    tabKey: tab.key,
+                    tabItem: tab,
+                    timelineViewModel: timelineViewModel,
+                    timelinePresenter: timelinePresenter,
+                    mediaPresenter: mediaPresenter
+                )
+                tabViewModels[tab.key] = tabViewModel
+
+            } else {
+                let timelinePresenter = createTimelinePresenter(for: tab)
+                await timelineViewModel.setupDataSource(presenter: timelinePresenter)
+
+                let tabViewModel = ProfileTabViewModel(
+                    tabKey: tab.key,
+                    tabItem: tab,
+                    timelineViewModel: timelineViewModel,
+                    timelinePresenter: timelinePresenter,
+                    mediaPresenter: nil
+                )
+                tabViewModels[tab.key] = tabViewModel
+            }
+
+            FlareLog.debug("✅ [ProfilePresenterWrapper] 创建TabViewModel: \(tab.key)")
+        }
+    }
+
+    private func createAvailableTabs(user: UiUserV2, userKey: MicroBlogKey?) -> [FLTabItem] {
+        let isGuestMode = user.key is AccountTypeGuest || UserManager.shared.getCurrentUser().0 == nil
+        let isOwnProfile = userKey == nil
+
+        let mediaTab = FLProfileMediaTabItem(
+            metaData: FLTabMetaData(
+                title: .localized(.profileMedia),
+                icon: .mixed(.media, userKey: user.key)
+            ),
+            account: AccountTypeSpecific(accountKey: user.key),
+            userKey: userKey
+        )
+
+        if isGuestMode, userKey != nil {
+            // 访客模式只显示media标签
+            return [mediaTab]
         } else {
-            os_log("[📔][ProfilePresenterWrapper]⚠️ TabStore中没有可用的Timeline Presenter", log: .default, type: .error)
+            var tabs = FLTabSettings.defaultThree(user: user, userKey: userKey)
+
+            if tabs.isEmpty {
+                tabs.append(mediaTab)
+            } else {
+                tabs.insert(mediaTab, at: max(0, tabs.count - 1))
+            }
+
+            if !isOwnProfile {
+                tabs = tabs.filter { !$0.key.contains("likes") }
+            }
+
+            return tabs
         }
     }
 
-    // 新增：更新TimelineViewModel的数据源（当tab切换时调用）
+    private func createTimelinePresenter(for tab: FLTabItem) -> TimelinePresenter {
+        guard let timelineItem = tab as? FLTimelineTabItem else {
+            fatalError("Invalid timeline tab")
+        }
+        return timelineItem.createPresenter()
+    }
+
+    private func createMediaPresenter(for tab: FLTabItem) -> ProfileMediaPresenter {
+        guard let mediaTab = tab as? FLProfileMediaTabItem else {
+            fatalError("Invalid media tab")
+        }
+        return ProfileMediaPresenter(accountType: mediaTab.account, userKey: mediaTab.userKey)
+    }
+
+    private func getUserForInitialization() -> UiUserV2 {
+        let result = UserManager.shared.getCurrentUser()
+        if let user = result.0 {
+            return user
+        } else if userKey != nil {
+            // 使用shared模块的createSampleUser函数
+            return createSampleUser()
+        } else {
+            fatalError("无法获取用户信息")
+        }
+    }
+
     @MainActor
-    func updateTimelineViewModel(with presenter: TimelinePresenter) async {
-        guard let viewModel = timelineViewModel else {
-            os_log("[📔][ProfilePresenterWrapper]⚠️ TimelineViewModel未初始化，无法更新", log: .default, type: .error)
-            return
+    func pauseAllViewModels() {
+        FlareLog.debug("🧹 [ProfilePresenterWrapper] 开始清理所有ViewModel")
+
+        for tabViewModel in tabViewModels.values {
+            tabViewModel.timelineViewModel.pause()
         }
 
-        os_log("[📔][ProfilePresenterWrapper]更新TimelineViewModel数据源", log: .default, type: .debug)
-        await viewModel.setupDataSource(presenter: presenter)
+        // tabViewModels.removeAll()
+        // currentTabViewModel = nil
+        // selectedTabKey = nil
+
+        FlareLog.debug("✅ [ProfilePresenterWrapper] 清理完成")
     }
 
-    // 新增：获取TimelineViewModel（如果已初始化）
-    func getTimelineViewModel() -> TimelineViewModel? {
-        timelineViewModel
+    @MainActor
+    func resumeCurrentViewModel() {
+        currentTabViewModel?.timelineViewModel.resume()
+        FlareLog.debug("▶️ [ProfilePresenterWrapper] 恢复当前ViewModel")
+    }
+
+    @MainActor
+    func refreshCurrentTab() async {
+        if let currentViewModel = currentTabViewModel?.timelineViewModel {
+            await currentViewModel.handleRefresh()
+        }
+    }
+
+    var tabCount: Int { availableTabs.count }
+    var selectedIndex: Int {
+        guard let selectedTabKey else { return 0 }
+        return availableTabs.firstIndex { $0.key == selectedTabKey } ?? 0
     }
 }

@@ -8,7 +8,7 @@ struct WaterfallItemsView: View {
     let hasMore: Bool
     let onError: (FlareError) -> Void
     @Binding var scrolledID: String?
-    let isCurrentTab: Bool
+    let isCurrentAppBarTabSelected: Bool
     let viewModel: TimelineViewModel
     @EnvironmentObject private var timelineState: TimelineExtState
     @Environment(FlareRouter.self) private var router
@@ -119,7 +119,7 @@ struct WaterfallItemsView: View {
         }
         .refreshable {}
         .onChange(of: timelineState.scrollToTopTrigger) { _, _ in
-            guard isCurrentTab else { return }
+            guard isCurrentAppBarTabSelected else { return }
 
             if let firstItem = waterfallItems.first {
                 withAnimation(.easeInOut(duration: 0.5)) {

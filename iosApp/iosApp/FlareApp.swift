@@ -55,6 +55,7 @@ struct FlareApp: SwiftUI.App {
                         }
                         .withFlareTheme()
                         .environment(router)
+                        .errorToast()
 
                 #endif
 

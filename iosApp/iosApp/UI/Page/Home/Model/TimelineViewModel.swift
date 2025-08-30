@@ -35,16 +35,16 @@ class TimelineViewModel {
         return false
     }
 
-    func updateItemOptimistically(itemId: String, actionType: ActionType) {
-        FlareLog.debug("🚀 [TimelineViewModel] 开始更新: itemId=\(itemId), actionType=\(actionType)")
+    func updateItemOptimisticallyWithState(itemId: String, actionType: ActionType, targetState: Bool) {
+        FlareLog.debug("🚀 [TimelineViewModel] 开始状态更新: itemId=\(itemId), actionType=\(actionType), targetState=\(targetState)")
 
         guard case let .loaded(items, hasMore) = timelineState else {
-            FlareLog.warning("⚠️ [TimelineViewModel] 更新失败: timelineState不是loaded状态")
+            FlareLog.warning("⚠️ [TimelineViewModel] 状态更新失败: timelineState不是loaded状态")
             return
         }
 
         guard let index = items.firstIndex(where: { $0.id == itemId }) else {
-            FlareLog.warning("⚠️ [TimelineViewModel] 更新失败: 未找到item \(itemId)")
+            FlareLog.warning("⚠️ [TimelineViewModel] 状态更新失败: 未找到item \(itemId)")
             return
         }
 
@@ -54,22 +54,22 @@ class TimelineViewModel {
         // 记录更新前的状态
         let beforeState = getItemState(item: item, actionType: actionType)
 
-        // 执行更新
+        // 执行精确状态更新
         switch actionType {
         case .like:
-            item.isLiked.toggle()
-            item.likeCount += item.isLiked ? 1 : -1
-//            item.actions = updateActions(item.actions, actionType: ActionType.like, newState: item.isLiked, newCount: item.likeCount)
+            item.isLiked = targetState
+            // 简化计数逻辑：直接根据targetState调整
+            item.likeCount += targetState ? 1 : -1
 
         case .retweet:
-            item.isRetweeted.toggle()
-            item.retweetCount += item.isRetweeted ? 1 : -1
-//            item.actions = updateActions(item.actions, actionType: ActionType.retweet, newState: item.isRetweeted, newCount: item.retweetCount)
+            item.isRetweeted = targetState
+            // 简化计数逻辑：直接根据targetState调整
+            item.retweetCount += targetState ? 1 : -1
 
         case .bookmark:
-            item.isBookmarked.toggle()
-            item.bookmarkCount += item.isBookmarked ? 1 : -1
-//            item.actions = updateActions(item.actions, actionType: ActionType.bookmark, newState: item.isBookmarked, newCount: item.bookmarkCount)
+            item.isBookmarked = targetState
+            // 简化计数逻辑：直接根据targetState调整
+            item.bookmarkCount += targetState ? 1 : -1
         }
 
         // 更新数组
@@ -84,8 +84,9 @@ class TimelineViewModel {
         // 记录更新后的状态
         let afterState = getItemState(item: item, actionType: actionType)
 
-        FlareLog.debug("✅ [TimelineViewModel] 更新完成: \(actionType) for \(itemId)")
+        FlareLog.debug("✅ [TimelineViewModel] 状态更新完成: \(actionType) for \(itemId)")
         FlareLog.debug("📊 [TimelineViewModel] 状态变化: \(beforeState) → \(afterState)")
+        FlareLog.debug("🎯 [TimelineViewModel] 目标状态已设置: \(targetState)")
         FlareLog.debug("🔧 [TimelineViewModel] Actions 数组已同步更新")
     }
 
@@ -149,7 +150,9 @@ class TimelineViewModel {
 //                    continue
 //                }
 
-                FlareLog.debug("📦 [Timeline ViewModel] Received KMP state update - type: \(type(of: state.listState))")
+                let presenterInfo = String(describing: type(of: presenter))
+                let presenterAddress = String(format: "%p", unsafeBitCast(presenter, to: Int.self))
+                FlareLog.debug("📦 [Timeline ViewModel] Received KMP state update - type: \(type(of: state.listState)), presenter: \(presenterInfo)@\(presenterAddress)")
 
                 if let successState = state.listState as? PagingStateSuccess<UiTimeline> {
                     FlareLog.debug("📊 [Timeline ViewModel] KMP state details - isRefreshing: \(successState.isRefreshing), itemCount: \(successState.itemCount)")
@@ -178,6 +181,14 @@ class TimelineViewModel {
 
                     if newItemsCount != oldItemsCount {
                         FlareLog.debug("📊 [Timeline ViewModel] Items数量变化详情 - 新增: \(newItemsCount - oldItemsCount)")
+
+                        // 记录前几个item的详细信息用于调试
+                        if case let .loaded(items, _) = flareState {
+                            let firstFewItems = Array(items.prefix(3))
+                            for (index, item) in firstFewItems.enumerated() {
+                                FlareLog.debug("📝 [Timeline ViewModel] Item[\(index)]: id=\(item.id), content=\(String(item.content.raw.prefix(50)))...")
+                            }
+                        }
                     }
                 }
             }
@@ -187,10 +198,15 @@ class TimelineViewModel {
     }
 
     func setupDataSource(presenter: PresenterBase<TimelineState>) async {
-        let timestamp = Date().timeIntervalSince1970
         let hadPreviousTask = dataSourceTask != nil
+        let presenterType = String(describing: type(of: presenter))
+        let presenterAddress = String(format: "%p", unsafeBitCast(presenter, to: Int.self))
 
-        FlareLog.debug("🔧 [Timeline ViewModel] setupDataSource (generic) started - hadPreviousTask: \(hadPreviousTask), timestamp: \(timestamp)")
+        FlareLog.debug("🔧 [Timeline ViewModel] setupDataSource (generic) started - hadPreviousTask: \(hadPreviousTask), presenterType: \(presenterType), presenterAddress: \(presenterAddress) ")
+
+        // 记录当前状态
+        let currentItemsCount = timelineState.itemCount
+        FlareLog.debug("📊 [Timeline ViewModel] Current state before setup - timelineState: \(timelineState), items count: \(currentItemsCount), hasMore: \(hasMore)")
 
         dataSourceTask?.cancel()
         if hadPreviousTask {
@@ -198,9 +214,20 @@ class TimelineViewModel {
         }
 
         if self.presenter === presenter {
-            FlareLog.debug("♻️ [Timeline ViewModel] Using existing presenter")
+            FlareLog.debug("♻️ [Timeline ViewModel] Using existing presenter - same instance")
         } else {
-            FlareLog.debug("🆕 [Timeline ViewModel] Setting new presenter")
+            let oldPresenterType = self.presenter != nil ? String(describing: type(of: self.presenter!)) : "nil"
+            let oldPresenterAddress = self.presenter != nil ? String(format: "%p", unsafeBitCast(self.presenter!, to: Int.self)) : "nil"
+            FlareLog.debug("🆕 [Timeline ViewModel] Setting new presenter - old: \(oldPresenterType)@\(oldPresenterAddress), new: \(presenterType)@\(presenterAddress)")
+
+            // 清除之前的状态
+            let currentItemsCount = timelineState.itemCount
+            FlareLog.debug("🧹 [Timeline ViewModel] Clearing previous state - items: \(currentItemsCount), hasMore: \(hasMore)")
+            await MainActor.run {
+                self.timelineState = .loading
+            }
+            FlareLog.debug("✨ [Timeline ViewModel] State cleared - new items count: \(timelineState.itemCount)")
+
             self.presenter = presenter
         }
 
@@ -213,8 +240,7 @@ class TimelineViewModel {
     }
 
     func setupDataSource(for tab: FLTabItem, using store: AppBarTabSettingStore) async {
-        let timestamp = Date().timeIntervalSince1970
-        FlareLog.debug("🔧 [Timeline ViewModel] setupDataSource (tab) started - tab: \(tab.key), timestamp: \(timestamp)")
+        FlareLog.debug("🔧 [Timeline ViewModel] setupDataSource (tab) started - tab: \(tab.key)")
 
         FlareLog.debug("� [Timeline ViewModel] Getting cached presenter for tab: \(tab.key)")
 
@@ -229,14 +255,13 @@ class TimelineViewModel {
     }
 
     func handleRefresh() async {
-        let timestamp = Date().timeIntervalSince1970
-        FlareLog.debug("🔄 [Timeline ViewModel] handleRefresh started - isLoadingMore: \(isLoadingMore), presenter: \(presenter != nil), timestamp: \(timestamp)")
+        FlareLog.debug("🔄 [Timeline ViewModel] handleRefresh started - isLoadingMore: \(isLoadingMore), presenter: \(presenter != nil) ")
 
         stateConverter.reset()
         FlareLog.debug("🔄 [Timeline ViewModel] State converter reset completed")
 
         guard let presenter else {
-            FlareLog.warning("⚠️ [Timeline ViewModel] handleRefresh failed - no presenter available, timestamp: \(timestamp)")
+            FlareLog.warning("⚠️ [Timeline ViewModel] handleRefresh failed - no presenter available ")
             return
         }
 
@@ -250,12 +275,10 @@ class TimelineViewModel {
             }.value
 
             if refreshResult {
-                let completionTimestamp = Date().timeIntervalSince1970
-                FlareLog.debug("✅ [Timeline ViewModel] handleRefresh completed successfully - timestamp: \(completionTimestamp)")
+                FlareLog.debug("✅ [Timeline ViewModel] handleRefresh completed successfully  ")
             }
         } catch {
-            let errorTimestamp = Date().timeIntervalSince1970
-            FlareLog.error("💥 [Timeline ViewModel] handleRefresh failed - error: \(error), timestamp: \(errorTimestamp)")
+            FlareLog.error("💥 [Timeline ViewModel] handleRefresh failed - error: \(error), ")
 
             let flareError = await Task.detached(priority: .utility) {
                 FlareError.from(error)
@@ -296,16 +319,15 @@ class TimelineViewModel {
     }
 
     func handleLoadMore(scrollToId: String) async {
-        let timestamp = Date().timeIntervalSince1970
-        FlareLog.debug("📄 [Timeline ViewModel] handleLoadMore started - isLoadingMore: \(isLoadingMore), hasPresenter: \(presenter != nil), timestamp: \(timestamp)")
+        FlareLog.debug("📄 [Timeline ViewModel] handleLoadMore started - isLoadingMore: \(isLoadingMore), hasPresenter: \(presenter != nil) ")
 
         guard let presenter else {
-            FlareLog.warning("⚠️ [Timeline ViewModel] handleLoadMore failed - no presenter available, timestamp: \(timestamp)")
+            FlareLog.warning("⚠️ [Timeline ViewModel] handleLoadMore failed - no presenter available ")
             return
         }
 
         guard !isLoadingMore else {
-            FlareLog.debug("⏸️ [Timeline ViewModel] handleLoadMore skipped - already loading, timestamp: \(timestamp)")
+            FlareLog.debug("⏸️ [Timeline ViewModel] handleLoadMore skipped - already loading ")
             return
         }
 
@@ -314,7 +336,7 @@ class TimelineViewModel {
 //        isLoadMoreInProgress = true
         FlareLog
             .debug(
-                "🔄 [Timeline ViewModel] isLoadingMore set to true, timestamp: \(timestamp),scrollToId: \(scrollToId)"
+                "🔄 [Timeline ViewModel] isLoadingMore set to true ,scrollToId: \(scrollToId)"
             )
 
 //        let topVisibleItem = visibleItems.first
@@ -322,16 +344,14 @@ class TimelineViewModel {
 
         defer {
             isLoadingMore = false
-            let deferTimestamp = Date().timeIntervalSince1970
-            FlareLog.debug("✅ [Timeline ViewModel] isLoadingMore reset to false, timestamp: \(deferTimestamp)")
+            FlareLog.debug("✅ [Timeline ViewModel] isLoadingMore reset to false ")
         }
 
         do {
             FlareLog.debug("🚀 [Timeline ViewModel] Starting loadMore operation")
             try await presenter.models.value.loadMore()
 
-            let completionTimestamp = Date().timeIntervalSince1970
-            FlareLog.debug("✅ [Timeline ViewModel] handleLoadMore completed successfully, timestamp: \(completionTimestamp)")
+            FlareLog.debug("✅ [Timeline ViewModel] handleLoadMore completed successfully ")
 
 //            if let topItem = topVisibleItem,
 //               visibleItems.contains(where: { $0.id == topItem.id })
@@ -344,8 +364,7 @@ class TimelineViewModel {
 //                }
 //            }
         } catch {
-            let errorTimestamp = Date().timeIntervalSince1970
-            FlareLog.error("💥 [Timeline ViewModel] handleLoadMore failed - error: \(error), timestamp: \(errorTimestamp)")
+            FlareLog.error("💥 [Timeline ViewModel] handleLoadMore failed - error: \(error) ")
         }
     }
 
@@ -401,19 +420,60 @@ class TimelineViewModel {
 //            }
 //        }
 //    }
-}
 
-struct TimelineLoadingView: View {
-    var body: some View {
-        VStack(spacing: 16) {
-            ProgressView()
-                .scaleEffect(1.2)
-            Text("Loading Timeline...")
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity, minHeight: 200)
-    }
+//     func updateItemOptimistically(itemId: String, actionType: ActionType) {
+//         FlareLog.debug("🚀 [TimelineViewModel] 开始更新: itemId=\(itemId), actionType=\(actionType)")
+
+//         guard case let .loaded(items, hasMore) = timelineState else {
+//             FlareLog.warning("⚠️ [TimelineViewModel] 更新失败: timelineState不是loaded状态")
+//             return
+//         }
+
+//         guard let index = items.firstIndex(where: { $0.id == itemId }) else {
+//             FlareLog.warning("⚠️ [TimelineViewModel] 更新失败: 未找到item \(itemId)")
+//             return
+//         }
+
+//         var updatedItems = items
+//         var item = updatedItems[index]
+
+//         // 记录更新前的状态
+//         let beforeState = getItemState(item: item, actionType: actionType)
+
+//         // 执行更新
+//         switch actionType {
+//         case .like:
+//             item.isLiked.toggle()
+//             item.likeCount += item.isLiked ? 1 : -1
+    // //            item.actions = updateActions(item.actions, actionType: ActionType.like, newState: item.isLiked, newCount: item.likeCount)
+
+//         case .retweet:
+//             item.isRetweeted.toggle()
+//             item.retweetCount += item.isRetweeted ? 1 : -1
+    // //            item.actions = updateActions(item.actions, actionType: ActionType.retweet, newState: item.isRetweeted, newCount: item.retweetCount)
+
+//         case .bookmark:
+//             item.isBookmarked.toggle()
+//             item.bookmarkCount += item.isBookmarked ? 1 : -1
+    // //            item.actions = updateActions(item.actions, actionType: ActionType.bookmark, newState: item.isBookmarked, newCount: item.bookmarkCount)
+//         }
+
+//         // 更新数组
+//         updatedItems[index] = item
+
+//         // 更新timelineState
+//         timelineState = .loaded(items: updatedItems, hasMore: hasMore)
+
+//         // 更新 PagingStateConverter
+//         stateConverter.syncUpdateItem(itemId: itemId, updatedItem: item)
+
+//         // 记录更新后的状态
+//         let afterState = getItemState(item: item, actionType: actionType)
+
+//         FlareLog.debug("✅ [TimelineViewModel] 更新完成: \(actionType) for \(itemId)")
+//         FlareLog.debug("📊 [TimelineViewModel] 状态变化: \(beforeState) → \(afterState)")
+//         FlareLog.debug("🔧 [TimelineViewModel] Actions 数组已同步更新")
+//     }
 }
 
 func createSampleTimelineItem() -> TimelineItem {

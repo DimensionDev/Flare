@@ -4,7 +4,6 @@ import os.log
 import shared
 import SwiftUI
 
-// user profile 入口
 struct ProfileWithUserNameScreen: View {
     @State private var presenter: ProfileWithUserNameAndHostPresenter
     private let accountType: AccountType
@@ -28,7 +27,7 @@ struct ProfileWithUserNameScreen: View {
                         }
                 case .loading:
                     List {
-                        CommonProfileHeader(
+                        ProfileHeaderSwiftUIViewV2(
                             userInfo: ProfileUserInfo(
                                 profile: createSampleUser(),
                                 relation: nil,
@@ -38,8 +37,8 @@ struct ProfileWithUserNameScreen: View {
                                 fields: [:],
                                 canSendMessage: false
                             ),
-                            state: nil,
-                            onFollowClick: { _ in }
+                            scrollProxy: nil,
+                            presenter: nil
                         )
                         .redacted(reason: .placeholder)
                         .listRowSeparator(.hidden)
@@ -57,7 +56,7 @@ struct ProfileWithUserNameScreen: View {
 //
 //                    let loadedUserInfo = ProfileUserInfo.from(state: state as! ProfileNewState)
 
-                    ProfileTabScreenUikit(
+                    ProfileSwiftUIViewV2(
                         accountType: accountType,
                         userKey: data.data.key
                     )

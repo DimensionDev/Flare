@@ -38,6 +38,9 @@ enum FlareDestination: Identifiable, Hashable {
 
     case podcastSheet(accountType: AccountType, podcastId: String)
 
+    case following(accountType: AccountType, userKey: MicroBlogKey, userName: String? = nil)
+    case followers(accountType: AccountType, userKey: MicroBlogKey, userName: String? = nil)
+
     enum CallbackType: Hashable {
         case mastodon
         case misskey
@@ -99,6 +102,10 @@ enum FlareDestination: Identifiable, Hashable {
             "podcastSheet_\(String(describing: accountType))_\(podcastId)"
         case let .instanceScreen(host, platformType):
             "instanceScreen_\(host)_\(platformType.name)"
+        case let .following(accountType, userKey, userName):
+            "following_\(String(describing: accountType))_\(userKey.description)_\(userName ?? "")"
+        case let .followers(accountType, userKey, userName):
+            "followers_\(String(describing: accountType))_\(userKey.description)_\(userName ?? "")"
         }
     }
 

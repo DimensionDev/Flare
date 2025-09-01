@@ -624,15 +624,18 @@ internal fun SettingsScreen(
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.AngleRight,
                             contentDescription = null,
+                            modifier = Modifier.size(12.dp),
                         )
                     },
                     caption = {
                         Text(stringResource(Res.string.settings_local_history_description))
                     },
+                    icon = null,
                 )
             }
             CardExpanderItem(
                 onClick = toStorage,
+                icon = null,
                 heading = {
                     Text(stringResource(Res.string.settings_storage_title))
                 },
@@ -640,6 +643,7 @@ internal fun SettingsScreen(
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.AngleRight,
                         contentDescription = null,
+                        modifier = Modifier.size(12.dp),
                     )
                 },
                 caption = {

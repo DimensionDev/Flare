@@ -31,18 +31,22 @@ public class ProfileMediaPresenter(
     private val userKey: MicroBlogKey?,
 ) : PresenterBase<ProfileMediaState>(),
     KoinComponent {
+    private val mediaTimelinePresenter = MediaTimelinePresenter(accountType, userKey)
+
     @Composable
     override fun body(): ProfileMediaState {
         val scope = rememberCoroutineScope()
         val state =
             remember(accountType, userKey) {
-                MediaTimelinePresenter(accountType, userKey).createTransformedPager(scope)
+                mediaTimelinePresenter.createTransformedPager(scope)
             }.collectAsLazyPagingItems()
                 .toPagingState()
         return object : ProfileMediaState {
             override val mediaState = state
         }
     }
+
+    public fun getMediaTimelinePresenter(): TimelinePresenter = mediaTimelinePresenter
 }
 
 private class MediaTimelinePresenter(

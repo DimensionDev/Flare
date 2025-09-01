@@ -5,7 +5,7 @@ enum FloatingButtonConfig {
 
     static let screenPadding: CGFloat = 20
 
-    static let bottomExtraMargin: CGFloat = 100
+    static let bottomExtraMargin: CGFloat = 120
 
     static let defaultPositionOffset = CGSize(width: 80, height: 250)
 

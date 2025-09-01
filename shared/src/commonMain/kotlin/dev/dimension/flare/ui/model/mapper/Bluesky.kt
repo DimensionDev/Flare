@@ -458,6 +458,14 @@ internal fun PostView.renderStatus(
                                         repostUri = viewer?.repost?.atUri,
                                     )
                                 },
+                                onClickedWithState = { shouldRetweet ->
+                                    event.reblogWithResult(
+                                        statusKey = statusKey,
+                                        cid = cid.cid,
+                                        uri = uri.atUri,
+                                        repostUri = if (shouldRetweet) null else viewer?.repost?.atUri,
+                                    )
+                                },
                             ),
                             StatusAction.Item.Quote(
                                 count = 0,
@@ -481,6 +489,14 @@ internal fun PostView.renderStatus(
                             cid = cid.cid,
                             uri = uri.atUri,
                             likedUri = viewer?.like?.atUri,
+                        )
+                    },
+                    onClickedWithState = { shouldLike ->
+                        event.likeWithResult(
+                            statusKey = statusKey,
+                            cid = cid.cid,
+                            uri = uri.atUri,
+                            likedUri = if (shouldLike) null else viewer?.like?.atUri,
                         )
                     },
                 ),
@@ -942,6 +958,14 @@ private fun render(
                                     cid = record.value.cid.cid,
                                     uri = record.value.uri.atUri,
                                     likedUri = null,
+                                )
+                            },
+                            onClickedWithState = { shouldLike ->
+                                event.likeWithResult(
+                                    statusKey = statusKey,
+                                    cid = record.value.cid.cid,
+                                    uri = record.value.uri.atUri,
+                                    likedUri = if (shouldLike) null else null,
                                 )
                             },
                         ),

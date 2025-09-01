@@ -84,6 +84,7 @@ import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.StatusActionResult
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
 import dev.dimension.flare.data.datasource.microblog.memoryPager
@@ -125,6 +126,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.toDeprecatedInstant
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -712,6 +714,143 @@ internal class BlueskyDataSource(
                 rkey = RKey(likedUri.substringAfterLast('/')),
             ),
         )
+
+    override fun likeWithResult(
+        statusKey: MicroBlogKey,
+        cid: String,
+        uri: String,
+        likedUri: String?,
+    ): StatusActionResult =
+        runBlocking {
+            try {
+                if (likedUri != null) {
+                    deleteLikeRecord(likedUri)
+
+                    updateLikeStatusWithResult(statusKey, false, null)
+                } else {
+                    val result = createLikeRecord(cid, uri)
+
+                    updateLikeStatusWithResult(statusKey, true, result.uri.atUri)
+                }
+
+                StatusActionResult.success()
+            } catch (e: Exception) {
+                StatusActionResult.failure(e)
+            }
+        }
+
+    override fun reblogWithResult(
+        statusKey: MicroBlogKey,
+        cid: String,
+        uri: String,
+        repostUri: String?,
+    ): StatusActionResult =
+        runBlocking {
+            try {
+                if (repostUri != null) {
+                    service.deleteRecord(
+                        DeleteRecordRequest(
+                            repo = Did(did = accountKey.id),
+                            collection = Nsid("app.bsky.feed.repost"),
+                            rkey = RKey(repostUri.substringAfterLast('/')),
+                        ),
+                    )
+
+                    updateReblogStatusWithResult(statusKey, false, null)
+                } else {
+                    val result =
+                        service
+                            .createRecord(
+                                CreateRecordRequest(
+                                    repo = Did(did = accountKey.id),
+                                    collection = Nsid("app.bsky.feed.repost"),
+                                    record =
+                                        app.bsky.feed
+                                            .Repost(
+                                                subject =
+                                                    StrongRef(
+                                                        uri = AtUri(uri),
+                                                        cid = Cid(cid),
+                                                    ),
+                                                createdAt = Clock.System.now().toDeprecatedInstant(),
+                                            ).bskyJson(),
+                                ),
+                            ).requireResponse()
+
+                    updateReblogStatusWithResult(statusKey, true, result.uri.atUri)
+                }
+
+                StatusActionResult.success()
+            } catch (e: Exception) {
+                StatusActionResult.failure(e)
+            }
+        }
+
+    private suspend fun updateLikeStatusWithResult(
+        statusKey: MicroBlogKey,
+        liked: Boolean,
+        likedUri: String?,
+    ) {
+        updateStatusUseCase<StatusContent.Bluesky>(
+            statusKey = statusKey,
+            accountKey = accountKey,
+            cacheDatabase = database,
+        ) { content ->
+            val newUri = likedUri?.let { AtUri(it) }
+            val count =
+                if (liked) {
+                    (content.data.likeCount ?: 0) + 1
+                } else {
+                    (content.data.likeCount ?: 1) - 1
+                }.coerceAtLeast(0)
+
+            content.copy(
+                data =
+                    content.data.copy(
+                        viewer =
+                            content.data.viewer?.copy(
+                                like = newUri,
+                            ) ?: ViewerState(
+                                like = newUri,
+                            ),
+                        likeCount = count,
+                    ),
+            )
+        }
+    }
+
+    private suspend fun updateReblogStatusWithResult(
+        statusKey: MicroBlogKey,
+        reblogged: Boolean,
+        repostUri: String?,
+    ) {
+        updateStatusUseCase<StatusContent.Bluesky>(
+            statusKey = statusKey,
+            accountKey = accountKey,
+            cacheDatabase = database,
+        ) { content ->
+            val newUri = repostUri?.let { AtUri(it) }
+            val count =
+                if (reblogged) {
+                    (content.data.repostCount ?: 0) + 1
+                } else {
+                    (content.data.repostCount ?: 1) - 1
+                }.coerceAtLeast(0)
+
+            content.copy(
+                data =
+                    content.data.copy(
+                        viewer =
+                            content.data.viewer?.copy(
+                                repost = newUri,
+                            ) ?: ViewerState(
+                                repost = newUri,
+                            ),
+                        repostCount = count,
+                    ),
+            )
+        }
+    }
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
         tryRun {

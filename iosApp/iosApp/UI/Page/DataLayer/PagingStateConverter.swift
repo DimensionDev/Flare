@@ -467,6 +467,7 @@ class PagingStateConverter {
     }
 
     private func updateExistingItems(with updatedItems: [TimelineItem]) {
+        return
         for updatedItem in updatedItems {
             if let existingIndex = convertedItems.firstIndex(where: { $0.id == updatedItem.id }) {
                 convertedItems[existingIndex] = updatedItem

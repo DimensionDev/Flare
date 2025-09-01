@@ -10,28 +10,26 @@ struct HomeTabViewContentViewSwiftUI: View {
     var body: some View {
         let displayType: TimelineDisplayType = appSettings.appearanceSettings.timelineDisplayType
 
-        // 添加selectedTab变化监控
         let _ = FlareLog.debug("🔍 [HomeTabView] Current selectedTab: '\(selectedTab)'")
 
         TabView(selection: $selectedTab) {
             ForEach(tabStore.availableAppBarTabsItems, id: \.key) { tab in
-                // 添加详细的isCurrentTab计算日志
-                let isCurrentTabValue = selectedTab == tab.key
-                let _ = FlareLog.debug("🔍 [HomeTabView] Tab '\(tab.key)': selectedTab==tab.key -> \(isCurrentTabValue)")
+                let isCurrentAppBarTabSelected = selectedTab == tab.key
+                let _ = FlareLog.debug("🔍 [HomeTabView] Tab '\(tab.key)': selectedTab==tab.key -> \(isCurrentAppBarTabSelected)")
 
                 switch displayType {
                 case .timeline:
                     TimelineViewSwiftUIV4(
                         tab: tab,
                         store: tabStore,
-                        isCurrentTab: isCurrentTabValue
+                        isCurrentAppBarTabSelected: isCurrentAppBarTabSelected
                     ).tag(tab.key)
 
                 case .mediaWaterfall, .mediaCardWaterfall:
                     WaterfallView(
                         tab: tab,
                         store: tabStore,
-                        isCurrentTab: isCurrentTabValue,
+                        isCurrentAppBarTabSelected: isCurrentAppBarTabSelected,
                         displayType: displayType
                     ).tag(tab.key)
                 }

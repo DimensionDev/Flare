@@ -1,10 +1,6 @@
-import Generated
 import Kingfisher
-import os
 import shared
 import SwiftUI
-
-private let logger = Logger(subsystem: "com.flare.app", category: "AllFeedsView")
 
 struct AllFeedsView: View {
     @State private var presenter: PinnableTimelineTabPresenter
@@ -32,7 +28,7 @@ struct AllFeedsView: View {
             let platformTypeString = String(describing: user.platformType).lowercased()
             if platformTypeString == "bluesky" {
                 missingFeedData = false
-                logger.debug("current user platform: \(platformTypeString), supports Feeds")
+                FlareLog.debug("[AllFeedsView] current user platform: \(platformTypeString), supports Feeds")
             }
         }
         _isMissingFeedData = State(initialValue: missingFeedData)

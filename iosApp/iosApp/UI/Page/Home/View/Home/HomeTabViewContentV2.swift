@@ -1,6 +1,5 @@
 import Awesome
 import FontAwesomeSwiftUI
-import Generated
 import os
 import os.log
 import shared
@@ -89,7 +88,7 @@ struct HomeTabViewContentV2: View {
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: FlareHomeTabs.profile) {
                         FlareTabItem(tabType: .profile) {
-                            ProfileTabScreenUikit(
+                            ProfileSwiftUIViewV2(
                                 accountType: accountType,
                                 userKey: nil
                             )

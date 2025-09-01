@@ -37,6 +37,7 @@ import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.StatusActionResult
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
 import dev.dimension.flare.data.datasource.microblog.memoryPager
@@ -110,6 +111,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.io.encoding.Base64
@@ -762,6 +764,39 @@ internal class XQTDataSource(
         }
     }
 
+    override fun likeWithResult(
+        statusKey: MicroBlogKey,
+        shouldLike: Boolean,
+    ): StatusActionResult =
+        runBlocking {
+            try {
+                if (shouldLike) {
+                    service.postFavoriteTweet(
+                        postFavoriteTweetRequest =
+                            PostFavoriteTweetRequest(
+                                variables =
+                                    PostCreateRetweetRequestVariables(
+                                        tweetId = statusKey.id,
+                                    ),
+                            ),
+                    )
+                } else {
+                    service.postUnfavoriteTweet(
+                        postUnfavoriteTweetRequest =
+                            PostUnfavoriteTweetRequest(
+                                variables = PostCreateRetweetRequestVariables(tweetId = statusKey.id),
+                            ),
+                    )
+                }
+
+                updateLikeStatus(statusKey, shouldLike)
+
+                StatusActionResult.success()
+            } catch (e: Exception) {
+                StatusActionResult.failure(e)
+            }
+        }
+
     override fun retweet(
         statusKey: MicroBlogKey,
         retweeted: Boolean,
@@ -928,6 +963,166 @@ internal class XQTDataSource(
             }.onSuccess {
             }
         }
+    }
+
+    override fun bookmarkWithResult(
+        statusKey: MicroBlogKey,
+        shouldBookmark: Boolean,
+    ): StatusActionResult =
+        runBlocking {
+            try {
+                if (shouldBookmark) {
+                    service.postCreateBookmark(
+                        postCreateBookmarkRequest =
+                            CreateBookmarkRequest(
+                                variables =
+                                    CreateBookmarkRequestVariables(
+                                        tweetId = statusKey.id,
+                                    ),
+                            ),
+                    )
+                } else {
+                    service.postDeleteBookmark(
+                        postDeleteBookmarkRequest =
+                            DeleteBookmarkRequest(
+                                variables =
+                                    DeleteBookmarkRequestVariables(
+                                        tweetId = statusKey.id,
+                                    ),
+                            ),
+                    )
+                }
+
+                updateBookmarkStatus(statusKey, shouldBookmark)
+
+                StatusActionResult.success()
+            } catch (e: Exception) {
+                StatusActionResult.failure(e)
+            }
+        }
+
+    override fun retweetWithResult(
+        statusKey: MicroBlogKey,
+        shouldRetweet: Boolean,
+    ): StatusActionResult =
+        runBlocking {
+            try {
+                if (shouldRetweet) {
+                    service.postCreateRetweet(
+                        postCreateRetweetRequest =
+                            PostCreateRetweetRequest(
+                                variables =
+                                    PostCreateRetweetRequestVariables(
+                                        tweetId = statusKey.id,
+                                    ),
+                            ),
+                    )
+                } else {
+                    service.postDeleteRetweet(
+                        postDeleteRetweetRequest =
+                            PostDeleteRetweetRequest(
+                                variables =
+                                    PostDeleteRetweetRequestVariables(
+                                        sourceTweetId = statusKey.id,
+                                    ),
+                            ),
+                    )
+                }
+
+                updateRetweetStatus(statusKey, shouldRetweet)
+
+                StatusActionResult.success()
+            } catch (e: Exception) {
+                StatusActionResult.failure(e)
+            }
+        }
+
+    private suspend fun updateLikeStatus(
+        statusKey: MicroBlogKey,
+        favorited: Boolean,
+    ) {
+        updateStatusUseCase<StatusContent.XQT>(
+            statusKey = statusKey,
+            accountKey = accountKey,
+            cacheDatabase = database,
+            update = {
+                it.copy(
+                    data =
+                        it.data.copy(
+                            legacy =
+                                it.data.legacy?.copy(
+                                    favorited = favorited,
+                                    favoriteCount =
+                                        if (favorited) {
+                                            it.data.legacy.favoriteCount
+                                                .plus(1)
+                                        } else {
+                                            it.data.legacy.favoriteCount
+                                                .minus(1)
+                                        },
+                                ),
+                        ),
+                )
+            },
+        )
+    }
+
+    private suspend fun updateBookmarkStatus(
+        statusKey: MicroBlogKey,
+        bookmarked: Boolean,
+    ) {
+        updateStatusUseCase<StatusContent.XQT>(
+            statusKey = statusKey,
+            accountKey = accountKey,
+            cacheDatabase = database,
+            update = {
+                it.copy(
+                    data =
+                        it.data.copy(
+                            legacy =
+                                it.data.legacy?.copy(
+                                    bookmarked = bookmarked,
+                                    bookmarkCount =
+                                        if (bookmarked) {
+                                            (it.data.legacy.bookmarkCount ?: 0) + 1
+                                        } else {
+                                            maxOf(0, (it.data.legacy.bookmarkCount ?: 1) - 1)
+                                        },
+                                ),
+                        ),
+                )
+            },
+        )
+    }
+
+    private suspend fun updateRetweetStatus(
+        statusKey: MicroBlogKey,
+        retweeted: Boolean,
+    ) {
+        updateStatusUseCase<StatusContent.XQT>(
+            statusKey = statusKey,
+            accountKey = accountKey,
+            cacheDatabase = database,
+            update = {
+                it.copy(
+                    data =
+                        it.data.copy(
+                            legacy =
+                                it.data.legacy?.copy(
+                                    retweeted = retweeted,
+                                    retweetCount =
+                                        if (retweeted) {
+                                            it.data.legacy.retweetCount
+                                                .plus(1)
+                                        } else {
+                                            it.data.legacy.retweetCount
+                                                .minus(1)
+                                        },
+                                ),
+                        ),
+                )
+            },
+        )
     }
 
     suspend fun follow(userKey: MicroBlogKey) {

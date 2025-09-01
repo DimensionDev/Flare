@@ -22,8 +22,7 @@ tasks.register<Exec>("compileWebviewBridgeArm64") {
         "-configuration", "Release",
     )
 
-    // copy buildOutput to targetLib
-    if (isMac) {
+    doLast {
         Files.copy(
             buildOutput.asFile.toPath(),
             targetLib.toPath(),

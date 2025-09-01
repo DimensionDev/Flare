@@ -81,16 +81,50 @@ fun Project.registerExtractFromJarTask(
     }
 }
 
-val nativeDestDirPath = (findProperty("nativeDestDir") as String?) ?: "resources/macos-arm64"
-val nativeDestDir = file(nativeDestDirPath)
+val currentArch = System.getProperty("os.arch")
+val isArm = currentArch == "aarch64" || currentArch == "arm64"
+val isX64 = currentArch == "x86_64" || currentArch == "amd64"
+val currentOs =
+    org.gradle.internal.os.OperatingSystem
+        .current()
 
+val resourceDirName =
+    when {
+        currentOs.isMacOsX && isArm -> "macos-arm64"
+        currentOs.isMacOsX && isX64 -> "macos-x64"
+        currentOs.isLinux && isArm -> "linux-arm64"
+        currentOs.isLinux && isX64 -> "linux-x64"
+        currentOs.isWindows && isX64 -> "windows-x64"
+        currentOs.isWindows && isArm -> "windows-arm64"
+        else -> throw GradleException("Unsupported OS or architecture: ${currentOs.name} $currentArch")
+    }
+
+val nativeDestDirPath = "resources/$resourceDirName"
+val nativeDestDir = file(nativeDestDirPath)
 val sqliteVersion = (findProperty("sqliteVersion") as String?) ?: "2.5.2"
-val sqliteOsArch = (findProperty("sqliteOsArch") as String?) ?: "osx_arm64"
+val sqliteOsArch =
+    when {
+        currentOs.isMacOsX && isArm -> "osx_arm64"
+        currentOs.isMacOsX && isX64 -> "osx_x64"
+        currentOs.isLinux && isArm -> "linux_arm64"
+        currentOs.isLinux && isX64 -> "linux_x64"
+        currentOs.isWindows && isX64 -> "windows_x64"
+        currentOs.isWindows && isArm -> "windows_arm64"
+        else -> throw GradleException("Unsupported OS or architecture: ${currentOs.name} $currentArch")
+    }
+
+val sqliteFileName =
+    when {
+        currentOs.isMacOsX -> "libsqliteJni.dylib"
+        currentOs.isLinux -> "libsqliteJni.so"
+        currentOs.isWindows -> "sqliteJni.dll"
+        else -> throw GradleException("Unsupported OS: ${currentOs.name}")
+    }
 
 val sqliteJarName = "sqlite-bundled-jvm-$sqliteVersion.jar"
 val sqliteJarUrl =
     "https://dl.google.com/android/maven2/androidx/sqlite/sqlite-bundled-jvm/$sqliteVersion/$sqliteJarName"
-val sqliteEntry = "natives/$sqliteOsArch/libsqliteJni.dylib"
+val sqliteEntry = "natives/$sqliteOsArch/$sqliteFileName"
 
 val sqliteTask =
     registerExtractFromJarTask(
@@ -99,14 +133,34 @@ val sqliteTask =
         cacheSubDir = "sqliteJni/$sqliteVersion",
         jarFileName = sqliteJarName,
         entryPathInJar = sqliteEntry,
-        destFile = nativeDestDir.resolve("libsqliteJni.dylib"),
+        destFile = nativeDestDir.resolve(sqliteFileName),
     )
 
 val cmpVersion = (findProperty("composeMediaPlayerVersion") as String?) ?: "0.8.1"
 val cmpJarName = "composemediaplayer-jvm-$cmpVersion.jar"
 val cmpJarUrl =
     "https://repo1.maven.org/maven2/io/github/kdroidfilter/composemediaplayer-jvm/$cmpVersion/$cmpJarName"
-val cmpEntry = "darwin-aarch64/libNativeVideoPlayer.dylib"
+
+val cmpDirName =
+    when {
+        currentOs.isMacOsX && isArm -> "darwin-aarch64"
+        currentOs.isMacOsX && isX64 -> "darwin-x86-64"
+        currentOs.isLinux && isArm -> "linux-aarch64"
+        currentOs.isLinux && isX64 -> "linux-x86-64"
+        currentOs.isWindows && isX64 -> "win32-x86-64"
+        currentOs.isWindows && isArm -> "win32-arm64"
+        else -> throw GradleException("Unsupported OS or architecture: ${currentOs.name} $currentArch")
+    }
+
+val cmpLibName =
+    when {
+        currentOs.isMacOsX -> "libNativeVideoPlayer.dylib"
+        currentOs.isLinux -> "libNativeVideoPlayer.so"
+        currentOs.isWindows -> "NativeVideoPlayer.dll"
+        else -> throw GradleException("Unsupported OS: ${currentOs.name}")
+    }
+
+val cmpEntry = "$cmpDirName/$cmpLibName"
 
 val cmpTask =
     registerExtractFromJarTask(
@@ -115,13 +169,35 @@ val cmpTask =
         cacheSubDir = "composeMediaPlayer/$cmpVersion",
         jarFileName = cmpJarName,
         entryPathInJar = cmpEntry,
-        destFile = nativeDestDir.resolve("libNativeVideoPlayer.dylib"),
+        destFile = nativeDestDir.resolve(cmpLibName),
     )
 
 val jnaVersion = (findProperty("jnaVersion") as String?) ?: "5.17.0"
 val jnaJarName = "jna-$jnaVersion.jar"
 val jnaJarUrl = "https://repo1.maven.org/maven2/net/java/dev/jna/jna/$jnaVersion/$jnaJarName"
-val jnaEntry = "com/sun/jna/darwin-aarch64/libjnidispatch.jnilib"
+val jnaDirName =
+    when {
+        currentOs.isMacOsX && isArm -> "darwin-aarch64"
+        currentOs.isMacOsX && isX64 -> "darwin-x86-64"
+        currentOs.isLinux && isArm -> "linux-aarch64"
+        currentOs.isLinux && isX64 -> "linux-x86-64"
+        currentOs.isWindows && isX64 -> "win32-x86-64"
+        currentOs.isWindows && isArm -> "win32-arm64"
+        else -> throw GradleException("Unsupported OS or architecture: ${currentOs.name} $currentArch")
+    }
+val jnaLibName =
+    when {
+        currentOs.isMacOsX -> "libjnidispatch.jnilib"
+        currentOs.isLinux -> "libjnidispatch.so"
+        currentOs.isWindows -> "jnidispatch.dll"
+        else -> throw GradleException("Unsupported OS: ${currentOs.name}")
+    }
+val jnaEntry = "com/sun/jna/$jnaDirName/$jnaLibName"
+val targetJnaLibName =
+    when {
+        currentOs.isMacOsX -> "libjnidispatch.dylib"
+        else -> jnaLibName
+    }
 
 val jnaTask =
     registerExtractFromJarTask(
@@ -130,7 +206,7 @@ val jnaTask =
         cacheSubDir = "jna/$jnaVersion",
         jarFileName = jnaJarName,
         entryPathInJar = jnaEntry,
-        destFile = nativeDestDir.resolve("libjnidispatch.dylib"),
+        destFile = nativeDestDir.resolve(targetJnaLibName),
     )
 
 afterEvaluate {

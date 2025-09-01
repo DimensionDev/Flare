@@ -222,6 +222,12 @@ internal sealed interface Route {
     @Serializable
     data object TabSetting : ScreenRoute
 
+    @Serializable
+    data object LocalCache : ScreenRoute
+
+    @Serializable
+    data object StorageUsage : ScreenRoute
+
     companion object {
         public fun parse(url: String): Route? {
             val data = Url(url)

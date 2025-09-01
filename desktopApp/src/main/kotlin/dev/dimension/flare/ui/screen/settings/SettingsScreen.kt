@@ -33,6 +33,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.brands.Github
 import compose.icons.fontawesomeicons.brands.Line
 import compose.icons.fontawesomeicons.brands.Telegram
+import compose.icons.fontawesomeicons.solid.AngleRight
 import compose.icons.fontawesomeicons.solid.CircleCheck
 import compose.icons.fontawesomeicons.solid.CircleXmark
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
@@ -103,9 +104,13 @@ import dev.dimension.flare.settings_appearance_theme_light
 import dev.dimension.flare.settings_appearance_title
 import dev.dimension.flare.settings_appearance_video_autoplay
 import dev.dimension.flare.settings_appearance_video_autoplay_description
+import dev.dimension.flare.settings_local_history_description
+import dev.dimension.flare.settings_local_history_title
 import dev.dimension.flare.settings_privacy_policy
 import dev.dimension.flare.settings_status_appearance_subtitle
 import dev.dimension.flare.settings_status_appearance_title
+import dev.dimension.flare.settings_storage_subtitle
+import dev.dimension.flare.settings_storage_title
 import dev.dimension.flare.ui.component.AccountItem
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
@@ -153,7 +158,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
-internal fun SettingsScreen(toLogin: () -> Unit) {
+internal fun SettingsScreen(
+    toLogin: () -> Unit,
+    toLocalCache: () -> Unit,
+    toStorage: () -> Unit,
+) {
     val uriHandler = LocalUriHandler.current
     val state by producePresenter { presenter() }
 
@@ -601,6 +610,46 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                     },
                 )
             }
+
+            Header(stringResource(Res.string.settings_storage_title))
+            AnimatedVisibility(
+                state.accountState.activeAccount.isSuccess,
+            ) {
+                CardExpanderItem(
+                    onClick = toLocalCache,
+                    heading = {
+                        Text(stringResource(Res.string.settings_local_history_title))
+                    },
+                    trailing = {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.AngleRight,
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp),
+                        )
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_local_history_description))
+                    },
+                    icon = null,
+                )
+            }
+            CardExpanderItem(
+                onClick = toStorage,
+                icon = null,
+                heading = {
+                    Text(stringResource(Res.string.settings_storage_title))
+                },
+                trailing = {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.AngleRight,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                    )
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_storage_subtitle))
+                },
+            )
 
             Header(stringResource(Res.string.settings_ai_config_title))
             ContentDialog(

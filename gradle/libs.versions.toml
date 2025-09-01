@@ -4,6 +4,7 @@ collection = "1.5.0"
 compileSdk = "36"
 composemediaplayer = "0.8.2"
 haze = "1.6.10"
+jna = "5.17.0"
 lifecycleViewmodelComposeVersion = "2.9.2"
 minSdk = "23"
 java = "21"
@@ -66,6 +67,7 @@ composemediaplayer = { module = "io.github.kdroidfilter:composemediaplayer", ver
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
+jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }

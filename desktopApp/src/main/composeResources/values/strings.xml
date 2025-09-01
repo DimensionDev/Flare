@@ -288,4 +288,17 @@
     <string name="edit_tab_with_avatar">With avatar</string>
 
     <string name="edit">Edit</string>
+
+    <string name="local_history_search_placeholder">Search local cache</string>
+    <string name="local_history_search_status_title">Status</string>
+    <string name="local_history_search_user_title">User</string>
+
+    <string name="settings_storage_clear_image_cache">Clear image cache</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB of images will be removed</string>
+
+    <string name="settings_storage_clear_database">Clear cache database</string>
+    <string name="settings_storage_clear_database_description">%1$s users, %2$s statuses will be removed</string>
+    <string name="settings_storage_app_log">Open app log</string>
+    <string name="settings_storage_app_log_description">View the app log</string>
+
 </resources>

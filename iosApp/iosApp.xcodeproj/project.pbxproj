@@ -11,6 +11,7 @@
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		060D00C22AC407DF0087427A /* FlareApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060D00C12AC407DF0087427A /* FlareApp.swift */; };
 		06244DED2B75F21E00884683 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06244DEC2B75F21E00884683 /* AVKit.framework */; };
+		062660592E65843E0084CB34 /* icon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 062660582E65843E0084CB34 /* icon.icon */; };
 		066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0442B3ACDC1006F28F4 /* Collections */; };
 		066AD0472B3ACDC1006F28F4 /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0462B3ACDC1006F28F4 /* DequeModule */; };
 		066AD0492B3ACDC1006F28F4 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0482B3ACDC1006F28F4 /* OrderedCollections */; };
@@ -54,6 +55,7 @@
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		060D00C12AC407DF0087427A /* FlareApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareApp.swift; sourceTree = "<group>"; };
 		06244DEC2B75F21E00884683 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
+		062660582E65843E0084CB34 /* icon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = icon.icon; sourceTree = "<group>"; };
 		06B8514E2B6B22A500DFA075 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		06B851502B6B22DD00DFA075 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		06B851542B6B926D00DFA075 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -221,6 +223,7 @@
 				06B851542B6B926D00DFA075 /* Localizable.xcstrings */,
 				06B851502B6B22DD00DFA075 /* AppDelegate.swift */,
 				B62B2291B79CA2EBCE71D4A8 /* AppIcon.appiconset */,
+				062660582E65843E0084CB34 /* icon.icon */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -390,6 +393,7 @@
 				64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */,
 				64D13E3D2DEEE1390013547A /* PrivacyInfo.xcprivacy in Resources */,
 				06B851552B6B926D00DFA075 /* Localizable.xcstrings in Resources */,
+				062660592E65843E0084CB34 /* icon.icon in Resources */,
 				64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */,
 				06B8514F2B6B22A500DFA075 /* GoogleService-Info.plist in Resources */,
 			);

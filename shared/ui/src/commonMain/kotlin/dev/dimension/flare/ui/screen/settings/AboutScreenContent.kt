@@ -31,6 +31,7 @@ import compose.icons.fontawesomeicons.solid.Lock
 import dev.dimension.flare.Res
 import dev.dimension.flare.app_name
 import dev.dimension.flare.ic_launcher_foreground
+import dev.dimension.flare.ic_logo_text
 import dev.dimension.flare.settings_about_description
 import dev.dimension.flare.settings_about_line
 import dev.dimension.flare.settings_about_line_description
@@ -61,11 +62,19 @@ public fun AboutScreenContent(
         Image(
             painter = painterResource(Res.drawable.ic_launcher_foreground),
             contentDescription = stringResource(resource = Res.string.app_name),
+            modifier =
+                Modifier
+                    .height(128.dp),
         )
-        Text(
-            text = stringResource(resource = Res.string.app_name),
-            style = MaterialTheme.typography.headlineMedium,
+        Spacer(Modifier.height(16.dp))
+        Icon(
+            painter = painterResource(Res.drawable.ic_logo_text),
+            contentDescription = stringResource(resource = Res.string.app_name),
+            modifier =
+                Modifier
+                    .height(32.dp),
         )
+        Spacer(Modifier.height(16.dp))
         Text(
             text = stringResource(resource = Res.string.settings_about_description),
             textAlign = TextAlign.Center,

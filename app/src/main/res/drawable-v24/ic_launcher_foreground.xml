@@ -11,7 +11,7 @@
     <path
         android:pathData="M108.62,195.05C78.23,212.82 84.54,245.13 88.91,260.79C91.15,260.79 93.42,260.72 95.72,260.56C130.07,258.16 163.46,230.23 171.89,192.57C175.02,178.56 174.3,163.44 170.54,147.78C165.77,174.12 141.87,175.6 108.63,195.04L108.62,195.05Z">
       <aapt:attr name="android:fillColor">
-        <gradient
+        <gradient 
             android:startX="129.53"
             android:startY="201.76"
             android:endX="129.53"
@@ -26,7 +26,7 @@
     <path
         android:pathData="M8.68,135.94C3.58,147.23 2.46,153.04 1.08,161.45C-6.34,206.36 25.02,254.29 77.51,260.19C48.7,225.8 33.5,182.24 83.98,122.57C115.83,84.93 116.98,48.5 90.13,0C92.42,68.24 13.05,89.05 25.14,160.82C15.55,156.14 8.69,135.94 8.69,135.94H8.68Z">
       <aapt:attr name="android:fillColor">
-        <gradient
+        <gradient 
             android:startX="42.3"
             android:startY="199.44"
             android:endX="97.39"
@@ -41,7 +41,7 @@
     <path
         android:pathData="M88.92,260.79C84.55,245.13 78.23,212.83 108.63,195.03C141.88,175.6 165.79,174.13 170.56,147.78C174.19,202.22 99.2,197.85 88.92,260.79Z">
       <aapt:attr name="android:fillColor">
-        <gradient
+        <gradient 
             android:startX="127.95"
             android:startY="215.04"
             android:endX="127.95"
@@ -56,7 +56,7 @@
     <path
         android:pathData="M71.92,209.93C82.57,170.54 146.68,161.88 156.83,131.1C163.88,109.74 151.35,83.78 138.99,71.91C151.97,129.75 53.85,144.53 71.93,209.93H71.92Z">
       <aapt:attr name="android:fillColor">
-        <gradient
+        <gradient 
             android:startX="114.28"
             android:startY="124.22"
             android:endX="114.28"
@@ -71,7 +71,7 @@
     <path
         android:pathData="M25.13,160.76C25.13,160.76 25.15,160.8 25.16,160.82C35.01,107.98 115.73,101.45 107.48,44.71C104.83,30.81 99.03,16.08 90.14,0.01C92.43,68.23 13.11,89.05 25.14,160.76H25.13Z">
       <aapt:attr name="android:fillColor">
-        <gradient
+        <gradient 
             android:startX="65.97"
             android:startY="65.35"
             android:endX="65.97"
@@ -86,7 +86,7 @@
     <path
         android:pathData="M77.5,260.2C25.03,254.28 -6.34,206.36 1.09,161.45C2.48,153.03 3.61,147.22 8.7,135.94C8.7,135.94 15.57,156.13 25.16,160.82C20.18,187.48 27.69,233.78 77.5,260.2Z">
       <aapt:attr name="android:fillColor">
-        <gradient
+        <gradient 
             android:startX="38.75"
             android:startY="69.62"
             android:endX="38.75"

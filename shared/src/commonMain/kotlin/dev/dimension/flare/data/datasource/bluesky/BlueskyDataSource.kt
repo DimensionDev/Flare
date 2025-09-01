@@ -67,6 +67,7 @@ import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.MessageContent
@@ -121,7 +122,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -862,14 +862,17 @@ internal class BlueskyDataSource(
                 ),
             )
             // delete status from cache
-            database.statusDao().delete(
-                statusKey = statusKey,
-                accountType = AccountType.Specific(accountKey),
-            )
-            database.pagingTimelineDao().deleteStatus(
-                accountKey = accountKey,
-                statusKey = statusKey,
-            )
+            database.connect {
+                database.statusDao().delete(
+                    statusKey = statusKey,
+                    accountType = AccountType.Specific(accountKey),
+                )
+                database.statusReferenceDao().delete(statusKey)
+                database.pagingTimelineDao().deleteStatus(
+                    accountKey = accountKey,
+                    statusKey = statusKey,
+                )
+            }
         }
     }
 

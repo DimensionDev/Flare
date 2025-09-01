@@ -16,6 +16,7 @@ import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
@@ -563,14 +564,17 @@ internal class XQTDataSource(
                     ),
             )
             // delete status from cache
-            database.statusDao().delete(
-                statusKey = statusKey,
-                accountType = AccountType.Specific(accountKey),
-            )
-            database.pagingTimelineDao().deleteStatus(
-                accountKey = accountKey,
-                statusKey = statusKey,
-            )
+            database.connect {
+                database.statusDao().delete(
+                    statusKey = statusKey,
+                    accountType = AccountType.Specific(accountKey),
+                )
+                database.statusReferenceDao().delete(statusKey)
+                database.pagingTimelineDao().deleteStatus(
+                    accountKey = accountKey,
+                    statusKey = statusKey,
+                )
+            }
         }
     }
 

@@ -13,6 +13,7 @@ import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.VVO
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
@@ -394,6 +395,17 @@ internal class VVODataSource(
             mid = statusKey.id,
             st = st,
         )
+        database.connect {
+            database.statusDao().delete(
+                statusKey = statusKey,
+                accountType = AccountType.Specific(accountKey),
+            )
+            database.statusReferenceDao().delete(statusKey)
+            database.pagingTimelineDao().deleteStatus(
+                accountKey = accountKey,
+                statusKey = statusKey,
+            )
+        }
     }
 
     override fun searchStatus(query: String) =

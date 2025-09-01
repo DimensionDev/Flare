@@ -90,6 +90,10 @@ internal suspend fun saveToDatabase(
     ).let {
         database.statusDao().insertAll(it)
     }
+    items.map { it.status.status.data.statusKey }.let {
+        // in case of timeline change, remove old references
+        database.statusReferenceDao().delete(it)
+    }
     items.flatMap { it.status.references }.map { it.reference }.let {
         database.statusReferenceDao().delete(it.map { it.statusKey })
         database.statusReferenceDao().insertAll(it)

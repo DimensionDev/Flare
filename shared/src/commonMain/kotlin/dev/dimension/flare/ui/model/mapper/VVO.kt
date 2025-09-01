@@ -275,7 +275,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         key = userKey,
         avatar = avatarHD ?: profileImageURL ?: "",
         handle = "@$screenName@${vvoHost.removePrefix("m.")}",
-        name =
+        nameInternal =
             Element("span")
                 .apply {
                     appendChild(TextNode(screenName))

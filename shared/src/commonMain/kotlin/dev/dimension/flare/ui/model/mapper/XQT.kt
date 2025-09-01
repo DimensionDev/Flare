@@ -644,7 +644,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
     return UiProfile(
         key = userKey,
         avatar = avatarUrl,
-        name =
+        nameInternal =
             Element("span")
                 .apply {
                     addChildren(TextNode(name))
@@ -1080,7 +1080,7 @@ private fun Admin.render(accountKey: MicroBlogKey): UiUserV2 {
     return UiProfile(
         key = key,
         avatar = avatarURL?.replaceWithOriginImageUrl().orEmpty(),
-        name =
+        nameInternal =
             Element("span")
                 .apply {
                     addChildren(TextNode(displayName.orEmpty()))

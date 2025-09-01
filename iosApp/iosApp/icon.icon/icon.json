@@ -1,13 +1,14 @@
 {
   "fill" : {
-    "automatic-gradient" : "extended-gray:1.00000,1.00000"
+    "automatic-gradient" : "extended-srgb:0.00000,0.78431,0.70196,1.00000"
   },
   "groups" : [
     {
       "blur-material" : 0.5,
       "layers" : [
         {
-          "glass" : true,
+          "glass" : false,
+          "hidden" : true,
           "image-name" : "Group.svg",
           "name" : "Group",
           "position" : {
@@ -21,8 +22,8 @@
         {
           "blend-mode" : "normal",
           "fill" : "automatic",
-          "glass" : true,
-          "hidden" : true,
+          "glass" : false,
+          "hidden" : false,
           "image-name" : "Group-2.svg",
           "name" : "Group-2",
           "position" : {

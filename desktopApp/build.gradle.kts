@@ -38,9 +38,7 @@ dependencies {
     implementation(libs.platformtools.darkmodedetector)
     implementation(libs.haze)
     implementation(libs.haze.materials)
-    implementation("net.java.dev.jna:jna:5.17.0")
-//    implementation(libs.bouncycastle.bcprov)
-//    implementation(libs.bouncycastle.bcpkix)
+    implementation(libs.jna)
 }
 
 compose.desktop {
@@ -49,12 +47,11 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Pkg)
-            packageName = "dev.dimension.flare"
+            packageName = "Flare"
             packageVersion = "1.0.0"
             macOS {
                 val file = project.file("signing.properties")
                 val hasSigningProps = file.exists()
-                println("hasSigningProps: ${hasSigningProps}")
                 packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "21"
                 bundleID = "dev.dimension.flare"
                 minimumSystemVersion = "12.0"
@@ -62,10 +59,6 @@ compose.desktop {
 
                 jvmArgs(
                     "-Dapple.awt.application.appearance=system",
-//                    "-Djna.nosys=false",
-//                    "-Djna.nounpack=true",
-//                    "-Djna.boot.library=\$APP_ROOT/Contents/app/resources:\$APP_ROOT/Contents/app:\$APP_ROOT/Contents/runtime/Contents/MacOS:\$APP_ROOT/Contents/runtime/Contents/Home/lib:\$APP_ROOT/Contents/runtime/Contents/Home/lib/server:/System/Library/Frameworks/Foundation.framework/Foundation",
-//                    "-Djna.library.path=\$APP_ROOT/Contents/app/resources:\$APP_ROOT/Contents/app:\$APP_ROOT/Contents/runtime/Contents/MacOS:\$APP_ROOT/Contents/runtime/Contents/Home/lib:\$APP_ROOT/Contents/runtime/Contents/Home/lib/server:/System/Library/Frameworks/Foundation.framework/Foundation",
                 )
 
                 infoPlist {
@@ -86,7 +79,7 @@ compose.desktop {
                     runtimeProvisioningProfile.set(project.file(signingProp.getProperty("runtimeProvisioningProfile")))
                 }
 
-//                iconFile.set(project.file("src/jvmMain/resources/icon/ic_launcher.icns"))
+                iconFile.set(project.file("resources/ic_launcher.icns"))
             }
             linux {
                 modules("jdk.security.auth")
@@ -143,7 +136,7 @@ val macExtraPlistKeys: String
 extra["sqliteVersion"] = libs.versions.sqlite.get()
 extra["sqliteOsArch"] = "osx_arm64"
 extra["composeMediaPlayerVersion"] = libs.versions.composemediaplayer.get()
-extra["jnaVersion"] = "5.17.0"
+extra["jnaVersion"] = libs.versions.jna.get()
 extra["nativeDestDir"] = "resources/macos-arm64"
 
 apply(from = File(projectDir, "install-native-libs.gradle.kts"))

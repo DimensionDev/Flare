@@ -12,6 +12,7 @@ import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Mastodon
 import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
@@ -531,14 +532,17 @@ internal open class MastodonDataSource(
         tryRun {
             service.delete(statusKey.id)
             // delete status from cache
-            database.statusDao().delete(
-                statusKey = statusKey,
-                accountType = AccountType.Specific(accountKey),
-            )
-            database.pagingTimelineDao().deleteStatus(
-                accountKey = accountKey,
-                statusKey = statusKey,
-            )
+            database.connect {
+                database.statusDao().delete(
+                    statusKey = statusKey,
+                    accountType = AccountType.Specific(accountKey),
+                )
+                database.statusReferenceDao().delete(statusKey)
+                database.pagingTimelineDao().deleteStatus(
+                    accountKey = accountKey,
+                    statusKey = statusKey,
+                )
+            }
         }
     }
 

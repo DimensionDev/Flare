@@ -16,15 +16,27 @@ public data class UiProfile internal constructor(
     override val key: MicroBlogKey,
     override val handle: String,
     override val avatar: String,
-    override val name: UiRichText,
+    private val nameInternal: UiRichText,
     override val platformType: PlatformType,
     override val onClicked: ClickContext.() -> Unit,
-    val banner: String?,
-    val description: UiRichText?,
-    val matrices: Matrices,
-    val mark: ImmutableList<Mark>,
-    val bottomContent: BottomContent?,
+    public val banner: String?,
+    public val description: UiRichText?,
+    public val matrices: Matrices,
+    public val mark: ImmutableList<Mark>,
+    public val bottomContent: BottomContent?,
 ) : UiUserV2 {
+    // If name is blank, use handle without @ as display name
+    override val name: UiRichText by lazy {
+        if (nameInternal.raw.isEmpty() || nameInternal.raw.isBlank()) {
+            Element("span")
+                .apply {
+                    appendText(handleWithoutAtAndHost)
+                }.toUi()
+        } else {
+            nameInternal
+        }
+    }
+
     @Immutable
     public data class Matrices internal constructor(
         val fansCount: Long,
@@ -86,7 +98,7 @@ public fun createSampleUser(): UiProfile =
         key = MicroBlogKey("sampleKey", "sampleHost"),
         handle = "@sampleUser",
         avatar = "https://example.com/avatar.jpg",
-        name = Element("span").toUi(),
+        nameInternal = Element("span").toUi(),
         platformType = PlatformType.Mastodon,
         onClicked = { /* Handle click */ },
         banner = "https://example.com/banner.jpg",

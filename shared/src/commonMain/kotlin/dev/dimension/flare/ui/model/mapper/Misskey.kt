@@ -298,7 +298,7 @@ internal fun Note.render(
                 onClicked = {},
                 statusKey = currentStatus.statusKey,
             )
-        } else if (renote == null || !text.isNullOrEmpty()) {
+        } else if ((renote == null && renoteId == null) || !text.isNullOrEmpty()) {
             null
         } else {
             UiTimeline.TopMessage(
@@ -320,13 +320,15 @@ internal fun Note.render(
         }
     return UiTimeline(
         topMessage = topMessage,
-        content = actualStatus.renderStatus(accountKey, event),
+        // TODO: show deleted placeholder when renote is deleted
+        content = actualStatus.renderStatus(accountKey, event, references),
     )
 }
 
 private fun Note.renderStatus(
     accountKey: MicroBlogKey,
     event: StatusEvent.Misskey,
+    references: Map<ReferenceType, List<StatusContent>> = mapOf(),
 ): UiTimeline.ItemContent.Status {
     val remoteHost =
         if (user.host.isNullOrEmpty()) {
@@ -334,6 +336,7 @@ private fun Note.renderStatus(
         } else {
             user.host
         }
+    val parent = references[ReferenceType.Reply]?.firstOrNull() as? StatusContent.Misskey
     val user = user.render(accountKey)
     val isFromMe = user.key == accountKey
     val canReblog = visibility in listOf(Visibility.Public, Visibility.Home) || (isFromMe && visibility != Visibility.Specified)
@@ -369,6 +372,13 @@ private fun Note.renderStatus(
             }.sortedByDescending { it.count }
             .toPersistentList()
     return UiTimeline.ItemContent.Status(
+        parents =
+            listOfNotNull(
+                parent?.data?.renderStatus(
+                    accountKey,
+                    event,
+                ),
+            ).toPersistentList(),
         images =
             files
                 ?.mapNotNull { file ->
@@ -624,7 +634,7 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatarUrl.orEmpty(),
-        name = parseName(name.orEmpty(), accountKey, emojis).toUi(),
+        nameInternal = parseName(name.orEmpty(), accountKey, emojis).toUi(),
         handle = "@$username@$remoteHost",
         key = userKey,
         banner = null,
@@ -658,7 +668,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatarUrl.orEmpty(),
-        name = parseName(name.orEmpty(), accountKey, emojis).toUi(),
+        nameInternal = parseName(name.orEmpty(), accountKey, emojis).toUi(),
         handle = "@$username@$remoteHost",
         key = userKey,
         banner = bannerUrl,

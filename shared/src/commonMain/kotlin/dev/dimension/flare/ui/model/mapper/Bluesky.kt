@@ -558,7 +558,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatar?.uri.orEmpty(),
-        name =
+        nameInternal =
             Element("span")
                 .apply {
                     addChildren(TextNode(displayName.orEmpty()))
@@ -597,7 +597,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatar?.uri.orEmpty(),
-        name =
+        nameInternal =
             Element("span")
                 .apply {
                     addChildren(TextNode(displayName.orEmpty()))
@@ -629,7 +629,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatar?.uri.orEmpty(),
-        name =
+        nameInternal =
             Element("span")
                 .apply {
                     addChildren(TextNode(displayName.orEmpty()))

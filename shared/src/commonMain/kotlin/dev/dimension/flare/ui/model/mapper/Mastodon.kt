@@ -540,7 +540,7 @@ internal fun Account.render(
         )
     return UiProfile(
         avatar = avatar.orEmpty(),
-        name = parseName(this).toUi(),
+        nameInternal = parseName(this).toUi(),
         handle = "@$username@$remoteHost",
         key = userKey,
         banner = header,

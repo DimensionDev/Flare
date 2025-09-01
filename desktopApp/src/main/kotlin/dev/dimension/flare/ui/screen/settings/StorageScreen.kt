@@ -19,9 +19,12 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Database
 import compose.icons.fontawesomeicons.solid.Images
-import dev.dimension.flare.*
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
+import dev.dimension.flare.settings_storage_clear_database
+import dev.dimension.flare.settings_storage_clear_database_description
+import dev.dimension.flare.settings_storage_clear_image_cache
+import dev.dimension.flare.settings_storage_clear_image_cache_description
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter

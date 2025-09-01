@@ -187,12 +187,17 @@ val jnaDirName =
     }
 val jnaLibName =
     when {
-        currentOs.isMacOsX -> "libjnidispatch.dylib"
+        currentOs.isMacOsX -> "libjnidispatch.jnilib"
         currentOs.isLinux -> "libjnidispatch.so"
         currentOs.isWindows -> "jnidispatch.dll"
         else -> throw GradleException("Unsupported OS: ${currentOs.name}")
     }
 val jnaEntry = "com/sun/jna/$jnaDirName/$jnaLibName"
+val targetJnaLibName =
+    when {
+        currentOs.isMacOsX -> "libjnidispatch.dylib"
+        else -> jnaLibName
+    }
 
 val jnaTask =
     registerExtractFromJarTask(
@@ -201,7 +206,7 @@ val jnaTask =
         cacheSubDir = "jna/$jnaVersion",
         jarFileName = jnaJarName,
         entryPathInJar = jnaEntry,
-        destFile = nativeDestDir.resolve(jnaLibName),
+        destFile = nativeDestDir.resolve(targetJnaLibName),
     )
 
 afterEvaluate {

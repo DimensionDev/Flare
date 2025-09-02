@@ -30,6 +30,8 @@ import dev.dimension.flare.ui.screen.dm.DmListScreen
 import dev.dimension.flare.ui.screen.dm.UserDMConversationScreen
 import dev.dimension.flare.ui.screen.feeds.FeedListScreen
 import dev.dimension.flare.ui.screen.home.DiscoverScreen
+import dev.dimension.flare.ui.screen.home.FansScreen
+import dev.dimension.flare.ui.screen.home.FollowingScreen
 import dev.dimension.flare.ui.screen.home.HomeTimelineScreen
 import dev.dimension.flare.ui.screen.home.NotificationScreen
 import dev.dimension.flare.ui.screen.home.ProfileScreen
@@ -339,8 +341,22 @@ internal fun WindowScope.RouteContent(
                         ),
                     )
                 },
-                onFollowListClick = {},
-                onFansListClick = {},
+                onFollowListClick = {
+                    navigate(
+                        Route.Following(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
+                onFansListClick = {
+                    navigate(
+                        Route.Fans(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
             )
         }
 
@@ -435,8 +451,22 @@ internal fun WindowScope.RouteContent(
                         ),
                     )
                 },
-                onFollowListClick = {},
-                onFansListClick = {},
+                onFollowListClick = {
+                    navigate(
+                        Route.Following(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
+                onFansListClick = {
+                    navigate(
+                        Route.Fans(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
             )
         }
 
@@ -550,5 +580,33 @@ internal fun WindowScope.RouteContent(
 
         Route.StorageUsage ->
             StorageScreen()
+
+        is Route.Following ->
+            FollowingScreen(
+                accountType = route.accountType,
+                userKey = route.userKey,
+                onUserClick = {
+                    navigate(
+                        Profile(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
+            )
+
+        is Route.Fans ->
+            FansScreen(
+                accountType = route.accountType,
+                userKey = route.userKey,
+                onUserClick = {
+                    navigate(
+                        Profile(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
+            )
     }
 }

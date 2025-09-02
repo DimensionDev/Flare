@@ -228,6 +228,18 @@ internal sealed interface Route {
     @Serializable
     data object StorageUsage : ScreenRoute
 
+    @Serializable
+    data class Following(
+        val accountType: AccountType,
+        val userKey: MicroBlogKey,
+    ) : ScreenRoute
+
+    @Serializable
+    data class Fans(
+        val accountType: AccountType,
+        val userKey: MicroBlogKey,
+    ) : ScreenRoute
+
     companion object {
         public fun parse(url: String): Route? {
             val data = Url(url)

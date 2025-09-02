@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">Pictogram</string>
     <string name="edit_tab_with_avatar">Met avatar</string>
     <string name="edit">Bewerken</string>
+    <string name="local_history_search_placeholder">Zoek lokale cache</string>
+    <string name="local_history_search_status_title">status</string>
+    <string name="local_history_search_user_title">Gebruiker</string>
+    <string name="settings_storage_clear_image_cache">Afbeeldingencache legen</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB van afbeeldingen zal worden verwijderd</string>
+    <string name="settings_storage_clear_database">Cache database wissen</string>
+    <string name="settings_storage_clear_database_description">%1$s gebruikers, %2$s statussen worden verwijderd</string>
+    <string name="settings_storage_app_log">Open app-logboek</string>
+    <string name="settings_storage_app_log_description">Bekijk het app-logboek</string>
 </resources>

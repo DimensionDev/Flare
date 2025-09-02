@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">Ikon</string>
     <string name="edit_tab_with_avatar">Med avatar</string>
     <string name="edit">Rediger</string>
+    <string name="local_history_search_placeholder">Søk lokal cache</string>
+    <string name="local_history_search_status_title">Status:</string>
+    <string name="local_history_search_user_title">Bruker</string>
+    <string name="settings_storage_clear_image_cache">Tøm bildebuffer</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder vil bli fjernet</string>
+    <string name="settings_storage_clear_database">Slett mellomlagerdatabase</string>
+    <string name="settings_storage_clear_database_description">%1$s brukere, %2$s statuser vil bli fjernet</string>
+    <string name="settings_storage_app_log">Åpne app-logg</string>
+    <string name="settings_storage_app_log_description">Se app-loggen</string>
 </resources>

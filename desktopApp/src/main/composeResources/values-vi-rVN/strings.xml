@@ -235,4 +235,13 @@
     <string name="edit_tab_icon">Biểu tượng</string>
     <string name="edit_tab_with_avatar">Có đại diện</string>
     <string name="edit">Chỉnh sửa</string>
+    <string name="local_history_search_placeholder">Tìm kiếm bộ nhớ đệm địa phương</string>
+    <string name="local_history_search_status_title">Trạng thái</string>
+    <string name="local_history_search_user_title">Người dùng</string>
+    <string name="settings_storage_clear_image_cache">Xóa bộ nhớ cache hình ảnh</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB hình ảnh sẽ được xóa</string>
+    <string name="settings_storage_clear_database">Xóa cơ sở dữ liệu bộ nhớ cache</string>
+    <string name="settings_storage_clear_database_description">%1$s người dùng, %2$s trạng thái sẽ bị xóa</string>
+    <string name="settings_storage_app_log">Mở nhật ký ứng dụng</string>
+    <string name="settings_storage_app_log_description">Xem nhật ký ứng dụng</string>
 </resources>

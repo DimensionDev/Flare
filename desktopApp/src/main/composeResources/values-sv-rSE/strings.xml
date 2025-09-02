@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">Ikon</string>
     <string name="edit_tab_with_avatar">Med avatar</string>
     <string name="edit">Redigera</string>
+    <string name="local_history_search_placeholder">Sök lokal cache</string>
+    <string name="local_history_search_status_title">Status</string>
+    <string name="local_history_search_user_title">Användare</string>
+    <string name="settings_storage_clear_image_cache">Rensa bildcache</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder kommer att tas bort</string>
+    <string name="settings_storage_clear_database">Rensa cache-databas</string>
+    <string name="settings_storage_clear_database_description">%1$s användare, %2$s status kommer att tas bort</string>
+    <string name="settings_storage_app_log">Öppna applogg</string>
+    <string name="settings_storage_app_log_description">Visa apploggen</string>
 </resources>

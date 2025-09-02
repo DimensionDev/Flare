@@ -240,4 +240,13 @@
     <string name="edit_tab_icon">아이콘</string>
     <string name="edit_tab_with_avatar">아바타와 함께</string>
     <string name="edit">편집</string>
+    <string name="local_history_search_placeholder">로컬 캐시 검색</string>
+    <string name="local_history_search_status_title">상태</string>
+    <string name="local_history_search_user_title"> 사용자</string>
+    <string name="settings_storage_clear_image_cache">이미지 캐시 지우기</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB의 이미지가 제거됩니다</string>
+    <string name="settings_storage_clear_database">캐시 데이터베이스 지우기</string>
+    <string name="settings_storage_clear_database_description">%1$s 사용자, %2$s 상태가 제거됩니다</string>
+    <string name="settings_storage_app_log">앱 로그 열기</string>
+    <string name="settings_storage_app_log_description">앱 로그 보기</string>
 </resources>

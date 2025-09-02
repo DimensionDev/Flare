@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">Icona</string>
     <string name="edit_tab_with_avatar">Con avatar</string>
     <string name="edit">Modifica</string>
+    <string name="local_history_search_placeholder">Cerca nella cache locale</string>
+    <string name="local_history_search_status_title">Stato</string>
+    <string name="local_history_search_user_title">Utente</string>
+    <string name="settings_storage_clear_image_cache">Cancella cache immagine</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB di immagini saranno rimossi</string>
+    <string name="settings_storage_clear_database">Cancella database cache</string>
+    <string name="settings_storage_clear_database_description">Utenti %1$s , gli stati %2$s verranno rimossi</string>
+    <string name="settings_storage_app_log">Apri registro app</string>
+    <string name="settings_storage_app_log_description">Visualizza il registro app</string>
 </resources>

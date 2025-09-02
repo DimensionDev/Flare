@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">Иконка</string>
     <string name="edit_tab_with_avatar">С аватаром</string>
     <string name="edit">Редактирование</string>
+    <string name="local_history_search_placeholder">Поиск локального кэша</string>
+    <string name="local_history_search_status_title">Статус</string>
+    <string name="local_history_search_user_title">Пользователь</string>
+    <string name="settings_storage_clear_image_cache">Очистить кэш изображений</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s МБ изображений будет удалено</string>
+    <string name="settings_storage_clear_database">Очистить базу данных кэша</string>
+    <string name="settings_storage_clear_database_description">%1$s пользователи, статусы %2$s будут удалены</string>
+    <string name="settings_storage_app_log">Открыть журнал приложений</string>
+    <string name="settings_storage_app_log_description">Просмотр журнала приложений</string>
 </resources>

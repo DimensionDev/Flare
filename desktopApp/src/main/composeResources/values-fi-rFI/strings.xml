@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">Kuvake</string>
     <string name="edit_tab_with_avatar">Avatarin kanssa</string>
     <string name="edit">Muokkaa</string>
+    <string name="local_history_search_placeholder">Etsi paikallista välimuistia</string>
+    <string name="local_history_search_status_title">Tila</string>
+    <string name="local_history_search_user_title">Käyttäjä</string>
+    <string name="settings_storage_clear_image_cache">Tyhjennä kuvien välimuisti</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB kuvia poistetaan</string>
+    <string name="settings_storage_clear_database">Tyhjennä välimuistin tietokanta</string>
+    <string name="settings_storage_clear_database_description">%1$s käyttäjää, %2$s tilat poistetaan</string>
+    <string name="settings_storage_app_log">Avaa sovelluksen loki</string>
+    <string name="settings_storage_app_log_description">Näytä sovellusloki</string>
 </resources>

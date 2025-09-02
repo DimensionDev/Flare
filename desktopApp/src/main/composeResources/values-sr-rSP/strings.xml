@@ -235,4 +235,13 @@
     <string name="edit_tab_icon">Икона</string>
     <string name="edit_tab_with_avatar">С аватаром</string>
     <string name="edit">Уреди</string>
+    <string name="local_history_search_placeholder">Претражите локални кеш</string>
+    <string name="local_history_search_status_title">Статус</string>
+    <string name="local_history_search_user_title">Корисник</string>
+    <string name="settings_storage_clear_image_cache">Очистите кеш слике</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s МБ слика биће уклоњено</string>
+    <string name="settings_storage_clear_database">Очистите базу кеша</string>
+    <string name="settings_storage_clear_database_description">%1$s корисника, %2$s статуси ће бити уклоњени</string>
+    <string name="settings_storage_app_log">Отворите лог апликације</string>
+    <string name="settings_storage_app_log_description">Погледајте лог апликације</string>
 </resources>

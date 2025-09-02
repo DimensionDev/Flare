@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">Ikona</string>
     <string name="edit_tab_with_avatar">S avatarem</string>
     <string name="edit">Upravit</string>
+    <string name="local_history_search_placeholder">Hledat místní keš</string>
+    <string name="local_history_search_status_title">Stav</string>
+    <string name="local_history_search_user_title">Uživatel</string>
+    <string name="settings_storage_clear_image_cache">Vymazat cache obrázků</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB obrázků bude odstraněno</string>
+    <string name="settings_storage_clear_database">Vymazat databázi mezipaměti</string>
+    <string name="settings_storage_clear_database_description">%1$s uživatelé, %2$s stavy budou odstraněny</string>
+    <string name="settings_storage_app_log">Otevřít protokol aplikace</string>
+    <string name="settings_storage_app_log_description">Zobrazit protokol aplikace</string>
 </resources>

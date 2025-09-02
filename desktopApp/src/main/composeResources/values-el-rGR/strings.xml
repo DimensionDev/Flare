@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">Εικονίδιο</string>
     <string name="edit_tab_with_avatar">Με avatar</string>
     <string name="edit">Επεξεργασία</string>
+    <string name="local_history_search_placeholder">Αναζήτηση τοπικής προσωρινής μνήμης</string>
+    <string name="local_history_search_status_title">Κατάσταση</string>
+    <string name="local_history_search_user_title">Χρήστης</string>
+    <string name="settings_storage_clear_image_cache">Εκκαθάριση προσωρινής μνήμης εικόνας</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB εικόνων θα αφαιρεθούν</string>
+    <string name="settings_storage_clear_database">Εκκαθάριση βάσης δεδομένων προσωρινής μνήμης</string>
+    <string name="settings_storage_clear_database_description">%1$s χρήστες, %2$s καταστάσεις θα αφαιρεθούν</string>
+    <string name="settings_storage_app_log">Άνοιγμα αρχείου καταγραφής εφαρμογής</string>
+    <string name="settings_storage_app_log_description">Δείτε το αρχείο καταγραφής της εφαρμογής</string>
 </resources>

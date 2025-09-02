@@ -235,4 +235,13 @@
     <string name="edit_tab_icon">Ic̀ona</string>
     <string name="edit_tab_with_avatar">Amb avatar</string>
     <string name="edit">Editar</string>
+    <string name="local_history_search_placeholder">Cerca a la memòria cau local</string>
+    <string name="local_history_search_status_title">Estat</string>
+    <string name="local_history_search_user_title">Usuari</string>
+    <string name="settings_storage_clear_image_cache">Esborrar la memòria cau d\'imatges</string>
+    <string name="settings_storage_clear_image_cache_description">S\'eliminaran %1$s MB d\'imatges</string>
+    <string name="settings_storage_clear_database">Esborrar la base de dades de la memòria cau</string>
+    <string name="settings_storage_clear_database_description">S\'eliminaran %1$s usuaris, %2$s estats</string>
+    <string name="settings_storage_app_log">Obrir registre de l\'aplicació</string>
+    <string name="settings_storage_app_log_description">Visualitzar el registre de l\'aplicació</string>
 </resources>

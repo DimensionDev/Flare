@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">Iconiță</string>
     <string name="edit_tab_with_avatar">Cu avatar</string>
     <string name="edit">Editare</string>
+    <string name="local_history_search_placeholder">Caută cache local</string>
+    <string name="local_history_search_status_title">Status</string>
+    <string name="local_history_search_user_title">Utilizator</string>
+    <string name="settings_storage_clear_image_cache">Golire cache imagine</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB de imagini vor fi eliminate</string>
+    <string name="settings_storage_clear_database">Goliţi baza de date cache</string>
+    <string name="settings_storage_clear_database_description">%1$s utilizatori, stările %2$s vor fi șterse</string>
+    <string name="settings_storage_app_log">Deschide jurnalul aplicației</string>
+    <string name="settings_storage_app_log_description">Vezi jurnalul aplicațiilor</string>
 </resources>

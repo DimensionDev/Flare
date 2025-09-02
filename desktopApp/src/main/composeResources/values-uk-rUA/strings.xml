@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">Іконка</string>
     <string name="edit_tab_with_avatar">З аватаром</string>
     <string name="edit">Редагувати</string>
+    <string name="local_history_search_placeholder">Пошук в локальному кеші</string>
+    <string name="local_history_search_status_title">Статус</string>
+    <string name="local_history_search_user_title">Користувач</string>
+    <string name="settings_storage_clear_image_cache">Очистити кеш зображень</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB із зображень буде видалено</string>
+    <string name="settings_storage_clear_database">Очистити базу даних кешу</string>
+    <string name="settings_storage_clear_database_description">%1$s користувачів, статуси %2$s буде видалено</string>
+    <string name="settings_storage_app_log">Відкрити журнал додатка</string>
+    <string name="settings_storage_app_log_description">Переглянути журнал програми</string>
 </resources>

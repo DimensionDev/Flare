@@ -235,4 +235,13 @@
     <string name="edit_tab_icon">איקון</string>
     <string name="edit_tab_with_avatar">עם אווטאר</string>
     <string name="edit">ערוך</string>
+    <string name="local_history_search_placeholder">חפש במטמון המקומי</string>
+    <string name="local_history_search_status_title">סטטוס</string>
+    <string name="local_history_search_user_title">משתמש</string>
+    <string name="settings_storage_clear_image_cache">נקה את מטמון התמונות</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB של תמונות יוסרו</string>
+    <string name="settings_storage_clear_database">נקה את מסד הנתונים</string>
+    <string name="settings_storage_clear_database_description">%1$s משתמשים, %2$s סטטוסים יוסרו</string>
+    <string name="settings_storage_app_log">פתח יומן אפליקציה</string>
+    <string name="settings_storage_app_log_description">צפה ביומן האפליקציה</string>
 </resources>

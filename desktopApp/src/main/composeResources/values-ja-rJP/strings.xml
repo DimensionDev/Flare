@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">アイコン</string>
     <string name="edit_tab_with_avatar">アバター付き</string>
     <string name="edit">編集</string>
+    <string name="local_history_search_placeholder">ローカルキャッシュを検索</string>
+    <string name="local_history_search_status_title">ステータス</string>
+    <string name="local_history_search_user_title">ユーザー</string>
+    <string name="settings_storage_clear_image_cache">画像キャッシュをクリア</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MBの画像が削除されます</string>
+    <string name="settings_storage_clear_database">キャッシュデータベースをクリア</string>
+    <string name="settings_storage_clear_database_description">%1$sユーザー、%2$sステータスが削除されます</string>
+    <string name="settings_storage_app_log">アプリログを開く</string>
+    <string name="settings_storage_app_log_description">アプリのログを表示</string>
 </resources>

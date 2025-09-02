@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">Symbol</string>
     <string name="edit_tab_with_avatar">Mit Avatar</string>
     <string name="edit">Bearbeiten</string>
+    <string name="local_history_search_placeholder">Lokalen Cache suchen</string>
+    <string name="local_history_search_status_title">Status</string>
+    <string name="local_history_search_user_title">Benutzer</string>
+    <string name="settings_storage_clear_image_cache">Bildercache leeren</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB Bilder werden entfernt</string>
+    <string name="settings_storage_clear_database">Cache-Datenbank leeren</string>
+    <string name="settings_storage_clear_database_description">%1$s Benutzer, %2$s Status werden entfernt</string>
+    <string name="settings_storage_app_log">App-Log öffnen</string>
+    <string name="settings_storage_app_log_description">App-Log anzeigen</string>
 </resources>

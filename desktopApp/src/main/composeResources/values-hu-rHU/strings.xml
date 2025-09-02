@@ -240,4 +240,13 @@
     <string name="edit_tab_icon">Ikon</string>
     <string name="edit_tab_with_avatar">Avatarral</string>
     <string name="edit">Szerkesztés</string>
+    <string name="local_history_search_placeholder">Helyi gyorsítótár keresése</string>
+    <string name="local_history_search_status_title">Állapot</string>
+    <string name="local_history_search_user_title">Felhasználó</string>
+    <string name="settings_storage_clear_image_cache">Kép gyorsítótár törlése</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB kép törlődik</string>
+    <string name="settings_storage_clear_database">Gyorsítótár adatbázisának törlése</string>
+    <string name="settings_storage_clear_database_description">%1$s felhasználó, %2$s bejegyzés törlődik</string>
+    <string name="settings_storage_app_log">Alkalmazásnapló megnyitása</string>
+    <string name="settings_storage_app_log_description">Tekintse meg az alkalmazásnaplót</string>
 </resources>

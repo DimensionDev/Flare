@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">أيقونة</string>
     <string name="edit_tab_with_avatar">مع الصورة الرمزية</string>
     <string name="edit">تحرير</string>
+    <string name="local_history_search_placeholder">البحث عن ذاكرة التخزين المؤقت المحلية</string>
+    <string name="local_history_search_status_title">الحالة</string>
+    <string name="local_history_search_user_title">المستخدم</string>
+    <string name="settings_storage_clear_image_cache">مسح ذاكرة التخزين المؤقت للصورة</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB من الصور سيتم إزالتها</string>
+    <string name="settings_storage_clear_database">مسح قاعدة بيانات ذاكرة التخزين المؤقت</string>
+    <string name="settings_storage_clear_database_description">%1$s مستخدمين، %2$s حالات سيتم إزالتها</string>
+    <string name="settings_storage_app_log">فتح سجل التطبيق</string>
+    <string name="settings_storage_app_log_description">عرض سجل التطبيقات</string>
 </resources>

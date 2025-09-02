@@ -240,4 +240,13 @@
     <string name="edit_tab_icon">Simge</string>
     <string name="edit_tab_with_avatar">Avatar ile</string>
     <string name="edit">Düzenle</string>
+    <string name="local_history_search_placeholder">Yerel önbellekte ara</string>
+    <string name="local_history_search_status_title">Durum</string>
+    <string name="local_history_search_user_title">Kullanıcı</string>
+    <string name="settings_storage_clear_image_cache">Görüntü önbelleğini temizle</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB görüntü silinecek</string>
+    <string name="settings_storage_clear_database">Önbellek veritabanını temizle</string>
+    <string name="settings_storage_clear_database_description">%1$s kullanıcı, %2$s durum silinecek</string>
+    <string name="settings_storage_app_log">Uygulama günlüğünü aç</string>
+    <string name="settings_storage_app_log_description">Uygulama günlüğünü görüntüle</string>
 </resources>

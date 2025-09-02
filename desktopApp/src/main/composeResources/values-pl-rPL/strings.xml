@@ -252,4 +252,13 @@
     <string name="edit_tab_icon">Ikona</string>
     <string name="edit_tab_with_avatar">Z awatarem</string>
     <string name="edit">Edytuj</string>
+    <string name="local_history_search_placeholder">Szukaj lokalnej pamięci podręcznej</string>
+    <string name="local_history_search_status_title">Status</string>
+    <string name="local_history_search_user_title">Użytkownik</string>
+    <string name="settings_storage_clear_image_cache">Usuń pamięć podręczną obrazów</string>
+    <string name="settings_storage_clear_image_cache_description">%1$s MB obrazów zostanie usunięte</string>
+    <string name="settings_storage_clear_database">Wyczyść bazę pamięci podręcznej</string>
+    <string name="settings_storage_clear_database_description">%1$s użytkowników, statusy %2$s zostaną usunięte</string>
+    <string name="settings_storage_app_log">Otwórz dziennik aplikacji</string>
+    <string name="settings_storage_app_log_description">Zobacz dziennik aplikacji</string>
 </resources>

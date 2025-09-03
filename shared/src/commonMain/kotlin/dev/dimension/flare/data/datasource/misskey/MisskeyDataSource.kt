@@ -50,6 +50,7 @@ import dev.dimension.flare.data.network.misskey.api.model.UsersListsShowRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsUpdateRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
@@ -936,8 +937,12 @@ internal class MisskeyDataSource(
                 )
 
                 StatusActionResult.success()
-            } catch (e: Exception) {
-                StatusActionResult.failure(e)
+            } catch (e: Throwable) {
+                val errorMessage = when (e) {
+                    is LoginExpiredException -> "Login expired, please re-login"
+                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                }
+                StatusActionResult.failure(errorMessage)
             }
         }
 
@@ -962,8 +967,12 @@ internal class MisskeyDataSource(
                 }
 
                 StatusActionResult.success()
-            } catch (e: Exception) {
-                StatusActionResult.failure(e)
+            } catch (e: Throwable) {
+                val errorMessage = when (e) {
+                    is LoginExpiredException -> "Login expired, please re-login"
+                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                }
+                StatusActionResult.failure(errorMessage)
             }
         }
 

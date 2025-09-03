@@ -778,8 +778,12 @@ internal class VVODataSource(
                 )
 
                 StatusActionResult.success()
-            } catch (e: Exception) {
-                StatusActionResult.failure(e)
+            } catch (e: Throwable) {
+                val errorMessage = when (e) {
+                    is LoginExpiredException -> "Login expired, please re-login"
+                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                }
+                StatusActionResult.failure(errorMessage)
             }
         }
     }
@@ -825,8 +829,12 @@ internal class VVODataSource(
                 )
 
                 StatusActionResult.success()
-            } catch (e: Exception) {
-                StatusActionResult.failure(e)
+            } catch (e: Throwable) {
+                val errorMessage = when (e) {
+                    is LoginExpiredException -> "Login expired, please re-login"
+                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                }
+                StatusActionResult.failure(errorMessage)
             }
         }
     }

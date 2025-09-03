@@ -33,11 +33,13 @@ import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
+import dev.dimension.flare.data.network.mastodon.MastodonException
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.PostAccounts
 import dev.dimension.flare.data.network.mastodon.api.model.PostList
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostReport
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
@@ -612,8 +614,13 @@ internal open class MastodonDataSource(
                 updateLikeStatus(statusKey, shouldLike, result)
 
                 StatusActionResult.success()
-            } catch (e: Exception) {
-                StatusActionResult.failure(e)
+            } catch (e: Throwable) {
+                val errorMessage = when (e) {
+                    is MastodonException -> e.error ?: e.message ?: "Unknown Mastodon error"
+                    is LoginExpiredException -> "Login expired, please re-login"
+                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                }
+                StatusActionResult.failure(errorMessage)
             }
         }
 
@@ -633,8 +640,13 @@ internal open class MastodonDataSource(
                 updateReblogStatus(statusKey, shouldReblog, result)
 
                 StatusActionResult.success()
-            } catch (e: Exception) {
-                StatusActionResult.failure(e)
+            } catch (e: Throwable) {
+                val errorMessage = when (e) {
+                    is MastodonException -> e.error ?: e.message ?: "Unknown Mastodon error"
+                    is LoginExpiredException -> "Login expired, please re-login"
+                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                }
+                StatusActionResult.failure(errorMessage)
             }
         }
 
@@ -654,8 +666,13 @@ internal open class MastodonDataSource(
                 updateBookmarkStatus(statusKey, shouldBookmark, result)
 
                 StatusActionResult.success()
-            } catch (e: Exception) {
-                StatusActionResult.failure(e)
+            } catch (e: Throwable) {
+                val errorMessage = when (e) {
+                    is MastodonException -> e.error ?: e.message ?: "Unknown Mastodon error"
+                    is LoginExpiredException -> "Login expired, please re-login"
+                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                }
+                StatusActionResult.failure(errorMessage)
             }
         }
 

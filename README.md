@@ -2,18 +2,17 @@
 [![license](https://img.shields.io/github/license/DimensionDev/Flare)](https://github.com/DimensionDev/Flare/blob/master/LICENSE)
 [![Crowdin](https://badges.crowdin.net/flareapp/localized.svg)](https://crowdin.com/project/flareapp)
 [![Telegram](https://img.shields.io/badge/-telegram-blue?logo=telegram&color=white)](https://t.me/+0UtcP6_qcDoyOWE1)
+[![Discord](https://img.shields.io/badge/-discord-blue?logo=discord&color=white)](https://discord.gg/De9NhXBryT)
 [![Line](https://img.shields.io/badge/-Line_Group-green?logo=line&color=white)](https://line.me/ti/g/hf95HyGJ9k)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/DimensionDev/Flare)
 
-![badge-Platform](https://img.shields.io/badge/Supported%20Platform-Mastodon%20|%20Misskey%20|%20Bluesky%20-black)
+![badge-Platform](https://img.shields.io/badge/Supported%20Platform-Mastodon%20|%20Misskey%20|%20Bluesky%20|%20X%20-black)
 
-![badge-Android](https://img.shields.io/badge/Android-5.0-3DDC84)
+![badge-Android](https://img.shields.io/badge/Android-6.0-3DDC84)
 ![badge-iOS](https://img.shields.io/badge/iOS-18.0-black)
+![badge-macOS](https://img.shields.io/badge/macOS-Monterey-black)
 
-
-The ultimate next generation* open-sourced AI powered decentralized social network client for Android/iOS, still in development.  
-*: _Just a joke_  
-
+Flare is an open-source social client that merges your feeds from Mastodon, Misskey, Bluesky, X, and RSS into a single timeline, turning it into your personal information hub, with Android/iOS and macOS/Windows Support.
 
 <a href='https://testflight.apple.com/join/iYP7QZME'><img alt='Get it on Google Play' src='https://developer.apple.com/app-store/marketing/guidelines/images/badge-example-preferred_2x.png' height=50/></a>
 <a href='https://play.google.com/store/apps/details?id=dev.dimension.flare&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_EN.svg/2880px-Google_Play_Store_badge_EN.svg.png' height=50/></a>
@@ -34,7 +33,7 @@ Here're some features we're planning to implement in the future.
    - [ ] Quick reply
  - [ ] Support for Meta Threads
  - [ ] Support for Discourse forum
- - [ ] Desktop Client
+ - [x] Desktop Client
  - [ ] Web Client(?)
 
 Here're some features we've done before.
@@ -97,6 +96,11 @@ If you prefer using Docker, you can use Docker Compose to run prebuild Server Im
    +   DOMAINS: your_domain_here -> http://flare-backend:8080
    ```
  - Run `docker compose up -d`
+
+### Desktop
+ - Make sure you have JDK 21 installed, JBR-21 is recommended.
+ - Depends on your build target, you might require to have XCode 16 (macOS) installed, or .Net 9 (Windows) installed.
+ - Run `./gradlew runDistributable` to build and run the debug version of the desktop app.
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.

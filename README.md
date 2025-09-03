@@ -99,7 +99,7 @@ If you prefer using Docker, you can use Docker Compose to run prebuild Server Im
 
 ### Desktop
  - Make sure you have JDK 21 installed, JBR-21 is recommended.
- - Depends on your build target, you might require to have XCode 16 (macOS) installed, or .Net 9 (Windows) installed.
+ - Depends on your build target, you might need to have Xcode 16 (macOS target) or .Net 9 (Windows target) installed.
  - Run `./gradlew runDistributable` to build and run the debug version of the desktop app.
 
 ## Contributing

@@ -3,7 +3,7 @@ import shared
 import SwiftUI
 
 struct LiveFloatingPlayerView: View {
-    @StateObject private var manager = IOSPodcastManager.shared
+    @State private var manager = IOSPodcastManager.shared
     @Environment(FlareRouter.self) private var router
 
     @State private var showPodcastSheet: Bool = false

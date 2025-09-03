@@ -5,7 +5,7 @@ import SwiftUI
 
 struct HomeAppBarSettingsView: View {
     @Environment(\.dismiss) var dismiss
-    @ObservedObject var store: AppBarTabSettingStore = .shared
+    var store: AppBarTabSettingStore = .shared
 
     // 列表 presenter 状态
     @State private var listPresenter: AllListPresenter
@@ -744,7 +744,6 @@ struct HomeAppBarSettingsView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             // 确保store的状态更新
             store.saveTabs()
-            store.objectWillChange.send()
 
             // 重置状态
             isActionInProgress = false
@@ -775,7 +774,6 @@ struct HomeAppBarSettingsView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             // 确保store的状态更新
             store.saveTabs()
-            store.objectWillChange.send()
 
             // 重置状态
             isActionInProgress = false

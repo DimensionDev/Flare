@@ -1,4 +1,3 @@
-import Combine
 import os.log
 import SafariServices
 import shared
@@ -6,12 +5,10 @@ import SwiftUI
 import UIKit
 
 @Observable
-class FlareRouter: ObservableObject {
+class FlareRouter {
     public static let shared = FlareRouter()
 
     public var menuState: FlareMenuState
-
-    private var cancellables = Set<AnyCancellable>()
 
     var activeDestination: FlareDestination?
 

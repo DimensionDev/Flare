@@ -9,17 +9,18 @@ extension Notification.Name {
     static let listTitleDidUpdate = Notification.Name("listTitleDidUpdate")
 }
 
-class AppBarTabSettingStore: ObservableObject, TabStateProvider {
+@Observable
+class AppBarTabSettingStore: TabStateProvider {
     static let shared = AppBarTabSettingStore(accountType: AccountTypeGuest())
 
-    @Published var primaryHomeItems: [FLTabItem] = [] // 主要标签（不可更改状态）Appbar 第一个Home 标签
-    @Published var secondaryItems: [FLTabItem] = [] // 所有次要标签
-    @Published var availableAppBarTabsItems: [FLTabItem] = [] // UserDefaults 存储的已启用标签
+    var primaryHomeItems: [FLTabItem] = [] // 主要标签（不可更改状态）Appbar 第一个Home 标签
+    var secondaryItems: [FLTabItem] = [] // 所有次要标签
+    var availableAppBarTabsItems: [FLTabItem] = [] // UserDefaults 存储的已启用标签
 
     // 简化列表状态管理，只存储已pin的列表ID
-    @Published var pinnedListIds: [String] = [] // 收藏的列表ID
-    @Published var listTitles: [String: String] = [:] // 列表ID到标题的映射
-    @Published var listIconUrls: [String: String] = [:] // 列表ID到头像URL的映射
+    var pinnedListIds: [String] = [] // 收藏的列表ID
+    var listTitles: [String: String] = [:] // 列表ID到标题的映射
+    var listIconUrls: [String: String] = [:] // 列表ID到头像URL的映射
 
     // 添加统一配置存储
     private var appBarItems: [AppBarItemConfig] = []
@@ -27,9 +28,9 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
     // 添加同步锁，确保线程安全
     private let storageLock = NSLock()
 
-    @Published var selectedAppBarTabKey: String = "" // 选中的 tab key
-    @Published var currentPresenter: TimelinePresenter?
-    @Published var currentUser: UiUserV2?
+    var selectedAppBarTabKey: String = "" // 选中的 tab key
+    var currentPresenter: TimelinePresenter?
+    var currentUser: UiUserV2?
 
     private var presenter = ActiveAccountPresenter()
     private let settingsManager = FLTabSettingsManager()
@@ -147,7 +148,6 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
         listIconUrls = [:]
         appBarItems = [] // 清空统一配置
 
-        objectWillChange.send()
         FlareLog.debug("状态清除完成")
     }
 
@@ -333,8 +333,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
             selectedAppBarTabKey = availableAppBarTabsItems[0].key
         }
 
-        // 通知UI更新
-        objectWillChange.send()
+
     }
 
     // 从配置更新UI状态
@@ -563,7 +562,6 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
         saveAppBarConfig()
 
         // 发送变更通知
-        objectWillChange.send()
         notificationService.postTabsDidUpdateNotification()
 
         // 恢复选中状态
@@ -661,8 +659,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
                             newTitle: newTitle
                         )
 
-                        // 通知UI更新
-                        self.objectWillChange.send()
+
 
                         break
                     }
@@ -842,9 +839,6 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
                 }
             }
         }
-
-        // 通知UI更新
-        objectWillChange.send()
 
         // 添加发送TabsDidUpdate通知，确保HomeTabController更新UI
         notificationService.postTabsDidUpdateNotification()

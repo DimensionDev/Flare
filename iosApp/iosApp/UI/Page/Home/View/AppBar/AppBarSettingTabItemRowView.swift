@@ -190,7 +190,7 @@ struct ListTabItemRowRow: View {
             }
             .padding(.leading, 8)
         }
-        .onReceive(store.$listTitles) { _ in
+        .onChange(of: store.listTitles) { _, _ in
             if let updatedTitle = store.listTitles[listId] {
                 currentTitle = updatedTitle
             }

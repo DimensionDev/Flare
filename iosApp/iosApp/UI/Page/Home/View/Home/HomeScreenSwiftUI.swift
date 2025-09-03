@@ -6,7 +6,7 @@ struct HomeScreenSwiftUI: View {
 
     var onSwitchToMenuTab: (() -> Void)?
 
-    @StateObject private var tabStore = AppBarTabSettingStore.shared
+    @State private var tabStore = AppBarTabSettingStore.shared
     @Environment(TimelineExtState.self) private var timelineState
     @State private var selectedHomeAppBarTabKey: String = ""
     @State private var showAppbarSettings = false

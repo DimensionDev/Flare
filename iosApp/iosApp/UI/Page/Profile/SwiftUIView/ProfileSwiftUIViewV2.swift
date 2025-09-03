@@ -7,7 +7,7 @@ struct ProfileSwiftUIViewV2: View {
     let userKey: MicroBlogKey?
     let showBackButton: Bool
 
-    @StateObject private var presenterWrapper: ProfilePresenterWrapper
+    @State private var presenterWrapper: ProfilePresenterWrapper
     @Environment(FlareTheme.self) private var theme
     @Environment(TimelineExtState.self) private var timelineState
     @Environment(\.appSettings) private var appSettings
@@ -20,11 +20,12 @@ struct ProfileSwiftUIViewV2: View {
         self.showBackButton = showBackButton
 
         let presenterWrapper = ProfilePresenterWrapper(accountType: accountType, userKey: userKey)
-        _presenterWrapper = StateObject(wrappedValue: presenterWrapper)
+        _presenterWrapper = State(wrappedValue: presenterWrapper)
     }
 
     var body: some View {
         @Bindable var bindableTimelineState = timelineState
+        @Bindable var bindablePresenterWrapper = presenterWrapper
 
         ZStack(alignment: .bottomTrailing) {
             if presenterWrapper.isInitialized {
@@ -47,7 +48,7 @@ struct ProfileSwiftUIViewV2: View {
                             // Tab Bar
                             if !presenterWrapper.availableTabs.isEmpty {
                                 ProfileTabBarViewV2(
-                                    selectedTabKey: $presenterWrapper.selectedTabKey,
+                                    selectedTabKey: $bindablePresenterWrapper.selectedTabKey,
                                     availableTabs: presenterWrapper.availableTabs
                                 )
                                 .listRowInsets(EdgeInsets())

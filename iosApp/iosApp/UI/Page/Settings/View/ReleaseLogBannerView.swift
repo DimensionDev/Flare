@@ -1,11 +1,15 @@
 import SwiftUI
 
 struct ReleaseLogBannerView: View {
-    @ObservedObject private var releaseLogManager = ReleaseLogManager.shared
+    private var releaseLogManager = ReleaseLogManager.shared
     @Environment(FlareTheme.self) private var theme
     @State private var showReleaseLogSheet = false
 
     let onDismiss: () -> Void
+
+    init(onDismiss: @escaping () -> Void) {
+        self.onDismiss = onDismiss
+    }
 
     var body: some View {
         Button(action: {

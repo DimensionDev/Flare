@@ -1,8 +1,8 @@
 import AVFoundation
-import Combine
 import Foundation
 import MediaPlayer
 import shared
+import SwiftUI
 import UIKit
 
 enum PodcastPlaybackState: Equatable {
@@ -24,24 +24,20 @@ enum PodcastPlaybackState: Equatable {
     }
 }
 
-class IOSPodcastManager: ObservableObject {
+@Observable
+class IOSPodcastManager {
     static let shared = IOSPodcastManager()
 
-    @Published private(set) var currentPodcast: UiPodcast? = nil
-    @Published private(set) var isPlaying: Bool = false
-    @Published private(set) var playbackState: PodcastPlaybackState = .stopped
-    @Published private(set) var duration: Double? = nil
-    @Published private(set) var canSeek: Bool = false
-    @Published private(set) var isSeeking: Bool = false
-
+    private(set) var currentPodcast: UiPodcast? = nil
+    private(set) var isPlaying: Bool = false
+    private(set) var playbackState: PodcastPlaybackState = .stopped
+    private(set) var duration: Double? = nil
+    private(set) var canSeek: Bool = false
+    private(set) var isSeeking: Bool = false
     private(set) var currentTime: Double = 0.0
-    private let currentTimeSubject = CurrentValueSubject<Double, Never>(0.0)
-    var currentTimePublisher: AnyPublisher<Double, Never> {
-        currentTimeSubject.eraseToAnyPublisher()
-    }
 
     var currentPlaybackTime: Double {
-        currentTimeSubject.value
+        currentTime
     }
 
     private var player: AVPlayer?
@@ -105,7 +101,6 @@ class IOSPodcastManager: ObservableObject {
             self.isPlaying = false
             self.duration = nil
             self.currentTime = 0.0
-            self.currentTimeSubject.send(0.0)
             self.canSeek = false
             self.isSeeking = false
             self.updateNowPlayingInfo()
@@ -133,7 +128,6 @@ class IOSPodcastManager: ObservableObject {
             self.isPlaying = false
             self.duration = nil
             self.currentTime = 0.0
-            self.currentTimeSubject.send(0.0)
             MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         }
     }
@@ -196,7 +190,6 @@ class IOSPodcastManager: ObservableObject {
                 FlareLog.debug("iOSPodcastManager Seek completed successfully to \(time).")
                 DispatchQueue.main.async {
                     self.currentTime = time
-                    self.currentTimeSubject.send(time)
                     self.updateNowPlayingInfo()
                 }
             } else {
@@ -346,8 +339,6 @@ class IOSPodcastManager: ObservableObject {
             // Only update if time has actually changed significantly and not during seeking
             if abs(currentTimeSeconds - currentTime) > 0.01, !isSeeking {
                 currentTime = currentTimeSeconds
-                currentTimeSubject.send(currentTimeSeconds)
-
                 updateNowPlayingInfo()
             }
         }
@@ -524,10 +515,14 @@ class IOSPodcastManager: ObservableObject {
             } catch let error as NSError where error.domain == NSURLErrorDomain && error.code == NSURLErrorCancelled {
                 FlareLog.debug("iOSPodcastManager Artwork fetch task explicitly cancelled for ID: \(podcast.id).")
 
-                await MainActor.run { self.artworkLoadingTasks.removeValue(forKey: podcast.id) }
+                await MainActor.run {
+                    _ = self.artworkLoadingTasks.removeValue(forKey: podcast.id)
+                }
             } catch {
                 FlareLog.error("iOSPodcastManager Error fetching artwork: \(error.localizedDescription)")
-                await MainActor.run { self.artworkLoadingTasks.removeValue(forKey: podcast.id) }
+                await MainActor.run {
+                    _ = self.artworkLoadingTasks.removeValue(forKey: podcast.id)
+                }
             }
         }
 

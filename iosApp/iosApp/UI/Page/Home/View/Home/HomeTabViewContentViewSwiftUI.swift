@@ -3,7 +3,7 @@ import SwiftUI
 import SwiftUIIntrospect
 
 struct HomeTabViewContentViewSwiftUI: View {
-    @ObservedObject var tabStore: AppBarTabSettingStore
+    var tabStore: AppBarTabSettingStore
     @Binding var selectedTab: String
     @Environment(\.appSettings) private var appSettings
 

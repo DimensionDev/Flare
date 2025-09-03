@@ -4,8 +4,8 @@ import SwiftUI
 
 struct FlareRootView: View {
     @State var menuState = FlareMenuState()
-    @StateObject private var router = FlareRouter.shared
-    @StateObject private var composeManager = ComposeManager.shared
+    @State private var router = FlareRouter.shared
+    @State private var composeManager = ComposeManager.shared
     @State private var timelineState = TimelineExtState()
     @State private var presenter = ActiveAccountPresenter()
     @Environment(\.appSettings) private var appSettings
@@ -67,7 +67,10 @@ struct FlareRootView: View {
                                     secondaryButton: .cancel()
                                 )
                             }
-                            .sheet(isPresented: $composeManager.showCompose) {
+                            .sheet(isPresented: Binding(
+                                get: { composeManager.showCompose },
+                                set: { composeManager.showCompose = $0 }
+                            )) {
                                 if let composeAccountType = composeManager.composeAccountType {
                                     NavigationView {
                                         ComposeScreen(

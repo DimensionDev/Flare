@@ -4,7 +4,7 @@ import SwiftUI
 
 struct TimelineViewSwiftUIV4: View {
     let tab: FLTabItem
-    @ObservedObject var store: AppBarTabSettingStore
+    var store: AppBarTabSettingStore
     let isCurrentAppBarTabSelected: Bool
     @Environment(FlareTheme.self) private var theme
     @Environment(\.shouldShowVersionBanner) private var shouldShowVersionBanner

@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.component.status
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
@@ -231,6 +233,7 @@ import dev.dimension.flare.compose.ui.xqt_item_reblogged_status
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareDividerDefaults
 import dev.dimension.flare.ui.component.VerticalDivider
 import dev.dimension.flare.ui.component.platform.PlatformButton
 import dev.dimension.flare.ui.component.platform.PlatformCard
@@ -459,9 +462,17 @@ private fun UserListContent(
         }
         val status = data.status
         if (status != null) {
-            StatusContent(
+            QuotedStatus(
                 data = status,
-                detailStatusKey = null,
+                modifier =
+                    Modifier
+                        .border(
+                            FlareDividerDefaults.thickness,
+                            color = FlareDividerDefaults.color,
+                            shape = PlatformTheme.shapes.medium,
+                        ).clip(
+                            shape = PlatformTheme.shapes.medium,
+                        ),
             )
         }
     }

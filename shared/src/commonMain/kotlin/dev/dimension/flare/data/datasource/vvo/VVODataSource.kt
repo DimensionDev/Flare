@@ -352,8 +352,10 @@ internal class VVODataSource(
         val mediaId = mediaIds.joinToString(",")
         if (data.referenceStatus != null && data.referenceStatus.composeStatus is ComposeStatus.VVOComment) {
             service.replyComment(
-                id = data.referenceStatus.composeStatus.statusKey.id,
-                cid = data.referenceStatus.composeStatus.rootId,
+                cid = data.referenceStatus.composeStatus.statusKey.id,
+                reply = data.referenceStatus.composeStatus.statusKey.id,
+                id = data.referenceStatus.composeStatus.rootId,
+                mid = data.referenceStatus.composeStatus.rootId,
                 content = data.content,
                 st = st,
                 picId = mediaId,

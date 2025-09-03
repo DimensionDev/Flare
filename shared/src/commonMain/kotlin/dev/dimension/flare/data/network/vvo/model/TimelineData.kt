@@ -580,6 +580,7 @@ internal data class Comment(
     val bid: String? = null,
     val comments: JsonElement? = null,
     val pic: StatusPic? = null,
+    val analysis_extra: String? = null,
 ) {
     val commentList: List<Comment>?
         get() =

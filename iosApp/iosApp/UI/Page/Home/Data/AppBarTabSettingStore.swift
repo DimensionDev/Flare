@@ -332,8 +332,6 @@ class AppBarTabSettingStore: TabStateProvider {
         } else if !availableAppBarTabsItems.isEmpty {
             selectedAppBarTabKey = availableAppBarTabsItems[0].key
         }
-
-
     }
 
     // 从配置更新UI状态
@@ -658,8 +656,6 @@ class AppBarTabSettingStore: TabStateProvider {
                             updatedTabKey: tabKey,
                             newTitle: newTitle
                         )
-
-
 
                         break
                     }

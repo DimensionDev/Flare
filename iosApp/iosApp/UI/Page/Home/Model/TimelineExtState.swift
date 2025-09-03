@@ -9,7 +9,6 @@ class TimelineExtState {
     private var lastScrollOffset: CGFloat = 0
 
     func updateTabBarOffset(currentOffset: CGFloat, isHomeTab: Bool) {
-       
         guard isHomeTab else {
             if tabBarOffset != 0 {
                 tabBarOffset = 0
@@ -43,7 +42,6 @@ class TimelineExtState {
 
         // 向上滚动 显示TabBar
         else if scrollDelta < 0 {
-
             guard tabBarOffset != 0 else {
                 lastScrollOffset = currentOffset
                 return

@@ -17,7 +17,6 @@ struct ReleaseLogScreen: View {
                 } else {
                     ForEach(releaseLogManager.releaseLogEntries, id: \.version) { entry in
                         VStack(alignment: .leading, spacing: 12) {
-
                             if let translatedContent = translatedEntries[entry.version] {
                                 Markdown(translatedContent)
                                     .markdownTheme(.flareMarkdownStyle(using: theme.flareTextBodyTextStyle, fontScale: theme.fontSizeScale))
@@ -70,28 +69,22 @@ struct ReleaseLogScreen: View {
         }
     }
 
-
     private func translateWithMergedContent(translationService: GoogleTranslationService) async {
         let entries = releaseLogManager.releaseLogEntries
         let separator = "###FLARE_RELEASE_LOG_SEPARATOR###"
 
-
         let fullContent = entries.map(\.content).joined(separator: separator)
 
         do {
-
             let result = try await translationService.translate(text: fullContent)
 
-
             let translatedParts = result.translatedText.components(separatedBy: separator)
-
 
             guard translatedParts.count == entries.count else {
                 print("拆分结果数量不匹配，降级到逐个翻译")
                 await fallbackToIndividualTranslation(translationService: translationService)
                 return
             }
-
 
             var newTranslatedEntries: [String: String] = [:]
             for (index, entry) in entries.enumerated() {
@@ -112,16 +105,13 @@ struct ReleaseLogScreen: View {
         }
     }
 
-
     private func fallbackToIndividualTranslation(translationService: GoogleTranslationService) async {
         let entries = releaseLogManager.releaseLogEntries
         var newTranslatedEntries: [String: String] = [:]
 
-
         newTranslatedEntries = translatedEntries
 
         for entry in entries {
-
             if translatedEntries[entry.version] != nil {
                 continue
             }
@@ -131,7 +121,6 @@ struct ReleaseLogScreen: View {
                 newTranslatedEntries[entry.version] = result.translatedText
             } catch {
                 print("翻译条目失败 \(entry.version): \(error)")
-
             }
         }
 

@@ -28,10 +28,10 @@ enum PodcastPlaybackState: Equatable {
 class IOSPodcastManager {
     static let shared = IOSPodcastManager()
 
-    private(set) var currentPodcast: UiPodcast? = nil
+    private(set) var currentPodcast: UiPodcast?
     private(set) var isPlaying: Bool = false
     private(set) var playbackState: PodcastPlaybackState = .stopped
-    private(set) var duration: Double? = nil
+    private(set) var duration: Double?
     private(set) var canSeek: Bool = false
     private(set) var isSeeking: Bool = false
     private(set) var currentTime: Double = 0.0

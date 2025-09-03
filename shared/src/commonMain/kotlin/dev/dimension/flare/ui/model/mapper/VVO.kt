@@ -351,6 +351,21 @@ internal fun Comment.renderStatus(
             id = id,
             host = vvoHost,
         )
+    val statusMid =
+        status?.mid ?: run {
+            analysis_extra
+                ?.split('|')
+                ?.mapNotNull {
+                    val pair = it.split(':')
+                    if (pair.size == 2) {
+                        pair[0] to pair[1]
+                    } else {
+                        null
+                    }
+                }?.toMap()
+                ?.get("mid")
+        }
+
     return UiTimeline.ItemContent.Status(
         statusKey = statusKey,
         content = element.toUi(),
@@ -372,8 +387,13 @@ internal fun Comment.renderStatus(
                                 )
                             },
                         )
-                }.orEmpty()
-                .toImmutableList(),
+                }?.toImmutableList() ?: listOfNotNull(status)
+                .map {
+                    it.renderStatus(
+                        accountKey,
+                        event,
+                    )
+                }.toImmutableList(),
         card = null,
         contentWarning = null,
         images =
@@ -398,20 +418,20 @@ internal fun Comment.renderStatus(
         poll = null,
         actions =
             listOfNotNull(
-                StatusAction.Item.Reply(
-                    count = replyCount ?: 0,
-                    onClicked = {
-                        if (rootidstr != null) {
+                statusMid?.let {
+                    StatusAction.Item.Reply(
+                        count = replyCount ?: 0,
+                        onClicked = {
                             launcher.launch(
                                 AppDeepLink.VVO.ReplyToComment(
                                     accountKey = accountKey,
                                     replyTo = statusKey,
-                                    rootId = rootidstr,
+                                    rootId = statusMid,
                                 ),
                             )
-                        }
-                    },
-                ),
+                        },
+                    )
+                },
                 StatusAction.Item.Like(
                     count = likeCount ?: 0,
                     liked = liked ?: false,
@@ -450,12 +470,21 @@ internal fun Comment.renderStatus(
         createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
         sensitive = false,
         onClicked = {
-            launcher.launch(
-                AppDeepLink.VVO.CommentDetail(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                ),
-            )
+            if (status != null) {
+                launcher.launch(
+                    AppDeepLink.VVO.StatusDetail(
+                        accountKey = accountKey,
+                        statusKey = status.renderStatus(accountKey, event).statusKey,
+                    ),
+                )
+            } else {
+                launcher.launch(
+                    AppDeepLink.VVO.CommentDetail(
+                        accountKey = accountKey,
+                        statusKey = statusKey,
+                    ),
+                )
+            }
         },
         platformType = PlatformType.VVo,
         onMediaClicked = { media, index ->
@@ -490,6 +519,11 @@ internal fun Attitude.render(
 ): UiTimeline {
     val content = status?.renderStatus(accountKey, event)
     val user = user?.render(accountKey)
+    val userListContent =
+        UiTimeline.ItemContent.UserList(
+            users = listOfNotNull(user).toImmutableList(),
+            status = content,
+        )
     return UiTimeline(
         topMessage =
             UiTimeline.TopMessage(
@@ -508,7 +542,7 @@ internal fun Attitude.render(
                 },
                 statusKey = MicroBlogKey(id.toString(), vvoHost),
             ),
-        content = content,
+        content = userListContent,
     )
 }
 

@@ -216,12 +216,7 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
                     showLinkPreview = appearanceSettings.showLinkPreview,
                     showMedia = appearanceSettings.showMedia,
                     showSensitiveContent = appearanceSettings.showSensitiveContent,
-                    videoAutoplay =
-                        when (appearanceSettings.videoAutoplay) {
-                            VideoAutoplay.ALWAYS -> ComponentAppearance.VideoAutoplay.ALWAYS
-                            VideoAutoplay.WIFI -> ComponentAppearance.VideoAutoplay.NEVER
-                            VideoAutoplay.NEVER -> ComponentAppearance.VideoAutoplay.NEVER
-                        },
+                    videoAutoplay = VideoAutoplay.NEVER,
                     expandMediaSize = appearanceSettings.expandMediaSize,
                     compatLinkPreview = appearanceSettings.compatLinkPreview,
                     aiConfig =

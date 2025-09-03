@@ -1,5 +1,6 @@
-import java.util.Properties
+
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -135,9 +136,9 @@ val macExtraPlistKeys: String
 
 extra["sqliteVersion"] = libs.versions.sqlite.get()
 extra["sqliteOsArch"] = "osx_arm64"
-extra["composeMediaPlayerVersion"] = libs.versions.composemediaplayer.get()
 extra["jnaVersion"] = libs.versions.jna.get()
 extra["nativeDestDir"] = "resources/macos-arm64"
 
 apply(from = File(projectDir, "install-native-libs.gradle.kts"))
 apply(from = File(projectDir, "build-swift.gradle.kts"))
+

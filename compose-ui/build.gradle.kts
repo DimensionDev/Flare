@@ -87,7 +87,6 @@ kotlin {
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.fluent.ui)
                 implementation(libs.koin.compose)
-                implementation(libs.composemediaplayer)
                 implementation(libs.androidx.collection)
             }
         }

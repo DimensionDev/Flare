@@ -39,12 +39,12 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostAccounts
 import dev.dimension.flare.data.network.mastodon.api.model.PostList
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
 import dev.dimension.flare.data.network.mastodon.api.model.PostReport
-import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -615,11 +615,12 @@ internal open class MastodonDataSource(
 
                 StatusActionResult.success()
             } catch (e: Throwable) {
-                val errorMessage = when (e) {
-                    is MastodonException -> e.error ?: e.message ?: "Unknown Mastodon error"
-                    is LoginExpiredException -> "Login expired, please re-login"
-                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
-                }
+                val errorMessage =
+                    when (e) {
+                        is MastodonException -> e.error ?: e.message ?: "Unknown Mastodon error"
+                        is LoginExpiredException -> "Login expired, please re-login"
+                        else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                    }
                 StatusActionResult.failure(errorMessage)
             }
         }
@@ -641,11 +642,12 @@ internal open class MastodonDataSource(
 
                 StatusActionResult.success()
             } catch (e: Throwable) {
-                val errorMessage = when (e) {
-                    is MastodonException -> e.error ?: e.message ?: "Unknown Mastodon error"
-                    is LoginExpiredException -> "Login expired, please re-login"
-                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
-                }
+                val errorMessage =
+                    when (e) {
+                        is MastodonException -> e.error ?: e.message ?: "Unknown Mastodon error"
+                        is LoginExpiredException -> "Login expired, please re-login"
+                        else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                    }
                 StatusActionResult.failure(errorMessage)
             }
         }
@@ -667,11 +669,12 @@ internal open class MastodonDataSource(
 
                 StatusActionResult.success()
             } catch (e: Throwable) {
-                val errorMessage = when (e) {
-                    is MastodonException -> e.error ?: e.message ?: "Unknown Mastodon error"
-                    is LoginExpiredException -> "Login expired, please re-login"
-                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
-                }
+                val errorMessage =
+                    when (e) {
+                        is MastodonException -> e.error ?: e.message ?: "Unknown Mastodon error"
+                        is LoginExpiredException -> "Login expired, please re-login"
+                        else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                    }
                 StatusActionResult.failure(errorMessage)
             }
         }

@@ -74,8 +74,8 @@ import dev.dimension.flare.data.network.xqt.model.UpdateListRequest
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -794,10 +794,11 @@ internal class XQTDataSource(
 
                 StatusActionResult.success()
             } catch (e: Throwable) {
-                val errorMessage = when (e) {
-                    is LoginExpiredException -> "Login expired, please re-login"
-                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
-                }
+                val errorMessage =
+                    when (e) {
+                        is LoginExpiredException -> "Login expired, please re-login"
+                        else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                    }
                 StatusActionResult.failure(errorMessage)
             }
         }
@@ -1002,10 +1003,11 @@ internal class XQTDataSource(
 
                 StatusActionResult.success()
             } catch (e: Throwable) {
-                val errorMessage = when (e) {
-                    is LoginExpiredException -> "Login expired, please re-login"
-                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
-                }
+                val errorMessage =
+                    when (e) {
+                        is LoginExpiredException -> "Login expired, please re-login"
+                        else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                    }
                 StatusActionResult.failure(errorMessage)
             }
         }
@@ -1042,10 +1044,11 @@ internal class XQTDataSource(
 
                 StatusActionResult.success()
             } catch (e: Throwable) {
-                val errorMessage = when (e) {
-                    is LoginExpiredException -> "Login expired, please re-login"
-                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
-                }
+                val errorMessage =
+                    when (e) {
+                        is LoginExpiredException -> "Login expired, please re-login"
+                        else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                    }
                 StatusActionResult.failure(errorMessage)
             }
         }

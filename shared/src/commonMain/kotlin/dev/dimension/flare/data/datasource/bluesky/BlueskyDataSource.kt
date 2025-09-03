@@ -93,9 +93,8 @@ import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.LoginExpiredException
-import sh.christian.ozone.api.response.AtpException
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -140,6 +139,7 @@ import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
 import sh.christian.ozone.api.model.JsonContent
 import sh.christian.ozone.api.model.JsonContent.Companion.encodeAsJsonContent
+import sh.christian.ozone.api.response.AtpException
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
@@ -737,11 +737,12 @@ internal class BlueskyDataSource(
 
                 StatusActionResult.success()
             } catch (e: Throwable) {
-                val errorMessage = when (e) {
-                    is AtpException -> e.error?.message ?: e.error?.error ?: e.message ?: "Unknown Bluesky error"
-                    is LoginExpiredException -> "Login expired, please re-login"
-                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
-                }
+                val errorMessage =
+                    when (e) {
+                        is AtpException -> e.error?.message ?: e.error?.error ?: e.message ?: "Unknown Bluesky error"
+                        is LoginExpiredException -> "Login expired, please re-login"
+                        else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                    }
                 StatusActionResult.failure(errorMessage)
             }
         }
@@ -789,11 +790,12 @@ internal class BlueskyDataSource(
 
                 StatusActionResult.success()
             } catch (e: Throwable) {
-                val errorMessage = when (e) {
-                    is AtpException -> e.error?.message ?: e.error?.error ?: e.message ?: "Unknown Bluesky error"
-                    is LoginExpiredException -> "Login expired, please re-login"
-                    else -> e.message ?: e::class.simpleName ?: "Unknown error"
-                }
+                val errorMessage =
+                    when (e) {
+                        is AtpException -> e.error?.message ?: e.error?.error ?: e.message ?: "Unknown Bluesky error"
+                        is LoginExpiredException -> "Login expired, please re-login"
+                        else -> e.message ?: e::class.simpleName ?: "Unknown error"
+                    }
                 StatusActionResult.failure(errorMessage)
             }
         }

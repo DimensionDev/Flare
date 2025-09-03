@@ -1,13 +1,15 @@
 import SwiftUI
 
-class TimelineExtState: ObservableObject {
-    @Published var scrollToTopTrigger = false
-    @Published var showFloatingButton = false
+@Observable
+class TimelineExtState {
+    var scrollToTopTrigger = false
+    var showFloatingButton = false
 
-    @Published var tabBarOffset: CGFloat = 0 // TabBar偏移量，0=显示，100=隐藏
+    var tabBarOffset: CGFloat = 0 // TabBar偏移量，0=显示，100=隐藏
     private var lastScrollOffset: CGFloat = 0
 
     func updateTabBarOffset(currentOffset: CGFloat, isHomeTab: Bool) {
+       
         guard isHomeTab else {
             if tabBarOffset != 0 {
                 tabBarOffset = 0
@@ -15,24 +17,42 @@ class TimelineExtState: ObservableObject {
             return
         }
 
+        //  滚动到顶部时显示TabBar
         if currentOffset <= 0 {
             if tabBarOffset != 0 {
                 tabBarOffset = 0
+                lastScrollOffset = currentOffset
             }
-            lastScrollOffset = currentOffset
             return
         }
 
         let scrollDelta = currentOffset - lastScrollOffset
 
-        if scrollDelta > 30, tabBarOffset == 0 {
-            tabBarOffset = 100
+        // 向下滚动 隐藏TabBar
+        if scrollDelta > 0 {
+            guard tabBarOffset != 100 else {
+                lastScrollOffset = currentOffset
+                return
+            }
+
+            if scrollDelta > 30 {
+                tabBarOffset = 100
+                lastScrollOffset = currentOffset
+            }
         }
 
-        else if scrollDelta < -30, tabBarOffset != 0 {
-            tabBarOffset = 0
-        }
+        // 向上滚动 显示TabBar
+        else if scrollDelta < 0 {
 
-        lastScrollOffset = currentOffset
+            guard tabBarOffset != 0 else {
+                lastScrollOffset = currentOffset
+                return
+            }
+
+            if scrollDelta < -10 {
+                tabBarOffset = 0
+                lastScrollOffset = currentOffset
+            }
+        }
     }
 }

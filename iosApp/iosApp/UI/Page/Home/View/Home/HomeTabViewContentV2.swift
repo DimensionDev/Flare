@@ -10,7 +10,7 @@ struct HomeTabViewContentV2: View {
     @Environment(FlareMenuState.self) private var menuState
     @Environment(FlareTheme.self) private var theme
     @Environment(\.appSettings) private var appSettings
-    @EnvironmentObject private var timelineState: TimelineExtState
+    @Environment(TimelineExtState.self) private var timelineState
 
     let accountType: AccountType
 
@@ -108,7 +108,7 @@ struct HomeTabViewContentV2: View {
                         accountType: accountType
                     )
                     .offset(y: timelineState.tabBarOffset)
-                    .animation(.easeInOut(duration: 0.3), value: timelineState.tabBarOffset)
+                    .animation(.easeInOut(duration: 0.1), value: timelineState.tabBarOffset)
 
                     Rectangle()
                         .fill(.clear)

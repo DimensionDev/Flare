@@ -6,7 +6,7 @@ struct FlareRootView: View {
     @State var menuState = FlareMenuState()
     @StateObject private var router = FlareRouter.shared
     @StateObject private var composeManager = ComposeManager.shared
-    @StateObject private var timelineState = TimelineExtState()
+    @State private var timelineState = TimelineExtState()
     @State private var presenter = ActiveAccountPresenter()
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareTheme.self) private var theme
@@ -36,7 +36,7 @@ struct FlareRootView: View {
                             .applyTheme(theme)
                             .environment(menuState)
                             .environment(router)
-                            .environmentObject(timelineState)
+                            .environment(timelineState)
                             .sheet(isPresented: $router.isSheetPresented) {
                                 if let destination = router.activeDestination {
                                     FlareDestinationView(

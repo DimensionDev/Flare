@@ -337,7 +337,6 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>We\’ve completed the UI/UX adjustments for the app, and will continue optimizing</li>
                 <li>Bug fixes and performance improvements</li>
             </ul>
         ]]>

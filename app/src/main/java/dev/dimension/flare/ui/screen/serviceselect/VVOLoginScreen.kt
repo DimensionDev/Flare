@@ -20,9 +20,9 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.VVOLoginPresenter
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import moe.tlaster.precompose.molecule.producePresenter
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun VVOLoginScreen(toHome: () -> Unit) {

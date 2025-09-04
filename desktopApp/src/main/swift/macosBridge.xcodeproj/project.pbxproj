@@ -268,7 +268,7 @@
 					"$(PROJECT_DIR)/macosBridge/build/macosBridge.build/Release/macosBridge.build/Objects-normal/arm64/Binary",
 					"$(PROJECT_DIR)/macosBridge/build/macosBridge.build/Release/macosBridge.build/Objects-normal/x86_64/Binary",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -293,7 +293,7 @@
 					"$(PROJECT_DIR)/macosBridge/build/macosBridge.build/Release/macosBridge.build/Objects-normal/arm64/Binary",
 					"$(PROJECT_DIR)/macosBridge/build/macosBridge.build/Release/macosBridge.build/Objects-normal/x86_64/Binary",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 6.0;

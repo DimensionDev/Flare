@@ -4,6 +4,12 @@ import Kingfisher
 import SwiftUI
 import AVKit
 
+class ClosableWindow : NSWindow {
+    override func cancelOperation(_ sender: Any?) {
+        self.close()
+    }
+}
+
 @_cdecl("open_img_viewer")
 public func open_img_viewer(urlCString: UnsafePointer<CChar>?) {
     let urlStr = urlCString.flatMap { String(cString: $0) } ?? "about:blank"
@@ -11,13 +17,14 @@ public func open_img_viewer(urlCString: UnsafePointer<CChar>?) {
     DispatchQueue.main.async {
         if NSApp == nil { _ = NSApplication.shared }
 
-        let win = NSWindow(contentRect: NSRect(x: 200, y: 200, width: 1000, height: 700),
+        let win = ClosableWindow(contentRect: NSRect(x: 200, y: 200, width: 1000, height: 700),
                            styleMask: [.resizable, .titled, .closable, .miniaturizable, .fullSizeContentView],
                            backing: .buffered, defer: false)
         win.titlebarAppearsTransparent = true
         win.titleVisibility = .hidden
         win.isMovableByWindowBackground = true
         win.appearance = .init(named: .darkAqua)
+        win.setFrameOriginToPositionWindowInCenterOfScreen()
 
         win.contentView = makeZoomingScrollView(targetURL: targetURL)
         win.isReleasedWhenClosed = false
@@ -35,13 +42,14 @@ public func open_video_viewer(urlCString: UnsafePointer<CChar>?) {
     DispatchQueue.main.async {
         if NSApp == nil { _ = NSApplication.shared }
 
-        let win = NSWindow(contentRect: NSRect(x: 200, y: 200, width: 1000, height: 700),
+        let win = ClosableWindow(contentRect: NSRect(x: 200, y: 200, width: 1000, height: 700),
                            styleMask: [.resizable, .titled, .closable, .miniaturizable, .fullSizeContentView],
                            backing: .buffered, defer: false)
         win.titlebarAppearsTransparent = true
         win.titleVisibility = .hidden
         win.isMovableByWindowBackground = true
         win.appearance = .init(named: .darkAqua)
+        win.setFrameOriginToPositionWindowInCenterOfScreen()
         let playerView = AVPlayerView()
         let videoPlayer = AVPlayer(url: targetURL)
         playerView.player = videoPlayer
@@ -56,53 +64,94 @@ public func open_video_viewer(urlCString: UnsafePointer<CChar>?) {
 
 
 
-//struct OpenStatusImageModel: Decodable {
-//    let index: Int
-//    let medias: [StatusMediaItem]
-//}
-//
-//struct StatusMediaItem: Decodable {
-//    let url: String
-//    let type: String
-//    let placeholder: String?
-//}
-//
-//@_cdecl("open_status_image_viewer")
-//public func open_status_image_viewer(_ json: UnsafePointer<CChar>?) {
-//    guard let json = json else { return }
-//    let s = String(cString: json)
-//    if let data = s.data(using: .utf8),
-//       let model = try? JSONDecoder().decode(OpenStatusImageModel.self, from: data) {
-//        DispatchQueue.main.sync {
-//            if NSApp == nil { _ = NSApplication.shared }
-//            let win = NSWindow(contentRect: NSRect(x: 200, y: 200, width: 1000, height: 700),
-//                               styleMask: [.resizable, .titled, .closable, .miniaturizable, .fullSizeContentView],
-//                               backing: .buffered, defer: false)
-////            let win = NSWindow(contentViewController: OpenStatusPagerViewController(model: model))
-////            win.contentMinSize = .init(width: 100, height: 100)
-////            win.styleMask = [.resizable, .titled, .closable, .miniaturizable, .fullSizeContentView]
-//            win.titlebarAppearsTransparent = true
-//            win.titleVisibility = .hidden
-//            win.isMovableByWindowBackground = true
-//            win.appearance = .init(named: .darkAqua)
-//            
-////            let pagerVC = OpenStatusPagerViewController(model: model)
-////            win.contentViewController = pagerVC
-//            win.contentView = NSHostingView(rootView: MediaPagerView(model: model))
-//            win.isReleasedWhenClosed = false
-//            win.delegate = windowDelegate
-//            openedWindows.insert(win)
-//            swiftLog(2, "Window opened. Total windows: \(openedWindows.count)") // 调试日志
-//
-//            win.makeKeyAndOrderFront(nil)
-//            NSApp.activate(ignoringOtherApps: true)
-//            swiftLog(2, "8. Window should be visible. Window count: \(openedWindows.count)")
-//            swiftLog(2, "9. Window is visible: \(win.isVisible), is key: \(win.isKeyWindow)")
-//
-//        }
-//    }
-//}
+struct OpenStatusImageModel: Decodable {
+    let index: Int
+    let medias: [StatusMediaItem]
+}
 
+struct StatusMediaItem: Decodable {
+    let url: String
+    let type: String
+    let placeholder: String?
+}
+
+@_cdecl("open_status_image_viewer")
+public func open_status_image_viewer(_ json: UnsafePointer<CChar>?) {
+    guard let json = json else { return }
+    let s = String(cString: json)
+    if let data = s.data(using: .utf8),
+       let model = try? JSONDecoder().decode(OpenStatusImageModel.self, from: data) {
+        DispatchQueue.main.sync {
+            if NSApp == nil { _ = NSApplication.shared }
+            let win = ClosableWindow(contentRect: NSRect(x: 200, y: 200, width: 1000, height: 700),
+                               styleMask: [.resizable, .titled, .closable, .miniaturizable, .fullSizeContentView],
+                               backing: .buffered, defer: false)
+            win.titlebarAppearsTransparent = true
+            win.titleVisibility = .hidden
+            win.isMovableByWindowBackground = true
+            win.appearance = .init(named: .darkAqua)
+            win.setFrameOriginToPositionWindowInCenterOfScreen()
+            
+            win.contentView = NSHostingView(rootView: StatusMediaView(medias: model.medias, page: model.index))
+            win.isReleasedWhenClosed = false
+            
+            win.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+
+        }
+    }
+}
+
+
+struct StatusMediaView: View {
+    let medias: [StatusMediaItem]
+    @State var page: Int? = 0
+    var body: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 0) {
+                ForEach(0..<medias.count, id: \.self) { i in
+                    let media = medias[i]
+                    ZStack {
+                        if (media.type == "gif" || media.type == "image") {
+                            KFImage(.init(string: media.url)!)
+                                .placeholder({
+                                    if let placeholder = media.placeholder {
+                                        KFImage
+                                            .url(.init(string: placeholder)!)
+                                            .resizable()
+                                            .scaledToFit()
+                                    } else {
+                                        ProgressView()
+                                    }
+                                })
+                                .resizable()
+                                .scaledToFit()
+                        } else if (media.type == "video") {
+                            if (page == i) {
+                                let player = AVPlayer(url: .init(string: media.url)!)
+                                VideoPlayer(player: player)
+                                    .onAppear {
+                                        player.play()
+                                    }
+                            } else if let placeholder = media.placeholder {
+                                KFImage(.init(string: placeholder)!)
+                            } else {
+                                EmptyView()
+                            }
+                        }
+                    }
+                    .containerRelativeFrame(.horizontal, count: 1, spacing: 0)
+                    .id(i)
+                }
+            }
+            .scrollTargetLayout()
+        }
+        .scrollIndicators(.hidden)
+        .scrollTargetBehavior(.paging)
+        .scrollPosition(id: $page)
+        .ignoresSafeArea()
+    }
+}
 
 
 
@@ -163,5 +212,13 @@ final class CenteringClipView: NSClipView {
             rect.origin.y = -(clipSize.height - docSize.height) / 2
         }
         return rect
+    }
+}
+
+extension NSWindow {
+    public func setFrameOriginToPositionWindowInCenterOfScreen() {
+        if let screenSize = screen?.frame.size {
+            self.setFrameOrigin(NSPoint(x: (screenSize.width-frame.size.width)/2, y: (screenSize.height-frame.size.height)/2))
+        }
     }
 }

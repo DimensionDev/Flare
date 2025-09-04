@@ -9,6 +9,9 @@ import kotlinx.serialization.Serializable
 internal object MacosBridge {
     private interface Bridge : Library {
         @Suppress("FunctionName")
+        fun open_status_image_viewer(modelJson: String)
+
+        @Suppress("FunctionName")
         fun open_video_viewer(modelJson: String)
 
         @Suppress("FunctionName")
@@ -122,18 +125,10 @@ internal object MacosBridge {
                 index = selectedIndex,
                 medias = medias,
             )
-
-        val selectedItem = data.getOrNull(selectedIndex)
-        when (selectedItem) {
-            is UiMedia.Audio -> Unit
-            is UiMedia.Gif ->
-                lib.open_img_viewer(selectedItem.url)
-            is UiMedia.Image ->
-                lib.open_img_viewer(selectedItem.url)
-            is UiMedia.Video ->
-                lib.open_video_viewer(selectedItem.url)
-            null -> Unit
-        }
+        val modelJson =
+            kotlinx.serialization.json.Json
+                .encodeToString(OpenStatusImageModel.serializer(), model)
+        lib.open_status_image_viewer(modelJson)
     }
 
     @Serializable

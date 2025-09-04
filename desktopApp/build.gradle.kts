@@ -55,7 +55,7 @@ compose.desktop {
                 val hasSigningProps = file.exists()
                 packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "21"
                 bundleID = "dev.dimension.flare"
-                minimumSystemVersion = "12.0"
+                minimumSystemVersion = "14.0"
                 appStore = hasSigningProps
 
                 jvmArgs(

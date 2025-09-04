@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.brands.Discord
 import compose.icons.fontawesomeicons.brands.Github
 import compose.icons.fontawesomeicons.brands.Line
 import compose.icons.fontawesomeicons.brands.Telegram
@@ -33,6 +34,8 @@ import dev.dimension.flare.app_name
 import dev.dimension.flare.ic_launcher_foreground
 import dev.dimension.flare.ic_logo_text
 import dev.dimension.flare.settings_about_description
+import dev.dimension.flare.settings_about_discord
+import dev.dimension.flare.settings_about_discord_description
 import dev.dimension.flare.settings_about_line
 import dev.dimension.flare.settings_about_line_description
 import dev.dimension.flare.settings_about_localization
@@ -138,6 +141,29 @@ public fun AboutScreenContent(
                     Icon(
                         imageVector = FontAwesomeIcons.Brands.Telegram,
                         contentDescription = stringResource(resource = Res.string.settings_about_telegram),
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+            )
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(resource = Res.string.settings_about_discord))
+                },
+                supportingContent = {
+                    Text(
+                        text = stringResource(resource = Res.string.settings_about_discord_description),
+                    )
+                },
+                modifier =
+                    Modifier
+                        .compatClip(MaterialTheme.shapes.extraSmall)
+                        .clickable {
+                            uriHandler.openUri("https://discord.gg/De9NhXBryT")
+                        },
+                leadingContent = {
+                    Icon(
+                        imageVector = FontAwesomeIcons.Brands.Discord,
+                        contentDescription = stringResource(resource = Res.string.settings_about_discord),
                         modifier = Modifier.size(24.dp),
                     )
                 },

@@ -276,7 +276,6 @@
     <string name="home_tab_social_timeline_title">Społeczność</string>
     <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
-                <li>Ukończyliśmy korekty UI/UX dla aplikacji, i będzie kontynuować optymalizację</li>
                 <li>Poprawki błędów i ulepszenia wydajności</li>
             </ul>
         ]]></string>

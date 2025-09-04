@@ -276,7 +276,6 @@
     <string name="home_tab_social_timeline_title">Sociale</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
-                <li>Am finalizat ajustările UI/UX pentru aplicație, şi va continua optimizarea</li>
                 <li>Remedierea erorilor şi îmbunătăţirea performanţei</li>
             </ul>
         ]]></string>

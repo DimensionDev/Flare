@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		06B27BA32E6814FC00B756CD /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 06B27BA22E6814FC00B756CD /* Kingfisher */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		065A63742E61790F003D9E48 /* libmacosBridge.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libmacosBridge.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				06B27BA32E6814FC00B756CD /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +80,7 @@
 			);
 			name = macosBridge;
 			packageProductDependencies = (
+				06B27BA22E6814FC00B756CD /* Kingfisher */,
 			);
 			productName = macosBridge;
 			productReference = 065A63742E61790F003D9E48 /* libmacosBridge.dylib */;
@@ -104,6 +110,9 @@
 			);
 			mainGroup = 065A636B2E61790F003D9E48;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				06B27BA12E6814FC00B756CD /* XCRemoteSwiftPackageReference "Kingfisher" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 065A63752E61790F003D9E48 /* Products */;
 			projectDirPath = "";
@@ -259,7 +268,7 @@
 					"$(PROJECT_DIR)/macosBridge/build/macosBridge.build/Release/macosBridge.build/Objects-normal/arm64/Binary",
 					"$(PROJECT_DIR)/macosBridge/build/macosBridge.build/Release/macosBridge.build/Objects-normal/x86_64/Binary",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.4;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -284,7 +293,7 @@
 					"$(PROJECT_DIR)/macosBridge/build/macosBridge.build/Release/macosBridge.build/Objects-normal/arm64/Binary",
 					"$(PROJECT_DIR)/macosBridge/build/macosBridge.build/Release/macosBridge.build/Objects-normal/x86_64/Binary",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 12.4;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 6.0;
@@ -313,6 +322,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		06B27BA12E6814FC00B756CD /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = exactVersion;
+				version = 8.5.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		06B27BA22E6814FC00B756CD /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 06B27BA12E6814FC00B756CD /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 065A636C2E61790F003D9E48 /* Project object */;
 }

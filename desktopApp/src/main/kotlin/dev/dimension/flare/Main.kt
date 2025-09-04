@@ -16,6 +16,7 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.DeeplinkHandler
+import dev.dimension.flare.common.NativeWindowBridge
 import dev.dimension.flare.common.SandboxHelper
 import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.di.composeUiModule
@@ -28,6 +29,7 @@ import dev.dimension.flare.ui.theme.ProvideThemeSettings
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
 import java.awt.Desktop
 
@@ -49,12 +51,17 @@ fun main(args: Array<String>) {
                 .build()
         }
         val extraWindowRoutes = remember { mutableStateMapOf<String, FloatingWindowState>() }
+        val nativeWindowBridge = koinInject<NativeWindowBridge>()
 
         fun openWindow(
             key: String,
             route: Route.WindowRoute,
         ) {
-            if (extraWindowRoutes.containsKey(key)) {
+            if (route is Route.RawImage) {
+                nativeWindowBridge.openImageImageViewer(route.rawImage)
+            } else if (route is Route.StatusMedia) {
+                nativeWindowBridge.openStatusImageViewer(route)
+            } else if (extraWindowRoutes.containsKey(key)) {
                 extraWindowRoutes[key]?.bringToFront?.invoke()
             } else {
                 extraWindowRoutes.put(

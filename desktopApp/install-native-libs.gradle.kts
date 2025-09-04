@@ -135,43 +135,6 @@ val sqliteTask =
         entryPathInJar = sqliteEntry,
         destFile = nativeDestDir.resolve(sqliteFileName),
     )
-
-val cmpVersion = (findProperty("composeMediaPlayerVersion") as String?) ?: "0.8.1"
-val cmpJarName = "composemediaplayer-jvm-$cmpVersion.jar"
-val cmpJarUrl =
-    "https://repo1.maven.org/maven2/io/github/kdroidfilter/composemediaplayer-jvm/$cmpVersion/$cmpJarName"
-
-val cmpDirName =
-    when {
-        currentOs.isMacOsX && isArm -> "darwin-aarch64"
-        currentOs.isMacOsX && isX64 -> "darwin-x86-64"
-        currentOs.isLinux && isArm -> "linux-aarch64"
-        currentOs.isLinux && isX64 -> "linux-x86-64"
-        currentOs.isWindows && isX64 -> "win32-x86-64"
-        currentOs.isWindows && isArm -> "win32-arm64"
-        else -> throw GradleException("Unsupported OS or architecture: ${currentOs.name} $currentArch")
-    }
-
-val cmpLibName =
-    when {
-        currentOs.isMacOsX -> "libNativeVideoPlayer.dylib"
-        currentOs.isLinux -> "libNativeVideoPlayer.so"
-        currentOs.isWindows -> "NativeVideoPlayer.dll"
-        else -> throw GradleException("Unsupported OS: ${currentOs.name}")
-    }
-
-val cmpEntry = "$cmpDirName/$cmpLibName"
-
-val cmpTask =
-    registerExtractFromJarTask(
-        taskName = "installNativeVideoPlayer_$cmpVersion",
-        jarUrl = cmpJarUrl,
-        cacheSubDir = "composeMediaPlayer/$cmpVersion",
-        jarFileName = cmpJarName,
-        entryPathInJar = cmpEntry,
-        destFile = nativeDestDir.resolve(cmpLibName),
-    )
-
 val jnaVersion = (findProperty("jnaVersion") as String?) ?: "5.17.0"
 val jnaJarName = "jna-$jnaVersion.jar"
 val jnaJarUrl = "https://repo1.maven.org/maven2/net/java/dev/jna/jna/$jnaVersion/$jnaJarName"
@@ -211,9 +174,9 @@ val jnaTask =
 
 afterEvaluate {
     tasks.named("compileKotlin").configure {
-        dependsOn(sqliteTask, cmpTask, jnaTask)
+        dependsOn(sqliteTask, jnaTask)
     }
     tasks.named("prepareAppResources").configure {
-        dependsOn(sqliteTask, cmpTask, jnaTask)
+        dependsOn(sqliteTask, jnaTask)
     }
 }

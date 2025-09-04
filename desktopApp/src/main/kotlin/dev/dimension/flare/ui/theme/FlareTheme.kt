@@ -33,7 +33,6 @@ import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
-import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.LocalComponentAppearance
@@ -216,12 +215,7 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
                     showLinkPreview = appearanceSettings.showLinkPreview,
                     showMedia = appearanceSettings.showMedia,
                     showSensitiveContent = appearanceSettings.showSensitiveContent,
-                    videoAutoplay =
-                        when (appearanceSettings.videoAutoplay) {
-                            VideoAutoplay.ALWAYS -> ComponentAppearance.VideoAutoplay.ALWAYS
-                            VideoAutoplay.WIFI -> ComponentAppearance.VideoAutoplay.NEVER
-                            VideoAutoplay.NEVER -> ComponentAppearance.VideoAutoplay.NEVER
-                        },
+                    videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
                     expandMediaSize = appearanceSettings.expandMediaSize,
                     compatLinkPreview = appearanceSettings.compatLinkPreview,
                     aiConfig =

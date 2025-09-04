@@ -5,6 +5,8 @@
     <string name="settings_about_source_code">Source code</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Join our Telegram group</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Join our Discord server</string>
     <string name="settings_about_line" translatable="false">Line</string>
     <string name="settings_about_line_description">Join our Line group</string>
     <string name="settings_about_localization">Crowdin</string>

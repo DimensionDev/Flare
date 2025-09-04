@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.serviceselect
 
 import android.graphics.Color
+import android.view.View
 import android.view.ViewGroup.LayoutParams
 import android.webkit.CookieManager
 import android.widget.FrameLayout
@@ -19,9 +20,9 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.VVOLoginPresenter
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import moe.tlaster.precompose.molecule.producePresenter
-import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun VVOLoginScreen(toHome: () -> Unit) {
@@ -58,7 +59,7 @@ internal fun VVOLoginScreen(toHome: () -> Unit) {
                     .padding(it)
                     .fillMaxSize(),
             onCreated = {
-//                it.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                it.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
                 it.setBackgroundColor(Color.TRANSPARENT)
                 // clea all cookies
                 CookieManager.getInstance().removeAllCookies(null)

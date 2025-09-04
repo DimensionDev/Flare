@@ -4,6 +4,7 @@
     <string name="settings_about_source_code">Código fonte</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Junte-se ao nosso grupo do Telegram</string>
+    <string name="settings_about_discord_description">Entre no nosso Discord</string>
     <string name="settings_about_line_description">Junte-se ao nosso grupo de linhas</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Ajude-nos a traduzir o Sinalizador</string>

@@ -276,8 +276,7 @@
     <string name="home_tab_social_timeline_title">Соцсети</string>
     <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
             <ul>
-                <li>Мы завершили настройки UI/UX приложения, и продолжит оптимизацию</li>
-                <li>исправления ошибок и улучшения производительности</li>
+                <li>Исправления ошибок и улучшения производительности</li>
             </ul>
         ]]></string>
 </resources>

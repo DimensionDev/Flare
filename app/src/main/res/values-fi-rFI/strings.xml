@@ -276,8 +276,7 @@
     <string name="home_tab_social_timeline_title">Sosiaalinen</string>
     <string name="changelog_current"><![CDATA[            <span>Versio %1$s:</span>
             <ul>
-                <li>Olemme suorittaneet UI/UX mukautukset sovellukselle, ja jatkaa</li>
-                <li>virhekorjauksia ja suorituskyvyn parannuksia</li>
+                <li>Virhekorjauksia ja suorituskyvyn parannuksia</li>
             </ul>
         ]]></string>
 </resources>

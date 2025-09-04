@@ -4,6 +4,7 @@
     <string name="settings_about_source_code">Code source</string>
     <string name="settings_about_telegram">Télégramme</string>
     <string name="settings_about_telegram_description">Rejoignez notre groupe Telegram</string>
+    <string name="settings_about_discord_description">Rejoignez notre serveur Discord</string>
     <string name="settings_about_line_description">Rejoignez notre groupe de lignes</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Aidez-nous à traduire Flare</string>

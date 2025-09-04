@@ -4,6 +4,7 @@
     <string name="settings_about_source_code">Cod sursă</string>
     <string name="settings_about_telegram">Telegramă</string>
     <string name="settings_about_telegram_description">Alătură-te grupului nostru de telegramă</string>
+    <string name="settings_about_discord_description">Alătură-te serverului nostru de Discord</string>
     <string name="settings_about_line_description">Alătură-te grupului nostru de linii</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Ajută-ne să traducem Flare</string>

@@ -871,12 +871,10 @@ private fun composePresenter(
                         account = it,
                         referenceStatus =
                             status?.let {
-                                state.replyState?.takeSuccess()?.let { item ->
-                                    ComposeData.ReferenceStatus(
-                                        data = item,
-                                        composeStatus = status,
-                                    )
-                                }
+                                ComposeData.ReferenceStatus(
+                                    data = state.replyState?.takeSuccess(),
+                                    composeStatus = status,
+                                )
                             },
                     )
                 state.send(data)

@@ -415,7 +415,7 @@ internal class XQTDataSource(
                 ?.let {
                     it as? ComposeStatus.Quote
                 }?.let {
-                    data.referenceStatus.data.content as? UiTimeline.ItemContent.Status
+                    data.referenceStatus.data?.content as? UiTimeline.ItemContent.Status
                 }?.user
                 ?.handle
                 ?.removePrefix("@")

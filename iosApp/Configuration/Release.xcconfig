@@ -1,3 +1,0 @@
-#include "Config.xcconfig"
-
-OTHER_LDFLAGS = $(inherited) -lsqlite3 -framework shared

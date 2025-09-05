@@ -98,7 +98,7 @@ internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
         val stackManager =
             rememberStackManager(
                 startRoute = getRoute(tabs.primary.first().tabItem),
-                key = tabs,
+                key = tabs.all.size,
                 topLevelRoutes = tabs.all.map { getRoute(it.tabItem) },
             )
 

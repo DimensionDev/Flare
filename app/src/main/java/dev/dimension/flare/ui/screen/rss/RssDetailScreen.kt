@@ -55,13 +55,13 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.rss.DocumentData
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
-import dev.dimension.flare.ui.model.localizedFullTime
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -157,9 +157,10 @@ internal fun RssDetailScreen(
                                 .padding(horizontal = screenHorizontalPadding),
                     ) {
                         it.publishDateTime?.let {
-                            Text(
-                                text = it.localizedFullTime,
+                            DateTimeText(
+                                it,
                                 style = MaterialTheme.typography.bodySmall,
+                                fullTime = true
                             )
                         }
                         Spacer(modifier = Modifier.weight(1f))

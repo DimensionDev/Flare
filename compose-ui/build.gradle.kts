@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.skie)
 }
 
 kotlin {
@@ -20,6 +21,9 @@ kotlin {
                 withCompilations { it is KotlinMultiplatformAndroidCompilation }
                 withJvm()
             }
+            group("apple") {
+                withIos()
+            }
         }
     }
     androidLibrary {
@@ -30,6 +34,18 @@ kotlin {
         enableCoreLibraryDesugaring = true
     }
     jvm()
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64(),
+    ).forEach { appleTarget ->
+        appleTarget.binaries.framework {
+            baseName = "KotlinSharedUI"
+            isStatic = true
+            linkerOpts("-ld_classic")
+            export(projects.shared)
+        }
+    }
 
     sourceSets {
         val commonMain by getting {
@@ -82,8 +98,24 @@ kotlin {
                 implementation(libs.fluent.ui)
                 implementation(libs.koin.compose)
                 implementation(libs.androidx.collection)
+                implementation("org.ocpsoft.prettytime:prettytime:5.0.7.Final")
             }
         }
+        val iosMain by getting {
+            dependencies {
+                api(projects.shared)
+            }
+        }
+    }
+}
+
+skie {
+    analytics {
+        disableUpload.set(true)
+        enabled.set(false)
+    }
+    features {
+        enableSwiftUIObservingPreview = true
     }
 }
 

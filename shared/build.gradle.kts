@@ -70,6 +70,7 @@ kotlin {
         }
         val commonMain by getting {
             dependencies {
+                implementation(compose.runtime)
                 implementation(libs.bundles.kotlinx)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)

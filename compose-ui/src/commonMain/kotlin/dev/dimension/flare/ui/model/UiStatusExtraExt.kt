@@ -1,66 +1,15 @@
+@file:OptIn(FormatStringsInDatetimeFormats::class)
+
 package dev.dimension.flare.ui.model
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import dev.dimension.flare.compose.ui.Res
-import dev.dimension.flare.compose.ui.date_format_full
-import dev.dimension.flare.compose.ui.date_format_month_day
-import dev.dimension.flare.compose.ui.date_format_year_month_day
-import dev.dimension.flare.ui.render.LocalizedShortTime
-import dev.dimension.flare.ui.render.UiDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toJavaLocalDateTime
-import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.compose.resources.stringResource
-import java.time.format.DateTimeFormatter
-import kotlin.time.Instant
+import androidx.compose.ui.unit.LayoutDirection
+import dev.dimension.flare.ui.render.UiRichText
+import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 
-@get:Composable
-public val UiDateTime.localizedShortTime: String
-    get() = shortTime.localizedShortTime
-
-@get:Composable
-public val UiDateTime.localizedFullTime: String
-    get() = value.localizedFullTime
-
-private val LocalizedShortTime.localizedShortTime: String
-    @Composable
+public val UiRichText.direction: LayoutDirection
     get() =
-        when (val type = this) {
-            is LocalizedShortTime.MonthDay ->
-                runCatching {
-                    DateTimeFormatter
-                        .ofPattern(stringResource(resource = Res.string.date_format_month_day))
-                        .format(type.localDateTime)
-                }.getOrElse {
-                    DateTimeFormatter
-                        .ofPattern("dd MMM")
-                        .format(type.localDateTime)
-                }
-            is LocalizedShortTime.String -> type.value
-            is LocalizedShortTime.YearMonthDay ->
-                runCatching {
-                    DateTimeFormatter
-                        .ofPattern(stringResource(resource = Res.string.date_format_year_month_day))
-                        .format(type.localDateTime)
-                }.getOrElse {
-                    DateTimeFormatter
-                        .ofPattern("dd MMM yy")
-                        .format(type.localDateTime)
-                }
+        if (isRtl) {
+            LayoutDirection.Rtl
+        } else {
+            LayoutDirection.Ltr
         }
-
-private val Instant.localizedFullTime: String
-    @Composable
-    get() {
-        val format = stringResource(resource = Res.string.date_format_full)
-        return remember(this) {
-            val timeZone = TimeZone.currentSystemDefault()
-            val time = toLocalDateTime(timeZone)
-            runCatching {
-                DateTimeFormatter.ofPattern(format).format(time.toJavaLocalDateTime())
-            }.getOrElse {
-                DateTimeFormatter.ofPattern("dd MMM yy HH:mm").format(time.toJavaLocalDateTime())
-            }
-        }
-    }

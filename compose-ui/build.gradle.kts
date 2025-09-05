@@ -1,3 +1,4 @@
+import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
 import org.jetbrains.compose.compose
 
 plugins {
@@ -9,32 +10,25 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
 }
 
-android {
-    namespace = "dev.dimension.flare.compose.ui"
-    compileOptions {
-        isCoreLibraryDesugaringEnabled = true
-    }
-}
-
 kotlin {
     jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
     applyDefaultHierarchyTemplate {
         common {
             group("androidJvm") {
-                withAndroidTarget()
+                // TODO: https://youtrack.jetbrains.com/issue/KT-80409
+                withCompilations { it is KotlinMultiplatformAndroidCompilation }
                 withJvm()
             }
         }
     }
-    androidTarget()
-//    androidLibrary {
-//        compileSdk = libs.versions.compileSdk.get().toInt()
-//        namespace = "dev.dimension.flare.compose.ui"
-//        minSdk = libs.versions.minSdk.get().toInt()
-//        experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
-//        enableCoreLibraryDesugaring = true
-//    }
+    androidLibrary {
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        namespace = "dev.dimension.flare.compose.ui"
+        minSdk = libs.versions.minSdk.get().toInt()
+        experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
+        enableCoreLibraryDesugaring = true
+    }
     jvm()
 
     sourceSets {

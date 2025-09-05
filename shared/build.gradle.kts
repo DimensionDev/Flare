@@ -1,4 +1,5 @@
 
+import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
 import java.util.Locale
 
 plugins {
@@ -14,10 +15,6 @@ plugins {
     alias(libs.plugins.room)
 }
 
-android {
-    namespace = "dev.dimension.flare.shared"
-}
-
 kotlin {
     applyDefaultHierarchyTemplate {
         common {
@@ -26,21 +23,19 @@ kotlin {
                 withIos()
             }
             group("androidJvm") {
-                withAndroidTarget()
+                // TODO: https://youtrack.jetbrains.com/issue/KT-80409
+                withCompilations { it is KotlinMultiplatformAndroidCompilation }
                 withJvm()
             }
         }
     }
     jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
-//    androidLibrary {
-//        compileSdk = libs.versions.compileSdk.get().toInt()
-//        namespace = "dev.dimension.flare.shared"
-//        minSdk = libs.versions.minSdk.get().toInt()
-//    }
-
-
-    androidTarget()
+    androidLibrary {
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        namespace = "dev.dimension.flare.shared"
+        minSdk = libs.versions.minSdk.get().toInt()
+    }
     jvm()
 
     listOf(

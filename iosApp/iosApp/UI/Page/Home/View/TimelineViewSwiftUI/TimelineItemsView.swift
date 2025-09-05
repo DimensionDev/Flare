@@ -18,7 +18,7 @@ struct TimelineItemsView: View {
                 .padding(.vertical, 4)
                 .onAppear {
                     // viewModel.itemOnAppear(item: item)
-                    FlareLog.debug("🔍 [TimelineItemsView] onAppear  for id: '\(item.id)', content: '\(item.content.raw)'")
+                    //  FlareLog.debug("🔍 [TimelineItemsView] onAppear  for id: '\(item.id)', content: '\(item.content.raw)'")
 
 //                    Task {
 //                        if hasMore, !viewModel.isLoadingMore,
@@ -38,7 +38,7 @@ struct TimelineItemsView: View {
 //                    }
                 }
                 .onDisappear {
-                    FlareLog.debug("🔍 [TimelineItemsView] onDisappear  for id: '\(item.id)'")
+                    // FlareLog.debug("🔍 [TimelineItemsView] onDisappear  for id: '\(item.id)'")
                     //                  viewModel.itemDidDisappear(item: item)
                 }
         }

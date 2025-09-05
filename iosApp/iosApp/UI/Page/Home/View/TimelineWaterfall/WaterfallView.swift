@@ -4,7 +4,7 @@ import WaterfallGrid
 
 struct WaterfallView: View {
     let tab: FLTabItem
-    @ObservedObject var store: AppBarTabSettingStore
+    var store: AppBarTabSettingStore
     let isCurrentAppBarTabSelected: Bool
     let displayType: TimelineDisplayType
 

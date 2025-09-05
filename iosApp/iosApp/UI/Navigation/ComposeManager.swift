@@ -4,12 +4,13 @@ import shared
 import SwiftUI
 import UIKit
 
-class ComposeManager: ObservableObject {
+@Observable
+class ComposeManager {
     static let shared = ComposeManager()
 
-    @Published var showCompose = false
-    @Published var composeAccountType: AccountType?
-    @Published var composeStatus: FlareComposeStatus?
+    var showCompose = false
+    var composeAccountType: AccountType?
+    var composeStatus: FlareComposeStatus?
 
     private init() {}
 

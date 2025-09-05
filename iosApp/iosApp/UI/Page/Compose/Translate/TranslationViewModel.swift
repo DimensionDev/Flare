@@ -2,10 +2,11 @@ import Foundation
 import SwiftUI
 
 @MainActor
-class TranslationViewModel: ObservableObject {
-    @Published var translatedText: String?
-    @Published var isTranslating = false
-    @Published var error: Error?
+@Observable
+class TranslationViewModel {
+    var translatedText: String?
+    var isTranslating = false
+    var error: Error?
 
     private let translationService: TranslationService
 

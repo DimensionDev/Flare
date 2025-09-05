@@ -7,10 +7,12 @@ struct ProfileWaterfallContentView: View {
     let selectedTabKey: String?
     let isCurrentTab: Bool
 
-    @EnvironmentObject private var timelineState: TimelineExtState
+    @Environment(TimelineExtState.self) private var timelineState
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
+        @Bindable var bindableTimelineState = timelineState
+
         Group {
             switch timelineViewModel.timelineState {
             case .loading:
@@ -34,7 +36,7 @@ struct ProfileWaterfallContentView: View {
                     FlareLog.debug("📜 [ProfileWaterfallContentView] Media滚动检测 - offsetY: \(newValue.contentOffset.y)")
                     timelineViewModel.handleScrollOffsetChange(
                         newValue.contentOffset.y,
-                        showFloatingButton: $timelineState.showFloatingButton,
+                        showFloatingButton: $bindableTimelineState.showFloatingButton,
                         timelineState: timelineState,
                         isHomeTab: isCurrentTab
                     )

@@ -9,8 +9,8 @@ struct FlareApp: SwiftUI.App {
     #else
         @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     #endif
-    @StateObject private var router = FlareRouter.shared
-    @StateObject private var podcastManager = IOSPodcastManager.shared
+    @State private var router = FlareRouter.shared
+    @State private var podcastManager = IOSPodcastManager.shared
     @State var theme = FlareTheme.shared
     @State private var shouldShowVersionBanner: Bool = false
 

@@ -7,11 +7,12 @@ struct ReleaseLogEntry {
 }
 
 @MainActor
-class ReleaseLogManager: ObservableObject {
+@Observable
+class ReleaseLogManager {
     static let shared = ReleaseLogManager()
 
-    @Published var releaseLogEntries: [ReleaseLogEntry] = []
-    @Published var isLoading = false
+    var releaseLogEntries: [ReleaseLogEntry] = []
+    var isLoading = false
 
     private init() {
         loadReleaseLog()

@@ -2,7 +2,7 @@ import shared
 import SwiftUI
 
 struct DraggablePlayerOverlay: View {
-    @StateObject private var manager = IOSPodcastManager.shared
+    @State private var manager = IOSPodcastManager.shared
 
     @State private var accumulatedOffset: CGSize = .zero
     @State private var dragOffset: CGSize = .zero

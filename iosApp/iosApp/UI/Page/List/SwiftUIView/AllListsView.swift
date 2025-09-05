@@ -14,7 +14,7 @@ struct AllListsView: View {
     private let accountType: AccountType
     @Environment(FlareTheme.self) private var theme
 
-    @StateObject private var tabSettingStore: AppBarTabSettingStore
+    @State private var tabSettingStore: AppBarTabSettingStore
 
     init(accountType: AccountType) {
         presenter = .init(accountType: accountType)
@@ -40,7 +40,7 @@ struct AllListsView: View {
             }
         }
         _isMastodonUser = State(initialValue: isMastodon)
-        _tabSettingStore = StateObject(wrappedValue: AppBarTabSettingStore.shared)
+        _tabSettingStore = State(wrappedValue: AppBarTabSettingStore.shared)
     }
 
     var body: some View {

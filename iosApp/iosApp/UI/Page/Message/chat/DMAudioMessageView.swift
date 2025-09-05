@@ -10,11 +10,12 @@ import SwiftUI
 // var waveformCache: [String: [CGFloat]] = [:] // Consider if cache is needed with pre-calculated data
 
 /// 音频播放器状态
-private class AudioPlayerState: ObservableObject {
-    @Published var isPlaying = false
-    @Published var progress: Double = 0
-    @Published var duration: Double = 0
-    @Published var currentTime: Double = 0 // Added current time
+@Observable
+private class AudioPlayerState {
+    var isPlaying = false
+    var progress: Double = 0
+    var duration: Double = 0
+    var currentTime: Double = 0 // Added current time
 
     private var player: AVPlayer?
     private var timeObserver: Any?
@@ -104,7 +105,7 @@ struct DMAudioMessageView: View {
     let url: URL
     let media: UiMedia
     let isCurrentUser: Bool
-    @StateObject private var playerState = AudioPlayerState()
+    @State private var playerState = AudioPlayerState()
     @State private var waveformSamples: [CGFloat] = Array(repeating: 0.05, count: 50)
 
     var body: some View {

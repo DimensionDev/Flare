@@ -2,10 +2,10 @@ import MarkdownUI
 import SwiftUI
 
 struct ReleaseLogScreen: View {
-    @StateObject private var releaseLogManager = ReleaseLogManager.shared
-    @StateObject private var translationViewModel = TranslationViewModel()
+    @State private var releaseLogManager = ReleaseLogManager.shared
+    @State private var translationViewModel = TranslationViewModel()
     @State private var isTranslating = false
-    @State private var translatedContent: String?
+    @State private var translatedEntries: [String: String] = [:] // 按版本存储翻译结果
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
@@ -17,8 +17,8 @@ struct ReleaseLogScreen: View {
                 } else {
                     ForEach(releaseLogManager.releaseLogEntries, id: \.version) { entry in
                         VStack(alignment: .leading, spacing: 12) {
-                            if let translated = translatedContent {
-                                Markdown(translated)
+                            if let translatedContent = translatedEntries[entry.version] {
+                                Markdown(translatedContent)
                                     .markdownTheme(.flareMarkdownStyle(using: theme.flareTextBodyTextStyle, fontScale: theme.fontSizeScale))
                                     .padding()
                             } else {
@@ -59,26 +59,74 @@ struct ReleaseLogScreen: View {
         guard !releaseLogManager.releaseLogEntries.isEmpty else { return }
 
         isTranslating = true
-        let fullContent = releaseLogManager.releaseLogEntries
-            .map(\.content)
-            .joined(separator: "\n\n----------\n\n")
 
         Task {
-            do {
-                let locale = Locale.current
-                let targetLanguage = locale.language.languageCode?.identifier ?? "en"
-                let translationService = GoogleTranslationService(targetLanguage: targetLanguage)
-                let result = try await translationService.translate(text: fullContent)
-                await MainActor.run {
-                    translatedContent = result.translatedText
-                    isTranslating = false
-                }
-            } catch {
-                await MainActor.run {
-                    isTranslating = false
-                    print("翻译失败: \(error)")
+            let locale = Locale.current
+            let targetLanguage = locale.language.languageCode?.identifier ?? "en"
+            let translationService = GoogleTranslationService(targetLanguage: targetLanguage)
+
+            await translateWithMergedContent(translationService: translationService)
+        }
+    }
+
+    private func translateWithMergedContent(translationService: GoogleTranslationService) async {
+        let entries = releaseLogManager.releaseLogEntries
+        let separator = "###FLARE_RELEASE_LOG_SEPARATOR###"
+
+        let fullContent = entries.map(\.content).joined(separator: separator)
+
+        do {
+            let result = try await translationService.translate(text: fullContent)
+
+            let translatedParts = result.translatedText.components(separatedBy: separator)
+
+            guard translatedParts.count == entries.count else {
+                print("拆分结果数量不匹配，降级到逐个翻译")
+                await fallbackToIndividualTranslation(translationService: translationService)
+                return
+            }
+
+            var newTranslatedEntries: [String: String] = [:]
+            for (index, entry) in entries.enumerated() {
+                let translatedContent = translatedParts[index].trimmingCharacters(in: .whitespacesAndNewlines)
+                if !translatedContent.isEmpty {
+                    newTranslatedEntries[entry.version] = translatedContent
                 }
             }
+
+            await MainActor.run {
+                translatedEntries = newTranslatedEntries
+                isTranslating = false
+            }
+
+        } catch {
+            print("合并翻译失败，降级到逐个翻译: \(error)")
+            await fallbackToIndividualTranslation(translationService: translationService)
+        }
+    }
+
+    private func fallbackToIndividualTranslation(translationService: GoogleTranslationService) async {
+        let entries = releaseLogManager.releaseLogEntries
+        var newTranslatedEntries: [String: String] = [:]
+
+        newTranslatedEntries = translatedEntries
+
+        for entry in entries {
+            if translatedEntries[entry.version] != nil {
+                continue
+            }
+
+            do {
+                let result = try await translationService.translate(text: entry.content)
+                newTranslatedEntries[entry.version] = result.translatedText
+            } catch {
+                print("翻译条目失败 \(entry.version): \(error)")
+            }
+        }
+
+        await MainActor.run {
+            translatedEntries = newTranslatedEntries
+            isTranslating = false
         }
     }
 }

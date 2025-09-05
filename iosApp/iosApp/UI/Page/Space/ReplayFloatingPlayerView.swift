@@ -1,10 +1,9 @@
 import AVFoundation
-import Combine
 import shared
 import SwiftUI
 
 struct ReplayFloatingPlayerView: View {
-    @ObservedObject var manager: IOSPodcastManager
+    @Bindable var manager: IOSPodcastManager
 
     @State private var displayTime: Double = 0.0
     @State private var isEditingSlider: Bool = false
@@ -26,15 +25,15 @@ struct ReplayFloatingPlayerView: View {
                 .padding(.horizontal)
                 .padding(.bottom, 5)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
-                .onReceive(manager.currentTimePublisher) { receivedTime in
+                .onChange(of: manager.currentTime) { _, newTime in
                     if !isEditingSlider, !manager.isSeeking {
-                        displayTime = receivedTime
+                        displayTime = newTime
                     }
                 }
                 .onAppear {
                     displayTime = manager.currentPlaybackTime
                 }
-                .onChange(of: manager.currentPodcast?.id) { _ in
+                .onChange(of: manager.currentPodcast?.id) { _, _ in
                     displayTime = manager.currentPlaybackTime
                 }
             }

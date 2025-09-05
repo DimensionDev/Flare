@@ -4,11 +4,11 @@ import SwiftUI
 
 struct TimelineViewSwiftUIV4: View {
     let tab: FLTabItem
-    @ObservedObject var store: AppBarTabSettingStore
+    var store: AppBarTabSettingStore
     let isCurrentAppBarTabSelected: Bool
     @Environment(FlareTheme.self) private var theme
     @Environment(\.shouldShowVersionBanner) private var shouldShowVersionBanner
-    @EnvironmentObject private var timelineState: TimelineExtState
+    @Environment(TimelineExtState.self) private var timelineState
 
     @State private var timeLineViewModel = TimelineViewModel()
     @State private var isInitialized: Bool = false
@@ -34,6 +34,8 @@ struct TimelineViewSwiftUIV4: View {
     }
 
     var body: some View {
+        @Bindable var bindableTimelineState = timelineState
+
         ScrollViewReader { proxy in
             VStack {
                 List {
@@ -100,7 +102,7 @@ struct TimelineViewSwiftUIV4: View {
                 } action: { _, newValue in
                     timeLineViewModel.handleScrollOffsetChange(
                         newValue.contentOffset.y,
-                        showFloatingButton: $timelineState.showFloatingButton,
+                        showFloatingButton: $bindableTimelineState.showFloatingButton,
                         timelineState: timelineState,
                         isHomeTab: isCurrentAppBarTabSelected
                     )

@@ -98,12 +98,13 @@ kotlin {
                 implementation(libs.fluent.ui)
                 implementation(libs.koin.compose)
                 implementation(libs.androidx.collection)
-                implementation("org.ocpsoft.prettytime:prettytime:5.0.7.Final")
+                implementation(libs.prettytime)
             }
         }
         val iosMain by getting {
             dependencies {
                 api(projects.shared)
+                implementation(libs.cupertino)
             }
         }
     }

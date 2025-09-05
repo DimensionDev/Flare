@@ -26,6 +26,7 @@ coil3 = "3.3.0"
 ktorfit = "2.6.4"
 ktor = "3.2.3"
 platformtoolsDarkmodedetector = "0.6.1"
+prettytime = "5.0.7.Final"
 reorderable = "3.0.0"
 stately = "2.1.0"
 twitter-parser = "0.5.5"
@@ -56,6 +57,8 @@ logback = "1.5.18"
 navigation3 = "1.0.0-alpha09"
 zoomable = "0.17.0"
 bouncycastle = "1.81"
+cupertino = "2.3.1"
+
 
 [libraries]
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
@@ -77,6 +80,7 @@ compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = 
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelComposeVersion" }
 openai-client = { module = "com.aallam.openai:openai-client", version.ref = "openaiClient" }
 platformtools-darkmodedetector = { module = "io.github.kdroidfilter:platformtools.darkmodedetector", version.ref = "platformtoolsDarkmodedetector" }
+prettytime = { module = "org.ocpsoft.prettytime:prettytime", version.ref = "prettytime" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }
@@ -212,6 +216,8 @@ androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecy
 
 bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
+
+cupertino = { group = "io.github.schott12521", name = "cupertino", version.ref = "cupertino" }
 
 ### Server ###
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
+import dev.dimension.flare.ui.model.direction
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.theme.isLightTheme
 

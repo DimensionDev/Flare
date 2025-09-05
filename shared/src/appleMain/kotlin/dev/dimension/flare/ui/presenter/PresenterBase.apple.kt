@@ -28,3 +28,8 @@ public actual abstract class PresenterBase<Model : Any> : AutoCloseable {
     @Composable
     public actual abstract fun body(): Model
 }
+
+@OptIn(ExperimentalObjCRefinement::class)
+@HiddenFromObjC
+@Composable
+public operator fun <Model : Any> PresenterBase<Model>.invoke(): Model = body()

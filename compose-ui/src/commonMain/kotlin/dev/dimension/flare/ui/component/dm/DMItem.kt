@@ -27,6 +27,7 @@ import dev.dimension.flare.compose.ui.dm_sending
 import dev.dimension.flare.compose.ui.send
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformIconButton
@@ -36,7 +37,6 @@ import dev.dimension.flare.ui.component.status.QuotedStatus
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiUserV2
-import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.theme.PlatformTheme
 import org.jetbrains.compose.resources.stringResource
 
@@ -174,8 +174,8 @@ public fun DMItem(
                     color = PlatformTheme.colorScheme.onCard,
                 )
             } else if (item.sendState == null || item.sendState != UiDMItem.SendState.Failed) {
-                PlatformText(
-                    item.timestamp.localizedShortTime,
+                DateTimeText(
+                    item.timestamp,
                     style = PlatformTheme.typography.caption,
                     color = PlatformTheme.colorScheme.onCard,
                 )

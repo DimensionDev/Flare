@@ -17,6 +17,7 @@ import coil3.compose.LocalPlatformContext
 import dev.dimension.flare.ui.common.PlatformShare
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformText
@@ -24,7 +25,6 @@ import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
-import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformTheme
 
@@ -57,8 +57,8 @@ public fun QuotedStatus(
         ) {
             data.user?.let {
                 UserCompat(it) {
-                    PlatformText(
-                        text = data.createdAt.localizedShortTime,
+                    DateTimeText(
+                        data.createdAt,
                         style = PlatformTheme.typography.caption,
                         modifier =
                             Modifier

@@ -103,6 +103,7 @@ import dev.dimension.flare.ui.common.PlatformShare
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.ComponentAppearance
+import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDividerDefaults
@@ -119,14 +120,13 @@ import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextButton
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.platform.placeholder
+import dev.dimension.flare.ui.component.rememberFormattedDateTime
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.Digit
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.localizedFullTime
-import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -199,8 +199,8 @@ public fun CommonStatusComponent(
                         null -> Unit
                     }
                     if (!isDetail) {
-                        PlatformText(
-                            text = item.createdAt.localizedShortTime,
+                        DateTimeText(
+                            item.createdAt,
                             style = PlatformTheme.typography.caption,
                             color = PlatformTheme.colorScheme.caption,
                         )
@@ -296,10 +296,11 @@ public fun CommonStatusComponent(
 
             if (isDetail) {
                 Spacer(modifier = Modifier.height(8.dp))
-                PlatformText(
-                    text = item.createdAt.localizedFullTime,
+                DateTimeText(
+                    item.createdAt,
                     style = PlatformTheme.typography.caption,
                     color = PlatformTheme.colorScheme.caption,
+                    fullTime = true,
                 )
             }
             if (appearanceSettings.showActions || isDetail) {
@@ -519,7 +520,7 @@ private fun TranslationComponent(
                 text =
                     stringResource(
                         resource = Res.string.status_detail_translate,
-                        Locale.current.platformLocale.displayLanguage,
+                        Locale.current.language,
                     ),
             )
         }
@@ -543,12 +544,12 @@ private fun TranslationComponent(
     if (enabledTldr) {
         Spacer(modifier = Modifier.height(4.dp))
         val state by producePresenter(
-            "tldr_${contentWarning}_${rawContent}_${Locale.current.platformLocale.language}",
+            "tldr_${contentWarning}_${rawContent}_${Locale.current.language}",
         ) {
             statusTldrPresenter(
                 contentWarning = contentWarning,
                 content = content,
-                targetLanguage = Locale.current.platformLocale.language,
+                targetLanguage = Locale.current.language,
             )
         }
         state
@@ -566,12 +567,12 @@ private fun TranslationComponent(
     if (enabledTranslate) {
         Spacer(modifier = Modifier.height(4.dp))
         val state by producePresenter(
-            "translate_${contentWarning}_${rawContent}_${Locale.current.platformLocale.language}_${componentAppearance.aiConfig.translation}",
+            "translate_${contentWarning}_${rawContent}_${Locale.current.language}_${componentAppearance.aiConfig.translation}",
         ) {
             statusTranslatePresenter(
                 contentWarning = contentWarning,
                 content = content,
-                targetLanguage = Locale.current.platformLocale.language,
+                targetLanguage = Locale.current.language,
                 useAi = componentAppearance.aiConfig.translation,
             )
         }
@@ -704,7 +705,7 @@ internal fun StatusActions(
                                                                     .size(
                                                                         with(LocalDensity.current) {
                                                                             PlatformTextStyle.current.fontSize.toDp() +
-                                                                                4.dp
+                                                                                    4.dp
                                                                         },
                                                                     ).placeholder(
                                                                         true,
@@ -1053,11 +1054,13 @@ private fun StatusPollComponent(
                 style = PlatformTheme.typography.caption,
             )
         } else {
+            val localizedExpiredTimeline =
+                rememberFormattedDateTime(poll.expiredAt, fullTime = true)
             PlatformText(
                 text =
                     stringResource(
                         resource = Res.string.poll_expired_at,
-                        poll.expiredAt.localizedFullTime,
+                        localizedExpiredTimeline,
                     ),
                 modifier =
                     Modifier

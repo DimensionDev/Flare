@@ -429,11 +429,6 @@ private fun Note.renderStatus(
                                             statusKey = statusKey,
                                         )
                                     },
-                                    onClickedWithState = { shouldRetweet ->
-                                        event.renoteWithResult(
-                                            statusKey = statusKey,
-                                        )
-                                    },
                                 ),
                                 StatusAction.Item.Quote(
                                     count = 0,
@@ -487,12 +482,6 @@ private fun Note.renderStatus(
                                                     event.favourite(
                                                         statusKey = statusKey,
                                                         favourited = it,
-                                                    )
-                                                },
-                                                onClickedWithState = { shouldLike ->
-                                                    event.favouriteWithResult(
-                                                        statusKey = statusKey,
-                                                        favourited = !shouldLike,
                                                     )
                                                 },
                                             )

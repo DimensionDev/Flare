@@ -537,9 +537,6 @@ internal fun Tweet.renderStatus(
                                 onClicked = {
                                     event.retweet(statusKey, legacy?.retweeted ?: false)
                                 },
-                                onClickedWithState = { shouldRetweet ->
-                                    event.retweetWithResult(statusKey, shouldRetweet)
-                                },
                             ),
                             StatusAction.Item.Quote(
                                 count = 0,
@@ -560,9 +557,6 @@ internal fun Tweet.renderStatus(
                     onClicked = {
                         event.like(statusKey, legacy?.favorited ?: false)
                     },
-                    onClickedWithState = { shouldLike ->
-                        event.likeWithResult(statusKey, shouldLike)
-                    },
                 ),
                 StatusAction.Group(
                     displayItem = StatusAction.Item.More,
@@ -573,9 +567,6 @@ internal fun Tweet.renderStatus(
                                 bookmarked = legacy?.bookmarked ?: false,
                                 onClicked = {
                                     event.bookmark(statusKey, legacy?.bookmarked ?: false)
-                                },
-                                onClickedWithState = { shouldBookmark ->
-                                    event.bookmarkWithResult(statusKey, shouldBookmark)
                                 },
                             ),
                             if (isFromMe) {

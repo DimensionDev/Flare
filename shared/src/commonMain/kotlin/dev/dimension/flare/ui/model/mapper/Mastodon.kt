@@ -336,9 +336,6 @@ private fun Status.renderStatus(
                             onClicked = {
                                 dataSource.reblog(statusKey, reblogged ?: false)
                             },
-                            onClickedWithState = { shouldReblog ->
-                                dataSource.reblogWithResult(statusKey, shouldReblog)
-                            },
                         )
                     } else {
                         null
@@ -348,9 +345,6 @@ private fun Status.renderStatus(
                         liked = favourited ?: false,
                         onClicked = {
                             dataSource.like(statusKey, favourited ?: false)
-                        },
-                        onClickedWithState = { shouldLike ->
-                            dataSource.likeWithResult(statusKey, shouldLike)
                         },
                     ),
                     if (canReact) {
@@ -377,9 +371,6 @@ private fun Status.renderStatus(
                                     bookmarked = bookmarked ?: false,
                                     onClicked = {
                                         dataSource.bookmark(statusKey, bookmarked ?: false)
-                                    },
-                                    onClickedWithState = { shouldBookmark ->
-                                        dataSource.bookmarkWithResult(statusKey, shouldBookmark)
                                     },
                                 ),
                                 if (isFromMe) {

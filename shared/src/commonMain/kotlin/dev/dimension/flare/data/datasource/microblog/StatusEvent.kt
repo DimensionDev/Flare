@@ -22,21 +22,6 @@ internal sealed interface StatusEvent {
             bookmarked: Boolean,
         )
 
-        fun likeWithResult(
-            statusKey: MicroBlogKey,
-            shouldLike: Boolean,
-        ): StatusActionResult
-
-        fun reblogWithResult(
-            statusKey: MicroBlogKey,
-            shouldReblog: Boolean,
-        ): StatusActionResult
-
-        fun bookmarkWithResult(
-            statusKey: MicroBlogKey,
-            shouldBookmark: Boolean,
-        ): StatusActionResult
-
         fun vote(
             statusKey: MicroBlogKey,
             id: String,
@@ -92,13 +77,6 @@ internal sealed interface StatusEvent {
             userKey: MicroBlogKey,
             notificationStatusKey: MicroBlogKey,
         )
-
-        fun renoteWithResult(statusKey: MicroBlogKey): StatusActionResult
-
-        fun favouriteWithResult(
-            statusKey: MicroBlogKey,
-            favourited: Boolean,
-        ): StatusActionResult
     }
 
     interface Bluesky : StatusEvent {
@@ -126,20 +104,6 @@ internal sealed interface StatusEvent {
             statusKey: MicroBlogKey,
             uri: String,
         )
-
-        fun likeWithResult(
-            statusKey: MicroBlogKey,
-            cid: String,
-            uri: String,
-            likedUri: String?,
-        ): StatusActionResult
-
-        fun reblogWithResult(
-            statusKey: MicroBlogKey,
-            cid: String,
-            uri: String,
-            repostUri: String?,
-        ): StatusActionResult
     }
 
     interface XQT : StatusEvent {
@@ -153,25 +117,10 @@ internal sealed interface StatusEvent {
             liked: Boolean,
         )
 
-        fun likeWithResult(
-            statusKey: MicroBlogKey,
-            shouldLike: Boolean,
-        ): StatusActionResult
-
         fun bookmark(
             statusKey: MicroBlogKey,
             bookmarked: Boolean,
         )
-
-        fun bookmarkWithResult(
-            statusKey: MicroBlogKey,
-            shouldBookmark: Boolean,
-        ): StatusActionResult
-
-        fun retweetWithResult(
-            statusKey: MicroBlogKey,
-            shouldRetweet: Boolean,
-        ): StatusActionResult
     }
 
     interface VVO : StatusEvent {
@@ -184,15 +133,5 @@ internal sealed interface StatusEvent {
             statusKey: MicroBlogKey,
             liked: Boolean,
         )
-
-        fun likeWithResult(
-            statusKey: MicroBlogKey,
-            shouldLike: Boolean,
-        ): StatusActionResult
-
-        fun likeCommentWithResult(
-            statusKey: MicroBlogKey,
-            shouldLike: Boolean,
-        ): StatusActionResult
     }
 }

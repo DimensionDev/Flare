@@ -1,24 +1,37 @@
 package dev.dimension.flare.ui.theme
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.slapps.cupertino.theme.CupertinoColors
+import com.slapps.cupertino.theme.CupertinoTheme
+import com.slapps.cupertino.theme.systemRed
 
 internal actual object PlatformColorScheme {
     actual val primary: Color
-        get() = TODO("Not yet implemented")
+        @Composable
+        get() = CupertinoTheme.colorScheme.accent
     actual val primaryContainer: Color
-        get() = TODO("Not yet implemented")
+        @Composable
+        get() = CupertinoTheme.colorScheme.accent
     actual val onPrimaryContainer: Color
-        get() = TODO("Not yet implemented")
+        @Composable
+        get() = CupertinoTheme.colorScheme.label
     actual val error: Color
-        get() = TODO("Not yet implemented")
+        @Composable
+        get() = CupertinoColors.systemRed
     actual val caption: Color
-        get() = TODO("Not yet implemented")
+        @Composable
+        get() = CupertinoTheme.colorScheme.secondaryLabel
     actual val outline: Color
-        get() = TODO("Not yet implemented")
+        @Composable
+        get() = CupertinoTheme.colorScheme.tertiaryLabel
     actual val card: Color
-        get() = TODO("Not yet implemented")
+        @Composable
+        get() = CupertinoTheme.colorScheme.systemBackground
     actual val cardAlt: Color
-        get() = TODO("Not yet implemented")
+        @Composable
+        get() = CupertinoTheme.colorScheme.secondarySystemBackground
     actual val onCard: Color
-        get() = TODO("Not yet implemented")
+        @Composable
+        get() = CupertinoTheme.colorScheme.label
 }

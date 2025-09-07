@@ -1,12 +1,17 @@
 package dev.dimension.flare.ui.theme
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
+import com.slapps.cupertino.theme.CupertinoTheme
 
 internal actual object PlatformTypography {
     actual val caption: TextStyle
-        get() = TODO("Not yet implemented")
+        @Composable
+        get() = CupertinoTheme.typography.caption1
     actual val title: TextStyle
-        get() = TODO("Not yet implemented")
+        @Composable
+        get() = CupertinoTheme.typography.title3
     actual val headline: TextStyle
-        get() = TODO("Not yet implemented")
+        @Composable
+        get() = CupertinoTheme.typography.headline
 }

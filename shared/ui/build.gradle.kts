@@ -57,7 +57,7 @@ kotlin {
         }
         val appleMain by getting {
             dependencies {
-                implementation(libs.compose.cupertino)
+                implementation(libs.cupertino)
             }
         }
     }

@@ -196,8 +196,6 @@ material-motion-compose = { module = "io.github.fornewid:material-motion-compose
 
 precompose-molecule = { module = "moe.tlaster:precompose-molecule", version = "1.7.0-alpha03" }
 
-compose-cupertino = { module = "io.github.alexzhirkevich:cupertino-core", version = "0.1.0-alpha04" }
-
 xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91.2" }
 
 fluent-ui = { module = "io.github.compose-fluent:fluent", version = "v0.1.0" }

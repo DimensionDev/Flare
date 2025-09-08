@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import dev.dimension.flare.ui.theme.PlatformTheme
 
 @Composable
 internal actual fun PlatformCard(
@@ -24,7 +25,7 @@ internal actual fun PlatformCard(
                 if (shape != null) {
                     it.clip(shape)
                 } else {
-                    it
+                    it.clip(PlatformTheme.shapes.medium)
                 }
             }
             .let {

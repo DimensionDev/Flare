@@ -39,7 +39,8 @@ public fun AdaptiveCard(
                     .listCard(
                         index = index,
                         totalCount = totalCount,
-                    ).background(PlatformTheme.colorScheme.card),
+                    )
+                    .background(PlatformTheme.colorScheme.card),
         ) {
             content.invoke()
         }

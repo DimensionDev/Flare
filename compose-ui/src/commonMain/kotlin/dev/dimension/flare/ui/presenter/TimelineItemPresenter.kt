@@ -35,6 +35,8 @@ public class TimelineItemPresenter(
         public fun onNewTootsShown()
 
         public fun refreshSync()
+
+        public suspend fun refreshSuspend()
     }
 
     @Composable
@@ -42,11 +44,11 @@ public class TimelineItemPresenter(
         val state =
             remember(timelineTabItem.key) {
                 timelineTabItem.createPresenter()
-            }.invoke()
+            }.body()
         val badge =
             remember(timelineTabItem) {
                 NotificationBadgePresenter(timelineTabItem.account)
-            }.invoke()
+            }.body()
         val scope = rememberCoroutineScope()
         var showNewToots by remember { mutableStateOf(false) }
         state.listState.onSuccess {
@@ -92,6 +94,10 @@ public class TimelineItemPresenter(
                 scope.launch {
                     state.refresh()
                 }
+                badge.refresh()
+            }
+            override suspend fun refreshSuspend() {
+                state.refresh()
                 badge.refresh()
             }
         }

@@ -7,16 +7,16 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		06E433FE2E6A9A2600CD0826 /* flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		06E433FE2E6A9A2600CD0826 /* Flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		06E434172E6A9DE000CD0826 /* Exceptions for "flare" folder in "flare" target */ = {
+		06E434172E6A9DE000CD0826 /* Exceptions for "flare" folder in "Flare" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 06E433FD2E6A9A2600CD0826 /* flare */;
+			target = 06E433FD2E6A9A2600CD0826 /* Flare */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -24,7 +24,7 @@
 		06E434002E6A9A2600CD0826 /* flare */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				06E434172E6A9DE000CD0826 /* Exceptions for "flare" folder in "flare" target */,
+				06E434172E6A9DE000CD0826 /* Exceptions for "flare" folder in "Flare" target */,
 			);
 			path = flare;
 			sourceTree = "<group>";
@@ -53,7 +53,7 @@
 		06E433FF2E6A9A2600CD0826 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				06E433FE2E6A9A2600CD0826 /* flare.app */,
+				06E433FE2E6A9A2600CD0826 /* Flare.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,9 +61,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		06E433FD2E6A9A2600CD0826 /* flare */ = {
+		06E433FD2E6A9A2600CD0826 /* Flare */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 06E434092E6A9A2700CD0826 /* Build configuration list for PBXNativeTarget "flare" */;
+			buildConfigurationList = 06E434092E6A9A2700CD0826 /* Build configuration list for PBXNativeTarget "Flare" */;
 			buildPhases = (
 				06E434182E6AA19200CD0826 /* Compile Kotlin */,
 				06E433FA2E6A9A2600CD0826 /* Sources */,
@@ -77,11 +77,11 @@
 			fileSystemSynchronizedGroups = (
 				06E434002E6A9A2600CD0826 /* flare */,
 			);
-			name = flare;
+			name = Flare;
 			packageProductDependencies = (
 			);
 			productName = flare;
-			productReference = 06E433FE2E6A9A2600CD0826 /* flare.app */;
+			productReference = 06E433FE2E6A9A2600CD0826 /* Flare.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -99,7 +99,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 06E433F92E6A9A2600CD0826 /* Build configuration list for PBXProject "flare" */;
+			buildConfigurationList = 06E433F92E6A9A2600CD0826 /* Build configuration list for PBXProject "Flare" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -108,12 +108,14 @@
 			);
 			mainGroup = 06E433F52E6A9A2600CD0826;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 06E433FF2E6A9A2600CD0826 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				06E433FD2E6A9A2600CD0826 /* flare */,
+				06E433FD2E6A9A2600CD0826 /* Flare */,
 			);
 		};
 /* End PBXProject section */
@@ -301,6 +303,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -338,6 +341,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -358,7 +362,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		06E433F92E6A9A2600CD0826 /* Build configuration list for PBXProject "flare" */ = {
+		06E433F92E6A9A2600CD0826 /* Build configuration list for PBXProject "Flare" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				06E434072E6A9A2700CD0826 /* Debug */,
@@ -367,7 +371,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		06E434092E6A9A2700CD0826 /* Build configuration list for PBXNativeTarget "flare" */ = {
+		06E434092E6A9A2700CD0826 /* Build configuration list for PBXNativeTarget "Flare" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				06E4340A2E6A9A2700CD0826 /* Debug */,

@@ -57,7 +57,7 @@ public class HomeTabsPresenter :
 
     @Composable
     override fun body(): State {
-        val activeAccount = remember { ActiveAccountPresenter() }.invoke()
+        val activeAccount = remember { ActiveAccountPresenter() }.body()
         val tabSettings by settingsRepository.tabSettings.collectAsUiState()
         val tabs =
             remember(tabSettings, activeAccount.user) {
@@ -141,7 +141,7 @@ public class HomeTabsPresenter :
         val presenter =
             remember(accountType) {
                 NotificationBadgePresenter(accountType)
-            }.invoke()
+            }.body()
         return presenter.count
     }
 
@@ -150,7 +150,7 @@ public class HomeTabsPresenter :
         val presenter =
             remember(accountType) {
                 DirectMessageBadgePresenter(accountType)
-            }.invoke()
+            }.body()
         return presenter.count
     }
 }

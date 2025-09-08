@@ -42,12 +42,12 @@ public class HomeTimelineWithTabsPresenter(
                     accountType = accountType,
                     userKey = null,
                 )
-            }.invoke()
+            }.body()
 
         val accountEvent =
             remember {
                 AccountEventPresenter()
-            }.invoke()
+            }.body()
 
         LaunchedEffect(accountEvent.onAdded) {
             accountEvent.onAdded.collect { account ->
@@ -125,7 +125,7 @@ public class HomeTimelineWithTabsPresenter(
                     .map {
                         // use key inorder to force update when the list is changed
                         key(it.key) {
-                            TimelineItemPresenter(it).invoke()
+                            TimelineItemPresenter(it).body()
                         }
                     }.toImmutableList()
             }

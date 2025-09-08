@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
 import org.jetbrains.compose.compose
 
 plugins {
@@ -14,18 +13,7 @@ plugins {
 kotlin {
     jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
-    applyDefaultHierarchyTemplate {
-        common {
-            group("androidJvm") {
-                // TODO: https://youtrack.jetbrains.com/issue/KT-80409
-                withCompilations { it is KotlinMultiplatformAndroidCompilation }
-                withJvm()
-            }
-            group("apple") {
-                withIos()
-            }
-        }
-    }
+    applyDefaultHierarchyTemplate()
     androidLibrary {
         compileSdk = libs.versions.compileSdk.get().toInt()
         namespace = "dev.dimension.flare.compose.ui"
@@ -78,9 +66,7 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
-        val androidJvmMain by getting
         val androidMain by getting {
-//            dependsOn(androidJvmMain)
             dependencies {
                 implementation(libs.compose.placeholder.material3)
                 implementation(libs.material3.adaptive)
@@ -105,6 +91,8 @@ kotlin {
             dependencies {
                 api(projects.shared)
                 implementation(libs.cupertino)
+                api(compose.uiUtil)
+                implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.9.3")
             }
         }
     }
@@ -134,4 +122,5 @@ ktlint {
 
 compose.resources {
     packageOfResClass = "dev.dimension.flare.compose.ui"
+    generateResClass = always
 }

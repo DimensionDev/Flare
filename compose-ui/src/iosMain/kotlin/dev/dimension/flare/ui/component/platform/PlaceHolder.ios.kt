@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.isSpecified
 import com.slapps.cupertino.theme.CupertinoTheme
 import io.github.fornewid.placeholder.foundation.PlaceholderHighlight
@@ -15,9 +14,7 @@ import io.github.fornewid.placeholder.foundation.placeholder
 
 @Composable
 private fun placeHolderColor(): Color =
-    CupertinoTheme.colorScheme.label
-        .copy(alpha = 0.1f)
-        .compositeOver(CupertinoTheme.colorScheme.systemFill)
+    CupertinoTheme.colorScheme.placeholderText
 
 internal actual fun Modifier.placeholder(
     visible: Boolean,

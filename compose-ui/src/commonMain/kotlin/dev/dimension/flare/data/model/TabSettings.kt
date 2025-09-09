@@ -138,8 +138,8 @@ public data class NotificationTabItem(
 }
 
 @Serializable
-public sealed interface TimelineTabItem : TabItem {
-    public fun createPresenter(): TimelinePresenter
+public sealed class TimelineTabItem : TabItem {
+    public abstract fun createPresenter(): TimelinePresenter
 
     public companion object {
         public val default: ImmutableList<TabItem> =
@@ -619,7 +619,7 @@ public sealed interface TimelineTabItem : TabItem {
 public data class HomeTimelineTabItem(
     override val metaData: TabMetaData,
     override val account: AccountType,
-) : TimelineTabItem {
+) : TimelineTabItem() {
     override val key: String = "home_$account"
 
     override fun createPresenter(): TimelinePresenter = HomeTimelinePresenter(account)
@@ -654,7 +654,7 @@ public data class MixedTimelineTabItem(
             title = TitleType.Localized(TitleType.Localized.LocalizedKey.MixedTimeline),
             icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
         ),
-) : TimelineTabItem {
+) : TimelineTabItem() {
     override fun createPresenter(): TimelinePresenter = MixedTimelinePresenter(subTimelineTabItem.map { it.createPresenter() })
 
     override val account: AccountType
@@ -676,7 +676,7 @@ public data class ListTimelineTabItem(
     override val account: AccountType,
     val listId: String,
     override val metaData: TabMetaData,
-) : TimelineTabItem {
+) : TimelineTabItem() {
     override val key: String = "list_${account}_$listId"
 
     override fun createPresenter(): TimelinePresenter = ListTimelinePresenter(account, listId)
@@ -699,7 +699,7 @@ public object Mastodon {
     public data class LocalTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem {
+    ) : TimelineTabItem() {
         override val key: String = "local_$account"
 
         override fun createPresenter(): TimelinePresenter =
@@ -713,7 +713,7 @@ public object Mastodon {
     public data class PublicTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem {
+    ) : TimelineTabItem() {
         override val key: String = "public_$account"
 
         override fun createPresenter(): TimelinePresenter =
@@ -727,7 +727,7 @@ public object Mastodon {
     public data class BookmarkTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem {
+    ) : TimelineTabItem() {
         override val key: String = "bookmark_$account"
 
         override fun createPresenter(): TimelinePresenter =
@@ -741,7 +741,7 @@ public object Mastodon {
     public data class FavouriteTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem {
+    ) : TimelineTabItem() {
         override val key: String = "favourite_$account"
 
         override fun createPresenter(): TimelinePresenter =
@@ -757,7 +757,7 @@ public object Misskey {
     public data class LocalTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem {
+    ) : TimelineTabItem() {
         override val key: String = "local_$account"
 
         override fun createPresenter(): TimelinePresenter =
@@ -771,7 +771,7 @@ public object Misskey {
     public data class GlobalTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem {
+    ) : TimelineTabItem() {
         override val key: String = "global_$account"
 
         override fun createPresenter(): TimelinePresenter =
@@ -785,7 +785,7 @@ public object Misskey {
     public data class HybridTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem {
+    ) : TimelineTabItem() {
         override val key: String = "hybrid_$account"
 
         override fun createPresenter(): TimelinePresenter =
@@ -799,7 +799,7 @@ public object Misskey {
     public data class FavouriteTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem {
+    ) : TimelineTabItem() {
         override val key: String = "favourite_$account"
 
         override fun createPresenter(): TimelinePresenter =
@@ -824,7 +824,7 @@ public object Misskey {
         val id: String,
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem {
+    ) : TimelineTabItem() {
         override val key: String = "antennas_${account}_$id"
 
         override fun createPresenter(): TimelinePresenter =
@@ -840,7 +840,7 @@ public object XQT {
     public data class FeaturedTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem {
+    ) : TimelineTabItem() {
         override val key: String = "featured_$account"
 
         override fun createPresenter(): TimelinePresenter =
@@ -854,7 +854,7 @@ public object XQT {
     public data class BookmarkTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem {
+    ) : TimelineTabItem() {
         override val key: String = "bookmark_$account"
 
         override fun createPresenter(): TimelinePresenter =
@@ -881,7 +881,7 @@ public object Bluesky {
         override val account: AccountType,
         val uri: String,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem {
+    ) : TimelineTabItem() {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.bluesky
                 .BlueskyFeedTimelinePresenter(account, uri)
@@ -920,7 +920,7 @@ public object Bluesky {
 public data class RssTimelineTabItem(
     val feedUrl: String,
     override val metaData: TabMetaData,
-) : TimelineTabItem {
+) : TimelineTabItem() {
     // This is a special case for RSS feeds, which are not tied to a specific account.
     override val account: AccountType = AccountType.Guest
     override val key: String = "rss_$feedUrl"

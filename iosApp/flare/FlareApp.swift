@@ -26,6 +26,4 @@ class SwiftInAppNotification: InAppNotification {
     func onSuccess(message: KotlinSharedUI.Message) {
         
     }
-    
-    
 }

@@ -25,7 +25,7 @@ struct TimelineV4Component: View {
                 }
 
             case let .loaded(items, hasMore):
-                ForEach(items) { item in
+                ForEach(items ) { item in
                     TimelineStatusViewV2(
                         item: item,
                         timelineViewModel: nil

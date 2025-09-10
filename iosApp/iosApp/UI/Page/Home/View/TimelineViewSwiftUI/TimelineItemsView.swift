@@ -13,10 +13,11 @@ struct TimelineItemsView: View {
             TimelineStatusViewV2(
                 item: item,
                 timelineViewModel: viewModel
-            ).id(item.id)
+            )
+//            .id(item.id)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 4)
-                .onAppear {
+//                .onAppear {
                     // viewModel.itemOnAppear(item: item)
                     //  FlareLog.debug("🔍 [TimelineItemsView] onAppear  for id: '\(item.id)', content: '\(item.content.raw)'")
 
@@ -36,11 +37,11 @@ struct TimelineItemsView: View {
 //                            }
 //                        }
 //                    }
-                }
-                .onDisappear {
+//                }
+//                .onDisappear {
                     // FlareLog.debug("🔍 [TimelineItemsView] onDisappear  for id: '\(item.id)'")
                     //                  viewModel.itemDidDisappear(item: item)
-                }
+//                }
         }
 
         if hasMore {

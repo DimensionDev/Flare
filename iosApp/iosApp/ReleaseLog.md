@@ -1,3 +1,19 @@
+# Flare 0.5.0 Release Notes
+
+## 🎉 新功能
+- **Optimize code**： 将Swift UI低版本特性升级成iOS18+，性能更好
+- **Timeline List**： 优化部分代码
+- **Following/followers list**： 增加 关注/ 粉丝 列表
+
+## 🎉 修复/调整
+- **App Tabbar**： 调整App Tabbar 隐藏/显示逻辑
+- **Release Notes**： 修复Release Notes 页面翻译显示重复问题
+- **闪退**： 修复点赞等 调用KMP方法 闪退问题
+- **多语言显示**： 调整X 的 部分显示内容
+
+---
+
+
 # Flare 0.4.9 Release Notes
 
 ## 🎉 新功能

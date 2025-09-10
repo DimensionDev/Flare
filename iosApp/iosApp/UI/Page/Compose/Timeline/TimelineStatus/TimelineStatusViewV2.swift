@@ -39,7 +39,7 @@ struct TimelineStatusViewV2: View, Equatable {
     static func == (lhs: TimelineStatusViewV2, rhs: TimelineStatusViewV2) -> Bool {
         guard lhs.item.id == rhs.item.id else { return false }
 
-        return lhs.item.id == rhs.item.id && 
+        return lhs.item.id == rhs.item.id &&
             lhs.item.likeCount == rhs.item.likeCount &&
             lhs.item.isLiked == rhs.item.isLiked &&
             lhs.item.retweetCount == rhs.item.retweetCount &&
@@ -47,7 +47,7 @@ struct TimelineStatusViewV2: View, Equatable {
             lhs.item.replyCount == rhs.item.replyCount &&
             lhs.item.bookmarkCount == rhs.item.bookmarkCount &&
             lhs.item.isBookmarked == rhs.item.isBookmarked &&
-            lhs.item.sensitive == rhs.item.sensitive  
+            lhs.item.sensitive == rhs.item.sensitive
     }
 
     @State private var state = TimelineItemState()

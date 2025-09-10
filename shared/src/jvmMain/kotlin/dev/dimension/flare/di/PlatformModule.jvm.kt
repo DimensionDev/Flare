@@ -13,7 +13,3 @@ internal actual val platformModule: Module =
         singleOf(::DriverFactory)
         singleOf(::PlatformPathProducer)
     }
-
-public object KoinHelper {
-    public fun modules(): List<Module> = appModule()
-}

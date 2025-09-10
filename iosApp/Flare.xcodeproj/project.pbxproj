@@ -6,12 +6,17 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0646B25D2E714C7B00535A3E /* Awesome in Frameworks */ = {isa = PBXBuildFile; productRef = 0646B25C2E714C7B00535A3E /* Awesome */; };
+		0646B2622E7151A700535A3E /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0646B2612E7151A700535A3E /* Kingfisher */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		06E433FE2E6A9A2600CD0826 /* Flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		06E434172E6A9DE000CD0826 /* Exceptions for "flare" folder in "Flare" target */ = {
+		06E434172E6A9DE000CD0826 /* Exceptions for "Flare" folder in "Flare" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -21,12 +26,12 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		06E434002E6A9A2600CD0826 /* flare */ = {
+		06E434002E6A9A2600CD0826 /* Flare */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				06E434172E6A9DE000CD0826 /* Exceptions for "flare" folder in "Flare" target */,
+				06E434172E6A9DE000CD0826 /* Exceptions for "Flare" folder in "Flare" target */,
 			);
-			path = flare;
+			path = Flare;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -36,6 +41,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0646B2622E7151A700535A3E /* Kingfisher in Frameworks */,
+				0646B25D2E714C7B00535A3E /* Awesome in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -45,7 +52,7 @@
 		06E433F52E6A9A2600CD0826 = {
 			isa = PBXGroup;
 			children = (
-				06E434002E6A9A2600CD0826 /* flare */,
+				06E434002E6A9A2600CD0826 /* Flare */,
 				06E433FF2E6A9A2600CD0826 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -75,10 +82,12 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				06E434002E6A9A2600CD0826 /* flare */,
+				06E434002E6A9A2600CD0826 /* Flare */,
 			);
 			name = Flare;
 			packageProductDependencies = (
+				0646B25C2E714C7B00535A3E /* Awesome */,
+				0646B2612E7151A700535A3E /* Kingfisher */,
 			);
 			productName = flare;
 			productReference = 06E433FE2E6A9A2600CD0826 /* Flare.app */;
@@ -109,6 +118,8 @@
 			mainGroup = 06E433F52E6A9A2600CD0826;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				0646B25B2E714C7B00535A3E /* XCRemoteSwiftPackageReference "Awesome" */,
+				0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 06E433FF2E6A9A2600CD0826 /* Products */;
@@ -222,6 +233,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -279,6 +291,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -303,7 +316,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -341,7 +354,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -381,6 +394,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0646B25B2E714C7B00535A3E /* XCRemoteSwiftPackageReference "Awesome" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Tlaster/Awesome";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = exactVersion;
+				version = 8.5.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0646B25C2E714C7B00535A3E /* Awesome */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0646B25B2E714C7B00535A3E /* XCRemoteSwiftPackageReference "Awesome" */;
+			productName = Awesome;
+		};
+		0646B2612E7151A700535A3E /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 06E433F62E6A9A2600CD0826 /* Project object */;
 }

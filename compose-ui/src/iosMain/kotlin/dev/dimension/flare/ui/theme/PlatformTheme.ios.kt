@@ -7,9 +7,7 @@ import com.slapps.cupertino.LocalContentColor
 import com.slapps.cupertino.theme.CupertinoTheme
 
 @Composable
-internal actual fun isLightTheme(): Boolean {
-    return !CupertinoTheme.colorScheme.isDark
-}
+internal actual fun isLightTheme(): Boolean = !CupertinoTheme.colorScheme.isDark
 
 internal actual val PlatformContentColor: ProvidableCompositionLocal<Color>
     @Composable

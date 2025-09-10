@@ -2,6 +2,8 @@ import SwiftUI
 import KotlinSharedUI
 
 struct ContentView: View {
+    
+    
     var body: some View {
         TabView {
             Router {
@@ -14,6 +16,7 @@ struct ContentView: View {
                     Image(systemName: "house.fill")
                 }
             }
+            .toolbar(.hidden, for: .tabBar)
             List {
                 ForEach(0..<1000) { index in
                     Text("index")
@@ -27,6 +30,7 @@ struct ContentView: View {
                     Image(systemName: "bell")
                 }
             }
+            .toolbar(.hidden, for: .tabBar)
             Text("Discover")
                 .tabItem {
                     Label {
@@ -35,6 +39,7 @@ struct ContentView: View {
                         Image(systemName: "magnifyingglass")
                     }
                 }
+                .toolbar(.hidden, for: .tabBar)
             Text("Search")
                 .tabItem {
                     Label {
@@ -43,55 +48,8 @@ struct ContentView: View {
                         Image(systemName: "magnifyingglass")
                     }
                 }
+                .toolbar(.hidden, for: .tabBar)
             
         }
-//        TabView {
-//            Tab {
-//                Router {
-//                    HomeTimelineScreen(accountType: AccountType.Guest())
-//                }
-//            } label: {
-//                Label {
-//                    Text("Home")
-//                } icon: {
-//                    Image(systemName: "house.fill")
-//                }
-//            }
-//            Tab {
-//                List {
-//                    ForEach(0..<1000) { index in
-//                        Text("index")
-//                            .padding()
-//                    }
-//                }
-//            } label: {
-//                Label {
-//                    Text("Notification")
-//                } icon: {
-//                    Image(systemName: "bell")
-//                }
-//
-//            }
-//            Tab {
-//                Text("Discover")
-//            } label: {
-//                Label {
-//                    Text("Discover")
-//                } icon: {
-//                    Image(systemName: "magnifyingglass")
-//                }
-//
-//            }
-//            Tab(role: .search) {
-//                Text("sarch")
-//            } label: {
-//                Label {
-//                    Text("Search")
-//                } icon: {
-//                    Image(systemName: "plus")
-//                }
-//
-//            }
-//        }
     }
 }

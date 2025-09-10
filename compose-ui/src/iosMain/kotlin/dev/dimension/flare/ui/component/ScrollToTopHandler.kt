@@ -2,7 +2,6 @@
 
 package dev.dimension.flare.ui.component
 
-
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,13 +33,14 @@ import platform.darwin.NSObject
 @Composable
 internal fun ScrollToTopHandler(listState: LazyStaggeredGridState) {
     val coroutineScope = rememberCoroutineScope()
-    val scrollViewDelegate = remember(coroutineScope, listState) {
-        createDelegate {
-            coroutineScope.launch {
-                listState.animateScrollToItem(0)
+    val scrollViewDelegate =
+        remember(coroutineScope, listState) {
+            createDelegate {
+                coroutineScope.launch {
+                    listState.animateScrollToItem(0)
+                }
             }
         }
-    }
 
     UIScrollView(scrollViewDelegate)
 }
@@ -48,45 +48,46 @@ internal fun ScrollToTopHandler(listState: LazyStaggeredGridState) {
 @Composable
 internal fun ScrollToTopHandler(scrollState: ScrollState) {
     val coroutineScope = rememberCoroutineScope()
-    val scrollViewDelegate = remember(coroutineScope, scrollState) {
-        createDelegate {
-            coroutineScope.launch {
-                scrollState.animateScrollTo(0)
+    val scrollViewDelegate =
+        remember(coroutineScope, scrollState) {
+            createDelegate {
+                coroutineScope.launch {
+                    scrollState.animateScrollTo(0)
+                }
             }
         }
-    }
     UIScrollView(scrollViewDelegate)
 }
 
 @Composable
 internal fun ScrollToTopHandler(listState: LazyListState) {
     val coroutineScope = rememberCoroutineScope()
-    val scrollViewDelegate = remember(coroutineScope, listState) {
-        createDelegate {
-            coroutineScope.launch {
-                listState.animateScrollToItem(0)
+    val scrollViewDelegate =
+        remember(coroutineScope, listState) {
+            createDelegate {
+                coroutineScope.launch {
+                    listState.animateScrollToItem(0)
+                }
             }
         }
-    }
     UIScrollView(scrollViewDelegate)
 }
 
 @Composable
 internal fun ScrollToTopHandler(gridState: LazyGridState) {
     val coroutineScope = rememberCoroutineScope()
-    val scrollViewDelegate = remember(coroutineScope, gridState) {
-        createDelegate {
-            coroutineScope.launch {
-                gridState.animateScrollToItem(0)
+    val scrollViewDelegate =
+        remember(coroutineScope, gridState) {
+            createDelegate {
+                coroutineScope.launch {
+                    gridState.animateScrollToItem(0)
+                }
             }
         }
-    }
     UIScrollView(scrollViewDelegate)
 }
 
-private fun createDelegate(
-    onScrollToTop: () -> Unit,
-): UIScrollViewDelegateProtocol {
+private fun createDelegate(onScrollToTop: () -> Unit): UIScrollViewDelegateProtocol {
     return object : NSObject(), UIScrollViewDelegateProtocol {
         override fun scrollViewShouldScrollToTop(scrollView: UIScrollView): Boolean = true
 
@@ -129,9 +130,7 @@ private fun createDelegate(
 }
 
 @Composable
-private fun UIScrollView(
-    scrollViewDelegate: UIScrollViewDelegateProtocol,
-) {
+private fun UIScrollView(scrollViewDelegate: UIScrollViewDelegateProtocol) {
     UIKitView(
         factory = {
             UIScrollView(CGRectMake(0.0, 0.0, 100.0, 1.0)).apply {
@@ -144,9 +143,10 @@ private fun UIScrollView(
                 setContentOffset(CGPointMake(0.0, 100.0)) // Enable scroll-to-top
             }
         },
-        modifier = Modifier
-            .alpha(0f)
-            .height(1.dp)
-            .fillMaxWidth()
+        modifier =
+            Modifier
+                .alpha(0f)
+                .height(1.dp)
+                .fillMaxWidth(),
     )
 }

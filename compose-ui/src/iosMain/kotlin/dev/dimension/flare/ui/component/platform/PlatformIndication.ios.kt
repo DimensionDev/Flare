@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 internal actual fun rippleIndication(
     bounded: Boolean,
     radius: Dp,
-    color: Color
+    color: Color,
 ): Indication =
     RippleIndication(
         hover = if (color.isSpecified) color else CupertinoTheme.colorScheme.systemFill,

@@ -13,7 +13,7 @@ import com.slapps.cupertino.theme.Gray
 internal actual fun PlatformLinearProgressIndicator(
     progress: () -> Float,
     modifier: Modifier,
-    color: Color?
+    color: Color?,
 ) {
     CupertinoActivityIndicator(
         modifier = modifier,
@@ -26,7 +26,7 @@ internal actual fun PlatformLinearProgressIndicator(
 @Composable
 internal actual fun PlatformLinearProgressIndicator(
     modifier: Modifier,
-    color: Color?
+    color: Color?,
 ) {
     CupertinoActivityIndicator(
         modifier = modifier,
@@ -39,7 +39,7 @@ internal actual fun PlatformLinearProgressIndicator(
 internal actual fun PlatformCircularProgressIndicator(
     progress: () -> Float,
     modifier: Modifier,
-    color: Color?
+    color: Color?,
 ) {
     CupertinoActivityIndicator(
         modifier = modifier,
@@ -52,7 +52,7 @@ internal actual fun PlatformCircularProgressIndicator(
 @Composable
 internal actual fun PlatformCircularProgressIndicator(
     modifier: Modifier,
-    color: Color?
+    color: Color?,
 ) {
     CupertinoActivityIndicator(
         modifier = modifier,

@@ -160,7 +160,7 @@ internal fun RssDetailScreen(
                             DateTimeText(
                                 it,
                                 style = MaterialTheme.typography.bodySmall,
-                                fullTime = true
+                                fullTime = true,
                             )
                         }
                         Spacer(modifier = Modifier.weight(1f))

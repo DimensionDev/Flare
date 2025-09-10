@@ -1,21 +1,21 @@
 import SwiftUI
 import KotlinSharedUI
 
-enum Route : Hashable {
-    static func == (lhs: Route, rhs: Route) -> Bool {
+enum Route: Hashable {
+    static func ==(lhs: Route, rhs: Route) -> Bool {
         return lhs.hashValue == rhs.hashValue
     }
-    
-    
+
+    @MainActor
     @ViewBuilder
-    func view() -> some View{
+    func view() -> some View {
         switch self {
         case .home(let accountType): HomeTimelineScreen(accountType: accountType)
         case .timeline(let item): TimelineScreen(tabItem: item)
         default: HomeTimelineScreen(accountType: AccountType.Guest())
         }
     }
-    
+
     case home(AccountType)
     case timeline(TimelineTabItem)
     case composeNew(AccountType)
@@ -38,7 +38,7 @@ enum Route : Hashable {
     case statusMisskeyReport(AccountType, MicroBlogKey, MicroBlogKey?)
     case statusVVOComment(AccountType, MicroBlogKey)
     case statusVVOStatus(AccountType, MicroBlogKey)
-    
+
     static func fromDeepLink(url: String) -> Route? {
         if let deeplinkRoute = DeeplinkRoute.companion.parse(url: url) {
             switch onEnum(of: deeplinkRoute) {

@@ -17,33 +17,32 @@ internal actual fun PlatformCard(
     shape: Shape?,
     elevated: Boolean,
     containerColor: Color?,
-    content: @Composable (() -> Unit)
+    content: @Composable (() -> Unit),
 ) {
     Box(
-        modifier = modifier
-            .let {
-                if (shape != null) {
-                    it.clip(shape)
-                } else {
-                    it.clip(PlatformTheme.shapes.medium)
-                }
-            }
-            .let {
-                if (containerColor != null) {
-                    it.background(containerColor)
-                } else {
-                    it
-                }
-            }
-            .let {
-                if (onClick != null) {
-                    it.clickable {
-                        onClick.invoke()
+        modifier =
+            modifier
+                .let {
+                    if (shape != null) {
+                        it.clip(shape)
+                    } else {
+                        it.clip(PlatformTheme.shapes.medium)
                     }
-                } else {
-                    it
-                }
-            }
+                }.let {
+                    if (containerColor != null) {
+                        it.background(containerColor)
+                    } else {
+                        it
+                    }
+                }.let {
+                    if (onClick != null) {
+                        it.clickable {
+                            onClick.invoke()
+                        }
+                    } else {
+                        it
+                    }
+                },
     ) {
         content.invoke()
     }

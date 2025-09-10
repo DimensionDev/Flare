@@ -41,7 +41,7 @@ internal actual fun PlatformText(
     minLines: Int,
     inlineContent: Map<String, InlineTextContent>,
     onTextLayout: (TextLayoutResult) -> Unit,
-    style: TextStyle
+    style: TextStyle,
 ) {
     CupertinoText(
         text = text,

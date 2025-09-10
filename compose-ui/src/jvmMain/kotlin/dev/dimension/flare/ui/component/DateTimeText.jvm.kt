@@ -3,9 +3,9 @@ package dev.dimension.flare.ui.component
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.rememberSaveable
 import dev.dimension.flare.ui.render.UiDateTime
+import org.ocpsoft.prettytime.PrettyTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
-import org.ocpsoft.prettytime.PrettyTime
 
 private val prettyTime = PrettyTime(Date(0))
 
@@ -30,7 +30,7 @@ internal actual fun rememberFormattedDateTime(
                 UiDateTime.DiffType.HOURS,
                 UiDateTime.DiffType.MINUTES,
                 UiDateTime.DiffType.SECONDS,
-                    ->
+                ->
                     prettyTime.format(Date(diff))
                 UiDateTime.DiffType.YEAR_MONTH_DAY ->
                     DateTimeFormatter.ISO_DATE

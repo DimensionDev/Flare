@@ -26,16 +26,15 @@ internal actual fun PlatformIcon(
     imageVector: ImageVector,
     contentDescription: String?,
     modifier: Modifier,
-    tint: Color
+    tint: Color,
 ) {
     Icon(
         imageVector = imageVector,
         contentDescription = contentDescription,
         modifier = modifier,
-        tint = tint
+        tint = tint,
     )
 }
-
 
 /**
  * A composable that draws an [ImageVector] as an icon.
@@ -54,7 +53,7 @@ private fun Icon(
     imageVector: ImageVector,
     contentDescription: String?,
     modifier: Modifier = Modifier,
-    tint: Color = CupertinoTheme.colorScheme.label
+    tint: Color = CupertinoTheme.colorScheme.label,
 ) {
     val painter = rememberVectorPainter(imageVector)
     Icon(painter, tint, contentDescription, modifier)
@@ -80,27 +79,28 @@ private fun Icon(
     painter: Painter,
     tint: Color = CupertinoTheme.colorScheme.label,
     contentDescription: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     // TODO: b/149735981 semantics for content description
     val colorFilter = if (tint == Color.Unspecified) null else ColorFilter.tint(tint)
-    val semantics = if (contentDescription != null) {
-        Modifier.semantics {
-            this.contentDescription = contentDescription
-            this.role = Role.Image
+    val semantics =
+        if (contentDescription != null) {
+            Modifier.semantics {
+                this.contentDescription = contentDescription
+                this.role = Role.Image
+            }
+        } else {
+            Modifier
         }
-    } else {
-        Modifier
-    }
     Box(
-        modifier.toolingGraphicsLayer()
+        modifier
+            .toolingGraphicsLayer()
             .defaultSizeFor(painter)
             .paint(
                 painter,
                 colorFilter = colorFilter,
-                contentScale = ContentScale.Fit
-            )
-            .then(semantics)
+                contentScale = ContentScale.Fit,
+            ).then(semantics),
     )
 }
 
@@ -110,7 +110,7 @@ private fun Modifier.defaultSizeFor(painter: Painter) =
             DefaultIconSizeModifier
         } else {
             Modifier
-        }
+        },
     )
 
 private fun Size.isInfinite() = width.isInfinite() && height.isInfinite()

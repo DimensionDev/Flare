@@ -1,4 +1,3 @@
-import Combine
 import Foundation
 import shared
 import SwiftUI
@@ -13,8 +12,9 @@ struct ProfileTabViewModel {
     var isMediaTab: Bool { mediaPresenter != nil }
 }
 
-class ProfilePresenterWrapper: ObservableObject {
-    @Published var selectedTabKey: String? {
+@Observable
+class ProfilePresenterWrapper {
+    var selectedTabKey: String? {
         didSet {
             if let tabKey = selectedTabKey {
                 Task { @MainActor in
@@ -24,9 +24,9 @@ class ProfilePresenterWrapper: ObservableObject {
         }
     }
 
-    @Published var availableTabs: [FLTabItem] = []
-    @Published private(set) var currentTabViewModel: ProfileTabViewModel?
-    @Published private(set) var isInitialized: Bool = false
+    var availableTabs: [FLTabItem] = []
+    private(set) var currentTabViewModel: ProfileTabViewModel?
+    private(set) var isInitialized: Bool = false
 
     var isCurrentTabActive: Bool {
         guard let selectedTabKey,

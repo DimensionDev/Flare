@@ -10,7 +10,7 @@ struct WaterfallItemsView: View {
     @Binding var scrolledID: String?
     let isCurrentAppBarTabSelected: Bool
     let viewModel: TimelineViewModel
-    @EnvironmentObject private var timelineState: TimelineExtState
+    @Environment(TimelineExtState.self) private var timelineState
     @Environment(FlareRouter.self) private var router
 
     @State private var scrollThreshold: CGFloat = 500
@@ -39,6 +39,8 @@ struct WaterfallItemsView: View {
     }
 
     var body: some View {
+        @Bindable var bindableTimelineState = timelineState
+
         ScrollView {
             LazyVStack(spacing: 0) {
                 WaterfallGrid(waterfallItems, id: \.id) { item in
@@ -97,7 +99,7 @@ struct WaterfallItemsView: View {
         .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
             geometry
         } action: { _, newValue in
-            viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $timelineState.showFloatingButton)
+            viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $bindableTimelineState.showFloatingButton)
 
             let currentOffset = newValue.contentOffset.y
 

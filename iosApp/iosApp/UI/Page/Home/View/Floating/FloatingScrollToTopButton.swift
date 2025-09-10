@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct FloatingScrollToTopButton: View {
-    @EnvironmentObject private var timelineState: TimelineExtState
+    @Environment(TimelineExtState.self) private var timelineState
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {

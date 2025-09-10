@@ -13,19 +13,19 @@ class TimelineViewModel {
 
     private(set) var presenter: PresenterBase<TimelineState>?
     private let stateConverter = PagingStateConverter()
-    private var refreshDebounceTimer: Timer?
-    private var cancellables = Set<AnyCancellable>()
 
     private var dataSourceTask: Task<Void, Never>?
 
     private(set) var isLoadingMore: Bool = false
-//    private var isLoadMoreInProgress: Bool = false
 
     var scrollToId: String = ""
 
-//    @ObservationIgnored
-//    private var visibleItems: [TimelineItem] = []
-//
+    //    private var isLoadMoreInProgress: Bool = false
+    //    private var refreshDebounceTimer: Timer?
+    //    private var cancellables = Set<AnyCancellable>()
+    //    @ObservationIgnored
+    //    private var visibleItems: [TimelineItem] = []
+    //
     //   private let visibilityQueue = DispatchQueue(label: "timeline.visibility", qos: .userInitiated)
 
     var hasMore: Bool {

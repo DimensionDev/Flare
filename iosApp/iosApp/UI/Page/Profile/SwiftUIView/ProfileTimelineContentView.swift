@@ -6,10 +6,12 @@ struct ProfileTimelineContentView: View {
     let timelineViewModel: TimelineViewModel
     let isCurrentTab: Bool
 
-    @EnvironmentObject private var timelineState: TimelineExtState
+    @Environment(TimelineExtState.self) private var timelineState
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
+        @Bindable var bindableTimelineState = timelineState
+
         Group {
             switch timelineViewModel.timelineState {
             case .loading:
@@ -28,7 +30,7 @@ struct ProfileTimelineContentView: View {
                     FlareLog.debug("📜 [ProfileTimelineContentView] Timeline滚动检测 - offsetY: \(newValue.contentOffset.y)")
                     timelineViewModel.handleScrollOffsetChange(
                         newValue.contentOffset.y,
-                        showFloatingButton: $timelineState.showFloatingButton,
+                        showFloatingButton: $bindableTimelineState.showFloatingButton,
                         timelineState: timelineState,
                         isHomeTab: isCurrentTab
                     )

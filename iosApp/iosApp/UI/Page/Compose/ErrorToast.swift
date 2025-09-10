@@ -1,10 +1,11 @@
 import SwiftUI
 
-class ErrorToastManager: ObservableObject {
+@Observable
+class ErrorToastManager {
     static let shared = ErrorToastManager()
 
-    @Published var isShowing = false
-    @Published var message = ""
+    var isShowing = false
+    var message = ""
 
     private init() {}
 
@@ -70,17 +71,19 @@ extension View {
         overlay(
             ErrorToastOverlay()
         )
-        .environmentObject(ErrorToastManager.shared)
     }
 }
 
 struct ErrorToastOverlay: View {
-    @ObservedObject private var toastManager = ErrorToastManager.shared
+    private var toastManager = ErrorToastManager.shared
 
     var body: some View {
         ErrorToast(
             message: toastManager.message,
-            isShowing: $toastManager.isShowing
+            isShowing: Binding(
+                get: { toastManager.isShowing },
+                set: { toastManager.isShowing = $0 }
+            )
         )
     }
 }

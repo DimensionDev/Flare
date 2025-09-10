@@ -9,7 +9,7 @@ struct FlareTabBarV2: View {
     @Environment(FlareMenuState.self) private var menuState
     @Environment(FlareTheme.self) private var theme
     @Environment(\.appSettings) private var appSettings
-    @EnvironmentObject private var timelineState: TimelineExtState
+    @Environment(TimelineExtState.self) private var timelineState
 
     let accountType: AccountType
     @Namespace private var tabBarNamespace

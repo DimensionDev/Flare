@@ -7,7 +7,7 @@ import SwiftUI
 struct TranslatableText: View {
     let originalText: String
     let forceTranslate: Bool
-    @StateObject private var transViewModel = TranslationViewModel()
+    @State private var transViewModel = TranslationViewModel()
     private let languageDetector = LanguageDetector()
     @Environment(\.appSettings) private var appSettings
     @Environment(\.isInCaptureMode) private var isInCaptureMode

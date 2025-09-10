@@ -7,9 +7,9 @@ struct ProfileSwiftUIViewV2: View {
     let userKey: MicroBlogKey?
     let showBackButton: Bool
 
-    @StateObject private var presenterWrapper: ProfilePresenterWrapper
+    @State private var presenterWrapper: ProfilePresenterWrapper
     @Environment(FlareTheme.self) private var theme
-    @EnvironmentObject private var timelineState: TimelineExtState
+    @Environment(TimelineExtState.self) private var timelineState
     @Environment(\.appSettings) private var appSettings
 
     @State private var showUserNameInNavBar = false
@@ -20,10 +20,13 @@ struct ProfileSwiftUIViewV2: View {
         self.showBackButton = showBackButton
 
         let presenterWrapper = ProfilePresenterWrapper(accountType: accountType, userKey: userKey)
-        _presenterWrapper = StateObject(wrappedValue: presenterWrapper)
+        _presenterWrapper = State(wrappedValue: presenterWrapper)
     }
 
     var body: some View {
+        @Bindable var bindableTimelineState = timelineState
+        @Bindable var bindablePresenterWrapper = presenterWrapper
+
         ZStack(alignment: .bottomTrailing) {
             if presenterWrapper.isInitialized {
                 ObservePresenter(presenter: presenterWrapper.profilePresenter) { state in
@@ -45,7 +48,7 @@ struct ProfileSwiftUIViewV2: View {
                             // Tab Bar
                             if !presenterWrapper.availableTabs.isEmpty {
                                 ProfileTabBarViewV2(
-                                    selectedTabKey: $presenterWrapper.selectedTabKey,
+                                    selectedTabKey: $bindablePresenterWrapper.selectedTabKey,
                                     availableTabs: presenterWrapper.availableTabs
                                 )
                                 .listRowInsets(EdgeInsets())
@@ -82,7 +85,7 @@ struct ProfileSwiftUIViewV2: View {
                         .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
                             geometry
                         } action: { _, newValue in
-                            handleProfileScrollChange(newValue.contentOffset.y)
+                            handleProfileScrollChange(newValue.contentOffset.y, bindableTimelineState: $bindableTimelineState.showFloatingButton)
                         }
                         .onChange(of: timelineState.scrollToTopTrigger) { _, _ in
                             let isCurrentTab = presenterWrapper.isCurrentTabActive
@@ -158,13 +161,13 @@ struct ProfileSwiftUIViewV2: View {
 }
 
 extension ProfileSwiftUIViewV2 {
-    private func handleProfileScrollChange(_ offsetY: CGFloat) {
+    private func handleProfileScrollChange(_ offsetY: CGFloat, bindableTimelineState: Binding<Bool>) {
         // FlareLog.debug("📜 [ProfileSwiftUIViewV2] Profile滚动检测 - offsetY: \(offsetY), tabBarOffset: \(timelineState.tabBarOffset)")
 
         if let currentTabViewModel = presenterWrapper.currentTabViewModel {
             currentTabViewModel.timelineViewModel.handleScrollOffsetChange(
                 offsetY,
-                showFloatingButton: $timelineState.showFloatingButton,
+                showFloatingButton: bindableTimelineState,
                 timelineState: timelineState,
                 isHomeTab: true
             )

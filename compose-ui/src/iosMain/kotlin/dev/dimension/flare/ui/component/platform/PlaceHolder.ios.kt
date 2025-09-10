@@ -13,8 +13,7 @@ import io.github.fornewid.placeholder.foundation.PlaceholderHighlight
 import io.github.fornewid.placeholder.foundation.placeholder
 
 @Composable
-private fun placeHolderColor(): Color =
-    CupertinoTheme.colorScheme.placeholderText
+private fun placeHolderColor(): Color = CupertinoTheme.colorScheme.placeholderText
 
 internal actual fun Modifier.placeholder(
     visible: Boolean,

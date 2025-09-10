@@ -13,7 +13,6 @@ struct HomeTimelineScreen: View {
             TimelineView(key: presenter.key, data: presenter.state)
                 .background(Color(.systemGroupedBackground))
                 .ignoresSafeArea()
-            
         }
     }
 }

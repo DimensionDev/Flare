@@ -4,26 +4,25 @@ import KotlinSharedUI
 @main
 struct FlareApp: App {
     init() {
-        KoinHelper.shared.start(inAppNotification: SwiftInAppNotification())
-        ComposeUIHelper.shared.initialize()
+        ComposeUIHelper.shared.initialize(inAppNotification: SwiftInAppNotification())
     }
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            FlareRoot()
         }
     }
 }
 
 class SwiftInAppNotification: InAppNotification {
-    func onError(message: KotlinSharedUI.Message, throwable: KotlinThrowable) {
+    func onError(message: Message, throwable: KotlinThrowable) {
         
     }
     
-    func onProgress(message: KotlinSharedUI.Message, progress: Int32, total: Int32) {
+    func onProgress(message: Message, progress: Int32, total: Int32) {
         
     }
     
-    func onSuccess(message: KotlinSharedUI.Message) {
+    func onSuccess(message: Message) {
         
     }
 }

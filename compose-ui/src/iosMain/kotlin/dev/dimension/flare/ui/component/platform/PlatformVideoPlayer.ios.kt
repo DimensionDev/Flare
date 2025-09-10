@@ -21,6 +21,6 @@ internal actual fun PlatformVideoPlayer(
     autoPlay: Boolean,
     remainingTimeContent: @Composable (BoxScope.(Long) -> Unit)?,
     errorContent: @Composable (BoxScope.() -> Unit),
-    loadingPlaceholder: @Composable (BoxScope.() -> Unit)
+    loadingPlaceholder: @Composable (BoxScope.() -> Unit),
 ) {
 }

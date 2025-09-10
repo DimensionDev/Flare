@@ -14,7 +14,7 @@ internal actual fun PlatformListItem(
     modifier: Modifier,
     leadingContent: @Composable (() -> Unit),
     supportingContent: @Composable (() -> Unit),
-    trailingContent: @Composable (() -> Unit)
+    trailingContent: @Composable (() -> Unit),
 ) {
     ListComponent(
         headlineContent = {

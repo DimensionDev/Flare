@@ -12,14 +12,14 @@ internal actual fun PlatformCheckbox(
     onCheckedChange: ((Boolean) -> Unit)?,
     modifier: Modifier,
     enabled: Boolean,
-    interactionSource: MutableInteractionSource?
+    interactionSource: MutableInteractionSource?,
 ) {
     CupertinoCheckBox(
         checked = checked,
         onCheckedChange = onCheckedChange,
         modifier = modifier,
         enabled = enabled,
-        interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+        interactionSource = interactionSource ?: remember { MutableInteractionSource() },
     )
 }
 
@@ -29,13 +29,13 @@ internal actual fun PlatformRadioButton(
     onClick: (() -> Unit)?,
     modifier: Modifier,
     enabled: Boolean,
-    interactionSource: MutableInteractionSource?
+    interactionSource: MutableInteractionSource?,
 ) {
     CupertinoCheckBox(
         checked = selected,
         onCheckedChange = { onClick?.invoke() },
         modifier = modifier,
         enabled = enabled,
-        interactionSource = interactionSource ?: remember { MutableInteractionSource() }
+        interactionSource = interactionSource ?: remember { MutableInteractionSource() },
     )
 }

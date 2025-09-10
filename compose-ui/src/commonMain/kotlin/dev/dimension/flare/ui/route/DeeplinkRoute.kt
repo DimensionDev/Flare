@@ -5,8 +5,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 
-public sealed class DeeplinkRoute() {
-
+public sealed class DeeplinkRoute {
     @Serializable
     public sealed class Callback : DeeplinkRoute() {
         @Serializable

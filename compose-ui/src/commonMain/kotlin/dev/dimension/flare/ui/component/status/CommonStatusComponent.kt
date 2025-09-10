@@ -708,7 +708,7 @@ internal fun StatusActions(
                                                                     .size(
                                                                         with(LocalDensity.current) {
                                                                             PlatformTextStyle.current.fontSize.toDp() +
-                                                                                    4.dp
+                                                                                4.dp
                                                                         },
                                                                     ).placeholder(
                                                                         true,

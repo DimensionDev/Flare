@@ -11,7 +11,7 @@ internal actual fun PlatformSlider(
     modifier: Modifier,
     enabled: Boolean,
     onValueChangeFinished: (() -> Unit)?,
-    valueRange: ClosedFloatingPointRange<Float>
+    valueRange: ClosedFloatingPointRange<Float>,
 ) {
     CupertinoSlider(
         value = value,
@@ -19,6 +19,6 @@ internal actual fun PlatformSlider(
         modifier = modifier,
         enabled = enabled,
         onValueChangeFinished = onValueChangeFinished,
-        valueRange = valueRange
+        valueRange = valueRange,
     )
 }

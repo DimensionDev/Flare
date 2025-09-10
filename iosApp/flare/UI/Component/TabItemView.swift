@@ -1,0 +1,36 @@
+import SwiftUI
+import KotlinSharedUI
+
+struct TabItemView : View {
+    let tabItem: TabItem
+    
+    var body: some View {
+        switch onEnum(of: tabItem) {
+        case .timelineTabItem(let timelineTabItem):
+            switch onEnum(of: timelineTabItem) {
+            case .HomeTimelineTabItem(let homeTimelineTabItem):
+                HomeTimelineScreen(accountType: homeTimelineTabItem.account)
+            default:
+                TimelineScreen(tabItem: timelineTabItem)
+            }
+        case .allListTabItem(_):
+            EmptyView()
+        case .feedsTabItem(_):
+            EmptyView()
+        case .directMessageTabItem(_):
+            EmptyView()
+        case .discoverTabItem(_):
+            EmptyView()
+        case .antennasListTabItem(_):
+            EmptyView()
+        case .notificationTabItem(_):
+            EmptyView()
+        case .profileTabItem(_):
+            EmptyView()
+        case .rssTabItem(_):
+            EmptyView()
+        case .settingsTabItem(_):
+            EmptyView()
+        }
+    }
+}

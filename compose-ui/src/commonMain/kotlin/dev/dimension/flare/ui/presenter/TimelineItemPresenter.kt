@@ -96,6 +96,7 @@ public class TimelineItemPresenter(
                 }
                 badge.refresh()
             }
+
             override suspend fun refreshSuspend() {
                 state.refresh()
                 badge.refresh()

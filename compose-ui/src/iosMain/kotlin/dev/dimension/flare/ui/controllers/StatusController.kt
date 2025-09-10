@@ -51,55 +51,55 @@ import kotlinx.coroutines.launch
 import platform.UIKit.UIViewController
 
 @OptIn(ExperimentalComposeUiApi::class)
-public fun TimelineController(
-    state: ComposeUIStateProxy<TimelineItemPresenter.State>,
-): UIViewController = FlareComposeUIViewController(state) { state ->
-    CupertinoTheme {
-        CompositionLocalProvider(
-            LocalComponentAppearance provides ComponentAppearance()
-        ) {
-            val scope = rememberCoroutineScope()
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize(),
+public fun TimelineController(state: ComposeUIStateProxy<TimelineItemPresenter.State>): UIViewController =
+    FlareComposeUIViewController(state) { state ->
+        CupertinoTheme {
+            CompositionLocalProvider(
+                LocalComponentAppearance provides ComponentAppearance(),
             ) {
-                ScrollToTopHandler(state.lazyListState)
-                LazyStatusVerticalStaggeredGrid(
-                    state = state.lazyListState,
-                    contentPadding = WindowInsets.safeDrawing.asPaddingValues()
-                ) {
-                    status(state.listState)
-                }
-                AnimatedVisibility(
-                    state.showNewToots,
-                    enter = slideInVertically { -it } + fadeIn(),
-                    exit = slideOutVertically { -it } + fadeOut(),
+                val scope = rememberCoroutineScope()
+                Box(
                     modifier =
                         Modifier
-                            .align(Alignment.TopCenter)
+                            .fillMaxSize(),
                 ) {
-                    Row(
-                        modifier = Modifier.clickable {
-                            state.onNewTootsShown()
-                            scope.launch {
-                                state.lazyListState.scrollToItem(0)
-                            }
-                        },
+                    ScrollToTopHandler(state.lazyListState)
+                    LazyStatusVerticalStaggeredGrid(
+                        state = state.lazyListState,
+                        contentPadding = WindowInsets.safeDrawing.asPaddingValues(),
                     ) {
-                        FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.AnglesUp,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        CupertinoText(text = "sadsa")
+                        status(state.listState)
+                    }
+                    AnimatedVisibility(
+                        state.showNewToots,
+                        enter = slideInVertically { -it } + fadeIn(),
+                        exit = slideOutVertically { -it } + fadeOut(),
+                        modifier =
+                            Modifier
+                                .align(Alignment.TopCenter),
+                    ) {
+                        Row(
+                            modifier =
+                                Modifier.clickable {
+                                    state.onNewTootsShown()
+                                    scope.launch {
+                                        state.lazyListState.scrollToItem(0)
+                                    }
+                                },
+                        ) {
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.AnglesUp,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            CupertinoText(text = "sadsa")
+                        }
                     }
                 }
             }
         }
     }
-}
 
 @Stable
 public class ComposeUIStateProxy<T>(
@@ -122,12 +122,17 @@ public class ComposeUIStateProxy<T>(
 
 public object ComposeUIStateProxyCache {
     private val cache = mutableMapOf<String, ComposeUIStateProxy<*>>()
-    public fun <T> getOrCreate(key: String, factory: () -> T): ComposeUIStateProxy<T> {
+
+    public fun <T> getOrCreate(
+        key: String,
+        factory: () -> T,
+    ): ComposeUIStateProxy<T> {
         @Suppress("UNCHECKED_CAST")
         return cache.getOrPut(key) {
             ComposeUIStateProxy(factory())
         } as ComposeUIStateProxy<T>
     }
+
     public fun remove(key: String) {
         cache.remove(key)?.dispose()
     }
@@ -136,17 +141,19 @@ public object ComposeUIStateProxyCache {
 internal class ComposeLifecycleProxy(
     private val parentLifecycleOwner: LifecycleOwner,
     private val parentViewModelStoreOwner: ViewModelStoreOwner,
-): LifecycleOwner, LifecycleEventObserver {
-    private val lifecycleRegistry = androidx.lifecycle.LifecycleRegistry(this).apply {
-        currentState = parentLifecycleOwner.lifecycle.currentState
-        parentLifecycleOwner.lifecycle.addObserver(this@ComposeLifecycleProxy)
-    }
+) : LifecycleOwner,
+    LifecycleEventObserver {
+    private val lifecycleRegistry =
+        androidx.lifecycle.LifecycleRegistry(this).apply {
+            currentState = parentLifecycleOwner.lifecycle.currentState
+            parentLifecycleOwner.lifecycle.addObserver(this@ComposeLifecycleProxy)
+        }
     override val lifecycle: Lifecycle
         get() = lifecycleRegistry
 
     override fun onStateChanged(
         source: LifecycleOwner,
-        event: Lifecycle.Event
+        event: Lifecycle.Event,
     ) {
 //        lifecycleRegistry.handleLifecycleEvent(event)
     }
@@ -161,37 +168,39 @@ internal class ComposeLifecycleProxy(
 @OptIn(ExperimentalComposeUiApi::class)
 internal fun <T> FlareComposeUIViewController(
     state: ComposeUIStateProxy<T>,
-    content: @Composable (T) -> Unit
-): UIViewController = ComposeUIViewController(
-    configure = {
-        parallelRendering = true
-        enableBackGesture = false
-        opaque = false
-    }
-) {
-    val parentLifecycleOwner = checkNotNull(LocalLifecycleOwner.current) {
-        "Parent ViewController is not a LifecycleOwner"
-    }
-    val parentViewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
-        "Parent ViewController is not a ViewModelStoreOwner"
-    }
-    val lifecycleProxy = remember(parentLifecycleOwner, parentViewModelStoreOwner) {
-        ComposeLifecycleProxy(parentLifecycleOwner, parentViewModelStoreOwner)
-    }
-    DisposableEffect(lifecycleProxy) {
-        state.onDispose = {
-            lifecycleProxy.dispose()
-        }
-        onDispose {
-            state.onDispose = null
-        }
-    }
-    CompositionLocalProvider(
-        androidx.lifecycle.compose.LocalLifecycleOwner provides parentLifecycleOwner,
-        LocalViewModelStoreOwner provides parentViewModelStoreOwner,
+    content: @Composable (T) -> Unit,
+): UIViewController =
+    ComposeUIViewController(
+        configure = {
+            parallelRendering = true
+            enableBackGesture = false
+            opaque = false
+        },
     ) {
-        content(state.state)
+        val parentLifecycleOwner =
+            checkNotNull(LocalLifecycleOwner.current) {
+                "Parent ViewController is not a LifecycleOwner"
+            }
+        val parentViewModelStoreOwner =
+            checkNotNull(LocalViewModelStoreOwner.current) {
+                "Parent ViewController is not a ViewModelStoreOwner"
+            }
+        val lifecycleProxy =
+            remember(parentLifecycleOwner, parentViewModelStoreOwner) {
+                ComposeLifecycleProxy(parentLifecycleOwner, parentViewModelStoreOwner)
+            }
+        DisposableEffect(lifecycleProxy) {
+            state.onDispose = {
+                lifecycleProxy.dispose()
+            }
+            onDispose {
+                state.onDispose = null
+            }
+        }
+        CompositionLocalProvider(
+            androidx.lifecycle.compose.LocalLifecycleOwner provides parentLifecycleOwner,
+            LocalViewModelStoreOwner provides parentViewModelStoreOwner,
+        ) {
+            content(state.state)
+        }
     }
-}
-
-

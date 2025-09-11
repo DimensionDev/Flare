@@ -27,6 +27,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ComposeUIViewController
 import androidx.lifecycle.Lifecycle
@@ -50,6 +52,7 @@ import dev.dimension.flare.ui.presenter.TimelineItemPresenter
 import kotlinx.coroutines.launch
 import platform.UIKit.UIViewController
 
+@Suppress("FunctionName")
 @OptIn(ExperimentalComposeUiApi::class)
 public fun TimelineController(state: ComposeUIStateProxy<TimelineItemPresenter.State>): UIViewController =
     FlareComposeUIViewController(state) { state ->
@@ -104,6 +107,7 @@ public fun TimelineController(state: ComposeUIStateProxy<TimelineItemPresenter.S
 @Stable
 public class ComposeUIStateProxy<T>(
     initialState: T,
+    private val onOpenLink: (String) -> Unit,
 ) {
     internal var onDispose: (() -> Unit)? = null
     internal var state by mutableStateOf(initialState)
@@ -115,6 +119,13 @@ public class ComposeUIStateProxy<T>(
         }
     }
 
+    internal val uriHandler =
+        object : UriHandler {
+            override fun openUri(uri: String) {
+                onOpenLink(uri)
+            }
+        }
+
     public fun dispose() {
         onDispose?.invoke()
     }
@@ -125,11 +136,11 @@ public object ComposeUIStateProxyCache {
 
     public fun <T> getOrCreate(
         key: String,
-        factory: () -> T,
+        factory: () -> ComposeUIStateProxy<T>,
     ): ComposeUIStateProxy<T> {
         @Suppress("UNCHECKED_CAST")
         return cache.getOrPut(key) {
-            ComposeUIStateProxy(factory())
+            factory()
         } as ComposeUIStateProxy<T>
     }
 
@@ -165,6 +176,7 @@ internal class ComposeLifecycleProxy(
     }
 }
 
+@Suppress("FunctionName")
 @OptIn(ExperimentalComposeUiApi::class)
 internal fun <T> FlareComposeUIViewController(
     state: ComposeUIStateProxy<T>,
@@ -200,6 +212,7 @@ internal fun <T> FlareComposeUIViewController(
         CompositionLocalProvider(
             androidx.lifecycle.compose.LocalLifecycleOwner provides parentLifecycleOwner,
             LocalViewModelStoreOwner provides parentViewModelStoreOwner,
+            LocalUriHandler provides state.uriHandler,
         ) {
             content(state.state)
         }

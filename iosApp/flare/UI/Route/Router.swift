@@ -19,10 +19,5 @@ struct Router<Root: View>: View {
                 return .systemAction
             }
         })
-        .onOpenURL { url in
-            if let newRoute = Route.fromDeepLink(url: url.absoluteString) {
-                route.append(newRoute)
-            }
-        }
     }
 }

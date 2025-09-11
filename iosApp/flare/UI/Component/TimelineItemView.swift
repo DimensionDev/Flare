@@ -7,11 +7,11 @@ struct TimelineView : UIViewControllerRepresentable {
     let data: TimelineItemPresenterState
     let state: ComposeUIStateProxy<TimelineItemPresenterState>
     
-    init(key: String, data: TimelineItemPresenterState) {
+    init(key: String, data: TimelineItemPresenterState, onOpenLink: @escaping (String) -> Void) {
         self.key = key
         self.data = data
         self.state = ComposeUIStateProxyCache.shared.getOrCreate(key: key, factory: {
-            data
+            .init(initialState: data, onOpenLink: onOpenLink)
         }) as! ComposeUIStateProxy<any TimelineItemPresenterState>
     }
     

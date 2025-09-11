@@ -1,9 +1,9 @@
 package dev.dimension.flare.ui.render
 
-import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 public data class UiDateTime internal constructor(
     val value: Instant,

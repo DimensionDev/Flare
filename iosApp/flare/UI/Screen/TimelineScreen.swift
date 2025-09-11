@@ -3,6 +3,7 @@ import KotlinSharedUI
 
 struct TimelineScreen: View {
     let tabItem: TimelineTabItem
+    @Environment(\.openURL) private var openURL
     @StateObject var presenter: KotlinPresenter<TimelineItemPresenterState>
     init(tabItem: TimelineTabItem) {
         self.tabItem = tabItem
@@ -10,7 +11,7 @@ struct TimelineScreen: View {
     }
     var body: some View {
         ZStack {
-            TimelineView(key: presenter.key, data: presenter.state)
+            TimelineView(key: presenter.key, data: presenter.state, onOpenLink: { link in openURL(.init(string: link)!) })
                 .background(Color(.systemGroupedBackground))
                 .ignoresSafeArea()
             

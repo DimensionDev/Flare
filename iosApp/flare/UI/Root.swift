@@ -31,13 +31,15 @@ struct FlareRoot: View {
                     }
                     .badge(badge)
                 }
-                Tab(value: "more", role: .search) {
-                    Text("More")
-                } label: {
-                    Label {
+                if case .success(_) = onEnum(of: activeAccountPresenter.state.user) {
+                    Tab(value: "more", role: .search) {
                         Text("More")
-                    } icon: {
-                        Awesome.Classic.Solid.ellipsis.image
+                    } label: {
+                        Label {
+                            Text("More")
+                        } icon: {
+                            Awesome.Classic.Solid.ellipsis.image
+                        }
                     }
                 }
             }

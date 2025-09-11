@@ -4,8 +4,8 @@ import androidx.paging.ExperimentalPagingApi
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Like
 import app.bsky.feed.Repost
+import app.bsky.notification.ListNotificationsNotificationReason
 import app.bsky.notification.ListNotificationsQueryParams
-import app.bsky.notification.ListNotificationsReason
 import app.bsky.notification.UpdateSeenRequest
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -79,27 +79,27 @@ internal class NotificationRemoteMediator(
             response.notifications
                 .mapNotNull {
                     when (it.reason) {
-                        is ListNotificationsReason.Unknown -> null
-                        ListNotificationsReason.Like ->
+                        is ListNotificationsNotificationReason.Unknown -> null
+                        ListNotificationsNotificationReason.Like ->
                             it.record
                                 .decodeAs<Like>()
                                 .subject.uri
 
-                        ListNotificationsReason.Repost ->
+                        ListNotificationsNotificationReason.Repost ->
                             it.record
                                 .decodeAs<Repost>()
                                 .subject.uri
 
-                        ListNotificationsReason.Follow -> null
-                        ListNotificationsReason.Mention -> it.uri
-                        ListNotificationsReason.Reply -> it.uri
-                        ListNotificationsReason.Quote -> it.uri
-                        ListNotificationsReason.StarterpackJoined -> null
-                        ListNotificationsReason.Unverified -> null
-                        ListNotificationsReason.Verified -> null
-                        ListNotificationsReason.LikeViaRepost -> it.uri
-                        ListNotificationsReason.RepostViaRepost -> it.uri
-                        ListNotificationsReason.SubscribedPost -> it.uri
+                        ListNotificationsNotificationReason.Follow -> null
+                        ListNotificationsNotificationReason.Mention -> it.uri
+                        ListNotificationsNotificationReason.Reply -> it.uri
+                        ListNotificationsNotificationReason.Quote -> it.uri
+                        ListNotificationsNotificationReason.StarterpackJoined -> null
+                        ListNotificationsNotificationReason.Unverified -> null
+                        ListNotificationsNotificationReason.Verified -> null
+                        ListNotificationsNotificationReason.LikeViaRepost -> it.uri
+                        ListNotificationsNotificationReason.RepostViaRepost -> it.uri
+                        ListNotificationsNotificationReason.SubscribedPost -> it.uri
                     }
                 }.distinct()
                 .toImmutableList()

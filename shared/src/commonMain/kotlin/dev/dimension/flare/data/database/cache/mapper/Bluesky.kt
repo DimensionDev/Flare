@@ -1,8 +1,11 @@
 package dev.dimension.flare.data.database.cache.mapper
 
+import SnowflakeIdGenerator
 import app.bsky.actor.ProfileView
 import app.bsky.actor.ProfileViewBasic
 import app.bsky.actor.ProfileViewDetailed
+import app.bsky.bookmark.BookmarkView
+import app.bsky.bookmark.BookmarkViewItemUnion
 import app.bsky.feed.FeedViewPost
 import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.Like
@@ -10,7 +13,7 @@ import app.bsky.feed.PostView
 import app.bsky.feed.ReplyRefParentUnion
 import app.bsky.feed.Repost
 import app.bsky.notification.ListNotificationsNotification
-import app.bsky.notification.ListNotificationsReason
+import app.bsky.notification.ListNotificationsNotificationReason
 import chat.bsky.convo.ConvoView
 import chat.bsky.convo.ConvoViewLastMessageUnion
 import chat.bsky.convo.MessageView
@@ -149,6 +152,25 @@ internal object Bluesky {
     }
 }
 
+internal suspend fun List<BookmarkView>.toDb(
+    accountKey: MicroBlogKey,
+    pagingKey: String,
+    sortIdProvider: suspend (BookmarkView) -> Long = {
+        it.createdAt?.toStdlibInstant()?.toEpochMilliseconds() ?: SnowflakeIdGenerator.nextId()
+    },
+): List<DbPagingTimelineWithStatus> =
+    this.mapNotNull {
+        it.toDbStatusWithUser(accountKey)?.let { status ->
+            createDbPagingTimelineWithStatus(
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                sortId = sortIdProvider(it),
+                status = status,
+                references = mapOf(),
+            )
+        }
+    }
+
 internal fun List<PostView>.toDb(
     accountKey: MicroBlogKey,
     pagingKey: String,
@@ -173,10 +195,10 @@ internal fun List<ListNotificationsNotification>.toDb(
     val grouped = this.groupBy { it.reason }.filter { it.value.any() }
     return grouped.flatMap { (reason, items) ->
         when (reason) {
-            is ListNotificationsReason.Unknown,
-            ListNotificationsReason.StarterpackJoined,
-            ListNotificationsReason.Verified,
-            ListNotificationsReason.Unverified,
+            is ListNotificationsNotificationReason.Unknown,
+            ListNotificationsNotificationReason.StarterpackJoined,
+            ListNotificationsNotificationReason.Verified,
+            ListNotificationsNotificationReason.Unverified,
             ->
                 items.map {
                     createDbPagingTimelineWithStatus(
@@ -188,15 +210,15 @@ internal fun List<ListNotificationsNotification>.toDb(
                     )
                 }
 
-            ListNotificationsReason.Repost, ListNotificationsReason.Like -> {
+            ListNotificationsNotificationReason.Repost, ListNotificationsNotificationReason.Like -> {
                 val post =
                     items
                         .first()
                         .record
                         .let {
                             when (reason) {
-                                ListNotificationsReason.Repost -> it.decodeAs<Repost>().subject
-                                ListNotificationsReason.Like -> it.decodeAs<Like>().subject
+                                ListNotificationsNotificationReason.Repost -> it.decodeAs<Repost>().subject
+                                ListNotificationsNotificationReason.Like -> it.decodeAs<Like>().subject
                                 else -> null
                             }
                         }?.uri
@@ -210,8 +232,8 @@ internal fun List<ListNotificationsNotification>.toDb(
                     )
                 val idSuffix =
                     when (reason) {
-                        ListNotificationsReason.Repost -> "_repost"
-                        ListNotificationsReason.Like -> "_like"
+                        ListNotificationsNotificationReason.Repost -> "_repost"
+                        ListNotificationsNotificationReason.Like -> "_like"
                         else -> ""
                     }
                 val data =
@@ -246,13 +268,18 @@ internal fun List<ListNotificationsNotification>.toDb(
                             listOfNotNull(
                                 post,
                             ).associate {
-                                ReferenceType.Notification to listOfNotNull(it.toDbStatusWithUser(accountKey = accountKey))
+                                ReferenceType.Notification to
+                                    listOfNotNull(
+                                        it.toDbStatusWithUser(
+                                            accountKey = accountKey,
+                                        ),
+                                    )
                             },
                     ),
                 )
             }
 
-            ListNotificationsReason.Follow -> {
+            ListNotificationsNotificationReason.Follow -> {
                 val content = UserList(data = items, post = null)
                 val data =
                     DbStatusWithUser(
@@ -287,7 +314,10 @@ internal fun List<ListNotificationsNotification>.toDb(
                 )
             }
 
-            ListNotificationsReason.Mention, ListNotificationsReason.Reply, ListNotificationsReason.Quote -> {
+            ListNotificationsNotificationReason.Mention,
+            ListNotificationsNotificationReason.Reply,
+            ListNotificationsNotificationReason.Quote,
+            -> {
                 items.mapNotNull {
                     val post = references[it.uri] ?: return@mapNotNull null
                     val content = Post(post = post)
@@ -316,13 +346,18 @@ internal fun List<ListNotificationsNotification>.toDb(
                         status = data,
                         references =
                             mapOf(
-                                ReferenceType.Notification to listOfNotNull(post.toDbStatusWithUser(accountKey)),
+                                ReferenceType.Notification to
+                                    listOfNotNull(
+                                        post.toDbStatusWithUser(
+                                            accountKey,
+                                        ),
+                                    ),
                             ),
                     )
                 }
             }
 
-            ListNotificationsReason.LikeViaRepost ->
+            ListNotificationsNotificationReason.LikeViaRepost ->
                 items.mapNotNull {
                     val post = references[it.uri] ?: return@mapNotNull null
                     val content = Post(post = post)
@@ -351,12 +386,17 @@ internal fun List<ListNotificationsNotification>.toDb(
                         status = data,
                         references =
                             mapOf(
-                                ReferenceType.Notification to listOfNotNull(post.toDbStatusWithUser(accountKey)),
+                                ReferenceType.Notification to
+                                    listOfNotNull(
+                                        post.toDbStatusWithUser(
+                                            accountKey,
+                                        ),
+                                    ),
                             ),
                     )
                 }
 
-            ListNotificationsReason.RepostViaRepost ->
+            ListNotificationsNotificationReason.RepostViaRepost ->
                 items.mapNotNull {
                     val post = references[it.uri] ?: return@mapNotNull null
                     val content = Post(post = post)
@@ -385,12 +425,17 @@ internal fun List<ListNotificationsNotification>.toDb(
                         status = data,
                         references =
                             mapOf(
-                                ReferenceType.Notification to listOfNotNull(post.toDbStatusWithUser(accountKey)),
+                                ReferenceType.Notification to
+                                    listOfNotNull(
+                                        post.toDbStatusWithUser(
+                                            accountKey,
+                                        ),
+                                    ),
                             ),
                     )
                 }
 
-            ListNotificationsReason.SubscribedPost -> {
+            ListNotificationsNotificationReason.SubscribedPost -> {
                 items.mapNotNull {
                     val post = references[it.uri] ?: return@mapNotNull null
                     val content = Post(post = post)
@@ -419,7 +464,12 @@ internal fun List<ListNotificationsNotification>.toDb(
                         status = data,
                         references =
                             mapOf(
-                                ReferenceType.Notification to listOfNotNull(post.toDbStatusWithUser(accountKey)),
+                                ReferenceType.Notification to
+                                    listOfNotNull(
+                                        post.toDbStatusWithUser(
+                                            accountKey,
+                                        ),
+                                    ),
                             ),
                     )
                 }
@@ -427,6 +477,14 @@ internal fun List<ListNotificationsNotification>.toDb(
         }
     }
 }
+
+private fun BookmarkView.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser? =
+    when (val content = item) {
+        is BookmarkViewItemUnion.BlockedPost -> null
+        is BookmarkViewItemUnion.NotFoundPost -> null
+        is BookmarkViewItemUnion.PostView -> content.value.toDbStatusWithUser(accountKey)
+        is BookmarkViewItemUnion.Unknown -> null
+    }
 
 private fun ListNotificationsNotification.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser {
     val user = this.author.toDbUser(accountKey.host)

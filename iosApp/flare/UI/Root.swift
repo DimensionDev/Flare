@@ -3,8 +3,8 @@ import KotlinSharedUI
 import Awesome
 
 struct FlareRoot: View {
-    @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
-    @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
+    @State private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
+    @State private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
     @State var selectedTab: String? = nil
     
     var body: some View {

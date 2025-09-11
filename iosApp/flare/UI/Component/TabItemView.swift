@@ -24,7 +24,7 @@ struct TabItemView : View {
         case .antennasListTabItem(_):
             EmptyView()
         case .notificationTabItem(_):
-            EmptyView()
+            NotificationScreen(accountType: tabItem.account)
         case .profileTabItem(_):
             EmptyView()
         case .rssTabItem(_):

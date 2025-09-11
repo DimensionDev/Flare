@@ -87,7 +87,7 @@ import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
@@ -95,6 +95,7 @@ import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -674,10 +675,24 @@ private fun statusMediaPresenter(
         remember(statusKey) {
             StatusPresenter(accountType = accountType, statusKey = statusKey)
         }.invoke()
-    val medias =
-        state.status.map {
-            (it.content as? UiTimeline.ItemContent.Status)?.images.orEmpty().toImmutableList()
+    var medias: UiState<ImmutableList<UiMedia>> by remember {
+        mutableStateOf(UiState.Loading())
+    }
+    // prevent media change when medias is loaded
+    if (!medias.isSuccess) {
+        LaunchedEffect(state) {
+            state.status
+                .onSuccess {
+                    medias =
+                        UiState.Success(
+                            (it.content as? UiTimeline.ItemContent.Status)
+                                ?.images
+                                .orEmpty()
+                                .toImmutableList(),
+                        )
+                }
         }
+    }
     var currentPage by remember {
         mutableIntStateOf(initialIndex)
     }

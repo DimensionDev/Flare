@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@" : {
+
+    },
     "antenna_title" : {
       "localizations" : {
         "en" : {
@@ -141,6 +144,9 @@
         }
       }
     },
+    "Login" : {
+
+    },
     "mastodon_tab_local_title" : {
       "localizations" : {
         "en" : {
@@ -183,6 +189,9 @@
           }
         }
       }
+    },
+    "notification_type_title" : {
+
     },
     "rss_title" : {
       "localizations" : {

@@ -35,7 +35,6 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.NotificationPresenter
-import dev.dimension.flare.ui.presenter.home.NotificationState
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
@@ -143,7 +142,7 @@ internal fun NotificationScreen(
 @Composable
 private fun NotificationFilterSelector(
     filters: ImmutableList<NotificationFilter>,
-    notificationState: NotificationState,
+    notificationState: NotificationPresenter.State,
     modifier: Modifier = Modifier,
 ) {
     val titles = filters.map { stringResource(id = it.title) }

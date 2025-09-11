@@ -10,7 +10,10 @@ internal class ProxyUriHandler(
         if (uri.startsWith("flare://")) {
             navigate.invoke(uri)
         } else {
-            actualUriHandler.openUri(uri)
+            // some crashes from firebase indicate that this can throw
+            runCatching {
+                actualUriHandler.openUri(uri)
+            }
         }
     }
 }

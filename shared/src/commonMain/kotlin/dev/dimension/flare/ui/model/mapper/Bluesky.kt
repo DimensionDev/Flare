@@ -13,7 +13,7 @@ import app.bsky.feed.Post
 import app.bsky.feed.PostView
 import app.bsky.feed.PostViewEmbedUnion
 import app.bsky.graph.ListView
-import app.bsky.notification.ListNotificationsReason
+import app.bsky.notification.ListNotificationsNotificationReason
 import app.bsky.richtext.Facet
 import app.bsky.richtext.FacetFeatureUnion
 import chat.bsky.convo.MessageView
@@ -345,40 +345,40 @@ internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
     }
 }
 
-private val ListNotificationsReason.icon: UiTimeline.TopMessage.Icon
+private val ListNotificationsNotificationReason.icon: UiTimeline.TopMessage.Icon
     get() =
         when (this) {
-            ListNotificationsReason.Like -> UiTimeline.TopMessage.Icon.Favourite
-            ListNotificationsReason.Repost -> UiTimeline.TopMessage.Icon.Retweet
-            ListNotificationsReason.Follow -> UiTimeline.TopMessage.Icon.Follow
-            ListNotificationsReason.Mention -> UiTimeline.TopMessage.Icon.Mention
-            ListNotificationsReason.Reply -> UiTimeline.TopMessage.Icon.Reply
-            ListNotificationsReason.Quote -> UiTimeline.TopMessage.Icon.Reply
-            is ListNotificationsReason.Unknown -> UiTimeline.TopMessage.Icon.Info
-            ListNotificationsReason.StarterpackJoined -> UiTimeline.TopMessage.Icon.Info
-            ListNotificationsReason.Unverified -> UiTimeline.TopMessage.Icon.Info
-            ListNotificationsReason.Verified -> UiTimeline.TopMessage.Icon.Info
-            ListNotificationsReason.LikeViaRepost -> UiTimeline.TopMessage.Icon.Favourite
-            ListNotificationsReason.RepostViaRepost -> UiTimeline.TopMessage.Icon.Retweet
-            ListNotificationsReason.SubscribedPost -> UiTimeline.TopMessage.Icon.Info
+            ListNotificationsNotificationReason.Like -> UiTimeline.TopMessage.Icon.Favourite
+            ListNotificationsNotificationReason.Repost -> UiTimeline.TopMessage.Icon.Retweet
+            ListNotificationsNotificationReason.Follow -> UiTimeline.TopMessage.Icon.Follow
+            ListNotificationsNotificationReason.Mention -> UiTimeline.TopMessage.Icon.Mention
+            ListNotificationsNotificationReason.Reply -> UiTimeline.TopMessage.Icon.Reply
+            ListNotificationsNotificationReason.Quote -> UiTimeline.TopMessage.Icon.Reply
+            is ListNotificationsNotificationReason.Unknown -> UiTimeline.TopMessage.Icon.Info
+            ListNotificationsNotificationReason.StarterpackJoined -> UiTimeline.TopMessage.Icon.Info
+            ListNotificationsNotificationReason.Unverified -> UiTimeline.TopMessage.Icon.Info
+            ListNotificationsNotificationReason.Verified -> UiTimeline.TopMessage.Icon.Info
+            ListNotificationsNotificationReason.LikeViaRepost -> UiTimeline.TopMessage.Icon.Favourite
+            ListNotificationsNotificationReason.RepostViaRepost -> UiTimeline.TopMessage.Icon.Retweet
+            ListNotificationsNotificationReason.SubscribedPost -> UiTimeline.TopMessage.Icon.Info
         }
 
-private val ListNotificationsReason.type: UiTimeline.TopMessage.MessageType
+private val ListNotificationsNotificationReason.type: UiTimeline.TopMessage.MessageType
     get() =
         when (this) {
-            ListNotificationsReason.Like -> UiTimeline.TopMessage.MessageType.Bluesky.Like
-            ListNotificationsReason.Repost -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
-            ListNotificationsReason.Follow -> UiTimeline.TopMessage.MessageType.Bluesky.Follow
-            ListNotificationsReason.Mention -> UiTimeline.TopMessage.MessageType.Bluesky.Mention
-            ListNotificationsReason.Reply -> UiTimeline.TopMessage.MessageType.Bluesky.Reply
-            ListNotificationsReason.Quote -> UiTimeline.TopMessage.MessageType.Bluesky.Quote
-            is ListNotificationsReason.Unknown -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
-            ListNotificationsReason.StarterpackJoined -> UiTimeline.TopMessage.MessageType.Bluesky.StarterpackJoined
-            ListNotificationsReason.Unverified -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
-            ListNotificationsReason.Verified -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
-            ListNotificationsReason.LikeViaRepost -> UiTimeline.TopMessage.MessageType.Bluesky.Like
-            ListNotificationsReason.RepostViaRepost -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
-            ListNotificationsReason.SubscribedPost -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
+            ListNotificationsNotificationReason.Like -> UiTimeline.TopMessage.MessageType.Bluesky.Like
+            ListNotificationsNotificationReason.Repost -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
+            ListNotificationsNotificationReason.Follow -> UiTimeline.TopMessage.MessageType.Bluesky.Follow
+            ListNotificationsNotificationReason.Mention -> UiTimeline.TopMessage.MessageType.Bluesky.Mention
+            ListNotificationsNotificationReason.Reply -> UiTimeline.TopMessage.MessageType.Bluesky.Reply
+            ListNotificationsNotificationReason.Quote -> UiTimeline.TopMessage.MessageType.Bluesky.Quote
+            is ListNotificationsNotificationReason.Unknown -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
+            ListNotificationsNotificationReason.StarterpackJoined -> UiTimeline.TopMessage.MessageType.Bluesky.StarterpackJoined
+            ListNotificationsNotificationReason.Unverified -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
+            ListNotificationsNotificationReason.Verified -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
+            ListNotificationsNotificationReason.LikeViaRepost -> UiTimeline.TopMessage.MessageType.Bluesky.Like
+            ListNotificationsNotificationReason.RepostViaRepost -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
+            ListNotificationsNotificationReason.SubscribedPost -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
         }
 
 internal fun PostView.render(

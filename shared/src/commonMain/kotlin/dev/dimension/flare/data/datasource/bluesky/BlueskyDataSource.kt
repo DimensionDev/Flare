@@ -12,7 +12,7 @@ import app.bsky.actor.GetProfileQueryParams
 import app.bsky.actor.PreferencesUnion
 import app.bsky.actor.PutPreferencesRequest
 import app.bsky.actor.SavedFeed
-import app.bsky.actor.Type
+import app.bsky.actor.SavedFeedType
 import app.bsky.embed.Images
 import app.bsky.embed.ImagesImage
 import app.bsky.embed.Record
@@ -1190,7 +1190,7 @@ internal class BlueskyDataSource(
                     ?.value
                     ?.items
                     ?.filter {
-                        it.type == Type.Feed
+                        it.type == SavedFeedType.Feed
                     }.orEmpty()
             service
                 .getFeedGenerators(
@@ -1325,7 +1325,7 @@ internal class BlueskyDataSource(
                             (
                                 pref.value.items +
                                     SavedFeed(
-                                        type = Type.Feed,
+                                        type = SavedFeedType.Feed,
                                         value = feedInfo.view.uri.atUri,
                                         pinned = true,
                                         id = Uuid.random().toString(),

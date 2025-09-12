@@ -8,11 +8,15 @@ enum Route: Hashable {
 
     @MainActor
     @ViewBuilder
-    func view() -> some View {
+    func view(
+        onNavigate: @escaping (Route) -> Void
+    ) -> some View {
         switch self {
-        case .home(let accountType): HomeTimelineScreen(accountType: accountType)
+        case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) })
         case .timeline(let item): TimelineScreen(tabItem: item)
-        default: HomeTimelineScreen(accountType: AccountType.Guest())
+        case .serviceSelect:
+            ServiceSelectionScreen(toHome: {  })
+        default: HomeTimelineScreen(accountType: AccountType.Guest(), toServiceSelect: { onNavigate(.serviceSelect) })
         }
     }
 
@@ -38,6 +42,7 @@ enum Route: Hashable {
     case statusMisskeyReport(AccountType, MicroBlogKey, MicroBlogKey?)
     case statusVVOComment(AccountType, MicroBlogKey)
     case statusVVOStatus(AccountType, MicroBlogKey)
+    case serviceSelect
 
     static func fromDeepLink(url: String) -> Route? {
         if let deeplinkRoute = DeeplinkRoute.companion.parse(url: url) {

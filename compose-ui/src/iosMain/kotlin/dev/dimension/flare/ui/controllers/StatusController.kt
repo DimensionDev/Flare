@@ -44,9 +44,14 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.isRefreshing
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.PullToRefresh
 import dev.dimension.flare.ui.component.ScrollToTopHandler
+import dev.dimension.flare.ui.component.floatingToolbarVerticalNestedScroll
+import dev.dimension.flare.ui.component.rememberPullToRefreshState
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiTimeline
@@ -59,24 +64,51 @@ import platform.UIKit.UIViewController
 public fun TimelineItemController(
     state: ComposeUIStateProxy<TimelineItemPresenter.State>,
     topPadding: Int,
+    onExpand: () -> Unit,
+    onCollapse: () -> Unit,
 ): UIViewController =
     FlareComposeUIViewController(state) { state ->
         val scope = rememberCoroutineScope()
+        var floatingExpanded by remember { mutableStateOf(false) }
+        val refreshState = rememberPullToRefreshState(isRefreshing = state.isRefreshing)
         Box(
             modifier =
                 Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .floatingToolbarVerticalNestedScroll(
+                        expanded = floatingExpanded,
+                        onExpand = {
+                            floatingExpanded = true
+                            onExpand()
+                        },
+                        onCollapse = {
+                            floatingExpanded = false
+                            onCollapse()
+                        },
+                    ),
         ) {
             ScrollToTopHandler(state.lazyListState)
-            LazyStatusVerticalStaggeredGrid(
-                state = state.lazyListState,
-                contentPadding =
+            PullToRefresh(
+                state = refreshState,
+                onRefresh = {
+                    state.refreshSync()
+                },
+                indicatorPadding =
                     WindowInsets.safeDrawing.asPaddingValues() +
                         PaddingValues(
                             top = topPadding.dp,
                         ),
             ) {
-                status(state.listState)
+                LazyStatusVerticalStaggeredGrid(
+                    state = state.lazyListState,
+                    contentPadding =
+                        WindowInsets.safeDrawing.asPaddingValues() +
+                            PaddingValues(
+                                top = topPadding.dp,
+                            ),
+                ) {
+                    status(state.listState)
+                }
             }
             AnimatedVisibility(
                 state.showNewToots,
@@ -111,24 +143,54 @@ public fun TimelineItemController(
 public fun TimelineController(
     state: ComposeUIStateProxy<PagingState<UiTimeline>>,
     topPadding: Int,
+    onExpand: () -> Unit,
+    onCollapse: () -> Unit,
 ): UIViewController =
     FlareComposeUIViewController(state) { state ->
+        var floatingExpanded by remember { mutableStateOf(false) }
         val lazyListState = rememberLazyStaggeredGridState()
+        val scope = rememberCoroutineScope()
+        val refreshState = rememberPullToRefreshState(isRefreshing = state.isRefreshing)
         Box(
             modifier =
                 Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .floatingToolbarVerticalNestedScroll(
+                        expanded = floatingExpanded,
+                        onExpand = {
+                            floatingExpanded = true
+                            onExpand()
+                        },
+                        onCollapse = {
+                            floatingExpanded = false
+                            onCollapse()
+                        },
+                    ),
         ) {
             ScrollToTopHandler(lazyListState)
-            LazyStatusVerticalStaggeredGrid(
-                state = lazyListState,
-                contentPadding =
+            PullToRefresh(
+                state = refreshState,
+                onRefresh = {
+                    scope.launch {
+                        state.refreshSuspend()
+                    }
+                },
+                indicatorPadding =
                     WindowInsets.safeDrawing.asPaddingValues() +
                         PaddingValues(
                             top = topPadding.dp,
                         ),
             ) {
-                status(state)
+                LazyStatusVerticalStaggeredGrid(
+                    state = lazyListState,
+                    contentPadding =
+                        WindowInsets.safeDrawing.asPaddingValues() +
+                            PaddingValues(
+                                top = topPadding.dp,
+                            ),
+                ) {
+                    status(state)
+                }
             }
         }
     }

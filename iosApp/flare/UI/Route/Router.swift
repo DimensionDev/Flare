@@ -2,18 +2,20 @@ import SwiftUI
 import KotlinSharedUI
 
 struct Router<Root: View>: View {
-    @ViewBuilder let root: () -> Root
-    @State private var route: [Route] = []
+    @ViewBuilder let root: (@escaping (Route) -> Void) -> Root
+    @State private var backStack: [Route] = []
     var body: some View {
-        NavigationStack(path: $route) {
-            root()
+        NavigationStack(path: $backStack) {
+            root({ route in
+                backStack.append(route)
+            })
                 .navigationDestination(for: Route.self) { route in
-                    route.view()
+                    route.view(onNavigate: { route in backStack.append(route) })
                 }
         }
         .environment(\.openURL, OpenURLAction { url in
             if let newRoute = Route.fromDeepLink(url: url.absoluteString) {
-                route.append(newRoute)
+                backStack.append(newRoute)
                 return .handled
             } else {
                 return .systemAction

@@ -37,7 +37,9 @@ public class NotificationPresenter(
         public val listState: PagingState<UiTimeline>
         public val notificationType: NotificationFilter?
         public val allTypes: UiState<ImmutableList<NotificationFilter>>
+
         public abstract suspend fun refresh()
+
         public abstract fun onNotificationTypeChanged(value: NotificationFilter)
     }
 

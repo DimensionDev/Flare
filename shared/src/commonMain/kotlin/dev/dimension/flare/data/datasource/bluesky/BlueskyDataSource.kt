@@ -97,7 +97,6 @@ import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
-import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -140,7 +139,6 @@ import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
 import sh.christian.ozone.api.model.JsonContent
 import sh.christian.ozone.api.model.JsonContent.Companion.encodeAsJsonContent
-import sh.christian.ozone.api.response.AtpException
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 

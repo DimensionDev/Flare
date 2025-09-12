@@ -510,10 +510,12 @@ internal fun PostView.renderStatus(
                                 onClicked = {
                                     if (viewer?.bookmarked == true) {
                                         event.unbookmark(
+                                            statusKey = statusKey,
                                             uri = uri.atUri,
                                         )
                                     } else {
                                         event.bookmark(
+                                            statusKey = statusKey,
                                             uri = uri.atUri,
                                             cid = cid.cid,
                                         )

@@ -117,11 +117,15 @@ internal sealed interface StatusEvent {
         )
 
         fun bookmark(
+            statusKey: MicroBlogKey,
             uri: String,
             cid: String,
         )
 
-        fun unbookmark(uri: String)
+        fun unbookmark(
+            statusKey: MicroBlogKey,
+            uri: String,
+        )
 
         fun likeWithResult(
             statusKey: MicroBlogKey,

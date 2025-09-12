@@ -2361,10 +2361,23 @@ internal class BlueskyDataSource(
         )
 
     override fun bookmark(
+        statusKey: MicroBlogKey,
         uri: String,
         cid: String,
     ) {
         coroutineScope.launch {
+            updateStatusUseCase<StatusContent.Bluesky>(
+                statusKey = statusKey,
+                accountKey = accountKey,
+                cacheDatabase = database,
+            ) { content ->
+                content.copy(
+                    data =
+                        content.data.copy(
+                            viewer = content.data.viewer?.copy(bookmarked = true),
+                        ),
+                )
+            }
             tryRun {
                 service
                     .createBookmark(
@@ -2375,12 +2388,40 @@ internal class BlueskyDataSource(
                     ).requireResponse()
             }.onFailure {
                 it.printStackTrace()
+                // rollback
+                updateStatusUseCase<StatusContent.Bluesky>(
+                    statusKey = statusKey,
+                    accountKey = accountKey,
+                    cacheDatabase = database,
+                ) { content ->
+                    content.copy(
+                        data =
+                            content.data.copy(
+                                viewer = content.data.viewer?.copy(bookmarked = false),
+                            ),
+                    )
+                }
             }
         }
     }
 
-    override fun unbookmark(uri: String) {
+    override fun unbookmark(
+        statusKey: MicroBlogKey,
+        uri: String,
+    ) {
         coroutineScope.launch {
+            updateStatusUseCase<StatusContent.Bluesky>(
+                statusKey = statusKey,
+                accountKey = accountKey,
+                cacheDatabase = database,
+            ) { content ->
+                content.copy(
+                    data =
+                        content.data.copy(
+                            viewer = content.data.viewer?.copy(bookmarked = false),
+                        ),
+                )
+            }
             tryRun {
                 service
                     .deleteBookmark(
@@ -2390,6 +2431,19 @@ internal class BlueskyDataSource(
                     ).requireResponse()
             }.onFailure {
                 it.printStackTrace()
+                // rollback
+                updateStatusUseCase<StatusContent.Bluesky>(
+                    statusKey = statusKey,
+                    accountKey = accountKey,
+                    cacheDatabase = database,
+                ) { content ->
+                    content.copy(
+                        data =
+                            content.data.copy(
+                                viewer = content.data.viewer?.copy(bookmarked = true),
+                            ),
+                    )
+                }
             }
         }
     }

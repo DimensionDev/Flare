@@ -17,8 +17,8 @@ struct FlareRoot: View {
                         0
                     }
                     Tab(value: data.tabItem.key) {
-                        Router {
-                            TabItemView(tabItem: data.tabItem)
+                        Router { onNavigate in
+                            TabItemView(tabItem: data.tabItem, onNavigate: onNavigate)
                         }
                         .id(data.tabItem.key)
                         .toolbarVisibility(tabs.secondary.contains(data) ? .hidden : .visible, for: .tabBar)

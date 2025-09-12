@@ -40,7 +40,6 @@ internal class ComposeUseCase(
             }.onSuccess {
                 progress.invoke(ComposeProgressState.Success)
             }.onFailure {
-                it.printStackTrace()
                 progress.invoke(ComposeProgressState.Error(it))
             }
         }

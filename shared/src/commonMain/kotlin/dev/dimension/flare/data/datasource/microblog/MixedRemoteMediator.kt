@@ -43,8 +43,6 @@ internal class MixedRemoteMediator(
                             async {
                                 runCatching {
                                     subRequest.load(pageSize)
-                                }.onFailure {
-                                    it.printStackTrace()
                                 }.getOrElse {
                                     Result(endOfPaginationReached = true)
                                 }.let {

@@ -47,7 +47,6 @@ public class VVOLoginPresenter(
                         )
                         toHome.invoke()
                     }.onFailure {
-                        it.printStackTrace()
                         error = it
                     }
                     loading = false

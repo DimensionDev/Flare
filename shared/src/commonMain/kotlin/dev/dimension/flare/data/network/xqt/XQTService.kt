@@ -186,8 +186,6 @@ private val XQTHeaderPlugin =
                         method = request.method.value,
                         path = request.url.encodedPath,
                     )
-                }.onFailure {
-                    it.printStackTrace()
                 }.getOrNull()
             val chocolate = chocolateFlow?.firstOrNull()
             request.headers {

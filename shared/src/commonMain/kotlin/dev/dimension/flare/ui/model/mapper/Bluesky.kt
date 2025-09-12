@@ -504,6 +504,24 @@ internal fun PostView.renderStatus(
                     displayItem = StatusAction.Item.More,
                     actions =
                         listOfNotNull(
+                            StatusAction.Item.Bookmark(
+                                count = 0,
+                                bookmarked = viewer?.bookmarked == true,
+                                onClicked = {
+                                    if (viewer?.bookmarked == true) {
+                                        event.unbookmark(
+                                            statusKey = statusKey,
+                                            uri = uri.atUri,
+                                        )
+                                    } else {
+                                        event.bookmark(
+                                            statusKey = statusKey,
+                                            uri = uri.atUri,
+                                            cid = cid.cid,
+                                        )
+                                    }
+                                },
+                            ),
                             if (isFromMe) {
                                 StatusAction.Item.Delete(
                                     onClicked = {

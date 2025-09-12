@@ -490,6 +490,9 @@ public sealed interface TimelineTabItem : TabItem {
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Feeds, accountKey),
                         ),
                 ),
+                Bluesky.BookmarkTimelineTabItem(
+                    accountType = AccountType.Specific(accountKey),
+                ),
                 DirectMessageTabItem(
                     account = AccountType.Specific(accountKey),
                     metaData =
@@ -886,6 +889,30 @@ public object Bluesky {
         override val key: String = "feed_${account}_$uri"
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Serializable
+    public data class BookmarkTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "bookmark_$account"
+
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.bluesky
+                .BlueskyBookmarkTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+
+        public constructor(accountType: AccountType) :
+            this(
+                account = accountType,
+                metaData =
+                    TabMetaData(
+                        title = TitleType.Localized(TitleType.Localized.LocalizedKey.Bookmark),
+                        icon = IconType.Material(IconType.Material.MaterialIcon.Bookmark),
+                    ),
+            )
     }
 }
 

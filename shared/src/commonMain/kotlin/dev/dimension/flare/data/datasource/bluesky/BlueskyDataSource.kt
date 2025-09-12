@@ -13,6 +13,8 @@ import app.bsky.actor.PreferencesUnion
 import app.bsky.actor.PutPreferencesRequest
 import app.bsky.actor.SavedFeed
 import app.bsky.actor.SavedFeedType
+import app.bsky.bookmark.CreateBookmarkRequest
+import app.bsky.bookmark.DeleteBookmarkRequest
 import app.bsky.embed.Images
 import app.bsky.embed.ImagesImage
 import app.bsky.embed.Record
@@ -59,6 +61,7 @@ import com.atproto.repo.PutRecordRequest
 import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
@@ -2349,6 +2352,47 @@ internal class BlueskyDataSource(
                 null
             },
         ).toPersistentList()
+
+    fun bookmarkTimeline(): BaseTimelineLoader =
+        BookmarkTimelineRemoteMediator(
+            service = service,
+            accountKey = accountKey,
+            database = database,
+        )
+
+    override fun bookmark(
+        uri: String,
+        cid: String,
+    ) {
+        coroutineScope.launch {
+            tryRun {
+                service
+                    .createBookmark(
+                        CreateBookmarkRequest(
+                            uri = AtUri(uri),
+                            cid = Cid(cid),
+                        ),
+                    ).requireResponse()
+            }.onFailure {
+                it.printStackTrace()
+            }
+        }
+    }
+
+    override fun unbookmark(uri: String) {
+        coroutineScope.launch {
+            tryRun {
+                service
+                    .deleteBookmark(
+                        DeleteBookmarkRequest(
+                            uri = AtUri(uri),
+                        ),
+                    ).requireResponse()
+            }.onFailure {
+                it.printStackTrace()
+            }
+        }
+    }
 }
 
 internal inline fun <reified T : Any> T.bskyJson(): JsonContent = bskyJson.encodeAsJsonContent(this)

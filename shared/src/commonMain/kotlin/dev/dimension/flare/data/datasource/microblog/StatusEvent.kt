@@ -116,6 +116,13 @@ internal sealed interface StatusEvent {
             likedUri: String?,
         )
 
+        fun bookmark(
+            uri: String,
+            cid: String,
+        )
+
+        fun unbookmark(uri: String)
+
         fun likeWithResult(
             statusKey: MicroBlogKey,
             cid: String,

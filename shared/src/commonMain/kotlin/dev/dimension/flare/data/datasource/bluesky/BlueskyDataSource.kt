@@ -1387,8 +1387,6 @@ internal class BlueskyDataSource(
                         record = record.bskyJson(),
                     ),
             )
-        }.onFailure {
-            it.printStackTrace()
         }.onSuccess {
             val uri = it.requireResponse().uri
             service
@@ -1429,8 +1427,6 @@ internal class BlueskyDataSource(
                             ),
                     ),
             )
-        }.onFailure {
-            it.printStackTrace()
         }.onSuccess {
             MemoryPagingSource.updateWith<UiList>(
                 key = myListKey,
@@ -1487,8 +1483,6 @@ internal class BlueskyDataSource(
                         record = newRecord.bskyJson(),
                     ),
             )
-        }.onFailure {
-            it.printStackTrace()
         }.onSuccess {
             MemoryPagingSource.updateWith<UiList>(
                 key = myListKey,

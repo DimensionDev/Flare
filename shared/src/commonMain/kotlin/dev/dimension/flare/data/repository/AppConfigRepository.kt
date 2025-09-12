@@ -6,11 +6,10 @@ import dev.dimension.flare.data.datasource.flare.FlareDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.onError
 import kotlinx.coroutines.flow.map
 
 @Composable
 internal fun flareDataSource(appDataStore: AppDataStore): UiState<FlareDataSource> =
     remember {
         appDataStore.flareDataStore.data.map { FlareDataSource(it.serverUrl) }
-    }.collectAsUiState(UiState.Loading()).value.onError { it.printStackTrace() }
+    }.collectAsUiState(UiState.Loading()).value

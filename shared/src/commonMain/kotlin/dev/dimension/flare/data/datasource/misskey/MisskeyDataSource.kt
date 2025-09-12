@@ -629,7 +629,6 @@ internal class MisskeyDataSource(
         tryRun {
             service.blockingCreate(AdminAccountsDeleteRequest(userId = userKey.id))
         }.onFailure {
-            it.printStackTrace()
             MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {

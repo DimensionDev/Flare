@@ -816,7 +816,6 @@ internal class XQTDataSource(
                     )
                 }
             }.onFailure {
-                it.printStackTrace()
                 updateStatusUseCase<StatusContent.XQT>(
                     statusKey = statusKey,
                     accountKey = accountKey,

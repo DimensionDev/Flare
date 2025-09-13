@@ -9,14 +9,18 @@ enum Route: Hashable {
     @MainActor
     @ViewBuilder
     func view(
-        onNavigate: @escaping (Route) -> Void
+        onNavigate: @escaping (Route) -> Void,
+        clearToHome: @escaping () -> Void
     ) -> some View {
         switch self {
         case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) })
         case .timeline(let item): TimelineScreen(tabItem: item)
         case .serviceSelect:
-            ServiceSelectionScreen(toHome: {  })
-        default: HomeTimelineScreen(accountType: AccountType.Guest(), toServiceSelect: { onNavigate(.serviceSelect) })
+            ServiceSelectionScreen(toHome: { clearToHome() })
+        case .statusDetail(let accountType, let statusKey):
+            StatusDetailScreen(accountType: accountType, statusKey: statusKey)
+        default:
+            EmptyView()
         }
     }
 

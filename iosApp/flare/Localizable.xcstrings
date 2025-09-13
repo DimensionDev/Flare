@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
     "%@" : {
 
     },
@@ -13,6 +16,36 @@
           }
         }
       }
+    },
+    "bluesky_notification_follow" : {
+
+    },
+    "bluesky_notification_item_pin" : {
+
+    },
+    "bluesky_notification_like" : {
+
+    },
+    "bluesky_notification_mention" : {
+
+    },
+    "bluesky_notification_quote" : {
+
+    },
+    "bluesky_notification_reply" : {
+
+    },
+    "bluesky_notification_repost" : {
+
+    },
+    "bluesky_notification_starterpackJoined" : {
+
+    },
+    "bluesky_notification_unKnown" : {
+
+    },
+    "Detail" : {
+
     },
     "Discover" : {
       "extractionState" : "stale",
@@ -153,6 +186,39 @@
     "Login" : {
 
     },
+    "mastodon_item_pinned" : {
+
+    },
+    "mastodon_item_show_less" : {
+
+    },
+    "mastodon_item_show_more" : {
+
+    },
+    "mastodon_notification_favourite" : {
+
+    },
+    "mastodon_notification_follow" : {
+
+    },
+    "mastodon_notification_follow_request" : {
+
+    },
+    "mastodon_notification_mention" : {
+
+    },
+    "mastodon_notification_poll" : {
+
+    },
+    "mastodon_notification_reblog" : {
+
+    },
+    "mastodon_notification_status" : {
+
+    },
+    "mastodon_notification_update" : {
+
+    },
     "mastodon_tab_local_title" : {
       "localizations" : {
         "en" : {
@@ -172,6 +238,510 @@
           }
         }
       }
+    },
+    "misskey_achievement_brain_diver_description" : {
+
+    },
+    "misskey_achievement_brain_diver_title" : {
+
+    },
+    "misskey_achievement_bubble_game_double_exploding_head_description" : {
+
+    },
+    "misskey_achievement_bubble_game_double_exploding_head_title" : {
+
+    },
+    "misskey_achievement_bubble_game_exploding_head_description" : {
+
+    },
+    "misskey_achievement_bubble_game_exploding_head_title" : {
+
+    },
+    "misskey_achievement_clicked_click_here_description" : {
+
+    },
+    "misskey_achievement_clicked_click_here_title" : {
+
+    },
+    "misskey_achievement_client30min_description" : {
+
+    },
+    "misskey_achievement_client30min_title" : {
+
+    },
+    "misskey_achievement_client60min_description" : {
+
+    },
+    "misskey_achievement_client60min_title" : {
+
+    },
+    "misskey_achievement_collect_achievements30_description" : {
+
+    },
+    "misskey_achievement_collect_achievements30_title" : {
+
+    },
+    "misskey_achievement_cookie_clicked_description" : {
+
+    },
+    "misskey_achievement_cookie_clicked_title" : {
+
+    },
+    "misskey_achievement_drive_folder_circular_reference_description" : {
+
+    },
+    "misskey_achievement_drive_folder_circular_reference_title" : {
+
+    },
+    "misskey_achievement_followers1_description" : {
+
+    },
+    "misskey_achievement_followers1_title" : {
+
+    },
+    "misskey_achievement_followers10_description" : {
+
+    },
+    "misskey_achievement_followers10_title" : {
+
+    },
+    "misskey_achievement_followers50_description" : {
+
+    },
+    "misskey_achievement_followers50_title" : {
+
+    },
+    "misskey_achievement_followers100_description" : {
+
+    },
+    "misskey_achievement_followers100_title" : {
+
+    },
+    "misskey_achievement_followers300_description" : {
+
+    },
+    "misskey_achievement_followers300_title" : {
+
+    },
+    "misskey_achievement_followers500_description" : {
+
+    },
+    "misskey_achievement_followers500_title" : {
+
+    },
+    "misskey_achievement_followers1000_description" : {
+
+    },
+    "misskey_achievement_followers1000_title" : {
+
+    },
+    "misskey_achievement_following1_description" : {
+
+    },
+    "misskey_achievement_following1_title" : {
+
+    },
+    "misskey_achievement_following10_description" : {
+
+    },
+    "misskey_achievement_following10_title" : {
+
+    },
+    "misskey_achievement_following50_description" : {
+
+    },
+    "misskey_achievement_following50_title" : {
+
+    },
+    "misskey_achievement_following100_description" : {
+
+    },
+    "misskey_achievement_following100_title" : {
+
+    },
+    "misskey_achievement_following300_description" : {
+
+    },
+    "misskey_achievement_following300_title" : {
+
+    },
+    "misskey_achievement_found_treasure_description" : {
+
+    },
+    "misskey_achievement_found_treasure_title" : {
+
+    },
+    "misskey_achievement_htl20npm_description" : {
+
+    },
+    "misskey_achievement_htl20npm_title" : {
+
+    },
+    "misskey_achievement_i_love_misskey_description" : {
+
+    },
+    "misskey_achievement_i_love_misskey_title" : {
+
+    },
+    "misskey_achievement_just_plain_lucky_description" : {
+
+    },
+    "misskey_achievement_just_plain_lucky_title" : {
+
+    },
+    "misskey_achievement_logged_in_on_birthday_description" : {
+
+    },
+    "misskey_achievement_logged_in_on_birthday_title" : {
+
+    },
+    "misskey_achievement_logged_in_on_new_years_day_description" : {
+
+    },
+    "misskey_achievement_logged_in_on_new_years_day_title" : {
+
+    },
+    "misskey_achievement_login3_description" : {
+
+    },
+    "misskey_achievement_login3_title" : {
+
+    },
+    "misskey_achievement_login7_description" : {
+
+    },
+    "misskey_achievement_login7_title" : {
+
+    },
+    "misskey_achievement_login15_description" : {
+
+    },
+    "misskey_achievement_login15_title" : {
+
+    },
+    "misskey_achievement_login30_description" : {
+
+    },
+    "misskey_achievement_login30_title" : {
+
+    },
+    "misskey_achievement_login60_description" : {
+
+    },
+    "misskey_achievement_login60_title" : {
+
+    },
+    "misskey_achievement_login100_description" : {
+
+    },
+    "misskey_achievement_login100_title" : {
+
+    },
+    "misskey_achievement_login200_description" : {
+
+    },
+    "misskey_achievement_login200_title" : {
+
+    },
+    "misskey_achievement_login300_description" : {
+
+    },
+    "misskey_achievement_login300_title" : {
+
+    },
+    "misskey_achievement_login400_description" : {
+
+    },
+    "misskey_achievement_login400_title" : {
+
+    },
+    "misskey_achievement_login500_description" : {
+
+    },
+    "misskey_achievement_login500_title" : {
+
+    },
+    "misskey_achievement_login600_description" : {
+
+    },
+    "misskey_achievement_login600_title" : {
+
+    },
+    "misskey_achievement_login700_description" : {
+
+    },
+    "misskey_achievement_login700_title" : {
+
+    },
+    "misskey_achievement_login800_description" : {
+
+    },
+    "misskey_achievement_login800_title" : {
+
+    },
+    "misskey_achievement_login900_description" : {
+
+    },
+    "misskey_achievement_login900_title" : {
+
+    },
+    "misskey_achievement_login1000_description" : {
+
+    },
+    "misskey_achievement_login1000_title" : {
+
+    },
+    "misskey_achievement_marked_as_cat_description" : {
+
+    },
+    "misskey_achievement_marked_as_cat_title" : {
+
+    },
+    "misskey_achievement_my_note_favorited1_description" : {
+
+    },
+    "misskey_achievement_my_note_favorited1_title" : {
+
+    },
+    "misskey_achievement_note_clipped1_description" : {
+
+    },
+    "misskey_achievement_note_clipped1_title" : {
+
+    },
+    "misskey_achievement_note_deleted_within1min_description" : {
+
+    },
+    "misskey_achievement_note_deleted_within1min_title" : {
+
+    },
+    "misskey_achievement_note_favorited1_description" : {
+
+    },
+    "misskey_achievement_note_favorited1_title" : {
+
+    },
+    "misskey_achievement_notes1_description" : {
+
+    },
+    "misskey_achievement_notes1_title" : {
+
+    },
+    "misskey_achievement_notes10_description" : {
+
+    },
+    "misskey_achievement_notes10_title" : {
+
+    },
+    "misskey_achievement_notes100_description" : {
+
+    },
+    "misskey_achievement_notes100_title" : {
+
+    },
+    "misskey_achievement_notes500_description" : {
+
+    },
+    "misskey_achievement_notes500_title" : {
+
+    },
+    "misskey_achievement_notes1000_description" : {
+
+    },
+    "misskey_achievement_notes1000_title" : {
+
+    },
+    "misskey_achievement_notes5000_description" : {
+
+    },
+    "misskey_achievement_notes5000_title" : {
+
+    },
+    "misskey_achievement_notes10000_description" : {
+
+    },
+    "misskey_achievement_notes10000_title" : {
+
+    },
+    "misskey_achievement_notes20000_description" : {
+
+    },
+    "misskey_achievement_notes20000_title" : {
+
+    },
+    "misskey_achievement_notes30000_description" : {
+
+    },
+    "misskey_achievement_notes30000_title" : {
+
+    },
+    "misskey_achievement_notes40000_description" : {
+
+    },
+    "misskey_achievement_notes40000_title" : {
+
+    },
+    "misskey_achievement_notes50000_description" : {
+
+    },
+    "misskey_achievement_notes50000_title" : {
+
+    },
+    "misskey_achievement_notes60000_description" : {
+
+    },
+    "misskey_achievement_notes60000_title" : {
+
+    },
+    "misskey_achievement_notes70000_description" : {
+
+    },
+    "misskey_achievement_notes70000_title" : {
+
+    },
+    "misskey_achievement_notes80000_description" : {
+
+    },
+    "misskey_achievement_notes80000_title" : {
+
+    },
+    "misskey_achievement_notes90000_description" : {
+
+    },
+    "misskey_achievement_notes90000_title" : {
+
+    },
+    "misskey_achievement_notes100000_description" : {
+
+    },
+    "misskey_achievement_notes100000_title" : {
+
+    },
+    "misskey_achievement_open3windows_description" : {
+
+    },
+    "misskey_achievement_open3windows_title" : {
+
+    },
+    "misskey_achievement_output_hello_world_on_scratchpad_description" : {
+
+    },
+    "misskey_achievement_output_hello_world_on_scratchpad_title" : {
+
+    },
+    "misskey_achievement_passed_since_account_created1_description" : {
+
+    },
+    "misskey_achievement_passed_since_account_created1_title" : {
+
+    },
+    "misskey_achievement_passed_since_account_created2_description" : {
+
+    },
+    "misskey_achievement_passed_since_account_created2_title" : {
+
+    },
+    "misskey_achievement_passed_since_account_created3_description" : {
+
+    },
+    "misskey_achievement_passed_since_account_created3_title" : {
+
+    },
+    "misskey_achievement_posted_at_0min0sec_description" : {
+
+    },
+    "misskey_achievement_posted_at_0min0sec_title" : {
+
+    },
+    "misskey_achievement_posted_at_late_night_description" : {
+
+    },
+    "misskey_achievement_posted_at_late_night_title" : {
+
+    },
+    "misskey_achievement_profile_filled_description" : {
+
+    },
+    "misskey_achievement_profile_filled_title" : {
+
+    },
+    "misskey_achievement_react_without_read_description" : {
+
+    },
+    "misskey_achievement_react_without_read_title" : {
+
+    },
+    "misskey_achievement_self_quote_description" : {
+
+    },
+    "misskey_achievement_self_quote_title" : {
+
+    },
+    "misskey_achievement_set_name_to_syuilo_description" : {
+
+    },
+    "misskey_achievement_set_name_to_syuilo_title" : {
+
+    },
+    "misskey_achievement_smash_test_notification_button_description" : {
+
+    },
+    "misskey_achievement_smash_test_notification_button_title" : {
+
+    },
+    "misskey_achievement_tutorial_completed_description" : {
+
+    },
+    "misskey_achievement_tutorial_completed_title" : {
+
+    },
+    "misskey_achievement_view_achievements3min_description" : {
+
+    },
+    "misskey_achievement_view_achievements3min_title" : {
+
+    },
+    "misskey_achievement_view_instance_chart_description" : {
+
+    },
+    "misskey_achievement_view_instance_chart_title" : {
+
+    },
+    "misskey_notification_achievement_earned" : {
+
+    },
+    "misskey_notification_app" : {
+
+    },
+    "misskey_notification_follow" : {
+
+    },
+    "misskey_notification_follow_request_accepted" : {
+
+    },
+    "misskey_notification_mention" : {
+
+    },
+    "misskey_notification_poll_ended" : {
+
+    },
+    "misskey_notification_quote" : {
+
+    },
+    "misskey_notification_reaction" : {
+
+    },
+    "misskey_notification_receive_follow_request" : {
+
+    },
+    "misskey_notification_renote" : {
+
+    },
+    "misskey_notification_reply" : {
+
+    },
+    "misskey_notification_unknwon" : {
+
     },
     "mixed_timeline_title" : {
       "localizations" : {
@@ -198,6 +768,9 @@
       }
     },
     "notification_type_title" : {
+
+    },
+    "Reply to %@" : {
 
     },
     "rss_title" : {
@@ -240,6 +813,15 @@
           }
         }
       }
+    },
+    "vvo_notification_like" : {
+
+    },
+    "xqt_notification_mention" : {
+
+    },
+    "xqt_notification_retweet" : {
+
     }
   },
   "version" : "1.1"

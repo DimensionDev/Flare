@@ -46,6 +46,7 @@ import compose.icons.fontawesomeicons.solid.AnglesUp
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.refreshSuspend
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.PullToRefresh
@@ -142,6 +143,7 @@ public fun TimelineItemController(
 @Suppress("FunctionName")
 public fun TimelineController(
     state: ComposeUIStateProxy<PagingState<UiTimeline>>,
+    detailStatusKey: MicroBlogKey?,
     topPadding: Int,
     onExpand: () -> Unit,
     onCollapse: () -> Unit,
@@ -189,7 +191,7 @@ public fun TimelineController(
                                 top = topPadding.dp,
                             ),
                 ) {
-                    status(state)
+                    status(state, detailStatusKey = detailStatusKey)
                 }
             }
         }

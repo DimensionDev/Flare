@@ -10,7 +10,10 @@ struct Router<Root: View>: View {
                 backStack.append(route)
             })
                 .navigationDestination(for: Route.self) { route in
-                    route.view(onNavigate: { route in backStack.append(route) })
+                    route.view(
+                        onNavigate: { route in backStack.append(route) },
+                        clearToHome: { backStack.removeAll() }
+                    )
                 }
         }
         .environment(\.openURL, OpenURLAction { url in

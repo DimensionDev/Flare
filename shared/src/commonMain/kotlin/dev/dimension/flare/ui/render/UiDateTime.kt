@@ -5,9 +5,16 @@ import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Instant
 
+public expect class PlatformDateTime
+
+internal expect fun Instant.toPlatform(): PlatformDateTime
+
 public data class UiDateTime internal constructor(
     val value: Instant,
 ) {
+    val platformValue: PlatformDateTime by lazy {
+        value.toPlatform()
+    }
     val diff: DiffType by lazy {
 
         val compareTo = Clock.System.now()

@@ -7,22 +7,28 @@ struct Router<Root: View>: View {
     var body: some View {
         NavigationStack(path: $backStack) {
             root({ route in
-                backStack.append(route)
+                navigate(route: route)
             })
                 .navigationDestination(for: Route.self) { route in
                     route.view(
-                        onNavigate: { route in backStack.append(route) },
+                        onNavigate: { route in navigate(route: route) },
                         clearToHome: { backStack.removeAll() }
                     )
                 }
         }
         .environment(\.openURL, OpenURLAction { url in
             if let newRoute = Route.fromDeepLink(url: url.absoluteString) {
-                backStack.append(newRoute)
+                navigate(route: newRoute)
                 return .handled
             } else {
                 return .systemAction
             }
         })
+    }
+    
+    func navigate(route: Route) {
+        if backStack.last != route {
+            backStack.append(route)
+        }
     }
 }

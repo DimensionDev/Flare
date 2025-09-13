@@ -3,7 +3,7 @@ import KotlinSharedUI
 
 struct DateTimeText: View {
     let data: UiDateTime
-    let fullTime = false
+    let fullTime: Bool
     
     var body: some View {
         if fullTime {
@@ -21,5 +21,12 @@ struct DateTimeText: View {
             case .yearMonthDay: Text(data.platformValue, style: .date)
             }
         }
+    }
+}
+
+extension DateTimeText {
+    init(data: UiDateTime) {
+        self.data = data
+        self.fullTime = false
     }
 }

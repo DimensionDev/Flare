@@ -12,10 +12,14 @@ struct StatusDetailScreen : View {
     }
     
     var body: some View {
+        let state = presenter.state
         List {
-            PagingView(data: presenter.state.listState) { item in
-                TimelineView(data: item)
+            PagingView(data: state.listState) { item in
+                TimelineView(data: item, detailStatusKey: statusKey)
             }
+        }
+        .refreshable {
+            try? await state.refresh()
         }
         .navigationTitle("Detail")
     }

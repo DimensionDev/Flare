@@ -43,6 +43,7 @@ struct FlareRoot: View {
                     }
                 }
             }
+            .tabBarMinimizeBehavior(.onScrollDown)
         }
     }
 }

@@ -3,7 +3,7 @@ import KotlinSharedUI
 
 struct TimelineView: View {
     let data: UiTimeline
-    let detailStatusKey: MicroBlogKey? = nil
+    let detailStatusKey: MicroBlogKey?
     
     var body: some View {
         VStack {
@@ -15,7 +15,7 @@ struct TimelineView: View {
                 case .feed(let feed):
                     FeedView(data: feed)
                 case .status(let status):
-                    StatusView(data: status, isDetail: false)
+                    StatusView(data: status, detailStatusKey: detailStatusKey)
                 case .user(let user):
                     TimelineUserView(data: user)
                 case .userList(let userList):
@@ -24,5 +24,12 @@ struct TimelineView: View {
             }
         }
         .id(data.itemKey)
+    }
+}
+
+extension TimelineView {
+    init(data: UiTimeline) {
+        self.data = data
+        self.detailStatusKey = nil
     }
 }

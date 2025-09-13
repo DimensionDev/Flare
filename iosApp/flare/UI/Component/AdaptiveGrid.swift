@@ -58,12 +58,16 @@ private extension AdaptiveMosaic {
                     .frame(maxWidth: .infinity)
                 
             case .force16x9:
-                ZStack {
-                    content(item)
-                        .clipped()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-                .aspectRatio(16.0/9.0, contentMode: .fit)
+                content(item)
+                    .clipped()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(
+                        minWidth: 0,
+                        maxWidth: .infinity,
+                        minHeight: 0,
+                        maxHeight: .infinity
+                    )
+                    .aspectRatio(16 / 9, contentMode: .fit)
             }
         }
     }

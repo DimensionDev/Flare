@@ -13,8 +13,9 @@ struct NotificationScreen: View {
     }
 
     var body: some View {
+        let state = presenter.state
         List {
-            StateView(state: presenter.state.allTypes) { allTypes in
+            StateView(state: state.allTypes) { allTypes in
                 Picker("notification_type_title", selection: $selectedType) {
                     ForEach(0..<allTypes.count) { index in
                         if let type = allTypes[index] as? NotificationFilter {
@@ -28,17 +29,20 @@ struct NotificationScreen: View {
                 .onChange(of: selectedType) { oldValue, newValue in
                     if let value = newValue {
                         if oldValue != newValue {
-                            presenter.state.onNotificationTypeChanged(value: value)
+                            state.onNotificationTypeChanged(value: value)
                         }
                     }
                 }
             }
             
-            PagingView(data: presenter.state.listState) { item in
+            PagingView(data: state.listState) { item in
                 TimelineView(data: item)
             }
         }
-        .onChange(of: presenter.state.notificationType) { oldValue, newValue in
+        .refreshable {
+            try? await state.refresh()
+        }
+        .onChange(of: state.notificationType) { oldValue, newValue in
             if selectedType == nil {
                 selectedType = newValue
             }

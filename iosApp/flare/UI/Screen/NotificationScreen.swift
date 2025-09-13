@@ -13,49 +13,29 @@ struct NotificationScreen: View {
     }
 
     var body: some View {
-        ZStack(
-            alignment: .top
-        ) {
-            TimelineView(
-                key: presenter.key,
-                data: presenter.state.listState,
-                topPadding: 50,
-                onOpenLink: { link in openURL(.init(string: link)!) },
-                onExpand: {
-                    withAnimation {
-                        showTopBar = true
-                    }
-                },
-                onCollapse: {
-                    withAnimation {
-                        showTopBar = false
-                    }
-                }
-            )
-            .background(Color(.systemGroupedBackground))
-            .ignoresSafeArea()
-
-            if showTopBar {
-                StateView(state: presenter.state.allTypes) { allTypes in
-                    Picker("notification_type_title", selection: $selectedType) {
-                        ForEach(0..<allTypes.count) { index in
-                            if let type = allTypes[index] as? NotificationFilter {
-                                Text("\(type.name)").tag(type)
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom)
-                    .pickerStyle(.segmented)
-                    .onChange(of: selectedType) { oldValue, newValue in
-                        if let value = newValue {
-                            if oldValue != newValue {
-                                presenter.state.onNotificationTypeChanged(value: value)
-                            }
+        List {
+            StateView(state: presenter.state.allTypes) { allTypes in
+                Picker("notification_type_title", selection: $selectedType) {
+                    ForEach(0..<allTypes.count) { index in
+                        if let type = allTypes[index] as? NotificationFilter {
+                            Text("\(type.name)").tag(type)
                         }
                     }
                 }
-                .transition(.move(edge: .top).combined(with: .opacity))
+                .padding(.horizontal)
+                .padding(.bottom)
+                .pickerStyle(.segmented)
+                .onChange(of: selectedType) { oldValue, newValue in
+                    if let value = newValue {
+                        if oldValue != newValue {
+                            presenter.state.onNotificationTypeChanged(value: value)
+                        }
+                    }
+                }
+            }
+            
+            PagingView(data: presenter.state.listState) { item in
+                TimelineView(data: item)
             }
         }
         .onChange(of: presenter.state.notificationType) { oldValue, newValue in

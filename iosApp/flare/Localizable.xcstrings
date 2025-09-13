@@ -7,6 +7,9 @@
     "%@" : {
 
     },
+    "0000" : {
+
+    },
     "antenna_title" : {
       "localizations" : {
         "en" : {
@@ -42,6 +45,15 @@
 
     },
     "bluesky_notification_unKnown" : {
+
+    },
+    "bookmark_add" : {
+
+    },
+    "bookmark_remove" : {
+
+    },
+    "delete" : {
 
     },
     "Detail" : {
@@ -181,6 +193,9 @@
       }
     },
     "Instance Url" : {
+
+    },
+    "like" : {
 
     },
     "Login" : {
@@ -753,6 +768,9 @@
         }
       }
     },
+    "more" : {
+
+    },
     "More" : {
 
     },
@@ -770,7 +788,28 @@
     "notification_type_title" : {
 
     },
+    "quote" : {
+
+    },
+    "reaction_add" : {
+
+    },
+    "reaction_remove" : {
+
+    },
+    "reply" : {
+
+    },
     "Reply to %@" : {
+
+    },
+    "report" : {
+
+    },
+    "retweet" : {
+
+    },
+    "retweet_remove" : {
 
     },
     "rss_title" : {
@@ -813,6 +852,9 @@
           }
         }
       }
+    },
+    "unlike" : {
+
     },
     "vvo_notification_like" : {
 

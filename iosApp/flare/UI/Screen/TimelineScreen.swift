@@ -10,17 +10,14 @@ struct TimelineScreen: View {
         _presenter = .init(wrappedValue: .init(presenter: TimelineItemPresenter(timelineTabItem: tabItem)))
     }
     var body: some View {
-//        ZStack {
-//            TimelineItemView(
-//                key: presenter.key,
-//                data: presenter.state,
-//                topPadding: 0,
-//                onOpenLink: { link in openURL(.init(string: link)!) },
-//                onExpand: {},
-//                onCollapse: {},
-//            )
-//                .background(Color(.systemGroupedBackground))
-//                .ignoresSafeArea()
-//        }
+        let state = presenter.state
+        List {
+            PagingView(data: state.listState) { item in
+                TimelineView(data: item)
+            }
+        }
+        .refreshable {
+            try? await state.refreshSuspend()
+        }
     }
 }

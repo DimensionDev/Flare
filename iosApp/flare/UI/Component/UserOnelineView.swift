@@ -1,22 +1,17 @@
 import SwiftUI
 import KotlinSharedUI
 
-struct UserCompatView<TrailingContent: View>: View {
+struct UserOnelineView<TrailingContent: View>: View {
     @Environment(\.openURL) private var openURL
     let data: UiUserV2
     let trailing: () -> TrailingContent
     var body: some View {
         HStack {
             AvatarView(data: data.avatar)
-                .frame(width: 44, height: 44)
-            VStack(
-                alignment: .leading
-            ) {
-                RichText(text: data.name)
-                Text(data.handle)
-                    .font(.caption)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(width: 20, height: 20)
+            RichText(text: data.name)
+            Text(data.handle)
+                .font(.caption)
             trailing()
         }
         .lineLimit(1)

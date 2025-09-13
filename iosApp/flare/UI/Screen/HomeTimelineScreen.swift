@@ -57,41 +57,9 @@ struct HomeTimelineScreen: View {
                     TimelineView(data: item)
                 }
             }
-            
-//            TimelineItemWithHeaderView(data: tab) {
-//                HStack {
-//                    ScrollView(.horizontal) {
-//                        HStack {
-//                            ForEach(tabs.indices) { index in
-//                                let tab = tabs[index]
-//                                Button {
-//                                    selectedTabIndex = index
-//                                } label: {
-//                                    Label {
-//                                        TabTitle(title: tab.timelineTabItem.metaData.title)
-//                                    } icon: {
-//                                        TabIcon(icon: tab.timelineTabItem.metaData.icon, accountType: tab.timelineTabItem.account)
-//                                    }
-//                                }
-//                                .buttonStyle(.bordered)
-//                            }
-//                        }
-//                        .padding(.horizontal)
-//                        .padding(.bottom)
-//                    }
-//                    .frame(maxWidth: .infinity)
-//                    if case .error(_) = onEnum(of: presenter.state.user) {
-//                        Button {
-//                            toServiceSelect()
-//                        } label: {
-//                            Text("Login")
-//                        }
-//                        .padding(.horizontal)
-//                        .padding(.bottom)
-//                        .buttonStyle(.bordered)
-//                    }
-//                }
-//            }
+            .refreshable {
+                try? await tab.refreshSuspend()
+            }
         }
     }
 }

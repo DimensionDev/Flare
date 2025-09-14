@@ -64,7 +64,7 @@ internal fun Router(
     val uriHandler = LocalUriHandler.current
     CompositionLocalProvider(
         LocalUriHandler provides
-            remember {
+            remember(topLevelBackStack, uriHandler) {
                 ProxyUriHandler(uriHandler) {
                     Route.parse(it)?.let {
                         navigate(it)

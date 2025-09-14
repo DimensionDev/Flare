@@ -295,12 +295,13 @@ internal class VVODataSource(
                         .rootComment
                         ?.firstOrNull()
                 if (item != null) {
-                    VVO.saveComment(
-                        accountKey = accountKey,
-                        pagingKey = pagingKey,
-                        database = database,
-                        statuses = listOf(item),
-                    )
+                    // prevent overwrite status with empty quote
+//                    VVO.saveComment(
+//                        accountKey = accountKey,
+//                        pagingKey = pagingKey,
+//                        database = database,
+//                        statuses = listOf(item),
+//                    )
                 } else {
                     throw Exception("status not found")
                 }

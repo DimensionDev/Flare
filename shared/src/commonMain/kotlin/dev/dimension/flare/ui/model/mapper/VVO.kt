@@ -419,7 +419,7 @@ internal fun Comment.renderStatus(
             listOfNotNull(
                 statusMid?.let {
                     StatusAction.Item.Comment(
-                        count = replyCount ?: 0,
+                        count = totalNumber ?: 0,
                         onClicked = {
                             launcher.launch(
                                 AppDeepLink.VVO.ReplyToComment(

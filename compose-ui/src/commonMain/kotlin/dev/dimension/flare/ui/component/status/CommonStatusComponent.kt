@@ -248,7 +248,7 @@ public fun CommonStatusComponent(
                     content = item.content,
                     contentWarning = item.contentWarning,
                     poll = item.poll,
-                    maxLines = 6,
+                    maxLines = appearanceSettings.lineLimit,
                 )
             }
 

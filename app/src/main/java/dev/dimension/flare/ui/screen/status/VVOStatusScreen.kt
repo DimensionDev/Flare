@@ -19,6 +19,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -44,6 +45,7 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusItem
@@ -114,23 +116,30 @@ internal fun VVOStatusScreen(
                     )
                 }
             }
-            LazyStatusVerticalStaggeredGrid(
-                contentPadding = contentPadding,
-                modifier = Modifier.fillMaxSize(),
+            CompositionLocalProvider(
+                LocalComponentAppearance provides
+                    LocalComponentAppearance.current.copy(
+                        lineLimit = Int.MAX_VALUE,
+                    ),
             ) {
-                if (!bigScreen) {
-                    item {
-                        AdaptiveCard {
-                            StatusContent(statusState = state.status, detailStatusKey = statusKey)
+                LazyStatusVerticalStaggeredGrid(
+                    contentPadding = contentPadding,
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    if (!bigScreen) {
+                        item {
+                            AdaptiveCard {
+                                StatusContent(statusState = state.status, detailStatusKey = statusKey)
+                            }
                         }
                     }
+                    reactionContent(
+                        comment = state.comment,
+                        repost = state.repost,
+                        detailType = state.type,
+                        onDetailTypeChange = state::onTypeChanged,
+                    )
                 }
-                reactionContent(
-                    comment = state.comment,
-                    repost = state.repost,
-                    detailType = state.type,
-                    onDetailTypeChange = state::onTypeChanged,
-                )
             }
         }
     }

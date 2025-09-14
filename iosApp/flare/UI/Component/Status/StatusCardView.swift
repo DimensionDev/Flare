@@ -6,7 +6,9 @@ struct StatusCardView: View {
     let data: UiCard
     
     var body: some View {
-        VStack {
+        VStack(
+            alignment: .leading
+        ) {
             if let media = data.media {
                 AdaptiveMosaic([media], singleMode: .force16x9) { item in
                     MediaView(data: item)
@@ -14,7 +16,9 @@ struct StatusCardView: View {
                 }
                 .clipped()
             }
-            VStack {
+            VStack(
+                alignment: .leading
+            ) {
                 Text(data.title)
                     .lineLimit(2)
                 if let desc = data.description_ {
@@ -23,7 +27,12 @@ struct StatusCardView: View {
                         .lineLimit(2)
                 }
             }
-            .padding()
+            .if(data.media == nil, if: { stack in
+                stack.padding()
+            }, else: { stack in
+                stack.padding(.horizontal)
+                    .padding(.bottom)
+            })
         }
         .clipShape(.rect(cornerRadius: 16))
         .overlay(

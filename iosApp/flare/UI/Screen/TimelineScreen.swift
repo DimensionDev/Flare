@@ -1,5 +1,5 @@
 import SwiftUI
-import KotlinSharedUI
+@preconcurrency import KotlinSharedUI
 
 struct TimelineScreen: View {
     let tabItem: TimelineTabItem
@@ -10,14 +10,13 @@ struct TimelineScreen: View {
         _presenter = .init(wrappedValue: .init(presenter: TimelineItemPresenter(timelineTabItem: tabItem)))
     }
     var body: some View {
-        let state = presenter.state
         List {
-            PagingView(data: state.listState) { item in
+            PagingView(data: presenter.state.listState) { item in
                 TimelineView(data: item)
             }
         }
         .refreshable {
-            try? await state.refreshSuspend()
+            try? await presenter.state.refreshSuspend()
         }
     }
 }

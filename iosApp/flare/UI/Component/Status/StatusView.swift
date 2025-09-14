@@ -93,6 +93,12 @@ struct StatusView: View {
                 if expand || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
                     if !data.content.isEmpty {
                         RichText(text: data.content)
+                            .if(isDetail) { richText in
+                                richText
+                            } else: { richText in
+                                richText.lineLimit(5)
+                            }
+
                     }
                 }
                 if !data.images.isEmpty {

@@ -1,5 +1,6 @@
 import SwiftUI
-import KotlinSharedUI
+import Awesome
+@preconcurrency import KotlinSharedUI
 
 struct HomeTimelineScreen: View {
     let toServiceSelect: () -> Void
@@ -20,45 +21,64 @@ struct HomeTimelineScreen: View {
             let tabs: [TimelineItemPresenterState] = state.cast(TimelineItemPresenterState.self)
             let tab = tabs[selectedTabIndex]
             List {
-                HStack {
-                    ScrollView(.horizontal) {
-                        HStack {
-                            ForEach(tabs.indices) { index in
-                                let tab = tabs[index]
-                                Button {
-                                    selectedTabIndex = index
-                                } label: {
-                                    Label {
-                                        TabTitle(title: tab.timelineTabItem.metaData.title)
-                                    } icon: {
-                                        TabIcon(icon: tab.timelineTabItem.metaData.icon, accountType: tab.timelineTabItem.account)
-                                    }
+                Section {
+                    PagingView(data: tab.listState) { item in
+                        TimelineView(data: item)
+                    }
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack {
+                        ForEach(tabs.indices) { index in
+                            let tab = tabs[index]
+                            Button {
+                                selectedTabIndex = index
+                            } label: {
+                                Label {
+                                    TabTitle(title: tab.timelineTabItem.metaData.title)
+                                } icon: {
+                                    TabIcon(icon: tab.timelineTabItem.metaData.icon, accountType: tab.timelineTabItem.account)
                                 }
-                                .buttonStyle(.bordered)
+                            }
+                            .if(selectedTabIndex == index) { button in
+                                button.buttonStyle(.glassProminent)
+                            } else: { button in
+                                button.buttonStyle(.glass)
                             }
                         }
-                        .padding(.horizontal)
-                        .padding(.bottom)
+                        if case .success = onEnum(of: presenter.state.user) {
+                            Button {
+                            } label: {
+                                Awesome.Classic.Solid.plus.image
+                            }
+                            .buttonStyle(.glass)
+                        }
                     }
-                    .frame(maxWidth: .infinity)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     if case .error(_) = onEnum(of: presenter.state.user) {
                         Button {
                             toServiceSelect()
                         } label: {
                             Text("Login")
                         }
-                        .padding(.horizontal)
-                        .padding(.bottom)
-                        .buttonStyle(.bordered)
+                    } else {
+                        Button {
+                        } label: {
+                            Awesome.Classic.Solid.penToSquare.image
+                        }
                     }
                 }
-                
-                PagingView(data: tab.listState) { item in
-                    TimelineView(data: item)
-                }
             }
+            .navigationBarBackButtonHidden()
+            .navigationBarTitleDisplayMode(.inline)
             .refreshable {
-                try? await tab.refreshSuspend()
+                if case .success(let success) = onEnum(of: presenter.state.tabState) {
+                    if let tab = success.data[selectedTabIndex] as? TimelineItemPresenterState {
+                        try? await tab.refreshSuspend()
+                    }
+                }
             }
         }
     }

@@ -1,5 +1,5 @@
 import SwiftUI
-import KotlinSharedUI
+@preconcurrency import KotlinSharedUI
 
 struct StatusDetailScreen : View {
     @Environment(\.openURL) private var openURL
@@ -12,14 +12,13 @@ struct StatusDetailScreen : View {
     }
     
     var body: some View {
-        let state = presenter.state
         List {
-            PagingView(data: state.listState) { item in
+            PagingView(data: presenter.state.listState) { item in
                 TimelineView(data: item, detailStatusKey: statusKey)
             }
         }
         .refreshable {
-            try? await state.refresh()
+            try? await presenter.state.refresh()
         }
         .navigationTitle("Detail")
     }

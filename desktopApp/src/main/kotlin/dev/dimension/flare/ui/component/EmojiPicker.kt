@@ -118,18 +118,13 @@ internal fun EmojiPicker(
 
             actualData.forEach { (category, emojis) ->
                 if (emojis.any()) {
-                    // TODO: after compose 1.8.0, we can use `stickyHeader` to make the header sticky
                     if (category.isNotEmpty() && category.isNotBlank()) {
                         item(
                             span = {
                                 GridItemSpan(maxLineSpan)
                             },
                         ) {
-                            ListHeader(
-                                content = {
-                                    Text(category)
-                                },
-                            )
+                            Text(category)
                         }
                     }
 

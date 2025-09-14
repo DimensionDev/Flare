@@ -10,6 +10,7 @@ public data class UiEmoji internal constructor(
     val url: String,
     val category: String,
     val searchKeywords: List<String>,
+    val insertText: String,
 )
 
 // compatibility class for Kotlin native

@@ -16,6 +16,8 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.VVO
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
+import dev.dimension.flare.data.database.cache.model.DbEmoji
+import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
@@ -39,6 +41,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
@@ -46,10 +49,14 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
+import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -459,6 +466,36 @@ internal class VVODataSource(
         ComposeConfig(
             text = ComposeConfig.Text(2000),
             media = ComposeConfig.Media(if (statusKey == null) 18 else 1, false),
+            emoji = ComposeConfig.Emoji(emoji = emoji(), mergeTag = "vvo@${accountKey.host}"),
+        )
+
+    fun emoji(): Cacheable<ImmutableMap<String, ImmutableList<UiEmoji>>> =
+        Cacheable(
+            fetchSource = {
+                val emojis = service.emojis()
+                database
+                    .emojiDao()
+                    .insert(
+                        DbEmoji(
+                            accountKey.host,
+                            EmojiContent.VVO(emojis),
+                        ),
+                    )
+            },
+            cacheSource = {
+                database
+                    .emojiDao()
+                    .get(accountKey.host)
+                    .distinctUntilChanged()
+                    .mapNotNull {
+                        it
+                            ?.toUi()
+                            ?.groupBy { it.category }
+                            ?.map { it.key to it.value.toImmutableList() }
+                            ?.toMap()
+                            ?.toImmutableMap()
+                    }
+            },
         )
 
     override suspend fun follow(

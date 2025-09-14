@@ -855,7 +855,7 @@ private fun composePresenter(
 
         fun selectEmoji(emoji: UiEmoji) {
             textFieldState.edit {
-                append(" ${emoji.shortcode} ")
+                append(emoji.insertText)
             }
         }
 

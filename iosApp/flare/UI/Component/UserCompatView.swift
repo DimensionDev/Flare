@@ -25,3 +25,12 @@ struct UserCompatView<TrailingContent: View>: View {
         }
     }
 }
+
+extension UserCompatView {
+    init(data: UiUserV2) where TrailingContent == EmptyView {
+        self.data = data
+        self.trailing = {
+            EmptyView()
+        }
+    }
+}

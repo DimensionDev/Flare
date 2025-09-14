@@ -10,6 +10,9 @@
     "0000" : {
 
     },
+    "Accept follow request" : {
+
+    },
     "antenna_title" : {
       "localizations" : {
         "en" : {
@@ -795,6 +798,9 @@
 
     },
     "reaction_remove" : {
+
+    },
+    "Reject follow request" : {
 
     },
     "reply" : {

@@ -15,7 +15,6 @@ import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
@@ -23,10 +22,9 @@ import dev.dimension.flare.ui.presenter.home.NotificationPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import io.github.composefluent.component.LiteFilter
+import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.ProgressBar
-import io.github.composefluent.component.SegmentedButton
-import io.github.composefluent.component.SegmentedControl
-import io.github.composefluent.component.SegmentedItemPosition
 import io.github.composefluent.component.Text
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
@@ -54,19 +52,15 @@ internal fun NotificationScreen(accountType: AccountType) {
                     item(
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
-                        SegmentedControl {
+                        LiteFilter {
                             types.forEachIndexed { index, type ->
-                                SegmentedButton(
-                                    checked = state.state.notificationType == type,
-                                    onCheckedChanged = {
-                                        state.state.onNotificationTypeChanged(type)
+                                PillButton(
+                                    selected = state.state.notificationType == type,
+                                    onSelectedChanged = {
+                                        if (it) {
+                                            state.state.onNotificationTypeChanged(type)
+                                        }
                                     },
-                                    position =
-                                        when (index) {
-                                            0 -> SegmentedItemPosition.Start
-                                            types.size - 1 -> SegmentedItemPosition.End
-                                            else -> SegmentedItemPosition.Center
-                                        },
                                 ) {
                                     Text(text = type.name)
                                 }

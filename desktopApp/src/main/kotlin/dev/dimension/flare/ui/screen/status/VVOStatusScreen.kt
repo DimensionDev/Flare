@@ -48,9 +48,8 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailPresenter
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import io.github.composefluent.component.SegmentedButton
-import io.github.composefluent.component.SegmentedControl
-import io.github.composefluent.component.SegmentedItemPosition
+import io.github.composefluent.component.LiteFilter
+import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.Text
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
@@ -174,21 +173,17 @@ private fun LazyStaggeredGridScope.reactionContent(
     item(
         span = StaggeredGridItemSpan.FullLine,
     ) {
-        SegmentedControl(
+        LiteFilter(
             modifier = Modifier.padding(horizontal = screenHorizontalPadding),
         ) {
             DetailType.entries.forEachIndexed { index, type ->
-                SegmentedButton(
-                    checked = detailType == type,
-                    onCheckedChanged = {
-                        onDetailTypeChange(type)
+                PillButton(
+                    selected = detailType == type,
+                    onSelectedChanged = {
+                        if (it) {
+                            onDetailTypeChange(type)
+                        }
                     },
-                    position =
-                        when (index) {
-                            0 -> SegmentedItemPosition.Start
-                            DetailType.entries.size - 1 -> SegmentedItemPosition.End
-                            else -> SegmentedItemPosition.Center
-                        },
                 ) {
                     Text(text = stringResource(type.title))
                 }

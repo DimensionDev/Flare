@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -64,9 +66,8 @@ import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresen
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
-import io.github.composefluent.component.SegmentedButton
-import io.github.composefluent.component.SegmentedControl
-import io.github.composefluent.component.SegmentedItemPosition
+import io.github.composefluent.component.LiteFilter
+import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.surface.Card
 import kotlinx.collections.immutable.toImmutableList
@@ -244,56 +245,69 @@ internal fun ProfileScreen(
                 item(
                     span = StaggeredGridItemSpan.FullLine,
                 ) {
-                    ProfileHeader(
-                        modifier =
-                            Modifier.let {
-                                if (isBigScreen) {
-                                    it
-                                } else {
-                                    it.ignoreHorizontalParentPadding(screenHorizontalPadding)
-                                }
+                    Column {
+                        ProfileHeader(
+                            modifier =
+                                Modifier
+                                    .ignoreHorizontalParentPadding(screenHorizontalPadding),
+                            state = state.state,
+                            menu = {
+                                ProfileMenu(
+                                    profileState = state.state,
+                                    setShowMoreMenus = state::setShowMoreMenus,
+                                    showMoreMenus = state.showMoreMenus,
+                                    toEditAccountList = toEditAccountList,
+                                    accountsState = state.allAccountsState,
+                                    toSearchUserUsingAccount = toSearchUserUsingAccount,
+                                    toStartMessage = toStartMessage,
+                                )
                             },
-                        state = state.state,
-                        menu = {
-                            ProfileMenu(
-                                profileState = state.state,
-                                setShowMoreMenus = state::setShowMoreMenus,
-                                showMoreMenus = state.showMoreMenus,
-                                toEditAccountList = toEditAccountList,
-                                accountsState = state.allAccountsState,
-                                toSearchUserUsingAccount = toSearchUserUsingAccount,
-                                toStartMessage = toStartMessage,
-                            )
-                        },
-                        onAvatarClick = {
-                        },
-                        onBannerClick = {
-                        },
-                        isBigScreen = false,
-                        onFollowListClick = onFollowListClick,
-                        onFansListClick = onFansListClick,
-                    )
+                            onAvatarClick = {
+                            },
+                            onBannerClick = {
+                            },
+                            isBigScreen = false,
+                            onFollowListClick = onFollowListClick,
+                            onFansListClick = onFansListClick,
+                        )
+                        state.state.tabs.onSuccess { tabs ->
+                            LiteFilter {
+                                repeat(tabs.size) { index ->
+                                    val tab = tabs.get(index)
+                                    PillButton(
+                                        selected = state.selectedTab == index,
+                                        onSelectedChanged = {
+                                            if (it) {
+                                                state.setSelectedTab(index)
+                                            }
+                                        },
+                                    ) {
+                                        Text(
+                                            stringResource(tab.title),
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
                 }
             }
             state.state.tabs.onSuccess { tabs ->
-                if (tabs.size > 1) {
+                if (tabs.size > 1 && isBigScreen) {
                     item(
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
-                        SegmentedControl {
+                        LiteFilter {
                             repeat(tabs.size) { index ->
                                 val tab = tabs.get(index)
-                                SegmentedButton(
-                                    checked = state.selectedTab == index,
-                                    onCheckedChanged = {
-                                        state.setSelectedTab(index)
+                                PillButton(
+                                    selected = state.selectedTab == index,
+                                    onSelectedChanged = {
+                                        if (it) {
+                                            state.setSelectedTab(index)
+                                        }
                                     },
-                                    position =
-                                        when (index) {
-                                            0 -> SegmentedItemPosition.Start
-                                            tabs.size - 1 -> SegmentedItemPosition.End
-                                            else -> SegmentedItemPosition.Center
-                                        },
                                 ) {
                                     Text(
                                         stringResource(tab.title),

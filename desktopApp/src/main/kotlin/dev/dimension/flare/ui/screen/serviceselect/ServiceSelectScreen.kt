@@ -323,7 +323,7 @@ internal fun ServiceSelectScreen(onBack: () -> Unit) {
                                         disabled =
                                             state.blueskyLoginState.loading ||
                                                 userName.text.isEmpty() ||
-                                                (useOAuth && password.text.isEmpty()) ||
+                                                (!useOAuth && password.text.isEmpty()) ||
                                                 (state.blueskyLoginState.require2FA && verifyCode.text.isEmpty()) ||
                                                 state.blueskyOauthLoginState.loading,
                                     ) {

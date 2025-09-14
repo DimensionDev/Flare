@@ -2,6 +2,7 @@ package dev.dimension.flare.data.database.cache.model
 
 import dev.dimension.flare.data.network.mastodon.api.model.Emoji
 import dev.dimension.flare.data.network.misskey.api.model.EmojiSimple
+import dev.dimension.flare.data.network.vvo.model.EmojiData
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -18,5 +19,11 @@ internal sealed interface EmojiContent {
     @SerialName("Misskey")
     data class Misskey internal constructor(
         internal val data: List<EmojiSimple>,
+    ) : EmojiContent
+
+    @Serializable
+    @SerialName("VVO")
+    data class VVO internal constructor(
+        internal val data: EmojiData,
     ) : EmojiContent
 }

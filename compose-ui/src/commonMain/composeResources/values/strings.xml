@@ -110,6 +110,7 @@
     <string name="retweet">Retweet</string>
     <string name="retweet_remove">Remove retweet</string>
     <string name="share">Share</string>
+    <string name="comment">Comment</string>
 
     <string name="user_report">Report %1$s</string>
     <string name="user_block">Block %1$s</string>

@@ -11,8 +11,10 @@ import dev.dimension.flare.data.network.vvo.api.createConfigApi
 import dev.dimension.flare.data.network.vvo.api.createStatusApi
 import dev.dimension.flare.data.network.vvo.api.createTimelineApi
 import dev.dimension.flare.data.network.vvo.api.createUserApi
+import dev.dimension.flare.data.network.vvo.model.EmojiData
 import dev.dimension.flare.data.network.vvo.model.UploadResponse
 import dev.dimension.flare.model.vvoHost
+import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.request.forms.append
@@ -111,6 +113,8 @@ internal class VVOService(
             },
         ).bodyAsText()
             .decodeJson<UploadResponse>()
+
+    suspend fun emojis(): EmojiData = ktorClient().get("https://flareapp.moe/emoji.json").body()
 }
 
 private class VVOHeaderConfig {

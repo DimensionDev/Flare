@@ -6,6 +6,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +22,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusItem
@@ -60,28 +62,35 @@ internal fun VVOCommentScreen(
         },
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->
-        RefreshContainer(
-            onRefresh = state::refresh,
-            isRefreshing = state.isRefreshing,
-            indicatorPadding = contentPadding,
-            content = {
-                LazyStatusVerticalStaggeredGrid(
-                    columns = StaggeredGridCells.Fixed(1),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = contentPadding,
-                ) {
-                    item {
-                        state.state.root
-                            .onSuccess {
-                                StatusItem(item = it)
-                            }.onLoading {
-                                StatusItem(item = null)
-                            }
+        CompositionLocalProvider(
+            LocalComponentAppearance provides
+                LocalComponentAppearance.current.copy(
+                    lineLimit = Int.MAX_VALUE,
+                ),
+        ) {
+            RefreshContainer(
+                onRefresh = state::refresh,
+                isRefreshing = state.isRefreshing,
+                indicatorPadding = contentPadding,
+                content = {
+                    LazyStatusVerticalStaggeredGrid(
+                        columns = StaggeredGridCells.Fixed(1),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = contentPadding,
+                    ) {
+                        item {
+                            state.state.root
+                                .onSuccess {
+                                    StatusItem(item = it)
+                                }.onLoading {
+                                    StatusItem(item = null)
+                                }
+                        }
+                        status(state.state.list)
                     }
-                    status(state.state.list)
-                }
-            },
-        )
+                },
+            )
+        }
     }
 }
 

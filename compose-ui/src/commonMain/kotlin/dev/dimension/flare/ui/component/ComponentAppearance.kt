@@ -20,6 +20,7 @@ public data class ComponentAppearance(
     val expandMediaSize: Boolean = false,
     val compatLinkPreview: Boolean = false,
     val aiConfig: AiConfig = AiConfig(),
+    val lineLimit: Int = 5,
 ) {
     public data class AiConfig(
         val translation: Boolean = false,

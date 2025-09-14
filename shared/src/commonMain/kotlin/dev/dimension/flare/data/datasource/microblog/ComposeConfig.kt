@@ -44,6 +44,7 @@ public data class ComposeConfig internal constructor(
 
     public data class Emoji internal constructor(
         internal val emoji: CacheData<ImmutableMap<String, ImmutableList<UiEmoji>>>,
+        // Emojis picker can be merged only if their mergeTag is the same.
         val mergeTag: String,
     ) {
         internal fun merge(other: Emoji): Emoji? =

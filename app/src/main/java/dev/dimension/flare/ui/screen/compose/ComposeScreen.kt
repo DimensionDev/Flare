@@ -192,7 +192,16 @@ internal fun ComposeScreen(
         FlareTopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             title = {
-                Text(text = stringResource(id = R.string.compose_title))
+                when (status) {
+                    is ComposeStatus.VVOComment ->
+                        Text(text = stringResource(id = R.string.compose_vvo_comment_title))
+                    is ComposeStatus.Quote ->
+                        Text(text = stringResource(id = R.string.compose_quote_title))
+                    is ComposeStatus.Reply ->
+                        Text(text = stringResource(id = R.string.compose_reply_title))
+                    null ->
+                        Text(text = stringResource(id = R.string.compose_title))
+                }
             },
             navigationIcon = {
                 IconButton(onClick = onBack) {
@@ -824,7 +833,7 @@ private fun composePresenter(
 
         fun selectEmoji(emoji: UiEmoji) {
             textFieldState.edit {
-                append(" ${emoji.shortcode} ")
+                append(emoji.insertText)
             }
         }
 

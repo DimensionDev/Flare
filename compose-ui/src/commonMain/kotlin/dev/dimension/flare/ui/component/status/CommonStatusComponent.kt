@@ -52,10 +52,12 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Regular
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.regular.Bookmark
+import compose.icons.fontawesomeicons.regular.CommentDots
 import compose.icons.fontawesomeicons.regular.Heart
 import compose.icons.fontawesomeicons.solid.At
 import compose.icons.fontawesomeicons.solid.Bookmark
 import compose.icons.fontawesomeicons.solid.CircleInfo
+import compose.icons.fontawesomeicons.solid.Comment
 import compose.icons.fontawesomeicons.solid.Ellipsis
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Heart
@@ -72,6 +74,7 @@ import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.bookmark_add
 import dev.dimension.flare.compose.ui.bookmark_remove
+import dev.dimension.flare.compose.ui.comment
 import dev.dimension.flare.compose.ui.delete
 import dev.dimension.flare.compose.ui.like
 import dev.dimension.flare.compose.ui.mastodon_item_show_less
@@ -245,7 +248,7 @@ public fun CommonStatusComponent(
                     content = item.content,
                     contentWarning = item.contentWarning,
                     poll = item.poll,
-                    maxLines = 6,
+                    maxLines = appearanceSettings.lineLimit,
                 )
             }
 
@@ -849,6 +852,7 @@ private val StatusAction.Item.icon: ImageVector
             is StatusAction.Item.Reply -> FontAwesomeIcons.Solid.Reply
             is StatusAction.Item.Report -> FontAwesomeIcons.Solid.CircleInfo
             is StatusAction.Item.Retweet -> FontAwesomeIcons.Solid.Retweet
+            is StatusAction.Item.Comment -> FontAwesomeIcons.Regular.CommentDots
         }
 
 private val StatusAction.Item.iconText: ImmutableList<Digit>?
@@ -863,6 +867,7 @@ private val StatusAction.Item.iconText: ImmutableList<Digit>?
             is StatusAction.Item.Reply -> digits
             is StatusAction.Item.Report -> null
             is StatusAction.Item.Retweet -> digits
+            is StatusAction.Item.Comment -> digits
         }
 
 @Composable
@@ -917,6 +922,8 @@ private fun statusActionItemText(item: StatusAction.Item) =
                 stringResource(resource = Res.string.retweet)
             }
         }
+
+        is StatusAction.Item.Comment -> stringResource(resource = Res.string.comment)
     }
 
 @Composable

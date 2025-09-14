@@ -581,6 +581,8 @@ internal data class Comment(
     val comments: JsonElement? = null,
     val pic: StatusPic? = null,
     val analysis_extra: String? = null,
+    @SerialName("total_number")
+    val totalNumber: Long? = null,
 ) {
     val commentList: List<Comment>?
         get() =

@@ -72,7 +72,7 @@ internal fun EmojiPicker(
             modifier = Modifier.fillMaxWidth(),
         )
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(48.dp),
+            columns = GridCells.Adaptive(36.dp),
             state = gridListState,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -103,7 +103,7 @@ internal fun EmojiPicker(
                             contentDescription = emoji.shortcode,
                             modifier =
                                 Modifier
-                                    .size(48.dp)
+                                    .size(36.dp)
                                     .clickable {
                                         onEmojiSelected(emoji)
                                         state.addHistory(emoji)
@@ -122,7 +122,6 @@ internal fun EmojiPicker(
 
             actualData.forEach { (category, emojis) ->
                 if (emojis.any()) {
-                    // TODO: after compose 1.8.0, we can use `stickyHeader` to make the header sticky
                     if (category.isNotEmpty() && category.isNotBlank()) {
                         item(
                             span = {
@@ -150,7 +149,7 @@ internal fun EmojiPicker(
                             contentDescription = emoji.shortcode,
                             modifier =
                                 Modifier
-                                    .size(48.dp)
+                                    .size(36.dp)
                                     .clickable {
                                         onEmojiSelected(emoji)
                                         state.addHistory(emoji)

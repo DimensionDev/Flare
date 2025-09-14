@@ -729,6 +729,7 @@ internal fun EmojiSimple.toUi(): UiEmoji =
         url = url,
         category = category.orEmpty(),
         searchKeywords = aliases + name,
+        insertText = " :$name: ",
     )
 
 internal fun resolveMisskeyEmoji(

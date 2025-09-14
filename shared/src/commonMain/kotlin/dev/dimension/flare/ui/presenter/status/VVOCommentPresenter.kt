@@ -20,6 +20,7 @@ import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.collections.immutable.persistentListOf
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -40,7 +41,17 @@ public class VVOCommentPresenter(
                     remember(commentKey, accountType) {
                         require(service is VVODataSource)
                         service.comment(commentKey)
-                    }.collectAsState().toUi()
+                    }.collectAsState().toUi().map {
+                        remember(it) {
+                            // hide quoted status to avoid confusion
+                            it.copy(
+                                content =
+                                    (it.content as? UiTimeline.ItemContent.Status)?.copy(
+                                        quote = persistentListOf(),
+                                    ),
+                            )
+                        }
+                    }
                 }
         val list =
             serviceState

@@ -681,14 +681,16 @@ internal fun DbEmoji.toUi(): List<UiEmoji> =
     when (content) {
         is EmojiContent.Mastodon -> {
             content.data.filter { it.visibleInPicker == true }.map {
+                val shortCode = it.shortcode.orEmpty().let { if (!it.startsWith(':') && !it.endsWith(':')) ":$it:" else it }
                 UiEmoji(
-                    shortcode = it.shortcode.orEmpty().let { if (!it.startsWith(':') && !it.endsWith(':')) ":$it:" else it },
+                    shortcode = shortCode,
                     url = it.url.orEmpty(),
                     category = it.category.orEmpty(),
                     searchKeywords =
                         listOfNotNull(
                             it.shortcode,
                         ),
+                    insertText = " $shortCode ",
                 )
             }
         }
@@ -698,6 +700,28 @@ internal fun DbEmoji.toUi(): List<UiEmoji> =
                 it.toUi()
             }
         }
+
+        is EmojiContent.VVO ->
+            content.data.data
+                ?.emoticon
+                ?.zhCN
+                ?.flatMap { (category, items) ->
+                    items.mapNotNull { item ->
+                        if (item.phrase.isNullOrEmpty() || item.url.isNullOrEmpty()) {
+                            return@mapNotNull null
+                        }
+                        UiEmoji(
+                            shortcode = item.phrase,
+                            url = item.url,
+                            category = category,
+                            searchKeywords =
+                                listOfNotNull(
+                                    item.phrase,
+                                ),
+                            insertText = item.phrase,
+                        )
+                    }
+                }.orEmpty()
     }
 
 private fun parseName(status: Account): Element {

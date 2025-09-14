@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,7 +19,7 @@ import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.component.status.status
@@ -49,20 +50,27 @@ internal fun VVOCommentScreen(
             Modifier
                 .fillMaxSize(),
     ) {
-        LazyStatusVerticalStaggeredGrid(
-            columns = StaggeredGridCells.Fixed(1),
-            contentPadding = LocalWindowPadding.current,
-            state = listState,
+        CompositionLocalProvider(
+            LocalComponentAppearance provides
+                LocalComponentAppearance.current.copy(
+                    lineLimit = Int.MAX_VALUE,
+                ),
         ) {
-            item {
-                state.state.root
-                    .onSuccess {
-                        StatusItem(item = it)
-                    }.onLoading {
-                        StatusItem(item = null)
-                    }
+            LazyStatusVerticalStaggeredGrid(
+                columns = StaggeredGridCells.Fixed(1),
+                contentPadding = LocalWindowPadding.current,
+                state = listState,
+            ) {
+                item {
+                    state.state.root
+                        .onSuccess {
+                            StatusItem(item = it)
+                        }.onLoading {
+                            StatusItem(item = null)
+                        }
+                }
+                status(state.state.list)
             }
-            status(state.state.list)
         }
         if (state.isRefreshing) {
             ProgressBar(

@@ -17,6 +17,9 @@
     <string name="notification_tab_likes_title">Likes</string>
 
     <string name="compose_title">Compose</string>
+    <string name="compose_reply_title">Reply</string>
+    <string name="compose_quote_title">Quote</string>
+    <string name="compose_vvo_comment_title">Comment</string>
     <string name="compose_hint">What\'s happening?</string>
     <string name="compose_poll_option_hint">Option %1$s</string>
     <string name="compose_poll_single_choice">Single choice</string>

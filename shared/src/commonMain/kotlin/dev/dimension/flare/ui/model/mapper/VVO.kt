@@ -166,9 +166,8 @@ internal fun Status.renderStatus(
         actions =
             listOfNotNull(
                 if (canReblog) {
-                    StatusAction.Item.Retweet(
+                    StatusAction.Item.Reply(
                         count = repostsCount?.content?.toLongOrNull() ?: 0,
-                        retweeted = false,
                         onClicked = {
                             launcher.launch(
                                 AppDeepLink.Compose.Quote(
@@ -181,7 +180,7 @@ internal fun Status.renderStatus(
                 } else {
                     null
                 },
-                StatusAction.Item.Reply(
+                StatusAction.Item.Comment(
                     count = commentsCount ?: 0,
                     onClicked = {
                         launcher.launch(
@@ -419,7 +418,7 @@ internal fun Comment.renderStatus(
         actions =
             listOfNotNull(
                 statusMid?.let {
-                    StatusAction.Item.Reply(
+                    StatusAction.Item.Comment(
                         count = replyCount ?: 0,
                         onClicked = {
                             launcher.launch(

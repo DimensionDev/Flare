@@ -104,14 +104,14 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
-import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
 fun ShortcutComposeRoute(
@@ -192,7 +192,16 @@ internal fun ComposeScreen(
         FlareTopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             title = {
-                Text(text = stringResource(id = R.string.compose_title))
+                when (status) {
+                    is ComposeStatus.VVOComment ->
+                        Text(text = stringResource(id = R.string.compose_vvo_comment_title))
+                    is ComposeStatus.Quote ->
+                        Text(text = stringResource(id = R.string.compose_quote_title))
+                    is ComposeStatus.Reply ->
+                        Text(text = stringResource(id = R.string.compose_reply_title))
+                    null ->
+                        Text(text = stringResource(id = R.string.compose_title))
+                }
             },
             navigationIcon = {
                 IconButton(onClick = onBack) {

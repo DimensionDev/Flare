@@ -131,6 +131,27 @@ public sealed interface StatusAction {
                         }.toImmutableList()
         }
 
+        public data class Comment internal constructor(
+            val count: Long,
+            override val onClicked: ClickContext.() -> Unit,
+        ) : Item,
+            Clickable {
+            public val humanizedCount: String by lazy {
+                count
+                    .takeIf {
+                        it > 0
+                    }?.humanize()
+                    .orEmpty()
+            }
+
+            val digits: ImmutableList<Digit>
+                get() =
+                    humanizedCount
+                        .mapIndexed { index, char ->
+                            Digit(char, index, count)
+                        }.toImmutableList()
+        }
+
         public data class Quote internal constructor(
             val count: Long,
             override val onClicked: ClickContext.() -> Unit,

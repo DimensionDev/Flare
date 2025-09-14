@@ -14,11 +14,12 @@ struct NotificationScreen: View {
 
     var body: some View {
         List {
-            Section {
-                PagingView(data: presenter.state.listState) { item in
-                    TimelineView(data: item)
-                }
-            } header: {
+            PagingView(data: presenter.state.listState) { item in
+                TimelineView(data: item)
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .principal) {
                 StateView(state: presenter.state.allTypes) { allTypes in
                     Picker("notification_type_title", selection: $selectedType) {
                         ForEach(0..<allTypes.count) { index in
@@ -27,8 +28,6 @@ struct NotificationScreen: View {
                             }
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom)
                     .pickerStyle(.segmented)
                     .onChange(of: selectedType) { oldValue, newValue in
                         if let value = newValue {

@@ -21,41 +21,44 @@ struct HomeTimelineScreen: View {
             let tabs: [TimelineItemPresenterState] = state.cast(TimelineItemPresenterState.self)
             let tab = tabs[selectedTabIndex]
             List {
-                Section {
-                    PagingView(data: tab.listState) { item in
-                        TimelineView(data: item)
-                    }
+                PagingView(data: tab.listState) { item in
+                    TimelineView(data: item)
                 }
             }
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    HStack {
-                        ForEach(tabs.indices) { index in
-                            let tab = tabs[index]
-                            Button {
-                                selectedTabIndex = index
-                            } label: {
-                                Label {
-                                    TabTitle(title: tab.timelineTabItem.metaData.title)
-                                } icon: {
-                                    TabIcon(icon: tab.timelineTabItem.metaData.icon, accountType: tab.timelineTabItem.account)
+                    ScrollView(.horizontal) {
+                        HStack {
+                            ForEach(tabs.indices) { index in
+                                let tab = tabs[index]
+                                Button {
+                                    selectedTabIndex = index
+                                } label: {
+                                    Label {
+                                        TabTitle(title: tab.timelineTabItem.metaData.title)
+                                    } icon: {
+                                        TabIcon(icon: tab.timelineTabItem.metaData.icon, accountType: tab.timelineTabItem.account)
+                                    }
+                                }
+                                .if(selectedTabIndex == index) { button in
+                                    button.buttonStyle(.glassProminent)
+                                } else: { button in
+                                    button.buttonStyle(.glass)
                                 }
                             }
-                            .if(selectedTabIndex == index) { button in
-                                button.buttonStyle(.glassProminent)
-                            } else: { button in
-                                button.buttonStyle(.glass)
+                            if case .success = onEnum(of: presenter.state.user) {
+                                Button {
+                                } label: {
+                                    Awesome.Classic.Solid.plus.image
+                                        .foregroundColor(.label)
+                                }
+                                .buttonStyle(.glass)
                             }
-                        }
-                        if case .success = onEnum(of: presenter.state.user) {
-                            Button {
-                            } label: {
-                                Awesome.Classic.Solid.plus.image
-                            }
-                            .buttonStyle(.glass)
                         }
                     }
+                    .scrollClipDisabled()
                 }
+                .sharedBackgroundVisibility(.hidden)
                 ToolbarItem(placement: .topBarTrailing) {
                     if case .error(_) = onEnum(of: presenter.state.user) {
                         Button {
@@ -67,6 +70,7 @@ struct HomeTimelineScreen: View {
                         Button {
                         } label: {
                             Awesome.Classic.Solid.penToSquare.image
+                                .foregroundColor(.label)
                         }
                     }
                 }

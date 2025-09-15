@@ -29,8 +29,8 @@ public val PlatformType.logoUrl: String
                 "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53" +
                     "/X_logo_2023_original.svg/1920px-X_logo_2023_original.svg.png"
             PlatformType.VVo ->
-                "https://symbl-world.akamaized.net/i/webp/48/" +
-                    "0a286d8ee91af2e78ff2ee8e5065c3.webp"
+                "https://upload.wikimedia.org/wikipedia/en/thumb/6/" +
+                    "6e/Sina_Weibo.svg/2560px-Sina_Weibo.svg.png"
         }
 
 public val xqtOldHost: String =

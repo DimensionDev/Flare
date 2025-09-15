@@ -78,6 +78,8 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.TabIcon
+import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.component.TopLevelBackStack
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.platform.isBigScreen
@@ -95,8 +97,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
 import dev.dimension.flare.ui.route.accountTypeOr
-import dev.dimension.flare.ui.screen.settings.TabIcon
-import dev.dimension.flare.ui.screen.settings.TabTitle
 import dev.dimension.flare.ui.screen.splash.SplashScreen
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.coroutines.launch

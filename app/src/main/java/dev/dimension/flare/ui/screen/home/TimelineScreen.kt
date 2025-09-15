@@ -16,12 +16,12 @@ import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.presenter.TimelineItemPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.screen.settings.TabTitle
 import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3Api::class)

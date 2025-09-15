@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 internal expect fun PlatformButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     content: @Composable RowScope.() -> Unit,
 )
 
@@ -15,6 +16,7 @@ internal expect fun PlatformButton(
 internal expect fun PlatformTextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     content: @Composable RowScope.() -> Unit,
 )
 
@@ -22,6 +24,7 @@ internal expect fun PlatformTextButton(
 internal expect fun PlatformFilledTonalButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     content: @Composable RowScope.() -> Unit,
 )
 
@@ -29,5 +32,6 @@ internal expect fun PlatformFilledTonalButton(
 internal expect fun PlatformIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     content: @Composable () -> Unit,
 )

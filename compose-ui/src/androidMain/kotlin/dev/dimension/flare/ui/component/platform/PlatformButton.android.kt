@@ -8,34 +8,59 @@ import androidx.compose.ui.Modifier
 internal actual fun PlatformButton(
     onClick: () -> Unit,
     modifier: Modifier,
+    enabled: Boolean,
     content: @Composable RowScope.() -> Unit,
 ) {
-    androidx.compose.material3.ElevatedButton(onClick = onClick, modifier = modifier, content = content, elevation = null)
+    androidx.compose.material3.ElevatedButton(
+        onClick = onClick,
+        modifier = modifier,
+        content = content,
+        elevation = null,
+        enabled = enabled,
+    )
 }
 
 @Composable
 internal actual fun PlatformTextButton(
     onClick: () -> Unit,
     modifier: Modifier,
+    enabled: Boolean,
     content: @Composable RowScope.() -> Unit,
 ) {
-    androidx.compose.material3.TextButton(onClick = onClick, modifier = modifier, content = content)
+    androidx.compose.material3.TextButton(
+        onClick = onClick,
+        modifier = modifier,
+        content = content,
+        enabled = enabled,
+    )
 }
 
 @Composable
 internal actual fun PlatformFilledTonalButton(
     onClick: () -> Unit,
     modifier: Modifier,
+    enabled: Boolean,
     content: @Composable RowScope.() -> Unit,
 ) {
-    androidx.compose.material3.FilledTonalButton(onClick = onClick, modifier = modifier, content = content)
+    androidx.compose.material3.FilledTonalButton(
+        onClick = onClick,
+        modifier = modifier,
+        content = content,
+        enabled = enabled,
+    )
 }
 
 @Composable
 internal actual fun PlatformIconButton(
     onClick: () -> Unit,
     modifier: Modifier,
+    enabled: Boolean,
     content: @Composable () -> Unit,
 ) {
-    androidx.compose.material3.IconButton(onClick = onClick, modifier = modifier, content = content)
+    androidx.compose.material3.IconButton(
+        onClick = onClick,
+        modifier = modifier,
+        content = content,
+        enabled = enabled,
+    )
 }

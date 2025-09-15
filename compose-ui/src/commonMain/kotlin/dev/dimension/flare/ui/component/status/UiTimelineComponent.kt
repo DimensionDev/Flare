@@ -383,24 +383,25 @@ private fun ItemContentComponent(
                                                 ),
                                             )
                                         },
-                                    ) {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.Xmark,
-                                            contentDescription =
-                                                stringResource(
-                                                    Res.string.notification_item_reject_follow_request,
-                                                ),
-                                            tint = PlatformTheme.colorScheme.error,
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        PlatformText(
-                                            text =
-                                                stringResource(
-                                                    Res.string.notification_item_reject_follow_request,
-                                                ),
-                                            color = PlatformTheme.colorScheme.error,
-                                        )
-                                    }
+                                        content = {
+                                            FAIcon(
+                                                FontAwesomeIcons.Solid.Xmark,
+                                                contentDescription =
+                                                    stringResource(
+                                                        Res.string.notification_item_reject_follow_request,
+                                                    ),
+                                                tint = PlatformTheme.colorScheme.error,
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            PlatformText(
+                                                text =
+                                                    stringResource(
+                                                        Res.string.notification_item_reject_follow_request,
+                                                    ),
+                                                color = PlatformTheme.colorScheme.error,
+                                            )
+                                        },
+                                    )
                                 }
                             }
                         }

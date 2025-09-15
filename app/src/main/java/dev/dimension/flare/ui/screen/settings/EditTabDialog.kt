@@ -1,17 +1,20 @@
 package dev.dimension.flare.ui.screen.settings
 
-import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -21,22 +24,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.data.model.resId
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.component.FlareDropdownMenu
-import dev.dimension.flare.ui.model.UiRssSource
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toPersistentList
+import dev.dimension.flare.ui.component.TabIcon
+import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.invoke
 import moe.tlaster.precompose.molecule.producePresenter
-import org.koin.compose.koinInject
 
 @Composable
 internal fun EditTabDialog(
@@ -71,70 +72,86 @@ internal fun EditTabDialog(
             }
         },
         text = {
-            Column {
-                ListItem(
-                    headlineContent = {
-                        Text(text = stringResource(id = R.string.edit_tab_icon))
-                    },
-                    supportingContent =
-                        if (tabItem.account is AccountType.Specific) {
-                            {
-                                Row(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                state.setWithAvatar(!state.withAvatar)
-                                            },
-                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                                ) {
-                                    Checkbox(
-                                        checked = state.withAvatar,
-                                        onCheckedChange = state::setWithAvatar,
-                                    )
-                                    Text(text = stringResource(id = R.string.edit_tab_with_avatar))
-                                }
-                            }
-                        } else {
-                            null
-                        },
-                    trailingContent = {
-                        IconButton(onClick = {
-                            state.setShowIconPicker(true)
-                        }) {
-                            TabIcon(
-                                accountType = tabItem.account,
-                                icon = state.icon,
-                                title = tabItem.metaData.title,
-                            )
-                        }
-                        FlareDropdownMenu(
-                            expanded = state.showIconPicker,
-                            onDismissRequest = {
-                                state.setShowIconPicker(false)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                TabIcon(
+                    accountType = tabItem.account,
+                    icon = state.icon,
+                    title = tabItem.metaData.title,
+                    size = 64.dp,
+                    modifier =
+                        Modifier
+                            .clickable {
+                                state.setShowIconPicker(true)
                             },
+                )
+                if (state.showIconPicker) {
+                    Popup(
+                        onDismissRequest = {
+                            state.setShowIconPicker(false)
+                        },
+                        alignment = Alignment.BottomCenter,
+                        properties =
+                            PopupProperties(
+                                usePlatformDefaultWidth = true,
+                                focusable = true,
+                            ),
+                    ) {
+                        Card(
+                            modifier =
+                                Modifier
+                                    .sizeIn(
+                                        maxHeight = 256.dp,
+                                        maxWidth = 384.dp,
+                                    ),
+                            elevation =
+                                CardDefaults.elevatedCardElevation(
+                                    defaultElevation = 3.dp,
+                                ),
                         ) {
-                            state.availableIcons.let { icons ->
-                                icons.forEach { icon ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            TabIcon(
-                                                accountType = tabItem.account,
-                                                icon = icon,
-                                                title = tabItem.metaData.title,
-                                            )
-                                        },
-                                        onClick = {
-                                            state.setIcon(icon)
-                                            state.setShowIconPicker(false)
-                                        },
+                            LazyHorizontalGrid(
+                                rows = GridCells.FixedSize(48.dp),
+                            ) {
+                                items(state.availableIcons) { icon ->
+                                    TabIcon(
+                                        accountType = tabItem.account,
+                                        icon = icon,
+                                        title = tabItem.metaData.title,
+                                        modifier =
+                                            Modifier
+                                                .padding(4.dp)
+                                                .clickable {
+                                                    state.setIcon(icon)
+                                                    state.setShowIconPicker(false)
+                                                },
+                                        size = 48.dp,
                                     )
                                 }
                             }
                         }
-                    },
-                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                )
+                    }
+                }
+
+                if (tabItem.account is AccountType.Specific) {
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    state.setWithAvatar(!state.withAvatar)
+                                },
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                    ) {
+                        Checkbox(
+                            checked = state.withAvatar,
+                            onCheckedChange = state::setWithAvatar,
+                        )
+                        Text(text = stringResource(id = R.string.edit_tab_with_avatar))
+                    }
+                }
+
                 OutlinedTextField(
                     state = state.text,
                     modifier = Modifier.fillMaxWidth(),
@@ -154,93 +171,28 @@ internal fun EditTabDialog(
 }
 
 @Composable
-private fun presenter(
-    tabItem: TabItem,
-    context: Context = koinInject(),
-) = run {
-    val text = rememberTextFieldState()
-    var icon: IconType by remember {
-        mutableStateOf(tabItem.metaData.icon)
-    }
-    var withAvatar by remember {
-        mutableStateOf(tabItem.metaData.icon is IconType.Mixed)
-    }
-    var showIconPicker by remember {
-        mutableStateOf(false)
-    }
-    LaunchedEffect(Unit) {
-        val value =
-            when (val title = tabItem.metaData.title) {
-                is TitleType.Localized -> context.getString(title.resId)
-                is TitleType.Text -> title.content
+private fun presenter(tabItem: TabItem) =
+    run {
+        val text = rememberTextFieldState()
+        val state =
+            remember(tabItem) {
+                EditTabPresenter(tabItem)
+            }.invoke()
+        var showIconPicker by remember { mutableStateOf(false) }
+        state.initialText.onSuccess {
+            LaunchedEffect(it) {
+                text.edit {
+                    append(it)
+                }
             }
-        text.edit {
-            append(value)
+        }
+        object : EditTabPresenter.State by state {
+            val text = text
+            val canConfirm = text.text.isNotEmpty()
+            val showIconPicker = showIconPicker
+
+            fun setShowIconPicker(value: Boolean) {
+                showIconPicker = value
+            }
         }
     }
-    object {
-        val showIconPicker = showIconPicker
-        val withAvatar = withAvatar
-        val availableIcons: ImmutableList<IconType> =
-            kotlin
-                .run {
-                    when (val account = tabItem.account) {
-                        is AccountType.Specific ->
-                            listOf(
-                                IconType.Avatar(account.accountKey),
-                                IconType.Url(
-                                    UiRssSource.favIconUrl(account.accountKey.host),
-                                ),
-                            )
-
-                        else -> emptyList()
-                    } +
-                        IconType.Material.MaterialIcon.entries.map {
-                            IconType.Material(it)
-                        } +
-                        if (tabItem is RssTimelineTabItem) {
-                            listOfNotNull(
-                                IconType.Url(UiRssSource.favIconUrl(tabItem.feedUrl)),
-                            )
-                        } else {
-                            emptyList()
-                        }
-                }.let {
-                    it.toPersistentList()
-                }
-        val text = text
-        val icon = icon
-        val canConfirm = text.text.isNotEmpty()
-
-        fun setWithAvatar(value: Boolean) {
-            withAvatar = value
-            setIcon(icon)
-        }
-
-        fun setIcon(value: IconType) {
-            val account = tabItem.account
-            icon =
-                if (withAvatar && account is AccountType.Specific) {
-                    when (value) {
-                        is IconType.Avatar -> value
-                        is IconType.Material ->
-                            IconType.Mixed(value.icon, account.accountKey)
-                        is IconType.Mixed ->
-                            IconType.Mixed(value.icon, account.accountKey)
-                        is IconType.Url -> value
-                    }
-                } else {
-                    when (value) {
-                        is IconType.Avatar -> value
-                        is IconType.Material -> value
-                        is IconType.Mixed -> IconType.Material(value.icon)
-                        is IconType.Url -> value
-                    }
-                }
-        }
-
-        fun setShowIconPicker(value: Boolean) {
-            showIconPicker = value
-        }
-    }
-}

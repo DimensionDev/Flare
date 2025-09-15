@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
@@ -58,30 +57,20 @@ import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.TableList
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.IconType.Mixed
 import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.data.model.resId
-import dev.dimension.flare.data.model.toIcon
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.TabIcon
+import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.presenter.home.UserPresenter
-import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -335,9 +324,7 @@ internal fun LazyItemScope.TabCustomItem(
                         },
                         leadingContent = {
                             TabIcon(
-                                item.account,
-                                item.metaData.icon,
-                                item.metaData.title,
+                                item,
                             )
                         },
                         trailingContent = {
@@ -378,130 +365,6 @@ internal fun LazyItemScope.TabCustomItem(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun TabTitle(
-    title: TitleType,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text =
-            when (title) {
-                is TitleType.Localized -> stringResource(id = title.resId)
-                is TitleType.Text -> title.content
-            },
-        modifier = modifier,
-    )
-}
-
-@Composable
-fun TabIcon(
-    accountType: AccountType,
-    icon: IconType,
-    title: TitleType,
-    modifier: Modifier = Modifier,
-    iconOnly: Boolean = false,
-) {
-    when (icon) {
-        is IconType.Avatar -> {
-            val userState by producePresenter(key = "$accountType:${icon.userKey}") {
-                remember(accountType, icon.userKey) {
-                    UserPresenter(
-                        accountType,
-                        icon.userKey,
-                    )
-                }.invoke()
-            }
-            userState.user
-                .onSuccess {
-                    AvatarComponent(it.avatar, size = 24.dp, modifier = modifier)
-                }.onLoading {
-                    AvatarComponent(null, size = 24.dp, modifier = modifier.placeholder(true))
-                }
-        }
-
-        is IconType.Material -> {
-            FAIcon(
-                imageVector = icon.icon.toIcon(),
-                contentDescription =
-                    when (title) {
-                        is TitleType.Localized -> stringResource(id = title.resId)
-                        is TitleType.Text -> title.content
-                    },
-                modifier =
-                    modifier
-                        .size(24.dp),
-            )
-        }
-
-        is Mixed -> {
-            if (iconOnly) {
-                FAIcon(
-                    imageVector = icon.icon.toIcon(),
-                    contentDescription =
-                        when (title) {
-                            is TitleType.Localized -> stringResource(id = title.resId)
-                            is TitleType.Text -> title.content
-                        },
-                    modifier =
-                        modifier
-                            .size(24.dp),
-                )
-            } else {
-                val userState by producePresenter(key = "$accountType:${icon.userKey}") {
-                    remember(accountType, icon.userKey) {
-                        UserPresenter(
-                            accountType,
-                            icon.userKey,
-                        )
-                    }.invoke()
-                }
-                Box(
-                    modifier = modifier,
-                ) {
-                    userState.user
-                        .onSuccess {
-                            AvatarComponent(it.avatar, size = 24.dp)
-                        }.onLoading {
-                            AvatarComponent(
-                                null,
-                                size = 24.dp,
-                                modifier = Modifier.placeholder(true),
-                            )
-                        }
-                    FAIcon(
-                        imageVector = icon.icon.toIcon(),
-                        contentDescription =
-                            when (title) {
-                                is TitleType.Localized -> stringResource(id = title.resId)
-                                is TitleType.Text -> title.content
-                            },
-                        modifier =
-                            Modifier
-                                .size(12.dp)
-                                .align(Alignment.BottomEnd)
-                                .background(
-                                    MaterialTheme.colorScheme.background,
-                                    shape = CircleShape,
-                                ).padding(2.dp),
-                    )
-                }
-            }
-        }
-
-        is IconType.Url -> {
-            NetworkImage(
-                icon.url,
-                contentDescription =
-                    when (title) {
-                        is TitleType.Localized -> stringResource(id = title.resId)
-                        is TitleType.Text -> title.content
-                    },
-                modifier = modifier.size(24.dp),
-            )
         }
     }
 }

@@ -11,12 +11,14 @@ import io.github.composefluent.component.SubtleButton
 internal actual fun PlatformButton(
     onClick: () -> Unit,
     modifier: Modifier,
+    enabled: Boolean,
     content: @Composable RowScope.() -> Unit,
 ) {
     Button(
         onClick = onClick,
         modifier = modifier,
         content = content,
+        disabled = !enabled,
     )
 }
 
@@ -24,12 +26,14 @@ internal actual fun PlatformButton(
 internal actual fun PlatformTextButton(
     onClick: () -> Unit,
     modifier: Modifier,
+    enabled: Boolean,
     content: @Composable RowScope.() -> Unit,
 ) {
     SubtleButton(
         onClick = onClick,
         modifier = modifier,
         content = content,
+        disabled = !enabled,
     )
 }
 
@@ -37,12 +41,14 @@ internal actual fun PlatformTextButton(
 internal actual fun PlatformFilledTonalButton(
     onClick: () -> Unit,
     modifier: Modifier,
+    enabled: Boolean,
     content: @Composable RowScope.() -> Unit,
 ) {
     AccentButton(
         onClick = onClick,
         modifier = modifier,
         content = content,
+        disabled = !enabled,
     )
 }
 
@@ -50,6 +56,7 @@ internal actual fun PlatformFilledTonalButton(
 internal actual fun PlatformIconButton(
     onClick: () -> Unit,
     modifier: Modifier,
+    enabled: Boolean,
     content: @Composable () -> Unit,
 ) {
     SubtleButton(
@@ -57,5 +64,6 @@ internal actual fun PlatformIconButton(
         modifier = modifier,
         content = { content.invoke() },
         iconOnly = true,
+        disabled = !enabled,
     )
 }

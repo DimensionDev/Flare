@@ -14,12 +14,14 @@ import com.slapps.cupertino.ExperimentalCupertinoApi
 internal actual fun PlatformButton(
     onClick: () -> Unit,
     modifier: Modifier,
+    enabled: Boolean,
     content: @Composable (RowScope.() -> Unit),
 ) {
     CupertinoButton(
         onClick = onClick,
         modifier = modifier,
         content = content,
+        enabled = enabled,
     )
 }
 
@@ -27,12 +29,14 @@ internal actual fun PlatformButton(
 internal actual fun PlatformTextButton(
     onClick: () -> Unit,
     modifier: Modifier,
+    enabled: Boolean,
     content: @Composable (RowScope.() -> Unit),
 ) {
     CupertinoButton(
         onClick = onClick,
         modifier = modifier,
         content = content,
+        enabled = enabled,
         colors = CupertinoButtonDefaults.plainButtonColors(),
     )
 }
@@ -41,12 +45,14 @@ internal actual fun PlatformTextButton(
 internal actual fun PlatformFilledTonalButton(
     onClick: () -> Unit,
     modifier: Modifier,
+    enabled: Boolean,
     content: @Composable (RowScope.() -> Unit),
 ) {
     CupertinoButton(
         onClick = onClick,
         modifier = modifier,
         content = content,
+        enabled = enabled,
         colors = CupertinoButtonDefaults.tintedButtonColors(),
     )
 }
@@ -55,11 +61,13 @@ internal actual fun PlatformFilledTonalButton(
 internal actual fun PlatformIconButton(
     onClick: () -> Unit,
     modifier: Modifier,
+    enabled: Boolean,
     content: @Composable (() -> Unit),
 ) {
     CupertinoIconButton(
         onClick = onClick,
         modifier = modifier,
         content = content,
+        enabled = enabled,
     )
 }

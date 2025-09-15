@@ -59,6 +59,9 @@
     "bookmark_remove" : {
 
     },
+    "comment" : {
+
+    },
     "delete" : {
 
     },
@@ -197,9 +200,6 @@
           }
         }
       }
-    },
-    "Instance Url" : {
-
     },
     "like" : {
 

@@ -4,7 +4,7 @@ import Awesome
 
 struct StatusActionsView: View {
     let data: [StatusAction]
-    
+
     var body: some View {
         HStack {
             ForEach(0..<data.count) { index in
@@ -29,10 +29,10 @@ struct StatusActionView: View {
             StatusActionItemView(data: item, useText: useText, isFixedWidth: isFixedWidth)
         case .group(let group):
             Menu {
-                 ForEach(0..<group.actions.count) { index in
-                     let item = group.actions[index]
-                     StatusActionView(data: item, useText: true, isFixedWidth: false)
-                 }
+                ForEach(0..<group.actions.count) { index in
+                    let item = group.actions[index]
+                    StatusActionView(data: item, useText: true, isFixedWidth: false)
+                }
             } label: {
                 if !isFixedWidth && group.displayItem.countText == nil {
                     StatusActionIcon(item: group.displayItem, color: .init(group.displayItem.color))
@@ -65,9 +65,9 @@ struct AsyncStatusActionView: View {
     let data: StatusActionAsyncActionItem
     var body: some View {
         Button {
-            
+
         } label: {
-            
+
         }
         .onAppear {
         }
@@ -112,16 +112,18 @@ struct StatusActionItemView: View {
 extension StatusActionItem {
     var countText: String? {
         switch onEnum(of: self) {
-           case .bookmark(let bookmark): bookmark.humanizedCount
-           case .delete: nil
-           case .like(let like): like.humanizedCount
-           case .more: nil
-           case .quote(let quote): quote.humanizedCount
-           case .reaction: nil
-           case .reply(let reply): reply.humanizedCount
-           case .report: nil
-           case .retweet(let retweet): retweet.humanizedCount
-           }
+        case .bookmark(let bookmark): bookmark.humanizedCount
+        case .delete: nil
+        case .like(let like): like.humanizedCount
+        case .more: nil
+        case .quote(let quote): quote.humanizedCount
+        case .reaction: nil
+        case .reply(let reply): reply.humanizedCount
+        case .report: nil
+        case .retweet(let retweet): retweet.humanizedCount
+        case .comment(let comment): comment.humanizedCount
+        }
+
     }
     var color: Color {
         if let colorized = self as? StatusActionItemColorized {
@@ -135,7 +137,7 @@ extension StatusActionItem {
             Color(.label)
         }
     }
-    
+
     var textKey: LocalizedStringResource {
         switch onEnum(of: self) {
         case .bookmark(let bookmarked):
@@ -172,6 +174,8 @@ extension StatusActionItem {
             return retweeted.retweeted
                 ? LocalizedStringResource("retweet_remove")
                 : LocalizedStringResource("retweet")
+        case .comment:
+            return LocalizedStringResource("comment")
         }
     }
 }
@@ -232,6 +236,10 @@ struct StatusActionIcon: View {
 
             case .retweet:
                 Awesome.Classic.Solid.retweet.image
+                    .foregroundColor(color)
+
+            case .comment:
+                Awesome.Classic.Regular.commentDots.image
                     .foregroundColor(color)
             }
         }

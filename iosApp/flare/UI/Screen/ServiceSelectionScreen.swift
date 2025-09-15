@@ -1,49 +1,59 @@
 import SwiftUI
 import KotlinSharedUI
 import Kingfisher
+import AuthenticationServices
 
 struct ServiceSelectionScreen : View {
-    @State private var presenter: KotlinPresenter<ServiceSelectState>
-    @State private var input: String = ""
-    
-    init(toHome: @escaping () -> Void) {
-        self._presenter = .init(initialValue: .init(presenter: ServiceSelectPresenter(toHome: toHome)))
-    }
+    @Environment(\.webAuthenticationSession) private var webAuthenticationSession
+    @Environment(\.openURL) private var openURL
+    let toHome: () -> Void
+    let key = UUID().uuidString
     
     var body: some View {
-        List {
-            Text("Login")
-            TextField(text: $input) {
-                Text("Instance Url")
-            }
-            .onChange(of: input) { oldValue, newValue in
-                presenter.state.setFilter(value: newValue)
-            }
-            StateView(state: presenter.state.detectedPlatformType) { platformType in
-
-            }
-            Section {
-                PagingView(data: presenter.state.instances) { instance in
-                    VStack(
-                        alignment: .center
-                    ) {
-                        if let banner = instance.bannerUrl {
-                            KFImage.url(.init(string: banner))
-                                .frame(maxHeight: 360)
-                                .aspectRatio(16.0 / 9.0, contentMode: .fill)
-                        }
-                        Text(instance.name)
-                            .font(.title)
-                        Text(instance.domain)
-                            .font(.caption)
-                        if let desc = instance.description_ {
-                            Text(desc)
-                                .font(.caption2)
-                        }
-                    }
-                    .containerShape(.capsule)
+        ServiceSelectionView(key: key, data: .init(onXQT: {
+            
+        }, onVVO: {
+            
+        }, onBack: {
+            toHome()
+        }, openUri: { url, callback in
+            Task {
+                let response = try? await webAuthenticationSession.authenticate(using: .init(string: url)!, callbackURLScheme: APPSCHEMA)
+                if let responseString = response?.absoluteString {
+                    _ = callback(responseString)
                 }
             }
+        })) { url in
+            openURL.callAsFunction(.init(string: url)!)
         }
+        .ignoresSafeArea()
+    }
+}
+
+struct ServiceSelectionView: UIViewControllerRepresentable {
+    let key: String
+    let state: ComposeUIStateProxy<ServiceSelectControllerState>
+    let data: ServiceSelectControllerState
+    
+    init(key: String, data: ServiceSelectControllerState, onOpenLink: @escaping (String) -> Void) {
+        self.key = key
+        self.data = data
+        self.state = ComposeUIStateProxyCache.shared.getOrCreate(key: key, factory: {
+            ComposeUIStateProxy(initialState: data, onOpenLink: onOpenLink)
+        }) as! ComposeUIStateProxy<ServiceSelectControllerState>
+    }
+    
+    func makeUIViewController(context: Context) -> some UIViewController {
+        return KotlinSharedUI.ServiceSelectController(state: state)
+    }
+    
+    func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
+        state.update(newState: data)
+    }
+    func dismantleUIViewController(
+        _ uiViewController: Self.UIViewControllerType,
+        coordinator: Self.Coordinator
+    ) {
+        ComposeUIStateProxyCache.shared.remove(key: key)
     }
 }

@@ -18,7 +18,7 @@ import dev.dimension.flare.ui.screen.login.ServiceSelectionScreenContent
 internal fun ServiceSelectScreen(
     onXQT: () -> Unit,
     onVVO: () -> Unit,
-    onBack: (() -> Unit)?,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -28,16 +28,14 @@ internal fun ServiceSelectScreen(
             modifier
                 .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            if (onBack != null) {
-                FlareTopAppBar(
-                    title = {
-                    },
-                    navigationIcon = {
-                        BackButton(onBack = onBack)
-                    },
-                    scrollBehavior = scrollBehavior,
-                )
-            }
+            FlareTopAppBar(
+                title = {
+                },
+                navigationIcon = {
+                    BackButton(onBack = onBack)
+                },
+                scrollBehavior = scrollBehavior,
+            )
         },
     ) { contentPadding ->
         ServiceSelectionScreenContent(

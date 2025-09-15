@@ -17,15 +17,9 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -78,13 +72,9 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
-import dev.dimension.flare.ui.presenter.login.ServiceSelectPresenter
-import dev.dimension.flare.ui.presenter.login.ServiceSelectState
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.distinctUntilChanged
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
@@ -92,13 +82,13 @@ import org.jetbrains.compose.resources.stringResource
 public fun ServiceSelectionScreenContent(
     onXQT: () -> Unit,
     onVVO: () -> Unit,
-    onBack: (() -> Unit)?,
+    onBack: (() -> Unit),
     openUri: (String) -> Unit,
     registerDeeplinkCallback: @Composable ((url: String) -> Unit) -> Unit,
     contentPadding: PaddingValues,
 ) {
     val state by producePresenter {
-        presenter(onBack)
+        remember { SelectionPresenter(onBack) }.body()
     }
     LazyStatusVerticalStaggeredGrid(
         modifier =
@@ -219,11 +209,13 @@ public fun ServiceSelectionScreenContent(
                                                 state.blueskyOauthLoginState.clear()
                                                 state.blueskyInputState.setUsePasswordLogin(true)
                                             }
+
                                             1 -> {
                                                 state.blueskyLoginState.clear()
                                                 state.blueskyOauthLoginState.clear()
                                                 state.blueskyInputState.setUsePasswordLogin(false)
                                             }
+
                                             else -> {}
                                         }
                                     },
@@ -556,78 +548,3 @@ private fun ServiceSelectItem(
         }
     }
 }
-
-@OptIn(FlowPreview::class)
-@Composable
-private fun presenter(onBack: (() -> Unit)?) =
-    run {
-        val instanceInputState = rememberTextFieldState()
-        val state =
-            remember {
-                ServiceSelectPresenter(
-                    toHome = {
-                        instanceInputState.edit {
-                            replace(0, instanceInputState.text.length, "")
-                        }
-                        onBack?.invoke()
-                    },
-                )
-            }.body()
-        LaunchedEffect(Unit) {
-            snapshotFlow {
-                instanceInputState.text
-            }.distinctUntilChanged()
-                .collect {
-                    state.setFilter(it.toString())
-                }
-        }
-        val blueskyInputState = blueskyInputPresenter()
-        object : ServiceSelectState by state {
-            val instanceInputState = instanceInputState
-            val blueskyInputState = blueskyInputState
-
-            fun selectInstance(instance: UiInstance) {
-                instanceInputState.edit {
-                    replace(0, instanceInputState.text.length, instance.domain)
-                }
-                setFilter(instance.domain)
-            }
-
-            fun clearInstance() {
-                instanceInputState.edit {
-                    replace(0, instanceInputState.text.length, "")
-                }
-                setFilter("")
-            }
-        }
-    }
-
-@Composable
-private fun blueskyInputPresenter() =
-    run {
-        var usePasswordLogin by remember { mutableStateOf(true) }
-        val username = rememberTextFieldState()
-        val password = rememberTextFieldState()
-        val authFactorToken = rememberTextFieldState()
-        val canLogin by remember(username, password) {
-            derivedStateOf {
-                username.text.isNotEmpty() &&
-                    if (usePasswordLogin) {
-                        password.text.isNotEmpty()
-                    } else {
-                        true
-                    }
-            }
-        }
-        object {
-            val username = username
-            val password = password
-            val authFactorToken = authFactorToken
-            val usePasswordLogin = usePasswordLogin
-            val canLogin = canLogin
-
-            fun setUsePasswordLogin(value: Boolean) {
-                usePasswordLogin = value
-            }
-        }
-    }

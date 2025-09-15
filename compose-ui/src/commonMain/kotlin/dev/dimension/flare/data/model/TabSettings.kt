@@ -895,7 +895,7 @@ public object Bluesky {
     public data class BookmarkTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
-    ) : TimelineTabItem {
+    ) : TimelineTabItem() {
         override val key: String = "bookmark_$account"
 
         override fun createPresenter(): TimelinePresenter =

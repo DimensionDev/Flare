@@ -14,15 +14,23 @@ struct StatusCardView: View {
                     MediaView(data: item)
                         .clipped()
                 }
+                .frame(maxWidth: .infinity)
                 .clipped()
             }
             VStack(
                 alignment: .leading
             ) {
                 Text(data.title)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .lineLimit(2)
-                if let desc = data.description_ {
+                if let desc = data.description_, !desc.isEmpty {
                     Text(desc)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .font(.caption)
+                        .lineLimit(2)
+                } else {
+                    Text(data.url)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .font(.caption)
                         .lineLimit(2)
                 }

@@ -606,34 +606,28 @@ private fun ImageItem(
             zoomableState.resetZoom()
         }
     }
-    val aspectRatio =
-        remember(zoomableState.coordinateSystem.unscaledContentBounds) {
-            with(zoomableState.coordinateSystem) {
-                unscaledContentBounds.rectIn(CoordinateSpace.Viewport)
-            }.let {
-                it.height / it.width
-            }
-        }
-
-    val alignment =
-        remember(aspectRatio) {
-            val targetAspectRatio = 19.5 / 9
+    var alignment by remember {
+        mutableStateOf(Alignment.Center)
+    }
+    var contentScale by remember {
+        mutableStateOf(ContentScale.Fit)
+    }
+    LaunchedEffect(zoomableState.coordinateSystem.contentBounds(false)) {
+        // only set once to prevent jitter
+        if (contentScale == ContentScale.Fit) {
+            val aspectRatio =
+                with(zoomableState.coordinateSystem) {
+                    contentBounds(false).rectIn(CoordinateSpace.Viewport)
+                }.let {
+                    it.height / it.width
+                }
+            val targetAspectRatio = 19.5f / 9f
             if (aspectRatio > targetAspectRatio) {
-                Alignment.TopCenter
-            } else {
-                Alignment.Center
+                alignment = Alignment.TopCenter
+                contentScale = ContentScale.FillWidth
             }
         }
-
-    val contentScale =
-        remember(aspectRatio) {
-            val targetAspectRatio = 19.5 / 9
-            if (aspectRatio > targetAspectRatio) {
-                ContentScale.FillWidth
-            } else {
-                ContentScale.Fit
-            }
-        }
+    }
 
     ZoomableAsyncImage(
         model =

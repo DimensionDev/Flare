@@ -96,6 +96,7 @@
     <string name="retweet">Retweet</string>
     <string name="retweet_remove">Αφαίρεση retweet</string>
     <string name="share">Κοινοποίηση</string>
+    <string name="comment">Σχόλιο</string>
     <string name="user_report">Αναφορά %1$s</string>
     <string name="user_block">Αποκλεισμός %1$s</string>
     <string name="user_unblock">Ξεμπλοκάρισμα %1$s</string>

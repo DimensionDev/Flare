@@ -96,6 +96,7 @@
     <string name="retweet">Ретвит</string>
     <string name="retweet_remove">Уклоните ретвит</string>
     <string name="share">Делите</string>
+    <string name="comment">Коментар</string>
     <string name="user_report">Пријави %1$s</string>
     <string name="user_block">Блокирај %1$s</string>
     <string name="user_unblock">Откључај %1$s</string>

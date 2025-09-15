@@ -96,6 +96,7 @@
     <string name="retweet">Retweet</string>
     <string name="retweet_remove">Bỏ retweet</string>
     <string name="share">Chia sẻ</string>
+    <string name="comment">Bình luận</string>
     <string name="user_report">Báo cáo %1$s</string>
     <string name="user_block">Chặn %1$s</string>
     <string name="user_unblock">Bỏ chặn %1$s</string>

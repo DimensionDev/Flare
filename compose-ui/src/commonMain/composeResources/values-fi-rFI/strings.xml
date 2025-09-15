@@ -96,6 +96,7 @@
     <string name="retweet">Yritä Uudelleen</string>
     <string name="retweet_remove">Poista uudelleentwiittaa</string>
     <string name="share">Jaa</string>
+    <string name="comment">Kommentti</string>
     <string name="user_report">Ilmoita %1$s</string>
     <string name="user_block">Estä %1$s</string>
     <string name="user_unblock">Poista %1$s Esto</string>

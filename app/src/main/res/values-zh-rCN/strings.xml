@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">评论</string>
     <string name="notification_tab_likes_title">点赞</string>
     <string name="compose_title">发帖</string>
+    <string name="compose_reply_title">回复</string>
+    <string name="compose_quote_title">引用</string>
+    <string name="compose_vvo_comment_title">评论</string>
     <string name="compose_hint">发生什么事了？</string>
     <string name="compose_poll_option_hint">选项 %1$s</string>
     <string name="compose_poll_single_choice">单选</string>

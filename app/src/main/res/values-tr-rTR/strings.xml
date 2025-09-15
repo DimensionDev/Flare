@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Yorumlar</string>
     <string name="notification_tab_likes_title">Beğeniler</string>
     <string name="compose_title">Kompoze et</string>
+    <string name="compose_reply_title">Yanıtla</string>
+    <string name="compose_quote_title">Alıntı</string>
+    <string name="compose_vvo_comment_title">Yorum</string>
     <string name="compose_hint">Ne oluyor?</string>
     <string name="compose_poll_option_hint">Seçenek %1$s</string>
     <string name="compose_poll_single_choice">Tek seçim</string>

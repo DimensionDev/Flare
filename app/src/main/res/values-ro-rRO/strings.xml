@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Comentarii</string>
     <string name="notification_tab_likes_title">Aprecieri</string>
     <string name="compose_title">Compune</string>
+    <string name="compose_reply_title">Răspuns</string>
+    <string name="compose_quote_title">Ofertă</string>
+    <string name="compose_vvo_comment_title">Comentariu</string>
     <string name="compose_hint">Ce se întâmplă?</string>
     <string name="compose_poll_option_hint">Opțiunea %1$s</string>
     <string name="compose_poll_single_choice">Alegere unică</string>

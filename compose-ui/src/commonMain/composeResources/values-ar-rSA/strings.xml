@@ -96,6 +96,7 @@
     <string name="retweet">تغريدة</string>
     <string name="retweet_remove">إزالة التغريدة</string>
     <string name="share">مشاركة</string>
+    <string name="comment">تعليق</string>
     <string name="user_report">التقرير %1$s</string>
     <string name="user_block">حظر %1$s</string>
     <string name="user_unblock">إلغاء حظر %1$s</string>

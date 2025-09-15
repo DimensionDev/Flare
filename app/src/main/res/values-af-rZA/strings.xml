@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Kommentaar</string>
     <string name="notification_tab_likes_title">Liefs</string>
     <string name="compose_title">Samestelling</string>
+    <string name="compose_reply_title">Antwoord</string>
+    <string name="compose_quote_title">Citaat</string>
+    <string name="compose_vvo_comment_title">Kommentaar</string>
     <string name="compose_hint">Wat gebeur?</string>
     <string name="compose_poll_option_hint">Keuse %1$s</string>
     <string name="compose_poll_single_choice">Enkel keuse</string>

@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">תגובות</string>
     <string name="notification_tab_likes_title">לייקים</string>
     <string name="compose_title">כתיבה</string>
+    <string name="compose_reply_title">תגובה</string>
+    <string name="compose_quote_title">ציטוט</string>
+    <string name="compose_vvo_comment_title">תגובה</string>
     <string name="compose_hint">מה קורה?</string>
     <string name="compose_poll_option_hint">אפשרות %1$s</string>
     <string name="compose_poll_single_choice">בחירה בודדת</string>

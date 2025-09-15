@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Kommentit</string>
     <string name="notification_tab_likes_title">Tykkäykset</string>
     <string name="compose_title">Luo</string>
+    <string name="compose_reply_title">Vastaa</string>
+    <string name="compose_quote_title">Tarjous</string>
+    <string name="compose_vvo_comment_title">Kommentti</string>
     <string name="compose_hint">Mitä tapahtuu?</string>
     <string name="compose_poll_option_hint">Vaihtoehto %1$s</string>
     <string name="compose_poll_single_choice">Yksi vaihtoehto</string>

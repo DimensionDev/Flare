@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Коментари</string>
     <string name="notification_tab_likes_title">Лајкови</string>
     <string name="compose_title">Саставите</string>
+    <string name="compose_reply_title">Одговори</string>
+    <string name="compose_quote_title">Цитат</string>
+    <string name="compose_vvo_comment_title">Коментар</string>
     <string name="compose_hint">Шта се дешава?</string>
     <string name="compose_poll_option_hint">Опција %1$s</string>
     <string name="compose_poll_single_choice">Један избор</string>

@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Bình luận</string>
     <string name="notification_tab_likes_title">Thích</string>
     <string name="compose_title">Soạn thảo</string>
+    <string name="compose_reply_title">Trả lời</string>
+    <string name="compose_quote_title">Trích dẫn</string>
+    <string name="compose_vvo_comment_title">Bình luận</string>
     <string name="compose_hint">Có chuyện gì xảy ra?</string>
     <string name="compose_poll_option_hint">Tùy chọn %1$s</string>
     <string name="compose_poll_single_choice">Lựa chọn đơn</string>

@@ -96,6 +96,7 @@
     <string name="retweet">리트윗</string>
     <string name="retweet_remove">리트윗 제거</string>
     <string name="share">공유</string>
+    <string name="comment">댓글</string>
     <string name="user_report">신고 %1$s</string>
     <string name="user_block">차단 %1$s</string>
     <string name="user_unblock">차단 해제 %1$s</string>

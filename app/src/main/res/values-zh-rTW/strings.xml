@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">評論</string>
     <string name="notification_tab_likes_title">喜歡</string>
     <string name="compose_title">撰寫</string>
+    <string name="compose_reply_title">回覆</string>
+    <string name="compose_quote_title">引用</string>
+    <string name="compose_vvo_comment_title">評論</string>
     <string name="compose_hint">發生了什麼事？</string>
     <string name="compose_poll_option_hint">選項 %1$s</string>
     <string name="compose_poll_single_choice">單選</string>

@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Opmerkingen</string>
     <string name="notification_tab_likes_title">Vind-ik-leuk</string>
     <string name="compose_title">Samenstellen</string>
+    <string name="compose_reply_title">Beantwoorden</string>
+    <string name="compose_quote_title">Offerte</string>
+    <string name="compose_vvo_comment_title">Opmerking</string>
     <string name="compose_hint">Wat gebeurt er?</string>
     <string name="compose_poll_option_hint">Optie %1$s</string>
     <string name="compose_poll_single_choice">Enkele keuze</string>

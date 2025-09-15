@@ -43,4 +43,28 @@ extension PagingView {
         self.init(data: data, emptyContent: { EmptyView() }, errorContent: {_ in EmptyView()}, loadingContent: {EmptyView()}, successContent: successContent)
     }
     
+    init(
+        data: PagingState<UiTimeline>,
+    ) where ErrorContent == EmptyView, EmptyContent == EmptyView, LoadingContent == TimelinePlaceholderView, SuccessContent == TimelineView, T == UiTimeline {
+        self.init(
+            data: data,
+            emptyContent: { EmptyView() },
+            errorContent: { _ in EmptyView() },
+            loadingContent: { TimelinePlaceholderView() },
+            successContent: { item in TimelineView(data: item) }
+        )
+    }
+    
+    init(
+        data: PagingState<UiTimeline>,
+        detailStatusKey: MicroBlogKey?
+    ) where ErrorContent == EmptyView, EmptyContent == EmptyView, LoadingContent == TimelinePlaceholderView, SuccessContent == TimelineView, T == UiTimeline {
+        self.init(
+            data: data,
+            emptyContent: { EmptyView() },
+            errorContent: { _ in EmptyView() },
+            loadingContent: { TimelinePlaceholderView() },
+            successContent: { item in TimelineView(data: item, detailStatusKey: detailStatusKey) }
+        )
+    }
 }

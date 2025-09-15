@@ -6,6 +6,11 @@ struct NetworkImage: View {
     var body: some View {
         KFImage
             .url(.init(string: data))
+            .placeholder {
+                Rectangle()
+                    .fill(.placeholder)
+                    .redacted(reason: .placeholder)
+            }
             .resizable()
             .scaledToFill()
     }

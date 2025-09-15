@@ -21,9 +21,7 @@ struct HomeTimelineScreen: View {
             let tabs: [TimelineItemPresenterState] = state.cast(TimelineItemPresenterState.self)
             let tab = tabs[selectedTabIndex]
             List {
-                PagingView(data: tab.listState) { item in
-                    TimelineView(data: item)
-                }
+                PagingView(data: tab.listState)
             }
             .toolbar {
                 ToolbarItem(placement: .principal) {

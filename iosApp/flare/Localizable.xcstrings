@@ -13,6 +13,9 @@
     "Accept follow request" : {
 
     },
+    "ALT" : {
+
+    },
     "antenna_title" : {
       "localizations" : {
         "en" : {
@@ -202,6 +205,9 @@
 
     },
     "Login" : {
+
+    },
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eget eros justo. Duis feugiat tortor sed lectus euismod iaculis. Donec aliquam sem dui, id facilisis velit luctus eget. Nam ac mattis sapien. Morbi ultrices diam at accumsan hendrerit. Donec vitae venenatis nulla. Nullam condimentum pharetra venenatis." : {
 
     },
     "mastodon_item_pinned" : {
@@ -860,6 +866,12 @@
       }
     },
     "unlike" : {
+
+    },
+    "user handle" : {
+
+    },
+    "user name" : {
 
     },
     "vvo_notification_like" : {

@@ -14,9 +14,7 @@ struct NotificationScreen: View {
 
     var body: some View {
         List {
-            PagingView(data: presenter.state.listState) { item in
-                TimelineView(data: item)
-            }
+            PagingView(data: presenter.state.listState)
         }
         .toolbar {
             ToolbarItem(placement: .principal) {

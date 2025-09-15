@@ -91,4 +91,3 @@ struct AvatarTabIcon: View {
         }
     }
 }
-

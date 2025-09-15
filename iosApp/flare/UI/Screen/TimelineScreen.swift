@@ -11,9 +11,7 @@ struct TimelineScreen: View {
     }
     var body: some View {
         List {
-            PagingView(data: presenter.state.listState) { item in
-                TimelineView(data: item)
-            }
+            PagingView(data: presenter.state.listState)
         }
         .refreshable {
             try? await presenter.state.refreshSuspend()

@@ -13,9 +13,7 @@ struct StatusDetailScreen : View {
     
     var body: some View {
         List {
-            PagingView(data: presenter.state.listState) { item in
-                TimelineView(data: item, detailStatusKey: statusKey)
-            }
+            PagingView(data: presenter.state.listState, detailStatusKey: statusKey)
         }
         .refreshable {
             try? await presenter.state.refresh()

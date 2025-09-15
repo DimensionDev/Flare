@@ -58,16 +58,23 @@ private extension AdaptiveMosaic {
                     .frame(maxWidth: .infinity)
                 
             case .force16x9:
-                content(item)
-                    .clipped()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(
-                        minWidth: 0,
-                        maxWidth: .infinity,
-                        minHeight: 0,
-                        maxHeight: .infinity
-                    )
-                    .aspectRatio(16 / 9, contentMode: .fit)
+                GeometryReader { geo in
+                    let W = geo.size.width
+                    let H = W * 9.0 / 16.0
+                    contentBox(item, size: CGSize(width: W, height: H))
+                        .frame(width: W, height: H)
+                }
+                .aspectRatio(16.0/9.0, contentMode: .fit)
+//                content(item)
+//                    .clipped()
+//                    .aspectRatio(contentMode: .fill)
+//                    .frame(
+//                        minWidth: 0,
+//                        maxWidth: .infinity,
+//                        minHeight: 0,
+//                        maxHeight: .infinity
+//                    )
+//                    .aspectRatio(16 / 9, contentMode: .fit)
             }
         }
     }

@@ -6,7 +6,13 @@ import Awesome
 struct TabTitle: View {
     let title: TitleType
     var body: some View {
-        switch onEnum(of: title) {
+        Text(title.text)
+    }
+}
+
+extension TitleType {
+    var text: String {
+        switch onEnum(of: self) {
         case .localized(let localized):
             let text = switch localized.key {
             case .home: String(localized: "home_tab_home_title")
@@ -27,9 +33,9 @@ struct TabTitle: View {
             case .antenna: String(localized: "antenna_title")
             case .mixedTimeline: String(localized: "mixed_timeline_title")
             }
-            Text(text)
+            return text
         case .text(let text):
-            Text(text.content)
+            return text.content
         }
     }
 }
@@ -44,7 +50,7 @@ struct TabIcon: View {
         case .avatar(let avatar):
             AvatarTabIcon(userKey: avatar.userKey, accountType: accountType)
         case .url(let url):
-            KFImage.url(.init(string: url.url))
+            NetworkImage(data: url.url)
         case .mixed(let mixed):
             MaterialTabIcon(icon: mixed.icon)
         }
@@ -87,7 +93,7 @@ struct AvatarTabIcon: View {
     
     var body: some View {
         StateView(state: presenter.state.user) { user in
-            KFImage.url(.init(string: user.avatar))
+            NetworkImage(data: user.avatar)
         }
     }
 }

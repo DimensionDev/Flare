@@ -2,10 +2,10 @@ import SwiftUI
 import Kingfisher
 
 struct NetworkImage: View {
-    let data: String
+    let data: URL?
     var body: some View {
         KFImage
-            .url(.init(string: data))
+            .url(data)
             .placeholder {
                 Rectangle()
                     .fill(.placeholder)
@@ -13,5 +13,12 @@ struct NetworkImage: View {
             }
             .resizable()
             .scaledToFill()
+    }
+}
+
+
+extension NetworkImage {
+    init(data: String) {
+        self.init(data: .init(string: data))
     }
 }

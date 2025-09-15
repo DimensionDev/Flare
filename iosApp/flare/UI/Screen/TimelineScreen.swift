@@ -16,5 +16,6 @@ struct TimelineScreen: View {
         .refreshable {
             try? await presenter.state.refreshSuspend()
         }
+        .navigationTitle(tabItem.metaData.title.text)
     }
 }

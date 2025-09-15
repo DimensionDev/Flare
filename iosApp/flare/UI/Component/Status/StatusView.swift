@@ -77,7 +77,7 @@ struct StatusView: View {
                             .font(.caption)
                         }
                     }
-                    if let contentWarning = data.contentWarning {
+                    if let contentWarning = data.contentWarning, !contentWarning.isEmpty {
                         RichText(text: contentWarning)
                         Button {
                             withAnimation {

@@ -36,6 +36,7 @@ struct HomeTimelineScreen: View {
                                         TabTitle(title: tab.timelineTabItem.metaData.title)
                                     } icon: {
                                         TabIcon(icon: tab.timelineTabItem.metaData.icon, accountType: tab.timelineTabItem.account)
+                                            .frame(width: 24, height: 24)
                                     }
                                 }
                                 .if(selectedTabIndex == index) { button in

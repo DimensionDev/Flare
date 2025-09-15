@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Σχόλια</string>
     <string name="notification_tab_likes_title">Αρέσει</string>
     <string name="compose_title">Σύνθεση</string>
+    <string name="compose_reply_title">Απάντηση</string>
+    <string name="compose_quote_title">Παράθεση</string>
+    <string name="compose_vvo_comment_title">Σχόλιο</string>
     <string name="compose_hint">Τι συμβαίνει?</string>
     <string name="compose_poll_option_hint">Επιλογή %1$s</string>
     <string name="compose_poll_single_choice">Ενιαία επιλογή</string>

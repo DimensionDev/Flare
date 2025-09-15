@@ -96,6 +96,7 @@
     <string name="retweet">Retweet</string>
     <string name="retweet_remove">Elimină retweet</string>
     <string name="share">Distribuie</string>
+    <string name="comment">Comentariu</string>
     <string name="user_report">Raportează %1$s</string>
     <string name="user_block">Blochează %1$s</string>
     <string name="user_unblock">Deblochează %1$s</string>

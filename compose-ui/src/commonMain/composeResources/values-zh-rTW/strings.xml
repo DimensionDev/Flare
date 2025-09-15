@@ -96,6 +96,7 @@
     <string name="retweet">轉發</string>
     <string name="retweet_remove">刪除轉發</string>
     <string name="share">分享</string>
+    <string name="comment">評論</string>
     <string name="user_report">報告 %1$s</string>
     <string name="user_block">封鎖 %1$s</string>
     <string name="user_unblock">解封 %1$s</string>

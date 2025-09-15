@@ -96,6 +96,7 @@
     <string name="retweet">שיתוף מחדש</string>
     <string name="retweet_remove">הסר שיתוף מחדש</string>
     <string name="share">שתף</string>
+    <string name="comment">תגובה</string>
     <string name="user_report">דווח על %1$s</string>
     <string name="user_block">חסום את %1$s</string>
     <string name="user_unblock">בטל חסימה של %1$s</string>

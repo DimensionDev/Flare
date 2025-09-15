@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">댓글</string>
     <string name="notification_tab_likes_title">좋아요</string>
     <string name="compose_title">작성하기</string>
+    <string name="compose_reply_title">답글</string>
+    <string name="compose_quote_title">인용하기</string>
+    <string name="compose_vvo_comment_title">댓글</string>
     <string name="compose_hint">무슨 일이 일어나고 있나요?</string>
     <string name="compose_poll_option_hint">옵션 %1$s</string>
     <string name="compose_poll_single_choice">단일 선택</string>

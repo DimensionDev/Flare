@@ -96,6 +96,7 @@
     <string name="retweet">Retweet</string>
     <string name="retweet_remove">Verwyder retweet</string>
     <string name="share">Deel</string>
+    <string name="comment">Kommentaar</string>
     <string name="user_report">Rapporteer %1$s</string>
     <string name="user_block">Blokkeer %1$s</string>
     <string name="user_unblock">Ontblokkeer %1$s</string>

@@ -96,6 +96,7 @@
     <string name="retweet">crwdns74747:0crwdne74747:0</string>
     <string name="retweet_remove">Usuń retweet</string>
     <string name="share">Udostępnij</string>
+    <string name="comment">Komentarz</string>
     <string name="user_report">Zgłoś %1$s</string>
     <string name="user_block">Blok %1$s</string>
     <string name="user_unblock">Odblokuj %1$s</string>

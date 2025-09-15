@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Komentarze</string>
     <string name="notification_tab_likes_title">Polubienia</string>
     <string name="compose_title">Napisz</string>
+    <string name="compose_reply_title">Odpowiedz</string>
+    <string name="compose_quote_title">Oferta</string>
+    <string name="compose_vvo_comment_title">Komentarz</string>
     <string name="compose_hint">Co się dzieje?</string>
     <string name="compose_poll_option_hint">Opcja %1$s</string>
     <string name="compose_poll_single_choice">Pojedynczy wybór</string>

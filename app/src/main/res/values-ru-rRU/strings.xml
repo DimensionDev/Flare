@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Комментарии</string>
     <string name="notification_tab_likes_title">Лайки</string>
     <string name="compose_title">Написать</string>
+    <string name="compose_reply_title">Ответ</string>
+    <string name="compose_quote_title">Цитата</string>
+    <string name="compose_vvo_comment_title">Комментарий</string>
     <string name="compose_hint">Что происходит?</string>
     <string name="compose_poll_option_hint">Опция %1$s</string>
     <string name="compose_poll_single_choice">Одиночный выбор</string>

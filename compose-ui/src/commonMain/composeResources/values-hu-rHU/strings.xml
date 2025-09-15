@@ -96,6 +96,7 @@
     <string name="retweet">Retweetelés</string>
     <string name="retweet_remove">Retweet eltávolítása</string>
     <string name="share">Megosztás</string>
+    <string name="comment">Hozzászólás</string>
     <string name="user_report">Jelentés %1$s</string>
     <string name="user_block">Blokkolás %1$s</string>
     <string name="user_unblock">Blokkolás eltávolítása %1$s</string>

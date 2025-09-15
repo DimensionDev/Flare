@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Komentáře</string>
     <string name="notification_tab_likes_title">Líbí se mi</string>
     <string name="compose_title">Napsat</string>
+    <string name="compose_reply_title">Odpověď</string>
+    <string name="compose_quote_title">Cenová nabídka</string>
+    <string name="compose_vvo_comment_title">Komentář</string>
     <string name="compose_hint">Co se děje?</string>
     <string name="compose_poll_option_hint">Možnost %1$s</string>
     <string name="compose_poll_single_choice">Jedna volba</string>

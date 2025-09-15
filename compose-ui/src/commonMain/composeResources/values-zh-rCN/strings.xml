@@ -96,6 +96,7 @@
     <string name="retweet">转推</string>
     <string name="retweet_remove">移除转推</string>
     <string name="share">分享</string>
+    <string name="comment">评论</string>
     <string name="user_report">举报 %1$s</string>
     <string name="user_block">屏蔽 %1$s</string>
     <string name="user_unblock">取消屏蔽 %1$s</string>

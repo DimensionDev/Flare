@@ -96,6 +96,7 @@
     <string name="retweet">Retweetle</string>
     <string name="retweet_remove">Retweeti kaldır</string>
     <string name="share">Paylaş</string>
+    <string name="comment">Yorum</string>
     <string name="user_report">%1$s bildir</string>
     <string name="user_block">%1$s engelle</string>
     <string name="user_unblock">%1$s engelini kaldır</string>

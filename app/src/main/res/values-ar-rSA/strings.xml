@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">تعليقات</string>
     <string name="notification_tab_likes_title">إعجاب</string>
     <string name="compose_title">تأليف</string>
+    <string name="compose_reply_title">الرد</string>
+    <string name="compose_quote_title">اقتباس</string>
+    <string name="compose_vvo_comment_title">تعليق</string>
     <string name="compose_hint">ماذا يحدث؟</string>
     <string name="compose_poll_option_hint">الخيار %1$s</string>
     <string name="compose_poll_single_choice">خيار واحد</string>

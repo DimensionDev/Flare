@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">コメント</string>
     <string name="notification_tab_likes_title">いいね</string>
     <string name="compose_title">作成</string>
+    <string name="compose_reply_title">返信</string>
+    <string name="compose_quote_title">引用</string>
+    <string name="compose_vvo_comment_title">コメント</string>
     <string name="compose_hint">何か起きているのでしょうか？</string>
     <string name="compose_poll_option_hint">オプション %1$s</string>
     <string name="compose_poll_single_choice">単一選択</string>

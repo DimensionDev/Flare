@@ -96,6 +96,7 @@
     <string name="retweet">Ретвитнуть</string>
     <string name="retweet_remove">Удалить ретвит</string>
     <string name="share">Поделиться</string>
+    <string name="comment">Комментарий</string>
     <string name="user_report">Отчёт %1$s</string>
     <string name="user_block">Блокировать %1$s</string>
     <string name="user_unblock">Разблокировать %1$s</string>

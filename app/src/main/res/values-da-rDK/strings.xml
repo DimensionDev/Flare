@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Kommentarer</string>
     <string name="notification_tab_likes_title">Likes</string>
     <string name="compose_title">Skriv</string>
+    <string name="compose_reply_title">Svar</string>
+    <string name="compose_quote_title">Tilbud</string>
+    <string name="compose_vvo_comment_title">Kommentar</string>
     <string name="compose_hint">Hvad sker der?</string>
     <string name="compose_poll_option_hint">Indstilling %1$s</string>
     <string name="compose_poll_single_choice">Enkelt valg</string>

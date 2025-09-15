@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Hozzászólások</string>
     <string name="notification_tab_likes_title">Tetszik</string>
     <string name="compose_title">Írás</string>
+    <string name="compose_reply_title">Válasz</string>
+    <string name="compose_quote_title">Idézet</string>
+    <string name="compose_vvo_comment_title">Hozzászólás</string>
     <string name="compose_hint">Mi történik?</string>
     <string name="compose_poll_option_hint">Opció %1$s</string>
     <string name="compose_poll_single_choice">Egyedi választás</string>

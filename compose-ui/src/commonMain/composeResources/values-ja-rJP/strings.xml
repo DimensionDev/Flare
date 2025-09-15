@@ -96,6 +96,7 @@
     <string name="retweet">リツイート</string>
     <string name="retweet_remove">リツイートを削除</string>
     <string name="share">共有</string>
+    <string name="comment">コメント</string>
     <string name="user_report">%1$sを報告</string>
     <string name="user_block">%1$sをブロック</string>
     <string name="user_unblock">%1$sのブロックを解除</string>

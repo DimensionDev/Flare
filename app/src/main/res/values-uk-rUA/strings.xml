@@ -12,6 +12,9 @@
     <string name="notification_tab_comments_title">Коментарі</string>
     <string name="notification_tab_likes_title">Сподобалося</string>
     <string name="compose_title">Написати лист</string>
+    <string name="compose_reply_title">Відповідь</string>
+    <string name="compose_quote_title">Цитувати</string>
+    <string name="compose_vvo_comment_title">Коментар</string>
     <string name="compose_hint">Що відбувається?</string>
     <string name="compose_poll_option_hint">Опція %1$s</string>
     <string name="compose_poll_single_choice">Вибір із списку значень</string>

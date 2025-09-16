@@ -10,9 +10,15 @@ struct TimelineScreen: View {
         _presenter = .init(wrappedValue: .init(presenter: TimelineItemPresenter(timelineTabItem: tabItem)))
     }
     var body: some View {
-        List {
-            PagingView(data: presenter.state.listState)
+        ScrollView {
+            LazyVStack(
+                spacing: 2,
+            ) {
+                PagingView(data: presenter.state.listState)
+            }
+            .padding(.horizontal)
         }
+        .background(Color(.systemGroupedBackground))
         .refreshable {
             try? await presenter.state.refreshSuspend()
         }

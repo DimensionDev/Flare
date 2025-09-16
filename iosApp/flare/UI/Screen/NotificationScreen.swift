@@ -13,9 +13,15 @@ struct NotificationScreen: View {
     }
 
     var body: some View {
-        List {
-            PagingView(data: presenter.state.listState)
+        ScrollView {
+            LazyVStack(
+                spacing: 2,
+            ) {
+                PagingView(data: presenter.state.listState)
+            }
+            .padding(.horizontal)
         }
+        .background(Color(.systemGroupedBackground))
         .toolbar {
             ToolbarItem(placement: .principal) {
                 StateView(state: presenter.state.allTypes) { allTypes in

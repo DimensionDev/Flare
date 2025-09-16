@@ -26,6 +26,9 @@
         }
       }
     },
+    "block" : {
+
+    },
     "bluesky_notification_follow" : {
 
     },
@@ -59,6 +62,9 @@
     "bookmark_remove" : {
 
     },
+    "Button" : {
+
+    },
     "comment" : {
 
     },
@@ -88,6 +94,9 @@
           }
         }
       }
+    },
+    "error" : {
+
     },
     "Home" : {
       "extractionState" : "stale",
@@ -262,6 +271,12 @@
           }
         }
       }
+    },
+    "matrix_followers" : {
+
+    },
+    "matrix_following" : {
+
     },
     "misskey_achievement_brain_diver_description" : {
 
@@ -783,6 +798,9 @@
     "More" : {
 
     },
+    "mute" : {
+
+    },
     "Notification" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -797,6 +815,18 @@
     "notification_type_title" : {
 
     },
+    "profile_tab_likes" : {
+
+    },
+    "profile_tab_media" : {
+
+    },
+    "profile_tab_replies" : {
+
+    },
+    "profile_tab_status" : {
+
+    },
     "quote" : {
 
     },
@@ -807,6 +837,18 @@
 
     },
     "Reject follow request" : {
+
+    },
+    "relation_blocked" : {
+
+    },
+    "relation_follow" : {
+
+    },
+    "relation_following" : {
+
+    },
+    "relation_requested" : {
 
     },
     "reply" : {
@@ -865,7 +907,13 @@
         }
       }
     },
+    "unblock" : {
+
+    },
     "unlike" : {
+
+    },
+    "unmute" : {
 
     },
     "user handle" : {

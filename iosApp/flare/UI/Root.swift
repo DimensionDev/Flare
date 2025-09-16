@@ -23,12 +23,6 @@ struct FlareRoot: View {
                             } label: {
                                 TabIcon(icon: data.tabItem.metaData.icon, accountType: data.tabItem.account, size: 36)
                             }
-//                            .if(selectedTab == data.tabItem.key) { button in
-//                                button.buttonStyle(.glassProminent)
-//                            } else: { button in
-//                                button.buttonStyle(.glass)
-//                            }
-
                         }
                     }
                     .padding(.horizontal, 24)

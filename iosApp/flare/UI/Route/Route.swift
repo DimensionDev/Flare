@@ -19,6 +19,8 @@ enum Route: Hashable {
             ServiceSelectionScreen(toHome: { clearToHome() })
         case .statusDetail(let accountType, let statusKey):
             StatusDetailScreen(accountType: accountType, statusKey: statusKey)
+        case .profileUser(let accountType, let userKey):
+            ProfileScreen(accountType: accountType, userKey: userKey)
         default:
             EmptyView()
         }

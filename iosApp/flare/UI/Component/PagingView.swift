@@ -16,18 +16,27 @@ struct PagingView<T: AnyObject, EmptyContent: View, ErrorContent: View, LoadingC
         switch onEnum(of: data) {
         case .empty(_): emptyContent()
         case .error(let error): errorContent(error.error)
-        case .loading(_): ForEach(0..<5) { _ in
-            loadingContent()
+        case .loading(_): ForEach(0..<5) { index in
+            ListCardView(index: index, totalCount: 5) {
+                loadingContent()
+                    .padding()
+            }
         }
         case .success(let success):
             ForEach(0..<success.itemCount, id: \.self) { index in
                 if let data = success.peek(index: index) {
-                    successContent(data)
-                        .onAppear {
-                            success.get(index: index)
-                        }
+                    ListCardView(index: Int(index), totalCount: Int(success.itemCount)) {
+                        successContent(data)
+                            .padding()
+                            .onAppear {
+                                success.get(index: index)
+                            }
+                    }
                 } else {
-                    loadingContent()
+                    ListCardView(index: Int(index), totalCount: Int(success.itemCount)) {
+                        loadingContent()
+                            .padding()
+                    }
                 }
             }
         }

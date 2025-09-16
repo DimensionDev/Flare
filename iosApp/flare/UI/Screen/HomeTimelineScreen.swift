@@ -24,7 +24,7 @@ struct HomeTimelineScreen: View {
                 LazyVStack(
                     spacing: 2,
                 ) {
-                    PagingView(data: tab.listState)
+                    TimelinePagingView(data: tab.listState)
                 }
                 .padding(.horizontal)
             }

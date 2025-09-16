@@ -69,54 +69,60 @@ struct CommonProfileHeader: View {
                             }
                     }
                 }
-                RichText(text: user.name)
-                    .font(.headline)
-                HStack {
-                    Text(user.handle)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                    ForEach(0..<user.mark.count, id: \.self) { index in
-                        let mark = user.mark[index]
-                        switch mark {
-                        case .cat: Awesome.Classic.Solid.cat.image.opacity(0.6)
-                        case .verified: Awesome.Classic.Solid.circleCheck.image.opacity(0.6)
-                        case .locked: Awesome.Classic.Solid.lock.image.opacity(0.6)
-                        case .bot: Awesome.Classic.Solid.robot.image.opacity(0.6)
-                        }
-                    }
-                }
-                if let desc = user.description_ {
-                    RichText(text: desc)
-                }
-
-                if let bottomContent = user.bottomContent {
-                    switch onEnum(of: bottomContent) {
-                    case .fields(let data):
-                        FieldsView(fields: data.fields)
-                    case .iconify(let data):
-                        let list = data.items.map { $0.key }
-                        ForEach(Array(data.items.keys), id: \.name) { key in
-                            let value = data.items[key]
-                            Label(
-                                title: {
-                                    if let text = value {
-                                        RichText(text: text)
-                                            .font(.body)
-                                    }
-                                },
-                                icon: {
-                                    switch key {
-                                    case .location: Awesome.Classic.Solid.locationDot.image
-                                    case .url: Awesome.Classic.Solid.globe.image
-                                    case .verify: Awesome.Classic.Solid.circleCheck.image
-                                    }
+                
+                ListCardView {
+                    VStack(alignment: .leading) {
+                        RichText(text: user.name)
+                            .font(.headline)
+                        HStack {
+                            Text(user.handle)
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                            ForEach(0..<user.mark.count, id: \.self) { index in
+                                let mark = user.mark[index]
+                                switch mark {
+                                case .cat: Awesome.Classic.Solid.cat.image.opacity(0.6)
+                                case .verified: Awesome.Classic.Solid.circleCheck.image.opacity(0.6)
+                                case .locked: Awesome.Classic.Solid.lock.image.opacity(0.6)
+                                case .bot: Awesome.Classic.Solid.robot.image.opacity(0.6)
                                 }
-                            )
+                            }
                         }
-                    }
-                }
+                        if let desc = user.description_ {
+                            RichText(text: desc)
+                        }
 
-                MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
+                        if let bottomContent = user.bottomContent {
+                            switch onEnum(of: bottomContent) {
+                            case .fields(let data):
+                                FieldsView(fields: data.fields)
+                            case .iconify(let data):
+                                let list = data.items.map { $0.key }
+                                ForEach(Array(data.items.keys), id: \.name) { key in
+                                    let value = data.items[key]
+                                    Label(
+                                        title: {
+                                            if let text = value {
+                                                RichText(text: text)
+                                                    .font(.body)
+                                            }
+                                        },
+                                        icon: {
+                                            switch key {
+                                            case .location: Awesome.Classic.Solid.locationDot.image
+                                            case .url: Awesome.Classic.Solid.globe.image
+                                            case .verify: Awesome.Classic.Solid.circleCheck.image
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
+                    }
+                    .padding()
+                }
             }
             .padding([.horizontal])
         }

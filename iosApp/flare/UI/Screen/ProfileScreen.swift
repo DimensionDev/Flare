@@ -46,7 +46,7 @@ struct ProfileScreen: View {
                     let selectedTabItem = tabs[selectedTab]
                     switch onEnum(of: selectedTabItem) {
                     case .timeline(let timeline):
-                        PagingView(data: timeline.data)
+                        TimelinePagingView(data: timeline.data)
                             .padding(.horizontal)
                     case .media(let media):
                         EmptyView()

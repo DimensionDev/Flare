@@ -28,7 +28,9 @@ struct StatusView: View {
                     }
                 }
             }
-            VStack {
+            VStack(
+                alignment: .leading,
+            ) {
                 if let user = data.user {
                     if isQuote {
                         UserOnelineView(data: user) {

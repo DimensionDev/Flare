@@ -16,7 +16,7 @@ struct StatusDetailScreen : View {
             LazyVStack(
                 spacing: 2,
             ) {
-                PagingView(data: presenter.state.listState, detailStatusKey: statusKey)
+                TimelinePagingView(data: presenter.state.listState, detailStatusKey: statusKey)
             }
             .padding(.horizontal)
         }

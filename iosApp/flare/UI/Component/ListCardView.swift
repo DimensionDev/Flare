@@ -19,3 +19,11 @@ struct ListCardView<Content: View>: View {
             )
     }
 }
+
+extension ListCardView {
+    init(
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.init(index: 0, totalCount: 1, content: content)
+    }
+}

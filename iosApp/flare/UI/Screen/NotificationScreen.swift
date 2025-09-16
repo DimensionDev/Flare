@@ -17,7 +17,7 @@ struct NotificationScreen: View {
             LazyVStack(
                 spacing: 2,
             ) {
-                PagingView(data: presenter.state.listState)
+                TimelinePagingView(data: presenter.state.listState)
             }
             .padding(.horizontal)
         }

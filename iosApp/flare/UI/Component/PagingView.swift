@@ -24,12 +24,12 @@ struct PagingView<T: AnyObject, EmptyContent: View, ErrorContent: View, LoadingC
         }
         case .success(let success):
             ForEach(0..<success.itemCount, id: \.self) { index in
-                if let data = success.peek(index: index) {
+                if let item = success.peek(index: index) {
                     ListCardView(index: Int(index), totalCount: Int(success.itemCount)) {
-                        successContent(data)
+                        successContent(item)
                             .padding()
                             .onAppear {
-                                success.get(index: index)
+                                _ = success.get(index: index)
                             }
                     }
                 } else {
@@ -37,10 +37,48 @@ struct PagingView<T: AnyObject, EmptyContent: View, ErrorContent: View, LoadingC
                         loadingContent()
                             .padding()
                     }
+                    
                 }
+//                PagingItemView(loadingContent: {
+//                    ListCardView(index: Int(index), totalCount: Int(success.itemCount)) {
+//                        loadingContent()
+//                            .padding()
+//                    }
+//                }, successContent: { data in
+//                    ListCardView(index: Int(index), totalCount: Int(success.itemCount)) {
+//                        successContent(data)
+//                            .padding()
+//                    }
+//                }, getData: {
+//                    success.get(index: index)
+//                }, data: success.peek(index: index))
             }
         }
     }
+}
+
+
+
+struct PagingItemView<T: AnyObject, LoadingContent: View, SuccessContent: View> : View {
+    @ViewBuilder
+    let loadingContent: () -> LoadingContent
+    let loadingCount = 5
+    @ViewBuilder
+    let successContent: (T) -> SuccessContent
+    let getData: () -> T?
+    @State var data: T?
+    
+    var body: some View {
+        if let data = data {
+            successContent(data)
+                .onAppear {
+                    self.data = getData()
+                }
+        } else {
+            loadingContent()
+        }
+    }
+    
 }
 
 extension PagingView {

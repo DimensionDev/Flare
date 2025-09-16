@@ -12,14 +12,14 @@ struct StatusDetailScreen : View {
     }
     
     var body: some View {
-        ScrollView {
-            LazyVStack(
-                spacing: 2,
-            ) {
-                TimelinePagingView(data: presenter.state.listState, detailStatusKey: statusKey)
-            }
-            .padding(.horizontal)
+        List {
+            TimelinePagingView(data: presenter.state.listState)
+                .listRowSeparator(.hidden)
+                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .padding(.horizontal)
         }
+        .listRowSpacing(2)
+        .listStyle(.plain)
         .background(Color(.systemGroupedBackground))
         .refreshable {
             try? await presenter.state.refresh()

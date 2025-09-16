@@ -15,30 +15,49 @@ struct TimelinePagingView : View {
             }
         }
         case .success(let success):
-            ForEach(TimelineCollection(data: success), id: \.key) { data in
-                PagingItemView(loadingContent: {
+            ForEach(TimelineCollection(data: success)) { data in
+                if let item = data.data {
+                    ListCardView(index: data.index, totalCount: Int(success.itemCount)) {
+                        TimelineView(data: item)
+//                            .id(item.itemKey)
+                            .padding()
+                            .onAppear {
+                                _ = success.get(index: Int32(data.index))
+                            }
+                    }
+                } else {
                     ListCardView(index: data.index, totalCount: Int(success.itemCount)) {
                         TimelinePlaceholderView()
                             .padding()
+                            .onAppear {
+                                _ = success.get(index: Int32(data.index))
+                            }
                     }
-                }, successContent: { item in
-                    ListCardView(index: data.index, totalCount: Int(success.itemCount)) {
-                        TimelineView(data: item)
-                            .id(item.itemKey)
-                            .padding()
-                    }
-                }, getData: {
-                    success.get(index: Int32(data.index))
-                }, data: data.data)
+                }
+                
+//                PagingItemView(loadingContent: {
+//                    ListCardView(index: data.index, totalCount: Int(success.itemCount)) {
+//                        TimelinePlaceholderView()
+//                            .padding()
+//                    }
+//                }, successContent: { item in
+//                    ListCardView(index: data.index, totalCount: Int(success.itemCount)) {
+//                        TimelineView(data: item)
+//                            .id(item.itemKey)
+//                            .padding()
+//                    }
+//                }, getData: {
+//                    success.get(index: Int32(data.index))
+//                }, data: data.data)
             }
         }
     }
 }
 
-struct TimelineData {
+struct TimelineData: Identifiable {
+    let id: String
     let data: UiTimeline?
     let index: Int
-    let key: String
 }
 
 struct TimelineCollection: @MainActor RandomAccessCollection {
@@ -53,7 +72,7 @@ struct TimelineCollection: @MainActor RandomAccessCollection {
 
     public subscript(position: Int) -> TimelineData {
         let item = data.peek(index: Int32(position))
-        return TimelineData(data: item, index: position, key: item?.itemKey ?? "\(position)")
+        return TimelineData(id: item?.itemKey ?? "\(position)", data: item, index: position)
     }
 
     public var count: Int { Int(data.itemCount) }

@@ -20,14 +20,14 @@ struct HomeTimelineScreen: View {
         StateView(state: presenter.state.tabState) { state in
             let tabs: [TimelineItemPresenterState] = state.cast(TimelineItemPresenterState.self)
             let tab = tabs[selectedTabIndex]
-            ScrollView {
-                LazyVStack(
-                    spacing: 2,
-                ) {
-                    TimelinePagingView(data: tab.listState)
-                }
-                .padding(.horizontal)
+            List {
+                TimelinePagingView(data: tab.listState)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .padding(.horizontal)
             }
+            .listRowSpacing(2)
+            .listStyle(.plain)
             .background(Color(.systemGroupedBackground))
             .toolbar {
                 ToolbarItem(placement: .principal) {

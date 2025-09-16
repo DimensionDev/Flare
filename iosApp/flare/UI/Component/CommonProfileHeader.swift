@@ -74,6 +74,7 @@ struct CommonProfileHeader: View {
                     VStack(alignment: .leading) {
                         RichText(text: user.name)
                             .font(.headline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         HStack {
                             Text(user.handle)
                                 .font(.subheadline)

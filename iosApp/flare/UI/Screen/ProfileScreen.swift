@@ -8,55 +8,58 @@ struct ProfileScreen: View {
     @State private var selectedTab: Int = 0
 
     var body: some View {
-        ScrollView {
-            LazyVStack(
-                spacing: 2
-            ) {
-                ProfileHeader(
-                    user: presenter.state.userState,
-                    relation: presenter.state.relationState,
-                    isMe: presenter.state.isMe,
-                    onFollowClick: { user, relation in
-                        presenter.state.follow(userKey: user.key, data: relation)
-                    }
-                )
-                StateView(state: presenter.state.tabs) { tabsArray in
-                    let tabs = tabsArray.cast(ProfileState.Tab.self)
-                    Picker(selection: $selectedTab) {
-                        ForEach(0..<tabs.count) { index in
-                            let tab = tabs[index]
-                            let text = switch onEnum(of: tab) {
-                            case .media: LocalizedStringResource(stringLiteral: "profile_tab_media")
-                            case .timeline(let timeline):
-                                switch timeline.type {
-                                case .likes: LocalizedStringResource(stringLiteral: "profile_tab_likes")
-                                case .status: LocalizedStringResource(stringLiteral: "profile_tab_status")
-                                case .statusWithReplies: LocalizedStringResource(stringLiteral: "profile_tab_replies")
-                                }
+        List {
+            ProfileHeader(
+                user: presenter.state.userState,
+                relation: presenter.state.relationState,
+                isMe: presenter.state.isMe,
+                onFollowClick: { user, relation in
+                    presenter.state.follow(userKey: user.key, data: relation)
+                }
+            )
+            .listRowSeparator(.hidden)
+            .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+            StateView(state: presenter.state.tabs) { tabsArray in
+                let tabs = tabsArray.cast(ProfileState.Tab.self)
+                Picker(selection: $selectedTab) {
+                    ForEach(0..<tabs.count) { index in
+                        let tab = tabs[index]
+                        let text = switch onEnum(of: tab) {
+                        case .media: LocalizedStringResource(stringLiteral: "profile_tab_media")
+                        case .timeline(let timeline):
+                            switch timeline.type {
+                            case .likes: LocalizedStringResource(stringLiteral: "profile_tab_likes")
+                            case .status: LocalizedStringResource(stringLiteral: "profile_tab_status")
+                            case .statusWithReplies: LocalizedStringResource(stringLiteral: "profile_tab_replies")
                             }
-                            Text(text)
-                                .tag(index)
-
                         }
-                    } label: {
+                        Text(text)
+                            .tag(index)
 
                     }
-                    .pickerStyle(.segmented)
-                    .padding()
-                    let selectedTabItem = tabs[selectedTab]
-                    switch onEnum(of: selectedTabItem) {
-                    case .timeline(let timeline):
-                        TimelinePagingView(data: timeline.data)
-                            .padding(.horizontal)
-                    case .media(let media):
-                        EmptyView()
-                    }
+                } label: {
 
                 }
+                .pickerStyle(.segmented)
+                .listRowSeparator(.hidden)
+                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .padding()
+                let selectedTabItem = tabs[selectedTab]
+                switch onEnum(of: selectedTabItem) {
+                case .timeline(let timeline):
+                    TimelinePagingView(data: timeline.data)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        .padding(.horizontal)
+                case .media(let media):
+                    EmptyView()
+                }
             }
-
-
         }
+        
+        .listRowSpacing(2)
+        .listStyle(.plain)
+        .background(Color(.systemGroupedBackground))
         .toolbar {
             Menu {
                 if case .success(let user) = onEnum(of: presenter.state.userState) {

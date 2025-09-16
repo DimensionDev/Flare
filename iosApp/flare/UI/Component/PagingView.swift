@@ -36,8 +36,10 @@ struct PagingView<T: AnyObject, EmptyContent: View, ErrorContent: View, LoadingC
                     ListCardView(index: Int(index), totalCount: Int(success.itemCount)) {
                         loadingContent()
                             .padding()
+                            .onAppear {
+                                _ = success.get(index: index)
+                            }
                     }
-                    
                 }
 //                PagingItemView(loadingContent: {
 //                    ListCardView(index: Int(index), totalCount: Int(success.itemCount)) {
@@ -76,6 +78,9 @@ struct PagingItemView<T: AnyObject, LoadingContent: View, SuccessContent: View> 
                 }
         } else {
             loadingContent()
+                .onAppear {
+                    self.data = getData()
+                }
         }
     }
     

@@ -322,4 +322,27 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">Không có nguồn rss nào</string>
+    <string name="service_select_welcome_title">Chào mừng bạn đến với Flare</string>
+    <string name="bluesky_login_username_hint">Tên người dùng</string>
+    <string name="bluesky_login_password_hint">Mật khẩu</string>
+    <string name="login_button">Đăng nhập</string>
+    <string name="mastodon_login_verify_message">Vui lòng chờ trong khi chúng tôi xác minh thông tin đăng nhập của bạn.</string>
+    <string name="service_select_instance_input_placeholder">URL phiên bản</string>
+    <string name="service_select_next_button">Tiếp theo</string>
+    <string name="service_select_empty_message">Không tìm thấy phiên bản nào</string>
+    <string name="home_tab_home_title">Trang chủ</string>
+    <string name="home_tab_notifications_title">Thông báo</string>
+    <string name="home_tab_me_title">Tôi</string>
+    <string name="home_tab_discover_title">Khám phá</string>
+    <string name="settings_title">Cài đặt</string>
+    <string name="mastodon_tab_local_title">Địa phương</string>
+    <string name="mastodon_tab_public_title">Công khai</string>
+    <string name="home_tab_featured_title">Nổi bật</string>
+    <string name="home_tab_bookmarks_title">Đánh dấu</string>
+    <string name="home_tab_favorite_title">Yêu thích</string>
+    <string name="home_tab_list_title">Danh sách</string>
+    <string name="home_tab_feeds_title">Nguồn cấp dữ liệu</string>
+    <string name="dm_list_title">Tin nhắn trực tiếp</string>
+    <string name="antenna_title">Ăng ten</string>
+    <string name="mixed_timeline_title">Hỗn hợp</string>
 </resources>

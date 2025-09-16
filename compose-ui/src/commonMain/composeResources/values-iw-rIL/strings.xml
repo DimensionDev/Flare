@@ -322,4 +322,27 @@
     <string name="rss_sources_url_label">כתובת URL</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">אין מקורות rss</string>
+    <string name="service_select_welcome_title">ברוך הבא ל-Flare</string>
+    <string name="bluesky_login_username_hint">שם משתמש</string>
+    <string name="bluesky_login_password_hint">סיסמה</string>
+    <string name="login_button">התחברות</string>
+    <string name="mastodon_login_verify_message">אנא המתן בזמן שאנו מאשרים את האישורים שלך.</string>
+    <string name="service_select_instance_input_placeholder">כתובת URL של מופע</string>
+    <string name="service_select_next_button">הבא</string>
+    <string name="service_select_empty_message">לא נמצאו מופעים</string>
+    <string name="home_tab_home_title">בית</string>
+    <string name="home_tab_notifications_title">התראות</string>
+    <string name="home_tab_me_title">אני</string>
+    <string name="home_tab_discover_title">גלה</string>
+    <string name="settings_title">הגדרות</string>
+    <string name="mastodon_tab_local_title">מקומי</string>
+    <string name="mastodon_tab_public_title">ציבורי</string>
+    <string name="home_tab_featured_title">מוצגים</string>
+    <string name="home_tab_bookmarks_title">מועדפים</string>
+    <string name="home_tab_favorite_title">מועדף</string>
+    <string name="home_tab_list_title">רשימה</string>
+    <string name="home_tab_feeds_title">פידים</string>
+    <string name="dm_list_title">הודעות ישירות</string>
+    <string name="antenna_title">אנטנה</string>
+    <string name="mixed_timeline_title">מעורב</string>
 </resources>

@@ -322,4 +322,27 @@
     <string name="rss_sources_url_label">Урл</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">Нема rss извора</string>
+    <string name="service_select_welcome_title">Добродошли у Flare</string>
+    <string name="bluesky_login_username_hint">Корисничко име</string>
+    <string name="bluesky_login_password_hint">Лозинка</string>
+    <string name="login_button">Пријава</string>
+    <string name="mastodon_login_verify_message">Молим сачекајте док оверимо ваше податке.</string>
+    <string name="service_select_instance_input_placeholder">URL инстанце</string>
+    <string name="service_select_next_button">Следеће</string>
+    <string name="service_select_empty_message">Нема пронађених инстанци</string>
+    <string name="home_tab_home_title">Почетна</string>
+    <string name="home_tab_notifications_title">Обавештења</string>
+    <string name="home_tab_me_title">Ја</string>
+    <string name="home_tab_discover_title">Откријте</string>
+    <string name="settings_title">Подешавања</string>
+    <string name="mastodon_tab_local_title">Локални</string>
+    <string name="mastodon_tab_public_title">Јавни</string>
+    <string name="home_tab_featured_title">Истакнути</string>
+    <string name="home_tab_bookmarks_title">Забелешке</string>
+    <string name="home_tab_favorite_title">Омиљени</string>
+    <string name="home_tab_list_title">Листа</string>
+    <string name="home_tab_feeds_title">Извори</string>
+    <string name="dm_list_title">Директне поруке</string>
+    <string name="antenna_title">Антена</string>
+    <string name="mixed_timeline_title">Мешано</string>
 </resources>

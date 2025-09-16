@@ -322,4 +322,27 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">No hi ha fonts rss</string>
+    <string name="service_select_welcome_title">Benvingut a Flare</string>
+    <string name="bluesky_login_username_hint">Nom d\'usuari</string>
+    <string name="bluesky_login_password_hint">Contrasenya</string>
+    <string name="login_button">Iniciar sessió</string>
+    <string name="mastodon_login_verify_message">Si us plau, espereu mentre verifiquem les vostres credencials.</string>
+    <string name="service_select_instance_input_placeholder">URL de la instància</string>
+    <string name="service_select_next_button">Següent</string>
+    <string name="service_select_empty_message">No s\'han trobat instàncies</string>
+    <string name="home_tab_home_title">Inici</string>
+    <string name="home_tab_notifications_title">Notifications</string>
+    <string name="home_tab_me_title">Jo</string>
+    <string name="home_tab_discover_title">Descobreix</string>
+    <string name="settings_title">Configuració</string>
+    <string name="mastodon_tab_local_title">Local</string>
+    <string name="mastodon_tab_public_title">Públic</string>
+    <string name="home_tab_featured_title">Destacats</string>
+    <string name="home_tab_bookmarks_title">Llibres d\'entrada</string>
+    <string name="home_tab_favorite_title">Favorit</string>
+    <string name="home_tab_list_title">Llista</string>
+    <string name="home_tab_feeds_title">Fluxos</string>
+    <string name="dm_list_title">Missatges directes</string>
+    <string name="antenna_title">Antena</string>
+    <string name="mixed_timeline_title">Mixt</string>
 </resources>

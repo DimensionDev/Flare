@@ -322,4 +322,27 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">Geen rss bronne</string>
+    <string name="service_select_welcome_title">Welkom by Flare</string>
+    <string name="bluesky_login_username_hint">Gebruikernaam</string>
+    <string name="bluesky_login_password_hint">Wagwoord</string>
+    <string name="login_button">Teken in</string>
+    <string name="mastodon_login_verify_message">Wag asseblief terwyl ons jou akrediteer.</string>
+    <string name="service_select_instance_input_placeholder">Instansie URL</string>
+    <string name="service_select_next_button">Volgende</string>
+    <string name="service_select_empty_message">Geen instansies gevind nie</string>
+    <string name="home_tab_home_title">Tuis</string>
+    <string name="home_tab_notifications_title">Kenmerke</string>
+    <string name="home_tab_me_title">Ek</string>
+    <string name="home_tab_discover_title">Ontdek</string>
+    <string name="settings_title">Instellings</string>
+    <string name="mastodon_tab_local_title">Plaaslike</string>
+    <string name="mastodon_tab_public_title">Openbaar</string>
+    <string name="home_tab_featured_title">Beklemtoon</string>
+    <string name="home_tab_bookmarks_title">Bladmerke</string>
+    <string name="home_tab_favorite_title">Gunste</string>
+    <string name="home_tab_list_title">Lys</string>
+    <string name="home_tab_feeds_title">Feeds</string>
+    <string name="dm_list_title">Direkte Boodskappe</string>
+    <string name="antenna_title">Antenna</string>
+    <string name="mixed_timeline_title">Gemengde</string>
 </resources>

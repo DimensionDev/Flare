@@ -57,7 +57,6 @@ import compose.icons.fontawesomeicons.regular.Heart
 import compose.icons.fontawesomeicons.solid.At
 import compose.icons.fontawesomeicons.solid.Bookmark
 import compose.icons.fontawesomeicons.solid.CircleInfo
-import compose.icons.fontawesomeicons.solid.Comment
 import compose.icons.fontawesomeicons.solid.Ellipsis
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Heart
@@ -1239,11 +1238,15 @@ private fun ExpandedCard(
                 Modifier
                     .padding(8.dp),
         ) {
-            PlatformText(text = card.title)
+            PlatformText(
+                text = card.title,
+                maxLines = 2,
+            )
             card.description?.let {
                 PlatformText(
                     text = it,
                     style = PlatformTheme.typography.caption,
+                    maxLines = 2,
                     modifier =
                         Modifier
                             .alpha(MediumAlpha),

@@ -27,10 +27,10 @@ internal actual object PlatformColorScheme {
         get() = CupertinoTheme.colorScheme.tertiaryLabel
     actual val card: Color
         @Composable
-        get() = CupertinoTheme.colorScheme.tertiarySystemBackground
+        get() = CupertinoTheme.colorScheme.secondarySystemBackground
     actual val cardAlt: Color
         @Composable
-        get() = CupertinoTheme.colorScheme.secondarySystemBackground
+        get() = CupertinoTheme.colorScheme.tertiarySystemBackground
     actual val onCard: Color
         @Composable
         get() = CupertinoTheme.colorScheme.label

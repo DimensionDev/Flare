@@ -6,11 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.BaseTimelineLoader
-import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.refreshSuspend
-import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
@@ -37,6 +35,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.status.LogUserHistoryPresenter
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -90,7 +89,7 @@ public class ProfilePresenter(
     private val profileActionsFlow by lazy {
         accountServiceFlow(accountType, accountRepository).map { service ->
             require(service is AuthenticatedMicroblogDataSource)
-            service.profileActions().toImmutableList().toImmutableListWrapper()
+            service.profileActions().toImmutableList()
         }
     }
 
@@ -181,7 +180,6 @@ public class ProfilePresenter(
                             }
                         }
                     }.toImmutableList()
-                    .toImmutableListWrapper()
             }
 
         return object : ProfileState(
@@ -247,12 +245,12 @@ public abstract class ProfileState(
     public val userState: UiState<UiProfile>,
     public val relationState: UiState<UiRelation>,
     public val isMe: UiState<Boolean>,
-    public val actions: UiState<ImmutableListWrapper<ProfileAction>>,
+    public val actions: UiState<ImmutableList<ProfileAction>>,
     public val isGuestMode: Boolean,
     public val isListDataSource: UiState<Boolean>,
     public val myAccountKey: UiState<MicroBlogKey>,
     public val canSendMessage: UiState<Boolean>,
-    public val tabs: UiState<ImmutableListWrapper<Tab>>,
+    public val tabs: UiState<ImmutableList<Tab>>,
 ) {
     public abstract suspend fun refresh()
 
@@ -270,17 +268,17 @@ public abstract class ProfileState(
     public abstract fun report(userKey: MicroBlogKey)
 
     @Immutable
-    public sealed interface Tab {
+    public sealed class Tab {
         @Immutable
         public data class Timeline internal constructor(
             val type: ProfileTab.Timeline.Type,
             val data: PagingState<UiTimeline>,
-        ) : Tab
+        ) : Tab()
 
         @Immutable
         public data class Media internal constructor(
             val data: PagingState<ProfileMedia>,
-        ) : Tab
+        ) : Tab()
     }
 }
 

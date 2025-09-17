@@ -50,13 +50,10 @@ import dev.dimension.flare.data.model.AppSettings
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
-import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.edit
 import dev.dimension.flare.home_login
-import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ok
 import dev.dimension.flare.remove_account
 import dev.dimension.flare.settings_about_line
@@ -120,8 +117,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
-import dev.dimension.flare.ui.presenter.settings.AccountsState
 import dev.dimension.flare.ui.presenter.settings.FlareServerProviderPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
@@ -933,48 +928,18 @@ private fun appearancePresenter() =
 @Composable
 private fun accountsPresenter(settingsRepository: SettingsRepository = koinInject()) =
     run {
-        val scope = rememberCoroutineScope()
         var expanded by remember { mutableStateOf(false) }
         val activeAccountState = remember { ActiveAccountPresenter() }.invoke()
         val state =
             remember {
-                AccountsPresenter()
+                AccountManagementPresenter()
             }.invoke()
 
-        object : AccountsState by state, UserState by activeAccountState {
+        object : AccountManagementPresenter.State by state, UserState by activeAccountState {
             val expanded = expanded
 
             fun setExpanded(value: Boolean) {
                 expanded = value
-            }
-
-            fun logout(accountKey: MicroBlogKey) {
-                accounts.onSuccess { accountList ->
-                    if (accountList.size == 1) {
-                        // is Last account
-                        scope.launch {
-                            settingsRepository.updateTabSettings {
-                                TabSettings()
-                            }
-                        }
-                    } else {
-                        scope.launch {
-                            settingsRepository.updateTabSettings {
-                                copy(
-                                    secondaryItems =
-                                        secondaryItems?.filter {
-                                            (it.account as? AccountType.Specific)?.accountKey != accountKey
-                                        },
-                                    mainTabs =
-                                        mainTabs.filter {
-                                            (it.account as? AccountType.Specific)?.accountKey != accountKey
-                                        },
-                                )
-                            }
-                        }
-                    }
-                }
-                removeAccount(accountKey)
             }
         }
     }

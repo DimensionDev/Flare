@@ -1,8 +1,5 @@
 package dev.dimension.flare.data.network
 
-import co.touchlab.kermit.Logger
-import co.touchlab.kermit.loggerConfigInit
-import co.touchlab.kermit.platformLogWriter
 import de.jensklingenberg.ktorfit.converter.CallConverterFactory
 import de.jensklingenberg.ktorfit.converter.FlowConverterFactory
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
@@ -63,15 +60,9 @@ internal fun ktorClient(
 internal expect val httpClientEngine: HttpClientEngine
 
 private data object NapierLogger : io.ktor.client.plugins.logging.Logger {
-    private val log =
-        Logger(
-            loggerConfigInit(platformLogWriter(co.touchlab.kermit.DefaultFormatter)),
-            "HTTP Client",
-        )
-
     override fun log(message: String) {
         if (BuildConfig.debug) {
-            log.d(message)
+            println(message)
         }
         DebugRepository.log(message)
     }

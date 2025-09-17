@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
 import org.jetbrains.compose.compose
 
 plugins {
@@ -8,20 +7,13 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.skie)
 }
 
 kotlin {
     jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
-    applyDefaultHierarchyTemplate {
-        common {
-            group("androidJvm") {
-                // TODO: https://youtrack.jetbrains.com/issue/KT-80409
-                withCompilations { it is KotlinMultiplatformAndroidCompilation }
-                withJvm()
-            }
-        }
-    }
+    applyDefaultHierarchyTemplate()
     androidLibrary {
         compileSdk = libs.versions.compileSdk.get().toInt()
         namespace = "dev.dimension.flare.compose.ui"
@@ -30,6 +22,18 @@ kotlin {
         enableCoreLibraryDesugaring = true
     }
     jvm()
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64(),
+    ).forEach { appleTarget ->
+        appleTarget.binaries.framework {
+            baseName = "KotlinSharedUI"
+            isStatic = true
+            linkerOpts("-ld_classic")
+            export(projects.shared)
+        }
+    }
 
     sourceSets {
         val commonMain by getting {
@@ -62,9 +66,7 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
-        val androidJvmMain by getting
         val androidMain by getting {
-//            dependsOn(androidJvmMain)
             dependencies {
                 implementation(libs.compose.placeholder.material3)
                 implementation(libs.material3.adaptive)
@@ -82,8 +84,29 @@ kotlin {
                 implementation(libs.fluent.ui)
                 implementation(libs.koin.compose)
                 implementation(libs.androidx.collection)
+                implementation(libs.prettytime)
             }
         }
+        val iosMain by getting {
+            dependencies {
+                api(projects.shared)
+                implementation(libs.cupertino)
+                api(compose.uiUtil)
+                implementation("com.composables:core:1.43.1")
+                implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.9.3")
+            }
+        }
+    }
+}
+
+skie {
+    analytics {
+        disableUpload.set(true)
+        enabled.set(false)
+    }
+    features {
+        enableSwiftUIObservingPreview = true
+        enableFlowCombineConvertorPreview = true
     }
 }
 
@@ -101,4 +124,5 @@ ktlint {
 
 compose.resources {
     packageOfResClass = "dev.dimension.flare.compose.ui"
+    generateResClass = always
 }

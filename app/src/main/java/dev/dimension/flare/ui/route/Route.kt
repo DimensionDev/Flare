@@ -4,7 +4,6 @@ import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -407,182 +406,110 @@ internal sealed interface Route : NavKey {
 
     companion object {
         public fun parse(url: String): Route? {
-            val data = Url(url)
-            return when (data.host) {
-                "Callback" ->
-                    when (data.segments.getOrNull(0)) {
-                        "SignIn" ->
-                            when (data.segments.getOrNull(1)) {
-//                                "Mastodon" -> Route.Callback.Mastodon
-//                                "Misskey" -> Route.Callback.Misskey
-                                else -> null
-                            }
-
-                        else -> null
-                    }
-
-                "Search" -> {
-                    val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
-                    val keyword = data.segments.getOrNull(0) ?: return null
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-                    Route.Search(accountType, keyword)
-                }
-
-                "Profile" -> {
-                    val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
-                    val userKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-                    Route.Profile.User(accountType, userKey)
-                }
-
-                "ProfileWithNameAndHost" -> {
-                    val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
-                    val userName = data.segments.getOrNull(0) ?: return null
-                    val host = data.segments.getOrNull(1) ?: return null
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-                    Route.Profile.UserNameWithHost(accountType, userName, host)
-                }
-
-                "StatusDetail" -> {
-                    val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
-                    val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-                    Route.Status.Detail(statusKey, accountType)
-                }
-
-                "Compose" ->
-                    when (data.segments.getOrNull(0)) {
-                        "Reply" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            Route.Compose.Reply(accountKey, statusKey)
-                        }
-
-                        "Quote" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            Route.Compose.Quote(accountKey, statusKey)
-                        }
-
-                        "New" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            Route.Compose.New(AccountType.Specific(accountKey))
-                        }
-
-                        else -> null
-                    }
-
-                "RawImage" -> {
-                    val rawImage = data.segments.getOrNull(0) ?: return null
-                    Route.Media.Image(rawImage, previewUrl = null)
-                }
-
-                "VVO" ->
-                    when (data.segments.getOrNull(0)) {
-                        "StatusDetail" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            Route.Status.VVOStatus(statusKey, AccountType.Specific(accountKey))
-                        }
-
-                        "CommentDetail" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            Route.Status.VVOComment(statusKey, AccountType.Specific(accountKey))
-                        }
-
-                        "ReplyToComment" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val replyTo = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            val rootId = data.segments.getOrNull(3) ?: return null
-                            Route.Compose.VVOReplyComment(accountKey, replyTo, rootId)
-                        }
-
-                        else -> null
-                    }
-
-                "DeleteStatus" -> {
-                    val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                    Route.Status.DeleteConfirm(statusKey, AccountType.Specific(accountKey))
-                }
-
-                "AddReaction" -> {
-                    val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                    Route.Status.AddReaction(statusKey, AccountType.Specific(accountKey))
-                }
-
-                "Bluesky" ->
-                    when (data.segments.getOrNull(0)) {
-                        "ReportStatus" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            Route.Status.BlueskyReport(statusKey, AccountType.Specific(accountKey))
-                        }
-
-                        else -> null
-                    }
-
-                "Mastodon" ->
-                    when (data.segments.getOrNull(0)) {
-                        "ReportStatus" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            val userKey = MicroBlogKey.valueOf(data.segments.getOrNull(3) ?: return null)
-                            Route.Status.MastodonReport(
-                                statusKey = statusKey,
-                                userKey = userKey,
-                                accountType = AccountType.Specific(accountKey),
-                            )
-                        }
-
-                        else -> null
-                    }
-
-                "Misskey" ->
-                    when (data.segments.getOrNull(0)) {
-                        "ReportStatus" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            val userKey = MicroBlogKey.valueOf(data.segments.getOrNull(3) ?: return null)
-                            Route.Status.MisskeyReport(
-                                accountType = AccountType.Specific(accountKey),
-                                statusKey = statusKey,
-                                userKey = userKey,
-                            )
-                        }
-
-                        else -> null
-                    }
-
-                "StatusMedia" -> {
-                    val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
-                    val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val index = data.segments.getOrNull(1)?.toIntOrNull() ?: return null
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-                    val preview = data.parameters["preview"]
-                    Route.Media.StatusMedia(accountType = accountType, statusKey = statusKey, index = index, preview = preview)
-                }
-
-                "Podcast" -> {
-                    val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val id = data.segments.getOrNull(1) ?: return null
-                    val accountType = accountKey.let { AccountType.Specific(it) }
-                    Route.Media.Podcast(accountType = accountType, id = id)
-                }
-
-                "AltText" -> {
-                    val text = data.segments.getOrNull(0) ?: return null
-                    Route.Status.AltText(text)
-                }
-
-                "RSS" -> {
-                    val feedUrl = data.segments.getOrNull(0) ?: return null
-                    Route.Rss.Detail(feedUrl)
-                }
-
-                else -> null
+            val deeplinkRoute = DeeplinkRoute.parse(url) ?: return null
+            return when (deeplinkRoute) {
+                is DeeplinkRoute.Callback -> null
+                is DeeplinkRoute.Compose.New ->
+                    Route.Compose.New(accountType = deeplinkRoute.accountType)
+                is DeeplinkRoute.Compose.Quote ->
+                    Route.Compose.Quote(
+                        accountKey = deeplinkRoute.accountKey,
+                        statusKey = deeplinkRoute.statusKey,
+                    )
+                is DeeplinkRoute.Compose.Reply ->
+                    Route.Compose.Reply(
+                        accountKey = deeplinkRoute.accountKey,
+                        statusKey = deeplinkRoute.statusKey,
+                    )
+                is DeeplinkRoute.Compose.VVOReplyComment ->
+                    Route.Compose.VVOReplyComment(
+                        accountKey = deeplinkRoute.accountKey,
+                        replyTo = deeplinkRoute.replyTo,
+                        rootId = deeplinkRoute.rootId,
+                    )
+                is DeeplinkRoute.Media.Image ->
+                    Route.Media.Image(
+                        uri = deeplinkRoute.uri,
+                        previewUrl = deeplinkRoute.previewUrl,
+                    )
+                is DeeplinkRoute.Media.Podcast ->
+                    Route.Media.Podcast(
+                        accountType = deeplinkRoute.accountType,
+                        id = deeplinkRoute.id,
+                    )
+                is DeeplinkRoute.Media.StatusMedia ->
+                    Route.Media.StatusMedia(
+                        statusKey = deeplinkRoute.statusKey,
+                        accountType = deeplinkRoute.accountType,
+                        index = deeplinkRoute.index,
+                        preview = deeplinkRoute.preview,
+                    )
+                is DeeplinkRoute.Profile.User ->
+                    Route.Profile.User(
+                        accountType = deeplinkRoute.accountType,
+                        userKey = deeplinkRoute.userKey,
+                    )
+                is DeeplinkRoute.Profile.UserNameWithHost ->
+                    Route.Profile.UserNameWithHost(
+                        accountType = deeplinkRoute.accountType,
+                        name = deeplinkRoute.userName,
+                        host = deeplinkRoute.host,
+                    )
+                is DeeplinkRoute.Rss.Detail ->
+                    Route.Rss.Detail(
+                        url = deeplinkRoute.url,
+                    )
+                is DeeplinkRoute.Search ->
+                    Route.Search(
+                        accountType = deeplinkRoute.accountType,
+                        query = deeplinkRoute.query,
+                    )
+                is DeeplinkRoute.Status.AddReaction ->
+                    Route.Status.AddReaction(
+                        statusKey = deeplinkRoute.statusKey,
+                        accountType = deeplinkRoute.accountType,
+                    )
+                is DeeplinkRoute.Status.AltText ->
+                    Route.Status.AltText(
+                        text = deeplinkRoute.text,
+                    )
+                is DeeplinkRoute.Status.BlueskyReport ->
+                    Route.Status.BlueskyReport(
+                        statusKey = deeplinkRoute.statusKey,
+                        accountType = deeplinkRoute.accountType,
+                    )
+                is DeeplinkRoute.Status.DeleteConfirm ->
+                    Route.Status.DeleteConfirm(
+                        statusKey = deeplinkRoute.statusKey,
+                        accountType = deeplinkRoute.accountType,
+                    )
+                is DeeplinkRoute.Status.Detail ->
+                    Route.Status.Detail(
+                        statusKey = deeplinkRoute.statusKey,
+                        accountType = deeplinkRoute.accountType,
+                    )
+                is DeeplinkRoute.Status.MastodonReport ->
+                    Route.Status.MastodonReport(
+                        userKey = deeplinkRoute.userKey,
+                        statusKey = deeplinkRoute.statusKey,
+                        accountType = deeplinkRoute.accountType,
+                    )
+                is DeeplinkRoute.Status.MisskeyReport ->
+                    Route.Status.MisskeyReport(
+                        userKey = deeplinkRoute.userKey,
+                        statusKey = deeplinkRoute.statusKey,
+                        accountType = deeplinkRoute.accountType,
+                    )
+                is DeeplinkRoute.Status.VVOComment ->
+                    Route.Status.VVOComment(
+                        commentKey = deeplinkRoute.commentKey,
+                        accountType = deeplinkRoute.accountType,
+                    )
+                is DeeplinkRoute.Status.VVOStatus ->
+                    Route.Status.VVOStatus(
+                        statusKey = deeplinkRoute.statusKey,
+                        accountType = deeplinkRoute.accountType,
+                    )
             }
         }
     }

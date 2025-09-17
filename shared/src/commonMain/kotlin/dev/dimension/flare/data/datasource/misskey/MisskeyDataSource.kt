@@ -30,7 +30,6 @@ import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.ReactionDataSource
-import dev.dimension.flare.data.datasource.microblog.StatusActionResult
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
@@ -52,7 +51,6 @@ import dev.dimension.flare.data.network.misskey.api.model.UsersListsUpdateReques
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
-import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -83,7 +81,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -632,7 +629,6 @@ internal class MisskeyDataSource(
         tryRun {
             service.blockingCreate(AdminAccountsDeleteRequest(userId = userKey.id))
         }.onFailure {
-            it.printStackTrace()
             MemCacheable.updateWith<UiRelation>(
                 key = key,
             ) {
@@ -915,71 +911,6 @@ internal class MisskeyDataSource(
                     emit(false)
                 },
             )
-        }
-
-    override fun renoteWithResult(statusKey: MicroBlogKey): StatusActionResult =
-        runBlocking {
-            try {
-                service.notesCreate(
-                    NotesCreateRequest(
-                        renoteId = statusKey.id,
-                    ),
-                )
-
-                updateStatusUseCase<StatusContent.Misskey>(
-                    statusKey = statusKey,
-                    accountKey = accountKey,
-                    cacheDatabase = database,
-                    update = {
-                        it.copy(
-                            data =
-                                it.data.copy(
-                                    renoteCount = it.data.renoteCount + 1,
-                                ),
-                        )
-                    },
-                )
-
-                StatusActionResult.success()
-            } catch (e: Throwable) {
-                val errorMessage =
-                    when (e) {
-                        is LoginExpiredException -> "Login expired, please re-login"
-                        else -> e.message ?: e::class.simpleName ?: "Unknown error"
-                    }
-                StatusActionResult.failure(errorMessage)
-            }
-        }
-
-    override fun favouriteWithResult(
-        statusKey: MicroBlogKey,
-        favourited: Boolean,
-    ): StatusActionResult =
-        runBlocking {
-            try {
-                if (favourited) {
-                    service.notesFavoritesDelete(
-                        IPinRequest(
-                            noteId = statusKey.id,
-                        ),
-                    )
-                } else {
-                    service.notesFavoritesCreate(
-                        IPinRequest(
-                            noteId = statusKey.id,
-                        ),
-                    )
-                }
-
-                StatusActionResult.success()
-            } catch (e: Throwable) {
-                val errorMessage =
-                    when (e) {
-                        is LoginExpiredException -> "Login expired, please re-login"
-                        else -> e.message ?: e::class.simpleName ?: "Unknown error"
-                    }
-                StatusActionResult.failure(errorMessage)
-            }
         }
 
     override fun following(

@@ -30,12 +30,23 @@ import org.koin.core.component.inject
 
 public class NotificationPresenter(
     private val accountType: AccountType,
-) : PresenterBase<NotificationState>(),
+) : PresenterBase<NotificationPresenter.State>(),
     KoinComponent {
+    @Immutable
+    public interface State {
+        public val listState: PagingState<UiTimeline>
+        public val notificationType: NotificationFilter?
+        public val allTypes: UiState<ImmutableList<NotificationFilter>>
+
+        public abstract suspend fun refresh()
+
+        public abstract fun onNotificationTypeChanged(value: NotificationFilter)
+    }
+
     private val accountRepository: AccountRepository by inject()
 
     @Composable
-    override fun body(): NotificationState {
+    override fun body(): State {
         val scope = rememberCoroutineScope()
         var type by remember { mutableStateOf<NotificationFilter?>(null) }
         val serviceState =
@@ -76,11 +87,11 @@ public class NotificationPresenter(
 //            listState is UiState.Loading ||
 //                listState is UiState.Success && listState.data.loadState.refresh is LoadState.Loading && listState.data.itemCount != 0
 
-        return object : NotificationState(
-            listState,
-            type,
-            allTypes,
-        ) {
+        return object : State {
+            override val listState: PagingState<UiTimeline> = listState
+            override val notificationType: NotificationFilter? = type
+            override val allTypes: UiState<ImmutableList<NotificationFilter>> = allTypes
+
             override suspend fun refresh() {
                 listState.onSuccess {
                     refreshSuspend()
@@ -92,15 +103,4 @@ public class NotificationPresenter(
             }
         }
     }
-}
-
-@Immutable
-public abstract class NotificationState(
-    public val listState: PagingState<UiTimeline>,
-    public val notificationType: NotificationFilter?,
-    public val allTypes: UiState<ImmutableList<NotificationFilter>>,
-) {
-    public abstract suspend fun refresh()
-
-    public abstract fun onNotificationTypeChanged(value: NotificationFilter)
 }

@@ -35,7 +35,7 @@ internal object DebugRepository {
             return
         }
         scope.launch {
-            exception.printStackTrace()
+//            exception.printStackTrace()
             val message =
                 buildString {
                     appendLine("Error: ${exception.message}")

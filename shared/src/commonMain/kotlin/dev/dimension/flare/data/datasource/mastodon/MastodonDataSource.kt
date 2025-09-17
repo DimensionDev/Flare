@@ -29,12 +29,10 @@ import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
-import dev.dimension.flare.data.datasource.microblog.StatusActionResult
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
-import dev.dimension.flare.data.network.mastodon.MastodonException
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.PostAccounts
 import dev.dimension.flare.data.network.mastodon.api.model.PostList
@@ -45,7 +43,6 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
-import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -75,7 +72,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.uuid.Uuid
@@ -600,143 +596,6 @@ internal open class MastodonDataSource(
                 )
             }
         }
-    }
-
-    override fun likeWithResult(
-        statusKey: MicroBlogKey,
-        shouldLike: Boolean,
-    ): StatusActionResult =
-        runBlocking {
-            try {
-                val result =
-                    if (shouldLike) {
-                        service.favourite(statusKey.id)
-                    } else {
-                        service.unfavourite(statusKey.id)
-                    }
-
-                updateLikeStatus(statusKey, shouldLike, result)
-
-                StatusActionResult.success()
-            } catch (e: Throwable) {
-                val errorMessage =
-                    when (e) {
-                        is MastodonException -> e.error ?: e.message ?: "Unknown Mastodon error"
-                        is LoginExpiredException -> "Login expired, please re-login"
-                        else -> e.message ?: e::class.simpleName ?: "Unknown error"
-                    }
-                StatusActionResult.failure(errorMessage)
-            }
-        }
-
-    override fun reblogWithResult(
-        statusKey: MicroBlogKey,
-        shouldReblog: Boolean,
-    ): StatusActionResult =
-        runBlocking {
-            try {
-                val result =
-                    if (shouldReblog) {
-                        service.reblog(statusKey.id)
-                    } else {
-                        service.unreblog(statusKey.id)
-                    }
-
-                updateReblogStatus(statusKey, shouldReblog, result)
-
-                StatusActionResult.success()
-            } catch (e: Throwable) {
-                val errorMessage =
-                    when (e) {
-                        is MastodonException -> e.error ?: e.message ?: "Unknown Mastodon error"
-                        is LoginExpiredException -> "Login expired, please re-login"
-                        else -> e.message ?: e::class.simpleName ?: "Unknown error"
-                    }
-                StatusActionResult.failure(errorMessage)
-            }
-        }
-
-    override fun bookmarkWithResult(
-        statusKey: MicroBlogKey,
-        shouldBookmark: Boolean,
-    ): StatusActionResult =
-        runBlocking {
-            try {
-                val result =
-                    if (shouldBookmark) {
-                        service.bookmark(statusKey.id)
-                    } else {
-                        service.unbookmark(statusKey.id)
-                    }
-
-                updateBookmarkStatus(statusKey, shouldBookmark, result)
-
-                StatusActionResult.success()
-            } catch (e: Throwable) {
-                val errorMessage =
-                    when (e) {
-                        is MastodonException -> e.error ?: e.message ?: "Unknown Mastodon error"
-                        is LoginExpiredException -> "Login expired, please re-login"
-                        else -> e.message ?: e::class.simpleName ?: "Unknown error"
-                    }
-                StatusActionResult.failure(errorMessage)
-            }
-        }
-
-    private suspend fun updateLikeStatus(
-        statusKey: MicroBlogKey,
-        liked: Boolean,
-        result: dev.dimension.flare.data.network.mastodon.api.model.Status,
-    ) {
-        updateStatusUseCase<StatusContent.Mastodon>(
-            statusKey = statusKey,
-            accountKey = accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(data = result)
-            },
-        )
-    }
-
-    private suspend fun updateReblogStatus(
-        statusKey: MicroBlogKey,
-        reblogged: Boolean,
-        result: dev.dimension.flare.data.network.mastodon.api.model.Status,
-    ) {
-        updateStatusUseCase<StatusContent.Mastodon>(
-            statusKey = statusKey,
-            accountKey = accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            reblogged = reblogged,
-                            reblogsCount =
-                                if (reblogged) {
-                                    (it.data.reblogsCount ?: 0) + 1
-                                } else {
-                                    maxOf(0, (it.data.reblogsCount ?: 1) - 1)
-                                },
-                        ),
-                )
-            },
-        )
-    }
-
-    private suspend fun updateBookmarkStatus(
-        statusKey: MicroBlogKey,
-        bookmarked: Boolean,
-        result: dev.dimension.flare.data.network.mastodon.api.model.Status,
-    ) {
-        updateStatusUseCase<StatusContent.Mastodon>(
-            statusKey = statusKey,
-            accountKey = accountKey,
-            cacheDatabase = database,
-            update = {
-                it.copy(data = result)
-            },
-        )
     }
 
     suspend fun report(

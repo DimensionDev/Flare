@@ -26,6 +26,7 @@ coil3 = "3.3.0"
 ktorfit = "2.6.4"
 ktor = "3.2.3"
 platformtoolsDarkmodedetector = "0.6.1"
+prettytime = "5.0.7.Final"
 reorderable = "3.0.0"
 stately = "2.1.0"
 twitter-parser = "0.5.5"
@@ -56,6 +57,8 @@ logback = "1.5.18"
 navigation3 = "1.0.0-alpha09"
 zoomable = "0.17.0"
 bouncycastle = "1.81"
+cupertino = "2.3.1"
+
 
 [libraries]
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
@@ -77,6 +80,7 @@ compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = 
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelComposeVersion" }
 openai-client = { module = "com.aallam.openai:openai-client", version.ref = "openaiClient" }
 platformtools-darkmodedetector = { module = "io.github.kdroidfilter:platformtools.darkmodedetector", version.ref = "platformtoolsDarkmodedetector" }
+prettytime = { module = "org.ocpsoft.prettytime:prettytime", version.ref = "prettytime" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }
@@ -178,7 +182,6 @@ compose-placeholder-foundation = { group = "io.github.fornewid", name = "placeho
 
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
-kermit = { group = "co.touchlab", name = "kermit", version = "2.0.8" }
 kotlin-codepoints-deluxe = { group = "de.cketti.unicode", name = "kotlin-codepoints-deluxe", version = "0.11.0" }
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
@@ -190,8 +193,6 @@ colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", vers
 material-motion-compose = { module = "io.github.fornewid:material-motion-compose-core", version = "2.0.1" }
 
 precompose-molecule = { module = "moe.tlaster:precompose-molecule", version = "1.7.0-alpha03" }
-
-compose-cupertino = { module = "io.github.alexzhirkevich:cupertino-core", version = "0.1.0-alpha04" }
 
 xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91.2" }
 
@@ -211,6 +212,8 @@ androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecy
 
 bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
+
+cupertino = { group = "io.github.schott12521", name = "cupertino", version.ref = "cupertino" }
 
 ### Server ###
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }

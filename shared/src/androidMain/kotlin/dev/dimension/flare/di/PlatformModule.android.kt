@@ -15,7 +15,3 @@ internal actual val platformModule: Module =
         singleOf(::NativeWebScraper)
         singleOf(::PlatformPathProducer)
     }
-
-public object KoinHelper {
-    public fun modules(): List<Module> = appModule()
-}

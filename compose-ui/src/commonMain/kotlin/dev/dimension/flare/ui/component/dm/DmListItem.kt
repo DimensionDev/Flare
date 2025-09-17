@@ -30,6 +30,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.ItemPlaceHolder
 import dev.dimension.flare.ui.component.RichText
@@ -37,7 +38,6 @@ import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.platform.PlatformListItem
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiDMRoom
-import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformTheme
 import org.jetbrains.compose.resources.stringResource
@@ -142,8 +142,8 @@ public fun LazyListScope.dmList(
                         }
                         val lastMessage = item.lastMessage
                         if (lastMessage != null) {
-                            PlatformText(
-                                text = lastMessage.timestamp.localizedShortTime,
+                            DateTimeText(
+                                lastMessage.timestamp,
                                 style = PlatformTheme.typography.caption,
                                 modifier =
                                     Modifier

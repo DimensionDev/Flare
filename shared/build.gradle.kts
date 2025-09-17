@@ -70,6 +70,7 @@ kotlin {
         }
         val commonMain by getting {
             dependencies {
+                implementation(compose.runtime)
                 implementation(libs.bundles.kotlinx)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
@@ -77,7 +78,6 @@ kotlin {
                 implementation(libs.bundles.ktorfit)
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)
-                implementation(libs.kermit)
                 implementation(libs.kotlin.codepoints.deluxe)
                 implementation(libs.ksoup)
                 implementation(libs.mfm.multiplatform)
@@ -152,6 +152,7 @@ skie {
     }
     features {
         enableSwiftUIObservingPreview = true
+        enableFlowCombineConvertorPreview = true
     }
 }
 

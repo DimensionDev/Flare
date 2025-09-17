@@ -6,22 +6,22 @@ import kotlinx.serialization.Serializable
 internal sealed interface DbAccountType
 
 @Serializable
-public sealed interface AccountType {
+public sealed class AccountType {
     @Serializable
     public data class Specific(
         val accountKey: MicroBlogKey,
-    ) : AccountType,
+    ) : AccountType(),
         DbAccountType {
         override fun toString(): String = "specific_$accountKey"
     }
 
     @Serializable
-    public data object Active : AccountType {
+    public data object Active : AccountType() {
         override fun toString(): String = "active"
     }
 
     @Serializable
-    public data object Guest : AccountType, DbAccountType {
+    public data object Guest : AccountType(), DbAccountType {
         override fun toString(): String = "guest"
     }
 }

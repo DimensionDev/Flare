@@ -81,7 +81,6 @@ internal sealed class CacheData<T>(
                         fetchSource.invoke()
                         LoadState.NotLoading(true)
                     } catch (e: Throwable) {
-                        e.printStackTrace()
                         LoadState.Error(e)
                     },
                 )

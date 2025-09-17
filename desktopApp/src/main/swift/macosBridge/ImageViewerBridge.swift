@@ -4,7 +4,7 @@ import Kingfisher
 import SwiftUI
 import AVKit
 
-class ClosableWindow : NSWindow {
+class ClosableWindow: NSWindow {
     override func cancelOperation(_ sender: Any?) {
         self.close()
     }
@@ -34,7 +34,6 @@ public func open_img_viewer(urlCString: UnsafePointer<CChar>?) {
     }
 }
 
-
 @_cdecl("open_video_viewer")
 public func open_video_viewer(urlCString: UnsafePointer<CChar>?) {
     let urlStr = urlCString.flatMap { String(cString: $0) } ?? "about:blank"
@@ -61,8 +60,6 @@ public func open_video_viewer(urlCString: UnsafePointer<CChar>?) {
         NSApp.activate(ignoringOtherApps: true)
     }
 }
-
-
 
 struct OpenStatusImageModel: Decodable {
     let index: Int
@@ -91,17 +88,16 @@ public func open_status_image_viewer(_ json: UnsafePointer<CChar>?) {
             win.isMovableByWindowBackground = true
             win.appearance = .init(named: .darkAqua)
             win.setFrameOriginToPositionWindowInCenterOfScreen()
-            
+
             win.contentView = NSHostingView(rootView: StatusMediaView(medias: model.medias, page: model.index))
             win.isReleasedWhenClosed = false
-            
+
             win.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
 
         }
     }
 }
-
 
 struct StatusMediaView: View {
     let medias: [StatusMediaItem]
@@ -112,7 +108,7 @@ struct StatusMediaView: View {
                 ForEach(0..<medias.count, id: \.self) { i in
                     let media = medias[i]
                     ZStack {
-                        if (media.type == "gif" || media.type == "image") {
+                        if media.type == "gif" || media.type == "image" {
                             KFImage(.init(string: media.url)!)
                                 .placeholder({
                                     if let placeholder = media.placeholder {
@@ -126,8 +122,8 @@ struct StatusMediaView: View {
                                 })
                                 .resizable()
                                 .scaledToFit()
-                        } else if (media.type == "video") {
-                            if (page == i) {
+                        } else if media.type == "video" {
+                            if page == i {
                                 let player = AVPlayer(url: .init(string: media.url)!)
                                 VideoPlayer(player: player)
                                     .onAppear {
@@ -153,8 +149,6 @@ struct StatusMediaView: View {
     }
 }
 
-
-
 @MainActor
 func makeZoomingScrollView(targetURL: URL) -> NSScrollView {
     let imageView = NSImageView()
@@ -173,7 +167,7 @@ func makeZoomingScrollView(targetURL: URL) -> NSScrollView {
     scrollView.maxMagnification = 8
     scrollView.automaticallyAdjustsContentInsets = false
     scrollView.contentInsets = .init()
-    
+
     imageView.kf
         .setImage(with: targetURL) { result in
         switch result {

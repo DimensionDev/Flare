@@ -2,13 +2,19 @@ package dev.dimension.flare.ui.screen.media
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +37,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,10 +57,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
@@ -69,6 +82,7 @@ import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
+import compose.icons.fontawesomeicons.solid.ShareNodes
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
@@ -113,6 +127,7 @@ import moe.tlaster.precompose.molecule.producePresenter
 import moe.tlaster.swiper.Swiper
 import moe.tlaster.swiper.rememberSwiperState
 import org.koin.compose.koinInject
+import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(
@@ -130,6 +145,7 @@ internal fun StatusMediaScreen(
     toAltText: (UiMedia) -> Unit,
     playerPool: VideoPlayerPool = koinInject(),
 ) {
+    val hapticFeedback = LocalHapticFeedback.current
     val hazeState = rememberHazeState()
     val context = LocalContext.current
     val permissionState =
@@ -230,107 +246,139 @@ internal fun StatusMediaScreen(
                             } ?: it
                         },
                     ) { index ->
-                        state.medias
-                            .onSuccess { medias ->
-                                when (val media = medias[index]) {
-                                    is UiMedia.Audio ->
-                                        VideoPlayer(
-                                            uri = media.url,
-                                            previewUri = null,
-                                            contentDescription = media.description,
-                                            autoPlay = false,
-                                            modifier =
-                                                Modifier
-                                                    .fillMaxSize(),
-                                            onClick = {
-                                                state.setShowUi(!state.showUi)
-                                            },
-                                        )
+                        AnimatedContent(
+                            state.medias,
+                            transitionSpec = {
+                                fadeIn() togetherWith fadeOut()
+                            },
+                        ) {
+                            it
+                                .onSuccess { medias ->
+                                    when (val media = medias[index]) {
+                                        is UiMedia.Audio ->
+                                            VideoPlayer(
+                                                uri = media.url,
+                                                previewUri = null,
+                                                contentDescription = media.description,
+                                                autoPlay = false,
+                                                modifier =
+                                                    Modifier
+                                                        .fillMaxSize(),
+                                                onClick = {
+                                                    state.setShowUi(!state.showUi)
+                                                },
+                                                onLongClick = {
+                                                    hapticFeedback.performHapticFeedback(
+                                                        HapticFeedbackType.LongPress,
+                                                    )
+                                                    state.setShowSheet(true)
+                                                },
+                                            )
 
-                                    is UiMedia.Gif ->
-                                        VideoPlayer(
-                                            uri = media.url,
-                                            previewUri = media.previewUrl,
-                                            contentDescription = media.description,
-                                            autoPlay = false,
-                                            modifier =
-                                                Modifier
-                                                    //                                                .sharedElement(
-                                                    //                                                    rememberSharedContentState(media.previewUrl),
-                                                    //                                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                                    //                                                )
-                                                    .fillMaxSize(),
-                                            onClick = {
-                                                state.setShowUi(!state.showUi)
-                                            },
-                                            aspectRatio = media.aspectRatio,
-                                            contentScale = ContentScale.Fit,
-                                        )
+                                        is UiMedia.Gif ->
+                                            VideoPlayer(
+                                                uri = media.url,
+                                                previewUri = media.previewUrl,
+                                                contentDescription = media.description,
+                                                autoPlay = false,
+                                                modifier =
+                                                    Modifier
+                                                        //                                                .sharedElement(
+                                                        //                                                    rememberSharedContentState(media.previewUrl),
+                                                        //                                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
+                                                        //                                                )
+                                                        .fillMaxSize(),
+                                                onClick = {
+                                                    state.setShowUi(!state.showUi)
+                                                },
+                                                aspectRatio = media.aspectRatio,
+                                                contentScale = ContentScale.Fit,
+                                                onLongClick = {
+                                                    hapticFeedback.performHapticFeedback(
+                                                        HapticFeedbackType.LongPress,
+                                                    )
+                                                    state.setShowSheet(true)
+                                                },
+                                            )
 
-                                    is UiMedia.Image -> {
+                                        is UiMedia.Image -> {
+                                            ImageItem(
+                                                modifier =
+                                                    Modifier
+                                                        //                                            .sharedElement(
+                                                        //                                                rememberSharedContentState(media.previewUrl),
+                                                        //                                                animatedVisibilityScope = this@AnimatedVisibilityScope,
+                                                        //                                            )
+                                                        .fillMaxSize(),
+                                                url = media.url,
+                                                previewUrl = media.previewUrl,
+                                                description = media.description,
+                                                onClick = {
+                                                    state.setShowUi(!state.showUi)
+                                                },
+                                                setLockPager = {
+                                                    if (pagerState.currentPage == index) {
+                                                        state.setLockPager(it)
+                                                    }
+                                                },
+                                                onLongClick = {
+                                                    hapticFeedback.performHapticFeedback(
+                                                        HapticFeedbackType.LongPress,
+                                                    )
+                                                    state.setShowSheet(true)
+                                                },
+                                            )
+                                        }
+
+                                        is UiMedia.Video ->
+                                            VideoPlayer(
+                                                uri = media.url,
+                                                previewUri = media.thumbnailUrl,
+                                                contentDescription = media.description,
+                                                autoPlay = false,
+                                                modifier =
+                                                    Modifier
+                                                        .fillMaxSize(),
+                                                onClick = {
+                                                    state.setShowUi(!state.showUi)
+                                                },
+                                                aspectRatio = media.aspectRatio,
+                                                showControls = true,
+                                                keepScreenOn = true,
+                                                muted = false,
+                                                contentScale = ContentScale.Fit,
+                                                onLongClick = {
+                                                    hapticFeedback.performHapticFeedback(
+                                                        HapticFeedbackType.LongPress,
+                                                    )
+                                                    state.setShowSheet(true)
+                                                },
+                                            )
+                                    }
+                                }.onLoading {
+                                    if (preview != null) {
                                         ImageItem(
+                                            url = preview,
+                                            previewUrl = preview,
+                                            description = null,
+                                            onClick = { /*TODO*/ },
+                                            setLockPager = state::setLockPager,
                                             modifier =
                                                 Modifier
-                                                    //                                            .sharedElement(
-                                                    //                                                rememberSharedContentState(media.previewUrl),
-                                                    //                                                animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                                    //                                            )
                                                     .fillMaxSize(),
-                                            url = media.url,
-                                            previewUrl = media.previewUrl,
-                                            description = media.description,
-                                            onClick = {
-                                                state.setShowUi(!state.showUi)
-                                            },
-                                            setLockPager = {
-                                                if (pagerState.currentPage == index) {
-                                                    state.setLockPager(it)
-                                                }
-                                            },
+                                            onLongClick = { },
+                                        )
+                                    } else {
+                                        Box(
+                                            modifier =
+                                                Modifier
+                                                    .aspectRatio(1f)
+                                                    .fillMaxSize()
+                                                    .placeholder(true),
                                         )
                                     }
-
-                                    is UiMedia.Video ->
-                                        VideoPlayer(
-                                            uri = media.url,
-                                            previewUri = media.thumbnailUrl,
-                                            contentDescription = media.description,
-                                            autoPlay = false,
-                                            modifier =
-                                                Modifier
-                                                    .fillMaxSize(),
-                                            onClick = {
-                                                state.setShowUi(!state.showUi)
-                                            },
-                                            aspectRatio = media.aspectRatio,
-                                            showControls = true,
-                                            keepScreenOn = true,
-                                            muted = false,
-                                            contentScale = ContentScale.Fit,
-                                        )
                                 }
-                            }.onLoading {
-                                if (preview != null) {
-                                    ImageItem(
-                                        url = preview,
-                                        previewUrl = preview,
-                                        description = null,
-                                        onClick = { /*TODO*/ },
-                                        setLockPager = state::setLockPager,
-                                        modifier =
-                                            Modifier
-                                                .fillMaxSize(),
-                                    )
-                                } else {
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .aspectRatio(1f)
-                                                .fillMaxSize()
-                                                .placeholder(true),
-                                    )
-                                }
-                            }
+                        }
                     }
                 }
                 AnimatedVisibility(
@@ -392,10 +440,10 @@ internal fun StatusMediaScreen(
                                         if (!permissionState.status.isGranted) {
                                             permissionState.launchPermissionRequest()
                                         } else {
-                                            state.save(medias[state.currentPage])
+                                            state.save(current)
                                         }
                                     } else {
-                                        state.save(medias[state.currentPage])
+                                        state.save(current)
                                     }
                                 },
                                 hazeState = hazeState,
@@ -407,6 +455,22 @@ internal fun StatusMediaScreen(
                                     FontAwesomeIcons.Solid.Download,
                                     contentDescription = stringResource(id = R.string.media_menu_save),
                                 )
+                            }
+                            AnimatedVisibility(current is UiMedia.Image) {
+                                Glassify(
+                                    onClick = {
+                                        state.shareMedia(current)
+                                    },
+                                    hazeState = hazeState,
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    modifier = Modifier.size(40.dp),
+                                    shape = CircleShape,
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.ShareNodes,
+                                        contentDescription = stringResource(id = R.string.media_menu_share_image),
+                                    )
+                                }
                             }
                         }
                     }
@@ -506,6 +570,74 @@ internal fun StatusMediaScreen(
                 }
             }
         }
+        if (state.showSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    state.setShowSheet(false)
+                },
+            ) {
+                ListItem(
+                    headlineContent = {
+                        Text(stringResource(id = R.string.media_menu_save))
+                    },
+                    leadingContent = {
+                        FAIcon(
+                            FontAwesomeIcons.Solid.Download,
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    },
+                    modifier =
+                        Modifier
+                            .clickable {
+                                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                                    if (!permissionState.status.isGranted) {
+                                        permissionState.launchPermissionRequest()
+                                    } else {
+                                        state.medias.onSuccess { medias ->
+                                            state.save(medias[state.currentPage])
+                                        }
+                                    }
+                                } else {
+                                    state.medias.onSuccess { medias ->
+                                        state.save(medias[state.currentPage])
+                                    }
+                                }
+                                state.setShowSheet(false)
+                            },
+                    colors =
+                        ListItemDefaults.colors(
+                            containerColor = Color.Transparent,
+                        ),
+                )
+                state.medias.onSuccess { medias ->
+                    if (medias[state.currentPage] is UiMedia.Image) {
+                        ListItem(
+                            headlineContent = {
+                                Text(stringResource(id = R.string.media_menu_share_image))
+                            },
+                            leadingContent = {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.ShareNodes,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            },
+                            modifier =
+                                Modifier
+                                    .clickable {
+                                        state.shareMedia(medias[state.currentPage])
+                                        state.setShowSheet(false)
+                                    },
+                            colors =
+                                ListItemDefaults.colors(
+                                    containerColor = Color.Transparent,
+                                ),
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -588,6 +720,7 @@ private fun ImageItem(
     previewUrl: String,
     description: String?,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     setLockPager: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -646,6 +779,9 @@ private fun ImageItem(
         onClick = {
             onClick.invoke()
         },
+        onLongClick = {
+            onLongClick.invoke()
+        },
     )
 }
 
@@ -659,6 +795,9 @@ private fun statusMediaPresenter(
     scope: CoroutineScope = koinInject(),
     videoDownloadHelper: VideoDownloadHelper = koinInject(),
 ) = run {
+    var showSheet by remember {
+        mutableStateOf(false)
+    }
     var showUi by remember {
         mutableStateOf(true)
     }
@@ -696,6 +835,11 @@ private fun statusMediaPresenter(
         val showUi = showUi
         val currentPage = currentPage
         val lockPager = lockPager
+        val showSheet = showSheet
+
+        fun setShowSheet(value: Boolean) {
+            showSheet = value
+        }
 
         fun setShowUi(value: Boolean) {
             if (!lockPager) {
@@ -718,6 +862,50 @@ private fun statusMediaPresenter(
                 is UiMedia.Gif -> download(data.url)
                 is UiMedia.Image -> save(data.url)
                 is UiMedia.Video -> download(data.url)
+            }
+        }
+
+        fun shareMedia(data: UiMedia) {
+            when (data) {
+                is UiMedia.Audio -> Unit
+                is UiMedia.Gif -> Unit
+                is UiMedia.Image -> {
+                    scope.launch {
+                        context.imageLoader.diskCache?.openSnapshot(data.url)?.use {
+                            val originFile = it.data.toFile()
+                            val targetFile =
+                                File(
+                                    context.cacheDir,
+                                    data.url.substringAfterLast("/"),
+                                )
+                            originFile.copyTo(targetFile, overwrite = true)
+                            val uri =
+                                FileProvider.getUriForFile(
+                                    context,
+                                    context.packageName + ".provider",
+                                    targetFile,
+                                )
+                            val intent =
+                                Intent().apply {
+                                    action = Intent.ACTION_SEND
+                                    putExtra(Intent.EXTRA_STREAM, uri)
+                                    setDataAndType(
+                                        uri,
+                                        "image/*",
+                                    )
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                            context.startActivity(
+                                Intent.createChooser(
+                                    intent,
+                                    context.getString(R.string.media_menu_share_image),
+                                ),
+                            )
+                        }
+                    }
+                }
+
+                is UiMedia.Video -> Unit
             }
         }
 
@@ -777,3 +965,10 @@ private fun statusMediaPresenter(
         }
     }
 }
+
+// suspend fun copyFile(
+//    sourceFile: File,
+//    destinationFile: File,
+// ) = withContext(Dispatchers.IO) {
+//    sourceFile.copyTo(destinationFile, overwrite = true)
+// }

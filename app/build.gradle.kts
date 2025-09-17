@@ -152,7 +152,6 @@ dependencies {
         implementation(platform(libs.firebase.bom))
         implementation(libs.firebase.crashlytics.ktx)
         implementation(libs.firebase.analytics.ktx)
-        implementation(libs.play.integrity)
     }
 
     testImplementation(libs.junit)

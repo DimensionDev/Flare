@@ -7,6 +7,9 @@ import kotlinx.serialization.Serializable
 
 public sealed class DeeplinkRoute {
     @Serializable
+    public data object Login : DeeplinkRoute()
+
+    @Serializable
     public sealed class Callback : DeeplinkRoute() {
         @Serializable
         public object Mastodon : Callback()

@@ -243,6 +243,7 @@ internal sealed interface Route {
         public fun parse(url: String): Route? {
             val deeplinkRoute = DeeplinkRoute.parse(url) ?: return null
             return when (deeplinkRoute) {
+                is DeeplinkRoute.Login -> ServiceSelect
                 is DeeplinkRoute.Callback -> null
                 is DeeplinkRoute.Compose.New -> Compose.New(deeplinkRoute.accountType)
                 is DeeplinkRoute.Compose.Quote ->

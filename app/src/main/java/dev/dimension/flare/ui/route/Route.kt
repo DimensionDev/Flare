@@ -408,6 +408,7 @@ internal sealed interface Route : NavKey {
         public fun parse(url: String): Route? {
             val deeplinkRoute = DeeplinkRoute.parse(url) ?: return null
             return when (deeplinkRoute) {
+                is DeeplinkRoute.Login -> Route.ServiceSelect.Selection
                 is DeeplinkRoute.Callback -> null
                 is DeeplinkRoute.Compose.New ->
                     Route.Compose.New(accountType = deeplinkRoute.accountType)

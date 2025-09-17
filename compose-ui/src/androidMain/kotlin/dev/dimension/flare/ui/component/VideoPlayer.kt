@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.layout.ContentScale
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -160,6 +161,13 @@ public fun VideoPlayer(
                             it
                         }
                     }.matchParentSize()
+                    .let {
+                        if (keepScreenOn) {
+                            it.keepScreenOn()
+                        } else {
+                            it
+                        }
+                    }
             if (isActive) {
                 PlayerSurface(
                     player = player,

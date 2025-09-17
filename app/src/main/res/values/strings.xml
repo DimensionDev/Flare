@@ -185,6 +185,7 @@
     <string name="settings_accounts_remove">Remove</string>
 
     <string name="media_menu_save">Save</string>
+    <string name="media_menu_share_image">Share image</string>
     <string name="media_save_success">Saved to Downloads</string>
     <string name="media_save_fail">Failed to save</string>
     <string name="media_alt_text">Alt text</string>

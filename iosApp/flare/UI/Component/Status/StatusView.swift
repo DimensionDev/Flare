@@ -102,6 +102,7 @@ struct StatusView: View {
                     if expand || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
                         if !data.content.isEmpty {
                             RichText(text: data.content)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                                 .if(isDetail) { richText in
                                     richText
                                 } else: { richText in

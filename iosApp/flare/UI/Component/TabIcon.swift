@@ -47,6 +47,7 @@ struct TabIcon: View {
         switch onEnum(of: icon) {
         case .material(let material):
             MaterialTabIcon(icon: material.icon)
+                .frame(width: size, height: size)
         case .avatar(let avatar):
             AvatarTabIcon(userKey: avatar.userKey, accountType: accountType)
                 .frame(width: size, height: size)
@@ -55,6 +56,7 @@ struct TabIcon: View {
                 .frame(width: size, height: size)
         case .mixed(let mixed):
             MaterialTabIcon(icon: mixed.icon)
+                .frame(width: size, height: size)
         }
     }
 }

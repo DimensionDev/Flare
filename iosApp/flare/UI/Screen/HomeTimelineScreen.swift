@@ -60,7 +60,8 @@ struct HomeTimelineScreen: View {
                             }
                         }
                     }
-                    .scrollClipDisabled()
+                    .scrollIndicators(.hidden)
+//                    .scrollClipDisabled()
                 }
                 .sharedBackgroundVisibility(.hidden)
                 ToolbarItem(placement: .topBarTrailing) {

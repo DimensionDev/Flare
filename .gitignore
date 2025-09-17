@@ -29,8 +29,4 @@ shared/shared.podspec
 .lh
 iosApp/K_D/
 *.sh
-.*
-/package_source
-/example_app
-
-/iosApp/iosApp/todo
+.env

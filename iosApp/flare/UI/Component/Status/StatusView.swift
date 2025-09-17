@@ -1,6 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import Awesome
 
 struct StatusView: View {
     @Environment(\.openURL) private var openURL
@@ -24,7 +23,7 @@ struct StatusView: View {
                             .frame(minWidth: 1, maxWidth: 1, alignment: .leading)
                             .padding(.leading, 22)
                             .padding(.top, 44)
-                        
+
                     }
                 }
             }
@@ -47,6 +46,9 @@ struct StatusView: View {
                                 }
                             }
                         }
+                        .onTapGesture {
+                            data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                        }
                     } else {
                         UserCompatView(data: user) {
                             HStack {
@@ -62,6 +64,9 @@ struct StatusView: View {
                                 }
                             }
                         }
+                        .onTapGesture {
+                            data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                        }
                     }
                 }
                 VStack(
@@ -72,8 +77,8 @@ struct StatusView: View {
                         switch onEnum(of: aboveTextContent) {
                         case .replyTo(let replyTo):
                             HStack {
-                                Awesome.Classic.Solid.reply.image
-                                    .foregroundColor(.label)
+                                Image("fa-reply")
+                                    .foregroundStyle(Color(.label))
                                 Text("Reply to \(replyTo.handle)")
                             }
                             .font(.caption)
@@ -93,7 +98,7 @@ struct StatusView: View {
                             }
                         }
                     }
-                    
+
                     if expand || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
                         if !data.content.isEmpty {
                             RichText(text: data.content)
@@ -109,13 +114,13 @@ struct StatusView: View {
                         StatusMediaView(data: data.images)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
-                    
+
                     if let card = data.card {
                         if data.images.isEmpty && data.quote.isEmpty {
                             StatusCardView(data: card)
                         }
                     }
-                    
+
                     if !data.quote.isEmpty {
                         VStack {
                             ForEach(data.quote, id: \.itemKey) { quote in
@@ -132,16 +137,16 @@ struct StatusView: View {
                                 .stroke(Color(.separator), lineWidth: 1)
                         )
                     }
-                    
+
                     if case .reaction(let reaction) = onEnum(of: data.bottomContent) {
                         StatusReactionView(data: reaction)
                     }
-                    
+
                     if isDetail {
                         DateTimeText(data: data.createdAt, fullTime: true)
                             .font(.caption)
                     }
-                    
+
                     if !isQuote {
                         StatusActionsView(data: data.actions)
                             .font(isDetail ? .body : .footnote)
@@ -160,7 +165,6 @@ struct StatusView: View {
         }
     }
 }
-
 
 extension StatusView {
     init(data: UiTimeline.ItemContentStatus, isDetail: Bool) {

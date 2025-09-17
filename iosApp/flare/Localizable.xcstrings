@@ -10,7 +10,16 @@
     "0000" : {
 
     },
+    "about_title" : {
+
+    },
     "Accept follow request" : {
+
+    },
+    "account_management_title" : {
+
+    },
+    "ai_config_title" : {
 
     },
     "ALT" : {
@@ -25,6 +34,9 @@
           }
         }
       }
+    },
+    "appearance_title" : {
+
     },
     "block" : {
 
@@ -213,10 +225,19 @@
     "like" : {
 
     },
+    "local_filter_title" : {
+
+    },
+    "local_history_title" : {
+
+    },
     "Login" : {
 
     },
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eget eros justo. Duis feugiat tortor sed lectus euismod iaculis. Donec aliquam sem dui, id facilisis velit luctus eget. Nam ac mattis sapien. Morbi ultrices diam at accumsan hendrerit. Donec vitae venenatis nulla. Nullam condimentum pharetra venenatis." : {
+    "login_title" : {
+
+    },
+    "logout_title" : {
 
     },
     "mastodon_item_pinned" : {
@@ -798,7 +819,13 @@
     "More" : {
 
     },
+    "more_panel_customize" : {
+
+    },
     "mute" : {
+
+    },
+    "Not done yet for %@" : {
 
     },
     "Notification" : {
@@ -906,6 +933,9 @@
           }
         }
       }
+    },
+    "storage_title" : {
+
     },
     "unblock" : {
 

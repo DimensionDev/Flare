@@ -1,10 +1,10 @@
 import SwiftUI
 import KotlinSharedUI
 
-struct TabItemView : View {
+struct TabItemView: View {
     let tabItem: TabItem
     let onNavigate: (Route) -> Void
-    
+
     var body: some View {
         switch onEnum(of: tabItem) {
         case .timelineTabItem(let timelineTabItem):
@@ -14,24 +14,24 @@ struct TabItemView : View {
             default:
                 TimelineScreen(tabItem: timelineTabItem)
             }
-        case .allListTabItem(_):
+        case .allListTabItem:
             EmptyView()
-        case .feedsTabItem(_):
+        case .feedsTabItem:
             EmptyView()
-        case .directMessageTabItem(_):
+        case .directMessageTabItem:
             EmptyView()
-        case .discoverTabItem(_):
+        case .discoverTabItem:
             EmptyView()
-        case .antennasListTabItem(_):
+        case .antennasListTabItem:
             EmptyView()
-        case .notificationTabItem(_):
+        case .notificationTabItem:
             NotificationScreen(accountType: tabItem.account)
-        case .profileTabItem(_):
+        case .profileTabItem:
             EmptyView()
-        case .rssTabItem(_):
+        case .rssTabItem:
             EmptyView()
-        case .settingsTabItem(_):
-            EmptyView()
+        case .settingsTabItem:
+            SettingsScreen()
         }
     }
 }

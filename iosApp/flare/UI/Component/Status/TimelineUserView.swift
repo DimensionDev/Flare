@@ -1,6 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import Awesome
 
 struct TimelineUserView: View {
     @Environment(\.openURL) private var openURL
@@ -20,8 +19,7 @@ struct TimelineUserView: View {
                                 Label {
                                     Text("Accept follow request")
                                 } icon: {
-                                    Awesome.Classic.Solid.check.image
-                                    
+                                    Image("fa-check")
                                 }
                             }
                         case .rejectFollowRequest(let rejectFollowButton):
@@ -31,8 +29,7 @@ struct TimelineUserView: View {
                                 Label {
                                     Text("Reject follow request")
                                 } icon: {
-                                    Awesome.Classic.Solid.xmark.image
-                                    
+                                    Image("fa-xmark")
                                 }
                             }
                         }

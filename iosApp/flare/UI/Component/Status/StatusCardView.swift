@@ -4,7 +4,7 @@ import KotlinSharedUI
 struct StatusCardView: View {
     @Environment(\.openURL) private var openURL
     let data: UiCard
-    
+
     var body: some View {
         VStack(
             alignment: .leading

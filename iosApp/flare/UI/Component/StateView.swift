@@ -2,7 +2,6 @@ import Foundation
 import KotlinSharedUI
 import SwiftUI
 
-
 struct StateView<T: AnyObject, SuccessContent: View, ErrorContent: View, LoadingContent: View>: View {
     let state: UiState<T>
     @ViewBuilder var successContent: (T) -> SuccessContent
@@ -12,7 +11,7 @@ struct StateView<T: AnyObject, SuccessContent: View, ErrorContent: View, Loading
         switch onEnum(of: state) {
         case .error(let error):
             errorContent(error.throwable)
-        case .loading(_):
+        case .loading:
             loadingContent()
         case .success(let data):
             successContent(data.data)
@@ -20,9 +19,8 @@ struct StateView<T: AnyObject, SuccessContent: View, ErrorContent: View, Loading
     }
 }
 
-
 extension StateView {
-    
+
     init(
         state: UiState<T>,
         @ViewBuilder successContent: @escaping (T) -> SuccessContent
@@ -34,7 +32,7 @@ extension StateView {
             loadingContent: { EmptyView() }
         )
     }
-    
+
     init(
         state: UiState<T>,
         @ViewBuilder successContent: @escaping (T) -> SuccessContent,
@@ -47,7 +45,7 @@ extension StateView {
             loadingContent: loadingContent
         )
     }
-    
+
     init(
         state: UiState<T>,
         @ViewBuilder successContent: @escaping (T) -> SuccessContent,

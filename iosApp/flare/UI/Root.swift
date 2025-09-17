@@ -1,13 +1,12 @@
 import SwiftUI
 import KotlinSharedUI
-import Awesome
 
 struct FlareRoot: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
     @State private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
-    @State var selectedTab: String? = nil
-    
+    @State var selectedTab: String?
+
     var body: some View {
         StateView(state: homeTabsPresenter.state.tabs) { tabs in
             HStack(
@@ -32,7 +31,7 @@ struct FlareRoot: View {
                 }
                 TabView(selection: $selectedTab) {
                     if horizontalSizeClass == .regular {
-                        ForEach(tabs.all, id:\.tabItem.key) { data in
+                        ForEach(tabs.all, id: \.tabItem.key) { data in
                             Tab(value: data.tabItem.key) {
                                 Router { onNavigate in
                                     TabItemView(tabItem: data.tabItem, onNavigate: onNavigate)
@@ -61,19 +60,14 @@ struct FlareRoot: View {
                             .badge(badge)
                         }
                     }
-                    if case .success(_) = onEnum(of: activeAccountPresenter.state.user) {
+                    if case .success = onEnum(of: activeAccountPresenter.state.user) {
                         Tab(value: "more", role: .search) {
-                            Text("More")
-                                .if(horizontalSizeClass == .regular) { view in
-                                    view.toolbarVisibility(.hidden, for: .tabBar)
-                                } else: { view in
-                                    view
-                                }
+                            SecondaryTabsScreen(tabs: tabs.secondary)
                         } label: {
                             Label {
                                 Text("More")
                             } icon: {
-                                Awesome.Classic.Solid.ellipsis.image
+                                Image("fa-ellipsis")
                             }
                         }
                     }

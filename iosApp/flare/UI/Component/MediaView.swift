@@ -1,6 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import Awesome
 
 struct MediaView: View {
     let data: UiMedia
@@ -31,9 +30,8 @@ struct MediaView: View {
                     }
                 }
                 .overlay(alignment: .bottomLeading) {
-                    Awesome.Classic.Solid.circlePlay.image
-                        .backgroundColor(.black)
-                        .foregroundColor(.white)
+                    Image("fa-circle-play")
+                        .foregroundStyle(Color(.white))
                         .padding(8)
                         .background(.black, in: .rect(cornerRadius: 16))
                         .padding()

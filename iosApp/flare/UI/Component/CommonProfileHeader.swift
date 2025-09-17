@@ -1,6 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import Awesome
 
 enum CommonProfileHeaderConstants {
     static let headerHeight: CGFloat = 200
@@ -69,9 +68,12 @@ struct CommonProfileHeader: View {
                             }
                     }
                 }
-                
+
                 ListCardView {
-                    VStack(alignment: .leading) {
+                    VStack(
+                        alignment: .leading,
+                        spacing: 8
+                    ) {
                         RichText(text: user.name)
                             .font(.headline)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -82,10 +84,10 @@ struct CommonProfileHeader: View {
                             ForEach(0..<user.mark.count, id: \.self) { index in
                                 let mark = user.mark[index]
                                 switch mark {
-                                case .cat: Awesome.Classic.Solid.cat.image.opacity(0.6)
-                                case .verified: Awesome.Classic.Solid.circleCheck.image.opacity(0.6)
-                                case .locked: Awesome.Classic.Solid.lock.image.opacity(0.6)
-                                case .bot: Awesome.Classic.Solid.robot.image.opacity(0.6)
+                                case .cat:      Image("fa-cat")
+                                case .verified: Image("fa-circle-check")
+                                case .locked:   Image("fa-lock")
+                                case .bot:      Image("fa-robot")
                                 }
                             }
                         }
@@ -110,9 +112,9 @@ struct CommonProfileHeader: View {
                                         },
                                         icon: {
                                             switch key {
-                                            case .location: Awesome.Classic.Solid.locationDot.image
-                                            case .url: Awesome.Classic.Solid.globe.image
-                                            case .verify: Awesome.Classic.Solid.circleCheck.image
+                                            case .location: Image("fa-location-dot")
+                                            case .url:      Image("fa-globe")
+                                            case .verify:   Image("fa-circle-check")
                                             }
                                         }
                                     )
@@ -129,8 +131,6 @@ struct CommonProfileHeader: View {
         }
     }
 }
-
-
 
 struct MatrixView: View {
     let followCount: String
@@ -151,7 +151,7 @@ struct FieldsView: View {
     let fields: [String: UiRichText]
     var body: some View {
         if fields.count > 0 {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 8) {
                 let keys = fields.map {
                     $0.key
                 }

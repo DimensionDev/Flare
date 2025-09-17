@@ -1,14 +1,13 @@
 import SwiftUI
 import KotlinSharedUI
 
-
-struct TimelinePagingView : View {
+struct TimelinePagingView: View {
     let data: PagingState<UiTimeline>
     var body: some View {
         switch onEnum(of: data) {
-        case .empty(_): EmptyView()
+        case .empty: EmptyView()
         case .error(let error): EmptyView()
-        case .loading(_): ForEach(0..<5) { index in
+        case .loading: ForEach(0..<5) { index in
             ListCardView(index: index, totalCount: 5) {
                 TimelinePlaceholderView()
                     .padding()
@@ -19,7 +18,6 @@ struct TimelinePagingView : View {
                 if let item = data.data {
                     ListCardView(index: data.index, totalCount: Int(success.itemCount)) {
                         TimelineView(data: item)
-//                            .id(item.itemKey)
                             .padding()
                             .onAppear {
                                 _ = success.get(index: Int32(data.index))
@@ -34,21 +32,6 @@ struct TimelinePagingView : View {
                             }
                     }
                 }
-                
-//                PagingItemView(loadingContent: {
-//                    ListCardView(index: data.index, totalCount: Int(success.itemCount)) {
-//                        TimelinePlaceholderView()
-//                            .padding()
-//                    }
-//                }, successContent: { item in
-//                    ListCardView(index: data.index, totalCount: Int(success.itemCount)) {
-//                        TimelineView(data: item)
-//                            .id(item.itemKey)
-//                            .padding()
-//                    }
-//                }, getData: {
-//                    success.get(index: Int32(data.index))
-//                }, data: data.data)
             }
         }
     }
@@ -65,9 +48,9 @@ struct TimelineCollection: @MainActor RandomAccessCollection {
     public var startIndex: Int { 0 }
     public var endIndex: Int { Int(data.itemCount) }
 
-    public func index(after i: Int) -> Int { i + 1 }
-    public func index(before i: Int) -> Int { i - 1 }
-    public func index(_ i: Int, offsetBy distance: Int) -> Int { i + distance }
+    public func index(after index: Int) -> Int { index + 1 }
+    public func index(before index: Int) -> Int { index - 1 }
+    public func index(_ index: Int, offsetBy distance: Int) -> Int { index + distance }
     public func distance(from start: Int, to end: Int) -> Int { end - start }
 
     public subscript(position: Int) -> TimelineData {

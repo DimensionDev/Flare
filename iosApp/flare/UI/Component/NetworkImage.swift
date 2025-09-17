@@ -16,7 +16,6 @@ struct NetworkImage: View {
     }
 }
 
-
 extension NetworkImage {
     init(data: String) {
         self.init(data: .init(string: data))

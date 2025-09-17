@@ -15,14 +15,14 @@ struct FlareApp: App {
 
 class SwiftInAppNotification: InAppNotification {
     func onError(message: Message, throwable: KotlinThrowable) {
-        
+
     }
-    
+
     func onProgress(message: Message, progress: Int32, total: Int32) {
-        
+
     }
-    
+
     func onSuccess(message: Message) {
-        
+
     }
 }

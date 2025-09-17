@@ -1,5 +1,4 @@
 import SwiftUI
-import Awesome
 @preconcurrency import KotlinSharedUI
 
 struct HomeTimelineScreen: View {
@@ -9,13 +8,13 @@ struct HomeTimelineScreen: View {
     @State private var selectedTabIndex = 0
     @State private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
     @State private var showTopBar = true
-    
+
     init(accountType: AccountType, toServiceSelect: @escaping () -> Void) {
         self.accountType = accountType
         self.toServiceSelect = toServiceSelect
         _presenter = .init(wrappedValue: .init(presenter: HomeTimelineWithTabsPresenter(accountType: accountType)))
     }
-    
+
     var body: some View {
         StateView(state: presenter.state.tabState) { state in
             let tabs: [TimelineItemPresenterState] = state.cast(TimelineItemPresenterState.self)
@@ -25,7 +24,9 @@ struct HomeTimelineScreen: View {
                     .listRowSeparator(.hidden)
                     .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                     .padding(.horizontal)
+                    .listRowBackground(Color.clear)
             }
+            .scrollContentBackground(.hidden)
             .listRowSpacing(2)
             .listStyle(.plain)
             .background(Color(.systemGroupedBackground))
@@ -53,8 +54,7 @@ struct HomeTimelineScreen: View {
                             if case .success = onEnum(of: presenter.state.user) {
                                 Button {
                                 } label: {
-                                    Awesome.Classic.Solid.plus.image
-                                        .foregroundColor(.label)
+                                    Image("fa-plus")
                                 }
                                 .buttonStyle(.glass)
                             }
@@ -64,7 +64,7 @@ struct HomeTimelineScreen: View {
                 }
                 .sharedBackgroundVisibility(.hidden)
                 ToolbarItem(placement: .topBarTrailing) {
-                    if case .error(_) = onEnum(of: presenter.state.user) {
+                    if case .error = onEnum(of: presenter.state.user) {
                         Button {
                             toServiceSelect()
                         } label: {
@@ -73,8 +73,7 @@ struct HomeTimelineScreen: View {
                     } else {
                         Button {
                         } label: {
-                            Awesome.Classic.Solid.penToSquare.image
-                                .foregroundColor(.label)
+                            Image("fa-pen-to-square")
                         }
                     }
                 }

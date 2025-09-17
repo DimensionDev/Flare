@@ -20,7 +20,7 @@ struct AdaptiveMosaic<Item, Content: View>: View {
     let spacing: CGFloat
     let singleMode: SingleMode
     let content: (Item) -> Content
-    
+
     init(
         _ items: [Item],
         spacing: CGFloat = 4,
@@ -32,7 +32,7 @@ struct AdaptiveMosaic<Item, Content: View>: View {
         self.singleMode = singleMode
         self.content = content
     }
-    
+
     var body: some View {
         switch items.count {
         case 0:
@@ -56,13 +56,13 @@ private extension AdaptiveMosaic {
                 // Let inner content keep its own aspect ratio (e.g., .scaledToFit())
                 content(item)
                     .frame(maxWidth: .infinity)
-                
+
             case .force16x9:
                 GeometryReader { geo in
-                    let W = geo.size.width
-                    let H = W * 9.0 / 16.0
-                    contentBox(item, size: CGSize(width: W, height: H))
-                        .frame(width: W, height: H)
+                    let width = geo.size.width
+                    let height = width * 9.0 / 16.0
+                    contentBox(item, size: CGSize(width: width, height: height))
+                        .frame(width: width, height: height)
                 }
                 .aspectRatio(16.0/9.0, contentMode: .fit)
 //                content(item)
@@ -85,31 +85,31 @@ private extension AdaptiveMosaic {
     @ViewBuilder
     func twoToFour(_ arr: [Item]) -> some View {
         GeometryReader { geo in
-            let W = geo.size.width
-            let H = W * 9.0 / 16.0       // Fix container height to 16:9 of its width
-            let halfW = (W - spacing) / 2
-            let halfH = (H - spacing) / 2
-            
+            let wdith = geo.size.width
+            let height = wdith * 9.0 / 16.0       // Fix container height to 16:9 of its width
+            let halfW = (wdith - spacing) / 2
+            let halfH = (height - spacing) / 2
+
             ZStack {
                 switch arr.count {
                 case 2:
                     // 1 row × 2 columns
                     HStack(spacing: spacing) {
-                        contentBox(arr[0], size: CGSize(width: halfW, height: H))
-                        contentBox(arr[1], size: CGSize(width: halfW, height: H))
+                        contentBox(arr[0], size: CGSize(width: halfW, height: height))
+                        contentBox(arr[1], size: CGSize(width: halfW, height: height))
                     }
-                    
+
                 case 3:
                     // Left: one large image (left half); Right: two stacked images
                     HStack(spacing: spacing) {
-                        contentBox(arr[0], size: CGSize(width: halfW, height: H))
-                        
+                        contentBox(arr[0], size: CGSize(width: halfW, height: height))
+
                         VStack(spacing: spacing) {
                             contentBox(arr[1], size: CGSize(width: halfW, height: halfH))
                             contentBox(arr[2], size: CGSize(width: halfW, height: halfH))
                         }
                     }
-                    
+
                 case 4:
                     // 2 × 2 grid
                     VStack(spacing: spacing) {
@@ -122,16 +122,16 @@ private extension AdaptiveMosaic {
                             contentBox(arr[3], size: CGSize(width: halfW, height: halfH))
                         }
                     }
-                    
+
                 default:
                     EmptyView()
                 }
             }
-            .frame(width: W, height: H)
+            .frame(width: wdith, height: height)
         }
         .aspectRatio(16.0/9.0, contentMode: .fit) // Guard at the outer level as well
     }
-    
+
     /// Unified cell wrapper: clip to a given fixed `size`
     @ViewBuilder
     func contentBox(_ item: Item, size: CGSize) -> some View {
@@ -147,14 +147,14 @@ private extension AdaptiveMosaic {
     @ViewBuilder
     func many(_ arr: [Item]) -> some View {
         GeometryReader { geo in
-            let W = geo.size.width
+            let width = geo.size.width
             let columns = 3
             let fullRowCount = arr.count / columns
             let remainder = arr.count % columns
-            
+
             // Side length of normal 1:1 squares based on a 3-column layout
-            let side = (W - CGFloat(columns - 1) * spacing) / CGFloat(columns)
-            
+            let side = (width - CGFloat(columns - 1) * spacing) / CGFloat(columns)
+
             VStack(spacing: spacing) {
                 // Render full rows first (each cell is 1:1)
                 ForEach(0..<fullRowCount, id: \.self) { row in
@@ -165,12 +165,12 @@ private extension AdaptiveMosaic {
                         }
                     }
                 }
-                
+
                 // Last row: if fewer than 3 items, fill the row using weight=1 (height keeps the same as above)
                 if remainder > 0 {
                     HStack(spacing: spacing) {
-                        ForEach(0..<remainder, id: \.self) { i in
-                            let idx = fullRowCount * columns + i
+                        ForEach(0..<remainder, id: \.self) { index in
+                            let idx = fullRowCount * columns + index
                             content(arr[idx])
                                 .frame(height: side)     // Keep height consistent with previous rows
                                 .frame(maxWidth: .infinity)
@@ -182,7 +182,7 @@ private extension AdaptiveMosaic {
         }
         .frame(maxWidth: .infinity)
     }
-    
+
     @ViewBuilder
     func squareBox(_ item: Item, side: CGFloat) -> some View {
         content(item)

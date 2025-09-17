@@ -3,7 +3,7 @@ import SwiftUI
 
 struct NotificationScreen: View {
     @State private var presenter: KotlinPresenter<NotificationPresenterState>
-    @State private var selectedType: NotificationFilter? = nil
+    @State private var selectedType: NotificationFilter?
     @Environment(\.openURL) private var openURL
     @State private var showTopBar = true
 
@@ -18,7 +18,9 @@ struct NotificationScreen: View {
                 .listRowSeparator(.hidden)
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .padding(.horizontal)
+                .listRowBackground(Color.clear)
         }
+        .scrollContentBackground(.hidden)
         .listRowSpacing(2)
         .listStyle(.plain)
         .background(Color(.systemGroupedBackground))
@@ -46,7 +48,7 @@ struct NotificationScreen: View {
         .refreshable {
             try? await presenter.state.refresh()
         }
-        .onChange(of: presenter.state.notificationType) { oldValue, newValue in
+        .onChange(of: presenter.state.notificationType) { _, newValue in
             if selectedType == nil {
                 selectedType = newValue
             }

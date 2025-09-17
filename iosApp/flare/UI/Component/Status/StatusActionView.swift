@@ -1,6 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import Awesome
 
 struct StatusActionsView: View {
     let data: [StatusAction]
@@ -105,6 +104,7 @@ struct StatusActionItemView: View {
                 StatusActionIcon(item: data, color: UIColor(data.color))
             }
         }
+        .sensoryFeedback(.success, trigger: data.color)
         .buttonStyle(.plain)
     }
 }
@@ -189,58 +189,58 @@ struct StatusActionIcon: View {
             switch onEnum(of: item) {
             case .bookmark(let bookmarked):
                 if bookmarked.bookmarked {
-                    Awesome.Classic.Solid.bookmark.image
-                        .foregroundColor(color)
+                    Image("fa-bookmark.fill")
+                        .foregroundStyle(Color(color))
                 } else {
-                    Awesome.Classic.Regular.bookmark.image
-                        .foregroundColor(color)
+                    Image("fa-bookmark")
+                        .foregroundStyle(Color(color))
                 }
 
             case .delete:
-                Awesome.Classic.Solid.trash.image
-                    .foregroundColor(color)
+                Image("fa-trash")
+                    .foregroundStyle(Color(color))
 
             case .like(let liked):
                 if liked.liked {
-                    Awesome.Classic.Solid.heart.image
-                        .foregroundColor(color)
+                    Image("fa-heart.fill")
+                        .foregroundStyle(Color(color))
                 } else {
-                    Awesome.Classic.Regular.heart.image
-                        .foregroundColor(color)
+                    Image("fa-heart")
+                        .foregroundStyle(Color(color))
                 }
 
             case .more:
-                Awesome.Classic.Solid.ellipsis.image
-                    .foregroundColor(color)
+                Image("fa-ellipsis")
+                    .foregroundStyle(Color(color))
 
             case .quote:
-                Awesome.Classic.Solid.quoteLeft.image
-                    .foregroundColor(color)
+                Image("fa-quote-left")
+                    .foregroundStyle(Color(color))
 
             case .reaction(let reacted):
                 if reacted.reacted {
-                    Awesome.Classic.Solid.minus.image
-                        .foregroundColor(color)
+                    Image("fa-minus")
+                        .foregroundStyle(Color(color))
                 } else {
-                    Awesome.Classic.Solid.plus.image
-                        .foregroundColor(color)
+                    Image("fa-plus")
+                        .foregroundStyle(Color(color))
                 }
 
             case .reply:
-                Awesome.Classic.Solid.reply.image
-                    .foregroundColor(color)
+                Image("fa-reply")
+                    .foregroundStyle(Color(color))
 
             case .report:
-                Awesome.Classic.Solid.circleInfo.image
-                    .foregroundColor(color)
+                Image("fa-circle-info")
+                    .foregroundStyle(Color(color))
 
             case .retweet:
-                Awesome.Classic.Solid.retweet.image
-                    .foregroundColor(color)
+                Image("fa-retweet")
+                    .foregroundStyle(Color(color))
 
             case .comment:
-                Awesome.Classic.Regular.commentDots.image
-                    .foregroundColor(color)
+                Image("fa-comment-dots")
+                    .foregroundStyle(Color(color))
             }
         }
     }

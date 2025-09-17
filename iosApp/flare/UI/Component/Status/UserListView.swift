@@ -18,7 +18,7 @@ struct UserListView: View {
                     }
                 }
             }
-            
+
             if let status = data.status {
                 VStack {
                     StatusView(data: status, isQuote: true)

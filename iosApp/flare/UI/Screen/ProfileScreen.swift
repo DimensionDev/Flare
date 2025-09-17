@@ -17,6 +17,7 @@ struct ProfileScreen: View {
                     presenter.state.follow(userKey: user.key, data: relation)
                 }
             )
+            .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
             .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
             StateView(state: presenter.state.tabs) { tabsArray in
@@ -44,6 +45,7 @@ struct ProfileScreen: View {
                 .listRowSeparator(.hidden)
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .padding()
+                .listRowBackground(Color.clear)
                 let selectedTabItem = tabs[selectedTab]
                 switch onEnum(of: selectedTabItem) {
                 case .timeline(let timeline):
@@ -51,12 +53,13 @@ struct ProfileScreen: View {
                         .listRowSeparator(.hidden)
                         .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                         .padding(.horizontal)
+                        .listRowBackground(Color.clear)
                 case .media(let media):
                     EmptyView()
                 }
             }
         }
-        
+        .scrollContentBackground(.hidden)
         .listRowSpacing(2)
         .listStyle(.plain)
         .background(Color(.systemGroupedBackground))
@@ -124,7 +127,6 @@ extension ProfileScreen {
         self.init(accountType: accountType, userKey: userKey, presenter: .init(presenter: ProfilePresenter(accountType: accountType, userKey: userKey)))
     }
 }
-
 
 struct ProfileHeader: View {
     let user: UiState<UiProfile>

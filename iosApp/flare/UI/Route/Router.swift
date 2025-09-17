@@ -25,7 +25,7 @@ struct Router<Root: View>: View {
             }
         })
     }
-    
+
     func navigate(route: Route) {
         if backStack.last != route {
             backStack.append(route)

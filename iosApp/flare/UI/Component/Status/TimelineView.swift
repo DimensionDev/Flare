@@ -39,21 +39,11 @@ struct TimelinePlaceholderView: View {
         VStack(
             alignment: .leading,
         ) {
-            HStack {
-                Rectangle()
-                .fill(.placeholder)
-                    .frame(width: 44, height: 44)
-                    .clipShape(.circle)
-                VStack(
-                    alignment: .leading
-                ) {
-                    Text("user name")
-                    Text("user handle")
-                        .font(.caption)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eget eros justo. Duis feugiat tortor sed lectus euismod iaculis. Donec aliquam sem dui, id facilisis velit luctus eget. Nam ac mattis sapien. Morbi ultrices diam at accumsan hendrerit. Donec vitae venenatis nulla. Nullam condimentum pharetra venenatis.")
+            UserLoadingView()
+            Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit." +
+                 "Pellentesque eget eros justo. Duis feugiat tortor sed lectus euismod iaculis. " +
+                 "Donec aliquam sem dui, id facilisis velit luctus eget. Nam ac mattis sapien. " +
+                 "Morbi ultrices diam at accumsan hendrerit. Donec vitae venenatis nulla. Nullam condimentum pharetra venenatis.")
         }
         .redacted(reason: .placeholder)
     }

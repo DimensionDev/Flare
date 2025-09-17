@@ -4,7 +4,7 @@ import KotlinSharedUI
 struct DateTimeText: View {
     let data: UiDateTime
     let fullTime: Bool
-    
+
     var body: some View {
         if fullTime {
             HStack {

@@ -8,7 +8,7 @@ struct StatusReactionView: View {
             LazyHStack {
                 ForEach(data.emojiReactions, id: \.name) { item in
                     Button {
-                        
+
                     } label: {
                         Label {
                             Text(item.humanizedCount)

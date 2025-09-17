@@ -15,8 +15,5 @@ struct UserOnelineView<TrailingContent: View>: View {
             trailing()
         }
         .lineLimit(1)
-        .onTapGesture {
-            data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-        }
     }
 }

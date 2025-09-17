@@ -1,7 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
 import Kingfisher
-import Awesome
 
 struct TabTitle: View {
     let title: TitleType
@@ -47,7 +46,7 @@ struct TabIcon: View {
     var body: some View {
         switch onEnum(of: icon) {
         case .material(let material):
-            MaterialTabIcon(icon: material.icon, size: size)
+            MaterialTabIcon(icon: material.icon)
         case .avatar(let avatar):
             AvatarTabIcon(userKey: avatar.userKey, accountType: accountType)
                 .frame(width: size, height: size)
@@ -55,7 +54,7 @@ struct TabIcon: View {
             NetworkImage(data: url.url)
                 .frame(width: size, height: size)
         case .mixed(let mixed):
-            MaterialTabIcon(icon: mixed.icon, size: size)
+            MaterialTabIcon(icon: mixed.icon)
         }
     }
 }
@@ -71,57 +70,38 @@ extension TabIcon {
 
 struct MaterialTabIcon: View {
     let icon: IconType.MaterialMaterialIcon
-    let size: CGFloat
     var body: some View {
         switch icon {
-        case .home: Awesome.Classic.Solid.house.image
-                .size(size)
-        case .notification: Awesome.Classic.Solid.bell.image
-                .size(size)
-        case .search:Awesome.Classic.Solid.magnifyingGlass.image
-                .size(size)
-        case .profile: Awesome.Classic.Solid.circleUser.image
-                .size(size)
-        case .settings: Awesome.Classic.Solid.gear.image
-                .size(size)
-        case .local: Awesome.Classic.Solid.users.image
-                .size(size)
-        case .world: Awesome.Classic.Solid.globe.image
-                .size(size)
-        case .featured: Awesome.Classic.Solid.rectangleList.image
-                .size(size)
-        case .bookmark: Awesome.Classic.Solid.bookBookmark.image
-                .size(size)
-        case .heart: Awesome.Classic.Solid.star.image
-                .size(size)
-        case .twitter: Awesome.Classic.Brand.twitter.image
-                .size(size)
-        case .mastodon: Awesome.Classic.Brand.mastodon.image
-                .size(size)
-        case .misskey: Awesome.Classic.Solid.globe.image
-                .size(size)
-        case .bluesky: Awesome.Classic.Brand.bluesky.image
-                .size(size)
-        case .list: Awesome.Classic.Solid.list.image
-                .size(size)
-        case .feeds: Awesome.Classic.Solid.squareRss.image
-                .size(size)
-        case .messages: Awesome.Classic.Solid.message.image
-                .size(size)
-        case .rss: Awesome.Classic.Solid.squareRss.image
-                .size(size)
+        case .home:        Image("fa-house")
+        case .notification: Image("fa-bell")
+        case .search:       Image("fa-magnifying-glass")
+        case .profile:      Image("fa-circle-user")
+        case .settings:     Image("fa-gear")
+        case .local:        Image("fa-users")
+        case .world:        Image("fa-globe")
+        case .featured:     Image("fa-rectangle-list")
+        case .bookmark:     Image("fa-book-bookmark")
+        case .heart:        Image("fa-star")
+        case .twitter:      Image("fa-twitter")
+        case .mastodon:     Image("fa-mastodon")
+        case .misskey:      Image("fa-globe")
+        case .bluesky:      Image("fa-bluesky")
+        case .list:         Image("fa-list")
+        case .feeds:        Image("fa-square-rss")
+        case .messages:     Image("fa-message")
+        case .rss:          Image("fa-square-rss")
         }
     }
 }
 
 struct AvatarTabIcon: View {
-    
+
     @State private var presenter: KotlinPresenter<UserState>
-    
+
     init(userKey: MicroBlogKey, accountType: AccountType) {
         self._presenter = .init(wrappedValue: .init(presenter: UserPresenter(accountType: accountType, userKey: userKey)))
     }
-    
+
     var body: some View {
         StateView(state: presenter.state.user) { user in
             NetworkImage(data: user.avatar)

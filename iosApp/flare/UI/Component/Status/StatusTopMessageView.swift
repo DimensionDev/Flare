@@ -1,14 +1,12 @@
 import SwiftUI
 import KotlinSharedUI
-import Awesome
 import MarkdownUI
 
 struct StatusTopMessageView: View {
     let topMessage: UiTimeline.TopMessage
     var body: some View {
         HStack {
-            topMessage.icon.awesomeImage.image
-                .foregroundColor(.label)
+            topMessage.icon.awesomeImage
             if let user = topMessage.user {
                 RichText(text: user.name)
                     .lineLimit(1)
@@ -18,6 +16,7 @@ struct StatusTopMessageView: View {
             }
             if let text = topMessage.type.localizedText {
                 Text(text)
+                    .lineLimit(1)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -26,32 +25,31 @@ struct StatusTopMessageView: View {
 }
 
 extension UiTimeline.TopMessageIcon {
-    var awesomeImage: some Amazing {
+    var awesomeImage: Image {
         switch self {
         case .retweet:
-            return Awesome.Classic.Solid.retweet
+            return Image("fa-retweet")
         case .follow:
-            return Awesome.Classic.Solid.userPlus
+            return Image("fa-user-plus")
         case .favourite:
-            return Awesome.Classic.Solid.heart
+            return Image("fa-heart")
         case .mention:
-            return Awesome.Classic.Solid.at
+            return Image("fa-at")
         case .poll:
-            return Awesome.Classic.Solid.squarePollHorizontal
+            return Image("fa-square-poll-horizontal")
         case .edit:
-            return Awesome.Classic.Solid.pen
+            return Image("fa-pen")
         case .info:
-            return Awesome.Classic.Solid.circleInfo
+            return Image("fa-circle-info")
         case .reply:
-            return Awesome.Classic.Solid.reply
+            return Image("fa-reply")
         case .quote:
-            return Awesome.Classic.Solid.quoteLeft
+            return Image("fa-quote-left")
         case .pin:
-            return Awesome.Classic.Solid.thumbtack
+            return Image("fa-thumbtack")
         }
     }
 }
-
 
 extension UiTimeline.TopMessageMessageType {
     var localizedText: String? {
@@ -84,7 +82,11 @@ extension UiTimeline.TopMessageMessageType {
         case .misskey(let data):
             switch onEnum(of: data) {
             case .achievementEarned(let achive):
-                String(format: NSLocalizedString("misskey_notification_achievement_earned", comment: ""), String(localized: achive.achievement?.titleKey ?? ""), String(localized: achive.achievement?.descriptionKey ?? ""))
+                String(
+                    format: NSLocalizedString("misskey_notification_achievement_earned", comment: ""),
+                    String(localized: achive.achievement?.titleKey ?? ""),
+                    String(localized: achive.achievement?.descriptionKey ?? "")
+                )
             case .app: String(localized: "misskey_notification_app")
             case .follow: String(localized: "misskey_notification_follow")
             case .followRequestAccepted: String(localized: "misskey_notification_follow_request_accepted")
@@ -112,7 +114,6 @@ extension UiTimeline.TopMessageMessageType {
         }
     }
 }
-
 
 extension MisskeyAchievement {
     var titleKey: LocalizedStringResource {
@@ -197,7 +198,7 @@ extension MisskeyAchievement {
         case .smashTestNotificationButton:  return "misskey_achievement_smash_test_notification_button_title"
         case .tutorialCompleted:            return "misskey_achievement_tutorial_completed_title"
         case .bubbleGameExplodingHead:      return "misskey_achievement_bubble_game_exploding_head_title"
-        case .bubbleGameDoubleExplodingHead:return "misskey_achievement_bubble_game_double_exploding_head_title"
+        case .bubbleGameDoubleExplodingHead: return "misskey_achievement_bubble_game_double_exploding_head_title"
         }
     }
 
@@ -283,7 +284,7 @@ extension MisskeyAchievement {
         case .smashTestNotificationButton:  return "misskey_achievement_smash_test_notification_button_description"
         case .tutorialCompleted:            return "misskey_achievement_tutorial_completed_description"
         case .bubbleGameExplodingHead:      return "misskey_achievement_bubble_game_exploding_head_description"
-        case .bubbleGameDoubleExplodingHead:return "misskey_achievement_bubble_game_double_exploding_head_description"
+        case .bubbleGameDoubleExplodingHead: return "misskey_achievement_bubble_game_double_exploding_head_description"
         }
     }
 }

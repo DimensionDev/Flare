@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0646B25D2E714C7B00535A3E /* Awesome in Frameworks */ = {isa = PBXBuildFile; productRef = 0646B25C2E714C7B00535A3E /* Awesome */; };
 		0646B2622E7151A700535A3E /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0646B2612E7151A700535A3E /* Kingfisher */; };
 		068F7CD12E75405A00B5FB40 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 068F7CD02E75405A00B5FB40 /* MarkdownUI */; };
 /* End PBXBuildFile section */
@@ -44,7 +43,6 @@
 			files = (
 				068F7CD12E75405A00B5FB40 /* MarkdownUI in Frameworks */,
 				0646B2622E7151A700535A3E /* Kingfisher in Frameworks */,
-				0646B25D2E714C7B00535A3E /* Awesome in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,13 +80,13 @@
 			buildRules = (
 			);
 			dependencies = (
+				06791BD62E7AA41500FF2050 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				06E434002E6A9A2600CD0826 /* Flare */,
 			);
 			name = Flare;
 			packageProductDependencies = (
-				0646B25C2E714C7B00535A3E /* Awesome */,
 				0646B2612E7151A700535A3E /* Kingfisher */,
 				068F7CD02E75405A00B5FB40 /* MarkdownUI */,
 			);
@@ -121,9 +119,9 @@
 			mainGroup = 06E433F52E6A9A2600CD0826;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				0646B25B2E714C7B00535A3E /* XCRemoteSwiftPackageReference "Awesome" */,
 				0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				068F7CCF2E75405A00B5FB40 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
+				06791BD42E7AA40000FF2050 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 06E433FF2E6A9A2600CD0826 /* Products */;
@@ -175,6 +173,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		06791BD62E7AA41500FF2050 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 06791BD52E7AA41500FF2050 /* SwiftLintBuildToolPlugin */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		06E434072E6A9A2700CD0826 /* Debug */ = {
@@ -402,20 +407,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		0646B25B2E714C7B00535A3E /* XCRemoteSwiftPackageReference "Awesome" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Tlaster/Awesome";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
 		0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
 			requirement = {
 				kind = exactVersion;
 				version = 8.5.0;
+			};
+		};
+		06791BD42E7AA40000FF2050 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
+			requirement = {
+				kind = exactVersion;
+				version = 0.61.0;
 			};
 		};
 		068F7CCF2E75405A00B5FB40 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
@@ -429,15 +434,15 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		0646B25C2E714C7B00535A3E /* Awesome */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 0646B25B2E714C7B00535A3E /* XCRemoteSwiftPackageReference "Awesome" */;
-			productName = Awesome;
-		};
 		0646B2612E7151A700535A3E /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		06791BD52E7AA41500FF2050 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 06791BD42E7AA40000FF2050 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
 		};
 		068F7CD02E75405A00B5FB40 /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;

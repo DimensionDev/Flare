@@ -14,13 +14,12 @@ struct RichText: View {
     }
 }
 
-
 struct KFImageProvider: ImageProvider, InlineImageProvider {
     func makeImage(url: URL?) -> some View {
         NetworkImage(data: url)
             .frame(width: 14, height: 14)
     }
-    
+
     func image(with url: URL, label: String) async throws -> Image {
         let image = try await KingfisherManager.shared.retrieveImage(with: url)
         if let resized = image.image.resize(height: 14) {
@@ -30,7 +29,6 @@ struct KFImageProvider: ImageProvider, InlineImageProvider {
         }
     }
 }
-
 
 extension ImageProvider where Self == KFImageProvider {
     static var kfImage: Self {

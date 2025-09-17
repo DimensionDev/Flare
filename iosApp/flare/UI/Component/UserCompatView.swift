@@ -20,9 +20,6 @@ struct UserCompatView<TrailingContent: View>: View {
             trailing()
         }
         .lineLimit(1)
-        .onTapGesture {
-            data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-        }
     }
 }
 
@@ -31,6 +28,25 @@ extension UserCompatView {
         self.data = data
         self.trailing = {
             EmptyView()
+        }
+    }
+}
+
+struct UserLoadingView: View {
+    var body: some View {
+        HStack {
+            Rectangle()
+            .fill(.placeholder)
+                .frame(width: 44, height: 44)
+                .clipShape(.circle)
+            VStack(
+                alignment: .leading
+            ) {
+                Text("user name")
+                Text("user handle")
+                    .font(.caption)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }

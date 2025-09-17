@@ -43,18 +43,16 @@ nonisolated(unsafe) private var gDecision: DecisionCB?
 public typealias WindowClosedCB = @convention(c) (_ id: Int64, _ reason: Int32) -> Void
 nonisolated(unsafe) private var gOnClosed: WindowClosedCB?
 
-
 @MainActor
 private func makeWindow(with web: WKWebView, title: String) -> NSWindow {
     let win = NSWindow(contentRect: NSRect(x: 200, y: 200, width: 1000, height: 700),
-                       styleMask: [.titled, .closable, .resizable, .miniaturizable,],
+                       styleMask: [.titled, .closable, .resizable, .miniaturizable ],
                        backing: .buffered, defer: false)
     win.title = title
     win.contentView = web
     win.isReleasedWhenClosed = false
     return win
 }
-
 
 private func cookieHeaderString(from cookies: [HTTPCookie], for url: URL?) -> String {
     let host = url?.host?.lowercased()

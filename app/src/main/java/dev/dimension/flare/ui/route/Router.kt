@@ -45,13 +45,13 @@ import soup.compose.material.motion.animation.translateXOut
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun Router(
-    topLevelBackStack: TopLevelBackStack<DeeplinkRoute>,
+    topLevelBackStack: TopLevelBackStack<Route>,
     navigationState: NavigationState,
     openDrawer: () -> Unit,
 ) {
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
 
-    fun navigate(route: DeeplinkRoute) {
+    fun navigate(route: Route) {
         topLevelBackStack.add(route)
     }
 

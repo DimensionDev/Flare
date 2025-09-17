@@ -143,6 +143,8 @@ enum Route: Hashable {
             case .status(let status):
                 return fromStatus(status)
             }
+            case .login:
+                return Route.serviceSelect
         } else {
             return nil
         }

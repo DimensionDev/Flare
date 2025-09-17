@@ -47,7 +47,7 @@ struct StatusView: View {
                             }
                         }
                         .onTapGesture {
-                            data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                            user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                         }
                     } else {
                         UserCompatView(data: user) {
@@ -65,7 +65,7 @@ struct StatusView: View {
                             }
                         }
                         .onTapGesture {
-                            data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                            user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                         }
                     }
                 }

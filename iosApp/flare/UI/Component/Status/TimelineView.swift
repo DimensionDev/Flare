@@ -4,11 +4,16 @@ import KotlinSharedUI
 struct TimelineView: View {
     let data: UiTimeline
     let detailStatusKey: MicroBlogKey?
-    
+    @Environment(\.openURL) private var openURL
     var body: some View {
         VStack {
             if let topMessage = data.topMessage {
                 StatusTopMessageView(topMessage: topMessage)
+                    .onTapGesture {
+                        if let user = topMessage.user {
+                            user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                        }
+                    }
             }
             if let content = data.content {
                 switch onEnum(of: content) {

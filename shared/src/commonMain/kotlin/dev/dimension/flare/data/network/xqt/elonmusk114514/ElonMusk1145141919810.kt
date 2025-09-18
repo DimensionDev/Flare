@@ -2,15 +2,16 @@ package dev.dimension.flare.data.network.xqt.elonmusk114514
 
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.network.ktorClient
+import dev.whyoleg.cryptography.CryptographyProvider
+import dev.whyoleg.cryptography.algorithms.SHA256
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.util.decodeBase64Bytes
 import io.ktor.util.encodeBase64
-import korlibs.crypto.sha256
-import kotlinx.serialization.Serializable
 import kotlin.experimental.xor
 import kotlin.random.Random
 import kotlin.time.Clock
+import kotlinx.serialization.Serializable
 
 internal object ElonMusk1145141919810 {
     @Serializable
@@ -21,7 +22,13 @@ internal object ElonMusk1145141919810 {
 
     private var jsonPair: List<JsonPair>? = null
 
-    fun encodeSha256(data: String): ByteArray = data.encodeToByteArray().sha256().bytes
+    suspend fun encodeSha256(data: String): ByteArray {
+        return CryptographyProvider
+            .Default
+            .get(SHA256)
+            .hasher()
+            .hash(data.encodeToByteArray())
+    }
 
     fun encodeBase64(data: ByteArray): String = data.encodeBase64()
 

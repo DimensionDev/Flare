@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,6 +36,7 @@ import dev.dimension.flare.ui.component.floatingToolbarVerticalNestedScroll
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
+import dev.dimension.flare.ui.presenter.TimelineItemPresenterWithLazyListState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
@@ -55,101 +57,105 @@ internal fun HomeTimelineScreen(
     }
 
     state.tabState.onSuccess { tabState ->
-        state.selectedTab.onSuccess { currentTab ->
-            Box {
-                TimelineContent(
-                    state = currentTab,
-                    modifier =
-                        Modifier
-                            .hazeSource(hazeState)
-                            .floatingToolbarVerticalNestedScroll(
-                                expanded = state.isTopBarExpanded,
-                                onExpand = {
-                                    state.setTopBarExpanded(true)
-                                },
-                                onCollapse = {
-                                    state.setTopBarExpanded(false)
-                                },
-                            ),
-                    contentPadding = PaddingValues(top = 48.dp),
-                    onScrollToTop = {
-                        state.setTopBarExpanded(true)
-                    },
-                )
-                AnimatedVisibility(
-                    visible = state.isTopBarExpanded,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                // prevent click through
-                            },
-                    enter = slideInVertically { -it },
-                    exit = slideOutVertically { -it },
-                ) {
-                    LiteFilter(
+        state.selectedTabTimelineState.onSuccess { currentTabTimelineState ->
+            state.selectedTab.onSuccess { currentTab ->
+                Box {
+                    TimelineContent(
+                        state = currentTabTimelineState,
                         modifier =
                             Modifier
-                                .hazeEffect(
-                                    state = hazeState,
-                                    style =
-                                        FluentMaterials.mica(
-                                            FluentTheme.colors.background.mica.base
-                                                .luminance() < 0.5f,
-                                        ),
-                                ).fillMaxWidth()
-                                .padding(LocalWindowPadding.current)
-                                .padding(horizontal = screenHorizontalPadding),
+                                .hazeSource(hazeState)
+                                .floatingToolbarVerticalNestedScroll(
+                                    expanded = state.isTopBarExpanded,
+                                    onExpand = {
+                                        state.setTopBarExpanded(true)
+                                    },
+                                    onCollapse = {
+                                        state.setTopBarExpanded(false)
+                                    },
+                                ),
+                        contentPadding = PaddingValues(top = 48.dp),
+                        onScrollToTop = {
+                            state.setTopBarExpanded(true)
+                        },
+                    )
+                    AnimatedVisibility(
+                        visible = state.isTopBarExpanded,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    // prevent click through
+                                },
+                        enter = slideInVertically { -it },
+                        exit = slideOutVertically { -it },
                     ) {
-                        tabState.forEachIndexed { index, tab ->
-                            PillButton(
-                                selected = tab.timelineTabItem.key == currentTab.timelineTabItem.key,
-                                onSelectedChanged = {
-                                    if (tab.timelineTabItem.key == currentTab.timelineTabItem.key) {
-                                        if (currentTab.lazyListState.firstVisibleItemIndex == 0) {
-                                            currentTab.refreshSync()
+                        LiteFilter(
+                            modifier =
+                                Modifier
+                                    .hazeEffect(
+                                        state = hazeState,
+                                        style =
+                                            FluentMaterials.mica(
+                                                FluentTheme.colors.background.mica.base
+                                                    .luminance() < 0.5f,
+                                            ),
+                                    ).fillMaxWidth()
+                                    .padding(LocalWindowPadding.current)
+                                    .padding(horizontal = screenHorizontalPadding),
+                        ) {
+                            tabState.forEachIndexed { index, tab ->
+                                PillButton(
+                                    selected = tab.key == currentTab.key,
+                                    onSelectedChanged = {
+                                        if (tab.key == currentTab.key) {
+                                            if (currentTabTimelineState.lazyListState.firstVisibleItemIndex == 0) {
+                                                currentTabTimelineState.refreshSync()
+                                            } else {
+                                                currentTabTimelineState.lazyListState.requestScrollToItem(
+                                                    0,
+                                                )
+                                            }
                                         } else {
-                                            currentTab.lazyListState.requestScrollToItem(0)
+                                            state.setSelectedIndex(index)
                                         }
-                                    } else {
-                                        state.setSelectedIndex(index)
-                                    }
-                                },
-                            ) {
-                                TabIcon(
-                                    tabItem = tab.timelineTabItem,
-                                )
-                                TabTitle(
-                                    title = tab.timelineTabItem.metaData.title,
-                                )
+                                    },
+                                ) {
+                                    TabIcon(
+                                        tabItem = tab,
+                                    )
+                                    TabTitle(
+                                        title = tab.metaData.title,
+                                    )
+                                }
                             }
-                        }
-                        if (accountType !is AccountType.Guest) {
-                            PillButton(
-                                selected = false,
-                                onSelectedChanged = {
-                                    onAddTab.invoke()
-                                },
-                            ) {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.Plus,
-                                    contentDescription = null,
-                                )
+                            if (accountType !is AccountType.Guest) {
+                                PillButton(
+                                    selected = false,
+                                    onSelectedChanged = {
+                                        onAddTab.invoke()
+                                    },
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Plus,
+                                        contentDescription = null,
+                                    )
+                                }
                             }
                         }
                     }
-                }
-                AnimatedVisibility(
-                    currentTab.isRefreshing,
-                    enter = slideInVertically { -it },
-                    exit = slideOutVertically { -it },
-                ) {
-                    ProgressBar(
-                        modifier =
-                            Modifier
-                                .align(Alignment.TopCenter)
-                                .fillMaxWidth(),
-                    )
+                    AnimatedVisibility(
+                        currentTabTimelineState.isRefreshing,
+                        enter = slideInVertically { -it },
+                        exit = slideOutVertically { -it },
+                    ) {
+                        ProgressBar(
+                            modifier =
+                                Modifier
+                                    .align(Alignment.TopCenter)
+                                    .fillMaxWidth(),
+                        )
+                    }
                 }
             }
         }
@@ -179,8 +185,18 @@ private fun presenter(accountType: AccountType) =
                 state.tabState.map { it.elementAt(selectedIndex) }
             }
 
+        val selectedTabTimelineState =
+            selectedTab.map {
+                key(it.key) {
+                    remember(it.key) {
+                        TimelineItemPresenterWithLazyListState(it)
+                    }.body()
+                }
+            }
+
         object : HomeTimelineWithTabsPresenter.State by state {
             val selectedTab = selectedTab
+            val selectedTabTimelineState = selectedTabTimelineState
 
             fun setSelectedIndex(index: Int) {
                 selectedIndex = index

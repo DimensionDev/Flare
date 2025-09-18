@@ -1,12 +1,13 @@
 import SwiftUI
 import KotlinSharedUI
 
-struct TabItemView: View {
-    let tabItem: TabItem
-    let onNavigate: (Route) -> Void
-
-    var body: some View {
-        switch onEnum(of: tabItem) {
+extension TabItem {
+    @MainActor
+    @ViewBuilder
+    func view(
+        onNavigate: @escaping (Route) -> Void,
+    ) -> some View {
+        switch onEnum(of: self) {
         case .timelineTabItem(let timelineTabItem):
             switch onEnum(of: timelineTabItem) {
             case .HomeTimelineTabItem(let homeTimelineTabItem):
@@ -25,7 +26,7 @@ struct TabItemView: View {
         case .antennasListTabItem:
             EmptyView()
         case .notificationTabItem:
-            NotificationScreen(accountType: tabItem.account)
+            NotificationScreen(accountType: self.account)
         case .profileTabItem:
             EmptyView()
         case .rssTabItem:

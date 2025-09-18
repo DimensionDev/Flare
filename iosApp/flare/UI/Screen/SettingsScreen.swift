@@ -2,7 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 
 struct SettingsScreen: View {
-    @State private var presenter = KotlinPresenter(presenter: ActiveAccountPresenter())
+    @StateObject private var presenter = KotlinPresenter(presenter: ActiveAccountPresenter())
 
     var body: some View {
         List {

@@ -36,7 +36,7 @@ import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.presenter.TimelineItemPresenter
+import dev.dimension.flare.ui.presenter.TimelineItemPresenterWithLazyListState
 import dev.dimension.flare.ui.presenter.invoke
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.ProgressBar
@@ -69,7 +69,7 @@ internal fun TimelineScreen(
 
 @Composable
 internal fun TimelineContent(
-    state: TimelineItemPresenter.State,
+    state: TimelineItemPresenterWithLazyListState.State,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     header: @Composable (() -> Unit)? = null,
@@ -156,6 +156,6 @@ internal fun TimelineContent(
 private fun presenter(tabItem: TimelineTabItem) =
     run {
         remember(tabItem.key) {
-            TimelineItemPresenter(tabItem)
+            TimelineItemPresenterWithLazyListState(tabItem)
         }.invoke()
     }

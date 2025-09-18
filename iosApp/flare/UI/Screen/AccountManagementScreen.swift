@@ -2,7 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 
 struct AccountManagementScreen: View {
-    @State private var presenter = KotlinPresenter(presenter: AccountManagementPresenter())
+    @StateObject private var presenter = KotlinPresenter(presenter: AccountManagementPresenter())
     var body: some View {
         List {
             StateView(state: presenter.state.accounts) { accounts in

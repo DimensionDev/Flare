@@ -55,8 +55,12 @@ public class ProfilePresenter(
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
 
+    private val serviceFlow by lazy {
+        accountServiceFlow(accountType, accountRepository)
+    }
+
     private val userStateFlow by lazy {
-        accountServiceFlow(accountType, accountRepository).flatMapLatest { service ->
+        serviceFlow.flatMapLatest { service ->
             val userId =
                 userKey?.id
                     ?: if (service is AuthenticatedMicroblogDataSource) {
@@ -69,7 +73,7 @@ public class ProfilePresenter(
     }
 
     private val relationStateFlow by lazy {
-        accountServiceFlow(accountType, accountRepository).flatMapLatest { service ->
+        serviceFlow.flatMapLatest { service ->
             require(service is AuthenticatedMicroblogDataSource)
             val actualUserKey = userKey ?: service.accountKey
             service.relation(actualUserKey)
@@ -77,7 +81,7 @@ public class ProfilePresenter(
     }
 
     private val isMeFlow by lazy {
-        accountServiceFlow(accountType, accountRepository).map { service ->
+        serviceFlow.map { service ->
             if (service is AuthenticatedMicroblogDataSource) {
                 service.accountKey == userKey || userKey == null
             } else {
@@ -87,14 +91,14 @@ public class ProfilePresenter(
     }
 
     private val profileActionsFlow by lazy {
-        accountServiceFlow(accountType, accountRepository).map { service ->
+        serviceFlow.map { service ->
             require(service is AuthenticatedMicroblogDataSource)
             service.profileActions().toImmutableList()
         }
     }
 
     private val canSendMessageFlow by lazy {
-        accountServiceFlow(accountType, accountRepository).flatMapLatest { service ->
+        serviceFlow.flatMapLatest { service ->
             if (service is DirectMessageDataSource && userKey != null) {
                 flow<Boolean> {
                     runCatching {
@@ -112,7 +116,7 @@ public class ProfilePresenter(
     }
 
     private val myAccountKeyFlow by lazy {
-        accountServiceFlow(accountType, accountRepository).map { service ->
+        serviceFlow.map { service ->
             if (service is AuthenticatedMicroblogDataSource) {
                 service.accountKey
             } else {
@@ -122,7 +126,7 @@ public class ProfilePresenter(
     }
 
     private val tabsFlow by lazy {
-        accountServiceFlow(accountType, accountRepository).map { service ->
+        serviceFlow.map { service ->
             val actualUserKey =
                 userKey
                     ?: if (service is AuthenticatedMicroblogDataSource) {

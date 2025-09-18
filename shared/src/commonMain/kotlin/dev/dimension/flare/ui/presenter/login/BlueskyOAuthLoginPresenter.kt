@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import dev.dimension.flare.data.network.bluesky.OAuthCodeChallengeMethodS256
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
@@ -21,7 +22,6 @@ import sh.christian.ozone.api.xrpc.BSKY_SOCIAL
 import sh.christian.ozone.oauth.OAuthApi
 import sh.christian.ozone.oauth.OAuthAuthorizationRequest
 import sh.christian.ozone.oauth.OAuthClient
-import sh.christian.ozone.oauth.OAuthCodeChallengeMethod
 import sh.christian.ozone.oauth.OAuthScope
 
 private const val CLIENT_METADATA = "https://flareapp.moe/client-metadata.json"
@@ -39,7 +39,7 @@ public class BlueskyOAuthLoginPresenter(
                     url.takeFrom(BSKY_SOCIAL)
                 }
             },
-            { OAuthCodeChallengeMethod.S256 },
+            { OAuthCodeChallengeMethodS256 },
         )
     }
 
@@ -88,6 +88,7 @@ public class BlueskyOAuthLoginPresenter(
                         try {
                             login(userName)
                         } catch (e: Exception) {
+                            e.printStackTrace()
                             error = e.message
                             null
                         }

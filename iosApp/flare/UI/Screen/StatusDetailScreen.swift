@@ -3,12 +3,12 @@ import SwiftUI
 
 struct StatusDetailScreen: View {
     @Environment(\.openURL) private var openURL
-    @State private var presenter: KotlinPresenter<TimelineState>
+    @StateObject private var presenter: KotlinPresenter<TimelineState>
     private let statusKey: MicroBlogKey
 
     init(accountType: AccountType, statusKey: MicroBlogKey) {
         self.statusKey = statusKey
-        self._presenter = .init(initialValue: .init(presenter: StatusContextPresenter(accountType: accountType, statusKey: statusKey)))
+        self._presenter = .init(wrappedValue: .init(presenter: StatusContextPresenter(accountType: accountType, statusKey: statusKey)))
     }
 
     var body: some View {

@@ -94,6 +94,7 @@ kotlin {
                 implementation(libs.krypto)
                 implementation(projects.shared.api)
                 implementation(libs.ktor.client.resources)
+                implementation("dev.whyoleg.cryptography:cryptography-provider-optimal:0.5.0")
             }
         }
         val commonTest by getting {

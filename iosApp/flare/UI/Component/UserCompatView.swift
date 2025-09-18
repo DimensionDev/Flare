@@ -36,7 +36,7 @@ struct UserLoadingView: View {
     var body: some View {
         HStack {
             Rectangle()
-            .fill(.placeholder)
+                .fill(.placeholder)
                 .frame(width: 44, height: 44)
                 .clipShape(.circle)
             VStack(
@@ -48,5 +48,6 @@ struct UserLoadingView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .redacted(reason: .placeholder)
     }
 }

@@ -9,9 +9,12 @@ struct UserOnelineView<TrailingContent: View>: View {
         HStack {
             AvatarView(data: data.avatar)
                 .frame(width: 20, height: 20)
-            RichText(text: data.name)
-            Text(data.handle)
-                .font(.caption)
+            HStack {
+                RichText(text: data.name)
+                Text(data.handle)
+                    .font(.caption)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
             trailing()
         }
         .lineLimit(1)

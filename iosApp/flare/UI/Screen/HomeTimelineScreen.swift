@@ -6,61 +6,57 @@ struct HomeTimelineScreen: View {
     let accountType: AccountType
     @Environment(\.openURL) private var openURL
     @State private var selectedTabIndex = 0
-    @State private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
+    @StateObject private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
     @State private var showTopBar = true
 
     init(accountType: AccountType, toServiceSelect: @escaping () -> Void) {
         self.accountType = accountType
         self.toServiceSelect = toServiceSelect
-        _presenter = .init(wrappedValue: .init(presenter: HomeTimelineWithTabsPresenter(accountType: accountType)))
+        self._presenter = .init(wrappedValue: .init(presenter: HomeTimelineWithTabsPresenter(accountType: accountType)))
     }
 
     var body: some View {
         StateView(state: presenter.state.tabState) { state in
-            let tabs: [TimelineItemPresenterState] = state.cast(TimelineItemPresenterState.self)
+            let tabs: [TimelineTabItem] = state.cast(TimelineTabItem.self)
             let tab = tabs[selectedTabIndex]
-            List {
-                TimelinePagingView(data: tab.listState)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    .padding(.horizontal)
-                    .listRowBackground(Color.clear)
+            ZStack {
+                TimelineScreen(tabItem: tab)
+                    .id(tab.key)
             }
-            .scrollContentBackground(.hidden)
-            .listRowSpacing(2)
-            .listStyle(.plain)
-            .background(Color(.systemGroupedBackground))
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     ScrollView(.horizontal) {
-                        HStack {
-                            ForEach(tabs.indices) { index in
-                                let tab = tabs[index]
-                                Button {
-                                    selectedTabIndex = index
-                                } label: {
-                                    Label {
-                                        TabTitle(title: tab.timelineTabItem.metaData.title)
-                                    } icon: {
-                                        TabIcon(icon: tab.timelineTabItem.metaData.icon, accountType: tab.timelineTabItem.account, size: 24)
+                        GlassEffectContainer {
+                            HStack {
+                                ForEach(0..<tabs.count, id: \.self) { index in
+                                    let tab = tabs[index]
+                                    Button {
+                                        selectedTabIndex = index
+                                    } label: {
+                                        Label {
+                                            TabTitle(title: tab.metaData.title)
+                                        } icon: {
+                                            TabIcon(icon: tab.metaData.icon, accountType: tab.account, size: 24)
+                                        }
+                                    }
+                                    .if(selectedTabIndex == index) { button in
+                                        button.buttonStyle(.glassProminent)
+                                    } else: { button in
+                                        button.buttonStyle(.glass)
                                     }
                                 }
-                                .if(selectedTabIndex == index) { button in
-                                    button.buttonStyle(.glassProminent)
-                                } else: { button in
-                                    button.buttonStyle(.glass)
+                                if case .success = onEnum(of: presenter.state.user) {
+                                    Button {
+                                    } label: {
+                                        Image("fa-plus")
+                                    }
+                                    .buttonStyle(.glass)
                                 }
-                            }
-                            if case .success = onEnum(of: presenter.state.user) {
-                                Button {
-                                } label: {
-                                    Image("fa-plus")
-                                }
-                                .buttonStyle(.glass)
                             }
                         }
                     }
-                    .scrollClipDisabled()
+                    .scrollIndicators(.hidden)
+//                    .scrollClipDisabled()
                 }
                 .sharedBackgroundVisibility(.hidden)
                 ToolbarItem(placement: .topBarTrailing) {
@@ -80,13 +76,6 @@ struct HomeTimelineScreen: View {
             }
             .navigationBarBackButtonHidden()
             .navigationBarTitleDisplayMode(.inline)
-            .refreshable {
-                if case .success(let success) = onEnum(of: presenter.state.tabState) {
-                    if let tab = success.data[selectedTabIndex] as? TimelineItemPresenterState {
-                        try? await tab.refreshSuspend()
-                    }
-                }
-            }
         }
     }
 }

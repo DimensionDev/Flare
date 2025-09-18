@@ -83,7 +83,6 @@ import io.github.composefluent.component.Icon
 import io.github.composefluent.component.NavigationDefaults
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
-import io.ktor.http.Url
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.apache.commons.lang3.SystemUtils
@@ -98,7 +97,7 @@ internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
         val stackManager =
             rememberStackManager(
                 startRoute = getRoute(tabs.primary.first().tabItem),
-                key = tabs.all.size,
+                key = tabs.all.joinToString { it.tabItem.key },
                 topLevelRoutes = tabs.all.map { getRoute(it.tabItem) },
             )
 
@@ -425,8 +424,6 @@ private class ProxyUriHandler(
 ) : UriHandler {
     override fun openUri(uri: String) {
         if (uri.startsWith("flare://")) {
-            val data = Url(uri)
-
             Route.parse(uri)?.let {
                 if (it is Route.WindowRoute) {
                     onWindowRoute.invoke(it)

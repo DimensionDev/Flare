@@ -98,7 +98,7 @@ struct MaterialTabIcon: View {
 
 struct AvatarTabIcon: View {
 
-    @State private var presenter: KotlinPresenter<UserState>
+    @StateObject private var presenter: KotlinPresenter<UserState>
 
     init(userKey: MicroBlogKey, accountType: AccountType) {
         self._presenter = .init(wrappedValue: .init(presenter: UserPresenter(accountType: accountType, userKey: userKey)))

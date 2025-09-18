@@ -24,7 +24,7 @@ enum Route: Hashable {
         case .settings:
             SettingsScreen()
         case .tabItem(let tabItem):
-            TabItemView(tabItem: tabItem, onNavigate: onNavigate)
+            tabItem.view(onNavigate: onNavigate)
         case .accountManagement:
             AccountManagementScreen()
         default:

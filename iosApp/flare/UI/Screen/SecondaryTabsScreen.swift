@@ -3,7 +3,7 @@ import KotlinSharedUI
 
 struct SecondaryTabsScreen: View {
     let tabs: [HomeTabsPresenterStateHomeTabState.HomeTabItem]
-    @State private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
+    @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
     var body: some View {
         Router { _ in
             List {

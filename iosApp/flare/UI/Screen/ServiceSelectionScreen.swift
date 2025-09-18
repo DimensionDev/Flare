@@ -11,13 +11,13 @@ struct ServiceSelectionScreen : View {
     let key = UUID().uuidString
     @State private var showVVOLoginSheet = false
     @State private var showXQTLoginSheet = false
-    @State private var vvoLoginPresenter: KotlinPresenter<VVOLoginState>
-    @State private var xqtLoginPresenter: KotlinPresenter<XQTLoginState>
+    @StateObject private var vvoLoginPresenter: KotlinPresenter<VVOLoginState>
+    @StateObject private var xqtLoginPresenter: KotlinPresenter<XQTLoginState>
     
     init(toHome: @escaping () -> Void) {
         self.toHome = toHome
-        self._vvoLoginPresenter = .init(initialValue: .init(presenter: VVOLoginPresenter(toHome: toHome)))
-        self._xqtLoginPresenter = .init(initialValue: .init(presenter: XQTLoginPresenter(toHome: toHome)))
+        self._vvoLoginPresenter = .init(wrappedValue: .init(presenter: VVOLoginPresenter(toHome: toHome)))
+        self._xqtLoginPresenter = .init(wrappedValue: .init(presenter: XQTLoginPresenter(toHome: toHome)))
     }
     
     var body: some View {

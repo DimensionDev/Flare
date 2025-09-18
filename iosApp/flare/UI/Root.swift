@@ -3,12 +3,13 @@ import KotlinSharedUI
 
 struct FlareRoot: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @State private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
-    @State private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
+    @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
+    @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
     @State var selectedTab: String?
 
     var body: some View {
-        StateView(state: homeTabsPresenter.state.tabs) { tabs in
+        if case .success(let success) = onEnum(of: homeTabsPresenter.state.tabs) {
+            let tabs = success.data
             HStack(
                 spacing: 0
             ) {
@@ -34,7 +35,7 @@ struct FlareRoot: View {
                         ForEach(tabs.all, id: \.tabItem.key) { data in
                             Tab(value: data.tabItem.key) {
                                 Router { onNavigate in
-                                    TabItemView(tabItem: data.tabItem, onNavigate: onNavigate)
+                                    data.tabItem.view(onNavigate: onNavigate)
                                 }
                                 .toolbarVisibility(.hidden, for: .tabBar)
                             }
@@ -48,7 +49,7 @@ struct FlareRoot: View {
                             }
                             Tab(value: data.tabItem.key) {
                                 Router { onNavigate in
-                                    TabItemView(tabItem: data.tabItem, onNavigate: onNavigate)
+                                    data.tabItem.view(onNavigate: onNavigate)
                                 }
                             } label: {
                                 Label {
@@ -75,7 +76,7 @@ struct FlareRoot: View {
                 .tabViewStyle(.tabBarOnly)
                 .tabBarMinimizeBehavior(.onScrollDown)
             }
+            .background(Color(.systemGroupedBackground))
         }
-        .background(Color(.systemGroupedBackground))
     }
 }

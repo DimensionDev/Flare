@@ -4,7 +4,7 @@ import KotlinSharedUI
 struct ProfileScreen: View {
     let accountType: AccountType
     let userKey: MicroBlogKey?
-    @State private var presenter: KotlinPresenter<ProfileState>
+    @StateObject private var presenter: KotlinPresenter<ProfileState>
     @State private var selectedTab: Int = 0
 
     var body: some View {
@@ -22,30 +22,39 @@ struct ProfileScreen: View {
             .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
             StateView(state: presenter.state.tabs) { tabsArray in
                 let tabs = tabsArray.cast(ProfileState.Tab.self)
-                Picker(selection: $selectedTab) {
-                    ForEach(0..<tabs.count) { index in
-                        let tab = tabs[index]
-                        let text = switch onEnum(of: tab) {
-                        case .media: LocalizedStringResource(stringLiteral: "profile_tab_media")
-                        case .timeline(let timeline):
-                            switch timeline.type {
-                            case .likes: LocalizedStringResource(stringLiteral: "profile_tab_likes")
-                            case .status: LocalizedStringResource(stringLiteral: "profile_tab_status")
-                            case .statusWithReplies: LocalizedStringResource(stringLiteral: "profile_tab_replies")
+                if tabs.count > 1 {
+                    Picker(selection: $selectedTab) {
+                        ForEach(0..<tabs.count) { index in
+                            let tab = tabs[index]
+                            let text = switch onEnum(of: tab) {
+                            case .media: LocalizedStringResource(stringLiteral: "profile_tab_media")
+                            case .timeline(let timeline):
+                                switch timeline.type {
+                                case .likes: LocalizedStringResource(stringLiteral: "profile_tab_likes")
+                                case .status: LocalizedStringResource(stringLiteral: "profile_tab_status")
+                                case .statusWithReplies: LocalizedStringResource(stringLiteral: "profile_tab_replies")
+                                }
                             }
+                            Text(text)
+                                .tag(index)
+
                         }
-                        Text(text)
-                            .tag(index)
+                    } label: {
 
                     }
-                } label: {
-
+                    .pickerStyle(.segmented)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .padding()
+                    .listRowBackground(Color.clear)
+                } else {
+                    Spacer()
+                        .frame(height: 16)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        .padding()
+                        .listRowBackground(Color.clear)
                 }
-                .pickerStyle(.segmented)
-                .listRowSeparator(.hidden)
-                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .padding()
-                .listRowBackground(Color.clear)
                 let selectedTabItem = tabs[selectedTab]
                 switch onEnum(of: selectedTabItem) {
                 case .timeline(let timeline):

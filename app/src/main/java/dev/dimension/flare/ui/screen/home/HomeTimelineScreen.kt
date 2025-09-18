@@ -48,6 +48,7 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
@@ -67,7 +68,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
-import dev.dimension.flare.ui.presenter.TimelineItemPresenter
+import dev.dimension.flare.ui.presenter.TimelineItemPresenterWithLazyListState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
@@ -86,28 +87,6 @@ internal fun HomeTimelineScreen(
         timelinePresenter(accountType)
     }
     val scope = rememberCoroutineScope()
-    state.pagerState.onSuccess { pagerState ->
-        state.tabState.onSuccess { tabState ->
-            LaunchedEffect(pagerState.currentPage >= tabState.size) {
-                if (pagerState.currentPage >= tabState.size) {
-                    scope.launch {
-                        pagerState.scrollToPage(0)
-                    }
-                }
-            }
-            val currentTab = tabState.elementAtOrNull(pagerState.currentPage)
-            if (currentTab != null) {
-                val lazyListState = currentTab.lazyListState
-                RegisterTabCallback(
-                    lazyListState = lazyListState,
-                    onRefresh = {
-                        currentTab.refreshSync()
-                        state.changeLogState.dismissChangeLog()
-                    },
-                )
-            }
-        }
-    }
 
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     FlareScaffold(
@@ -154,7 +133,7 @@ internal fun HomeTimelineScreen(
                                                 },
                                                 text = {
                                                     TabTitle(
-                                                        tab.timelineTabItem.metaData.title,
+                                                        tab.metaData.title,
 //                                                        modifier =
 //                                                            Modifier
 //                                                                .padding(8.dp),
@@ -162,9 +141,9 @@ internal fun HomeTimelineScreen(
                                                 },
                                                 icon = {
                                                     TabIcon(
-                                                        accountType = tab.timelineTabItem.account,
-                                                        icon = tab.timelineTabItem.metaData.icon,
-                                                        title = tab.timelineTabItem.metaData.title,
+                                                        accountType = tab.account,
+                                                        icon = tab.metaData.icon,
+                                                        title = tab.metaData.title,
                                                     )
                                                 },
 //                                                colors = FilterChipDefaults.filterChipColors(
@@ -221,18 +200,28 @@ internal fun HomeTimelineScreen(
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->
         state.pagerState.onSuccess { pagerState ->
-            state.tabState.onSuccess { tabs ->
+            state.tabState.onSuccess { tabState ->
+
+                LaunchedEffect(pagerState.currentPage >= tabState.size) {
+                    if (pagerState.currentPage >= tabState.size) {
+                        scope.launch {
+                            pagerState.scrollToPage(0)
+                        }
+                    }
+                }
+
                 HorizontalPager(
                     state = pagerState,
                     key = { index ->
-                        tabs.getOrNull(index)?.timelineTabItem?.key ?: "timeline_$index"
+                        tabState.getOrNull(index)?.key ?: "timeline_$index"
                     },
                 ) { index ->
                     TimelineItemContent(
-                        state = tabs[index],
+                        item = tabState[index],
                         contentPadding = contentPadding,
                         modifier = Modifier.fillMaxWidth(),
                         changeLogState = state.changeLogState,
+                        isCurrentlyVisible = pagerState.currentPage == index,
                     )
                 }
             }
@@ -242,11 +231,27 @@ internal fun HomeTimelineScreen(
 
 @Composable
 internal fun TimelineItemContent(
-    state: TimelineItemPresenter.State,
+    item: TimelineTabItem,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     changeLogState: ChangeLogState? = null,
+    isCurrentlyVisible: Boolean = true,
 ) {
+    val state by producePresenter(
+        "timeline_${item.key}",
+    ) {
+        remember { TimelineItemPresenterWithLazyListState(item) }
+            .invoke()
+    }
+    if (isCurrentlyVisible) {
+        RegisterTabCallback(
+            lazyListState = state.lazyListState,
+            onRefresh = {
+                state.refreshSync()
+                changeLogState?.dismissChangeLog()
+            },
+        )
+    }
     val hazeState = rememberHazeState()
     val scope = rememberCoroutineScope()
     RefreshContainer(

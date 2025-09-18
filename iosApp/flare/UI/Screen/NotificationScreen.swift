@@ -2,14 +2,15 @@ import SwiftUI
 @preconcurrency import KotlinSharedUI
 
 struct NotificationScreen: View {
-    @State private var presenter: KotlinPresenter<NotificationPresenterState>
+    @StateObject private var presenter: KotlinPresenter<NotificationPresenterState>
     @State private var selectedType: NotificationFilter?
     @Environment(\.openURL) private var openURL
     @State private var showTopBar = true
 
     init(accountType: AccountType) {
-        self._presenter = .init(initialValue: .init(presenter: NotificationPresenter(accountType: accountType)))
-        self._selectedType = .init(initialValue: presenter.state.notificationType)
+        self._presenter = .init(wrappedValue: .init(presenter: NotificationPresenter(accountType: accountType)))
+//        self._selectedType = .init(initialValue: presenter.state.notificationType)
+        print("create NotificationScreen")
     }
 
     var body: some View {
@@ -24,21 +25,26 @@ struct NotificationScreen: View {
         .listRowSpacing(2)
         .listStyle(.plain)
         .background(Color(.systemGroupedBackground))
+        .onAppear {
+            selectedType = presenter.state.notificationType
+        }
         .toolbar {
             ToolbarItem(placement: .principal) {
                 StateView(state: presenter.state.allTypes) { allTypes in
-                    Picker("notification_type_title", selection: $selectedType) {
-                        ForEach(0..<allTypes.count) { index in
-                            if let type = allTypes[index] as? NotificationFilter {
-                                Text("\(type.name)").tag(type)
+                    if allTypes.count > 1 {
+                        Picker("notification_type_title", selection: $selectedType) {
+                            ForEach(0..<allTypes.count) { index in
+                                if let type = allTypes[index] as? NotificationFilter {
+                                    Text("\(type.name)").tag(type)
+                                }
                             }
                         }
-                    }
-                    .pickerStyle(.segmented)
-                    .onChange(of: selectedType) { oldValue, newValue in
-                        if let value = newValue {
-                            if oldValue != newValue {
-                                presenter.state.onNotificationTypeChanged(value: value)
+                        .pickerStyle(.segmented)
+                        .onChange(of: selectedType) { oldValue, newValue in
+                            if let value = newValue {
+                                if oldValue != newValue {
+                                    presenter.state.onNotificationTypeChanged(value: value)
+                                }
                             }
                         }
                     }

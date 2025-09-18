@@ -34,13 +34,13 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 
-internal class AccountRepository(
+public class AccountRepository internal constructor(
     private val appDatabase: AppDatabase,
     private val coroutineScope: CoroutineScope,
     internal val appDataStore: AppDataStore,
     private val cacheDatabase: CacheDatabase,
 ) {
-    val activeAccount: Flow<UiState<UiAccount>> by lazy {
+    internal val activeAccount: Flow<UiState<UiAccount>> by lazy {
         appDatabase
             .accountDao()
             .activeAccount()
@@ -54,30 +54,30 @@ internal class AccountRepository(
                 }
             }
     }
-    val allAccounts: Flow<ImmutableList<UiAccount>> by lazy {
+    internal val allAccounts: Flow<ImmutableList<UiAccount>> by lazy {
         appDatabase.accountDao().allAccounts().map {
             it.map { it.toUi() }.toImmutableList()
         }
     }
 
-    private val _onAdded by lazy {
+    private val addAccountFlow by lazy {
         MutableStateFlow<UiAccount?>(null)
     }
-    val onAdded: Flow<UiAccount> by lazy {
-        _onAdded
+    internal val onAdded: Flow<UiAccount> by lazy {
+        addAccountFlow
             .mapNotNull { it }
             .distinctUntilChangedBy { it.accountKey }
     }
-    private val _onRemoved by lazy {
+    private val removeAccountFlow by lazy {
         MutableStateFlow<MicroBlogKey?>(null)
     }
-    val onRemoved: Flow<MicroBlogKey> by lazy {
-        _onRemoved
+    internal val onRemoved: Flow<MicroBlogKey> by lazy {
+        removeAccountFlow
             .mapNotNull { it }
             .distinctUntilChangedBy { it }
     }
 
-    fun addAccount(
+    internal fun addAccount(
         account: UiAccount,
         credential: UiAccount.Credential,
     ) = coroutineScope.launch {
@@ -89,10 +89,10 @@ internal class AccountRepository(
                 credential_json = credential.encodeJson(),
             ),
         )
-        _onAdded.value = account
+        addAccountFlow.value = account
     }
 
-    fun setActiveAccount(accountKey: MicroBlogKey) =
+    internal fun setActiveAccount(accountKey: MicroBlogKey) =
         coroutineScope.launch {
             appDatabase.accountDao().setLastActive(
                 accountKey,
@@ -100,9 +100,9 @@ internal class AccountRepository(
             )
         }
 
-    fun delete(accountKey: MicroBlogKey) =
+    internal fun delete(accountKey: MicroBlogKey) =
         coroutineScope.launch {
-            _onRemoved.value = accountKey
+            removeAccountFlow.value = accountKey
             cacheDatabase.pagingTimelineDao().deleteByAccountType(
                 AccountType.Specific(accountKey),
             )
@@ -121,7 +121,7 @@ internal class AccountRepository(
             appDatabase.accountDao().delete(accountKey)
         }
 
-    fun getFlow(accountKey: MicroBlogKey): Flow<UiState<UiAccount>> =
+    internal fun getFlow(accountKey: MicroBlogKey): Flow<UiState<UiAccount>> =
         appDatabase.accountDao().get(accountKey).map {
             if (it == null) {
                 UiState.Error(NoActiveAccountException)
@@ -130,7 +130,7 @@ internal class AccountRepository(
             }
         }
 
-    inline fun <reified T : UiAccount.Credential> credentialFlow(accountKey: MicroBlogKey): Flow<T> =
+    internal inline fun <reified T : UiAccount.Credential> credentialFlow(accountKey: MicroBlogKey): Flow<T> =
         appDatabase
             .accountDao()
             .get(accountKey)
@@ -221,6 +221,12 @@ internal fun accountServiceFlow(
                 .map { it.dataSource }
         }
     }
+
+public fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount> =
+    repository
+        .activeAccount
+        .map { it.takeSuccess() ?: throw NoActiveAccountException }
+        .distinctUntilChangedBy { it.accountKey }
 
 @Composable
 internal fun allAccountsPresenter(repository: AccountRepository): State<UiState<ImmutableList<UiAccount>>> =

@@ -4,7 +4,7 @@ import SwiftUI
 struct TimelineScreen: View {
     let tabItem: TimelineTabItem
     @Environment(\.openURL) private var openURL
-    @State var presenter: KotlinPresenter<TimelineItemPresenterState>
+    @StateObject var presenter: KotlinPresenter<TimelineItemPresenterState>
     init(tabItem: TimelineTabItem) {
         self.tabItem = tabItem
         _presenter = .init(wrappedValue: .init(presenter: TimelineItemPresenter(timelineTabItem: tabItem)))

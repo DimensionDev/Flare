@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.component
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.InteractionSource
@@ -14,9 +15,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicSecureTextField
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.KeyboardActionHandler
+import androidx.compose.foundation.text.input.OutputTransformation
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.runtime.Composable
@@ -49,7 +57,7 @@ import com.slapps.cupertino.theme.CupertinoTheme
 import com.slapps.cupertino.theme.systemRed
 
 @Composable
-internal fun CupertinoTextField(
+private fun CupertinoTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -127,7 +135,7 @@ internal fun CupertinoTextField(
 }
 
 @Composable
-internal fun CupertinoTextField(
+private fun CupertinoTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
@@ -205,7 +213,7 @@ internal fun CupertinoTextField(
 }
 
 @Composable
-internal fun CupertinoBorderedTextField(
+private fun CupertinoBorderedTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -264,7 +272,7 @@ internal fun CupertinoBorderedTextField(
 }
 
 @Composable
-internal fun CupertinoBorderedTextField(
+private fun CupertinoBorderedTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
@@ -321,8 +329,266 @@ internal fun CupertinoBorderedTextField(
     }
 }
 
+@Composable
+public fun CupertinoTextField(
+    state: TextFieldState,
+    modifier: Modifier = Modifier,
+    onKeyboardAction: KeyboardActionHandler? = null,
+    inputTransformation: InputTransformation? = null,
+    outputTransformation: OutputTransformation? = null,
+    lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
+    scrollState: ScrollState = rememberScrollState(),
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    textStyle: TextStyle = LocalTextStyle.current,
+    placeholder: @Composable (() -> Unit)? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    contentAlignment: Alignment.Vertical = Alignment.CenterVertically,
+    colors: CupertinoTextFieldColors = CupertinoTextFieldDefaults.colors(),
+) {
+    // If color is not provided via the text style, use content color as a default
+    val textColor =
+        textStyle.color.takeOrElse {
+            colors.textColor(enabled, isError, interactionSource).value
+        }
+    val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
+
+    CompositionLocalProvider(
+        LocalTextSelectionColors provides colors.selectionColors,
+    ) {
+        var layoutResult by remember {
+            mutableStateOf<TextLayoutResult?>(null)
+        }
+
+        BasicTextField(
+            state = state,
+            modifier =
+                Modifier
+                    .defaultMinSize(
+                        minWidth = CupertinoTextFieldDefaults.MinWidth,
+                        minHeight = CupertinoTextFieldDefaults.MinHeight,
+                    ),
+            enabled = enabled,
+            readOnly = readOnly,
+            textStyle = mergedTextStyle,
+            cursorBrush = SolidColor(colors.cursorColor(isError).value),
+            keyboardOptions = keyboardOptions,
+            interactionSource = interactionSource,
+            onTextLayout = {
+                layoutResult = it.invoke()
+            },
+            lineLimits = lineLimits,
+            onKeyboardAction = onKeyboardAction,
+            inputTransformation = inputTransformation,
+            outputTransformation = outputTransformation,
+            scrollState = scrollState,
+            decorator = {
+                CupertinoTextFieldDefaults.DecorationBox(
+                    modifier = modifier,
+                    valueIsEmpty = state.text.isEmpty(),
+                    innerTextField = it,
+                    enabled = enabled,
+                    interactionSource = interactionSource,
+                    contentAlignment = contentAlignment,
+                    isError = isError,
+                    placeholder = placeholder,
+                    leadingIcon = leadingIcon,
+                    textLayoutResult = layoutResult,
+                    trailingIcon = trailingIcon,
+                )
+            },
+        )
+    }
+}
+
+@Composable
+public fun CupertinoSecureTextField(
+    state: TextFieldState,
+    modifier: Modifier = Modifier,
+    onKeyboardAction: KeyboardActionHandler? = null,
+    inputTransformation: InputTransformation? = null,
+    scrollState: ScrollState = rememberScrollState(),
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    textStyle: TextStyle = LocalTextStyle.current,
+    placeholder: @Composable (() -> Unit)? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    contentAlignment: Alignment.Vertical = Alignment.CenterVertically,
+    colors: CupertinoTextFieldColors = CupertinoTextFieldDefaults.colors(),
+) {
+    // If color is not provided via the text style, use content color as a default
+    val textColor =
+        textStyle.color.takeOrElse {
+            colors.textColor(enabled, isError, interactionSource).value
+        }
+    val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
+
+    CompositionLocalProvider(
+        LocalTextSelectionColors provides colors.selectionColors,
+    ) {
+        var layoutResult by remember {
+            mutableStateOf<TextLayoutResult?>(null)
+        }
+
+        BasicSecureTextField(
+            state = state,
+            modifier =
+                Modifier
+                    .defaultMinSize(
+                        minWidth = CupertinoTextFieldDefaults.MinWidth,
+                        minHeight = CupertinoTextFieldDefaults.MinHeight,
+                    ),
+            enabled = enabled,
+            readOnly = readOnly,
+            textStyle = mergedTextStyle,
+            cursorBrush = SolidColor(colors.cursorColor(isError).value),
+            keyboardOptions = keyboardOptions,
+            interactionSource = interactionSource,
+            onTextLayout = {
+                layoutResult = it.invoke()
+            },
+            onKeyboardAction = onKeyboardAction,
+            inputTransformation = inputTransformation,
+            scrollState = scrollState,
+            decorator = {
+                CupertinoTextFieldDefaults.DecorationBox(
+                    modifier = modifier,
+                    valueIsEmpty = state.text.isEmpty(),
+                    innerTextField = it,
+                    enabled = enabled,
+                    interactionSource = interactionSource,
+                    contentAlignment = contentAlignment,
+                    isError = isError,
+                    placeholder = placeholder,
+                    leadingIcon = leadingIcon,
+                    textLayoutResult = layoutResult,
+                    trailingIcon = trailingIcon,
+                )
+            },
+        )
+    }
+}
+
+@Composable
+public fun CupertinoBorderedTextField(
+    state: TextFieldState,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    textStyle: TextStyle = LocalTextStyle.current,
+    placeholder: @Composable (() -> Unit)? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    shape: Shape = CupertinoBorderedTextFieldDefaults.shape,
+    strokeWidth: Dp = CupertinoBorderedTextFieldDefaults.StrokeWidth,
+    paddingValues: PaddingValues = CupertinoBorderedTextFieldDefaults.PaddingValues,
+    contentAlignment: Alignment.Vertical = Alignment.CenterVertically,
+    colors: CupertinoTextFieldColors = CupertinoBorderedTextFieldDefaults.colors(),
+    onKeyboardAction: KeyboardActionHandler? = null,
+    inputTransformation: InputTransformation? = null,
+    scrollState: ScrollState = rememberScrollState(),
+    outputTransformation: OutputTransformation? = null,
+    lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
+) {
+    Border(
+        modifier = modifier,
+        strokeWidth = strokeWidth,
+        enabled = enabled,
+        isError = isError,
+        interactionSource = interactionSource,
+        colors = colors,
+        shape = shape,
+        paddingValues = paddingValues,
+    ) {
+        CupertinoTextField(
+            state = state,
+            modifier = modifier,
+            onKeyboardAction = onKeyboardAction,
+            inputTransformation = inputTransformation,
+            outputTransformation = outputTransformation,
+            lineLimits = lineLimits,
+            scrollState = scrollState,
+            enabled = enabled,
+            readOnly = readOnly,
+            textStyle = textStyle,
+            placeholder = placeholder,
+            leadingIcon = leadingIcon,
+            trailingIcon = trailingIcon,
+            isError = isError,
+            keyboardOptions = keyboardOptions,
+            interactionSource = interactionSource,
+            contentAlignment = contentAlignment,
+            colors = colors,
+        )
+    }
+}
+
+@Composable
+public fun CupertinoBorderedSecureTextField(
+    state: TextFieldState,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    textStyle: TextStyle = LocalTextStyle.current,
+    placeholder: @Composable (() -> Unit)? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    shape: Shape = CupertinoBorderedTextFieldDefaults.shape,
+    strokeWidth: Dp = CupertinoBorderedTextFieldDefaults.StrokeWidth,
+    paddingValues: PaddingValues = CupertinoBorderedTextFieldDefaults.PaddingValues,
+    contentAlignment: Alignment.Vertical = Alignment.CenterVertically,
+    colors: CupertinoTextFieldColors = CupertinoBorderedTextFieldDefaults.colors(),
+    onKeyboardAction: KeyboardActionHandler? = null,
+    inputTransformation: InputTransformation? = null,
+    scrollState: ScrollState = rememberScrollState(),
+) {
+    Border(
+        modifier = modifier,
+        strokeWidth = strokeWidth,
+        enabled = enabled,
+        isError = isError,
+        interactionSource = interactionSource,
+        colors = colors,
+        shape = shape,
+        paddingValues = paddingValues,
+    ) {
+        CupertinoSecureTextField(
+            state = state,
+            modifier = modifier,
+            onKeyboardAction = onKeyboardAction,
+            inputTransformation = inputTransformation,
+            scrollState = scrollState,
+            enabled = enabled,
+            readOnly = readOnly,
+            textStyle = textStyle,
+            placeholder = placeholder,
+            leadingIcon = leadingIcon,
+            trailingIcon = trailingIcon,
+            isError = isError,
+            keyboardOptions = keyboardOptions,
+            interactionSource = interactionSource,
+            contentAlignment = contentAlignment,
+            colors = colors,
+        )
+    }
+}
+
 @Immutable
-internal class CupertinoTextFieldColors internal constructor(
+public class CupertinoTextFieldColors internal constructor(
     private val focusedTextColor: Color,
     private val unfocusedTextColor: Color,
     private val disabledTextColor: Color,
@@ -590,16 +856,16 @@ internal class CupertinoTextFieldColors internal constructor(
 }
 
 @Immutable
-internal object CupertinoBorderedTextFieldDefaults {
-    val StrokeWidth: Dp = 1.dp
+public object CupertinoBorderedTextFieldDefaults {
+    public val StrokeWidth: Dp = 1.dp
 
     /** Default shape for an [CupertinoTextField]. */
-    val shape: Shape
+    public val shape: Shape
         @ReadOnlyComposable
         @Composable
         get() = CupertinoTheme.shapes.small
 
-    val PaddingValues = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+    public val PaddingValues: PaddingValues = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
 
     /**
      * Creates a [CupertinoTextFieldColors] that represents the default input text, container, and content
@@ -636,7 +902,7 @@ internal object CupertinoBorderedTextFieldDefaults {
      * @param errorPlaceholderColor the placeholder color for this text field when in error state
      */
     @Composable
-    fun colors(
+    public fun colors(
         focusedTextColor: Color = CupertinoTheme.colorScheme.label,
         unfocusedTextColor: Color = CupertinoTheme.colorScheme.label,
         disabledTextColor: Color = CupertinoTheme.colorScheme.secondaryLabel,
@@ -906,8 +1172,11 @@ private fun Border(
     Box(
         modifier
             .clip(shape)
-            .border(strokeWidth, colors.indicatorColor(enabled, isError, interactionSource).value, shape)
-            .background(colors.containerColor(enabled, isError, interactionSource).value)
+            .border(
+                strokeWidth,
+                colors.indicatorColor(enabled, isError, interactionSource).value,
+                shape,
+            ).background(colors.containerColor(enabled, isError, interactionSource).value)
             .padding(paddingValues),
     ) {
         textField()

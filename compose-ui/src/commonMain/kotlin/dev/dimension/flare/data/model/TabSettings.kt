@@ -4,6 +4,7 @@ import androidx.datastore.core.okio.OkioSerializer
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
@@ -241,7 +242,7 @@ public sealed class TimelineTabItem : TabItem() {
                 PlatformType.VVo -> vvo(user.key)
             }
 
-        public fun defaultSecondary(user: UiUserV2): ImmutableList<TabItem> {
+        public fun defaultSecondary(user: UiAccount): ImmutableList<TabItem> {
             val result =
                 listOf(
                     RssTabItem(
@@ -254,11 +255,11 @@ public sealed class TimelineTabItem : TabItem() {
                     ),
                 ) +
                     when (user.platformType) {
-                        PlatformType.Mastodon -> defaultMastodonSecondaryItems(user.key)
-                        PlatformType.Misskey -> defaultMisskeySecondaryItems(user.key)
-                        PlatformType.Bluesky -> defaultBlueskySecondaryItems(user.key)
-                        PlatformType.xQt -> defaultXqtSecondaryItems(user.key)
-                        PlatformType.VVo -> defaultVVOSecondaryItems(user.key)
+                        PlatformType.Mastodon -> defaultMastodonSecondaryItems(user.accountKey)
+                        PlatformType.Misskey -> defaultMisskeySecondaryItems(user.accountKey)
+                        PlatformType.Bluesky -> defaultBlueskySecondaryItems(user.accountKey)
+                        PlatformType.xQt -> defaultXqtSecondaryItems(user.accountKey)
+                        PlatformType.VVo -> defaultVVOSecondaryItems(user.accountKey)
                     }
             return result.toImmutableList()
         }

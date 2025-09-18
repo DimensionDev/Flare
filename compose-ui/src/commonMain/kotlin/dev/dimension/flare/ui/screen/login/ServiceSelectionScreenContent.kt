@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.runtime.Composable
@@ -86,11 +88,13 @@ public fun ServiceSelectionScreenContent(
     openUri: (String) -> Unit,
     registerDeeplinkCallback: @Composable ((url: String) -> Unit) -> Unit,
     contentPadding: PaddingValues,
+    listState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ) {
     val state by producePresenter {
         remember { SelectionPresenter(onBack) }.body()
     }
     LazyStatusVerticalStaggeredGrid(
+        state = listState,
         modifier =
             Modifier.fillMaxSize(),
         columns = StaggeredGridCells.Adaptive(300.dp),
@@ -237,6 +241,16 @@ public fun ServiceSelectionScreenContent(
                                             imeAction = ImeAction.Done,
                                             autoCorrectEnabled = false,
                                         ),
+                                    onKeyboardAction = {
+                                        if (!state.blueskyInputState.usePasswordLogin) {
+                                            state.blueskyOauthLoginState.login(
+                                                userName =
+                                                    state.blueskyInputState.username.text
+                                                        .toString(),
+                                                launchUrl = openUri,
+                                            )
+                                        }
+                                    },
                                 )
                                 AnimatedVisibility(state.blueskyInputState.usePasswordLogin) {
                                     PlatformSecureTextField(
@@ -248,6 +262,20 @@ public fun ServiceSelectionScreenContent(
                                         modifier =
                                             Modifier
                                                 .width(300.dp),
+                                        onKeyboardAction = {
+                                            state.blueskyLoginState.login(
+                                                baseUrl = state.instanceInputState.text.toString(),
+                                                username =
+                                                    state.blueskyInputState.username.text
+                                                        .toString(),
+                                                password =
+                                                    state.blueskyInputState.password.text
+                                                        .toString(),
+                                                authFactorToken =
+                                                    state.blueskyInputState.authFactorToken.text
+                                                        .toString(),
+                                            )
+                                        },
                                     )
                                 }
                                 AnimatedVisibility(state.blueskyLoginState.require2FA && state.blueskyInputState.usePasswordLogin) {
@@ -266,6 +294,20 @@ public fun ServiceSelectionScreenContent(
                                                 imeAction = ImeAction.Done,
                                                 autoCorrectEnabled = false,
                                             ),
+                                        onKeyboardAction = {
+                                            state.blueskyLoginState.login(
+                                                baseUrl = state.instanceInputState.text.toString(),
+                                                username =
+                                                    state.blueskyInputState.username.text
+                                                        .toString(),
+                                                password =
+                                                    state.blueskyInputState.password.text
+                                                        .toString(),
+                                                authFactorToken =
+                                                    state.blueskyInputState.authFactorToken.text
+                                                        .toString(),
+                                            )
+                                        },
                                     )
                                 }
                                 AnimatedVisibility(!state.blueskyInputState.usePasswordLogin) {

@@ -19,7 +19,10 @@ struct HomeTimelineScreen: View {
         StateView(state: presenter.state.tabState) { state in
             let tabs: [TimelineTabItem] = state.cast(TimelineTabItem.self)
             let tab = tabs[selectedTabIndex]
-            TimelineScreen(tabItem: tab)
+            ZStack {
+                TimelineScreen(tabItem: tab)
+                    .id(tab.key)
+            }
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     ScrollView(.horizontal) {

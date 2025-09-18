@@ -7,7 +7,7 @@ struct TimelineScreen: View {
     @StateObject var presenter: KotlinPresenter<TimelineItemPresenterState>
     init(tabItem: TimelineTabItem) {
         self.tabItem = tabItem
-        _presenter = .init(wrappedValue: .init(presenter: TimelineItemPresenter(timelineTabItem: tabItem)))
+        self._presenter = .init(wrappedValue: .init(presenter: TimelineItemPresenter(timelineTabItem: tabItem)))
     }
     var body: some View {
         List {

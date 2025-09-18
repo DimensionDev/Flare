@@ -6,6 +6,7 @@ struct NetworkImage: View {
     var body: some View {
         KFImage
             .url(data)
+            .loadTransition(.blurReplace)
             .placeholder {
                 Rectangle()
                     .fill(.placeholder)

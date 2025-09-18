@@ -91,7 +91,6 @@ kotlin {
                 implementation(libs.datastore)
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(libs.xmlUtil)
-                implementation(libs.krypto)
                 implementation(projects.shared.api)
                 implementation(libs.ktor.client.resources)
                 implementation("dev.whyoleg.cryptography:cryptography-provider-optimal:0.5.0")

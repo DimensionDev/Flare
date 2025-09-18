@@ -155,6 +155,7 @@
     <string name="media_viewer_title">Medienbetrachter</string>
     <string name="settings_accounts_remove">Entfernen</string>
     <string name="media_menu_save">Speichern</string>
+    <string name="media_menu_share_image">Bild teilen</string>
     <string name="media_save_success">In Downloads gespeichert</string>
     <string name="media_save_fail">Speichern fehlgeschlagen</string>
     <string name="media_alt_text">Alt Text</string>

@@ -155,6 +155,7 @@
     <string name="media_viewer_title">Media visare</string>
     <string name="settings_accounts_remove">Radera</string>
     <string name="media_menu_save">Spara</string>
+    <string name="media_menu_share_image">Dela bild</string>
     <string name="media_save_success">Sparad i hämtningar</string>
     <string name="media_save_fail">Det gick inte att spara</string>
     <string name="media_alt_text">Alt text</string>

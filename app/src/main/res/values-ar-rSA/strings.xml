@@ -155,6 +155,7 @@
     <string name="media_viewer_title">مشاهدة الوسائط</string>
     <string name="settings_accounts_remove">إزالة</string>
     <string name="media_menu_save">حفظ</string>
+    <string name="media_menu_share_image">مشاركة الصورة</string>
     <string name="media_save_success">حفظ في التنزيلات</string>
     <string name="media_save_fail">فشل في الحفظ</string>
     <string name="media_alt_text">نص بديل</string>

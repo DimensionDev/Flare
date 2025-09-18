@@ -155,6 +155,7 @@
     <string name="media_viewer_title">メディアビューアー</string>
     <string name="settings_accounts_remove">削除</string>
     <string name="media_menu_save">保存</string>
+    <string name="media_menu_share_image">画像を共有</string>
     <string name="media_save_success">ダウンロードに保存しました</string>
     <string name="media_save_fail">保存に失敗しました</string>
     <string name="media_alt_text">Altテキスト</string>

@@ -155,6 +155,7 @@
     <string name="media_viewer_title">Vizualizare media</string>
     <string name="settings_accounts_remove">Elimină</string>
     <string name="media_menu_save">Salvează</string>
+    <string name="media_menu_share_image">Distribuie imaginea</string>
     <string name="media_save_success">Salvat în Descărcări</string>
     <string name="media_save_fail">Salvarea nu a reușit</string>
     <string name="media_alt_text">Text alternativ</string>

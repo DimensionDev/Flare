@@ -155,6 +155,7 @@
     <string name="media_viewer_title">Prohlížeč médií</string>
     <string name="settings_accounts_remove">Odebrat</string>
     <string name="media_menu_save">Uložit</string>
+    <string name="media_menu_share_image">Sdílet obrázek</string>
     <string name="media_save_success">Uloženo do souborů</string>
     <string name="media_save_fail">Uložení se nezdařilo</string>
     <string name="media_alt_text">Alternativní text</string>

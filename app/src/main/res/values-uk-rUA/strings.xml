@@ -155,6 +155,7 @@
     <string name="media_viewer_title">Переглядач мультимедіа</string>
     <string name="settings_accounts_remove">Видалити</string>
     <string name="media_menu_save">Зберегти</string>
+    <string name="media_menu_share_image">Поділитись зображенням</string>
     <string name="media_save_success">Збережено на завантаження</string>
     <string name="media_save_fail">Не вдалося зберегти</string>
     <string name="media_alt_text">Alt-текст</string>

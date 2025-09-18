@@ -155,6 +155,7 @@
     <string name="media_viewer_title">Forhåndsvisning av media</string>
     <string name="settings_accounts_remove">Fjern</string>
     <string name="media_menu_save">Lagre</string>
+    <string name="media_menu_share_image">Del bilde</string>
     <string name="media_save_success">Lagret i Nedlastingen</string>
     <string name="media_save_fail">Kunne ikke lagre</string>
     <string name="media_alt_text">Alt. tekst</string>

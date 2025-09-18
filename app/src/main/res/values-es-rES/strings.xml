@@ -155,6 +155,7 @@
     <string name="media_viewer_title">Visor de medios</string>
     <string name="settings_accounts_remove">Eliminar</string>
     <string name="media_menu_save">Guardar</string>
+    <string name="media_menu_share_image">Compartir imagen</string>
     <string name="media_save_success">Guardado en descargas</string>
     <string name="media_save_fail">Error al guardar</string>
     <string name="media_alt_text">Texto Alt</string>

@@ -155,6 +155,7 @@
     <string name="media_viewer_title">Przeglądarka mediów</string>
     <string name="settings_accounts_remove">Usuń</string>
     <string name="media_menu_save">Zapisz</string>
+    <string name="media_menu_share_image">Udostępnij obraz</string>
     <string name="media_save_success">Zapisano do pobrania</string>
     <string name="media_save_fail">Nie udało się zapisać</string>
     <string name="media_alt_text">Tekst alternatywny</string>

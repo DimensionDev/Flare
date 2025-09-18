@@ -155,6 +155,7 @@
     <string name="media_viewer_title">Просмотрщик медиа</string>
     <string name="settings_accounts_remove">Удалить</string>
     <string name="media_menu_save">Сохранить</string>
+    <string name="media_menu_share_image">Поделиться изображением</string>
     <string name="media_save_success">Сохранено в Загрузках</string>
     <string name="media_save_fail">Не удалось сохранить</string>
     <string name="media_alt_text">Alt текст</string>

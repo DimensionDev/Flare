@@ -155,6 +155,7 @@
     <string name="media_viewer_title">Visualizzatore multimediale</string>
     <string name="settings_accounts_remove">Rimuovi</string>
     <string name="media_menu_save">Salva</string>
+    <string name="media_menu_share_image">Condividi immagine</string>
     <string name="media_save_success">Salvato in Download</string>
     <string name="media_save_fail">Salvataggio non riuscito</string>
     <string name="media_alt_text">Testo alternativo</string>

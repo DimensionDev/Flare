@@ -155,6 +155,7 @@
     <string name="media_viewer_title">Visionneuse multimédia</string>
     <string name="settings_accounts_remove">Retirer</string>
     <string name="media_menu_save">Enregistrer</string>
+    <string name="media_menu_share_image">Partager l\'image</string>
     <string name="media_save_success">Enregistré dans les téléchargements</string>
     <string name="media_save_fail">Échec de l\'enregistrement</string>
     <string name="media_alt_text">Texte Alt</string>

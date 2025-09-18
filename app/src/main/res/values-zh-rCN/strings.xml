@@ -155,6 +155,7 @@
     <string name="media_viewer_title">媒体查看器</string>
     <string name="settings_accounts_remove">删除账户</string>
     <string name="media_menu_save">保存</string>
+    <string name="media_menu_share_image">分享图像</string>
     <string name="media_save_success">已保存到下载文件夹</string>
     <string name="media_save_fail">保存失败</string>
     <string name="media_alt_text">备用文本</string>

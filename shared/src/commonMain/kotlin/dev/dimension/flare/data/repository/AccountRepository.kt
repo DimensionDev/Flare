@@ -222,11 +222,11 @@ internal fun accountServiceFlow(
         }
     }
 
-public fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount> =
+public fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> =
     repository
         .activeAccount
-        .map { it.takeSuccess() ?: throw NoActiveAccountException }
-        .distinctUntilChangedBy { it.accountKey }
+        .map { it.takeSuccess() }
+        .distinctUntilChangedBy { it?.accountKey }
 
 @Composable
 internal fun allAccountsPresenter(repository: AccountRepository): State<UiState<ImmutableList<UiAccount>>> =

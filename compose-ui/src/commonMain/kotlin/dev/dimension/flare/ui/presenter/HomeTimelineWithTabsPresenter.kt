@@ -19,7 +19,6 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.settings.AccountEventPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
@@ -33,6 +32,10 @@ public class HomeTimelineWithTabsPresenter(
 
     public interface State : UserState {
         public val tabState: UiState<ImmutableList<TimelineTabItem>>
+    }
+
+    init {
+        println("HomeTimelineWithTabsPresenter: accountType=$accountType")
     }
 
     private val tabsState by lazy {
@@ -62,8 +65,7 @@ public class HomeTimelineWithTabsPresenter(
                         )
                     }
                 }
-            }.distinctUntilChanged()
-            .map {
+            }.map {
                 it.toImmutableList()
             }
     }
@@ -143,10 +145,8 @@ public class HomeTimelineWithTabsPresenter(
 //                    }.toImmutableList()
 //            }
 
-        return remember(accountState, tabs) {
-            object : State, UserState by accountState {
-                override val tabState = tabs
-            }
+        return object : State, UserState by accountState {
+            override val tabState = tabs
         }
     }
 }

@@ -21,9 +21,7 @@ import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -58,56 +56,56 @@ public class HomeTabsPresenter :
 
     private val settingsRepository by inject<SettingsRepository>()
     private val accountRepository by inject<AccountRepository>()
-    private val activeAccountFlow by lazy {
-        combine(
-            activeAccountFlow(accountRepository),
-            settingsRepository.tabSettings.distinctUntilChangedBy { it.secondaryItems },
-        ) { account, tabsState ->
-            println("Active account changed: $account, tabsState: $tabsState")
-            val secondary =
-                tabsState.secondaryItems ?: TimelineTabItem.defaultSecondary(account)
-            State.HomeTabState(
-                primary =
-                    TimelineTabItem.default
-                        .map {
-                            HomeTabItem(it)
-                        }.toImmutableList(),
-                secondary =
-                    secondary
-                        .map {
-                            HomeTabItem(it)
-                        }.toImmutableList(),
-                extraProfileRoute =
-                    HomeTabItem(
-                        tabItem =
-                            ProfileTabItem(
-                                accountKey = account.accountKey,
-                                userKey = account.accountKey,
+    private val tabsFlow by lazy {
+        activeAccountFlow(accountRepository)
+            .combine(
+                settingsRepository.tabSettings.distinctUntilChangedBy { it.secondaryItems },
+            ) { account, tabsState ->
+                println("Active account changed: $account, tabsState: $tabsState")
+                if (account == null) {
+                    State.HomeTabState(
+                        primary =
+                            TimelineTabItem.guest
+                                .map {
+                                    HomeTabItem(it)
+                                }.toImmutableList(),
+                        secondary = persistentListOf(),
+                        extraProfileRoute = null,
+                        secondaryIconOnly = true,
+                    )
+                } else {
+                    val secondary =
+                        tabsState.secondaryItems ?: TimelineTabItem.defaultSecondary(account)
+                    State.HomeTabState(
+                        primary =
+                            TimelineTabItem.default
+                                .map {
+                                    HomeTabItem(it)
+                                }.toImmutableList(),
+                        secondary =
+                            secondary
+                                .map {
+                                    HomeTabItem(it)
+                                }.toImmutableList(),
+                        extraProfileRoute =
+                            HomeTabItem(
+                                tabItem =
+                                    ProfileTabItem(
+                                        accountKey = account.accountKey,
+                                        userKey = account.accountKey,
+                                    ),
                             ),
-                    ),
-                secondaryIconOnly = tabsState.secondaryItems == null,
-            )
-        }.catch {
-            emit(
-                State.HomeTabState(
-                    primary =
-                        TimelineTabItem.guest
-                            .map {
-                                HomeTabItem(it)
-                            }.toImmutableList(),
-                    secondary = persistentListOf(),
-                    extraProfileRoute = null,
-                    secondaryIconOnly = true,
-                ),
-            )
-        }.distinctUntilChanged()
+                        secondaryIconOnly = tabsState.secondaryItems == null,
+                    )
+                }
+            }
     }
 
     @Composable
     override fun body(): State {
         val tabs =
-            remember(activeAccountFlow) {
-                activeAccountFlow
+            remember(tabsFlow) {
+                tabsFlow
             }.collectAsUiState().value.map {
                 it.copy(
                     primary =

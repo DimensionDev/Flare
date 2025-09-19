@@ -280,6 +280,7 @@
     <string name="home_tab_social_timeline_title">إجتماعي</string>
     <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
             <ul>
+                <li>إضافة دعم الإشارات المرجعية إلى Bluesky</li>
                 <li>إصلاحات الشوائب وتحسين الأداء</li>
             </ul>
         ]]></string>

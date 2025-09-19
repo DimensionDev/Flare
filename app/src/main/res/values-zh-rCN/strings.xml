@@ -278,8 +278,9 @@
     <string name="tab_settings_mixed_timeline">添加混合时间线标签</string>
     <string name="tab_settings_mixed_timeline_desc">混合时间线将混合所有标签页的时间线结果</string>
     <string name="home_tab_social_timeline_title">社交活动</string>
-    <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
+    <string name="changelog_current"><![CDATA[            <span> %1$s版本:</span>
             <ul>
+                <li>添加书签支持Bluesky</li>
                 <li>Bug 修复和性能改进</li>
             </ul>
         ]]></string>

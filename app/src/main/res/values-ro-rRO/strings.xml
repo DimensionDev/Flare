@@ -280,7 +280,8 @@
     <string name="home_tab_social_timeline_title">Sociale</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
-                <li>Remedierea erorilor şi îmbunătăţirea performanţei</li>
+                <li>Adaugă suport pentru semnul de carte pentru Bluesky</li>
+                <li>Remedieri ale erorilor și îmbunătățiri de performanță</li>
             </ul>
         ]]></string>
 </resources>

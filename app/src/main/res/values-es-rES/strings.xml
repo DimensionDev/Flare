@@ -280,7 +280,8 @@
     <string name="home_tab_social_timeline_title">Social</string>
     <string name="changelog_current"><![CDATA[            <span>Versión %1$s:</span>
             <ul>
-                <li>Error corrige y mejora de rendimiento</li>
+                <li>Añadir soporte para marcadores para Bluesky</li>
+                <li>correcciones de errores y mejoras de rendimiento</li>
             </ul>
         ]]></string>
 </resources>

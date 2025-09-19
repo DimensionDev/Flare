@@ -10,16 +10,16 @@ import com.slapps.cupertino.theme.CupertinoTheme
 internal actual object PlatformShapes {
     actual val extraSmall: Shape
         @Composable
-        get() = CupertinoTheme.shapes.extraSmall
+        get() = CupertinoTheme.shapes.small
     actual val small: Shape
         @Composable
-        get() = CupertinoTheme.shapes.small
+        get() = CupertinoTheme.shapes.medium
     actual val medium: Shape
         @Composable
-        get() = CupertinoTheme.shapes.medium
+        get() = CupertinoTheme.shapes.large
     actual val large: Shape
         @Composable
-        get() = CupertinoTheme.shapes.large
+        get() = CupertinoTheme.shapes.extraLarge
 
     actual val topCardShape: Shape
         @Composable
@@ -39,7 +39,7 @@ internal actual object PlatformShapes {
 
     actual val listCardContainerShape: CornerBasedShape
         @Composable
-        get() = CupertinoTheme.shapes.large
+        get() = CupertinoTheme.shapes.extraLarge
 
     actual val listCardItemShape: CornerBasedShape
         @Composable
@@ -47,13 +47,13 @@ internal actual object PlatformShapes {
     actual val dmShapeFromMe: CornerBasedShape
         @Composable
         get() =
-            CupertinoTheme.shapes.large.copy(
+            CupertinoTheme.shapes.extraLarge.copy(
                 bottomEnd = CornerSize(0.dp),
             )
     actual val dmShapeFromOther: CornerBasedShape
         @Composable
         get() =
-            CupertinoTheme.shapes.large.copy(
+            CupertinoTheme.shapes.extraLarge.copy(
                 bottomStart = CornerSize(0.dp),
             )
 }

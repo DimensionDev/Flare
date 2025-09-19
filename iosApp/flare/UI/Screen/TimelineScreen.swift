@@ -10,6 +10,16 @@ struct TimelineScreen: View {
         self._presenter = .init(wrappedValue: .init(presenter: TimelineItemPresenter(timelineTabItem: tabItem)))
     }
     var body: some View {
+//        ComposeTimelineView(
+//            key: presenter.key,
+//            data: presenter.state.listState,
+//            detailStatusKey: nil,
+//            topPadding: 0,
+//            onOpenLink: { url in openURL.callAsFunction(.init(string: url)!) },
+//            onExpand: {},
+//            onCollapse: {}
+//        )
+//        .ignoresSafeArea()
         List {
             TimelinePagingView(data: presenter.state.listState)
                 .listRowSeparator(.hidden)
@@ -20,10 +30,10 @@ struct TimelineScreen: View {
         .scrollContentBackground(.hidden)
         .listRowSpacing(2)
         .listStyle(.plain)
-        .background(Color(.systemGroupedBackground))
         .refreshable {
             try? await presenter.state.refreshSuspend()
         }
+        .background(Color(.systemGroupedBackground))
         .navigationTitle(tabItem.metaData.title.text)
     }
 }

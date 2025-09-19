@@ -49,11 +49,11 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Pkg)
             packageName = "Flare"
-            packageVersion = "1.0.0"
+            packageVersion = "1.0.1"
             macOS {
                 val file = project.file("signing.properties")
                 val hasSigningProps = file.exists()
-                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "24"
+                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "26"
                 bundleID = "dev.dimension.flare"
                 minimumSystemVersion = "14.0"
                 appStore = hasSigningProps

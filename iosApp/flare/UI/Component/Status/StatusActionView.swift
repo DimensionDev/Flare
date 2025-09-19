@@ -8,10 +8,13 @@ struct StatusActionsView: View {
         HStack {
             ForEach(0..<data.count) { index in
                 let item = data[index]
-                if index == data.count - 1 {
-                    Spacer()
-                }
                 StatusActionView(data: item, useText: false, isFixedWidth: index != data.count - 1)
+                    .if(index == data.count - 1) { view in
+                        view.frame(maxWidth: .infinity, alignment: .trailing)
+                    } else: { view in
+                        view
+                    }
+
             }
         }
         .labelIconToTitleSpacing(4)
@@ -130,7 +133,7 @@ extension StatusActionItem {
             switch colorized.color {
             case .contentColor: Color(.label)
             case .error: Color(.systemRed)
-            case .primaryColor: Color.primary
+            case .primaryColor: Color.accentColor
             case .red: Color(.systemRed)
             }
         } else {

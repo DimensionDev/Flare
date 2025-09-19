@@ -15,24 +15,12 @@ extension TabItem {
             default:
                 TimelineScreen(tabItem: timelineTabItem)
             }
-        case .allListTabItem:
-            EmptyView()
-        case .feedsTabItem:
-            EmptyView()
-        case .directMessageTabItem:
-            EmptyView()
-        case .discoverTabItem:
-            EmptyView()
-        case .antennasListTabItem:
-            EmptyView()
         case .notificationTabItem:
             NotificationScreen(accountType: self.account)
-        case .profileTabItem:
-            EmptyView()
-        case .rssTabItem:
-            EmptyView()
         case .settingsTabItem:
             SettingsScreen()
+        default:
+            Text("Not done yet for \(self)")
         }
     }
 }

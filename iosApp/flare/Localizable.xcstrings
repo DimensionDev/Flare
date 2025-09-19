@@ -914,6 +914,9 @@
         }
       }
     },
+    "sensitive_button_show" : {
+      "comment" : "Button to show sensitive media"
+    },
     "settings_title" : {
       "localizations" : {
         "en" : {

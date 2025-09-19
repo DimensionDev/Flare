@@ -97,6 +97,7 @@ struct StatusView: View {
                                 Text("mastodon_item_show_more")
                             }
                         }
+                        .buttonStyle(.glassProminent)
                     }
 
                     if expand || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
@@ -106,13 +107,14 @@ struct StatusView: View {
                                 .if(isDetail) { richText in
                                     richText
                                 } else: { richText in
-                                    richText.lineLimit(5)
+                                    richText
+                                        .lineLimit(5)
                                 }
 
                         }
                     }
                     if !data.images.isEmpty {
-                        StatusMediaView(data: data.images)
+                        StatusMediaView(data: data.images, sensitive: data.sensitive)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
 

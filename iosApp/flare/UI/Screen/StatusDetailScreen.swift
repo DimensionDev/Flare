@@ -13,7 +13,7 @@ struct StatusDetailScreen: View {
 
     var body: some View {
         List {
-            TimelinePagingView(data: presenter.state.listState)
+            TimelinePagingView(data: presenter.state.listState, detailStatusKey: statusKey)
                 .listRowSeparator(.hidden)
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .padding(.horizontal)

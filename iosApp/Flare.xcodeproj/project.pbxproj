@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0646B2622E7151A700535A3E /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0646B2612E7151A700535A3E /* Kingfisher */; };
 		068F7CD12E75405A00B5FB40 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 068F7CD02E75405A00B5FB40 /* MarkdownUI */; };
+		06C7FC172E7D474900A0D01A /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = 06C7FC162E7D474900A0D01A /* LazyPager */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				06C7FC172E7D474900A0D01A /* LazyPager in Frameworks */,
 				068F7CD12E75405A00B5FB40 /* MarkdownUI in Frameworks */,
 				0646B2622E7151A700535A3E /* Kingfisher in Frameworks */,
 			);
@@ -89,6 +91,7 @@
 			packageProductDependencies = (
 				0646B2612E7151A700535A3E /* Kingfisher */,
 				068F7CD02E75405A00B5FB40 /* MarkdownUI */,
+				06C7FC162E7D474900A0D01A /* LazyPager */,
 			);
 			productName = flare;
 			productReference = 06E433FE2E6A9A2600CD0826 /* Flare.app */;
@@ -122,6 +125,7 @@
 				0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				068F7CCF2E75405A00B5FB40 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				06791BD42E7AA40000FF2050 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
+				06C7FC152E7D474900A0D01A /* XCRemoteSwiftPackageReference "LazyPager" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 06E433FF2E6A9A2600CD0826 /* Products */;
@@ -431,6 +435,14 @@
 				version = 2.4.1;
 			};
 		};
+		06C7FC152E7D474900A0D01A /* XCRemoteSwiftPackageReference "LazyPager" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gh123man/LazyPager";
+			requirement = {
+				kind = exactVersion;
+				version = 1.1.13;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -448,6 +460,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 068F7CCF2E75405A00B5FB40 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
+		};
+		06C7FC162E7D474900A0D01A /* LazyPager */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 06C7FC152E7D474900A0D01A /* XCRemoteSwiftPackageReference "LazyPager" */;
+			productName = LazyPager;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

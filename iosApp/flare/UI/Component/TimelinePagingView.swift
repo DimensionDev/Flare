@@ -3,6 +3,7 @@ import KotlinSharedUI
 
 struct TimelinePagingView: View {
     let data: PagingState<UiTimeline>
+    let detailStatusKey: MicroBlogKey?
     var body: some View {
         switch onEnum(of: data) {
         case .empty: EmptyView()
@@ -17,7 +18,7 @@ struct TimelinePagingView: View {
             ForEach(TimelineCollection(data: success)) { data in
                 if let item = data.data {
                     ListCardView(index: data.index, totalCount: Int(success.itemCount)) {
-                        TimelineView(data: item)
+                        TimelineView(data: item, detailStatusKey: detailStatusKey)
                             .padding()
                             .onAppear {
                                 _ = success.get(index: Int32(data.index))
@@ -34,6 +35,13 @@ struct TimelinePagingView: View {
                 }
             }
         }
+    }
+}
+
+extension TimelinePagingView {
+    init(data: PagingState<UiTimeline>) {
+        self.data = data
+        self.detailStatusKey = nil
     }
 }
 

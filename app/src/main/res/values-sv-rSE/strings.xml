@@ -280,6 +280,7 @@
     <string name="home_tab_social_timeline_title">Socialt</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
+                <li>Lägg till bokmärkesstöd för Bluesky</li>
                 <li>Felrättelser och prestandaförbättringar</li>
             </ul>
         ]]></string>

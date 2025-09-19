@@ -280,6 +280,7 @@
     <string name="home_tab_social_timeline_title">Społeczność</string>
     <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
+                <li>Dodaj obsługę zakładek Bluesky</li>
                 <li>Poprawki błędów i ulepszenia wydajności</li>
             </ul>
         ]]></string>

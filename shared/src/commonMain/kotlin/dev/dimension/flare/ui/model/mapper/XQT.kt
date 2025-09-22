@@ -619,7 +619,7 @@ internal fun Tweet.renderStatus(
         url =
             buildString {
                 append("https://${accountKey.host}/")
-                append(user?.handleWithoutAt)
+                append(user?.handleWithoutAtAndHost)
                 append("/status/")
                 append(legacy?.idStr ?: restId)
             },

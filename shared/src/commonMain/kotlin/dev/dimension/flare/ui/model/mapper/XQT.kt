@@ -44,6 +44,9 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.toUi
+import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlin.uuid.Uuid
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
@@ -53,9 +56,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import moe.tlaster.twitter.parser.TwitterParser
 import moe.tlaster.twitter.parser.UrlToken
-import kotlin.time.Clock
-import kotlin.time.Instant
-import kotlin.uuid.Uuid
 
 private val twitterParser by lazy {
     TwitterParser(enableNonAsciiInUrl = false)

@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.insert
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -855,7 +856,7 @@ private fun composePresenter(
 
         fun selectEmoji(emoji: UiEmoji) {
             textFieldState.edit {
-                append(emoji.insertText)
+                insert(textFieldState.selection.start, emoji.insertText)
             }
         }
 

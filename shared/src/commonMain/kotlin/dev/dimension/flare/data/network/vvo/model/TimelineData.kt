@@ -583,6 +583,8 @@ internal data class Comment(
     val analysis_extra: String? = null,
     @SerialName("total_number")
     val totalNumber: Long? = null,
+    @SerialName("associate_status_id")
+    val associateStatusID: String? = null,
 ) {
     val commentList: List<Comment>?
         get() =

@@ -559,7 +559,16 @@ private fun replaceMentionAndHashtag(
     if (node is Element) {
         val href = node.attribute("href")?.value
         if (href != null) {
-            if (href.startsWith("/n/")) {
+            if (href.all { it.isDigit() }) {
+                val statusId = href
+                node.attributes().put(
+                    "href",
+                    AppDeepLink.VVO.StatusDetail(
+                        accountKey = accountKey,
+                        statusKey = MicroBlogKey(statusId, accountKey.host),
+                    ),
+                )
+            } else if (href.startsWith("/n/")) {
                 val id = href.removePrefix("/n/")
                 if (id.isNotEmpty()) {
                     node.attributes().put(

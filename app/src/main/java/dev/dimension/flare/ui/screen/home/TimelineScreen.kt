@@ -19,7 +19,6 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.presenter.home.UserPresenter
-import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -30,7 +29,7 @@ internal fun TimelineScreen(
     toLogin: (() -> Unit)? = null,
     onBack: () -> Unit,
 ) {
-    val state by producePresenter(key = "timeline_${tabItem.key}") {
+    val state by producePresenter(key = "timeline_screen_${tabItem.key}") {
         timelinePresenter(tabItem)
     }
 //    RegisterTabCallback(
@@ -75,13 +74,10 @@ internal fun TimelineScreen(
 @Composable
 private fun timelinePresenter(tabItem: TimelineTabItem) =
     run {
-        val accountState =
-            remember(tabItem.account) {
-                UserPresenter(
-                    accountType = tabItem.account,
-                    userKey = null,
-                )
-            }.invoke()
-        object : UserState by accountState {
-        }
+        remember(tabItem.account) {
+            UserPresenter(
+                accountType = tabItem.account,
+                userKey = null,
+            )
+        }.invoke()
     }

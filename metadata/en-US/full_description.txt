@@ -1,0 +1,8 @@
+Flare is an open-source, privacy-first social client that brings together multiple decentralized and federated networks into one seamless timeline. Whether you follow people on Mastodon, Bluesky, Misskey, or prefer RSS feeds, Flare lets you see everything in one place — no need to switch between apps.
+
+Features:
+ - Unified timeline covering Mastodon, Misskey, Bluesky, X, and RSS feeds. 
+ - Crossposting: share your thoughts across multiple platforms simultaneously. 
+ - Full support for features common in federated social networks (polls, lists, favourites/bookmarks, etc.) depending on the platform. 
+ - AI-powered tools: translation, summaries, local history to help you catch up quickly. 
+ - Strong focus on privacy and control: anonymous mode, local filtering, data transparency. 

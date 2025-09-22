@@ -25,13 +25,16 @@ if (project.file("google-services.json").exists()) {
 android {
     namespace = "dev.dimension.flare"
     compileSdk = libs.versions.compileSdk.get().toInt()
+    val fdroid = rootProject.file("fdroid.properties")
+    val fdroidProp = Properties()
+    fdroidProp.load(fdroid.inputStream())
 
     defaultConfig {
         applicationId = "dev.dimension.flare"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.compileSdk.get().toInt()
-        versionCode = System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: 1
-        versionName = System.getenv("BUILD_VERSION")?.toString() ?: "0.0.0"
+        versionCode = System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: fdroidProp.getProperty("versionCode")?.toIntOrNull() ?: 1
+        versionName = System.getenv("BUILD_VERSION")?.toString() ?: fdroidProp.getProperty("versionName")?.toString() ?: "0.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

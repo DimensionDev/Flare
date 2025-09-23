@@ -13,10 +13,11 @@ struct StatusMediaScreen: View {
             switch onEnum(of: media) {
             case .image(let image):
                 NetworkImage(data: image.url, placeholder: image.previewUrl)
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
             case .video(let video):
                 if selectedIndex == data.firstIndex(where: { $0.url == video.url }) {
                     let player = AVPlayer(url: .init(string: video.url)!)
+
                     VideoPlayer(player: player)
                         .onAppear {
                             player.play()
@@ -29,14 +30,13 @@ struct StatusMediaScreen: View {
                             }
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .aspectRatio(contentMode: .fit)
                 } else {
                     NetworkImage(data: video.thumbnailUrl)
-                        .aspectRatio(contentMode: .fit)
+                        .scaledToFit()
                 }
             case .gif(let gif):
                 NetworkImage(data: gif.url, placeholder: gif.previewUrl)
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
             case .audio(let audio):
                 EmptyView()
             }
@@ -47,7 +47,6 @@ struct StatusMediaScreen: View {
         .zoomable(min: 1, max: 5)
         .background(.black.opacity(opacity))
         .background(ClearFullScreenBackground())
-        .ignoresSafeArea()
         .overlay(alignment: .topLeading) {
             Button {
                 dismiss()

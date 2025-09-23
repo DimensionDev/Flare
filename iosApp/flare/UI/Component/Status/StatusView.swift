@@ -115,7 +115,6 @@ struct StatusView: View {
                     }
                     if !data.images.isEmpty {
                         StatusMediaView(data: data.images, sensitive: data.sensitive)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
 
                     if let card = data.card {

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0646B2622E7151A700535A3E /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0646B2612E7151A700535A3E /* Kingfisher */; };
+		068923482E82A80700981D8E /* Flow in Frameworks */ = {isa = PBXBuildFile; productRef = 068923472E82A80700981D8E /* Flow */; };
 		068F7CD12E75405A00B5FB40 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 068F7CD02E75405A00B5FB40 /* MarkdownUI */; };
 		06C7FC172E7D474900A0D01A /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = 06C7FC162E7D474900A0D01A /* LazyPager */; };
 /* End PBXBuildFile section */
@@ -42,6 +43,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				068923482E82A80700981D8E /* Flow in Frameworks */,
 				06C7FC172E7D474900A0D01A /* LazyPager in Frameworks */,
 				068F7CD12E75405A00B5FB40 /* MarkdownUI in Frameworks */,
 				0646B2622E7151A700535A3E /* Kingfisher in Frameworks */,
@@ -91,6 +93,7 @@
 				0646B2612E7151A700535A3E /* Kingfisher */,
 				068F7CD02E75405A00B5FB40 /* MarkdownUI */,
 				06C7FC162E7D474900A0D01A /* LazyPager */,
+				068923472E82A80700981D8E /* Flow */,
 			);
 			productName = flare;
 			productReference = 06E433FE2E6A9A2600CD0826 /* Flare.app */;
@@ -125,6 +128,7 @@
 				068F7CCF2E75405A00B5FB40 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				06791BD42E7AA40000FF2050 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 				06C7FC152E7D474900A0D01A /* XCRemoteSwiftPackageReference "LazyPager" */,
+				068923462E82A80700981D8E /* XCRemoteSwiftPackageReference "SwiftUI-Flow" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 06E433FF2E6A9A2600CD0826 /* Products */;
@@ -317,6 +321,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = flare/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Flare;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -355,6 +360,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = flare/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Flare;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -419,6 +425,14 @@
 				version = 0.61.0;
 			};
 		};
+		068923462E82A80700981D8E /* XCRemoteSwiftPackageReference "SwiftUI-Flow" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tevelee/SwiftUI-Flow";
+			requirement = {
+				kind = exactVersion;
+				version = 3.1.1;
+			};
+		};
 		068F7CCF2E75405A00B5FB40 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
@@ -442,6 +456,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		068923472E82A80700981D8E /* Flow */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 068923462E82A80700981D8E /* XCRemoteSwiftPackageReference "SwiftUI-Flow" */;
+			productName = Flow;
 		};
 		068F7CD02E75405A00B5FB40 /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;

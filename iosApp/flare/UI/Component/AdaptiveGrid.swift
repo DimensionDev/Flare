@@ -148,9 +148,9 @@ struct AdaptiveGrid: Layout {
         }
     }
 
-    private func heightForGridFillLastRow(width width: CGFloat, count n: Int, cols: Int, spacing s: CGFloat) -> CGFloat {
+    private func heightForGridFillLastRow(width: CGFloat, count n: Int, cols: Int, spacing: CGFloat) -> CGFloat {
         let rowsTotal = Int(ceil(Double(n) / Double(cols)))
-        let columnWidth = (width - CGFloat(cols - 1) * s) / CGFloat(cols)
-        return CGFloat(rowsTotal) * columnWidth + CGFloat(max(0, rowsTotal - 1)) * s
+        let columnWidth = (width - CGFloat(cols - 1) * spacing) / CGFloat(cols)
+        return CGFloat(rowsTotal) * columnWidth + CGFloat(max(0, rowsTotal - 1)) * spacing
     }
 }

@@ -52,6 +52,10 @@ public class AllListPresenter(
                     items.refreshSuspend()
                 }
             }
+
+            override suspend fun refreshSuspend() {
+                items.refreshSuspend()
+            }
         }
     }
 }
@@ -62,4 +66,6 @@ public interface AllListState {
     public val isRefreshing: Boolean
 
     public fun refresh()
+
+    public suspend fun refreshSuspend()
 }

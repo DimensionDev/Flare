@@ -86,27 +86,27 @@ struct AdaptiveGrid: Layout {
         switch count {
         case 1:
             let ratio = aspectForSingle(subviews: subviews)
-            place(0, x: 0, y: 0, w: width, h: width / ratio)
+            place(0, x: 0, y: 0, width: width, height: width / ratio)
 
         case 2:
             let cellW = (width - spacing) / 2
-            place(0, x: 0, y: 0, w: cellW, h: height)
-            place(1, x: cellW + spacing, y: 0, w: cellW, h: height)
+            place(0, x: 0, y: 0, width: cellW, height: height)
+            place(1, x: cellW + spacing, y: 0, width: cellW, height: height)
 
         case 3:
             let halfW = (width - spacing) / 2
             let rightH = (height - spacing) / 2
-            place(0, x: 0, y: 0, w: halfW, h: height)
-            place(1, x: halfW + spacing, y: 0, w: halfW, h: rightH)
-            place(2, x: halfW + spacing, y: rightH + spacing, w: halfW, h: rightH)
+            place(0, x: 0, y: 0, width: halfW, height: height)
+            place(1, x: halfW + spacing, y: 0, width: halfW, height: rightH)
+            place(2, x: halfW + spacing, y: rightH + spacing, width: halfW, height: rightH)
 
         case 4:
             let cellW = (width - spacing) / 2
             let cellH = (height - spacing) / 2
-            place(0, x: 0, y: 0, w: cellW, h: cellH)
-            place(1, x: cellW + spacing, y: 0, w: cellW, h: cellH)
-            place(2, x: 0, y: cellH + spacing, w: cellW, h: cellH)
-            place(3, x: cellW + spacing, y: cellH + spacing, w: cellW, h: cellH)
+            place(0, x: 0, y: 0, width: cellW, height: cellH)
+            place(1, x: cellW + spacing, y: 0, width: cellW, height: cellH)
+            place(2, x: 0, y: cellH + spacing, width: cellW, height: cellH)
+            place(3, x: cellW + spacing, y: cellH + spacing, width: cellW, height: cellH)
 
         default:
             let cols = min(maxColumns, 3)
@@ -120,7 +120,7 @@ struct AdaptiveGrid: Layout {
             for r in 0..<fullRows {
                 for c in 0..<cols {
                     let x = CGFloat(c) * (columnWidth + spacing)
-                    place(idx, x: x, y: y, w: columnWidth, h: columnWidth)
+                    place(idx, x: x, y: y, width: columnWidth, height: columnWidth)
                     idx += 1
                 }
                 y += columnWidth
@@ -131,7 +131,7 @@ struct AdaptiveGrid: Layout {
                 let tailW = (width - CGFloat(rem - 1) * spacing) / CGFloat(rem)
                 for c in 0..<rem {
                     let x = CGFloat(c) * (tailW + spacing)
-                    place(idx, x: x, y: y, w: tailW, h: columnWidth)
+                    place(idx, x: x, y: y, width: tailW, height: columnWidth)
                     idx += 1
                 }
             }

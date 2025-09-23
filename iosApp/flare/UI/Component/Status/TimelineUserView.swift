@@ -7,6 +7,9 @@ struct TimelineUserView: View {
     var body: some View {
         VStack {
             UserCompatView(data: data.value)
+                .onTapGesture {
+                    data.value.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                }
             if !data.button.isEmpty {
                 HStack {
                     ForEach(0..<data.button.count, id: \.self) { index in

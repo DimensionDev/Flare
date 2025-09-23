@@ -21,6 +21,7 @@ struct StatusTopMessageView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .font(.caption)
+        .foregroundStyle(.secondary)
     }
 }
 

@@ -44,13 +44,24 @@ struct AllFeedScreen: View {
                                     Bluesky.FeedTabItem(account: accountType, uri: item.id, metaData: .init(title: TitleType.Text(content: item.title), icon: IconType.Material(icon: .feeds)))
                                 )
                         ) {
-                            Label {
-                                Text(item.title)
-                            } icon: {
-                                if let image = item.avatar {
-                                    AvatarView(data: image)
-                                } else {
-                                    Image("fa-list")
+                            VStack(
+                                alignment: .leading,
+                                spacing: 8
+                            ) {
+                                Label {
+                                    Text(item.title)
+                                } icon: {
+                                    if let image = item.avatar {
+                                        AvatarView(data: image)
+                                            .frame(width: 24, height: 24)
+                                    } else {
+                                        Image("fa-list")
+                                    }
+                                }
+                                if let desc = item.description_, !desc.isEmpty {
+                                    Text(desc)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
                                 }
                             }
                         }

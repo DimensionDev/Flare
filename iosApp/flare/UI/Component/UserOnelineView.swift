@@ -13,6 +13,7 @@ struct UserOnelineView<TrailingContent: View>: View {
                 RichText(text: data.name)
                 Text(data.handle)
                     .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             trailing()

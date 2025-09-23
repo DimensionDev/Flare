@@ -22,6 +22,7 @@ struct FeedView: View {
             if let desc = data.description_ {
                 Text(desc)
                     .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             HStack {
                 NetworkImage(data: data.sourceIcon)

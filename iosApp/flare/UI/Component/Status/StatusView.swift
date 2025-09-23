@@ -43,6 +43,7 @@ struct StatusView: View {
                                 if !isDetail {
                                     DateTimeText(data: data.createdAt)
                                         .font(.caption)
+                                        .foregroundStyle(.secondary)
                                 }
                             }
                         }
@@ -61,6 +62,7 @@ struct StatusView: View {
                                 if !isDetail {
                                     DateTimeText(data: data.createdAt)
                                         .font(.caption)
+                                        .foregroundStyle(.secondary)
                                 }
                             }
                         }
@@ -78,10 +80,10 @@ struct StatusView: View {
                         case .replyTo(let replyTo):
                             HStack {
                                 Image("fa-reply")
-                                    .foregroundStyle(Color(.label))
                                 Text("Reply to \(replyTo.handle)")
                             }
                             .font(.caption)
+                            .foregroundStyle(.secondary)
                         }
                     }
                     if let contentWarning = data.contentWarning, !contentWarning.isEmpty {
@@ -147,6 +149,7 @@ struct StatusView: View {
                     if isDetail {
                         DateTimeText(data: data.createdAt, fullTime: true)
                             .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
 
                     if !isQuote {

@@ -15,6 +15,7 @@ struct UserCompatView<TrailingContent: View>: View {
                 RichText(text: data.name)
                 Text(data.handle)
                     .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             trailing()
@@ -45,6 +46,7 @@ struct UserLoadingView: View {
                 Text("user name")
                 Text("user handle")
                     .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }

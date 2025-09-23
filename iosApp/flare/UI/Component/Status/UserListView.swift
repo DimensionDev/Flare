@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 
 struct UserListView: View {
+    @Environment(\.openURL) private var openURL
     let data: UiTimeline.ItemContentUserList
     var body: some View {
         VStack {
@@ -16,6 +17,9 @@ struct UserListView: View {
                                 RoundedRectangle(cornerRadius: 16)
                                     .stroke(Color(.separator), lineWidth: 1)
                             )
+                            .onTapGesture {
+                                user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                            }
                     }
                 }
             }

@@ -10,11 +10,14 @@ struct StatusCardView: View {
             alignment: .leading
         ) {
             if let media = data.media {
-                AdaptiveMosaic([media], singleMode: .force16x9) { item in
-                    MediaView(data: item)
+                AdaptiveGrid(singleFollowsImageAspect: false) {
+                    Color.clear
+                        .overlay {
+                            MediaView(data: media)
+                                .clipped()
+                        }
                         .clipped()
                 }
-                .frame(maxWidth: .infinity)
                 .clipped()
             }
             VStack(

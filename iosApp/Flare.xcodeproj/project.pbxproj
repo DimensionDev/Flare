@@ -82,7 +82,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				06791BD62E7AA41500FF2050 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				06E434002E6A9A2600CD0826 /* Flare */,
@@ -177,13 +176,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		06791BD62E7AA41500FF2050 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 06791BD52E7AA41500FF2050 /* SwiftLintBuildToolPlugin */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		06E434072E6A9A2700CD0826 /* Debug */ = {
@@ -450,11 +442,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
-		};
-		06791BD52E7AA41500FF2050 /* SwiftLintBuildToolPlugin */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 06791BD42E7AA40000FF2050 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
-			productName = "plugin:SwiftLintBuildToolPlugin";
 		};
 		068F7CD02E75405A00B5FB40 /* MarkdownUI */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -48,7 +48,6 @@ kotlin {
         appleTarget.binaries.framework {
             baseName = "shared"
 //            isStatic = true
-            linkerOpts("-ld_classic")
         }
     }
     targets.forEach { target ->

@@ -9,8 +9,11 @@ struct FeedView: View {
             alignment: .leading
         ) {
             if let image = data.image {
-                AdaptiveMosaic([image], singleMode: .force16x9) { image in
-                    NetworkImage(data: image)
+                AdaptiveGrid(singleFollowsImageAspect: false, spacing: 4, maxColumns: 3) {
+                    Color.clear
+                        .overlay {
+                            NetworkImage(data: image)
+                        }
                         .clipped()
                 }
                 .clipped()

@@ -1,193 +1,156 @@
 import SwiftUI
 
-/// Single image display mode
-enum SingleMode {
-    /// Respect the image's own aspect ratio (recommend using .resizable().scaledToFit() inside `content`)
-    case preserveImageAspect
-    /// Force 16:9 (the container applies .aspectRatio(16/9, .fit))
-    case force16x9
-}
+struct AdaptiveGrid: Layout {
 
-/// A generic mosaic grid (WeChat/Instagram-style)
-/// - Rules:
-///   1) items.count == 1 -> decided by `singleMode`
-///   2) 2...4:
-///      - odd (=3): left large image occupies the left half; right side has two images stacked vertically; overall 16:9
-///      - even (2, 4): grid fill; overall 16:9
-///   3) >4: 3-column grid; all full rows are 1:1 squares; the last incomplete row uses weight=1 to fill the width
-struct AdaptiveMosaic<Item, Content: View>: View {
-    let items: [Item]
-    let spacing: CGFloat
-    let singleMode: SingleMode
-    let content: (Item) -> Content
+    public var singleFollowsImageAspect: Bool
+    public var spacing: CGFloat
+    public var maxColumns: Int
 
-    init(
-        _ items: [Item],
+    public init(
+        singleFollowsImageAspect: Bool = true,
         spacing: CGFloat = 4,
-        singleMode: SingleMode = .preserveImageAspect,
-        @ViewBuilder content: @escaping (Item) -> Content
+        maxColumns: Int = 3
     ) {
-        self.items = items
+        self.singleFollowsImageAspect = singleFollowsImageAspect
         self.spacing = spacing
-        self.singleMode = singleMode
-        self.content = content
+        self.maxColumns = max(1, maxColumns)
     }
 
-    var body: some View {
-        switch items.count {
-        case 0:
-            EmptyView()
+    public struct Cache {}
+    public func makeCache(subviews: Subviews) -> Cache { Cache() }
+    public func updateCache(_ cache: inout Cache, subviews: Subviews) {}
+
+    public func sizeThatFits(
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout Cache
+    ) -> CGSize {
+        let count = subviews.count
+        guard count > 0 else { return .zero }
+
+        let defaultWidth: CGFloat = 320
+        var width = proposal.width ?? defaultWidth
+
+        switch count {
         case 1:
-            singleView(items[0])
-        case 2...4:
-            twoToFour(items)
+            let ratio = aspectForSingle(subviews: subviews)
+            if let height = proposal.height, proposal.width == nil { width = height * ratio }
+            return CGSize(width: width, height: width / ratio)
+
+        case 2, 3, 4:
+            let ratio: CGFloat = 16.0 / 9.0
+            if let height = proposal.height, proposal.width == nil { width = height * ratio }
+            return CGSize(width: width, height: width / ratio)
+
         default:
-            many(items)
+            let cols = min(maxColumns, 3)
+            let rowsTotal = Int(ceil(Double(count) / Double(cols)))
+            if let height = proposal.height, proposal.width == nil {
+                let a = CGFloat(rowsTotal) / CGFloat(cols)
+                let b = spacing * (CGFloat(rowsTotal) / CGFloat(cols) - 1)
+                width = a > 0 ? max(1, (height - b) / a) : defaultWidth
+            }
+            let height = heightForGridFillLastRow(width: width, count: count, cols: cols, spacing: spacing)
+            return CGSize(width: width, height: height)
         }
     }
-}
 
-// MARK: - Single image
-private extension AdaptiveMosaic {
-    func singleView(_ item: Item) -> some View {
-        Group {
-            switch singleMode {
-            case .preserveImageAspect:
-                // Let inner content keep its own aspect ratio (e.g., .scaledToFit())
-                content(item)
-                    .frame(maxWidth: .infinity)
+    public func placeSubviews(
+        in bounds: CGRect,
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout Cache
+    ) {
+        let count = subviews.count
+        guard count > 0 else { return }
 
-            case .force16x9:
-                GeometryReader { geo in
-                    let width = geo.size.width
-                    let height = width * 9.0 / 16.0
-                    contentBox(item, size: CGSize(width: width, height: height))
-                        .frame(width: width, height: height)
+        let size = sizeThatFits(
+            proposal: ProposedViewSize(width: bounds.width, height: bounds.height),
+            subviews: subviews,
+            cache: &cache
+        )
+        let width = size.width
+        let height = size.height
+        let spacing = spacing
+        let origin = CGPoint(x: bounds.minX, y: bounds.minY)
+
+        func place(_ i: Int, x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat) {
+            guard subviews.indices.contains(i) else { return }
+            subviews[i].place(
+                at: CGPoint(x: origin.x + x, y: origin.y + y),
+                anchor: .topLeading,
+                proposal: ProposedViewSize(width: width, height: height)
+            )
+        }
+
+        switch count {
+        case 1:
+            let ratio = aspectForSingle(subviews: subviews)
+            place(0, x: 0, y: 0, width: width, height: width / ratio)
+
+        case 2:
+            let cellW = (width - spacing) / 2
+            place(0, x: 0, y: 0, width: cellW, height: height)
+            place(1, x: cellW + spacing, y: 0, width: cellW, height: height)
+
+        case 3:
+            let halfW = (width - spacing) / 2
+            let rightH = (height - spacing) / 2
+            place(0, x: 0, y: 0, width: halfW, height: height)
+            place(1, x: halfW + spacing, y: 0, width: halfW, height: rightH)
+            place(2, x: halfW + spacing, y: rightH + spacing, width: halfW, height: rightH)
+
+        case 4:
+            let cellW = (width - spacing) / 2
+            let cellH = (height - spacing) / 2
+            place(0, x: 0, y: 0, width: cellW, height: cellH)
+            place(1, x: cellW + spacing, y: 0, width: cellW, height: cellH)
+            place(2, x: 0, y: cellH + spacing, width: cellW, height: cellH)
+            place(3, x: cellW + spacing, y: cellH + spacing, width: cellW, height: cellH)
+
+        default:
+            let cols = min(maxColumns, 3)
+            let fullRows = count / cols
+            let rem = count % cols
+
+            let columnWidth = (width - CGFloat(cols - 1) * spacing) / CGFloat(cols)   // 行高
+            var idx = 0
+            var y: CGFloat = 0
+
+            for r in 0..<fullRows {
+                for c in 0..<cols {
+                    let x = CGFloat(c) * (columnWidth + spacing)
+                    place(idx, x: x, y: y, width: columnWidth, height: columnWidth)
+                    idx += 1
                 }
-                .aspectRatio(16.0/9.0, contentMode: .fit)
-//                content(item)
-//                    .clipped()
-//                    .aspectRatio(contentMode: .fill)
-//                    .frame(
-//                        minWidth: 0,
-//                        maxWidth: .infinity,
-//                        minHeight: 0,
-//                        maxHeight: .infinity
-//                    )
-//                    .aspectRatio(16 / 9, contentMode: .fit)
+                y += columnWidth
+                if r < fullRows - 1 || rem > 0 { y += spacing }
+            }
+
+            if rem > 0 {
+                let tailW = (width - CGFloat(rem - 1) * spacing) / CGFloat(rem)
+                for c in 0..<rem {
+                    let x = CGFloat(c) * (tailW + spacing)
+                    place(idx, x: x, y: y, width: tailW, height: columnWidth)
+                    idx += 1
+                }
             }
         }
     }
-}
 
-// MARK: - 2 ~ 4 items (overall 16:9)
-private extension AdaptiveMosaic {
-    @ViewBuilder
-    func twoToFour(_ arr: [Item]) -> some View {
-        GeometryReader { geo in
-            let wdith = geo.size.width
-            let height = wdith * 9.0 / 16.0       // Fix container height to 16:9 of its width
-            let halfW = (wdith - spacing) / 2
-            let halfH = (height - spacing) / 2
-
-            ZStack {
-                switch arr.count {
-                case 2:
-                    // 1 row × 2 columns
-                    HStack(spacing: spacing) {
-                        contentBox(arr[0], size: CGSize(width: halfW, height: height))
-                        contentBox(arr[1], size: CGSize(width: halfW, height: height))
-                    }
-
-                case 3:
-                    // Left: one large image (left half); Right: two stacked images
-                    HStack(spacing: spacing) {
-                        contentBox(arr[0], size: CGSize(width: halfW, height: height))
-
-                        VStack(spacing: spacing) {
-                            contentBox(arr[1], size: CGSize(width: halfW, height: halfH))
-                            contentBox(arr[2], size: CGSize(width: halfW, height: halfH))
-                        }
-                    }
-
-                case 4:
-                    // 2 × 2 grid
-                    VStack(spacing: spacing) {
-                        HStack(spacing: spacing) {
-                            contentBox(arr[0], size: CGSize(width: halfW, height: halfH))
-                            contentBox(arr[1], size: CGSize(width: halfW, height: halfH))
-                        }
-                        HStack(spacing: spacing) {
-                            contentBox(arr[2], size: CGSize(width: halfW, height: halfH))
-                            contentBox(arr[3], size: CGSize(width: halfW, height: halfH))
-                        }
-                    }
-
-                default:
-                    EmptyView()
-                }
-            }
-            .frame(width: wdith, height: height)
+    private func aspectForSingle(subviews: Subviews) -> CGFloat {
+        if singleFollowsImageAspect {
+            let ideal = subviews[0].sizeThatFits(.unspecified)
+            if ideal.width > 0, ideal.height > 0 { return max(0.01, ideal.width / ideal.height) }
+            return 1
+        } else {
+            return 16.0 / 9.0
         }
-        .aspectRatio(16.0/9.0, contentMode: .fit) // Guard at the outer level as well
     }
 
-    /// Unified cell wrapper: clip to a given fixed `size`
-    @ViewBuilder
-    func contentBox(_ item: Item, size: CGSize) -> some View {
-        content(item)
-            .frame(width: size.width, height: size.height)
-            .clipped()
-            .contentShape(Rectangle())
-    }
-}
-
-// MARK: - > 4 items (max 3 columns; full rows 1:1; last row uses weights to fill)
-private extension AdaptiveMosaic {
-    @ViewBuilder
-    func many(_ arr: [Item]) -> some View {
-        GeometryReader { geo in
-            let width = geo.size.width
-            let columns = 3
-            let fullRowCount = arr.count / columns
-            let remainder = arr.count % columns
-
-            // Side length of normal 1:1 squares based on a 3-column layout
-            let side = (width - CGFloat(columns - 1) * spacing) / CGFloat(columns)
-
-            VStack(spacing: spacing) {
-                // Render full rows first (each cell is 1:1)
-                ForEach(0..<fullRowCount, id: \.self) { row in
-                    HStack(spacing: spacing) {
-                        ForEach(0..<columns, id: \.self) { col in
-                            let idx = row * columns + col
-                            squareBox(arr[idx], side: side)
-                        }
-                    }
-                }
-
-                // Last row: if fewer than 3 items, fill the row using weight=1 (height keeps the same as above)
-                if remainder > 0 {
-                    HStack(spacing: spacing) {
-                        ForEach(0..<remainder, id: \.self) { index in
-                            let idx = fullRowCount * columns + index
-                            content(arr[idx])
-                                .frame(height: side)     // Keep height consistent with previous rows
-                                .frame(maxWidth: .infinity)
-                                .clipped()
-                        }
-                    }
-                }
-            }
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    @ViewBuilder
-    func squareBox(_ item: Item, side: CGFloat) -> some View {
-        content(item)
-            .frame(width: side, height: side)
-            .clipped()
-            .contentShape(Rectangle())
+    private func heightForGridFillLastRow(width width: CGFloat, count n: Int, cols: Int, spacing s: CGFloat) -> CGFloat {
+        let rowsTotal = Int(ceil(Double(n) / Double(cols)))
+        let columnWidth = (width - CGFloat(cols - 1) * s) / CGFloat(cols)
+        return CGFloat(rowsTotal) * columnWidth + CGFloat(max(0, rowsTotal - 1)) * s
     }
 }

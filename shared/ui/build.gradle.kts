@@ -28,7 +28,6 @@ kotlin {
         appleTarget.binaries.framework {
             baseName = "sharedUI"
 //            isStatic = true
-            linkerOpts("-ld_classic")
         }
     }
 

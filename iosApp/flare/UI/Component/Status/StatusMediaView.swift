@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import TipKit
 
 struct StatusMediaView: View {
     let data: [any UiMedia]
@@ -7,17 +8,54 @@ struct StatusMediaView: View {
     @State private var isBlur: Bool
     @State private var showFullScreen: Bool = false
     @State private var selectedItem: (any UiMedia)?
+    @State private var selectedAlt: AltTextHolder? = nil
+    
+    struct AltTextHolder: Identifiable {
+        let id: String
+    }
 
     var body: some View {
-        AdaptiveMosaic(data, spacing: 4, singleMode: .force16x9) { item in
-            MediaView(data: item)
-                .onTapGesture {
-                    if !sensitive || !isBlur {
-                        // Only allow tap if not sensitive or already unblurred
-                        selectedItem = item
-                        showFullScreen = true
+        AdaptiveGrid(singleFollowsImageAspect: false, spacing: 4, maxColumns: 3) {
+            ForEach(data, id: \.url) { item in
+                Color.gray
+                    .opacity(0.2)
+                    .onTapGesture {
+                        if !sensitive || !isBlur {
+                            // Only allow tap if not sensitive or already unblurred
+                            selectedItem = item
+                            showFullScreen = true
+                        }
                     }
-                }
+                    .overlay {
+                        MediaView(data: item)
+                            .allowsHitTesting(false)
+                    }
+                    .overlay(alignment: .bottomTrailing) {
+                        if let alt = item.description_, !alt.isEmpty {
+                            Button {
+                                selectedAlt = AltTextHolder(id: alt)
+                            } label: {
+                                Text("ALT")
+                            }
+                            .popover(item: $selectedAlt) { alt in
+                                Text(alt.id)
+                                    .padding()
+                            }
+                            .padding()
+                            .buttonStyle(.glass)
+                        }
+                    }
+                    .overlay(alignment: .bottomLeading) {
+                        if case .video = onEnum(of: item) {
+                            Image("fa-circle-play")
+                                .foregroundStyle(Color(.white))
+                                .padding(8)
+                                .background(.black, in: .rect(cornerRadius: 16))
+                                .padding()
+                        }
+                    }
+                    .clipped()
+            }
         }
         .fullScreenCover(isPresented: $showFullScreen, onDismiss: {
             showFullScreen = false
@@ -68,4 +106,18 @@ extension StatusMediaView {
         self.sensitive = sensitive
         self._isBlur = State(initialValue: sensitive)
     }
+}
+
+struct AltTextTip: Tip {
+    let altText: String
+    
+    var title: Text {
+        Text("tip_alt_text_title")
+    }
+
+
+    var message: Text? {
+        Text(altText)
+    }
+
 }

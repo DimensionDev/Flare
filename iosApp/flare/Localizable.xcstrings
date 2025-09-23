@@ -4,6 +4,9 @@
     "" : {
 
     },
+    "#loading" : {
+
+    },
     "%@" : {
 
     },
@@ -96,6 +99,18 @@
           }
         }
       }
+    },
+    "discover_status" : {
+
+    },
+    "discover_tags" : {
+
+    },
+    "discover_title" : {
+
+    },
+    "discover_users" : {
+
     },
     "dm_list_title" : {
       "localizations" : {
@@ -913,6 +928,15 @@
           }
         }
       }
+    },
+    "search_status" : {
+
+    },
+    "search_title" : {
+
+    },
+    "search_users" : {
+
     },
     "sensitive_button_show" : {
       "comment" : "Button to show sensitive media"

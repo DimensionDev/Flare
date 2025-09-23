@@ -10,6 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -71,6 +72,11 @@ public class SearchPresenter(
             override fun search(new: String) {
                 query = new
             }
+
+            override suspend fun refreshSuspend() {
+                user.refreshSuspend()
+                stateState.refreshSuspend()
+            }
         }
     }
 }
@@ -82,4 +88,6 @@ public interface SearchState {
     public val searching: Boolean
 
     public fun search(new: String)
+
+    public suspend fun refreshSuspend()
 }

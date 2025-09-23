@@ -144,6 +144,7 @@ struct MatrixView: View {
             Text("matrix_followers")
         }
         .font(.caption)
+        .foregroundStyle(.secondary)
     }
 }
 
@@ -159,6 +160,7 @@ struct FieldsView: View {
                     let key = keys[index]
                     Text(key)
                         .font(.caption)
+                        .foregroundStyle(.secondary)
                     if let richText = fields[key] {
                         RichText(text: richText)
                             .font(.body)

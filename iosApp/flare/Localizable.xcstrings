@@ -4,6 +4,9 @@
     "" : {
 
     },
+    "#loading" : {
+
+    },
     "%@" : {
 
     },
@@ -20,6 +23,18 @@
 
     },
     "ai_config_title" : {
+
+    },
+    "all_feeds_section_explore_feeds" : {
+
+    },
+    "all_feeds_section_my_feeds" : {
+
+    },
+    "all_feeds_title" : {
+
+    },
+    "all_lists_title" : {
 
     },
     "ALT" : {
@@ -96,6 +111,18 @@
           }
         }
       }
+    },
+    "discover_status" : {
+
+    },
+    "discover_tags" : {
+
+    },
+    "discover_title" : {
+
+    },
+    "discover_users" : {
+
     },
     "dm_list_title" : {
       "localizations" : {
@@ -913,6 +940,15 @@
           }
         }
       }
+    },
+    "search_status" : {
+
+    },
+    "search_title" : {
+
+    },
+    "search_users" : {
+
     },
     "sensitive_button_show" : {
       "comment" : "Button to show sensitive media"

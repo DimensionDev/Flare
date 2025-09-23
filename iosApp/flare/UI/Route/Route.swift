@@ -27,6 +27,8 @@ enum Route: Hashable {
             tabItem.view(onNavigate: onNavigate)
         case .accountManagement:
             AccountManagementScreen()
+        case .search(let accountType, let query):
+            SearchScreen(accountType: accountType, initialQuery: query)
         default:
             Text("Not done yet for \(self)")
         }

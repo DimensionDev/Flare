@@ -12,6 +12,7 @@ struct StatusTopMessageView: View {
                     .lineLimit(1)
                     .markdownTextStyle(\.text) {
                         FontSize(12)
+                        ForegroundColor(.secondary)
                     }
             }
             if let text = topMessage.type.localizedText {
@@ -21,6 +22,7 @@ struct StatusTopMessageView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .font(.caption)
+        .foregroundStyle(.secondary)
     }
 }
 

@@ -30,11 +30,13 @@ struct StatusCardView: View {
                     Text(desc)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .font(.caption)
+                        .foregroundStyle(.secondary)
                         .lineLimit(2)
                 } else {
                     Text(data.url)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .font(.caption)
+                        .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
             }

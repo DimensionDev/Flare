@@ -19,6 +19,12 @@ extension TabItem {
             NotificationScreen(accountType: self.account)
         case .settingsTabItem:
             SettingsScreen()
+        case .discoverTabItem(let discoverTabItem):
+            DiscoverScreen(accountType: discoverTabItem.account)
+        case .allListTabItem(let allListTabItem):
+            AllListScreen(accountType: allListTabItem.account)
+        case .feedsTabItem(let feedsTabItem):
+            AllFeedScreen(accountType: feedsTabItem.account)
         default:
             Text("Not done yet for \(self)")
         }

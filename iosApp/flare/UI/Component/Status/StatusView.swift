@@ -37,12 +37,15 @@ struct StatusView: View {
                                 switch onEnum(of: data.topEndContent) {
                                 case .visibility(let visibility):
                                     StatusVisibilityView(data: visibility.visibility)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
                                 case .none:
                                     EmptyView()
                                 }
                                 if !isDetail {
                                     DateTimeText(data: data.createdAt)
                                         .font(.caption)
+                                        .foregroundStyle(.secondary)
                                 }
                             }
                         }
@@ -55,12 +58,15 @@ struct StatusView: View {
                                 switch onEnum(of: data.topEndContent) {
                                 case .visibility(let visibility):
                                     StatusVisibilityView(data: visibility.visibility)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
                                 case .none:
                                     EmptyView()
                                 }
                                 if !isDetail {
                                     DateTimeText(data: data.createdAt)
                                         .font(.caption)
+                                        .foregroundStyle(.secondary)
                                 }
                             }
                         }
@@ -78,10 +84,10 @@ struct StatusView: View {
                         case .replyTo(let replyTo):
                             HStack {
                                 Image("fa-reply")
-                                    .foregroundStyle(Color(.label))
                                 Text("Reply to \(replyTo.handle)")
                             }
                             .font(.caption)
+                            .foregroundStyle(.secondary)
                         }
                     }
                     if let contentWarning = data.contentWarning, !contentWarning.isEmpty {
@@ -147,6 +153,7 @@ struct StatusView: View {
                     if isDetail {
                         DateTimeText(data: data.createdAt, fullTime: true)
                             .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
 
                     if !isQuote {

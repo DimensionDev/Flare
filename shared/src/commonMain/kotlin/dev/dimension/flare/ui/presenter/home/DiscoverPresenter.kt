@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -70,6 +71,12 @@ public class DiscoverPresenter(
             override val users = users
             override val status = status
             override val hashtags = hashtags
+
+            override suspend fun refreshSuspend() {
+                users.refreshSuspend()
+                status.refreshSuspend()
+                hashtags.refreshSuspend()
+            }
         }
     }
 }
@@ -79,4 +86,6 @@ public interface DiscoverState {
     public val users: PagingState<UiUserV2>
     public val status: PagingState<UiTimeline>
     public val hashtags: PagingState<UiHashtag>
+
+    public suspend fun refreshSuspend()
 }

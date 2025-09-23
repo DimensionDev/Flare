@@ -37,6 +37,8 @@ struct StatusView: View {
                                 switch onEnum(of: data.topEndContent) {
                                 case .visibility(let visibility):
                                     StatusVisibilityView(data: visibility.visibility)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
                                 case .none:
                                     EmptyView()
                                 }
@@ -56,6 +58,8 @@ struct StatusView: View {
                                 switch onEnum(of: data.topEndContent) {
                                 case .visibility(let visibility):
                                     StatusVisibilityView(data: visibility.visibility)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
                                 case .none:
                                     EmptyView()
                                 }

@@ -4,7 +4,7 @@ import KotlinSharedUI
 struct StatusReactionView: View {
     let data: UiTimeline.ItemContentStatusBottomContentReaction
     var body: some View {
-        ScrollView {
+        ScrollView(.horizontal) {
             LazyHStack {
                 ForEach(data.emojiReactions, id: \.name) { item in
                     Button {
@@ -17,6 +17,7 @@ struct StatusReactionView: View {
                                 Text(item.name)
                             } else {
                                 NetworkImage(data: item.url)
+                                    .frame(height: 20)
                             }
                         }
                     }
@@ -26,8 +27,8 @@ struct StatusReactionView: View {
                         button.buttonStyle(.bordered)
                     })
                 }
-                .listStyle(.plain)
             }
         }
+        .scrollIndicators(.hidden)
     }
 }

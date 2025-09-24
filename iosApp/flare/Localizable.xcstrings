@@ -101,17 +101,6 @@
     "Detail" : {
 
     },
-    "Discover" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Discover"
-          }
-        }
-      }
-    },
     "discover_status" : {
 
     },
@@ -136,17 +125,6 @@
     },
     "error" : {
 
-    },
-    "Home" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Home"
-          }
-        }
-      }
     },
     "home_tab_bookmarks_title" : {
       "localizations" : {
@@ -234,17 +212,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Notification"
-          }
-        }
-      }
-    },
-    "index" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Index"
           }
         }
       }
@@ -855,17 +822,6 @@
     "Not done yet for %@" : {
 
     },
-    "Notification" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notification"
-          }
-        }
-      }
-    },
     "notification_type_title" : {
 
     },
@@ -930,17 +886,6 @@
         }
       }
     },
-    "Search" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search"
-          }
-        }
-      }
-    },
     "search_status" : {
 
     },
@@ -974,9 +919,6 @@
       }
     },
     "storage_title" : {
-
-    },
-    "tip_alt_text_title" : {
 
     },
     "unblock" : {

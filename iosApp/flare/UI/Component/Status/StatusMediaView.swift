@@ -8,11 +8,6 @@ struct StatusMediaView: View {
     @State private var isBlur: Bool
     @State private var showFullScreen: Bool = false
     @State private var selectedItem: (any UiMedia)?
-    @State private var selectedAlt: AltTextHolder? = nil
-    
-    struct AltTextHolder: Identifiable {
-        let id: String
-    }
 
     var body: some View {
         AdaptiveGrid(singleFollowsImageAspect: false, spacing: 4, maxColumns: 3) {
@@ -32,17 +27,7 @@ struct StatusMediaView: View {
                     }
                     .overlay(alignment: .bottomTrailing) {
                         if let alt = item.description_, !alt.isEmpty {
-                            Button {
-                                selectedAlt = AltTextHolder(id: alt)
-                            } label: {
-                                Text("ALT")
-                            }
-                            .popover(item: $selectedAlt) { alt in
-                                Text(alt.id)
-                                    .padding()
-                            }
-                            .padding()
-                            .buttonStyle(.glass)
+                            AltTextOverlay(altText: alt)
                         }
                     }
                     .overlay(alignment: .bottomLeading) {
@@ -108,16 +93,22 @@ extension StatusMediaView {
     }
 }
 
-struct AltTextTip: Tip {
+struct AltTextOverlay: View {
     let altText: String
-    
-    var title: Text {
-        Text("tip_alt_text_title")
+    @State private var showAltText: Bool = false
+    var body: some View {
+        Button {
+            showAltText = true
+        } label: {
+            Text("ALT")
+        }
+        .padding()
+        .buttonStyle(.glass)
+        .popover(isPresented: $showAltText) {
+            Text(altText)
+                .padding()
+                .frame(width: 280)
+                .presentationCompactAdaptation(.popover)
+        }
     }
-
-
-    var message: Text? {
-        Text(altText)
-    }
-
 }

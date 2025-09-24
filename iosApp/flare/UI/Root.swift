@@ -11,24 +11,35 @@ struct FlareRoot: View {
         if case .success(let success) = onEnum(of: homeTabsPresenter.state.tabs) {
             let tabs = success.data
             HStack(
-                spacing: 0
+                spacing: 0,
             ) {
                 if horizontalSizeClass == .regular {
-                    VStack(
-                        spacing: 24
-                    ) {
-                        ForEach(tabs.all, id: \.tabItem.key) { data in
-                            Button {
-                                selectedTab = data.tabItem.key
-                            } label: {
-                                TabIcon(icon: data.tabItem.metaData.icon, accountType: data.tabItem.account, size: 36)
+                    ScrollView {
+                        VStack(
+                            spacing: 24,
+                        ) {
+                            ForEach(tabs.all, id: \.tabItem.key) { data in
+                                Button {
+                                    selectedTab = data.tabItem.key
+                                } label: {
+                                    TabIcon(icon: data.tabItem.metaData.icon, accountType: data.tabItem.account, size: 36)
+                                }
+                                .foregroundStyle(selectedTab == data.tabItem.key ? .primary : .secondary)
                             }
+                            Button {
+                                selectedTab = "settings"
+                            } label: {
+                                Image("fa-gear")
+                            }
+                            .foregroundStyle(selectedTab == "settings" ? .primary : .secondary)
                         }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 24)
+                        .frame(maxHeight: .infinity, alignment: .top)
+                        .font(.title)
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 24)
-                    .glassEffect()
-                    .padding()
+                    .background(Color(.systemBackground))
                 }
                 TabView(selection: $selectedTab) {
                     if horizontalSizeClass == .regular {
@@ -36,6 +47,12 @@ struct FlareRoot: View {
                             Tab(value: data.tabItem.key) {
                                 Router { onNavigate in
                                     data.tabItem.view(onNavigate: onNavigate)
+                                }
+                                .toolbarVisibility(.hidden, for: .tabBar)
+                            }
+                            Tab(value: "settings") {
+                                Router { _ in
+                                    SettingsScreen()
                                 }
                                 .toolbarVisibility(.hidden, for: .tabBar)
                             }

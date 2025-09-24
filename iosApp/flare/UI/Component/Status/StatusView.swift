@@ -147,7 +147,9 @@ struct StatusView: View {
                     }
 
                     if case .reaction(let reaction) = onEnum(of: data.bottomContent) {
-                        StatusReactionView(data: reaction)
+                        if !reaction.emojiReactions.isEmpty {
+                            StatusReactionView(data: reaction)
+                        }
                     }
 
                     if isDetail {
@@ -159,7 +161,7 @@ struct StatusView: View {
                     if !isQuote {
                         StatusActionsView(data: data.actions)
                             .font(isDetail ? .body : .footnote)
-                            .opacity(isDetail ? 1.0 : 0.6)
+                            .foregroundStyle(isDetail ? .primary : .secondary)
                     }
                 }
                 .if(withLeadingPadding, if: { stack in

@@ -21,7 +21,7 @@ struct HomeTimelineScreen: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let headerHeight = 72 + proxy.safeAreaInsets.top
+            let headerHeight = 60 + proxy.safeAreaInsets.top
             StateView(state: presenter.state.tabState) { state in
                 let tabs: [TimelineTabItem] = state.cast(TimelineTabItem.self)
                 let tab = tabs[selectedTabIndex]
@@ -40,7 +40,7 @@ struct HomeTimelineScreen: View {
                 })
                 .onScrollPhaseChange({ oldPhase, newPhase, context in
                     if !newPhase.isScrolling && (headerOffset != 0 || headerOffset != headerHeight) {
-                        withAnimation(.snappy(duration: 0.25, extraBounce: 0)) {
+                        withAnimation(.spring) {
                             if headerOffset > (headerHeight * 0.5) {
                                 headerOffset = headerHeight
                             } else {
@@ -60,23 +60,30 @@ struct HomeTimelineScreen: View {
                     ) {
                         ScrollView(.horizontal) {
                             GlassEffectContainer {
-                                HStack {
+                                HStack(
+                                    spacing: 8,
+                                ) {
                                     ForEach(0..<tabs.count, id: \.self) { index in
                                         let tab = tabs[index]
-                                        Button {
-                                            selectedTabIndex = index
-                                        } label: {
-                                            Label {
-                                                TabTitle(title: tab.metaData.title)
-                                            } icon: {
-                                                TabIcon(icon: tab.metaData.icon, accountType: tab.account, size: 24)
-                                                    .font(.title)
-                                            }
+                                        
+                                        Label {
+                                            TabTitle(title: tab.metaData.title)
+                                                .font(.subheadline)
+                                        } icon: {
+                                            TabIcon(icon: tab.metaData.icon, accountType: tab.account, size: 24)
+                                                .font(.title)
                                         }
-                                        .if(selectedTabIndex == index) { button in
-                                            button.buttonStyle(.borderedProminent)
-                                        } else: { button in
-                                            button.buttonStyle(.bordered)
+                                        .padding(.horizontal)
+                                        .padding(.vertical, 8)
+                                        .foregroundStyle(selectedTabIndex == index ? Color.white : .primary)
+                                        .background(
+                                            Capsule()
+                                                .foregroundColor(selectedTabIndex == index ? .accentColor : Color(.systemBackground))
+                                        )
+                                        .onTapGesture {
+                                            withAnimation(.spring) {
+                                                selectedTabIndex = index
+                                            }
                                         }
                                     }
                                     if case .success = onEnum(of: presenter.state.user) {
@@ -108,8 +115,9 @@ struct HomeTimelineScreen: View {
                             .buttonStyle(.glass)
                         }
                     }
-                    .padding()
-                    .background(Color(.systemGroupedBackground))
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(.regularMaterial)
                     .offset(y: -headerOffset)
                 }
                 .toolbarVisibility(.hidden, for: .navigationBar)

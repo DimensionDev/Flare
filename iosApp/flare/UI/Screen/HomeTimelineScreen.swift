@@ -65,25 +65,23 @@ struct HomeTimelineScreen: View {
                                 ) {
                                     ForEach(0..<tabs.count, id: \.self) { index in
                                         let tab = tabs[index]
-                                        
-                                        Label {
-                                            TabTitle(title: tab.metaData.title)
-                                                .font(.subheadline)
-                                        } icon: {
-                                            TabIcon(icon: tab.metaData.icon, accountType: tab.account, size: 24)
-                                                .font(.title)
-                                        }
-                                        .padding(.horizontal)
-                                        .padding(.vertical, 8)
-                                        .foregroundStyle(selectedTabIndex == index ? Color.white : .primary)
-                                        .background(
-                                            Capsule()
-                                                .foregroundColor(selectedTabIndex == index ? .accentColor : Color(.systemBackground))
-                                        )
-                                        .onTapGesture {
+                                        Button {
                                             withAnimation(.spring) {
                                                 selectedTabIndex = index
                                             }
+                                        } label: {
+                                            Label {
+                                                TabTitle(title: tab.metaData.title)
+                                                    .font(.subheadline)
+                                            } icon: {
+                                                TabIcon(icon: tab.metaData.icon, accountType: tab.account, size: 24)
+                                                    .font(.title)
+                                            }
+                                        }
+                                        .if(selectedTabIndex == index) { button in
+                                            button.buttonStyle(.glassProminent)
+                                        } else: { button in
+                                            button.buttonStyle(.glass)
                                         }
                                     }
                                     if case .success = onEnum(of: presenter.state.user) {
@@ -91,7 +89,7 @@ struct HomeTimelineScreen: View {
                                         } label: {
                                             Image("fa-plus")
                                         }
-                                        .buttonStyle(.bordered)
+                                        .buttonStyle(.glass)
                                     }
                                 }
                             }
@@ -117,7 +115,8 @@ struct HomeTimelineScreen: View {
                     }
                     .padding(.horizontal)
                     .padding(.vertical, 8)
-                    .background(.regularMaterial)
+                    .glassEffect()
+                    .padding(.horizontal)
                     .offset(y: -headerOffset)
                 }
                 .toolbarVisibility(.hidden, for: .navigationBar)

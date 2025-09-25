@@ -150,6 +150,7 @@ dependencies {
     implementation(libs.bundles.navigation3)
     implementation(libs.haze)
     implementation(libs.haze.materials)
+    implementation group: 'org.rust-nostr', name: 'nostr-sdk-jvm', version: '0.43.0'
 
     if (project.file("google-services.json").exists()) {
         implementation(platform(libs.firebase.bom))

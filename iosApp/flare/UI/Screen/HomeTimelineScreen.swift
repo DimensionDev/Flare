@@ -56,7 +56,7 @@ struct HomeTimelineScreen: View {
                 })
                 .safeAreaInset(edge: .top) {
                     HStack(
-                        spacing: 4
+                        spacing: 2
                     ) {
                         ScrollView(.horizontal) {
                             GlassEffectContainer {
@@ -94,6 +94,9 @@ struct HomeTimelineScreen: View {
                                 }
                             }
                         }
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .glassEffect()
                         .scrollIndicators(.hidden)
                         Spacer()
                         if case .error = onEnum(of: presenter.state.user) {
@@ -113,9 +116,6 @@ struct HomeTimelineScreen: View {
                             .buttonStyle(.glass)
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .glassEffect()
                     .padding(.horizontal)
                     .offset(y: -headerOffset)
                 }

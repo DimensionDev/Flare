@@ -131,7 +131,7 @@ struct DiscoverScreen: View {
                     .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                     .listRowBackground(Color.clear)
                 }
-                if !presenter.state.status.isEmpty && !presenter.state.status.isEmpty {
+                if !presenter.state.status.isEmpty && !presenter.state.status.isError {
                     Section {
                         TimelinePagingView(data: presenter.state.status)
                     } header: {

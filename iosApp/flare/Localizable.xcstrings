@@ -10,6 +10,16 @@
     "%@" : {
 
     },
+    "%lld/%d" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$d"
+          }
+        }
+      }
+    },
     "0000" : {
 
     },
@@ -93,6 +103,45 @@
 
     },
     "comment" : {
+
+    },
+    "compose_button_cancel" : {
+
+    },
+    "compose_button_send" : {
+
+    },
+    "compose_cw_placeholder" : {
+
+    },
+    "compose_media_mark_sensitive" : {
+
+    },
+    "compose_placeholder" : {
+
+    },
+    "compose_poll_choice_placeholder" : {
+
+    },
+    "compose_poll_expiration" : {
+
+    },
+    "compose_poll_type" : {
+
+    },
+    "compose_poll_type_multiple" : {
+
+    },
+    "compose_poll_type_single" : {
+
+    },
+    "compose_title_new" : {
+
+    },
+    "compose_title_quote" : {
+
+    },
+    "compose_title_reply" : {
 
     },
     "delete" : {

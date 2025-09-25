@@ -7,6 +7,7 @@ struct StatusView: View {
     let isDetail: Bool
     let isQuote: Bool
     let withLeadingPadding: Bool
+    let showMedia: Bool
     @State private var expand = false
     var body: some View {
         VStack(
@@ -119,11 +120,11 @@ struct StatusView: View {
 
                         }
                     }
-                    if !data.images.isEmpty {
+                    if !data.images.isEmpty, showMedia {
                         StatusMediaView(data: data.images, sensitive: data.sensitive)
                     }
 
-                    if let card = data.card {
+                    if let card = data.card, showMedia {
                         if data.images.isEmpty && data.quote.isEmpty {
                             StatusCardView(data: card)
                         }
@@ -146,7 +147,7 @@ struct StatusView: View {
                         )
                     }
 
-                    if case .reaction(let reaction) = onEnum(of: data.bottomContent) {
+                    if case .reaction(let reaction) = onEnum(of: data.bottomContent), showMedia {
                         if !reaction.emojiReactions.isEmpty {
                             StatusReactionView(data: reaction)
                         }
@@ -183,23 +184,34 @@ extension StatusView {
         self.isDetail = isDetail
         self.isQuote = false
         self.withLeadingPadding = false
+        self.showMedia = true
     }
     init(data: UiTimeline.ItemContentStatus, detailStatusKey: MicroBlogKey?) {
         self.data = data
         self.isDetail = data.statusKey == detailStatusKey
         self.isQuote = false
         self.withLeadingPadding = false
+        self.showMedia = true
     }
     init(data: UiTimeline.ItemContentStatus, isQuote: Bool) {
         self.data = data
         self.isDetail = false
         self.isQuote = isQuote
         self.withLeadingPadding = false
+        self.showMedia = true
     }
     init(data: UiTimeline.ItemContentStatus, withLeadingPadding: Bool) {
         self.data = data
         self.isDetail = false
         self.isQuote = false
         self.withLeadingPadding = withLeadingPadding
+        self.showMedia = true
+    }
+    init(data: UiTimeline.ItemContentStatus, isQuote: Bool, showMedia: Bool) {
+        self.data = data
+        self.isDetail = false
+        self.isQuote = isQuote
+        self.withLeadingPadding = false
+        self.showMedia = showMedia
     }
 }

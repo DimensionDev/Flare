@@ -3,6 +3,8 @@ import SwiftUI
 
 struct HomeTimelineScreen: View {
     let toServiceSelect: () -> Void
+    let toCompose: () -> Void
+    let toTabSetting: () -> Void
     let accountType: AccountType
     @Environment(\.openURL) private var openURL
     @State private var selectedTabIndex = 0
@@ -13,9 +15,11 @@ struct HomeTimelineScreen: View {
     @State private var isScrollingUp = false
     @State private var naturalScrollOffset: CGFloat = 0
 
-    init(accountType: AccountType, toServiceSelect: @escaping () -> Void) {
+    init(accountType: AccountType, toServiceSelect: @escaping () -> Void, toCompose: @escaping () -> Void, toTabSetting: @escaping () -> Void) {
         self.accountType = accountType
+        self.toCompose = toCompose
         self.toServiceSelect = toServiceSelect
+        self.toTabSetting = toTabSetting
         self._presenter = .init(wrappedValue: .init(presenter: HomeTimelineWithTabsPresenter(accountType: accountType)))
     }
 
@@ -86,6 +90,7 @@ struct HomeTimelineScreen: View {
                                     }
                                     if case .success = onEnum(of: presenter.state.user) {
                                         Button {
+                                            toTabSetting()
                                         } label: {
                                             Image("fa-plus")
                                         }
@@ -109,6 +114,7 @@ struct HomeTimelineScreen: View {
                             .padding()
                         } else {
                             Button {
+                                toCompose()
                             } label: {
                                 Image("fa-pen-to-square")
                                     .font(.title2)

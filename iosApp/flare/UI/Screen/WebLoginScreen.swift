@@ -12,11 +12,26 @@ struct WebLoginScreen: View {
         self.url = url
     }
     var body: some View {
-        if viewModel.canShowWebView {
-            WebView(viewModel.page)
-                .onAppear {
-                    viewModel.page.load(.init(string: url)!)
-                }
+        NavigationStack {
+            if viewModel.canShowWebView {
+                WebView(viewModel.page)
+                    .onAppear {
+                        viewModel.page.load(.init(string: url)!)
+                    }
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button {
+                                dismiss()
+                            } label: {
+                                Label {
+                                    Text("compose_button_cancel")
+                                } icon: {
+                                    Image(systemName: "xmark")
+                                }
+                            }
+                        }
+                    }
+            }
         }
     }
 }

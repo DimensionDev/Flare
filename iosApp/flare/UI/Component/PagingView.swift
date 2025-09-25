@@ -45,4 +45,14 @@ extension PagingView {
     ) where ErrorContent == EmptyView, LoadingContent == EmptyView, EmptyContent == EmptyView {
         self.init(data: data, emptyContent: { EmptyView() }, errorContent: {_ in EmptyView()}, loadingContent: {EmptyView()}, successContent: successContent)
     }
+    
+    init(
+        data: PagingState<T>,
+        @ViewBuilder
+        successContent: @escaping (T) -> SuccessContent,
+        @ViewBuilder
+        loadingContent: @escaping () -> LoadingContent
+    ) where ErrorContent == EmptyView, EmptyContent == EmptyView {
+        self.init(data: data, emptyContent: { EmptyView() }, errorContent: {_ in EmptyView()}, loadingContent: loadingContent, successContent: successContent)
+    }
 }

@@ -10,6 +10,7 @@
 		0646B2622E7151A700535A3E /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0646B2612E7151A700535A3E /* Kingfisher */; };
 		068923482E82A80700981D8E /* Flow in Frameworks */ = {isa = PBXBuildFile; productRef = 068923472E82A80700981D8E /* Flow */; };
 		068F7CD12E75405A00B5FB40 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 068F7CD02E75405A00B5FB40 /* MarkdownUI */; };
+		06C6B5482E853AAF00CCD388 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */; };
 		06C7FC172E7D474900A0D01A /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = 06C7FC162E7D474900A0D01A /* LazyPager */; };
 /* End PBXBuildFile section */
 
@@ -46,6 +47,7 @@
 				068923482E82A80700981D8E /* Flow in Frameworks */,
 				06C7FC172E7D474900A0D01A /* LazyPager in Frameworks */,
 				068F7CD12E75405A00B5FB40 /* MarkdownUI in Frameworks */,
+				06C6B5482E853AAF00CCD388 /* SwiftUIIntrospect in Frameworks */,
 				0646B2622E7151A700535A3E /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -94,6 +96,7 @@
 				068F7CD02E75405A00B5FB40 /* MarkdownUI */,
 				06C7FC162E7D474900A0D01A /* LazyPager */,
 				068923472E82A80700981D8E /* Flow */,
+				06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */,
 			);
 			productName = flare;
 			productReference = 06E433FE2E6A9A2600CD0826 /* Flare.app */;
@@ -129,6 +132,7 @@
 				06791BD42E7AA40000FF2050 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 				06C7FC152E7D474900A0D01A /* XCRemoteSwiftPackageReference "LazyPager" */,
 				068923462E82A80700981D8E /* XCRemoteSwiftPackageReference "SwiftUI-Flow" */,
+				06C6B5462E853AAF00CCD388 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 06E433FF2E6A9A2600CD0826 /* Products */;
@@ -441,6 +445,14 @@
 				version = 2.4.1;
 			};
 		};
+		06C6B5462E853AAF00CCD388 /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/swiftui-introspect";
+			requirement = {
+				kind = exactVersion;
+				version = 26.0.0;
+			};
+		};
 		06C7FC152E7D474900A0D01A /* XCRemoteSwiftPackageReference "LazyPager" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gh123man/LazyPager";
@@ -466,6 +478,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 068F7CCF2E75405A00B5FB40 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
+		};
+		06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 06C6B5462E853AAF00CCD388 /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
+			productName = SwiftUIIntrospect;
 		};
 		06C7FC162E7D474900A0D01A /* LazyPager */ = {
 			isa = XCSwiftPackageProductDependency;

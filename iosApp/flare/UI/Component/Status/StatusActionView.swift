@@ -37,7 +37,12 @@ struct StatusActionView: View {
                 }
             } label: {
                 if !isFixedWidth && group.displayItem.countText == nil {
-                    StatusActionIcon(item: group.displayItem, color: .init(group.displayItem.color))
+                    if let color = group.displayItem.color {
+                        StatusActionIcon(item: group.displayItem)
+                            .foregroundStyle(color)
+                    } else {
+                        StatusActionIcon(item: group.displayItem)
+                    }
                 } else {
                     Label {
                         ZStack(
@@ -48,12 +53,21 @@ struct StatusActionView: View {
                                     .opacity(0.0)
                             }
                             if let text = group.displayItem.countText {
-                                Text(text)
-                                    .foregroundStyle(group.displayItem.color)
+                                if let color = group.displayItem.color {
+                                    Text(text)
+                                        .foregroundStyle(color)
+                                } else {
+                                    Text(text)
+                                }
                             }
                         }
                     } icon: {
-                        StatusActionIcon(item: group.displayItem, color: .init(group.displayItem.color))
+                        if let color = group.displayItem.color {
+                            StatusActionIcon(item: group.displayItem)
+                                .foregroundStyle(color)
+                        } else {
+                            StatusActionIcon(item: group.displayItem)
+                        }
                     }
                 }
             }
@@ -96,15 +110,28 @@ struct StatusActionItemView: View {
                             .opacity(0.0)
                     }
                     if useText {
-                        Text(data.textKey)
-                            .foregroundStyle(data.color)
+                        if let color = data.color {
+                            Text(data.textKey)
+                                .foregroundStyle(color)
+                        } else {
+                            Text(data.textKey)
+                        }
                     } else if let text = data.countText {
-                        Text(text)
-                            .foregroundStyle(data.color)
+                        if let color = data.color {
+                            Text(text)
+                                .foregroundStyle(color)
+                        } else {
+                            Text(text)
+                        }
                     }
                 }
             } icon: {
-                StatusActionIcon(item: data, color: UIColor(data.color))
+                if let color = data.color {
+                    StatusActionIcon(item: data)
+                        .foregroundStyle(color)
+                } else {
+                    StatusActionIcon(item: data)
+                }
             }
         }
         .sensoryFeedback(.success, trigger: data.color)
@@ -128,16 +155,16 @@ extension StatusActionItem {
         }
 
     }
-    var color: Color {
+    var color: Color? {
         if let colorized = self as? StatusActionItemColorized {
             switch colorized.color {
-            case .contentColor: Color(.label)
+            case .contentColor: nil
             case .error: Color(.systemRed)
             case .primaryColor: Color.accentColor
             case .red: Color(.systemRed)
             }
         } else {
-            Color(.label)
+            nil
         }
     }
 
@@ -185,7 +212,6 @@ extension StatusActionItem {
 
 struct StatusActionIcon: View {
     let item: StatusActionItem
-    let color: UIColor
 
     var body: some View {
         Group {
@@ -193,57 +219,44 @@ struct StatusActionIcon: View {
             case .bookmark(let bookmarked):
                 if bookmarked.bookmarked {
                     Image("fa-bookmark.fill")
-                        .foregroundStyle(Color(color))
                 } else {
                     Image("fa-bookmark")
-                        .foregroundStyle(Color(color))
                 }
 
             case .delete:
                 Image("fa-trash")
-                    .foregroundStyle(Color(color))
 
             case .like(let liked):
                 if liked.liked {
                     Image("fa-heart.fill")
-                        .foregroundStyle(Color(color))
                 } else {
                     Image("fa-heart")
-                        .foregroundStyle(Color(color))
                 }
 
             case .more:
                 Image("fa-ellipsis")
-                    .foregroundStyle(Color(color))
 
             case .quote:
                 Image("fa-quote-left")
-                    .foregroundStyle(Color(color))
 
             case .reaction(let reacted):
                 if reacted.reacted {
                     Image("fa-minus")
-                        .foregroundStyle(Color(color))
                 } else {
                     Image("fa-plus")
-                        .foregroundStyle(Color(color))
                 }
 
             case .reply:
                 Image("fa-reply")
-                    .foregroundStyle(Color(color))
 
             case .report:
                 Image("fa-circle-info")
-                    .foregroundStyle(Color(color))
 
             case .retweet:
                 Image("fa-retweet")
-                    .foregroundStyle(Color(color))
 
             case .comment:
                 Image("fa-comment-dots")
-                    .foregroundStyle(Color(color))
             }
         }
     }

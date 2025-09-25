@@ -21,3 +21,12 @@ struct UserOnelineView<TrailingContent: View>: View {
         .lineLimit(1)
     }
 }
+
+extension UserOnelineView {
+    init(data: UiUserV2) where TrailingContent == EmptyView {
+        self.data = data
+        self.trailing = {
+            EmptyView()
+        }
+    }
+}

@@ -1,7 +1,11 @@
 import SwiftUI
 import KotlinSharedUI
 
-enum Route: Hashable {
+enum Route: Hashable, Identifiable {
+    var id: Int {
+        return self.hashValue
+    }
+    
     static func == (lhs: Route, rhs: Route) -> Bool {
         return lhs.hashValue == rhs.hashValue
     }
@@ -13,7 +17,7 @@ enum Route: Hashable {
         clearToHome: @escaping () -> Void
     ) -> some View {
         switch self {
-        case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) })
+        case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew(accountType)) }, toTabSetting: {})
         case .timeline(let item): TimelineScreen(tabItem: item)
         case .serviceSelect:
             ServiceSelectionScreen(toHome: { clearToHome() })
@@ -29,6 +33,14 @@ enum Route: Hashable {
             AccountManagementScreen()
         case .search(let accountType, let query):
             SearchScreen(accountType: accountType, initialQuery: query)
+        case .composeNew(let accountType):
+            ComposeScreen(accountType: accountType)
+        case .composeQuote(let accountType, let statusKey):
+            ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.Quote(statusKey: statusKey))
+        case .composeReply(let accountType, let statusKey):
+            ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.Reply(statusKey: statusKey))
+        case .composeVVOReplyComment(let accountType, let statueKey, let rootId):
+            ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.VVOComment(statusKey: statueKey, rootId: rootId))
         default:
             Text("Not done yet for \(self)")
         }

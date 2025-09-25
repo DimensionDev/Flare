@@ -281,16 +281,16 @@ public interface VisibilityState {
 }
 
 @Immutable
-public sealed interface ComposeStatus {
-    public val statusKey: MicroBlogKey
+public sealed class ComposeStatus {
+    public abstract val statusKey: MicroBlogKey
 
     public data class Quote(
         override val statusKey: MicroBlogKey,
-    ) : ComposeStatus
+    ) : ComposeStatus()
 
     public open class Reply(
         override val statusKey: MicroBlogKey,
-    ) : ComposeStatus
+    ) : ComposeStatus()
 
     public data class VVOComment(
         override val statusKey: MicroBlogKey,

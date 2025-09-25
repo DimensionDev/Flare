@@ -26,16 +26,10 @@ struct AllListScreen: View {
                             )
                         )
                 ) {
-                    Label {
-                        Text(item.title)
-                    } icon: {
-                        if let image = item.avatar {
-                            AvatarView(data: image)
-                        } else {
-                            Image("fa-list")
-                        }
-                    }
+                    UiListView(data: item)
                 }
+            } loadingContent: {
+                UiListPlaceholder()
             }
         }
         .navigationTitle("all_lists_title")

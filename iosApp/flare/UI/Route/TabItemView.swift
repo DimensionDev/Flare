@@ -11,7 +11,7 @@ extension TabItem {
         case .timelineTabItem(let timelineTabItem):
             switch onEnum(of: timelineTabItem) {
             case .HomeTimelineTabItem(let homeTimelineTabItem):
-                HomeTimelineScreen(accountType: homeTimelineTabItem.account, toServiceSelect: { onNavigate(.serviceSelect) })
+                HomeTimelineScreen(accountType: homeTimelineTabItem.account, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew(homeTimelineTabItem.account) ) }, toTabSetting: {} )
             default:
                 TimelineScreen(tabItem: timelineTabItem)
             }

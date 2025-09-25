@@ -10,6 +10,16 @@
     "%@" : {
 
     },
+    "%lld/%d" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$d"
+          }
+        }
+      }
+    },
     "0000" : {
 
     },
@@ -95,22 +105,50 @@
     "comment" : {
 
     },
+    "compose_button_cancel" : {
+
+    },
+    "compose_button_send" : {
+
+    },
+    "compose_cw_placeholder" : {
+
+    },
+    "compose_media_mark_sensitive" : {
+
+    },
+    "compose_placeholder" : {
+
+    },
+    "compose_poll_choice_placeholder" : {
+
+    },
+    "compose_poll_expiration" : {
+
+    },
+    "compose_poll_type" : {
+
+    },
+    "compose_poll_type_multiple" : {
+
+    },
+    "compose_poll_type_single" : {
+
+    },
+    "compose_title_new" : {
+
+    },
+    "compose_title_quote" : {
+
+    },
+    "compose_title_reply" : {
+
+    },
     "delete" : {
 
     },
     "Detail" : {
 
-    },
-    "Discover" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Discover"
-          }
-        }
-      }
     },
     "discover_status" : {
 
@@ -136,17 +174,6 @@
     },
     "error" : {
 
-    },
-    "Home" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Home"
-          }
-        }
-      }
     },
     "home_tab_bookmarks_title" : {
       "localizations" : {
@@ -238,18 +265,13 @@
         }
       }
     },
-    "index" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Index"
-          }
-        }
-      }
-    },
     "like" : {
+
+    },
+    "list description" : {
+
+    },
+    "list title" : {
 
     },
     "local_filter_title" : {
@@ -855,17 +877,6 @@
     "Not done yet for %@" : {
 
     },
-    "Notification" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notification"
-          }
-        }
-      }
-    },
     "notification_type_title" : {
 
     },
@@ -930,17 +941,6 @@
         }
       }
     },
-    "Search" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search"
-          }
-        }
-      }
-    },
     "search_status" : {
 
     },
@@ -974,9 +974,6 @@
       }
     },
     "storage_title" : {
-
-    },
-    "tip_alt_text_title" : {
 
     },
     "unblock" : {

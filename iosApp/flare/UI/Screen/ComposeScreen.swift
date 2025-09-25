@@ -11,7 +11,8 @@ struct ComposeScreen: View {
     @FocusState private var cwKeyboardFocused: Bool
     @StateObject private var presenter: KotlinPresenter<ComposeState>
     @State private var viewModel = ComposeInputViewModel()
-    @State private var uiTextView: UITextField?
+    @State private var uiTextView: UITextView?
+    @State private var pendingCursor: Int?
 
     var body: some View {
         VStack(
@@ -82,15 +83,14 @@ struct ComposeScreen: View {
                     TextField(text: $viewModel.text, axis: .vertical) {
                         Text("compose_placeholder")
                     }
-                    .introspect(.textField, on: .iOS(.v13, .v14, .v15, .v16, .v17, .v18, .v26)) { textField in
+                    .introspect(.textField(axis: .vertical), on: .iOS(.v16, .v17, .v18, .v26)) { textField in
                         self.uiTextView = textField
+                        applyCursorIfPossible()
                     }
                     .textFieldStyle(.plain)
                     .focused($keyboardFocused)
                     .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            keyboardFocused = true
-                        }
+                        keyboardFocused = true
                     }
                     Spacer()
                     if viewModel.mediaViewModel.items.count > 0 {
@@ -265,6 +265,7 @@ struct ComposeScreen: View {
                                 .popover(isPresented: $viewModel.showEmoji) {
                                     EmojiPopup(data: emojis) { item in
                                         viewModel.addEmoji(emoji: item)
+                                        insert(item.insertText)
                                     }
                                 }
                             }
@@ -290,15 +291,10 @@ struct ComposeScreen: View {
         .onChange(of: presenter.state.initialTextState) { oldValue, newValue in
             if case .success(let initialText) = onEnum(of: newValue) {
                 viewModel.text = initialText.data.text
+                pendingCursor = Int(initialText.data.cursorPosition)
+                applyCursorIfPossible()
             }
         }
-        .onChange(of: uiTextView, { oldValue, newValue in
-            if case .success(let initialText) = onEnum(of: presenter.state.initialTextState),
-                let textField = newValue,
-                let newPosition = textField.position(from: textField.beginningOfDocument, offset: Int(initialText.data.cursorPosition)) {
-                textField.selectedTextRange = textField.textRange(from: newPosition, to: newPosition)
-            }
-        })
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -334,6 +330,35 @@ struct ComposeScreen: View {
             }
         }
     }
+    
+    private func applyCursorIfPossible() {
+        guard let textView = uiTextView, textView.isFirstResponder, let pendingCursor else { return }
+        let length = textView.text.count
+        let clamped = NSRange(location: max(0, min(pendingCursor, length)),
+                              length: 0)
+        textView.selectedRange = clamped
+        textView.scrollRangeToVisible(clamped)
+        self.pendingCursor = nil
+    }
+    
+    private func insert(_ s: String) {
+        guard let textView = uiTextView else { return }
+
+        if textView.markedTextRange != nil { return }
+
+        let sel = textView.selectedRange
+        let current = textView.text ?? ""
+        let ns = current as NSString
+        let newText = ns.replacingCharacters(in: sel, with: s)
+
+        textView.text = newText
+        viewModel.text = newText
+
+        let newLocation = sel.location + (s as NSString).length
+        textView.selectedRange = NSRange(location: newLocation, length: 0)
+        textView.scrollRangeToVisible(NSRange(location: max(0, newLocation - 1), length: 1))
+    }
+
 }
 
 struct EmojiPopup: View {

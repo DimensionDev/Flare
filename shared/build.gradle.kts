@@ -19,7 +19,6 @@ kotlin {
     applyDefaultHierarchyTemplate {
         common {
             group("apple") {
-                withMacos()
                 withIos()
             }
             group("androidJvm") {
@@ -42,8 +41,6 @@ kotlin {
         iosX64(),
         iosArm64(),
         iosSimulatorArm64(),
-        macosArm64(),
-        macosX64(),
     ).forEach { appleTarget ->
         appleTarget.binaries.framework {
             baseName = "shared"

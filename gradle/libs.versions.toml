@@ -198,7 +198,7 @@ xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91
 
 fluent-ui = { module = "io.github.compose-fluent:fluent", version = "v0.1.0" }
 
-commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.18.0" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.19.0" }
 
 jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version = "3.9.1" }
 

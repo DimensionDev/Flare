@@ -53,15 +53,15 @@ private fun ColorScheme.withPureColorLightMode(): ColorScheme =
 
 private fun ColorScheme.withPureColorDarkMode(): ColorScheme =
     copy(
-        background = MoreColors.Gray900,
-        surface = Color.Black,
+        background = Color.Black,
+        surface = MoreColors.Gray900,
         onBackground = Color.White,
         onSurface = Color.White,
-        surfaceContainer = Color.Black,
-        surfaceContainerLow = MoreColors.Gray900,
-        surfaceContainerHigh = Color.Black,
-        surfaceContainerLowest = Color.Black,
-        surfaceContainerHighest = Color.Black,
+        surfaceContainer = MoreColors.Gray900,
+        surfaceContainerLow = Color.Black,
+        surfaceContainerHigh = MoreColors.Gray900,
+        surfaceContainerLowest = MoreColors.Gray900,
+        surfaceContainerHighest = MoreColors.Gray900,
         onSurfaceVariant = MoreColors.Gray400,
         outlineVariant = MoreColors.Gray800,
     )

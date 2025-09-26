@@ -117,6 +117,7 @@ import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.saket.telephoto.ExperimentalTelephotoApi
+import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.Viewport
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
@@ -782,6 +783,7 @@ private fun ImageItem(
         onLongClick = {
             onLongClick.invoke()
         },
+        onDoubleClick = DoubleClickToZoomListener.cycle(2f),
     )
 }
 
@@ -901,6 +903,15 @@ private fun statusMediaPresenter(
                                     context.getString(R.string.media_menu_share_image),
                                 ),
                             )
+                        } ?: run {
+                            withContext(Dispatchers.Main) {
+                                Toast
+                                    .makeText(
+                                        context,
+                                        context.getString(R.string.media_is_downloading),
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                            }
                         }
                     }
                 }
@@ -952,12 +963,19 @@ private fun statusMediaPresenter(
                     val byteArray = it.data.toFile().readBytes()
                     val fileName = uri.substringAfterLast("/")
                     saveByteArrayToDownloads(context, byteArray, fileName)
-                }
-                withContext(Dispatchers.Main) {
+                    withContext(Dispatchers.Main) {
+                        Toast
+                            .makeText(
+                                context,
+                                context.getString(R.string.media_save_success),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                    }
+                } ?: withContext(Dispatchers.Main) {
                     Toast
                         .makeText(
                             context,
-                            context.getString(R.string.media_save_success),
+                            context.getString(R.string.media_is_downloading),
                             Toast.LENGTH_SHORT,
                         ).show()
                 }
@@ -965,10 +983,3 @@ private fun statusMediaPresenter(
         }
     }
 }
-
-// suspend fun copyFile(
-//    sourceFile: File,
-//    destinationFile: File,
-// ) = withContext(Dispatchers.IO) {
-//    sourceFile.copyTo(destinationFile, overwrite = true)
-// }

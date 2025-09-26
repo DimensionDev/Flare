@@ -12,8 +12,8 @@ files:
       "translation": "%original_path%-%android_code%/strings.xml",
     },
     {
-      "source": "iosApp/iosApp/Localizable.xcstrings",
-      "translation": "iosApp/iosApp/Localizable.xcstrings",
+      "source": "iosApp/flare/Localizable.xcstrings",
+      "translation": "iosApp/flare/Localizable.xcstrings",
       "multilingual": true,
     },
   ]

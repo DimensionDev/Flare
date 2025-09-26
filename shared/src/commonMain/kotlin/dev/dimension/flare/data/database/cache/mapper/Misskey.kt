@@ -79,10 +79,10 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
     )
 }
 
-internal fun List<Note>.toDbPagingTimeline(
+internal suspend fun List<Note>.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (Note) -> Long = { Instant.parse(it.createdAt).toEpochMilliseconds() },
+    sortIdProvider: suspend (Note) -> Long = { Instant.parse(it.createdAt).toEpochMilliseconds() },
 ): List<DbPagingTimelineWithStatus> =
     this.map {
         createDbPagingTimelineWithStatus(

@@ -5,7 +5,6 @@ import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.isBottomEnd
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
@@ -50,117 +49,119 @@ internal class StatusDetailRemoteMediator(
         pageSize: Int,
         request: Request,
     ): Result {
-        if (request == Request.Refresh) {
-            if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
-                database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
-                    database.connect {
-                        database
-                            .pagingTimelineDao()
-                            .insertAll(
-                                listOf(
-                                    DbPagingTimeline(
-                                        accountType = AccountType.Specific(accountKey),
-                                        statusKey = statusKey,
-                                        pagingKey = pagingKey,
-                                        sortId = 0,
-                                    ),
-                                ),
-                            )
-                    }
-                }
-            }
-        }
+        when (request) {
+            is Request.Append -> {
+                if (statusOnly) {
+                    return Result(
+                        endOfPaginationReached = true,
+                    )
+                } else {
+                    val cursor = request.nextKey.takeIf { it.isNotEmpty() }
+                    val response =
+                        service
+                            .getTweetDetail(
+                                variables =
+                                    TweetDetailRequest(
+                                        focalTweetID = statusKey.id,
+                                        cursor = cursor,
+                                    ).encodeJson(),
+                            ).body()
+                            ?.data
+                            ?.threadedConversationWithInjectionsV2
+                            ?.instructions
+                            .orEmpty()
 
-        if (statusOnly) {
-            val response =
-                service
-                    .getTweetDetail(
-                        variables =
-                            TweetDetailRequest(
-                                focalTweetID = statusKey.id,
-                                cursor = null,
-                            ).encodeJson(),
-                    ).body()
-                    ?.data
-                    ?.threadedConversationWithInjectionsV2
-                    ?.instructions
-                    .orEmpty()
-            val tweet = response.tweets()
-            val item = tweet.firstOrNull { it.id == statusKey.id }
-            if (item != null) {
-                database.connect {
-                    XQT.save(
-                        accountKey = accountKey,
-                        pagingKey = pagingKey,
-                        database = database,
-                        tweet = listOf(item),
+                    val tweet =
+                        service
+                            .getTweetResultByRestId(
+                                variables =
+                                    TweetDetailWithRestIdRequest(
+                                        tweetID = statusKey.id,
+                                        withCommunity = true,
+                                        includePromotedContent = true,
+                                        withVoice = true,
+                                    ).encodeJson(),
+                            ).body()
+                            ?.data
+                            ?.tweetResult
+                            ?.result
+
+                    conversationId =
+                        when (tweet) {
+                            is Tweet -> tweet.legacy?.conversationIdStr
+                            is TweetTombstone -> null
+                            is TweetWithVisibilityResults -> tweet.tweet.legacy?.conversationIdStr
+                            null -> null
+                        }
+
+                    val actualTweet =
+                        response
+                            .tweets()
+                            .filter {
+                                when (val result = it.tweets.tweetResults.result) {
+                                    is TweetTombstone -> false
+                                    null -> false
+                                    is Tweet -> result.legacy?.conversationIdStr == conversationId
+                                    is TweetWithVisibilityResults -> result.tweet.legacy?.conversationIdStr == conversationId
+                                }
+                            }
+                    val result = actualTweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
+
+                    return Result(
+                        endOfPaginationReached = response.isBottomEnd() || actualTweet.size == 1 || response.cursor() == null,
+                        data = result,
+                        nextKey = response.cursor(),
                     )
                 }
             }
-            return Result(
-                endOfPaginationReached = true,
-            )
-        } else {
-            val cursor =
-                if (request is Request.Append) {
-                    request.nextKey
-                } else {
-                    null
-                }
-            val response =
-                service
-                    .getTweetDetail(
-                        variables =
-                            TweetDetailRequest(
-                                focalTweetID = statusKey.id,
-                                cursor = cursor,
-                            ).encodeJson(),
-                    ).body()
-                    ?.data
-                    ?.threadedConversationWithInjectionsV2
-                    ?.instructions
-                    .orEmpty()
-
-            val tweet =
-                service
-                    .getTweetResultByRestId(
-                        variables =
-                            TweetDetailWithRestIdRequest(
-                                tweetID = statusKey.id,
-                                withCommunity = true,
-                                includePromotedContent = true,
-                                withVoice = true,
-                            ).encodeJson(),
-                    ).body()
-                    ?.data
-                    ?.tweetResult
-                    ?.result
-
-            conversationId =
-                when (tweet) {
-                    is Tweet -> tweet.legacy?.conversationIdStr
-                    is TweetTombstone -> null
-                    is TweetWithVisibilityResults -> tweet.tweet.legacy?.conversationIdStr
-                    null -> null
-                }
-
-            val actualTweet =
-                response
-                    .tweets()
-                    .filter {
-                        when (val result = it.tweets.tweetResults.result) {
-                            is TweetTombstone -> false
-                            null -> false
-                            is Tweet -> result.legacy?.conversationIdStr == conversationId
-                            is TweetWithVisibilityResults -> result.tweet.legacy?.conversationIdStr == conversationId
+            is Request.Prepend -> {
+                return Result(
+                    endOfPaginationReached = true,
+                )
+            }
+            Request.Refresh -> {
+                if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
+                    database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
+                        database.connect {
+                            database
+                                .pagingTimelineDao()
+                                .insertAll(
+                                    listOf(
+                                        DbPagingTimeline(
+                                            accountType = AccountType.Specific(accountKey),
+                                            statusKey = statusKey,
+                                            pagingKey = pagingKey,
+                                            sortId = 0,
+                                        ),
+                                    ),
+                                )
                         }
                     }
+                }
 
-            return Result(
-                endOfPaginationReached = response.isBottomEnd() || actualTweet.size == 1 || response.cursor() == null,
-                data = actualTweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) },
-                nextKey = response.cursor(),
-            )
+                val response =
+                    service
+                        .getTweetDetail(
+                            variables =
+                                TweetDetailRequest(
+                                    focalTweetID = statusKey.id,
+                                    cursor = null,
+                                ).encodeJson(),
+                        ).body()
+                        ?.data
+                        ?.threadedConversationWithInjectionsV2
+                        ?.instructions
+                        .orEmpty()
+                val tweet = response.tweets()
+                val item = tweet.firstOrNull { it.id == statusKey.id }
+                val result = listOf(item).mapNotNull { it?.toDbPagingTimeline(accountKey, pagingKey) }
+
+                return Result(
+                    endOfPaginationReached = statusOnly,
+                    data = result,
+                    nextKey = "",
+                )
+            }
         }
     }
 }

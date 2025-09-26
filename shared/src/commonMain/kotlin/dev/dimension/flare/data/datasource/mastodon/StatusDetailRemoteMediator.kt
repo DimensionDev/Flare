@@ -36,52 +36,61 @@ internal class StatusDetailRemoteMediator(
         pageSize: Int,
         request: Request,
     ): Result {
-        if (request != Request.Refresh) {
-            return Result(
-                endOfPaginationReached = true,
-            )
-        }
-        val exists = database.pagingTimelineDao().existsPaging(accountKey, pagingKey)
-        if (!exists) {
-            val status = database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()
-            status?.let {
-                database.connect {
-                    database
-                        .pagingTimelineDao()
-                        .insertAll(
-                            listOf(
-                                DbPagingTimeline(
-                                    accountType = AccountType.Specific(accountKey),
-                                    statusKey = statusKey,
-                                    pagingKey = pagingKey,
-                                    sortId = 0,
-                                ),
-                            ),
+        val result =
+            when (request) {
+                is Request.Append -> {
+                    if (statusOnly) {
+                        return Result(
+                            endOfPaginationReached = true,
                         )
+                    } else {
+                        val context =
+                            service.context(
+                                statusKey.id,
+                            )
+                        val current =
+                            service.lookupStatus(
+                                statusKey.id,
+                            )
+                        context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()
+                    }
+                }
+                is Request.Prepend ->
+                    return Result(
+                        endOfPaginationReached = true,
+                    )
+                Request.Refresh -> {
+                    val exists = database.pagingTimelineDao().existsPaging(accountKey, pagingKey)
+                    if (!exists) {
+                        val status = database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()
+                        status?.let {
+                            database.connect {
+                                database
+                                    .pagingTimelineDao()
+                                    .insertAll(
+                                        listOf(
+                                            DbPagingTimeline(
+                                                accountType = AccountType.Specific(accountKey),
+                                                statusKey = statusKey,
+                                                pagingKey = pagingKey,
+                                                sortId = 0,
+                                            ),
+                                        ),
+                                    )
+                            }
+                        }
+                    }
+                    val current =
+                        service.lookupStatus(
+                            statusKey.id,
+                        )
+                    listOf(current)
                 }
             }
-        }
-        val result =
-            if (statusOnly) {
-                val current =
-                    service.lookupStatus(
-                        statusKey.id,
-                    )
-                listOf(current)
-            } else {
-                val context =
-                    service.context(
-                        statusKey.id,
-                    )
-                val current =
-                    service.lookupStatus(
-                        statusKey.id,
-                    )
-                context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()
-            }
+        val shouldLoadMore = !(request is Request.Append || statusOnly)
 
         return Result(
-            endOfPaginationReached = true,
+            endOfPaginationReached = !shouldLoadMore,
             data =
                 result.toDbPagingTimeline(
                     accountKey = accountKey,
@@ -89,6 +98,7 @@ internal class StatusDetailRemoteMediator(
                 ) {
                     -result.indexOf(it).toLong()
                 },
+            nextKey = if (shouldLoadMore) pagingKey else null,
         )
     }
 }

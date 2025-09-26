@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.misskey
 
+import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -33,83 +34,87 @@ internal class StatusDetailRemoteMediator(
             append("_")
             append(accountKey.toString())
         }
-    private var page = 1
 
     override suspend fun timeline(
         pageSize: Int,
         request: Request,
     ): Result {
-        if (request is Request.Prepend) {
-            return Result(
-                endOfPaginationReached = true,
-            )
-        }
-        if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
-            val status = database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()
-            status?.let {
-                database.connect {
-                    database
-                        .pagingTimelineDao()
-                        .insertAll(
-                            listOf(
-                                DbPagingTimeline(
-                                    accountType = AccountType.Specific(accountKey),
-                                    statusKey = statusKey,
-                                    pagingKey = pagingKey,
-                                    sortId = 0,
-                                ),
-                            ),
-                        )
-                }
-            }
-        }
         val result =
-            if (statusOnly) {
-                val current =
-                    service
-                        .notesShow(
-                            IPinRequest(noteId = statusKey.id),
+            when (request) {
+                is Request.Append -> {
+                    if (statusOnly) {
+                        return Result(
+                            endOfPaginationReached = true,
                         )
-                listOf(current)
-            } else {
-                val current =
-                    if (request is Request.Refresh) {
-                        page = 0
-                        service
-                            .notesShow(
-                                IPinRequest(noteId = statusKey.id),
-                            )
-                    } else {
-                        page++
-                        null
                     }
-                val lastItem =
-                    database.pagingTimelineDao().getLastPagingTimeline(pagingKey)?.takeIf {
-                        it.timeline.statusKey != statusKey
-                    }
-                val children =
                     service
                         .notesChildren(
                             NotesChildrenRequest(
                                 noteId = statusKey.id,
-                                untilId = lastItem?.timeline?.statusKey?.id,
+                                untilId = request.nextKey.takeIf { it.isNotEmpty() },
                                 limit = pageSize,
                             ),
-                        ).orEmpty()
-                listOfNotNull(current?.reply, current) + children
-            }.filterNotNull()
+                        )
+                }
+
+                is Request.Prepend ->
+                    return Result(
+                        endOfPaginationReached = true,
+                    )
+
+                Request.Refresh -> {
+                    if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
+                        val status =
+                            database
+                                .statusDao()
+                                .get(statusKey, AccountType.Specific(accountKey))
+                                .firstOrNull()
+                        status?.let {
+                            database.connect {
+                                database
+                                    .pagingTimelineDao()
+                                    .insertAll(
+                                        listOf(
+                                            DbPagingTimeline(
+                                                accountType = AccountType.Specific(accountKey),
+                                                statusKey = statusKey,
+                                                pagingKey = pagingKey,
+                                                sortId = 0,
+                                            ),
+                                        ),
+                                    )
+                            }
+                        }
+                    }
+                    val current =
+                        service
+                            .notesShow(
+                                IPinRequest(noteId = statusKey.id),
+                            )
+                    if (statusOnly) {
+                        listOf(current)
+                    } else {
+                        listOfNotNull(current.reply, current)
+                    }
+                }
+            }
 
         return Result(
-            endOfPaginationReached = true,
+            endOfPaginationReached = statusOnly || result.isEmpty(),
             data =
                 result.toDbPagingTimeline(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                     sortIdProvider = {
-                        val index = result.indexOf(it)
-                        -(index + page * pageSize).toLong()
+                        -SnowflakeIdGenerator.nextId()
                     },
                 ),
+            nextKey =
+                if (request == Request.Refresh) {
+                    ""
+                } else {
+                    result.lastOrNull()?.id
+                },
         )
     }
 }

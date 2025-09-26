@@ -81,12 +81,13 @@ internal fun VVOStatusScreen(
                     modifier =
                         Modifier
                             .verticalScroll(rememberScrollState())
-                            .width(432.dp)
+                            .width(350.dp)
                             .padding(PaddingValues(horizontal = screenHorizontalPadding))
                             .padding(LocalWindowPadding.current),
                 )
                 LazyStatusVerticalStaggeredGrid(
                     contentPadding = LocalWindowPadding.current,
+                    modifier = Modifier.weight(1f),
                 ) {
                     reactionContent(
                         comment = state.comment,
@@ -126,6 +127,7 @@ private fun StatusContent(
                 StatusItem(
                     item = status,
                     detailStatusKey = detailStatusKey,
+                    modifier = modifier,
 //                    modifier =
 //                        modifier.sharedBounds(
 //                            rememberSharedContentState(key = status.itemKey),

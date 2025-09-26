@@ -320,6 +320,7 @@ struct ComposeScreen: View {
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button {
+                    send()
                 } label: {
                     Label {
                         Text("compose_button_send")
@@ -357,6 +358,54 @@ struct ComposeScreen: View {
         let newLocation = sel.location + (s as NSString).length
         textView.selectedRange = NSRange(location: newLocation, length: 0)
         textView.scrollRangeToVisible(NSRange(location: max(0, newLocation - 1), length: 1))
+    }
+    
+    private func getComposeData() -> [ComposeData] {
+        return presenter.state.selectedAccounts.map { account in
+            ComposeData(
+                account: account,
+                content: viewModel.text,
+                visibility: getVisibility(),
+                language: ["en"],
+                medias: getMedia(),
+                sensitive: viewModel.mediaViewModel.sensitive,
+                spoilerText: viewModel.contentWarning,
+                poll: getPoll(),
+                localOnly: false,
+                referenceStatus: getReferenceStatus()
+            )
+        }
+    }
+    
+    private func send() {
+        let datas = getComposeData()
+        for data in datas {
+            presenter.state.send(data: data)
+        }
+        dismiss()
+    }
+    
+    private func getMedia() -> [FileItem] {
+        return viewModel.mediaViewModel.items.map { item in
+            FileItem(name: item.item.itemIdentifier, data: KotlinByteArray.from(data: item.data!))
+        }
+    }
+    private func getReferenceStatus() -> ComposeData.ReferenceStatus? {
+        return if let data = composeStatus, let replyState = presenter.state.replyState, case .success(let timeline) = onEnum(of: replyState) {
+            ComposeData.ReferenceStatus(data: timeline.data, composeStatus: data)
+        } else {
+            nil
+        }
+    }
+    private func getPoll() -> ComposeData.Poll? {
+        return if viewModel.pollViewModel.enabled {
+            ComposeData.Poll(options: viewModel.pollViewModel.choices.map { item in item.text }, expiredAfter: viewModel.pollViewModel.expired.inWholeMilliseconds, multiple: viewModel.pollViewModel.pollType == ComposePollType.multiple)
+        } else {
+            nil
+        }
+    }
+    private func getVisibility() -> UiTimeline.ItemContentStatusTopEndContentVisibilityType {
+        return viewModel.visibility
     }
 
 }

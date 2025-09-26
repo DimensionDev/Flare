@@ -2,6 +2,9 @@ package dev.dimension.flare.data.network.nodeinfo
 
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
+import dev.dimension.flare.data.network.misskey.MisskeyService
+import dev.dimension.flare.data.network.misskey.api.model.MetaRequest
 import dev.dimension.flare.data.network.nodeinfo.model.NodeInfo
 import dev.dimension.flare.data.network.nodeinfo.model.Schema10
 import dev.dimension.flare.data.network.nodeinfo.model.Schema11
@@ -103,24 +106,73 @@ internal data object NodeInfoService {
             }.first()
     }
 
-    suspend fun detectPlatformType(host: String): PlatformType =
+    suspend fun detectPlatformType(host: String): NodeData =
         coroutineScope {
             val xqt = listOf(xqtOldHost, "xqt.social", xqtHost)
             if (xqt.any { it.equals(host, ignoreCase = true) }) {
-                return@coroutineScope PlatformType.xQt
+                return@coroutineScope NodeData(
+                    PlatformType.xQt,
+                    PlatformType.xQt.name,
+                    compatibleMode = false,
+                )
             }
             val vvo = listOf(vvoHost, vvo, vvoHostShort, "vvo.social", vvoHostLong)
             if (vvo.any { it.equals(host, ignoreCase = true) }) {
-                return@coroutineScope PlatformType.VVo
+                return@coroutineScope NodeData(
+                    PlatformType.VVo,
+                    PlatformType.VVo.name,
+                    compatibleMode = false,
+                )
             }
             val nodeInfo =
                 async {
                     tryRun {
-                        val nodeInfo = fetchNodeInfo(host)
-                        when {
-                            mastodonNodeInfoName.any { it.equals(nodeInfo, ignoreCase = true) } -> PlatformType.Mastodon
-                            misskeyNodeInfoName.any { it.equals(nodeInfo, ignoreCase = true) } -> PlatformType.Misskey
-                            else -> throw IllegalArgumentException("Unsupported platform: $nodeInfo")
+                        val nodeInfo =
+                            fetchNodeInfo(host)
+                                ?: throw IllegalArgumentException("NodeInfo not found: $host")
+                        if (mastodonNodeInfoName.any { it.equals(nodeInfo, ignoreCase = true) }) {
+                            NodeData(
+                                platformType = PlatformType.Mastodon,
+                                software = nodeInfo,
+                                compatibleMode =
+                                    !nodeInfo.equals(
+                                        "mastodon",
+                                        ignoreCase = true,
+                                    ),
+                            )
+                        } else if (misskeyNodeInfoName.any { it.equals(nodeInfo, ignoreCase = true) }) {
+                            NodeData(
+                                platformType = PlatformType.Misskey,
+                                software = nodeInfo,
+                                compatibleMode = !nodeInfo.equals("misskey", ignoreCase = true),
+                            )
+                        } else {
+                            tryRun {
+                                MisskeyService(
+                                    "https://$host/api/",
+                                    accessTokenFlow = null,
+                                ).meta(MetaRequest()).let {
+                                    requireNotNull(it.name)
+                                    // should be able to use as misskey
+                                    NodeData(
+                                        platformType = PlatformType.Misskey,
+                                        software = nodeInfo,
+                                        compatibleMode = true,
+                                    )
+                                }
+                            }.getOrElse {
+                                tryRun {
+                                    MastodonInstanceService("https://$host/").instance().let {
+                                        requireNotNull(it.title)
+                                        // should be able to use as mastodon
+                                        NodeData(
+                                            platformType = PlatformType.Mastodon,
+                                            software = nodeInfo,
+                                            compatibleMode = true,
+                                        )
+                                    }
+                                }.getOrNull()
+                            }
                         }
                     }.getOrNull()
                 }
@@ -129,7 +181,11 @@ internal data object NodeInfoService {
                 async {
                     tryRun {
                         BlueskyService("https://$host").describeServer().requireResponse()
-                        PlatformType.Bluesky
+                        NodeData(
+                            platformType = PlatformType.Bluesky,
+                            software = PlatformType.Bluesky.name,
+                            compatibleMode = false,
+                        )
                     }.getOrNull()
                 }
 
@@ -140,3 +196,10 @@ internal data object NodeInfoService {
                 ?: throw IllegalArgumentException("Unsupported platform: $host")
         }
 }
+
+public data class NodeData(
+    val platformType: PlatformType,
+    val software: String,
+    // not officially supported, but works fine for basic features
+    val compatibleMode: Boolean,
+)

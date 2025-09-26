@@ -444,7 +444,7 @@
     <string name="service_select_instance_input_placeholder">Instance URL</string>
     <string name="service_select_next_button">Next</string>
     <string name="service_select_empty_message">No instances found</string>
-
+    <string name="service_select_compatibility_warning">This server uses %1$s, Flare will run in compatibility mode. Some features may not work properly.</string>
 
     <string name="home_tab_home_title">Home</string>
     <string name="home_tab_notifications_title">Notifications</string>

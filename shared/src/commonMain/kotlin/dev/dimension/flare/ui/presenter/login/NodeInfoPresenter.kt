@@ -17,10 +17,11 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.RecommendInstancePagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.network.nodeinfo.NodeData
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -59,7 +60,7 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
 
         val detectedPlatformType by remember(filterFlow) {
             filterFlow.flatMapLatest {
-                flow<UiState<PlatformType>> {
+                flow {
                     runCatching {
                         emit(UiState.Loading())
                         NodeInfoService.detectPlatformType(it)
@@ -75,7 +76,7 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
         return object : NodeInfoState {
             override val instances = instances.toPagingState()
             override val detectedPlatformType = detectedPlatformType
-            override val canNext = detectedPlatformType is UiState.Success<PlatformType>
+            override val canNext = detectedPlatformType.isSuccess
 
             override fun setFilter(value: String) {
                 if (filter != value) {
@@ -89,7 +90,7 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
 @Immutable
 public interface NodeInfoState {
     public val instances: PagingState<UiInstance>
-    public val detectedPlatformType: UiState<PlatformType>
+    public val detectedPlatformType: UiState<NodeData>
     public val canNext: Boolean
 
     public fun setFilter(value: String)

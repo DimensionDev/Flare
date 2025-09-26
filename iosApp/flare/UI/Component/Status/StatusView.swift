@@ -120,6 +120,10 @@ struct StatusView: View {
 
                         }
                     }
+                    if let poll = data.poll, showMedia {
+                        StatusPollView(data: poll)
+                    }
+                    
                     if !data.images.isEmpty, showMedia {
                         StatusMediaView(data: data.images, sensitive: data.sensitive)
                     }

@@ -5,7 +5,9 @@ import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class ComposeUseCase(
     private val scope: CoroutineScope,
@@ -13,20 +15,22 @@ internal class ComposeUseCase(
 ) {
     operator fun invoke(data: ComposeData) {
         invoke(data) {
-            when (it) {
-                is ComposeProgressState.Error ->
-                    inAppNotification.onError(Message.Compose, it.throwable)
-                is ComposeProgressState.Progress ->
-                    inAppNotification.onProgress(Message.Compose, it.current, it.max)
-                ComposeProgressState.Success ->
-                    inAppNotification.onSuccess(Message.Compose)
+            withContext(Dispatchers.Main) {
+                when (it) {
+                    is ComposeProgressState.Error ->
+                        inAppNotification.onError(Message.Compose, it.throwable)
+                    is ComposeProgressState.Progress ->
+                        inAppNotification.onProgress(Message.Compose, it.current, it.max)
+                    ComposeProgressState.Success ->
+                        inAppNotification.onSuccess(Message.Compose)
+                }
             }
         }
     }
 
     operator fun invoke(
         data: ComposeData,
-        progress: (ComposeProgressState) -> Unit,
+        progress: suspend (ComposeProgressState) -> Unit,
     ) {
         scope.launch {
             runCatching {
@@ -34,7 +38,9 @@ internal class ComposeUseCase(
                 data.account.dataSource.compose(
                     data = data,
                     progress = {
-                        progress.invoke(ComposeProgressState.Progress(it.progress, it.total))
+                        scope.launch {
+                            progress.invoke(ComposeProgressState.Progress(it.progress, it.total))
+                        }
                     },
                 )
             }.onSuccess {

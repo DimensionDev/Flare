@@ -877,7 +877,25 @@
     "Not done yet for %@" : {
 
     },
+    "notification_compose_error" : {
+
+    },
+    "notification_compose_success" : {
+
+    },
+    "notification_login_expired" : {
+
+    },
     "notification_type_title" : {
+
+    },
+    "poll_expired" : {
+
+    },
+    "poll_expires_at" : {
+
+    },
+    "poll_vote" : {
 
     },
     "profile_tab_likes" : {

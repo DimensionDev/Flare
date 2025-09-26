@@ -47,112 +47,124 @@ internal class StatusDetailRemoteMediator(
         pageSize: Int,
         request: Request,
     ): Result {
-        if (request != Request.Refresh) {
-            return Result(
-                endOfPaginationReached = true,
-            )
-        }
-        if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
-            database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
-                database
-                    .pagingTimelineDao()
-                    .insertAll(
-                        listOf(
-                            DbPagingTimeline(
-                                accountType = AccountType.Specific(accountKey),
-                                statusKey = statusKey,
-                                pagingKey = pagingKey,
-                                sortId = 0,
-                            ),
-                        ),
-                    )
-            }
-        }
         val result =
-            if (statusOnly) {
-                val current =
-                    service
-                        .getPosts(
-                            GetPostsQueryParams(
-                                persistentListOf(AtUri(statusKey.id)),
-                            ),
-                        ).requireResponse()
-                        .posts
-                        .firstOrNull()
-                listOfNotNull(current).map(::FeedViewPost)
-            } else {
-                val context =
-                    service
-                        .getPostThread(
-                            GetPostThreadQueryParams(
-                                AtUri(statusKey.id),
-                            ),
-                        ).requireResponse()
-                when (val thread = context.thread) {
-                    is GetPostThreadResponseThreadUnion.ThreadViewPost -> {
-                        val parents = mutableListOf<ThreadViewPost>()
-                        var current: ThreadViewPost? = thread.value
-                        while (current != null) {
-                            parents.add(current)
-                            current =
-                                when (val parent = current.parent) {
-                                    is ThreadViewPostParentUnion.ThreadViewPost -> parent.value
-                                    else -> null
+            when (request) {
+                is Request.Append -> {
+                    if (statusOnly) {
+                        return Result(
+                            endOfPaginationReached = true,
+                        )
+                    } else {
+                        val context =
+                            service
+                                .getPostThread(
+                                    GetPostThreadQueryParams(
+                                        AtUri(statusKey.id),
+                                    ),
+                                ).requireResponse()
+                        when (val thread = context.thread) {
+                            is GetPostThreadResponseThreadUnion.ThreadViewPost -> {
+                                val parents = mutableListOf<ThreadViewPost>()
+                                var current: ThreadViewPost? = thread.value
+                                while (current != null) {
+                                    parents.add(current)
+                                    current =
+                                        when (val parent = current.parent) {
+                                            is ThreadViewPostParentUnion.ThreadViewPost -> parent.value
+                                            else -> null
+                                        }
                                 }
-                        }
-                        val replies =
-                            thread.value.replies.mapNotNull {
-                                when (it) {
-                                    is ThreadViewPostReplieUnion.ThreadViewPost -> {
-                                        if (it.value.replies.any()) {
-                                            val last =
-                                                it.value.replies.last().let {
-                                                    when (it) {
-                                                        is ThreadViewPostReplieUnion.ThreadViewPost -> it.value.post
-                                                        else -> null
-                                                    }
-                                                }
-                                            if (last != null) {
-                                                val parents =
-                                                    listOfNotNull(it.value.post) +
-                                                        it.value.replies.toList().dropLast(1).mapNotNull {
+                                val replies =
+                                    thread.value.replies.mapNotNull {
+                                        when (it) {
+                                            is ThreadViewPostReplieUnion.ThreadViewPost -> {
+                                                if (it.value.replies.any()) {
+                                                    val last =
+                                                        it.value.replies.last().let {
                                                             when (it) {
                                                                 is ThreadViewPostReplieUnion.ThreadViewPost -> it.value.post
                                                                 else -> null
                                                             }
                                                         }
-                                                val currentRef =
-                                                    ReplyRef(
-                                                        root = ReplyRefRootUnion.PostView(parents.last()),
-                                                        parent = ReplyRefParentUnion.PostView(parents.last()),
-                                                    )
+                                                    if (last != null) {
+                                                        val parents =
+                                                            listOfNotNull(it.value.post) +
+                                                                it.value.replies.toList().dropLast(1).mapNotNull {
+                                                                    when (it) {
+                                                                        is ThreadViewPostReplieUnion.ThreadViewPost -> it.value.post
+                                                                        else -> null
+                                                                    }
+                                                                }
+                                                        val currentRef =
+                                                            ReplyRef(
+                                                                root = ReplyRefRootUnion.PostView(parents.last()),
+                                                                parent = ReplyRefParentUnion.PostView(parents.last()),
+                                                            )
 
-                                                FeedViewPost(
-                                                    post = last,
-                                                    reply = currentRef,
-                                                )
-                                            } else {
-                                                FeedViewPost(
-                                                    it.value.post,
-                                                )
+                                                        FeedViewPost(
+                                                            post = last,
+                                                            reply = currentRef,
+                                                        )
+                                                    } else {
+                                                        FeedViewPost(
+                                                            it.value.post,
+                                                        )
+                                                    }
+                                                } else {
+                                                    FeedViewPost(
+                                                        it.value.post,
+                                                    )
+                                                }
                                             }
-                                        } else {
-                                            FeedViewPost(
-                                                it.value.post,
-                                            )
+                                            else -> null
                                         }
                                     }
-                                    else -> null
-                                }
+                                parents.map { FeedViewPost(it.post) }.reversed() + FeedViewPost(thread.value.post) + replies
                             }
-                        parents.map { FeedViewPost(it.post) }.reversed() + FeedViewPost(thread.value.post) + replies
+
+                            else -> emptyList()
+                        }
+                    }
+                }
+                is Request.Prepend -> {
+                    return Result(
+                        endOfPaginationReached = true,
+                    )
+                }
+                Request.Refresh -> {
+                    if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
+                        database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
+                            database
+                                .pagingTimelineDao()
+                                .insertAll(
+                                    listOf(
+                                        DbPagingTimeline(
+                                            accountType = AccountType.Specific(accountKey),
+                                            statusKey = statusKey,
+                                            pagingKey = pagingKey,
+                                            sortId = 0,
+                                        ),
+                                    ),
+                                )
+                        }
                     }
 
-                    else -> emptyList()
+                    val current =
+                        service
+                            .getPosts(
+                                GetPostsQueryParams(
+                                    persistentListOf(AtUri(statusKey.id)),
+                                ),
+                            ).requireResponse()
+                            .posts
+                            .firstOrNull()
+                    listOfNotNull(current).map(::FeedViewPost)
                 }
             }
+
+        val shouldLoadMore = !(request is Request.Append || statusOnly)
         return Result(
-            endOfPaginationReached = true,
+            endOfPaginationReached = !shouldLoadMore,
             data =
                 result.toDbPagingTimeline(
                     accountKey,
@@ -160,6 +172,7 @@ internal class StatusDetailRemoteMediator(
                 ) {
                     -result.indexOf(it).toLong()
                 },
+            nextKey = if (shouldLoadMore) pagingKey else null,
         )
     }
 }

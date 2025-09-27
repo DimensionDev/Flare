@@ -140,7 +140,6 @@ dependencies {
     implementation(libs.androidx.window)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.compose.webview)
-    implementation(libs.kotlinx.coroutines.play.services)
     implementation(projects.shared)
     implementation(projects.shared.ui)
     implementation(projects.composeUi)
@@ -161,6 +160,7 @@ dependencies {
         implementation(platform(libs.firebase.bom))
         implementation(libs.firebase.crashlytics.ktx)
         implementation(libs.firebase.analytics.ktx)
+        implementation(libs.kotlinx.coroutines.play.services)
     }
     // END Non-FOSS component
 

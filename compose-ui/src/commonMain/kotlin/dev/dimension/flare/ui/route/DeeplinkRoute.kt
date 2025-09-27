@@ -163,6 +163,7 @@ public sealed class DeeplinkRoute {
         public fun parse(url: String): DeeplinkRoute? {
             val data = Url(url)
             return when (data.host) {
+                "Login" -> Login
                 "Callback" ->
                     when (data.segments.getOrNull(0)) {
                         "SignIn" ->

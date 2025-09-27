@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">URL Instanță</string>
     <string name="service_select_next_button">Următoarea</string>
     <string name="service_select_empty_message">Nu s-au găsit instanțe</string>
+    <string name="service_select_compatibility_warning">Acest server folosește %1$s, Flare va rula în modul compatibilitate. Este posibil ca unele caracteristici să nu funcționeze corect.</string>
     <string name="home_tab_home_title">Acasă</string>
     <string name="home_tab_notifications_title">Notificări</string>
     <string name="home_tab_me_title">Eu</string>

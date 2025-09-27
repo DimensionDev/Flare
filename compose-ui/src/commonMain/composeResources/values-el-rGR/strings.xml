@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">Διεύθυνση Url Παρουσίας</string>
     <string name="service_select_next_button">Επόμενο</string>
     <string name="service_select_empty_message">Δεν βρέθηκαν παρουσίες</string>
+    <string name="service_select_compatibility_warning">Αυτός ο διακομιστής χρησιμοποιεί %1$s, η Flare θα εκτελείται σε λειτουργία συμβατότητας. Ορισμένες λειτουργίες ενδέχεται να μην λειτουργούν σωστά.</string>
     <string name="home_tab_home_title">Αρχική</string>
     <string name="home_tab_notifications_title">Ειδοποιήσεις</string>
     <string name="home_tab_me_title">Εγώ</string>

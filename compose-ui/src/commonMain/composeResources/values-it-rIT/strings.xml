@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">Url Istanza</string>
     <string name="service_select_next_button">Successivo</string>
     <string name="service_select_empty_message">Nessuna istanza trovata</string>
+    <string name="service_select_compatibility_warning">Questo server utilizza %1$s, Flare verrà eseguito in modalità compatibilità. Alcune funzionalità potrebbero non funzionare correttamente.</string>
     <string name="home_tab_home_title">Home</string>
     <string name="home_tab_notifications_title">Notifiche</string>
     <string name="home_tab_me_title">Io</string>

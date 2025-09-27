@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">URL экземпляра</string>
     <string name="service_select_next_button">Следующий</string>
     <string name="service_select_empty_message">Экземпляров не найдено</string>
+    <string name="service_select_compatibility_warning">Этот сервер использует %1$s, Flare будет работать в режиме совместимости. Некоторые функции могут работать некорректно.</string>
     <string name="home_tab_home_title">Домашний</string>
     <string name="home_tab_notifications_title">Уведомления</string>
     <string name="home_tab_me_title">Я</string>

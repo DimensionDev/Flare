@@ -159,6 +159,7 @@
     <string name="media_save_success">Сохранено в Загрузках</string>
     <string name="media_save_fail">Не удалось сохранить</string>
     <string name="media_alt_text">Alt текст</string>
+    <string name="media_is_downloading">Загрузка медиа, повторите попытку позже</string>
     <string name="settings_side_panel_empty">По умолчанию будет отображаться боковая панель в зависимости от платформы аккаунта.</string>
     <string name="tab_settings_add">Добавить</string>
     <string name="tab_settings_drag">Перетащите</string>

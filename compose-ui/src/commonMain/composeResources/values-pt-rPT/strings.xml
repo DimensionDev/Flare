@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">Instância URL</string>
     <string name="service_select_next_button">Próximo</string>
     <string name="service_select_empty_message">Nenhuma instância encontrada</string>
+    <string name="service_select_compatibility_warning">Este servidor usa %1$s, Sinalizador será executado em modo de compatibilidade. Alguns recursos podem não funcionar corretamente.</string>
     <string name="home_tab_home_title">Residencial</string>
     <string name="home_tab_notifications_title">notificações</string>
     <string name="home_tab_me_title">Eu</string>

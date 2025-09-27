@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">Aanleg URL</string>
     <string name="service_select_next_button">Volgende</string>
     <string name="service_select_empty_message">Geen instanties gevonden</string>
+    <string name="service_select_compatibility_warning">Deze server maakt gebruik van %1$s, Flare werkt in compatibiliteitsmodus. Sommige functies werken mogelijk niet goed.</string>
     <string name="home_tab_home_title">Startpagina</string>
     <string name="home_tab_notifications_title">Notificaties</string>
     <string name="home_tab_me_title">IK</string>

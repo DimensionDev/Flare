@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">URL instance</string>
     <string name="service_select_next_button">Další</string>
     <string name="service_select_empty_message">Nebyly nalezeny žádné instance</string>
+    <string name="service_select_compatibility_warning">Tento server používá %1$s, Flare bude spuštěn v režimu kompatibility. Některé funkce nemusí fungovat správně.</string>
     <string name="home_tab_home_title">Domů</string>
     <string name="home_tab_notifications_title">Oznámení</string>
     <string name="home_tab_me_title">Já</string>

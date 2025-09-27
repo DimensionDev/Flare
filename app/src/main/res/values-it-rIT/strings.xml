@@ -159,6 +159,7 @@
     <string name="media_save_success">Salvato in Download</string>
     <string name="media_save_fail">Salvataggio non riuscito</string>
     <string name="media_alt_text">Testo alternativo</string>
+    <string name="media_is_downloading">Il media è in download, riprova più tardi</string>
     <string name="settings_side_panel_empty">Il pannello laterale predefinito verrà visualizzato dipende dalla piattaforma dell\'account.</string>
     <string name="tab_settings_add">Aggiungi</string>
     <string name="tab_settings_drag">Trascina</string>

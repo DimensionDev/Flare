@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">Instans URL</string>
     <string name="service_select_next_button">Neste</string>
     <string name="service_select_empty_message">Ingen instanser funnet</string>
+    <string name="service_select_compatibility_warning">Denne serveren bruker %1$s, Flare vil kjøre i kompatibilitetsmodus. Noen funksjoner fungerer kanskje ikke skikkelig.</string>
     <string name="home_tab_home_title">Hjem</string>
     <string name="home_tab_notifications_title">Varsler</string>
     <string name="home_tab_me_title">Meg</string>

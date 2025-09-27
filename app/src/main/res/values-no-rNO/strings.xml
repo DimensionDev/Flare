@@ -159,6 +159,7 @@
     <string name="media_save_success">Lagret i Nedlastingen</string>
     <string name="media_save_fail">Kunne ikke lagre</string>
     <string name="media_alt_text">Alt. tekst</string>
+    <string name="media_is_downloading">Media lastes ned, vennligst prøv igjen senere</string>
     <string name="settings_side_panel_empty">Standard sidepanelet vil vise avhenger av kontoplattformen.</string>
     <string name="tab_settings_add">Legg til</string>
     <string name="tab_settings_drag">Dra</string>

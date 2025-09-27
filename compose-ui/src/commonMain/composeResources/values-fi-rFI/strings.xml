@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">Ilmentymän URL</string>
     <string name="service_select_next_button">Seuraava</string>
     <string name="service_select_empty_message">Esiintymiä ei löytynyt</string>
+    <string name="service_select_compatibility_warning">Tämä palvelin käyttää %1$s, Flare toimii yhteensopivuustilassa. Jotkin ominaisuudet eivät välttämättä toimi oikein.</string>
     <string name="home_tab_home_title">Koti</string>
     <string name="home_tab_notifications_title">Ilmoitukset</string>
     <string name="home_tab_me_title">Minä</string>

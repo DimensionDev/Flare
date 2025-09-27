@@ -159,6 +159,7 @@
     <string name="media_save_success">Uloženo do souborů</string>
     <string name="media_save_fail">Uložení se nezdařilo</string>
     <string name="media_alt_text">Alternativní text</string>
+    <string name="media_is_downloading">Média se stahují, zkuste to prosím později</string>
     <string name="settings_side_panel_empty">Výchozí zobrazení bočního panelu závisí na platformě účtu.</string>
     <string name="tab_settings_add">Přidat</string>
     <string name="tab_settings_drag">Přetažení</string>

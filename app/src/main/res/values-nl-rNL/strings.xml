@@ -281,8 +281,7 @@
     <string name="home_tab_social_timeline_title">Sociaal</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
-                <li>Voeg bladwijzerondersteuning toe voor Bluesky</li>
-                <li>bugfixes en prestatieverbeteringen</li>
+                <li>Bug fixes and performance verbeteringen</li>
             </ul>
-        <span>        ]]></string>
+        ]]></string>
 </resources>

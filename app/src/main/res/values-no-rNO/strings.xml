@@ -281,8 +281,7 @@
     <string name="home_tab_social_timeline_title">Sosial</string>
     <string name="changelog_current"><![CDATA[            <span>Versjon %1$s:</span>
             <ul>
-                <li>Legg til bokmerke støtte for Bluesky</li>
-                <li>Bug fikser og ytelsesforbedringer</li>
+                <li>Bug fixes og ytelsesforbedringer</li>
             </ul>
         ]]></string>
 </resources>

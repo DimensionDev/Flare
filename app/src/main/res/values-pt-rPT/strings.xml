@@ -281,8 +281,7 @@
     <string name="home_tab_social_timeline_title">Sócio</string>
     <string name="changelog_current"><![CDATA[            <span>Versão %1$s:</span>
             <ul>
-                <li>Adicionar favorito ao Bluesky</li>
-                <li>correções de bugs e melhorias de desempenho</li>
+                <li>Correções de erros e melhorias de desempenho</li>
             </ul>
         ]]></string>
 </resources>

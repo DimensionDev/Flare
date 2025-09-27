@@ -5,9 +5,9 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavEntry
-import androidx.navigation3.ui.OverlayScene
-import androidx.navigation3.ui.Scene
-import androidx.navigation3.ui.SceneStrategy
+import androidx.navigation3.scene.OverlayScene
+import androidx.navigation3.scene.Scene
+import androidx.navigation3.scene.SceneStrategy
 
 internal class BottomSheetScene<T : Any>
     @OptIn(ExperimentalMaterial3Api::class)

@@ -3,8 +3,7 @@ package dev.dimension.flare.ui.screen.compose
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entry
-import androidx.navigation3.ui.DialogSceneStrategy
+import androidx.navigation3.scene.DialogSceneStrategy
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.route.Route

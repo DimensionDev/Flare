@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.screen.serviceselect
 
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entry
 import dev.dimension.flare.ui.route.Route
 
 internal fun EntryProviderBuilder<NavKey>.serviceSelectEntryBuilder(

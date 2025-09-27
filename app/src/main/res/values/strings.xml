@@ -342,7 +342,6 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Add bookmark support for Bluesky</li>
                 <li>Bug fixes and performance improvements</li>
             </ul>
         ]]>

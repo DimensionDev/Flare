@@ -159,6 +159,7 @@
     <string name="media_save_success">ダウンロードに保存しました</string>
     <string name="media_save_fail">保存に失敗しました</string>
     <string name="media_alt_text">Altテキスト</string>
+    <string name="media_is_downloading">メディアをダウンロード中です。しばらくしてからもう一度お試しください。</string>
     <string name="settings_side_panel_empty">デフォルトでは、アカウントのプラットフォームによってサイドパネルが表示されます。</string>
     <string name="tab_settings_add">追加</string>
     <string name="tab_settings_drag">ドラッグ</string>

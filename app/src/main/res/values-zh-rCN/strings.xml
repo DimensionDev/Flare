@@ -159,6 +159,7 @@
     <string name="media_save_success">已保存到下载文件夹</string>
     <string name="media_save_fail">保存失败</string>
     <string name="media_alt_text">备用文本</string>
+    <string name="media_is_downloading">媒体正在下载，请稍后再试</string>
     <string name="settings_side_panel_empty">默认显示侧面板取决于账户平台。</string>
     <string name="tab_settings_add">添加</string>
     <string name="tab_settings_drag">拖动</string>

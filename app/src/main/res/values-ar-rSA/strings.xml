@@ -159,6 +159,7 @@
     <string name="media_save_success">حفظ في التنزيلات</string>
     <string name="media_save_fail">فشل في الحفظ</string>
     <string name="media_alt_text">نص بديل</string>
+    <string name="media_is_downloading">يتم تحميل الوسائط، الرجاء المحاولة مرة أخرى لاحقاً</string>
     <string name="settings_side_panel_empty">سيتم عرض اللوحة الجانبية بشكل افتراضي اعتمادا على منصة الحساب.</string>
     <string name="tab_settings_add">إضافة</string>
     <string name="tab_settings_drag">اسحب</string>

@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">Instans URL</string>
     <string name="service_select_next_button">Nästa</string>
     <string name="service_select_empty_message">Inga instanser hittades</string>
+    <string name="service_select_compatibility_warning">Denna server använder %1$s, Flare kommer att köras i kompatibilitetsläge. Vissa funktioner kanske inte fungerar som de ska.</string>
     <string name="home_tab_home_title">Hem</string>
     <string name="home_tab_notifications_title">Aviseringar</string>
     <string name="home_tab_me_title">Jag</string>

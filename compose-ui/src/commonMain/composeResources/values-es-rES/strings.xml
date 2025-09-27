@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">URL de instancia</string>
     <string name="service_select_next_button">Siguiente</string>
     <string name="service_select_empty_message">No se encontraron instancias</string>
+    <string name="service_select_compatibility_warning">Este servidor usa %1$s, Bengala se ejecutará en modo de compatibilidad. Algunas características pueden no funcionar correctamente.</string>
     <string name="home_tab_home_title">Inicio</string>
     <string name="home_tab_notifications_title">Notificaciones</string>
     <string name="home_tab_me_title">Yo</string>

@@ -159,6 +159,7 @@
     <string name="media_save_success">Sparad i hämtningar</string>
     <string name="media_save_fail">Det gick inte att spara</string>
     <string name="media_alt_text">Alt text</string>
+    <string name="media_is_downloading">Media laddas ner, vänligen försök igen senare</string>
     <string name="settings_side_panel_empty">Standard kommer att visa sidopanel beror på kontoplattformen.</string>
     <string name="tab_settings_add">Lägg till</string>
     <string name="tab_settings_drag">Dra</string>

@@ -159,6 +159,7 @@
     <string name="media_save_success">Guardado en descargas</string>
     <string name="media_save_fail">Error al guardar</string>
     <string name="media_alt_text">Texto Alt</string>
+    <string name="media_is_downloading">El medio está descargando, por favor inténtalo de nuevo más tarde</string>
     <string name="settings_side_panel_empty">El panel lateral por defecto dependerá de la plataforma de la cuenta.</string>
     <string name="tab_settings_add">Añadir</string>
     <string name="tab_settings_drag">Arrastre</string>

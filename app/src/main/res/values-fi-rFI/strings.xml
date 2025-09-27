@@ -159,6 +159,7 @@
     <string name="media_save_success">Tallennettu latauksiin</string>
     <string name="media_save_fail">Tallennus epäonnistui</string>
     <string name="media_alt_text">Alt teksti</string>
+    <string name="media_is_downloading">Median lataus, yritä myöhemmin uudelleen</string>
     <string name="settings_side_panel_empty">Oletus näyttää sivupaneeli riippuu tilin alustan.</string>
     <string name="tab_settings_add">Lisää</string>
     <string name="tab_settings_drag">Vedä</string>

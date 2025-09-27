@@ -159,6 +159,7 @@
     <string name="media_save_success">Salvat în Descărcări</string>
     <string name="media_save_fail">Salvarea nu a reușit</string>
     <string name="media_alt_text">Text alternativ</string>
+    <string name="media_is_downloading">Fișierul media se descarcă, vă rugăm să încercați din nou mai târziu</string>
     <string name="settings_side_panel_empty">Panoul implicit va afișa panoul lateral depinde de platforma contului.</string>
     <string name="tab_settings_add">Adăugare</string>
     <string name="tab_settings_drag">Trage</string>

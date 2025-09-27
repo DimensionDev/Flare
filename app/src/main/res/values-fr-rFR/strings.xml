@@ -159,6 +159,7 @@
     <string name="media_save_success">Enregistré dans les téléchargements</string>
     <string name="media_save_fail">Échec de l\'enregistrement</string>
     <string name="media_alt_text">Texte Alt</string>
+    <string name="media_is_downloading">Le média est en cours de téléchargement, veuillez réessayer plus tard</string>
     <string name="settings_side_panel_empty">Le panneau latéral par défaut sera affiché en fonction de la plateforme du compte.</string>
     <string name="tab_settings_add">Ajouter</string>
     <string name="tab_settings_drag">Glisser</string>

@@ -159,6 +159,7 @@
     <string name="media_save_success">Αποθηκεύτηκε στις Λήψεις</string>
     <string name="media_save_fail">Αποτυχία αποθήκευσης</string>
     <string name="media_alt_text">Εναλλακτικό κείμενο</string>
+    <string name="media_is_downloading">Το αρχείο πολυμέσων κατεβάζει, παρακαλώ δοκιμάστε ξανά αργότερα</string>
     <string name="settings_side_panel_empty">Προεπιλογή θα εμφανίσει πλευρικό πίνακα εξαρτάται από την πλατφόρμα λογαριασμού.</string>
     <string name="tab_settings_add">Προσθήκη</string>
     <string name="tab_settings_drag">Σύρετε</string>

@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">Instanz URL</string>
     <string name="service_select_next_button">Nächste</string>
     <string name="service_select_empty_message">Keine Instanzen gefunden</string>
+    <string name="service_select_compatibility_warning">Dieser Server verwendet %1$s, Leuchten wird im Kompatibilitätsmodus ausgeführt. Einige Funktionen funktionieren möglicherweise nicht richtig.</string>
     <string name="home_tab_home_title">Zuhause</string>
     <string name="home_tab_notifications_title">Benachrichtigungen</string>
     <string name="home_tab_me_title">Ich</string>

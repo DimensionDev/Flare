@@ -32,7 +32,12 @@ public data class AppearanceSettings(
     val videoAutoplay: VideoAutoplay = VideoAutoplay.WIFI,
     val expandMediaSize: Boolean = false,
     val compatLinkPreview: Boolean = false,
-)
+) {
+    public companion object {
+        // for iOS
+        public val Default: AppearanceSettings = AppearanceSettings()
+    }
+}
 
 @Serializable
 public enum class Theme {

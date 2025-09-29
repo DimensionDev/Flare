@@ -328,6 +328,7 @@ struct ComposeScreen: View {
                         Image(systemName: "paperplane.fill")
                     }
                 }
+                .disabled(viewModel.text.isEmpty)
             }
         }
     }

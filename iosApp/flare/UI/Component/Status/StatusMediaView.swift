@@ -5,41 +5,67 @@ import TipKit
 struct StatusMediaView: View {
     let data: [any UiMedia]
     let sensitive: Bool
+    @Environment(\.themeSettings) private var themeSettings
     @State private var isBlur: Bool
     @State private var showFullScreen: Bool = false
     @State private var selectedItem: (any UiMedia)?
 
     var body: some View {
-        AdaptiveGrid(singleFollowsImageAspect: false, spacing: 4, maxColumns: 3) {
+        AdaptiveGrid(singleFollowsImageAspect: themeSettings.appearanceSettings.expandMediaSize, spacing: 4, maxColumns: 3) {
             ForEach(data, id: \.url) { item in
-                Color.gray
-                    .opacity(0.2)
-                    .onTapGesture {
-                        if !sensitive || !isBlur {
-                            // Only allow tap if not sensitive or already unblurred
-                            selectedItem = item
-                            showFullScreen = true
+                if themeSettings.appearanceSettings.expandMediaSize, data.count == 1 {
+                    MediaView(data: item)
+                        .onTapGesture {
+                            if !sensitive || !isBlur {
+                                // Only allow tap if not sensitive or already unblurred
+                                selectedItem = item
+                                showFullScreen = true
+                            }
                         }
-                    }
-                    .overlay {
-                        MediaView(data: item)
-                            .allowsHitTesting(false)
-                    }
-                    .overlay(alignment: .bottomTrailing) {
-                        if let alt = item.description_, !alt.isEmpty {
-                            AltTextOverlay(altText: alt)
+                        .overlay(alignment: .bottomTrailing) {
+                            if let alt = item.description_, !alt.isEmpty {
+                                AltTextOverlay(altText: alt)
+                            }
                         }
-                    }
-                    .overlay(alignment: .bottomLeading) {
-                        if case .video = onEnum(of: item) {
-                            Image("fa-circle-play")
-                                .foregroundStyle(Color(.white))
-                                .padding(8)
-                                .background(.black, in: .rect(cornerRadius: 16))
-                                .padding()
+                        .overlay(alignment: .bottomLeading) {
+                            if case .video = onEnum(of: item) {
+                                Image("fa-circle-play")
+                                    .foregroundStyle(Color(.white))
+                                    .padding(8)
+                                    .background(.black, in: .rect(cornerRadius: 16))
+                                    .padding()
+                            }
                         }
-                    }
-                    .clipped()
+                } else {
+                    Color.gray
+                        .opacity(0.2)
+                        .onTapGesture {
+                            if !sensitive || !isBlur {
+                                // Only allow tap if not sensitive or already unblurred
+                                selectedItem = item
+                                showFullScreen = true
+                            }
+                        }
+                        .overlay {
+                            MediaView(data: item)
+                                .allowsHitTesting(false)
+                        }
+                        .overlay(alignment: .bottomTrailing) {
+                            if let alt = item.description_, !alt.isEmpty {
+                                AltTextOverlay(altText: alt)
+                            }
+                        }
+                        .overlay(alignment: .bottomLeading) {
+                            if case .video = onEnum(of: item) {
+                                Image("fa-circle-play")
+                                    .foregroundStyle(Color(.white))
+                                    .padding(8)
+                                    .background(.black, in: .rect(cornerRadius: 16))
+                                    .padding()
+                            }
+                        }
+                        .clipped()
+                }
             }
         }
         .fullScreenCover(isPresented: $showFullScreen, onDismiss: {
@@ -62,6 +88,7 @@ struct StatusMediaView: View {
                             Text("sensitive_button_show", comment: "Button to show sensitive media")
                         } icon: {
                             Image("fa-eye")
+                                .foregroundStyle(.white)
                         }
                     }
                     .buttonStyle(.glassProminent)

@@ -41,6 +41,12 @@ enum Route: Hashable, Identifiable {
             ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.Reply(statusKey: statusKey))
         case .composeVVOReplyComment(let accountType, let statueKey, let rootId):
             ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.VVOComment(statusKey: statueKey, rootId: rootId))
+        case .profileUserNameWithHost(let accountType, let userName, let host):
+            ProfileWithUserNameAndHostScreen(userName: userName, host: host, accountType: accountType)
+        case .appearance:
+            AppearanceScreen()
+        case .about:
+            AboutScreen()
         default:
             Text("Not done yet for \(self)")
         }

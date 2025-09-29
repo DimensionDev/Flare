@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 
 struct StatusView: View {
+    @Environment(\.themeSettings) private var themeSettings
     @Environment(\.openURL) private var openURL
     let data: UiTimeline.ItemContentStatus
     let isDetail: Bool
@@ -9,6 +10,7 @@ struct StatusView: View {
     let withLeadingPadding: Bool
     let showMedia: Bool
     @State private var expand = false
+    @State private var expandMedia = false
     var body: some View {
         VStack(
             alignment: .leading,
@@ -125,11 +127,28 @@ struct StatusView: View {
                     }
                     
                     if !data.images.isEmpty, showMedia {
-                        StatusMediaView(data: data.images, sensitive: data.sensitive)
+                        if themeSettings.appearanceSettings.showMedia || expandMedia {
+                            StatusMediaView(data: data.images, sensitive: !(themeSettings.appearanceSettings.showSensitiveContent) && data.sensitive)
+                        } else {
+                            Button {
+                                withAnimation {
+                                    expandMedia = true
+                                }
+                            } label: {
+                                Label {
+                                    Text("show_media_button", comment: "Button to show media attachments" )
+                                } icon: {
+                                    Image("fa-image")
+                                }
+                            }
+                            .buttonStyle(.glass)
+                        }
                     }
 
-                    if let card = data.card, showMedia {
-                        if data.images.isEmpty && data.quote.isEmpty {
+                    if let card = data.card, showMedia, data.images.isEmpty, data.quote.isEmpty, themeSettings.appearanceSettings.showLinkPreview {
+                        if themeSettings.appearanceSettings.compatLinkPreview {
+                            StatusCompatCardView(data: card)
+                        } else {
                             StatusCardView(data: card)
                         }
                     }
@@ -163,7 +182,7 @@ struct StatusView: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    if !isQuote {
+                    if !isQuote, (themeSettings.appearanceSettings.showActions || isDetail) {
                         StatusActionsView(data: data.actions)
                             .font(isDetail ? .body : .footnote)
                             .foregroundStyle(isDetail ? .primary : .secondary)

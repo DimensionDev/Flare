@@ -6,7 +6,7 @@ struct PagingView<T: AnyObject, EmptyContent: View, ErrorContent: View, LoadingC
     @ViewBuilder
     let emptyContent: () -> EmptyContent
     @ViewBuilder
-    let errorContent: (KotlinThrowable) -> ErrorContent
+    let errorContent: (KotlinThrowable, @escaping () -> Void) -> ErrorContent
     @ViewBuilder
     let loadingContent: () -> LoadingContent
     let loadingCount = 5
@@ -15,8 +15,11 @@ struct PagingView<T: AnyObject, EmptyContent: View, ErrorContent: View, LoadingC
     var body: some View {
         switch onEnum(of: data) {
         case .empty: emptyContent()
-        case .error(let error): errorContent(error.error)
-        case .loading: ForEach(0..<5) { index in
+        case .error(let error): errorContent(error.error) {
+            _ = error.onRetry()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        case .loading: ForEach(0..<loadingCount) { index in
             loadingContent()
         }
         case .success(let success):
@@ -33,6 +36,20 @@ struct PagingView<T: AnyObject, EmptyContent: View, ErrorContent: View, LoadingC
                         }
                 }
             }
+            
+            switch onEnum(of: success.appendState) {
+            case .error(let error):
+                errorContent(error.error) {
+                    _ = success.retry()
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+            case .loading:
+                ForEach(0..<loadingCount) { index in
+                    loadingContent()
+               }
+            case .notLoading(let notLoading):
+                EmptyView()
+            }
         }
     }
 }
@@ -41,18 +58,18 @@ extension PagingView {
     init(
         data: PagingState<T>,
         @ViewBuilder
-        successContent: @escaping (T) -> SuccessContent
-    ) where ErrorContent == EmptyView, LoadingContent == EmptyView, EmptyContent == EmptyView {
-        self.init(data: data, emptyContent: { EmptyView() }, errorContent: {_ in EmptyView()}, loadingContent: {EmptyView()}, successContent: successContent)
-    }
-    
-    init(
-        data: PagingState<T>,
-        @ViewBuilder
         successContent: @escaping (T) -> SuccessContent,
         @ViewBuilder
         loadingContent: @escaping () -> LoadingContent
-    ) where ErrorContent == EmptyView, EmptyContent == EmptyView {
-        self.init(data: data, emptyContent: { EmptyView() }, errorContent: {_ in EmptyView()}, loadingContent: loadingContent, successContent: successContent)
+    ) where ErrorContent == ListErrorView, EmptyContent == ListEmptyView {
+        self.init(
+            data: data,
+            emptyContent: { ListEmptyView() },
+            errorContent: { error, retry in
+                ListErrorView(error: error) {
+                    retry()
+                }
+            },
+            loadingContent: loadingContent, successContent: successContent)
     }
 }

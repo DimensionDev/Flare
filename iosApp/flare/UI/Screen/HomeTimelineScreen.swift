@@ -63,45 +63,41 @@ struct HomeTimelineScreen: View {
                         spacing: 2
                     ) {
                         ScrollView(.horizontal) {
-                            GlassEffectContainer {
-                                HStack(
-                                    spacing: 8,
-                                ) {
-                                    ForEach(0..<tabs.count, id: \.self) { index in
-                                        let tab = tabs[index]
-                                        Button {
-                                            withAnimation(.spring) {
-                                                selectedTabIndex = index
-                                            }
-                                        } label: {
-                                            Label {
-                                                TabTitle(title: tab.metaData.title)
-                                                    .font(.subheadline)
-                                            } icon: {
-                                                TabIcon(icon: tab.metaData.icon, accountType: tab.account, size: 24)
-                                                    .font(.title)
-                                            }
-                                        }
-                                        .if(selectedTabIndex == index) { button in
-                                            button.buttonStyle(.glassProminent)
-                                        } else: { button in
-                                            button.buttonStyle(.glass)
+                            HStack(
+                                spacing: 8,
+                            ) {
+                                ForEach(0..<tabs.count, id: \.self) { index in
+                                    let tab = tabs[index]
+                                    Label {
+                                        TabTitle(title: tab.metaData.title)
+                                            .font(.subheadline)
+                                    } icon: {
+                                        TabIcon(icon: tab.metaData.icon, accountType: tab.account, size: 24)
+                                    }
+                                    .onTapGesture {
+                                        withAnimation(.spring) {
+                                            selectedTabIndex = index
                                         }
                                     }
-                                    if case .success = onEnum(of: presenter.state.user) {
-                                        Button {
-                                            toTabSetting()
-                                        } label: {
-                                            Image("fa-plus")
-                                        }
-                                        .buttonStyle(.glass)
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 8)
+                                    .foregroundStyle(selectedTabIndex == index ? Color.white : .primary)
+                                    .glassEffect(selectedTabIndex == index ? .regular.tint(.accentColor) : .regular, in: .capsule)
+                                }
+                                if case .success = onEnum(of: presenter.state.user) {
+                                    Button {
+                                        toTabSetting()
+                                    } label: {
+                                        Image("fa-plus")
                                     }
+                                    .buttonStyle(.glass)
                                 }
                             }
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
                         }
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
-                        .glassEffect()
+                        .clipShape(.capsule)
+                        .glassEffect(.regular.interactive(), in: .capsule)
                         .scrollIndicators(.hidden)
                         Spacer()
                         if case .error = onEnum(of: presenter.state.user) {

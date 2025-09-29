@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.component
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import dev.dimension.flare.ui.theme.PlatformShapes
 import dev.dimension.flare.ui.theme.PlatformTheme
 
 @Composable
@@ -26,3 +27,9 @@ public fun Modifier.listCard(
     } else {
         clip(shape = PlatformTheme.shapes.listCardContainerShape)
     }
+
+@Composable
+public fun Modifier.listCardContainer(): Modifier = this.clip(PlatformShapes.listCardContainerShape)
+
+@Composable
+public fun Modifier.listCardItem(): Modifier = this.clip(PlatformShapes.listCardItemShape)

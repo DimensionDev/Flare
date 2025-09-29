@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.settings
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,10 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,22 +26,27 @@ import compose.icons.fontawesomeicons.brands.Line
 import compose.icons.fontawesomeicons.brands.Telegram
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Lock
-import dev.dimension.flare.Res
-import dev.dimension.flare.app_name
-import dev.dimension.flare.ic_launcher_foreground
-import dev.dimension.flare.ic_logo_text
-import dev.dimension.flare.settings_about_description
-import dev.dimension.flare.settings_about_discord
-import dev.dimension.flare.settings_about_discord_description
-import dev.dimension.flare.settings_about_line
-import dev.dimension.flare.settings_about_line_description
-import dev.dimension.flare.settings_about_localization
-import dev.dimension.flare.settings_about_localization_description
-import dev.dimension.flare.settings_about_source_code
-import dev.dimension.flare.settings_about_telegram
-import dev.dimension.flare.settings_about_telegram_description
-import dev.dimension.flare.settings_privacy_policy
-import dev.dimension.flare.ui.component.compatClip
+import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.app_name
+import dev.dimension.flare.compose.ui.ic_launcher_foreground
+import dev.dimension.flare.compose.ui.ic_logo_text
+import dev.dimension.flare.compose.ui.settings_about_description
+import dev.dimension.flare.compose.ui.settings_about_discord
+import dev.dimension.flare.compose.ui.settings_about_discord_description
+import dev.dimension.flare.compose.ui.settings_about_line
+import dev.dimension.flare.compose.ui.settings_about_line_description
+import dev.dimension.flare.compose.ui.settings_about_localization
+import dev.dimension.flare.compose.ui.settings_about_localization_description
+import dev.dimension.flare.compose.ui.settings_about_source_code
+import dev.dimension.flare.compose.ui.settings_about_telegram
+import dev.dimension.flare.compose.ui.settings_about_telegram_description
+import dev.dimension.flare.compose.ui.settings_privacy_policy
+import dev.dimension.flare.ui.component.listCardContainer
+import dev.dimension.flare.ui.component.listCardItem
+import dev.dimension.flare.ui.component.platform.PlatformIcon
+import dev.dimension.flare.ui.component.platform.PlatformListItem
+import dev.dimension.flare.ui.component.platform.PlatformText
+import dev.dimension.flare.ui.theme.PlatformTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -52,13 +54,14 @@ import org.jetbrains.compose.resources.stringResource
 public fun AboutScreenContent(
     version: String,
     modifier: Modifier = Modifier,
+    scrollState: ScrollState = rememberScrollState(),
 ) {
     val uriHandler = LocalUriHandler.current
     Column(
         modifier =
             Modifier
                 .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .then(modifier),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -70,167 +73,167 @@ public fun AboutScreenContent(
                     .height(128.dp),
         )
         Spacer(Modifier.height(16.dp))
-        Icon(
-            painter = painterResource(Res.drawable.ic_logo_text),
+        PlatformIcon(
+            painterResource(Res.drawable.ic_logo_text),
             contentDescription = stringResource(resource = Res.string.app_name),
             modifier =
                 Modifier
                     .height(32.dp),
         )
         Spacer(Modifier.height(16.dp))
-        Text(
+        PlatformText(
             text = stringResource(resource = Res.string.settings_about_description),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodySmall,
+            style = PlatformTheme.typography.caption,
             modifier =
                 Modifier
                     .padding(horizontal = 16.dp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = PlatformTheme.colorScheme.caption,
         )
-        Text(
+        PlatformText(
             text = version,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = PlatformTheme.typography.caption,
+            color = PlatformTheme.colorScheme.caption,
         )
         Spacer(Modifier.height(16.dp))
         Column(
             modifier =
                 Modifier
-                    .compatClip(MaterialTheme.shapes.medium),
+                    .listCardContainer(),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            ListItem(
+            PlatformListItem(
                 headlineContent = {
-                    Text(text = stringResource(resource = Res.string.settings_about_source_code))
+                    PlatformText(text = stringResource(resource = Res.string.settings_about_source_code))
                 },
                 supportingContent = {
-                    Text(
+                    PlatformText(
                         text = "https://github.com/DimensionDev/Flare",
                     )
                 },
                 modifier =
                     Modifier
-                        .compatClip(MaterialTheme.shapes.extraSmall)
+                        .listCardItem()
                         .clickable {
                             uriHandler.openUri("https://github.com/DimensionDev/Flare")
                         },
                 leadingContent = {
-                    Icon(
+                    PlatformIcon(
                         imageVector = FontAwesomeIcons.Brands.Github,
                         contentDescription = "GitHub",
                         modifier = Modifier.size(24.dp),
                     )
                 },
             )
-            ListItem(
+            PlatformListItem(
                 headlineContent = {
-                    Text(text = stringResource(resource = Res.string.settings_about_telegram))
+                    PlatformText(text = stringResource(resource = Res.string.settings_about_telegram))
                 },
                 supportingContent = {
-                    Text(
+                    PlatformText(
                         text = stringResource(resource = Res.string.settings_about_telegram_description),
                     )
                 },
                 modifier =
                     Modifier
-                        .compatClip(MaterialTheme.shapes.extraSmall)
+                        .listCardItem()
                         .clickable {
                             uriHandler.openUri("https://t.me/+0UtcP6_qcDoyOWE1")
                         },
                 leadingContent = {
-                    Icon(
+                    PlatformIcon(
                         imageVector = FontAwesomeIcons.Brands.Telegram,
                         contentDescription = stringResource(resource = Res.string.settings_about_telegram),
                         modifier = Modifier.size(24.dp),
                     )
                 },
             )
-            ListItem(
+            PlatformListItem(
                 headlineContent = {
-                    Text(text = stringResource(resource = Res.string.settings_about_discord))
+                    PlatformText(text = stringResource(resource = Res.string.settings_about_discord))
                 },
                 supportingContent = {
-                    Text(
+                    PlatformText(
                         text = stringResource(resource = Res.string.settings_about_discord_description),
                     )
                 },
                 modifier =
                     Modifier
-                        .compatClip(MaterialTheme.shapes.extraSmall)
+                        .listCardItem()
                         .clickable {
                             uriHandler.openUri("https://discord.gg/De9NhXBryT")
                         },
                 leadingContent = {
-                    Icon(
+                    PlatformIcon(
                         imageVector = FontAwesomeIcons.Brands.Discord,
                         contentDescription = stringResource(resource = Res.string.settings_about_discord),
                         modifier = Modifier.size(24.dp),
                     )
                 },
             )
-            ListItem(
+            PlatformListItem(
                 headlineContent = {
-                    Text(text = stringResource(resource = Res.string.settings_about_line))
+                    PlatformText(text = stringResource(resource = Res.string.settings_about_line))
                 },
                 supportingContent = {
-                    Text(
+                    PlatformText(
                         text = stringResource(resource = Res.string.settings_about_line_description),
                     )
                 },
                 modifier =
                     Modifier
-                        .compatClip(MaterialTheme.shapes.extraSmall)
+                        .listCardItem()
                         .clickable {
                             uriHandler.openUri("https://line.me/ti/g/hf95HyGJ9k")
                         },
                 leadingContent = {
-                    Icon(
+                    PlatformIcon(
                         imageVector = FontAwesomeIcons.Brands.Line,
                         contentDescription = stringResource(resource = Res.string.settings_about_telegram),
                         modifier = Modifier.size(24.dp),
                     )
                 },
             )
-            ListItem(
+            PlatformListItem(
                 headlineContent = {
-                    Text(text = stringResource(resource = Res.string.settings_about_localization))
+                    PlatformText(text = stringResource(resource = Res.string.settings_about_localization))
                 },
                 supportingContent = {
-                    Text(
+                    PlatformText(
                         text = stringResource(resource = Res.string.settings_about_localization_description),
                     )
                 },
                 modifier =
                     Modifier
-                        .compatClip(MaterialTheme.shapes.extraSmall)
+                        .listCardItem()
                         .clickable {
                             uriHandler.openUri("https://crowdin.com/project/flareapp")
                         },
                 leadingContent = {
-                    Icon(
+                    PlatformIcon(
                         imageVector = FontAwesomeIcons.Solid.Language,
                         contentDescription = stringResource(resource = Res.string.settings_about_localization),
                         modifier = Modifier.size(24.dp),
                     )
                 },
             )
-            ListItem(
+            PlatformListItem(
                 headlineContent = {
-                    Text(text = stringResource(resource = Res.string.settings_privacy_policy))
+                    PlatformText(text = stringResource(resource = Res.string.settings_privacy_policy))
                 },
                 supportingContent = {
-                    Text(
+                    PlatformText(
                         text = "https://legal.mask.io/maskbook",
                     )
                 },
                 modifier =
                     Modifier
-                        .compatClip(MaterialTheme.shapes.extraSmall)
+                        .listCardItem()
                         .clickable {
                             uriHandler.openUri("https://legal.mask.io/maskbook/")
                         },
                 leadingContent = {
-                    Icon(
+                    PlatformIcon(
                         imageVector = FontAwesomeIcons.Solid.Lock,
                         contentDescription = stringResource(resource = Res.string.settings_privacy_policy),
                         modifier = Modifier.size(24.dp),

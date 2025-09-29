@@ -20,12 +20,14 @@ struct CommonProfileHeader: View {
                         .frame(height: CommonProfileHeaderConstants.headerHeight)
                 }
                 .frame(height: CommonProfileHeaderConstants.headerHeight)
+                .clipped()
             } else {
                 Rectangle()
                     .foregroundColor(.gray)
                     .frame(height: CommonProfileHeaderConstants.headerHeight)
+                    .clipped()
             }
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     VStack {
                         Spacer()
@@ -43,21 +45,25 @@ struct CommonProfileHeader: View {
 
                             if case .success(let data) = onEnum(of: isMe), !data.data.boolValue {
                                 switch onEnum(of: relation) {
-                                case .success(let relationState): Button(action: {
-                                    onFollowClick(relationState.data)
-                                }, label: {
-                                    let text = if relationState.data.blocking {
-                                        String(localized: "relation_blocked")
-                                    } else if relationState.data.following {
-                                        String(localized: "relation_following")
-                                    } else if relationState.data.hasPendingFollowRequestFromYou {
-                                        String(localized: "relation_requested")
-                                    } else {
-                                        String(localized: "relation_follow")
+                                case .success(let relationState):
+                                    Button(action: {
+                                        onFollowClick(relationState.data)
+                                    }, label: {
+                                        let text = if relationState.data.blocking {
+                                            String(localized: "relation_blocked")
+                                        } else if relationState.data.following {
+                                            String(localized: "relation_following")
+                                        } else if relationState.data.hasPendingFollowRequestFromYou {
+                                            String(localized: "relation_requested")
+                                        } else {
+                                            String(localized: "relation_follow")
+                                        }
+                                        Text(text)
+                                    })
+                                    .buttonStyle(.borderless)
+                                    if relationState.data.isFans {
+                                        Text("relation_is_fans")
                                     }
-                                    Text(text)
-                                })
-                                .buttonStyle(.borderless)
                                 case .loading: Button(action: {}, label: {
                                     Text("Button")
                                 })
@@ -100,7 +106,6 @@ struct CommonProfileHeader: View {
                             case .fields(let data):
                                 FieldsView(fields: data.fields)
                             case .iconify(let data):
-                                let list = data.items.map { $0.key }
                                 ForEach(Array(data.items.keys), id: \.name) { key in
                                     let value = data.items[key]
                                     Label(

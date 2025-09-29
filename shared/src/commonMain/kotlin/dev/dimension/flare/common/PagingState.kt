@@ -188,6 +188,15 @@ public inline fun LoadState.onEndOfList(block: () -> Unit): LoadState {
     return this
 }
 
+public inline val LoadState.isLoading: Boolean
+    get() = this is LoadState.Loading
+
+public inline val LoadState.isError: Boolean
+    get() = this is LoadState.Error
+
+public inline val LoadState.isEndOfList: Boolean
+    get() = this is LoadState.NotLoading && endOfPaginationReached
+
 internal fun <T : Any> UiState<LazyPagingItems<T>>.toPagingState(): PagingState<T> =
     when (this) {
         is UiState.Loading -> PagingState.Loading()

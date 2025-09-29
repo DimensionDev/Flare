@@ -3695,6 +3695,9 @@
         }
       }
     },
+    "cancel" : {
+
+    },
     "comment" : {
       "localizations" : {
         "ar" : {
@@ -33429,6 +33432,9 @@
         }
       }
     },
+    "ok" : {
+
+    },
     "poll_expired" : {
       "localizations" : {
         "ar" : {
@@ -37095,6 +37101,25 @@
           }
         }
       }
+    },
+    "storage_clear_database_cache_confirm" : {
+
+    },
+    "storage_clear_database_cache%lld %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "storage_clear_database_cache%1$lld %2$lld"
+          }
+        }
+      }
+    },
+    "storage_clear_image_cache" : {
+
+    },
+    "storage_clear_image_cache_confirm" : {
+
     },
     "storage_title" : {
       "localizations" : {

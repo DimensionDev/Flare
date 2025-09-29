@@ -49,6 +49,8 @@ enum Route: Hashable, Identifiable {
             AboutScreen()
         case .localHostory:
             LocalHistoryScreen()
+        case .storage:
+            StorageScreen()
         default:
             Text("Not done yet for \(self)")
         }

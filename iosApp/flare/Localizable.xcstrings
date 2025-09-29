@@ -3695,7 +3695,7 @@
         }
       }
     },
-    "cancel" : {
+    "Cancel" : {
 
     },
     "comment" : {
@@ -6416,6 +6416,9 @@
         }
       }
     },
+    "Done" : {
+
+    },
     "end_of_list" : {
 
     },
@@ -8587,6 +8590,33 @@
       }
     },
     "list_empty_title" : {
+
+    },
+    "local_filter_delete" : {
+
+    },
+    "local_filter_edit" : {
+
+    },
+    "local_filter_edit_title" : {
+
+    },
+    "local_filter_keyword_header" : {
+
+    },
+    "local_filter_keyword_placeholder" : {
+
+    },
+    "local_filter_notification" : {
+
+    },
+    "local_filter_scope_header" : {
+
+    },
+    "local_filter_search" : {
+
+    },
+    "local_filter_timeline" : {
 
     },
     "local_filter_title" : {
@@ -33432,7 +33462,7 @@
         }
       }
     },
-    "ok" : {
+    "Ok" : {
 
     },
     "poll_expired" : {

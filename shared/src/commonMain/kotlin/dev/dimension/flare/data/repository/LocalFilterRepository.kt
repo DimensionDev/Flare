@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.repository
 
-import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbKeywordFilter
 import dev.dimension.flare.ui.model.UiKeywordFilter
@@ -33,7 +32,6 @@ internal class LocalFilterRepository(
                                     ?.let { Instant.fromEpochMilliseconds(it) },
                         )
                     }.toImmutableList()
-                    .toImmutableListWrapper()
             }
 
     fun getFlow(

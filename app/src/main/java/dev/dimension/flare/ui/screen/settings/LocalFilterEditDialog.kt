@@ -211,7 +211,7 @@ private fun presenter(keyword: String?) =
 
         state.items.onSuccess {
             LaunchedEffect(Unit) {
-                it.toImmutableList().find { it.keyword == keyword }?.let { item ->
+                it.find { it.keyword == keyword }?.let { item ->
                     forTimeline = item.forTimeline
                     forNotification = item.forNotification
                     forSearch = item.forSearch

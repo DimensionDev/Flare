@@ -923,6 +923,18 @@
     "action_retry" : {
 
     },
+    "ai_config_options_section_header" : {
+
+    },
+    "ai_config_server_provider_placeholder" : {
+
+    },
+    "ai_config_server_provider_section_header" : {
+
+    },
+    "ai_config_summarize" : {
+
+    },
     "ai_config_title" : {
       "localizations" : {
         "ar" : {
@@ -1046,6 +1058,9 @@
           }
         }
       }
+    },
+    "ai_config_translate" : {
+
     },
     "all_feeds_section_explore_feeds" : {
       "localizations" : {

@@ -53,6 +53,8 @@ enum Route: Hashable, Identifiable {
             StorageScreen()
         case .localFilter:
             LocalFilterScreen()
+        case .aiConfig:
+            AiConfigScreen()
         default:
             Text("Not done yet for \(self)")
         }

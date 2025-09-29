@@ -8710,6 +8710,12 @@
         }
       }
     },
+    "local_history_search_prompt" : {
+
+    },
+    "local_history_status" : {
+
+    },
     "local_history_title" : {
       "localizations" : {
         "ar" : {
@@ -8833,6 +8839,9 @@
           }
         }
       }
+    },
+    "local_history_user" : {
+
     },
     "Login" : {
       "localizations" : {

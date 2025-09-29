@@ -47,6 +47,8 @@ enum Route: Hashable, Identifiable {
             AppearanceScreen()
         case .about:
             AboutScreen()
+        case .localHostory:
+            LocalHistoryScreen()
         default:
             Text("Not done yet for \(self)")
         }

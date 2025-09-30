@@ -48,10 +48,10 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.screen.settings.AllTabsPresenter
 import dev.dimension.flare.ui.screen.settings.EditTabDialog
 import dev.dimension.flare.ui.screen.settings.TabAddBottomSheet
 import dev.dimension.flare.ui.screen.settings.TabCustomItem
-import dev.dimension.flare.ui.screen.settings.allTabsPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -227,7 +227,7 @@ private fun presenter(
             )
         }.invoke()
     var selectedEditTab by remember { mutableStateOf<TabItem?>(null) }
-    val allTabsState = allTabsPresenter(filterIsTimeline = true)
+    val allTabsState = remember { AllTabsPresenter(filterIsTimeline = true) }.invoke()
     val tabSettings by settingsRepository.tabSettings.collectAsUiState()
     val cacheTabs =
         remember {

@@ -1060,20 +1060,22 @@ private fun StatusPollComponent(
                 style = PlatformTheme.typography.caption,
             )
         } else {
-            val localizedExpiredTimeline =
-                rememberFormattedDateTime(poll.expiredAt, fullTime = true)
-            PlatformText(
-                text =
-                    stringResource(
-                        resource = Res.string.poll_expired_at,
-                        localizedExpiredTimeline,
-                    ),
-                modifier =
-                    Modifier
-                        .align(Alignment.End)
-                        .alpha(MediumAlpha),
-                style = PlatformTheme.typography.caption,
-            )
+            poll.expiredAt?.let { expiredAt ->
+                val localizedExpiredTimeline =
+                    rememberFormattedDateTime(expiredAt, fullTime = true)
+                PlatformText(
+                    text =
+                        stringResource(
+                            resource = Res.string.poll_expired_at,
+                            localizedExpiredTimeline,
+                        ),
+                    modifier =
+                        Modifier
+                            .align(Alignment.End)
+                            .alpha(MediumAlpha),
+                    style = PlatformTheme.typography.caption,
+                )
+            }
         }
         if (poll.canVote) {
             PlatformFilledTonalButton(

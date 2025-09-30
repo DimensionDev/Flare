@@ -11,7 +11,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.presenter.PinTabsPresenter
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.AntennasListPresenter
 
 public class MisskeyAntennasListWithTabsPresenter(
@@ -21,12 +20,12 @@ public class MisskeyAntennasListWithTabsPresenter(
         object : PinTabsPresenter<UiList>() {
             override fun List<TimelineTabItem>.filterPinned(): List<String> =
                 filterIsInstance<Misskey.AntennasTimelineTabItem>()
-                    .map { it.id }
+                    .map { it.antennasId }
 
             override fun getTimelineTabItem(item: UiList): TimelineTabItem =
                 Misskey.AntennasTimelineTabItem(
                     account = accountType,
-                    id = item.id,
+                    antennasId = item.id,
                     metaData =
                         TabMetaData(
                             title = TitleType.Text(item.title),
@@ -37,7 +36,7 @@ public class MisskeyAntennasListWithTabsPresenter(
             override fun List<TimelineTabItem>.filter(item: UiList): List<TimelineTabItem> =
                 filter {
                     if (it is Misskey.AntennasTimelineTabItem) {
-                        it.id != item.id
+                        it.antennasId != item.id
                     } else {
                         true
                     }
@@ -50,9 +49,9 @@ public class MisskeyAntennasListWithTabsPresenter(
         val state =
             remember(accountType) {
                 AntennasListPresenter(accountType)
-            }.invoke()
+            }.body()
 
-        val pinTabsState = pinTabsPresenter.invoke()
+        val pinTabsState = pinTabsPresenter.body()
         return object :
             State,
             AntennasListPresenter.State by state,

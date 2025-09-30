@@ -1,4 +1,5 @@
 <resources>
+    <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Delete</string>
     
     <string name="profile_header_following_count">%1$s Following</string>
@@ -444,7 +445,7 @@
     <string name="service_select_instance_input_placeholder">Instance URL</string>
     <string name="service_select_next_button">Next</string>
     <string name="service_select_empty_message">No instances found</string>
-
+    <string name="service_select_compatibility_warning">This server uses %1$s, Flare will run in compatibility mode. Some features may not work properly.</string>
 
     <string name="home_tab_home_title">Home</string>
     <string name="home_tab_notifications_title">Notifications</string>
@@ -463,4 +464,16 @@
     <string name="antenna_title">Antenna</string>
     <string name="mixed_timeline_title">Mixed</string>
 
+
+    <string name="settings_about_description">The ultimate next generation open-sourced AI powered decentralized social network client.</string>
+    <string name="settings_about_source_code">Source code</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Join our Telegram group</string>
+    <string name="settings_about_discord" translatable="false">Discord</string>
+    <string name="settings_about_discord_description">Join our Discord server</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Join our Line group</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Help us translate Flare</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
 </resources>

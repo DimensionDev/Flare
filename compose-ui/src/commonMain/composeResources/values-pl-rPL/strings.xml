@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">Adres URL instancji</string>
     <string name="service_select_next_button">Następny</string>
     <string name="service_select_empty_message">Nie znaleziono instancji</string>
+    <string name="service_select_compatibility_warning">Ten serwer używa %1$s, Flara będzie działać w trybie zgodności. Niektóre funkcje mogą nie działać poprawnie.</string>
     <string name="home_tab_home_title">Strona główna</string>
     <string name="home_tab_notifications_title">Powiadomienia</string>
     <string name="home_tab_me_title">Pr</string>

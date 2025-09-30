@@ -159,6 +159,7 @@
     <string name="media_save_success">Gemt i Downloads</string>
     <string name="media_save_fail">Kunne ikke gemme</string>
     <string name="media_alt_text">Alternativ tekst</string>
+    <string name="media_is_downloading">Mediet downloades, prøv igen senere</string>
     <string name="settings_side_panel_empty">Standard vil vise sidepanelet afhænger af kontoplatformen.</string>
     <string name="tab_settings_add">Tilføj</string>
     <string name="tab_settings_drag">Træk</string>
@@ -280,8 +281,7 @@
     <string name="home_tab_social_timeline_title">Social</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Tilføj bogmærkeunderstøttelse for Bluesky</li>
-                <li>Fejlrettelser og ydeevneforbedringer</li>
+                <li>Fejlrettelser og ydelsesforbedringer</li>
             </ul>
         ]]></string>
 </resources>

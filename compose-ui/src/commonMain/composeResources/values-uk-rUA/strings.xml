@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">URL-адреса інстансу</string>
     <string name="service_select_next_button">Уперед</string>
     <string name="service_select_empty_message">Екземплярів не знайдено</string>
+    <string name="service_select_compatibility_warning">Цей сервер використовує %1$s, Flare працюватиме в режимі сумісності. Деякі функції можуть працювати не належним чином.</string>
     <string name="home_tab_home_title">Домашній екран</string>
     <string name="home_tab_notifications_title">Сповіщення</string>
     <string name="home_tab_me_title">Ме</string>

@@ -34,10 +34,6 @@ public class HomeTimelineWithTabsPresenter(
         public val tabState: UiState<ImmutableList<TimelineTabItem>>
     }
 
-    init {
-        println("HomeTimelineWithTabsPresenter: accountType=$accountType")
-    }
-
     private val tabsState by lazy {
         settingsRepository.tabSettings
             .distinctUntilChangedBy { it.mainTabs + it.enableMixedTimeline }

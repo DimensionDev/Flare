@@ -46,6 +46,7 @@ import dev.dimension.flare.compose.ui.bluesky_login_use_password_button
 import dev.dimension.flare.compose.ui.bluesky_login_username_hint
 import dev.dimension.flare.compose.ui.login_button
 import dev.dimension.flare.compose.ui.mastodon_login_verify_message
+import dev.dimension.flare.compose.ui.service_select_compatibility_warning
 import dev.dimension.flare.compose.ui.service_select_empty_message
 import dev.dimension.flare.compose.ui.service_select_instance_input_placeholder
 import dev.dimension.flare.compose.ui.service_select_next_button
@@ -162,7 +163,7 @@ public fun ServiceSelectionScreenContent(
                         state.detectedPlatformType
                             .onSuccess {
                                 NetworkImage(
-                                    it.logoUrl,
+                                    it.platformType.logoUrl,
                                     contentDescription = null,
                                     modifier = Modifier.size(24.dp),
                                     contentScale = ContentScale.Fit,
@@ -191,7 +192,18 @@ public fun ServiceSelectionScreenContent(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        when (state.detectedPlatformType.takeSuccess()) {
+                        state.detectedPlatformType.takeSuccess()?.let {
+                            if (it.compatibleMode) {
+                                PlatformText(
+                                    stringResource(
+                                        Res.string.service_select_compatibility_warning,
+                                        it.software,
+                                    ),
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
+                        }
+                        when (state.detectedPlatformType.takeSuccess()?.platformType) {
                             null -> Unit
                             PlatformType.Bluesky -> {
                                 val oauthString =
@@ -516,6 +528,11 @@ public fun ServiceSelectionScreenContent(
                         PlatformText(
                             text = stringResource(Res.string.service_select_empty_message),
                             style = PlatformTheme.typography.title,
+                            textAlign = TextAlign.Center,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = screenHorizontalPadding),
                         )
                     }
                 }

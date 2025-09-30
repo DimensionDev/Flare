@@ -19,7 +19,7 @@ struct SecondaryTabsScreen: View {
                             Label {
                                 TabTitle(title: tab.tabItem.metaData.title)
                             } icon: {
-                                TabIcon(icon: tab.tabItem.metaData.icon, accountType: tab.tabItem.account)
+                                TabIcon(icon: tab.tabItem.metaData.icon, accountType: tab.tabItem.account, iconOnly: true)
                             }
                         }
                     }

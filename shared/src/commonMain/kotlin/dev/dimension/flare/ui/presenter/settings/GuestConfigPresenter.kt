@@ -78,7 +78,7 @@ public class GuestConfigPresenter :
                         emit(UiState.Loading())
                         NodeInfoService.detectPlatformType(it)
                     }.onSuccess {
-                        emit(UiState.Success(it))
+                        emit(UiState.Success(it.platformType))
                     }.onFailure {
                         emit(UiState.Error(it))
                     }

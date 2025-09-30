@@ -159,6 +159,7 @@
     <string name="media_save_success">In Downloads gespeichert</string>
     <string name="media_save_fail">Speichern fehlgeschlagen</string>
     <string name="media_alt_text">Alt Text</string>
+    <string name="media_is_downloading">Die Medien werden heruntergeladen, bitte versuchen Sie es später erneut</string>
     <string name="settings_side_panel_empty">Standardmäßig wird das Seitenfenster von der Konto-Plattform abhängig.</string>
     <string name="tab_settings_add">Neu</string>
     <string name="tab_settings_drag">Ziehen</string>
@@ -280,8 +281,6 @@
     <string name="home_tab_social_timeline_title">Soziale</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Lesezeichenunterstützung für Bluesky</li>
-                
                 <li>Fehlerbehebungen und Leistungsverbesserungen</li>
             </ul>
         ]]></string>

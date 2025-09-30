@@ -95,7 +95,7 @@ struct DiscoverScreen: View {
                     .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                     .listRowBackground(Color.clear)
                 }
-                
+
                 if case .success(let tagState) = onEnum(of: presenter.state.hashtags) {
                     Section {
                         HFlow {

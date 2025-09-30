@@ -159,6 +159,7 @@
     <string name="media_save_success">Збережено на завантаження</string>
     <string name="media_save_fail">Не вдалося зберегти</string>
     <string name="media_alt_text">Alt-текст</string>
+    <string name="media_is_downloading">Медіафайл завантажується, будь ласка, спробуйте ще раз пізніше</string>
     <string name="settings_side_panel_empty">Типово відображатиметься бічна панель, залежить від платформи облікового запису.</string>
     <string name="tab_settings_add">Додати</string>
     <string name="tab_settings_drag">Тягнути</string>

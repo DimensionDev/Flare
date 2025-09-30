@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">رابط مثيل</string>
     <string name="service_select_next_button">التالي</string>
     <string name="service_select_empty_message">لا يوجد مثيلات</string>
+    <string name="service_select_compatibility_warning">هذا الخادم يستخدم %1$s، سيتم تشغيل Fflowفي وضع التوافق. قد لا تعمل بعض الميزات بشكل صحيح.</string>
     <string name="home_tab_home_title">المنزل</string>
     <string name="home_tab_notifications_title">الإشعارات</string>
     <string name="home_tab_me_title">أنا</string>

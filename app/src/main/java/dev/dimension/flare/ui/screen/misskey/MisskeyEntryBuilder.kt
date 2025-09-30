@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entry
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.SquareRss
@@ -59,7 +58,7 @@ internal fun EntryProviderBuilder<NavKey>.misskeyEntryBuilder(
             tabItem = remember(args) {
                 Misskey.AntennasTimelineTabItem(
                     account = args.accountType,
-                    id = args.antennaId,
+                    antennasId = args.antennaId,
                     metaData = TabMetaData(
                         title = TitleType.Text(args.title),
                         icon = IconType.Material(IconType.Material.MaterialIcon.Rss),

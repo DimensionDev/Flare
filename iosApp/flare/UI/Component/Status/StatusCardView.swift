@@ -57,3 +57,59 @@ struct StatusCardView: View {
         }
     }
 }
+
+
+struct StatusCompatCardView: View {
+    @Environment(\.openURL) private var openURL
+    let data: UiCard
+    var body: some View {
+        HStack(
+            spacing: 8
+        ) {
+            if let media = data.media {
+                Color.clear
+                    .overlay {
+                        MediaView(data: media)
+                            .clipped()
+                    }
+                    .clipped()
+                    .frame(width: 72, height: 72)
+            }
+            VStack(
+                alignment: .leading
+            ) {
+                Text(data.title)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineLimit(1)
+                if let desc = data.description_, !desc.isEmpty {
+                    Text(desc)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                } else {
+                    Text(data.url)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            
+            .if(data.media == nil, if: { stack in
+                stack.padding()
+            }, else: { stack in
+                stack.padding(.vertical)
+                    .padding(.trailing)
+            })
+        }
+        .clipShape(.rect(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(.separator), lineWidth: 1)
+        )
+        .onTapGesture {
+            openURL.callAsFunction(.init(string: data.url)!)
+        }
+    }
+}

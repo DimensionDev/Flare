@@ -337,6 +337,7 @@
     <string name="service_select_instance_input_placeholder">インスタンス URL</string>
     <string name="service_select_next_button">次へ</string>
     <string name="service_select_empty_message">インスタンスが見つかりません</string>
+    <string name="service_select_compatibility_warning">このサーバーは %1$sを使用しています。Flare は互換モードで実行されます。一部の機能が正常に動作しない可能性があります。</string>
     <string name="home_tab_home_title">ホーム</string>
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">自分</string>

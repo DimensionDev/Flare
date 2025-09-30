@@ -159,6 +159,7 @@
     <string name="media_save_success">Uloženo do souborů</string>
     <string name="media_save_fail">Uložení se nezdařilo</string>
     <string name="media_alt_text">Alternativní text</string>
+    <string name="media_is_downloading">Média se stahují, zkuste to prosím později</string>
     <string name="settings_side_panel_empty">Výchozí zobrazení bočního panelu závisí na platformě účtu.</string>
     <string name="tab_settings_add">Přidat</string>
     <string name="tab_settings_drag">Přetažení</string>
@@ -278,10 +279,4 @@
     <string name="tab_settings_mixed_timeline">Přidat smíšenou časovou osu</string>
     <string name="tab_settings_mixed_timeline_desc">Směsná časová osa promíchá všechny panely s výsledkem jedné záložky</string>
     <string name="home_tab_social_timeline_title">Sociální</string>
-    <string name="changelog_current"><![CDATA[            <span>Verze %1$s:</span>
-            <ul>
-                <li>Přidat podporu záložek pro Bluesky</li>
-                <li>Opravy chyb a zlepšení výkonnosti</li>
-            </ul>
-        ]]></string>
 </resources>

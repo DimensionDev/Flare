@@ -159,6 +159,7 @@
     <string name="media_save_success">Salvat în Descărcări</string>
     <string name="media_save_fail">Salvarea nu a reușit</string>
     <string name="media_alt_text">Text alternativ</string>
+    <string name="media_is_downloading">Fișierul media se descarcă, vă rugăm să încercați din nou mai târziu</string>
     <string name="settings_side_panel_empty">Panoul implicit va afișa panoul lateral depinde de platforma contului.</string>
     <string name="tab_settings_add">Adăugare</string>
     <string name="tab_settings_drag">Trage</string>
@@ -280,8 +281,7 @@
     <string name="home_tab_social_timeline_title">Sociale</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
-                <li>Adaugă suport pentru semnul de carte pentru Bluesky</li>
-                <li>Remedieri ale erorilor și îmbunătățiri de performanță</li>
+                <li>Remedierea erorilor şi îmbunătăţirea performanţei</li>
             </ul>
         ]]></string>
 </resources>

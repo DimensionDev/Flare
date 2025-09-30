@@ -159,6 +159,7 @@
     <string name="media_save_success">已保存到下载文件夹</string>
     <string name="media_save_fail">保存失败</string>
     <string name="media_alt_text">备用文本</string>
+    <string name="media_is_downloading">媒体正在下载，请稍后再试</string>
     <string name="settings_side_panel_empty">默认显示侧面板取决于账户平台。</string>
     <string name="tab_settings_add">添加</string>
     <string name="tab_settings_drag">拖动</string>
@@ -278,9 +279,8 @@
     <string name="tab_settings_mixed_timeline">添加混合时间线标签</string>
     <string name="tab_settings_mixed_timeline_desc">混合时间线将混合所有标签页的时间线结果</string>
     <string name="home_tab_social_timeline_title">社交活动</string>
-    <string name="changelog_current"><![CDATA[            <span> %1$s版本:</span>
+    <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
             <ul>
-                <li>添加书签支持Bluesky</li>
                 <li>Bug 修复和性能改进</li>
             </ul>
         ]]></string>

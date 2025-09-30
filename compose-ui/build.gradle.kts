@@ -91,7 +91,7 @@ kotlin {
                 api(projects.shared)
                 implementation(libs.cupertino)
                 api(compose.uiUtil)
-                implementation("com.composables:core:1.43.1")
+                implementation("com.composables:core:1.44.0")
                 implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
             }
         }

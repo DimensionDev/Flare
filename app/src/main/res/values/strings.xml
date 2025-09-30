@@ -189,6 +189,7 @@
     <string name="media_save_success">Saved to Downloads</string>
     <string name="media_save_fail">Failed to save</string>
     <string name="media_alt_text">Alt text</string>
+    <string name="media_is_downloading">The media is downloading, please try again later</string>
 
     <string name="settings_side_panel_empty">Default will display side panel depends on the account platform.</string>
     <string name="tab_settings_add">Add</string>
@@ -341,7 +342,6 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Add bookmark support for Bluesky</li>
                 <li>Bug fixes and performance improvements</li>
             </ul>
         ]]>

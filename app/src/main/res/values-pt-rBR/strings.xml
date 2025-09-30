@@ -159,6 +159,7 @@
     <string name="media_save_success">Salvo nos Downloads</string>
     <string name="media_save_fail">Falha ao salvar</string>
     <string name="media_alt_text">Texto alternativo</string>
+    <string name="media_is_downloading">O download está sendo feito, por favor, tente novamente mais tarde</string>
     <string name="settings_side_panel_empty">O padrão mostrará o painel lateral depende da plataforma da conta.</string>
     <string name="tab_settings_add">Adicionar</string>
     <string name="tab_settings_drag">Arrastar</string>
@@ -280,8 +281,7 @@
     <string name="home_tab_social_timeline_title">Sócio</string>
     <string name="changelog_current"><![CDATA[            <span>Versão %1$s:</span>
             <ul>
-                <li>Adicionar favorito ao Bluesky</li>
-                <li>correções de bugs e melhorias de desempenho</li>
+                <li>Correções de erros e melhorias de desempenho</li>
             </ul>
         ]]></string>
 </resources>

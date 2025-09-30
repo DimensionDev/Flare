@@ -159,6 +159,7 @@
     <string name="media_save_success">Zapisano do pobrania</string>
     <string name="media_save_fail">Nie udało się zapisać</string>
     <string name="media_alt_text">Tekst alternatywny</string>
+    <string name="media_is_downloading">Media są pobierane, spróbuj ponownie później</string>
     <string name="settings_side_panel_empty">Domyślnie wyświetlany będzie panel boczny zależy od platformy konta.</string>
     <string name="tab_settings_add">Dodaj</string>
     <string name="tab_settings_drag">Przeciągnij</string>
@@ -280,7 +281,6 @@
     <string name="home_tab_social_timeline_title">Społeczność</string>
     <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
-                <li>Dodaj obsługę zakładek Bluesky</li>
                 <li>Poprawki błędów i ulepszenia wydajności</li>
             </ul>
         ]]></string>

@@ -48,7 +48,7 @@ public fun UiList.toTabItem(accountKey: MicroBlogKey): TabItem =
         UiList.Type.Antenna ->
             Misskey.AntennasTimelineTabItem(
                 account = AccountType.Specific(accountKey),
-                id = id,
+                antennasId = id,
                 metaData =
                     TabMetaData(
                         title = TitleType.Text(title),

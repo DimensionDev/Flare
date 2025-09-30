@@ -159,6 +159,7 @@
     <string name="media_save_success">Opgeslagen in Downloads</string>
     <string name="media_save_fail">Opslaan mislukt</string>
     <string name="media_alt_text">Alternatieve tekst</string>
+    <string name="media_is_downloading">De media wordt gedownload, probeer het later opnieuw</string>
     <string name="settings_side_panel_empty">Standaard wordt zijpaneel weergegeven afhankelijk van het account platform.</string>
     <string name="tab_settings_add">Toevoegen</string>
     <string name="tab_settings_drag">Sleep</string>
@@ -280,8 +281,7 @@
     <string name="home_tab_social_timeline_title">Sociaal</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
-                <li>Voeg bladwijzerondersteuning toe voor Bluesky</li>
-                <li>bugfixes en prestatieverbeteringen</li>
+                <li>Bug fixes and performance verbeteringen</li>
             </ul>
-        <span>        ]]></string>
+        ]]></string>
 </resources>

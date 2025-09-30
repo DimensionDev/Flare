@@ -78,7 +78,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun TabAddBottomSheet(
     tabs: ImmutableList<TabItem>,
-    allTabs: AllTabsState,
+    allTabs: AllTabsPresenter.State,
     onDismissRequest: () -> Unit,
     onAddTab: (TabItem) -> Unit,
     onDeleteTab: (String) -> Unit,
@@ -149,7 +149,7 @@ internal fun TabAddBottomSheet(
                         },
                         modifier = Modifier.clip(CircleShape),
                     )
-                    tabs.forEachIndexed { index, tabState ->
+                    tabs.forEachIndexed { index, tab ->
                         LeadingIconTab(
                             modifier = Modifier.clip(CircleShape),
                             selected = pagerState.currentPage == index + 2,
@@ -159,35 +159,31 @@ internal fun TabAddBottomSheet(
                                 }
                             },
                             text = {
-                                tabState.onSuccess { tab ->
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    ) {
-                                        RichText(
-                                            text = tab.profile.name,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
-                                        Text(
-                                            text = tab.profile.handle,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            modifier =
-                                                Modifier
-                                                    .alpha(MediumAlpha),
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
-                                    }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    RichText(
+                                        text = tab.profile.name,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                    Text(
+                                        text = tab.profile.handle,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier =
+                                            Modifier
+                                                .alpha(MediumAlpha),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
                                 }
                             },
                             icon = {
-                                tabState.onSuccess { tab ->
-                                    AvatarComponent(
-                                        tab.profile.avatar,
-                                        size = 24.dp,
-                                    )
-                                }
+                                AvatarComponent(
+                                    tab.profile.avatar,
+                                    size = 24.dp,
+                                )
                             },
                         )
                     }
@@ -278,79 +274,82 @@ internal fun TabAddBottomSheet(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.fillMaxWidth(),
                         ) {
-                            val tabState = tabs[it - 2]
-                            tabState.onSuccess { tab ->
-                                var selectedIndex by remember { mutableStateOf(0) }
-                                if (tab.extraTabs.any()) {
-                                    val items =
-                                        listOf(
-                                            stringResource(id = R.string.tab_settings_default),
-                                        ) +
-                                            tab.extraTabs
-                                                .map {
-                                                    when (it) {
-                                                        is PinnableTimelineTabPresenter.State.Tab.Feed ->
-                                                            R.string.tab_settings_feed
+                            val tab = tabs[it - 2]
+                            var selectedIndex by remember { mutableStateOf(0) }
+                            if (tab.extraTabs.any()) {
+                                val items =
+                                    listOf(
+                                        stringResource(id = R.string.tab_settings_default),
+                                    ) +
+                                        tab.extraTabs
+                                            .map {
+                                                when (it) {
+                                                    is PinnableTimelineTabPresenter.State.Tab.Feed ->
+                                                        R.string.tab_settings_feed
 
-                                                        is PinnableTimelineTabPresenter.State.Tab.List ->
-                                                            R.string.tab_settings_list
+                                                    is PinnableTimelineTabPresenter.State.Tab.List ->
+                                                        R.string.tab_settings_list
 
-                                                        is PinnableTimelineTabPresenter.State.Tab.Antenna ->
-                                                            R.string.home_tab_antennas_title
-                                                    }
-                                                }.map { stringResource(id = it) }
-                                    ButtonGroup(
-                                        overflowIndicator = {},
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-                                        modifier = Modifier.fillMaxWidth(),
+                                                    is PinnableTimelineTabPresenter.State.Tab.Antenna ->
+                                                        R.string.home_tab_antennas_title
+                                                }
+                                            }.map { stringResource(id = it) }
+                                ButtonGroup(
+                                    overflowIndicator = {},
+                                    horizontalArrangement =
+                                        Arrangement.spacedBy(
+                                            4.dp,
+                                            Alignment.CenterHorizontally,
+                                        ),
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    items.forEachIndexed { index, text ->
+                                        toggleableItem(
+                                            checked = selectedIndex == index,
+                                            onCheckedChange = { selectedIndex = index },
+                                            label = text,
+                                        )
+                                    }
+                                }
+                            }
+                            when (selectedIndex) {
+                                0 -> {
+                                    LazyColumn(
+                                        contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                                        verticalArrangement = Arrangement.spacedBy(2.dp),
                                     ) {
-                                        items.forEachIndexed { index, text ->
-                                            toggleableItem(
-                                                checked = selectedIndex == index,
-                                                onCheckedChange = { selectedIndex = index },
-                                                label = text,
+                                        itemsIndexed(tab.tabs) { index, it ->
+                                            TabItem(
+                                                it,
+                                                modifier =
+                                                    Modifier
+                                                        .listCard(
+                                                            index = index,
+                                                            totalCount = tab.tabs.size,
+                                                        ),
                                             )
                                         }
                                     }
                                 }
-                                when (selectedIndex) {
-                                    0 -> {
-                                        LazyColumn(
-                                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
-                                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                                        ) {
-                                            itemsIndexed(tab.tabs) { index, it ->
+
+                                else -> {
+                                    LazyColumn(
+                                        contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                                    ) {
+                                        val data =
+                                            tab.extraTabs.elementAtOrNull(selectedIndex - 1)?.data
+                                        if (data != null) {
+                                            itemsIndexed(data) { index, totalCount, item ->
                                                 TabItem(
-                                                    it,
+                                                    remember(item) { item.toTabItem(accountKey = tab.profile.key) },
                                                     modifier =
                                                         Modifier
                                                             .listCard(
                                                                 index = index,
-                                                                totalCount = tab.tabs.size,
+                                                                totalCount = totalCount,
                                                             ),
                                                 )
-                                            }
-                                        }
-                                    }
-
-                                    else -> {
-                                        LazyColumn(
-                                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
-                                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                                        ) {
-                                            val data = tab.extraTabs.elementAtOrNull(selectedIndex - 1)?.data
-                                            if (data != null) {
-                                                itemsIndexed(data) { index, totalCount, item ->
-                                                    TabItem(
-                                                        remember(item) { item.toTabItem(accountKey = tab.profile.key) },
-                                                        modifier =
-                                                            Modifier
-                                                                .listCard(
-                                                                    index = index,
-                                                                    totalCount = totalCount,
-                                                                ),
-                                                    )
-                                                }
                                             }
                                         }
                                     }

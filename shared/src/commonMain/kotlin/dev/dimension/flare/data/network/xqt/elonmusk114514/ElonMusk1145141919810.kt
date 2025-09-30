@@ -8,10 +8,10 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.util.decodeBase64Bytes
 import io.ktor.util.encodeBase64
+import kotlinx.serialization.Serializable
 import kotlin.experimental.xor
 import kotlin.random.Random
 import kotlin.time.Clock
-import kotlinx.serialization.Serializable
 
 internal object ElonMusk1145141919810 {
     @Serializable
@@ -22,13 +22,12 @@ internal object ElonMusk1145141919810 {
 
     private var jsonPair: List<JsonPair>? = null
 
-    suspend fun encodeSha256(data: String): ByteArray {
-        return CryptographyProvider
+    suspend fun encodeSha256(data: String): ByteArray =
+        CryptographyProvider
             .Default
             .get(SHA256)
             .hasher()
             .hash(data.encodeToByteArray())
-    }
 
     fun encodeBase64(data: ByteArray): String = data.encodeBase64()
 

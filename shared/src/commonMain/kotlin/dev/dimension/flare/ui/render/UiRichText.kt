@@ -34,7 +34,7 @@ private fun Node.toMarkdown(): String =
         is Element -> toMarkdown()
         is TextNode ->
             text()
-                .replace("#", "\\#")
+                .escapeMarkdown()
         else -> ""
     }
 
@@ -120,3 +120,34 @@ private fun Element.toMarkdown(): String =
             childNodes().joinToString("") { it.toMarkdown() }
         }
     }
+
+// /\\ (backslash itself)
+// ` (backtick)
+// * (asterisk)
+// _ (underscore)
+// { } (curly braces)
+// [ ] (square brackets)
+// ( ) (parentheses)
+// # (hash mark)
+// + (plus sign)
+// - (minus sign or hyphen)
+// . (dot)
+// ! (exclamation mark)
+// > (blockquote)
+private fun String.escapeMarkdown(): String =
+    replace("\\", "\\\\")
+        .replace("`", "\\`")
+        .replace("*", "\\*")
+        .replace("_", "\\_")
+        .replace("{", "\\{")
+        .replace("}", "\\}")
+        .replace("[", "\\[")
+        .replace("]", "\\]")
+        .replace("(", "\\(")
+        .replace(")", "\\)")
+        .replace("#", "\\#")
+        .replace("+", "\\+")
+        .replace("-", "\\-")
+        .replace(".", "\\.")
+        .replace("!", "\\!")
+        .replace(">", "\\>")

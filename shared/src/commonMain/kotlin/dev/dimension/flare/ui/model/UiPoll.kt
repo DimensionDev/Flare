@@ -15,12 +15,19 @@ public data class UiPoll internal constructor(
     val multiple: Boolean,
     val ownVotes: ImmutableList<Int>,
     val onVote: (options: ImmutableList<Int>) -> Unit,
-    private val expiresAt: Instant,
+    // null indicates no expiration
+    private val expiresAt: Instant?,
     private val enabled: Boolean = true,
 ) {
-    val expired: Boolean by lazy { expiresAt < Clock.System.now() }
+    val expired: Boolean by lazy {
+        if (expiresAt == null) {
+            false
+        } else {
+            expiresAt < Clock.System.now()
+        }
+    }
     val voted: Boolean by lazy { ownVotes.isNotEmpty() }
-    val expiredAt: UiDateTime by lazy { expiresAt.toUi() }
+    val expiredAt: UiDateTime? by lazy { expiresAt?.toUi() }
 
     val canVote: Boolean by lazy { !expired && !voted && enabled }
 

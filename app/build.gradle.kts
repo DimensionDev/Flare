@@ -1,26 +1,31 @@
-
+// START Non-FOSS component
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
+// END Non-FOSS component
 import com.google.gms.googleservices.GoogleServicesPlugin
 import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.android.application)
+    id("com.android.application")
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.google.services) apply false
+    // START Non-FOSS component
     alias(libs.plugins.firebase.crashlytics) apply false
+    // END Non-FOSS component
     alias(libs.plugins.compose.compiler)
     id("kotlin-parcelize")
 }
 
+// START Non-FOSS component
 if (project.file("google-services.json").exists()) {
     apply<GoogleServicesPlugin>()
     apply<CrashlyticsPlugin>()
 }
+// END Non-FOSS component
 
 android {
     namespace = "dev.dimension.flare"
@@ -135,9 +140,7 @@ dependencies {
     implementation(libs.androidx.window)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.compose.webview)
-    implementation(libs.kotlinx.coroutines.play.services)
     implementation(projects.shared)
-    implementation(projects.shared.ui)
     implementation(projects.composeUi)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)
@@ -152,11 +155,14 @@ dependencies {
     implementation(libs.haze.materials)
     implementation('org.rust-nostr', name: 'nostr-sdk-jvm', version: '0.43.0')
 
+    // START Non-FOSS component
     if (project.file("google-services.json").exists()) {
         implementation(platform(libs.firebase.bom))
         implementation(libs.firebase.crashlytics.ktx)
         implementation(libs.firebase.analytics.ktx)
+        implementation(libs.kotlinx.coroutines.play.services)
     }
+    // END Non-FOSS component
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
@@ -174,7 +180,7 @@ ktlint {
     }
 }
 
-if (project.file("google-services.json").exists()) {    
+if (project.file("google-services.json").exists()) {
     afterEvaluate {
         val uploadCrashlyticsMappingFileRelease by tasks
         val processDebugGoogleServices by tasks

@@ -17,7 +17,7 @@ enum Route: Hashable, Identifiable {
         clearToHome: @escaping () -> Void
     ) -> some View {
         switch self {
-        case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew(accountType)) }, toTabSetting: {})
+        case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew(accountType)) }, toTabSetting: { onNavigate(.tabSettings) })
         case .timeline(let item): TimelineScreen(tabItem: item)
         case .serviceSelect:
             ServiceSelectionScreen(toHome: { clearToHome() })
@@ -41,6 +41,22 @@ enum Route: Hashable, Identifiable {
             ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.Reply(statusKey: statusKey))
         case .composeVVOReplyComment(let accountType, let statueKey, let rootId):
             ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.VVOComment(statusKey: statueKey, rootId: rootId))
+        case .profileUserNameWithHost(let accountType, let userName, let host):
+            ProfileWithUserNameAndHostScreen(userName: userName, host: host, accountType: accountType)
+        case .appearance:
+            AppearanceScreen()
+        case .about:
+            AboutScreen()
+        case .localHostory:
+            LocalHistoryScreen()
+        case .storage:
+            StorageScreen()
+        case .localFilter:
+            LocalFilterScreen()
+        case .aiConfig:
+            AiConfigScreen()
+        case .tabSettings:
+            TabSettingsScreen()
         default:
             Text("Not done yet for \(self)")
         }
@@ -79,6 +95,7 @@ enum Route: Hashable, Identifiable {
     case settings
     case about
     case tabItem(TabItem)
+    case tabSettings
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {

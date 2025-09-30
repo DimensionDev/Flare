@@ -425,7 +425,7 @@ private fun Status.renderStatus(
                                             )?.takeUnless { it.isNaN() } ?: 0f,
                                 )
                             }?.toPersistentList() ?: persistentListOf(),
-                    expiresAt = it.expiresAt ?: Instant.DISTANT_PAST,
+                    expiresAt = it.expiresAt,
                     multiple = it.multiple ?: false,
                     ownVotes = it.ownVotes?.toPersistentList() ?: persistentListOf(),
                     onVote = { options ->

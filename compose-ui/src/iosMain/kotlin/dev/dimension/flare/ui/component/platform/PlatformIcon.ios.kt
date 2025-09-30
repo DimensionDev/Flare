@@ -117,3 +117,18 @@ private fun Size.isInfinite() = width.isInfinite() && height.isInfinite()
 
 // Default icon size, for icons with no intrinsic size information
 private val DefaultIconSizeModifier = Modifier.size(16.dp)
+
+@Composable
+internal actual fun PlatformIcon(
+    painter: Painter,
+    contentDescription: String?,
+    modifier: Modifier,
+    tint: Color,
+) {
+    Icon(
+        painter = painter,
+        contentDescription = contentDescription,
+        modifier = modifier,
+        tint = tint,
+    )
+}

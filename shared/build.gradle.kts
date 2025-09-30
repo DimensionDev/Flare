@@ -90,7 +90,7 @@ kotlin {
                 implementation(projects.shared.api)
                 implementation(libs.ktor.client.resources)
                 implementation("dev.whyoleg.cryptography:cryptography-provider-optimal:0.5.0")
-                implementation group: 'org.rust-nostr', name: 'nostr-sdk-jvm', version: '0.43.0'
+                implementation('org.rust-nostr', name: 'nostr-sdk-jvm', version: '0.43.0')
             }
         }
         val commonTest by getting {

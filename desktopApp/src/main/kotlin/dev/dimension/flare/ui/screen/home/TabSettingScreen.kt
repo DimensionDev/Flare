@@ -47,6 +47,8 @@ import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.screen.settings.AllTabsPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.AccentButton
@@ -249,7 +251,7 @@ private fun presenter(
 ) = run {
     val scope = rememberCoroutineScope()
     var selectedEditTab by remember { mutableStateOf<TabItem?>(null) }
-    val allTabsState = allTabsPresenter(filterIsTimeline = true)
+    val allTabsState = remember { AllTabsPresenter(filterIsTimeline = true) }.invoke()
     val tabSettings by settingsRepository.tabSettings.collectAsUiState()
     val cacheTabs =
         remember {

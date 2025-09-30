@@ -5,6 +5,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
@@ -35,6 +36,10 @@ public data class TabSettings(
 
 @Serializable
 public sealed class TabItem {
+    // for iOS
+    public val id: String by lazy {
+        key
+    }
     public abstract val metaData: TabMetaData
     public abstract val account: AccountType
     public abstract val key: String
@@ -678,6 +683,20 @@ public data class ListTimelineTabItem(
     val listId: String,
     override val metaData: TabMetaData,
 ) : TimelineTabItem() {
+    public constructor(accountKey: MicroBlogKey, data: UiList) : this(
+        listId = data.id,
+        account = AccountType.Specific(accountKey),
+        metaData =
+            TabMetaData(
+                title = TitleType.Text(data.title),
+                icon =
+                    IconType.Mixed(
+                        icon = IconType.Material.MaterialIcon.List,
+                        userKey = accountKey,
+                    ),
+            ),
+    )
+
     override val key: String = "list_${account}_$listId"
 
     override fun createPresenter(): TimelinePresenter = ListTimelinePresenter(account, listId)
@@ -822,15 +841,29 @@ public object Misskey {
 
     @Serializable
     public data class AntennasTimelineTabItem(
-        val id: String,
+        val antennasId: String,
         override val account: AccountType,
         override val metaData: TabMetaData,
     ) : TimelineTabItem() {
-        override val key: String = "antennas_${account}_$id"
+        public constructor(accountKey: MicroBlogKey, data: UiList) : this(
+            antennasId = data.id,
+            account = AccountType.Specific(accountKey),
+            metaData =
+                TabMetaData(
+                    title = TitleType.Text(data.title),
+                    icon =
+                        IconType.Mixed(
+                            icon = IconType.Material.MaterialIcon.Rss,
+                            userKey = accountKey,
+                        ),
+                ),
+        )
+
+        override val key: String = "antennas_${account}_$antennasId"
 
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.list
-                .AntennasTimelinePresenter(account, id)
+                .AntennasTimelinePresenter(account, antennasId)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -883,6 +916,20 @@ public object Bluesky {
         val uri: String,
         override val metaData: TabMetaData,
     ) : TimelineTabItem() {
+        public constructor(accountKey: MicroBlogKey, data: UiList) : this(
+            uri = data.id,
+            account = AccountType.Specific(accountKey),
+            metaData =
+                TabMetaData(
+                    title = TitleType.Text(data.title),
+                    icon =
+                        IconType.Mixed(
+                            icon = IconType.Material.MaterialIcon.Feeds,
+                            userKey = accountKey,
+                        ),
+                ),
+        )
+
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.bluesky
                 .BlueskyFeedTimelinePresenter(account, uri)

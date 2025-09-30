@@ -46,7 +46,7 @@ struct Router<Root: View>: View {
     
     func isSheetRoute(route: Route) -> Bool {
         switch route {
-        case .composeNew, .composeQuote, .composeReply, .composeVVOReplyComment:
+        case .composeNew, .composeQuote, .composeReply, .composeVVOReplyComment, .tabSettings:
             return true
         default:
             return false

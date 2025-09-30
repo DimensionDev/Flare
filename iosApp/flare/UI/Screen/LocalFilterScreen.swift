@@ -102,7 +102,9 @@ struct LocalFilterEditSheet: View {
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
+                Button(
+                    role: .confirm
+                ) {
                     onConfirm(keyword, forTimeline, forNotification, forSearch)
                     dismiss()
                 } label: {

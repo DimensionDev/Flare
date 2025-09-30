@@ -923,6 +923,9 @@
     "action_retry" : {
 
     },
+    "Add" : {
+
+    },
     "ai_config_options_section_header" : {
 
     },
@@ -2221,6 +2224,9 @@
           }
         }
       }
+    },
+    "bluesky_feeds_title" : {
+
     },
     "bluesky_notification_follow" : {
       "localizations" : {
@@ -3711,6 +3717,9 @@
       }
     },
     "Cancel" : {
+
+    },
+    "Close" : {
 
     },
     "comment" : {
@@ -32562,6 +32571,7 @@
       }
     },
     "more_panel_customize" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -36179,6 +36189,9 @@
         }
       }
     },
+    "rss_add_source" : {
+
+    },
     "rss_title" : {
       "localizations" : {
         "ar" : {
@@ -37289,6 +37302,36 @@
           }
         }
       }
+    },
+    "tab_settings_delete" : {
+
+    },
+    "tab_settings_edit" : {
+
+    },
+    "tab_settings_edit_icon_header" : {
+
+    },
+    "tab_settings_edit_title_header" : {
+
+    },
+    "tab_settings_edit_title_placeholder" : {
+
+    },
+    "tab_settings_edit_use_avatar" : {
+
+    },
+    "tab_settings_enable_mixed_timeline_desc" : {
+
+    },
+    "tab_settings_enable_mixed_timeline_title" : {
+
+    },
+    "tab_settings_section_main_tabs" : {
+
+    },
+    "tab_settings_title" : {
+
     },
     "unblock" : {
       "localizations" : {

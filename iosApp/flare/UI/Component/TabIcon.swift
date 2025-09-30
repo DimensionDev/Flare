@@ -43,6 +43,7 @@ struct TabIcon: View {
     let icon: IconType
     let accountType: AccountType
     let size: CGFloat
+    let iconOnly: Bool
     var body: some View {
         switch onEnum(of: icon) {
         case .material(let material):
@@ -55,8 +56,23 @@ struct TabIcon: View {
             NetworkImage(data: url.url)
                 .frame(width: size, height: size)
         case .mixed(let mixed):
-            MaterialTabIcon(icon: mixed.icon)
+            if iconOnly {
+                MaterialTabIcon(icon: mixed.icon)
+                    .frame(width: size, height: size)
+            } else {
+                ZStack(
+                    alignment: .bottomTrailing
+                ) {
+                    AvatarTabIcon(userKey: mixed.userKey, accountType: accountType)
+                    MaterialTabIcon(icon: mixed.icon)
+                        .padding(2)
+                        .background(Color.white)
+                        .foregroundStyle(Color.black)
+                        .clipShape(.circle)
+                        .frame(width: size / 2, height: size / 2)
+                }
                 .frame(width: size, height: size)
+            }
         }
     }
 }
@@ -66,7 +82,21 @@ extension TabIcon {
         icon: IconType,
         accountType: AccountType,
     ) {
-        self.init(icon: icon, accountType: accountType, size: 24)
+        self.init(icon: icon, accountType: accountType, size: 20)
+    }
+    init(
+        icon: IconType,
+        accountType: AccountType,
+        size: CGFloat
+    ) {
+        self.init(icon: icon, accountType: accountType, size: size, iconOnly: false)
+    }
+    init(
+        icon: IconType,
+        accountType: AccountType,
+        iconOnly: Bool
+    ) {
+        self.init(icon: icon, accountType: accountType, size: 20, iconOnly: iconOnly)
     }
 }
 

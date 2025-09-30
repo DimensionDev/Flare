@@ -11,7 +11,7 @@ extension TabItem {
         case .timelineTabItem(let timelineTabItem):
             switch onEnum(of: timelineTabItem) {
             case .HomeTimelineTabItem(let homeTimelineTabItem):
-                HomeTimelineScreen(accountType: homeTimelineTabItem.account, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew(homeTimelineTabItem.account) ) }, toTabSetting: {} )
+                HomeTimelineScreen(accountType: homeTimelineTabItem.account, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew(homeTimelineTabItem.account) ) }, toTabSetting: { onNavigate(.tabSettings) } )
             default:
                 TimelineScreen(tabItem: timelineTabItem)
             }
@@ -25,6 +25,8 @@ extension TabItem {
             AllListScreen(accountType: allListTabItem.account)
         case .feedsTabItem(let feedsTabItem):
             AllFeedScreen(accountType: feedsTabItem.account)
+        case .profileTabItem(let profileTabItem):
+            ProfileScreen(accountType: profileTabItem.account, userKey: nil)
         default:
             Text("Not done yet for \(self)")
         }

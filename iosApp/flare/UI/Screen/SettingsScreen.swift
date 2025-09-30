@@ -24,15 +24,15 @@ struct SettingsScreen: View {
                         Image("fa-palette")
                     }
                 }
-                StateView(state: presenter.state.user) { _ in
-                    NavigationLink(value: Route.moreMenuCustomize) {
-                        Label {
-                            Text("more_panel_customize")
-                        } icon: {
-                            Image("fa-table-list")
-                        }
-                    }
-                }
+//                StateView(state: presenter.state.user) { _ in
+//                    NavigationLink(value: Route.moreMenuCustomize) {
+//                        Label {
+//                            Text("more_panel_customize")
+//                        } icon: {
+//                            Image("fa-table-list")
+//                        }
+//                    }
+//                }
             }
 
             StateView(state: presenter.state.user) { _ in

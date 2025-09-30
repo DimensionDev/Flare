@@ -58,7 +58,7 @@ internal fun EntryProviderBuilder<NavKey>.misskeyEntryBuilder(
             tabItem = remember(args) {
                 Misskey.AntennasTimelineTabItem(
                     account = args.accountType,
-                    id = args.antennaId,
+                    antennasId = args.antennaId,
                     metaData = TabMetaData(
                         title = TitleType.Text(args.title),
                         icon = IconType.Material(IconType.Material.MaterialIcon.Rss),

@@ -69,6 +69,7 @@ import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
@@ -393,7 +394,7 @@ private fun presenter(
 //    val except = remember(cacheTabs) {
 //        cacheTabs.map { it.key }.toImmutableList()
 //    }
-    val allTabs = allTabsPresenter()
+    val allTabs = remember { AllTabsPresenter() }.invoke()
 
     object {
         val tabs = cacheTabs

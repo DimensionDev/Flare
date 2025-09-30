@@ -22,6 +22,7 @@ struct StatusActionsView: View {
 }
 
 struct StatusActionView: View {
+    @Environment(\.themeSettings) private var themeSettings
     let data: StatusAction
     let useText: Bool
     let isFixedWidth: Bool
@@ -52,7 +53,7 @@ struct StatusActionView: View {
                                 Text("0000")
                                     .opacity(0.0)
                             }
-                            if let text = group.displayItem.countText {
+                            if let text = group.displayItem.countText, themeSettings.appearanceSettings.showNumbers {
                                 if let color = group.displayItem.color {
                                     Text(text)
                                         .foregroundStyle(color)
@@ -91,6 +92,7 @@ struct AsyncStatusActionView: View {
 }
 
 struct StatusActionItemView: View {
+    @Environment(\.themeSettings) private var themeSettings
     @Environment(\.openURL) private var openURL
     let data: StatusActionItem
     let useText: Bool
@@ -116,7 +118,7 @@ struct StatusActionItemView: View {
                         } else {
                             Text(data.textKey)
                         }
-                    } else if let text = data.countText {
+                    } else if let text = data.countText, themeSettings.appearanceSettings.showNumbers {
                         if let color = data.color {
                             Text(text)
                                 .foregroundStyle(color)

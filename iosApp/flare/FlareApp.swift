@@ -8,7 +8,9 @@ struct FlareApp: App {
     }
     var body: some Scene {
         WindowGroup {
-            FlareRoot()
+            FlareTheme {
+                FlareRoot()
+            }
         }
     }
 }

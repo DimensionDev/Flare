@@ -6,8 +6,11 @@ struct TimelinePagingView: View {
     let detailStatusKey: MicroBlogKey?
     var body: some View {
         switch onEnum(of: data) {
-        case .empty: EmptyView()
-        case .error(let error): EmptyView()
+        case .empty: ListEmptyView()
+        case .error(let error): ListErrorView(error: error.error) {
+            error.onRetry()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         case .loading: ForEach(0..<5) { index in
             ListCardView(index: index, totalCount: 5) {
                 TimelinePlaceholderView()
@@ -32,6 +35,30 @@ struct TimelinePagingView: View {
                                 _ = success.get(index: Int32(data.index))
                             }
                     }
+                }
+            }
+            switch onEnum(of: success.appendState) {
+            case .error(let error):
+                ListErrorView(error: error.error) {
+                    success.retry()
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+            case .loading:
+                ForEach(0..<5) { index in
+                   ListCardView(index: index, totalCount: 5) {
+                       TimelinePlaceholderView()
+                           .padding()
+                   }
+               }
+            case .notLoading(let notLoading):
+                if notLoading.endOfPaginationReached {
+                    Text("end_of_list")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .center)
+                } else {
+                    EmptyView()
                 }
             }
         }

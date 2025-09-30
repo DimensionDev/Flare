@@ -1,5 +1,5 @@
 import SwiftUI
-import KotlinSharedUI
+@preconcurrency import KotlinSharedUI
 
 struct ProfileScreen: View {
     let accountType: AccountType
@@ -22,39 +22,30 @@ struct ProfileScreen: View {
             .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
             StateView(state: presenter.state.tabs) { tabsArray in
                 let tabs = tabsArray.cast(ProfileState.Tab.self)
-                if tabs.count > 1 {
-                    Picker(selection: $selectedTab) {
-                        ForEach(0..<tabs.count) { index in
-                            let tab = tabs[index]
-                            let text = switch onEnum(of: tab) {
-                            case .media: LocalizedStringResource(stringLiteral: "profile_tab_media")
-                            case .timeline(let timeline):
-                                switch timeline.type {
-                                case .likes: LocalizedStringResource(stringLiteral: "profile_tab_likes")
-                                case .status: LocalizedStringResource(stringLiteral: "profile_tab_status")
-                                case .statusWithReplies: LocalizedStringResource(stringLiteral: "profile_tab_replies")
-                                }
+                Picker(selection: $selectedTab) {
+                    ForEach(0..<tabs.count) { index in
+                        let tab = tabs[index]
+                        let text = switch onEnum(of: tab) {
+                        case .media: LocalizedStringResource(stringLiteral: "profile_tab_media")
+                        case .timeline(let timeline):
+                            switch timeline.type {
+                            case .likes: LocalizedStringResource(stringLiteral: "profile_tab_likes")
+                            case .status: LocalizedStringResource(stringLiteral: "profile_tab_status")
+                            case .statusWithReplies: LocalizedStringResource(stringLiteral: "profile_tab_replies")
                             }
-                            Text(text)
-                                .tag(index)
-
                         }
-                    } label: {
+                        Text(text)
+                            .tag(index)
 
                     }
-                    .pickerStyle(.segmented)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    .padding()
-                    .listRowBackground(Color.clear)
-                } else {
-                    Spacer()
-                        .frame(height: 16)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                        .padding()
-                        .listRowBackground(Color.clear)
+                } label: {
+
                 }
+                .pickerStyle(.segmented)
+                .listRowSeparator(.hidden)
+                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .padding()
+                .listRowBackground(Color.clear)
                 let selectedTabItem = tabs[selectedTab]
                 switch onEnum(of: selectedTabItem) {
                 case .timeline(let timeline):
@@ -124,6 +115,10 @@ struct ProfileScreen: View {
                 Image(systemName: "ellipsis")
             }
         }
+        .refreshable {
+            try? await presenter.state.refresh()
+        }
+        .edgesIgnoringSafeArea(.top)
         .background(Color(.systemGroupedBackground))
     }
 }
@@ -172,5 +167,22 @@ struct ProfileHeaderSuccess: View {
     let onFollowClick: (UiRelation) -> Void
     var body: some View {
         CommonProfileHeader(user: user, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
+    }
+}
+
+struct ProfileWithUserNameAndHostScreen: View {
+    @StateObject private var presenter: KotlinPresenter<UserState>
+    let accountType: AccountType
+    
+    init(userName: String, host: String, accountType: AccountType) {
+        self.accountType = accountType
+        self._presenter = .init(wrappedValue: .init(presenter: ProfileWithUserNameAndHostPresenter(userName: userName, host: host, accountType: accountType)))
+    }
+    var body: some View {
+        StateView(state: presenter.state.user) { user in
+            ProfileScreen(accountType: accountType, userKey: user.key)
+        } loadingContent: {
+            ProgressView()
+        }
     }
 }

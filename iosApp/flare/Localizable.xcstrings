@@ -66,16 +66,16 @@
             "value" : "読み込み中"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "#lasting"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "#laden"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "#lasting"
           }
         },
         "pl" : {
@@ -220,13 +220,13 @@
             "value" : "%@"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@"
@@ -374,13 +374,13 @@
             "value" : "%1$lld/%2$d"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$lld/%2$d"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$lld/%2$d"
@@ -486,13 +486,13 @@
             "value" : "0000"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "0000"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "0000"
@@ -610,13 +610,13 @@
             "value" : "about_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "about_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "about_title"
@@ -734,16 +734,16 @@
             "value" : "フォローリクエストを承認する"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Godta følg-forespørsel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Accepteer volgverzoek"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Godta følg-forespørsel"
           }
         },
         "pl" : {
@@ -858,16 +858,16 @@
             "value" : "account_management_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konto_management_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "account_management_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konto_management_tittel"
           }
         },
         "pl" : {
@@ -919,6 +919,24 @@
           }
         }
       }
+    },
+    "action_retry" : {
+
+    },
+    "Add" : {
+
+    },
+    "ai_config_options_section_header" : {
+
+    },
+    "ai_config_server_provider_placeholder" : {
+
+    },
+    "ai_config_server_provider_section_header" : {
+
+    },
+    "ai_config_summarize" : {
+
     },
     "ai_config_title" : {
       "localizations" : {
@@ -982,16 +1000,16 @@
             "value" : "ai_config_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ai_config_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "vrij_config_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ai_config_tittel"
           }
         },
         "pl" : {
@@ -1043,6 +1061,9 @@
           }
         }
       }
+    },
+    "ai_config_translate" : {
+
     },
     "all_feeds_section_explore_feeds" : {
       "localizations" : {
@@ -1106,13 +1127,13 @@
             "value" : "all_feeds_section_explore_feeds"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "all_feeds_section_explore_feeds"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "all_feeds_section_explore_feeds"
@@ -1230,13 +1251,13 @@
             "value" : "all_feeds_section_my_feeds"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "all_feeds_section_my_feeds"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "all_feeds_section_my_feeds"
@@ -1354,16 +1375,16 @@
             "value" : "all_feeds_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "all_feeds_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "alle_feeds_titel"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "all_feeds_tittel"
           }
         },
         "pl" : {
@@ -1478,16 +1499,16 @@
             "value" : "all_lists_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "all_lists_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "all_lijsten_titel"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "all_lists_tittel"
           }
         },
         "pl" : {
@@ -1602,13 +1623,13 @@
             "value" : "ALT"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ALT"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ALT"
@@ -1762,13 +1783,13 @@
             "value" : "안테나"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Antenne"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Antenne"
@@ -1848,6 +1869,48 @@
         }
       }
     },
+    "appearance_avatar_shape" : {
+
+    },
+    "appearance_avatar_shape_circle" : {
+
+    },
+    "appearance_avatar_shape_square" : {
+
+    },
+    "appearance_compat_link_preview" : {
+
+    },
+    "appearance_expand_media_size" : {
+
+    },
+    "appearance_show_actions" : {
+
+    },
+    "appearance_show_link_preview" : {
+
+    },
+    "appearance_show_media" : {
+
+    },
+    "appearance_show_numbers" : {
+
+    },
+    "appearance_show_sensitive_content" : {
+
+    },
+    "appearance_theme" : {
+
+    },
+    "appearance_theme_dark" : {
+
+    },
+    "appearance_theme_light" : {
+
+    },
+    "appearance_theme_system" : {
+
+    },
     "appearance_title" : {
       "localizations" : {
         "ar" : {
@@ -1910,16 +1973,16 @@
             "value" : "appearance_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "utseende_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "uiterlijk_titel"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "utseende_tittel"
           }
         },
         "pl" : {
@@ -1971,6 +2034,18 @@
           }
         }
       }
+    },
+    "appearance_video_autoplay" : {
+
+    },
+    "appearance_video_autoplay_always" : {
+
+    },
+    "appearance_video_autoplay_never" : {
+
+    },
+    "appearance_video_autoplay_wifi" : {
+
     },
     "block" : {
       "localizations" : {
@@ -2064,16 +2139,16 @@
             "value" : "차단"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "blokk"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Blokkeren"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "blokk"
           }
         },
         "pl" : {
@@ -2150,6 +2225,9 @@
         }
       }
     },
+    "bluesky_feeds_title" : {
+
+    },
     "bluesky_notification_follow" : {
       "localizations" : {
         "ar" : {
@@ -2212,13 +2290,13 @@
             "value" : "bluesky_notification_follow"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_follow"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_follow"
@@ -2336,13 +2414,13 @@
             "value" : "bluesky_notification_item_pin"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_item_pin"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_item_pin"
@@ -2460,13 +2538,13 @@
             "value" : "bluesky_notification_like"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_like"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_like"
@@ -2584,13 +2662,13 @@
             "value" : "bluesky_notification_member"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_mention"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_mention"
@@ -2708,16 +2786,16 @@
             "value" : "bluesky_notification_quote"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notifikasjon_sitat"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_quote"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "bluesky_notifikasjon_sitat"
           }
         },
         "pl" : {
@@ -2832,16 +2910,16 @@
             "value" : "bluesky_notification_reply"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "blåesky_varsling_svar"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_reply"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "blåesky_varsling_svar"
           }
         },
         "pl" : {
@@ -2956,13 +3034,13 @@
             "value" : "bluesky_notification_repost"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_repost"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_repost"
@@ -3080,16 +3158,16 @@
             "value" : "bluesky_notification_starterpackJoined"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_starterpackukket"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_starterpackToegetreden"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "bluesky_notification_starterpackukket"
           }
         },
         "pl" : {
@@ -3204,16 +3282,16 @@
             "value" : "bluesky_notification_unKnown"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_unkjentn"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "bluesky_notification_unKnown"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "bluesky_notification_unkjentn"
           }
         },
         "pl" : {
@@ -3328,16 +3406,16 @@
             "value" : "bookmark_add"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legg til bokmerke_legg"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toevoegen bladwijzer_"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Legg til bokmerke_legg"
           }
         },
         "pl" : {
@@ -3452,16 +3530,16 @@
             "value" : "bookmark_remove"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bokmerke_fjern"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verwijder bladwijzer_verwijderen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "bokmerke_fjern"
           }
         },
         "pl" : {
@@ -3576,16 +3654,16 @@
             "value" : "ボタン"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knapp"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Knop"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Knapp"
           }
         },
         "pl" : {
@@ -3637,6 +3715,12 @@
           }
         }
       }
+    },
+    "Cancel" : {
+
+    },
+    "Close" : {
+
     },
     "comment" : {
       "localizations" : {
@@ -3700,16 +3784,16 @@
             "value" : "コメント"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kommentar"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Commentaar"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "kommentar"
           }
         },
         "pl" : {
@@ -3824,16 +3908,16 @@
             "value" : "compose_button_cancel"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sammenstill_button_avbryt"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_button_cancel"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sammenstill_button_avbryt"
           }
         },
         "pl" : {
@@ -3948,16 +4032,16 @@
             "value" : "compose_button_send"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "prest_button_send"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_button_send"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "prest_button_send"
           }
         },
         "pl" : {
@@ -4072,16 +4156,16 @@
             "value" : "compose_cw_placeholder"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "komponist_cw_placeholder"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_cw_placeholder"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "komponist_cw_placeholder"
           }
         },
         "pl" : {
@@ -4196,16 +4280,16 @@
             "value" : "compose_media_mark_sensitive"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kompone_media_mark_sensitiv"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_media_mark_gevoelig"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "kompone_media_mark_sensitiv"
           }
         },
         "pl" : {
@@ -4320,16 +4404,16 @@
             "value" : "compose_placeholder"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "komponist_plassholder"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_placeholder"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "komponist_plassholder"
           }
         },
         "pl" : {
@@ -4444,13 +4528,13 @@
             "value" : "compose_poll_choice_placeholder"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_poll_choice_placeholder"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_poll_choice_placeholder"
@@ -4568,16 +4652,16 @@
             "value" : "compose_poll_expiration"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "compose_poll_utløpsdato"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_poll_expiratie"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "compose_poll_utløpsdato"
           }
         },
         "pl" : {
@@ -4692,13 +4776,13 @@
             "value" : "compose_poll_type"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_poll_type"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_poll_type"
@@ -4816,16 +4900,16 @@
             "value" : "compose_poll_type_multiple"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kompone_poll_type_multiple"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_poll_type_multiple"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "kompone_poll_type_multiple"
           }
         },
         "pl" : {
@@ -4940,16 +5024,16 @@
             "value" : "compose_poll_type_single"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kompone_poll_type_single"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_poll_type_single"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "kompone_poll_type_single"
           }
         },
         "pl" : {
@@ -5064,16 +5148,16 @@
             "value" : "compose_title_new"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "prest_tittel_ny"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "samenstellen_titel_nieuw"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "prest_tittel_ny"
           }
         },
         "pl" : {
@@ -5188,16 +5272,16 @@
             "value" : "compose_title_quote"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sammenstilling_tilbud"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_title_quote"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sammenstilling_tilbud"
           }
         },
         "pl" : {
@@ -5312,16 +5396,16 @@
             "value" : "compose_title_reply"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "med_tittel_svar"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "compose_title_antwoord"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "med_tittel_svar"
           }
         },
         "pl" : {
@@ -5466,16 +5550,16 @@
             "value" : "삭제"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "slett"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verwijderen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "slett"
           }
         },
         "pl" : {
@@ -5644,16 +5728,16 @@
             "value" : "상세정보"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detaljer"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Detail"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Detaljer"
           }
         },
         "pl" : {
@@ -5792,16 +5876,16 @@
             "value" : "discover_status"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "oppdag_status"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "discover_status"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "oppdag_status"
           }
         },
         "pl" : {
@@ -5916,16 +6000,16 @@
             "value" : "タグの検出"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "oppdag_merker"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ontdekkingslabels"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "oppdag_merker"
           }
         },
         "pl" : {
@@ -6040,13 +6124,13 @@
             "value" : "discover_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "discover_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "discover_title"
@@ -6164,16 +6248,16 @@
             "value" : "discover_users"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "oppdag_brukere"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ontdekking_gebruikers"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "oppdag_brukere"
           }
         },
         "pl" : {
@@ -6294,16 +6378,16 @@
             "value" : "ダイレクトメッセージ"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Direkte melding"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Direct Bericht"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Direkte melding"
           }
         },
         "pl" : {
@@ -6355,6 +6439,12 @@
           }
         }
       }
+    },
+    "Done" : {
+
+    },
+    "end_of_list" : {
+
     },
     "error" : {
       "localizations" : {
@@ -6448,16 +6538,16 @@
             "value" : "오류"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feil"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fout"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feil"
           }
         },
         "pl" : {
@@ -6533,6 +6623,15 @@
           }
         }
       }
+    },
+    "error_generic" : {
+
+    },
+    "error_login_expired_action" : {
+
+    },
+    "error_login_expired%@" : {
+
     },
     "home_tab_bookmarks_title" : {
       "localizations" : {
@@ -6632,16 +6731,16 @@
             "value" : "북마크"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bokmerker"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bladwijzers"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bokmerker"
           }
         },
         "pl" : {
@@ -6816,16 +6915,16 @@
             "value" : "발견하기"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oppdag"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ontdek"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oppdag"
           }
         },
         "pl" : {
@@ -6970,16 +7069,16 @@
             "value" : "お気に入り"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favoritt"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Favoriete"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Favoritt"
           }
         },
         "pl" : {
@@ -7130,16 +7229,16 @@
             "value" : "추천"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anbefalt"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aanbevolen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Anbefalt"
           }
         },
         "pl" : {
@@ -7314,16 +7413,16 @@
             "value" : "피드"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strøm"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Feeds"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Strøm"
           }
         },
         "pl" : {
@@ -7498,16 +7597,16 @@
             "value" : "홈"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hjem"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Startpagina"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hjem"
           }
         },
         "pl" : {
@@ -7682,16 +7781,16 @@
             "value" : "목록"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liste"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Klantenlijst"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liste"
           }
         },
         "pl" : {
@@ -7866,16 +7965,16 @@
             "value" : "내 정보"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meg"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "IK"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Meg"
           }
         },
         "pl" : {
@@ -8020,16 +8119,16 @@
             "value" : "Notification"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varsling"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Notificatie"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Varsling"
           }
         },
         "pl" : {
@@ -8174,16 +8273,16 @@
             "value" : "좋아요"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lik"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "vind-ik-leuk"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "lik"
           }
         },
         "pl" : {
@@ -8328,16 +8427,16 @@
             "value" : "リストの説明"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "liste beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "beschrijving lijst"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "liste beskrivelse"
           }
         },
         "pl" : {
@@ -8452,16 +8551,16 @@
             "value" : "リストのタイトル"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "liste tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "lijst titel"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "liste tittel"
           }
         },
         "pl" : {
@@ -8513,6 +8612,36 @@
           }
         }
       }
+    },
+    "list_empty_title" : {
+
+    },
+    "local_filter_delete" : {
+
+    },
+    "local_filter_edit" : {
+
+    },
+    "local_filter_edit_title" : {
+
+    },
+    "local_filter_keyword_header" : {
+
+    },
+    "local_filter_keyword_placeholder" : {
+
+    },
+    "local_filter_notification" : {
+
+    },
+    "local_filter_scope_header" : {
+
+    },
+    "local_filter_search" : {
+
+    },
+    "local_filter_timeline" : {
+
     },
     "local_filter_title" : {
       "localizations" : {
@@ -8576,16 +8705,16 @@
             "value" : "local_filter_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "local_filter_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "titel"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "local_filter_tittel"
           }
         },
         "pl" : {
@@ -8637,6 +8766,12 @@
           }
         }
       }
+    },
+    "local_history_search_prompt" : {
+
+    },
+    "local_history_status" : {
+
     },
     "local_history_title" : {
       "localizations" : {
@@ -8700,16 +8835,16 @@
             "value" : "local_history_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "local_history_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "historie_titel"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "local_history_title"
           }
         },
         "pl" : {
@@ -8761,6 +8896,9 @@
           }
         }
       }
+    },
+    "local_history_user" : {
+
     },
     "Login" : {
       "localizations" : {
@@ -8854,16 +8992,16 @@
             "value" : "로그인"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Innlogging"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aanmelden"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Innlogging"
           }
         },
         "pl" : {
@@ -9002,13 +9140,13 @@
             "value" : "login_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "login_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "login_title"
@@ -9126,13 +9264,13 @@
             "value" : "logout_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "logout_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "logout_title"
@@ -9250,16 +9388,16 @@
             "value" : "ピン留めされた"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_item_sperret"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mastodon_item_vastgezet"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mastodon_item_sperret"
           }
         },
         "pl" : {
@@ -9374,13 +9512,13 @@
             "value" : "mastodon_item_show_less"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mastodon_item_show_less"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mastodon_item_show_less"
@@ -9498,16 +9636,16 @@
             "value" : "mastodon_item_show_more"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_item_vis_mer"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mastodon_item_show_meer"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mastodon_item_vis_mer"
           }
         },
         "pl" : {
@@ -9622,16 +9760,16 @@
             "value" : "mastodon_notification_Favorite"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_varsel_favoritt"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mastodon_notification_favoriet"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mastodon_varsel_favoritt"
           }
         },
         "pl" : {
@@ -9746,16 +9884,16 @@
             "value" : "mastodon_notification_follow"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_varsl_følg"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mastodon_notification_follow"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mastodon_varsl_følg"
           }
         },
         "pl" : {
@@ -9870,16 +10008,16 @@
             "value" : "mastodon_notification_follow_request"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_notification_follow_forespørsel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mastodon_notification_follow_request"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mastodon_notification_follow_forespørsel"
           }
         },
         "pl" : {
@@ -9994,16 +10132,16 @@
             "value" : "mastodon_notification_<unk>"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_varsling_nevnelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mastodon_notification_mention"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mastodon_varsling_nevnelse"
           }
         },
         "pl" : {
@@ -10118,13 +10256,13 @@
             "value" : "mastodon_notification_poll"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mastodon_notification_poll"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mastodon_notification_poll"
@@ -10242,16 +10380,16 @@
             "value" : "mastodon_notification_reblog"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_varsl_reblogg"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mastodon_notification_reblog"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mastodon_varsl_reblogg"
           }
         },
         "pl" : {
@@ -10366,16 +10504,16 @@
             "value" : "mastodon_notification_status"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_varsling_status"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mastodon_notification_status"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mastodon_varsling_status"
           }
         },
         "pl" : {
@@ -10490,16 +10628,16 @@
             "value" : "mastodon_notification_update"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_varsl_oppdatering"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mastodon_notification_update"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mastodon_varsl_oppdatering"
           }
         },
         "pl" : {
@@ -10620,16 +10758,16 @@
             "value" : "ローカルタイムライン"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lokal tidslinje"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lokale tijdlijn"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lokal tidslinje"
           }
         },
         "pl" : {
@@ -10750,16 +10888,16 @@
             "value" : "公開タイムライン"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offentlig tidslinje"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Publieke tijdlijn"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Offentlig tidslinje"
           }
         },
         "pl" : {
@@ -10874,16 +11012,16 @@
             "value" : "matrix_フォロワー"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "matrise_følgere"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "matrix_volgers"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "matrise_følgere"
           }
         },
         "pl" : {
@@ -10998,16 +11136,16 @@
             "value" : "matrix_following"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "matriks_følgende"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "matrix_volgt"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "matriks_følgende"
           }
         },
         "pl" : {
@@ -11122,16 +11260,16 @@
             "value" : "misskey_achievement_brain_diver_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_achievement_brain_diver_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_brain_diver_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_achievement_brain_diver_beskrivelse"
           }
         },
         "pl" : {
@@ -11246,16 +11384,16 @@
             "value" : "misskey_achievement_brain_diver_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_achievement_brain_diver_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_brain_diver_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_achievement_brain_diver_title"
           }
         },
         "pl" : {
@@ -11370,16 +11508,16 @@
             "value" : "misskey_achievement_bubble_game_double_exploment_head_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_achievement_bubble_game_double_exploding_head_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_bubble_game_double_exploding_head_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_achievement_bubble_game_double_exploding_head_description"
           }
         },
         "pl" : {
@@ -11494,16 +11632,16 @@
             "value" : "misskey_achievement_bubble_game_double_exploment_head_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_achievement_bubble_game_double_exploding_head_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_bubble_game_double_exploding_head_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_achievement_bubble_game_double_exploding_head_title"
           }
         },
         "pl" : {
@@ -11618,16 +11756,16 @@
             "value" : "misskey_achievement_bubble_game_explothing_head_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_achievement_bubble_game_exploding_head_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_bubble_game_exploding_head_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_achievement_bubble_game_exploding_head_beskrivelse"
           }
         },
         "pl" : {
@@ -11742,13 +11880,13 @@
             "value" : "misskey_achievement_bubble_game_exploment_head_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_bubble_game_exploding_head_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_bubble_game_exploding_head_title"
@@ -11866,16 +12004,16 @@
             "value" : "misskey_achievement_clicked_click_here_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uvis_prestasjon_klikk_click_here_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_clicked_click_here_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "uvis_prestasjon_klikk_click_here_description"
           }
         },
         "pl" : {
@@ -11990,16 +12128,16 @@
             "value" : "misskey_achievement_clicked_clicked_here_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uvis_prestasjon_klikk_click_here_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_clicked_click_here_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "uvis_prestasjon_klikk_click_here_title"
           }
         },
         "pl" : {
@@ -12114,16 +12252,16 @@
             "value" : "misskey_achievement_client30min_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_prestasjon_client30min_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_client30min_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_prestasjon_client30min_description"
           }
         },
         "pl" : {
@@ -12238,13 +12376,13 @@
             "value" : "misskey_achievement_client30min_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_client30min_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_client30min_title"
@@ -12362,16 +12500,16 @@
             "value" : "misskey_achievement_client60min_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_prestasjon_client60min_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_client60min_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_prestasjon_client60min_description"
           }
         },
         "pl" : {
@@ -12486,13 +12624,13 @@
             "value" : "misskey_achievement_client60min_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_client60min_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_client60min_title"
@@ -12610,16 +12748,16 @@
             "value" : "misskey_achievement_collect_achievements30_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_prestasjon_collect_achievements30_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_collect_achievements 30_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_prestasjon_collect_achievements30_description"
           }
         },
         "pl" : {
@@ -12734,16 +12872,16 @@
             "value" : "misskey_achievement_achievements30_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ulagre_prestasjon_collect_achievements30_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_collect_achievements30_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ulagre_prestasjon_collect_achievements30_title"
           }
         },
         "pl" : {
@@ -12858,16 +12996,16 @@
             "value" : "misskey_achievement_cookie_clicked_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_achievement_cookie_clicked_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_cookie_kliked_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_achievement_cookie_clicked_description"
           }
         },
         "pl" : {
@@ -12982,16 +13120,16 @@
             "value" : "misskey_achievement_cookie_clicked_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_achievement_cookie_clicked_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_cookie_kliked_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_achievement_cookie_clicked_title"
           }
         },
         "pl" : {
@@ -13106,16 +13244,16 @@
             "value" : "misskey_achievement_drive_folder_circular_reference_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_drive_folder_circular_reference_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_drive_folder_circular_reference_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_drive_folder_circular_reference_description"
           }
         },
         "pl" : {
@@ -13230,16 +13368,16 @@
             "value" : "misskey_achievement_drive_folder_circular_reference_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_achievement_drive_folder_circular_reference_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_drive_folder_circular_reference_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_achievement_drive_folder_circular_reference_title"
           }
         },
         "pl" : {
@@ -13354,16 +13492,16 @@
             "value" : "misskey_achievement_followers1_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_prestasjon_følger1_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_vollowers1_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_prestasjon_følger1_beskrivelse"
           }
         },
         "pl" : {
@@ -13478,16 +13616,16 @@
             "value" : "misskey_achievement_followers1_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_achievement_followers1_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_vollowers1_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_achievement_followers1_title"
           }
         },
         "pl" : {
@@ -13602,16 +13740,16 @@
             "value" : "misskey_achievement_followers10_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_prestasjon_følger10_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_vollowers10_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_prestasjon_følger10_beskrivelse"
           }
         },
         "pl" : {
@@ -13726,16 +13864,16 @@
             "value" : "misskey_achievement_followers10_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_achievement_followers10_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_vollowers10_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_achievement_followers10_title"
           }
         },
         "pl" : {
@@ -13850,16 +13988,16 @@
             "value" : "misskey_achievement_followers50_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_achievement_followers50_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_vollowers50_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_achievement_followers50_description"
           }
         },
         "pl" : {
@@ -13974,13 +14112,13 @@
             "value" : "misskey_achievement_followers50_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_followers50_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_followers50_title"
@@ -14098,16 +14236,16 @@
             "value" : "misskey_achievement_followers100_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_prestasjon_følger100_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_vollowers100_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_prestasjon_følger100_beskrivelse"
           }
         },
         "pl" : {
@@ -14222,13 +14360,13 @@
             "value" : "misskey_achievement_followers100_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_followers100_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_followers100_title"
@@ -14346,16 +14484,16 @@
             "value" : "misskey_achievement_followers300_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_prestasjon_følger300_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_vollowers300_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_prestasjon_følger300_beskrivelse"
           }
         },
         "pl" : {
@@ -14470,13 +14608,13 @@
             "value" : "misskey_achievement_followers300_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_followers300_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_followers300_title"
@@ -14594,16 +14732,16 @@
             "value" : "misskey_achievement_followers500_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_prestasjon_følger500_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_vollowers500_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_prestasjon_følger500_beskrivelse"
           }
         },
         "pl" : {
@@ -14718,16 +14856,16 @@
             "value" : "misskey_achievement_followers500_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_achievement_followers500_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_vollowers500_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_achievement_followers500_title"
           }
         },
         "pl" : {
@@ -14842,16 +14980,16 @@
             "value" : "misskey_achievement_followers1000_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_prestasjon_følger1000_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_vollowers1000_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_prestasjon_følger1000_beskrivelse"
           }
         },
         "pl" : {
@@ -14966,16 +15104,16 @@
             "value" : "misskey_achievement_followers1000_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_achievement_followers1000_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_vollowers1000_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_achievement_followers1000_title"
           }
         },
         "pl" : {
@@ -15090,13 +15228,13 @@
             "value" : "misskey_achievement_following1_description"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following1_description"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following1_description"
@@ -15214,13 +15352,13 @@
             "value" : "misskey_achievement_following1_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following1_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following1_title"
@@ -15338,13 +15476,13 @@
             "value" : "misskey_achievement_following10_description"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following10_description"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following10_description"
@@ -15462,13 +15600,13 @@
             "value" : "misskey_achievement_following10_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following10_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following10_title"
@@ -15586,13 +15724,13 @@
             "value" : "misskey_achievement_following50_description"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following50_description"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following50_description"
@@ -15710,13 +15848,13 @@
             "value" : "misskey_achievement_following50_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following50_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following50_title"
@@ -15834,16 +15972,16 @@
             "value" : "misskey_achievement_following100_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_achievement_following100_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_follow 100_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_achievement_following100_description"
           }
         },
         "pl" : {
@@ -15958,13 +16096,13 @@
             "value" : "misskey_achievement_following100_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following100_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following100_title"
@@ -16082,13 +16220,13 @@
             "value" : "misskey_achievement_following300_description"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following300_description"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following300_description"
@@ -16206,13 +16344,13 @@
             "value" : "misskey_achievement_following300_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following300_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_following300_title"
@@ -16330,16 +16468,16 @@
             "value" : "misskey_achievement_found_treasure_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_oppnåelse_funnet_treasure_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_found_treasure_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_oppnåelse_funnet_treasure_description"
           }
         },
         "pl" : {
@@ -16454,16 +16592,16 @@
             "value" : "misskey_achievement_found_treasure_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ulemp_prestasjon_funnet_treasure_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_found_treasure_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ulemp_prestasjon_funnet_treasure_title"
           }
         },
         "pl" : {
@@ -16578,16 +16716,16 @@
             "value" : "misskey_achievement_htl20npm_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_htl20npm_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_htl20npm_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_htl20npm_beskrivelse"
           }
         },
         "pl" : {
@@ -16702,16 +16840,16 @@
             "value" : "misskey_achievement_htl20npm_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mangler _prestasjon_htl20npm_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_htl20npm_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mangler _prestasjon_htl20npm_tittel"
           }
         },
         "pl" : {
@@ -16826,16 +16964,16 @@
             "value" : "misskey_achievement_i_love_misskey_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_i_love_misskey_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_i_love_misskey_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_i_love_misskey_beskrivelse"
           }
         },
         "pl" : {
@@ -16950,16 +17088,16 @@
             "value" : "misskey_achievement_i_love_misskey_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mangler _prestasjon_i_love_misskey_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_i_love_misskey_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mangler _prestasjon_i_love_misskey_tittel"
           }
         },
         "pl" : {
@@ -17074,16 +17212,16 @@
             "value" : "misskey_achievement_just_plain_lucky_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_prestasjon_just_plain_lucky_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_just_plain_lucky_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_prestasjon_just_plain_lucky_beskrivelse"
           }
         },
         "pl" : {
@@ -17198,16 +17336,16 @@
             "value" : "misskey_achievement_just_plain_lucky_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_prestasjon_just_plain_lucky_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_just_plain_lucky_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_prestasjon_just_plain_lucky_tittel"
           }
         },
         "pl" : {
@@ -17322,16 +17460,16 @@
             "value" : "misskey_achievement_logged_in_on_birthday_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_achievement_logged_in_on_fødselsdag_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_logged_in_on_birthday_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_achievement_logged_in_on_fødselsdag_beskrivelse"
           }
         },
         "pl" : {
@@ -17446,16 +17584,16 @@
             "value" : "misskey_achievement_logged_in_on_birthday_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tilfredsstillende svar_prestasjon_logged_in_on_fødselsdag_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_logged_in_on_birthday_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "tilfredsstillende svar_prestasjon_logged_in_on_fødselsdag_tittel"
           }
         },
         "pl" : {
@@ -17570,13 +17708,13 @@
             "value" : "misskey_achievement_logged_in_on_new_years_day_description"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_logged_in_on_new_years_day_description"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_logged_in_on_new_years_day_description"
@@ -17694,16 +17832,16 @@
             "value" : "misskey_achievement_logged_in_on_new_years_day_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "usøk_prestasjon_logged_in_on_new_years_day_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_logged_in_on_new_years_day_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "usøk_prestasjon_logged_in_on_new_years_day_title"
           }
         },
         "pl" : {
@@ -17818,16 +17956,16 @@
             "value" : "misskey_achievement_login3_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_login3_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login3_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_login3_beskrivelse"
           }
         },
         "pl" : {
@@ -17942,13 +18080,13 @@
             "value" : "misskey_achievement_login3_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login3_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login3_title"
@@ -18066,16 +18204,16 @@
             "value" : "misskey_achievement_login7_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_login7_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login7_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_login7_beskrivelse"
           }
         },
         "pl" : {
@@ -18190,13 +18328,13 @@
             "value" : "misskey_achievement_login7_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login7_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login7_title"
@@ -18314,16 +18452,16 @@
             "value" : "misskey_achievement_login15_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_login15_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login15_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_login15_beskrivelse"
           }
         },
         "pl" : {
@@ -18438,13 +18576,13 @@
             "value" : "misskey_achievement_login15_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login15_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login15_title"
@@ -18562,16 +18700,16 @@
             "value" : "misskey_achievement_login30_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_login30_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login30_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_login30_beskrivelse"
           }
         },
         "pl" : {
@@ -18686,16 +18824,16 @@
             "value" : "misskey_achievement_login30_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mangel_prestasjon_login30_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login30_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mangel_prestasjon_login30_tittel"
           }
         },
         "pl" : {
@@ -18810,13 +18948,13 @@
             "value" : "misskey_achievement_login60_description"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login60_description"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login60_description"
@@ -18934,13 +19072,13 @@
             "value" : "misskey_achievement_login60_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login60_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login60_title"
@@ -19058,16 +19196,16 @@
             "value" : "misskey_achievement_login100_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_login100_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login100_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_login100_beskrivelse"
           }
         },
         "pl" : {
@@ -19182,16 +19320,16 @@
             "value" : "misskey_achievement_login100_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_login100_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login100_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_login100_tittel"
           }
         },
         "pl" : {
@@ -19306,16 +19444,16 @@
             "value" : "misskey_achievement_login200_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_login200_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login200_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_login200_beskrivelse"
           }
         },
         "pl" : {
@@ -19430,13 +19568,13 @@
             "value" : "misskey_achievement_login200_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login200_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login200_title"
@@ -19554,13 +19692,13 @@
             "value" : "misskey_achievement_login300_description"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login300_description"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login300_description"
@@ -19678,13 +19816,13 @@
             "value" : "misskey_achievement_login300_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login300_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login300_title"
@@ -19802,16 +19940,16 @@
             "value" : "misskey_achievement_login400_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_login400_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login400_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_login400_beskrivelse"
           }
         },
         "pl" : {
@@ -19926,13 +20064,13 @@
             "value" : "misskey_achievement_login400_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login400_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login400_title"
@@ -20050,16 +20188,16 @@
             "value" : "misskey_achievement_login500_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_prestasjon_login500_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login500_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_prestasjon_login500_beskrivelse"
           }
         },
         "pl" : {
@@ -20174,13 +20312,13 @@
             "value" : "misskey_achievement_login500_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login500_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login500_title"
@@ -20298,13 +20436,13 @@
             "value" : "misskey_achievement_login600_description"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login600_description"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login600_description"
@@ -20422,13 +20560,13 @@
             "value" : "misskey_achievement_login600_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login600_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login600_title"
@@ -20546,16 +20684,16 @@
             "value" : "misskey_achievement_login700_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_login700_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login700_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_login700_beskrivelse"
           }
         },
         "pl" : {
@@ -20670,13 +20808,13 @@
             "value" : "misskey_achievement_login700_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login700_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login700_title"
@@ -20794,16 +20932,16 @@
             "value" : "misskey_achievement_login800_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_login800_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login800_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_login800_beskrivelse"
           }
         },
         "pl" : {
@@ -20918,16 +21056,16 @@
             "value" : "misskey_achievement_login800_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_login800_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login800_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_login800_tittel"
           }
         },
         "pl" : {
@@ -21042,16 +21180,16 @@
             "value" : "misskey_achievement_login900_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_login900_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login900_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_login900_beskrivelse"
           }
         },
         "pl" : {
@@ -21166,16 +21304,16 @@
             "value" : "misskey_achievement_login900_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_achievement_login900_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login900_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_achievement_login900_tittel"
           }
         },
         "pl" : {
@@ -21290,13 +21428,13 @@
             "value" : "misskey_achievement_login1000_description"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login1000_description"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login1000_description"
@@ -21414,13 +21552,13 @@
             "value" : "misskey_achievement_login1000_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login1000_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_login1000_title"
@@ -21538,16 +21676,16 @@
             "value" : "misskey_achievement_marked_as_cat_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_merke_as_cat_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_marked_as_cat_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_merke_as_cat_description"
           }
         },
         "pl" : {
@@ -21662,16 +21800,16 @@
             "value" : "misskey_achievement_marked_as_cat_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_prestasjon_merke_as_cat_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_marked_as_cat_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_prestasjon_merke_as_cat_title"
           }
         },
         "pl" : {
@@ -21786,16 +21924,16 @@
             "value" : "misskey_achievement_my_note_favorited1_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tilfredsstillende svar_prestasjon_my_note_favorited1_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_my_note_favoriet1_beschrijving"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "tilfredsstillende svar_prestasjon_my_note_favorited1_beskrivelse"
           }
         },
         "pl" : {
@@ -21910,16 +22048,16 @@
             "value" : "misskey_achievement_my_note_favorited1_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tilfredsstillende svar_prestasjon_my_note_favorited1_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_my_note_favoriet1_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "tilfredsstillende svar_prestasjon_my_note_favorited1_tittel"
           }
         },
         "pl" : {
@@ -22034,16 +22172,16 @@
             "value" : "misskey_achievement_note_clipped1_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uvis_achievement_note_clippet1_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_note_clipped1_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "uvis_achievement_note_clippet1_beskrivelse"
           }
         },
         "pl" : {
@@ -22158,16 +22296,16 @@
             "value" : "misskey_achievement_note_clipped1_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uvis_achievement_note_clipped1_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_note_clipped1_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "uvis_achievement_note_clipped1_tittel"
           }
         },
         "pl" : {
@@ -22282,16 +22420,16 @@
             "value" : "misskey_achievement_note_deleted_within1min_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "manglende svar_prestasjon_note_sletted_within1min_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_note_deleted_binnen1min_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "manglende svar_prestasjon_note_sletted_within1min_description"
           }
         },
         "pl" : {
@@ -22406,16 +22544,16 @@
             "value" : "misskey_achievement_note_deleted_within1min_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ulagre_prestasjon_note_slettet_med1min_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_note_deleted_binnenin1min_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ulagre_prestasjon_note_slettet_med1min_tittel"
           }
         },
         "pl" : {
@@ -22530,16 +22668,16 @@
             "value" : "misskey_achievement_note_favorited1_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_note_favoritted1_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_note_favoriet1_beschrijving"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_note_favoritted1_beskrivelse"
           }
         },
         "pl" : {
@@ -22654,16 +22792,16 @@
             "value" : "misskey_achievement_note_favorited1_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_achievement_note_favorited1_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_note_favoriet1_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_achievement_note_favorited1_tittel"
           }
         },
         "pl" : {
@@ -22778,16 +22916,16 @@
             "value" : "misskey_achievement_notes1_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes1_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "mist key_achievement_notes1_beschrijving"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes1_beskrivelse"
           }
         },
         "pl" : {
@@ -22902,16 +23040,16 @@
             "value" : "misskey_achievement_notes1_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes1_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "miss_achievement_notes1_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes1_tittel"
           }
         },
         "pl" : {
@@ -23026,16 +23164,16 @@
             "value" : "misskey_achievement_notes10_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøkende_prestasjon_notes10_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes10_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøkende_prestasjon_notes10_beskrivelse"
           }
         },
         "pl" : {
@@ -23150,16 +23288,16 @@
             "value" : "misskey_achievement_notes10_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_notes10_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "miss_achievement_notes10_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_notes10_tittel"
           }
         },
         "pl" : {
@@ -23274,16 +23412,16 @@
             "value" : "misskey_achievement_notes100_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_prestasjon_notes100_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes100_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_prestasjon_notes100_beskrivelse"
           }
         },
         "pl" : {
@@ -23398,16 +23536,16 @@
             "value" : "misskey_achievement_notes100_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_notes100_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes100_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_notes100_tittel"
           }
         },
         "pl" : {
@@ -23522,16 +23660,16 @@
             "value" : "misskey_achievement_notes500_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes500_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes500_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes500_description"
           }
         },
         "pl" : {
@@ -23646,16 +23784,16 @@
             "value" : "misskey_achievement_notes500_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes500_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes500_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes500_title"
           }
         },
         "pl" : {
@@ -23770,13 +23908,13 @@
             "value" : "misskey_achievement_notes1000_description"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes1000_description"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes1000_description"
@@ -23894,16 +24032,16 @@
             "value" : "misskey_achievement_notes1000_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes1000_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes1000_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes1000_tittel"
           }
         },
         "pl" : {
@@ -24018,16 +24156,16 @@
             "value" : "misskey_achievement_notes5000_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes5000_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes5000_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes5000_beskrivelse"
           }
         },
         "pl" : {
@@ -24142,16 +24280,16 @@
             "value" : "misskey_achievement_notes5000_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes5000_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes5000_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes5000_tittel"
           }
         },
         "pl" : {
@@ -24266,16 +24404,16 @@
             "value" : "misskey_achievement_notes10000_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes10000_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes10000_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes10000_beskrivelse"
           }
         },
         "pl" : {
@@ -24390,16 +24528,16 @@
             "value" : "misskey_achievement_notes10000_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_achievement_notes10000_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes10000_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_achievement_notes10000_tittel"
           }
         },
         "pl" : {
@@ -24514,16 +24652,16 @@
             "value" : "misskey_achievement_notes20000_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes20000_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes20000_beschrijving"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes20000_beskrivelse"
           }
         },
         "pl" : {
@@ -24638,16 +24776,16 @@
             "value" : "misskey_achievement_notes20000_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes20000_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes20000_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes20000_tittel"
           }
         },
         "pl" : {
@@ -24762,16 +24900,16 @@
             "value" : "misskey_achievement_notes300000_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes30000_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes30000_beschrijving"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes30000_beskrivelse"
           }
         },
         "pl" : {
@@ -24886,16 +25024,16 @@
             "value" : "misskey_achievement_notes300000_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes30000_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes30000_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes30000_tittel"
           }
         },
         "pl" : {
@@ -25010,16 +25148,16 @@
             "value" : "misskey_achievement_notes40000_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes40000_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes40000_beschrijving"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes40000_beskrivelse"
           }
         },
         "pl" : {
@@ -25134,16 +25272,16 @@
             "value" : "misskey_achievement_notes40000_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes40000_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes40000_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes40000_tittel"
           }
         },
         "pl" : {
@@ -25258,16 +25396,16 @@
             "value" : "misskey_achievement_notes50000_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes50000_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes50000_beschrijving"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes50000_beskrivelse"
           }
         },
         "pl" : {
@@ -25382,16 +25520,16 @@
             "value" : "misskey_achievement_notes50000_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes50000_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes50000_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes50000_tittel"
           }
         },
         "pl" : {
@@ -25506,16 +25644,16 @@
             "value" : "misskey_achievement_notes60000_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes60000_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes60000_beschrijving"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes60000_beskrivelse"
           }
         },
         "pl" : {
@@ -25630,16 +25768,16 @@
             "value" : "misskey_achievement_notes60000_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes60000_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes60000_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes60000_title"
           }
         },
         "pl" : {
@@ -25754,16 +25892,16 @@
             "value" : "misskey_achievement_notes70000_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes70000_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes70000_beschrijving"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes70000_beskrivelse"
           }
         },
         "pl" : {
@@ -25878,16 +26016,16 @@
             "value" : "misskey_achievement_notes70000_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes70000_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes70000_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes70000_tittel"
           }
         },
         "pl" : {
@@ -26002,16 +26140,16 @@
             "value" : "misskey_achievement_notes80000_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_notes80000_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes80000_beschrijving"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_notes80000_beskrivelse"
           }
         },
         "pl" : {
@@ -26126,16 +26264,16 @@
             "value" : "misskey_achievement_notes80000_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes80000_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes80000_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes80000_tittel"
           }
         },
         "pl" : {
@@ -26250,16 +26388,16 @@
             "value" : "misskey_achievement_notes90000_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes90000_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes90000_beschrijving"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes90000_beskrivelse"
           }
         },
         "pl" : {
@@ -26374,16 +26512,16 @@
             "value" : "misskey_achievement_notes90000_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes90000_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes90000_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes90000_tittel"
           }
         },
         "pl" : {
@@ -26498,16 +26636,16 @@
             "value" : "misskey_achievement_notes100000_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_prestasjon_notes100000_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes100000_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_prestasjon_notes100000_beskrivelse"
           }
         },
         "pl" : {
@@ -26622,16 +26760,16 @@
             "value" : "misskey_achievement_notes100000_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_achievement_notes100000_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_notes100000_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_achievement_notes100000_tittel"
           }
         },
         "pl" : {
@@ -26746,13 +26884,13 @@
             "value" : "misskey_achievement_open3windows_description"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_open3windows_description"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_open3windows_description"
@@ -26870,13 +27008,13 @@
             "value" : "misskey_achievement_open3windows_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_open3windows_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_open3windows_title"
@@ -26994,16 +27132,16 @@
             "value" : "misskey_achievement_output_hello_world_on_scratchpad_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_output_hello_world_on_scratchpad_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_output_hello_world_on_scratchpad_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_output_hello_world_on_scratchpad_beskrivelse"
           }
         },
         "pl" : {
@@ -27118,16 +27256,16 @@
             "value" : "misskey_achievement_output_hello_world_on_scratchpad_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mangel_prestasjon_output_hello_world_on_scratchpad_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_output_hello_world_on_scratchpad_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mangel_prestasjon_output_hello_world_on_scratchpad_tittel"
           }
         },
         "pl" : {
@@ -27242,16 +27380,16 @@
             "value" : "misskey_achievement_passed_since_account_created1_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_passed_since_account_opprettet1_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_passed_since_account_created1_beschrijving"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_passed_since_account_opprettet1_beskrivelse"
           }
         },
         "pl" : {
@@ -27366,16 +27504,16 @@
             "value" : "misskey_achievement_passed_since_account_created1_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_passed_since_account_opprettet1_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_passed_since_account_created1_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_passed_since_account_opprettet1_tittel"
           }
         },
         "pl" : {
@@ -27490,16 +27628,16 @@
             "value" : "misskey_achievement_passed_since_account_created2_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_passed_since_account_opprettet2_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_passed_since_account_created2_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_passed_since_account_opprettet2_beskrivelse"
           }
         },
         "pl" : {
@@ -27614,16 +27752,16 @@
             "value" : "misskey_achievement_passed_since_account_created2_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_passed_since_account_opprettet2_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_passed_since_account_created2_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_passed_since_account_opprettet2_tittel"
           }
         },
         "pl" : {
@@ -27738,16 +27876,16 @@
             "value" : "misskey_achievement_passed_since_account_created3_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_passed_since_account_opprettet3_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_passed_since_account_created3_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_passed_since_account_opprettet3_beskrivelse"
           }
         },
         "pl" : {
@@ -27862,16 +28000,16 @@
             "value" : "misskey_achievement_passed_since_account_created3_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_passed_since_account_opprettet3_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_passed_since_account_created3_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_passed_since_account_opprettet3_tittel"
           }
         },
         "pl" : {
@@ -27986,16 +28124,16 @@
             "value" : "misskey_achievement_posted_at_0min0sec_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_prestasjon_posted_at_0min0sec_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_posted_at_0min0sec_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_prestasjon_posted_at_0min0sec_description"
           }
         },
         "pl" : {
@@ -28110,16 +28248,16 @@
             "value" : "misskey_achievement_posted_at_0min0sec_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_posted_at_0min0sec_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_posted_at_0min0sec_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_posted_at_0min0sec_tittel"
           }
         },
         "pl" : {
@@ -28234,16 +28372,16 @@
             "value" : "misskey_achievement_posted_at_late_night_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_posted_at_late_night_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_posted_at_late_night_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_posted_at_late_night_description"
           }
         },
         "pl" : {
@@ -28358,16 +28496,16 @@
             "value" : "misskey_achievement_posted_at_late_night_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_posted_at_late_night_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_posted_at_late_night_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_posted_at_late_night_title"
           }
         },
         "pl" : {
@@ -28482,16 +28620,16 @@
             "value" : "misskey_achievement_profile_filled_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_prestasjon_profile_filled_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_profile_filter_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_prestasjon_profile_filled_beskrivelse"
           }
         },
         "pl" : {
@@ -28606,16 +28744,16 @@
             "value" : "misskey_achievement_profile_filled_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_profile_filled_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_profile_filter_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_profile_filled_title"
           }
         },
         "pl" : {
@@ -28730,16 +28868,16 @@
             "value" : "misskey_achievement_react_witout_read_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_react_with_read_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_react_without_read_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_react_with_read_description"
           }
         },
         "pl" : {
@@ -28854,16 +28992,16 @@
             "value" : "misskey_achievement_react_witout_read_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misskey_prestasjon_react_with_read_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_react_without_read_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misskey_prestasjon_react_with_read_title"
           }
         },
         "pl" : {
@@ -28978,16 +29116,16 @@
             "value" : "misskey_achievement_self_quote_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_prestasjon_self_quote_description"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_self_quote_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_prestasjon_self_quote_description"
           }
         },
         "pl" : {
@@ -29102,16 +29240,16 @@
             "value" : "misskey_achievement_self_quote_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_self_quote_title"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_self_quote_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_self_quote_title"
           }
         },
         "pl" : {
@@ -29226,16 +29364,16 @@
             "value" : "misskey_achievement_set_name_to_syuilo_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_achievement_set_name_to_syuilo_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_set_name_to_syuilo_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_achievement_set_name_to_syuilo_beskrivelse"
           }
         },
         "pl" : {
@@ -29350,13 +29488,13 @@
             "value" : "misskey_achievement_set_name_to_syuilo_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_set_name_to_syuilo_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_set_name_to_syuilo_title"
@@ -29474,16 +29612,16 @@
             "value" : "misskey_achievement_smash_test_notification_button_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_smash_test_notification_button_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_smash_test_notification_button_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_smash_test_notification_button_beskrivelse"
           }
         },
         "pl" : {
@@ -29598,16 +29736,16 @@
             "value" : "misskey_achievement_smash_test_notification_button_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilsøk_prestasjon_smash_test_notification_button_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_smash_test_notification_button_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilsøk_prestasjon_smash_test_notification_button_tittel"
           }
         },
         "pl" : {
@@ -29722,16 +29860,16 @@
             "value" : "misskey_achievement_tutorial_completed_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uholdende_prestasjon_opplæring_fullstendig_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_tutorial_completed_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "uholdende_prestasjon_opplæring_fullstendig_beskrivelse"
           }
         },
         "pl" : {
@@ -29846,16 +29984,16 @@
             "value" : "misskey_achievement_tutorial_completed_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uoppdagende_prestasjon_opplæring_komplett_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_tutorial_completed_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "uoppdagende_prestasjon_opplæring_komplett_tittel"
           }
         },
         "pl" : {
@@ -29970,13 +30108,13 @@
             "value" : "misskey_achievement_view_achievements3min_description"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_view_achievements3min_description"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_view_achievements3min_description"
@@ -30094,13 +30232,13 @@
             "value" : "misskey_achievement_view_achievements3min_title"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_view_achievements3min_title"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_view_achievements3min_title"
@@ -30218,16 +30356,16 @@
             "value" : "misskey_achievement_view_instance_chart_description"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_view_instance_chart_beskrivelse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_view_instance_chart_description"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_view_instance_chart_beskrivelse"
           }
         },
         "pl" : {
@@ -30342,16 +30480,16 @@
             "value" : "misskey_achievement_view_instance_chart_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_prestasjon_view_instance_chart_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_achievement_view_instance_chart_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_prestasjon_view_instance_chart_tittel"
           }
         },
         "pl" : {
@@ -30466,16 +30604,16 @@
             "value" : "misskey_notification_achievement_get"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uforskyld_varsl_prestasjon_tjent"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_notification_achievement_earned"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "uforskyld_varsl_prestasjon_tjent"
           }
         },
         "pl" : {
@@ -30590,16 +30728,16 @@
             "value" : "misskey_notification_app"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feil_varsling_app"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ontbrekend_notification_app"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feil_varsling_app"
           }
         },
         "pl" : {
@@ -30714,16 +30852,16 @@
             "value" : "misskey_notification_follow"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feil_varsling_følg"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "missent_notification_follow"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feil_varsling_følg"
           }
         },
         "pl" : {
@@ -30838,16 +30976,16 @@
             "value" : "misskey_notification_follow_request_accepted"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "godtatt feil_notification_follow_request_"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_notification_follow_request_accepted"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "godtatt feil_notification_follow_request_"
           }
         },
         "pl" : {
@@ -30962,16 +31100,16 @@
             "value" : "misskey_notification_member"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_varsling_nevn"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_notification_mention"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskøy_varsling_nevn"
           }
         },
         "pl" : {
@@ -31086,16 +31224,16 @@
             "value" : "misskey_notification_poll_ended"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uvisning_varsler_poll_stoppet"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_notification_poll_eindigd"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uvisning_varsler_poll_stoppet"
           }
         },
         "pl" : {
@@ -31210,16 +31348,16 @@
             "value" : "misskey_notification_quote"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feil_melding_sitat"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_notification_quote"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feil_melding_sitat"
           }
         },
         "pl" : {
@@ -31334,16 +31472,16 @@
             "value" : "misskey_notification_reactions"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feil_varsling_reaksjon"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_notification_reactie"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feil_varsling_reaksjon"
           }
         },
         "pl" : {
@@ -31458,16 +31596,16 @@
             "value" : "misskey_notification_receive_follow_request"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_notification_receive_follow_forespørsel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_notification_receive_follow_request"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_notification_receive_follow_forespørsel"
           }
         },
         "pl" : {
@@ -31582,16 +31720,16 @@
             "value" : "misskey_notification_renote"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_varsling_endre stemme"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_notification_renote"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_varsling_endre stemme"
           }
         },
         "pl" : {
@@ -31706,16 +31844,16 @@
             "value" : "misskey_notification_reply"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feil_varsling_svar"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_notification_reply"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feil_varsling_svar"
           }
         },
         "pl" : {
@@ -31830,16 +31968,16 @@
             "value" : "misskey_notification_unknwen"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_varsling_unknwon"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "misskey_notification_unknwon"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "feilskey_varsling_unknwon"
           }
         },
         "pl" : {
@@ -31990,16 +32128,16 @@
             "value" : "혼합"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blandet"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gemengd"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blandet"
           }
         },
         "pl" : {
@@ -32168,16 +32306,16 @@
             "value" : "더보기"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mer"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "meer"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mer"
           }
         },
         "pl" : {
@@ -32346,16 +32484,16 @@
             "value" : "더보기"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mer"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meer"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mer"
           }
         },
         "pl" : {
@@ -32433,6 +32571,7 @@
       }
     },
     "more_panel_customize" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -32494,16 +32633,16 @@
             "value" : "more_panel_customize"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mer_panel_tilpasse"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "meer_panel_aanpassen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mer_panel_tilpasse"
           }
         },
         "pl" : {
@@ -32648,16 +32787,16 @@
             "value" : "음소거"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "demp"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dempen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "demp"
           }
         },
         "pl" : {
@@ -32796,16 +32935,16 @@
             "value" : "%@ はまだ完了していません。"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ikke ferdig enda for %@"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nog niet klaar voor %@"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ikke ferdig enda for %@"
           }
         },
         "pl" : {
@@ -32914,16 +33053,16 @@
             "value" : "notification_compose_error"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "varsling_kompose_error"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "notification_compose_error"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "varsling_kompose_error"
           }
         },
         "pl" : {
@@ -33038,16 +33177,16 @@
             "value" : "notification_compose_success"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "varsling_compose_success"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "notification_compose_success"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "varsling_compose_success"
           }
         },
         "pl" : {
@@ -33162,16 +33301,16 @@
             "value" : "notification_login_expired"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "varsling_login_utløpt"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "notification_login_expired"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "varsling_login_utløpt"
           }
         },
         "pl" : {
@@ -33286,16 +33425,16 @@
             "value" : "notification_type_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "varsling_type_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "notification_type_title"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "varsling_type_tittel"
           }
         },
         "pl" : {
@@ -33347,6 +33486,9 @@
           }
         }
       }
+    },
+    "Ok" : {
+
     },
     "poll_expired" : {
       "localizations" : {
@@ -33410,16 +33552,16 @@
             "value" : "poll_expired"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "poll_utløpt"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "poll_verlopen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "poll_utløpt"
           }
         },
         "pl" : {
@@ -33534,16 +33676,16 @@
             "value" : "poll_expires_at"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "poll_utløpe_på"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "poll_expires_om"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "poll_utløpe_på"
           }
         },
         "pl" : {
@@ -33658,16 +33800,16 @@
             "value" : "poll_vote"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poll_stemme"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "stemmen_stemmen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Poll_stemme"
           }
         },
         "pl" : {
@@ -33782,13 +33924,13 @@
             "value" : "profile_tab_likes"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "profile_tab_likes"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "profile_tab_likes"
@@ -33906,16 +34048,16 @@
             "value" : "profile_tab_media"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "profil_tab_media"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tabblad_media"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "profil_tab_media"
           }
         },
         "pl" : {
@@ -34030,16 +34172,16 @@
             "value" : "profile_tab_replies"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "profil_tab_svar"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "profile_tab_posts"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "profil_tab_svar"
           }
         },
         "pl" : {
@@ -34154,13 +34296,13 @@
             "value" : "profile_tab_status"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "profile_tab_status"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "profile_tab_status"
@@ -34278,16 +34420,16 @@
             "value" : "引用"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tilbud"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "offerte"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "tilbud"
           }
         },
         "pl" : {
@@ -34402,16 +34544,16 @@
             "value" : "reaction_add"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "reaksjon_legg til"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toetsen_toevoegen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "reaksjon_legg til"
           }
         },
         "pl" : {
@@ -34526,16 +34668,16 @@
             "value" : "reaction_remove"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "reaksjon_fjern"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "reaction_verwijderen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "reaksjon_fjern"
           }
         },
         "pl" : {
@@ -34650,16 +34792,16 @@
             "value" : "フォローリクエストを拒否"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avvis følge-forespørsel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Volgverzoek afwijzen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avvis følge-forespørsel"
           }
         },
         "pl" : {
@@ -34774,16 +34916,16 @@
             "value" : "リレーション(_B)"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "relasjon_sperret"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Relatie_geblokkeerd"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "relasjon_sperret"
           }
         },
         "pl" : {
@@ -34898,16 +35040,16 @@
             "value" : "relation_follow"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "relasjon_følger"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "relatie_volgen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "relasjon_følger"
           }
         },
         "pl" : {
@@ -35022,16 +35164,16 @@
             "value" : "リレーションのフォロー"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "relasjon_følgende"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "relatie_volgen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "relasjon_følgende"
           }
         },
         "pl" : {
@@ -35083,6 +35225,9 @@
           }
         }
       }
+    },
+    "relation_is_fans" : {
+
     },
     "relation_requested" : {
       "localizations" : {
@@ -35146,16 +35291,16 @@
             "value" : "リクエストされた"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "relasjon_forespurt"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "relatie_aangevraagd"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "relasjon_forespurt"
           }
         },
         "pl" : {
@@ -35300,16 +35445,16 @@
             "value" : "답장"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "svar"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Beantwoorden"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "svar"
           }
         },
         "pl" : {
@@ -35478,16 +35623,16 @@
             "value" : "%@에게 답장"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Svar til %@"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Antwoorden aan %@"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Svar til %@"
           }
         },
         "pl" : {
@@ -35656,16 +35801,16 @@
             "value" : "보고서"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "rapport"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rapporteren"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "rapport"
           }
         },
         "pl" : {
@@ -35834,16 +35979,16 @@
             "value" : "리트윗"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "retweet"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Retweeten"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "retweet"
           }
         },
         "pl" : {
@@ -35982,16 +36127,16 @@
             "value" : "retweet_remove"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "retweet_fjern"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "retweet_verwijderen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "retweet_fjern"
           }
         },
         "pl" : {
@@ -36043,6 +36188,9 @@
           }
         }
       }
+    },
+    "rss_add_source" : {
+
     },
     "rss_title" : {
       "localizations" : {
@@ -36112,13 +36260,13 @@
             "value" : "RSS"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "RSS"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "RSS"
@@ -36236,16 +36384,16 @@
             "value" : "検索の状態"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "søk_status"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "zoek_status"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "søk_status"
           }
         },
         "pl" : {
@@ -36360,16 +36508,16 @@
             "value" : "検索タイトル"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "søk_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "zoek_titel"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "søk_tittel"
           }
         },
         "pl" : {
@@ -36484,16 +36632,16 @@
             "value" : "search_users"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "søk_brukere"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "zoekgebruikers"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "søk_brukere"
           }
         },
         "pl" : {
@@ -36609,16 +36757,16 @@
             "value" : "sensitive_button_show"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sensitiv_button_show"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "gevoelig_button_show"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sensitiv_button_show"
           }
         },
         "pl" : {
@@ -36769,16 +36917,16 @@
             "value" : "설정"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Innstillinger"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Instellingen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Innstillinger"
           }
         },
         "pl" : {
@@ -36854,6 +37002,9 @@
           }
         }
       }
+    },
+    "show_media_button" : {
+      "comment" : "Button to show media attachments"
     },
     "social_title" : {
       "localizations" : {
@@ -36935,16 +37086,16 @@
             "value" : "소셜"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sosial"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sociaal"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sosial"
           }
         },
         "pl" : {
@@ -37009,6 +37160,25 @@
         }
       }
     },
+    "storage_clear_database_cache_confirm" : {
+
+    },
+    "storage_clear_database_cache%lld %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "storage_clear_database_cache%1$lld %2$lld"
+          }
+        }
+      }
+    },
+    "storage_clear_image_cache" : {
+
+    },
+    "storage_clear_image_cache_confirm" : {
+
+    },
     "storage_title" : {
       "localizations" : {
         "ar" : {
@@ -37071,16 +37241,16 @@
             "value" : "storage_title"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lagre_tittel"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "storage_titel"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "lagre_tittel"
           }
         },
         "pl" : {
@@ -37132,6 +37302,36 @@
           }
         }
       }
+    },
+    "tab_settings_delete" : {
+
+    },
+    "tab_settings_edit" : {
+
+    },
+    "tab_settings_edit_icon_header" : {
+
+    },
+    "tab_settings_edit_title_header" : {
+
+    },
+    "tab_settings_edit_title_placeholder" : {
+
+    },
+    "tab_settings_edit_use_avatar" : {
+
+    },
+    "tab_settings_enable_mixed_timeline_desc" : {
+
+    },
+    "tab_settings_enable_mixed_timeline_title" : {
+
+    },
+    "tab_settings_section_main_tabs" : {
+
+    },
+    "tab_settings_title" : {
+
     },
     "unblock" : {
       "localizations" : {
@@ -37225,16 +37425,16 @@
             "value" : "차단 해제"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "oppheve blokkering"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Deblokkeren"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "oppheve blokkering"
           }
         },
         "pl" : {
@@ -37373,16 +37573,16 @@
             "value" : "と違って"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misliker"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vergelijkbaar"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misliker"
           }
         },
         "pl" : {
@@ -37527,16 +37727,16 @@
             "value" : "음소거 해제"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "udemp"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dempen opheffen"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "udemp"
           }
         },
         "pl" : {
@@ -37675,16 +37875,16 @@
             "value" : "ユーザーハンドル："
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brukerhåndtak"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "gebruiker handgreep"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "brukerhåndtak"
           }
         },
         "pl" : {
@@ -37799,16 +37999,16 @@
             "value" : "ユーザー名"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brukernavn"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "gebruikersnaam"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "brukernavn"
           }
         },
         "pl" : {
@@ -37923,16 +38123,16 @@
             "value" : "vvo_notification_like"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vvo_beskjed_like"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "vind-ik-leuk"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "vvo_beskjed_like"
           }
         },
         "pl" : {
@@ -38047,13 +38247,13 @@
             "value" : "xqt_notification_member"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "xqt_notification_mention"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "xqt_notification_mention"
@@ -38171,13 +38371,13 @@
             "value" : "xqt_notification_retweet"
           }
         },
-        "nl" : {
+        "nb" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "xqt_notification_retweet"
           }
         },
-        "no" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "xqt_notification_retweet"

@@ -563,7 +563,7 @@ internal fun WindowScope.RouteContent(
                         Timeline(
                             Misskey.AntennasTimelineTabItem(
                                 account = route.accountType,
-                                id = it.id,
+                                antennasId = it.id,
                                 metaData =
                                     TabMetaData(
                                         title = TitleType.Text(it.title),

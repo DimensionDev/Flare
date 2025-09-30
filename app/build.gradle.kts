@@ -141,7 +141,6 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.compose.webview)
     implementation(projects.shared)
-    implementation(projects.shared.ui)
     implementation(projects.composeUi)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)
@@ -180,7 +179,7 @@ ktlint {
     }
 }
 
-if (project.file("google-services.json").exists()) {    
+if (project.file("google-services.json").exists()) {
     afterEvaluate {
         val uploadCrashlyticsMappingFileRelease by tasks
         val processDebugGoogleServices by tasks

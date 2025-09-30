@@ -61,7 +61,6 @@ public class HomeTabsPresenter :
             .combine(
                 settingsRepository.tabSettings.distinctUntilChangedBy { it.secondaryItems },
             ) { account, tabsState ->
-                println("Active account changed: $account, tabsState: $tabsState")
                 if (account == null) {
                     State.HomeTabState(
                         primary =

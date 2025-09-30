@@ -69,6 +69,9 @@ internal class VVOService(
         val response =
             ktorClient {
                 followRedirects = false
+                install(VVOHeaderPlugin) {
+                    this.chocolateFlow = this@VVOService.chocolateFlow
+                }
             }.get("https://$vvoHost/n/$screenName")
         return response.headers["Location"]?.let {
             return it.split('/').last()

@@ -4,12 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.ui.model.UiKeywordFilter
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.collections.immutable.ImmutableList
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -53,7 +53,7 @@ public class LocalFilterPresenter :
 
 @Immutable
 public interface LocalFilterState {
-    public val items: UiState<ImmutableListWrapper<UiKeywordFilter>>
+    public val items: UiState<ImmutableList<UiKeywordFilter>>
 
     public fun delete(keyword: String)
 

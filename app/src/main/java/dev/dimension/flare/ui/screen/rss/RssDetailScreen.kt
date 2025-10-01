@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -247,6 +248,10 @@ internal fun RssDetailScreen(
                     AndroidView(
                         modifier =
                             Modifier
+                                // https://stackoverflow.com/questions/79334922
+                                // idk why the webview will crash on aosp
+                                // and idk why alpha 0.99f can fix it
+                                .alpha(0.99f)
                                 .listCard()
                                 .background(MaterialTheme.colorScheme.surface)
                                 .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),

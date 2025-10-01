@@ -926,6 +926,9 @@
     "Add" : {
 
     },
+    "add_rss_title" : {
+
+    },
     "ai_config_options_section_header" : {
 
     },
@@ -6443,6 +6446,9 @@
     "Done" : {
 
     },
+    "edit_rss_title" : {
+
+    },
     "end_of_list" : {
 
     },
@@ -8180,6 +8186,9 @@
           }
         }
       }
+    },
+    "Invalid URL" : {
+
     },
     "like" : {
       "localizations" : {
@@ -36192,6 +36201,24 @@
     "rss_add_source" : {
 
     },
+    "rss_feed_header" : {
+
+    },
+    "rss_hub_header" : {
+
+    },
+    "rss_hub_host_placeholder" : {
+
+    },
+    "rss_hub_server_header" : {
+
+    },
+    "rss_item_title" : {
+
+    },
+    "rss_sources_header" : {
+
+    },
     "rss_title" : {
       "localizations" : {
         "ar" : {
@@ -36321,6 +36348,12 @@
           }
         }
       }
+    },
+    "rss_url_header" : {
+
+    },
+    "rss_url_placeholder" : {
+
     },
     "search_status" : {
       "localizations" : {

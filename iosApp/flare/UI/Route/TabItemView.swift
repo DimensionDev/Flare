@@ -27,6 +27,8 @@ extension TabItem {
             AllFeedScreen(accountType: feedsTabItem.account)
         case .profileTabItem(let profileTabItem):
             ProfileScreen(accountType: profileTabItem.account, userKey: nil)
+        case .rssTabItem(let rssTabItem):
+            RssScreen()
         default:
             Text("Not done yet for \(self)")
         }

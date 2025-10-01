@@ -57,6 +57,8 @@ enum Route: Hashable, Identifiable {
             AiConfigScreen()
         case .tabSettings:
             TabSettingsScreen()
+        case .rssDetail(let url):
+            RssDetailScreen(url: url)
         default:
             Text("Not done yet for \(self)")
         }

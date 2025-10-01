@@ -59,6 +59,8 @@ public class EditRssSourcePresenter(
 
         public val data: UiState<UiRssSource>
         public val checkState: UiState<CheckRssSourcePresenter.State.RssState>
+
+        public val canSave: Boolean
     }
 
     @Composable
@@ -183,10 +185,26 @@ public class EditRssSourcePresenter(
                         }
                 }
             }
+        val canSave =
+            when (val state = checkRssSourcePresenterState.state) {
+                is UiState.Success ->
+                    when (state.data) {
+                        is RssState.RssFeed -> true
+                        RssState.RssHub -> when (val inputState = inputState) {
+                            is State.RssInputState.RssHub ->
+                                inputState.checkState is UiState.Success
+                            else -> false
+                        }
+                        is RssState.RssSources -> state.data.sources.isNotEmpty()
+                    }
+                else -> false
+            }
         return object : State {
             override val checkState = checkRssSourcePresenterState.state
 
             override val inputState = inputState
+
+            override val canSave = canSave
 
             override fun checkUrl(value: String) {
                 url = value

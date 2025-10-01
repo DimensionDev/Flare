@@ -10,12 +10,14 @@ struct TabSettingsScreen: View {
     @State private var editItem: TabItem? = nil
     var body: some View {
         List {
-            Section {
-                Toggle(isOn: $enableMixedTimeline) {
-                    Text("tab_settings_enable_mixed_timeline_title")
-                    Text("tab_settings_enable_mixed_timeline_desc")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+            if tabItems.count > 1 {
+                Section {
+                    Toggle(isOn: $enableMixedTimeline) {
+                        Text("tab_settings_enable_mixed_timeline_title")
+                        Text("tab_settings_enable_mixed_timeline_desc")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
             Section {
@@ -128,9 +130,6 @@ struct TabSettingsScreen: View {
                             tabItems.append(tabItem)
                         }
                     },
-                    onAddRssSource: {
-                        
-                    }
                 )
             }
         }
@@ -251,7 +250,7 @@ struct AddTabSheet: View {
     let selectedTabs: [TabItem]
     let onDelete: (TabItem) -> Void
     let onAdd: (TabItem) -> Void
-    let onAddRssSource: () -> Void
+    @State private var showAddRssSource = false
     @State private var selectedIndex = 0
     var body: some View {
         VStack {
@@ -333,7 +332,7 @@ struct AddTabSheet: View {
                         }
                     }
                     Button {
-                        onAddRssSource()
+                        showAddRssSource = true
                     } label: {
                         Label {
                             Text("rss_add_source")
@@ -371,6 +370,11 @@ struct AddTabSheet: View {
                         Image("fa-xmark")
                     }
                 }
+            }
+        }
+        .sheet(isPresented: $showAddRssSource) {
+            NavigationStack {
+                EditRssSheet(id: nil)
             }
         }
     }
@@ -471,12 +475,10 @@ extension AddTabSheet {
         filterIsTimeline: Bool,
         onDelete: @escaping (TabItem) -> Void,
         onAdd: @escaping (TabItem) -> Void,
-        onAddRssSource: @escaping () -> Void
     ) {
         self.selectedTabs = selectedTabs
         self.onDelete = onDelete
         self.onAdd = onAdd
-        self.onAddRssSource = onAddRssSource
         self._presenter = .init(wrappedValue: .init(presenter: AllTabsPresenter(filterIsTimeline: filterIsTimeline)))
     }
 }

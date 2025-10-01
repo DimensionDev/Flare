@@ -1,30 +1,27 @@
 package dev.dimension.flare.data.network.rss
 
-import platform.Foundation.NSURL
-import platform.Foundation.NSURLRequest
-import platform.WebKit.WKNavigation
-import platform.WebKit.WKNavigationDelegateProtocol
-import platform.WebKit.WKWebView
-import platform.darwin.NSObject
+import dev.dimension.flare.common.encodeJson
 
-internal actual class NativeWebScraper {
+internal actual class NativeWebScraper(
+    private val appleWebScraper: AppleWebScraper
+) {
     actual fun parse(
         url: String,
         scriptToInject: String,
         callback: (String) -> Unit,
     ) {
-        val webview = WKWebView()
-        webview.navigationDelegate =
-            object : NSObject(), WKNavigationDelegateProtocol {
-                override fun webView(
-                    webView: WKWebView,
-                    didFinishNavigation: WKNavigation?,
-                ) {
-                    webView.evaluateJavaScript(scriptToInject) { result, error ->
-                        callback.invoke(result?.toString() ?: "null")
-                    }
-                }
-            }
-        webview.loadRequest(NSURLRequest(NSURL.URLWithString(url)!!))
+        appleWebScraper.parse(
+            url = url,
+            callback = {
+                callback.invoke(it.encodeJson())
+            },
+        )
     }
+}
+
+public interface AppleWebScraper {
+    public fun parse(
+        url: String,
+        callback: (DocumentData) -> Unit,
+    )
 }

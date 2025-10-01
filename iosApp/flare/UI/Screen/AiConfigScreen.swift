@@ -11,9 +11,9 @@ struct AiConfigScreen: View {
                 TextField("ai_config_server_provider_placeholder", text: $serverName, prompt: Text("ai_config_server_provider_placeholder"))
                     .safeAreaInset(edge: .trailing) {
                         StateView(state: serverPresenter.state.serverValidation) { _ in
-                            Image("fa-check").foregroundColor(.green)
+                            Image("fa-circle-check").foregroundColor(.green)
                         } errorContent: { _ in
-                            Image("fa-xmark").foregroundColor(.red)
+                            Image("fa-circle-exclamation").foregroundColor(.red)
                         } loadingContent: {
                             ProgressView().frame(width: 20, height: 20)
                         }

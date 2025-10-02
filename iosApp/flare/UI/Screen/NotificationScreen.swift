@@ -35,7 +35,16 @@ struct NotificationScreen: View {
                         Picker("notification_type_title", selection: $selectedType) {
                             ForEach(0..<allTypes.count) { index in
                                 if let type = allTypes[index] as? NotificationFilter {
-                                    Text("\(type.name)").tag(type)
+                                    switch type {
+                                    case .all:
+                                        Text("notification_type_all").tag(type)
+                                    case .comment:
+                                        Text("notification_type_comments").tag(type)
+                                    case .like:
+                                        Text("notification_type_likes").tag(type)
+                                    case .mention:
+                                        Text("notification_type_mentions").tag(type)
+                                    }
                                 }
                             }
                         }

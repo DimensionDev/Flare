@@ -26,6 +26,6 @@ struct StatusDetailScreen: View {
         .refreshable {
             try? await presenter.state.refresh()
         }
-        .navigationTitle("Detail")
+        .navigationTitle("status_detail_title")
     }
 }

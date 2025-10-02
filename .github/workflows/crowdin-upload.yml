@@ -5,7 +5,7 @@ on:
     branches: [master]
     paths:
       - "**/values/strings.xml"
-      - "iosApp/iosApp/Localizable.xcstrings"
+      - "iosApp/flare/Localizable.xcstrings"
 
 jobs:
   crowdin:

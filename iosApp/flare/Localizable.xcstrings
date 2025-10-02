@@ -68164,7 +68164,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "清楚数据库缓存， %1$lld 用户和 %2$lld 状态将被删除"
+            "value" : "清除数据库缓存， %1$lld 用户和 %2$lld 状态将被删除"
           }
         }
       }

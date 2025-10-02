@@ -28,6 +28,8 @@ public class AntennasListPresenter(
         public val data: PagingState<UiList>
 
         public fun refresh()
+
+        public suspend fun refreshSuspend()
     }
 
     @Composable
@@ -49,6 +51,10 @@ public class AntennasListPresenter(
                 scope.launch {
                     data.refreshSuspend()
                 }
+            }
+
+            override suspend fun refreshSuspend() {
+                data.refreshSuspend()
             }
         }
     }

@@ -98,7 +98,6 @@ struct LocalFilterEditSheet: View {
                     } icon: {
                         Image("fa-xmark")
                     }
-
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing) {

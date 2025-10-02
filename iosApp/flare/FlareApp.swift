@@ -4,7 +4,9 @@ import KotlinSharedUI
 @main
 struct FlareApp: App {
     init() {
-        ComposeUIHelper.shared.initialize(inAppNotification: SwiftInAppNotification.shared)
+        ComposeUIHelper.shared.initialize(
+            inAppNotification: SwiftInAppNotification.shared,
+        )
     }
     var body: some Scene {
         WindowGroup {

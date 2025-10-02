@@ -19,7 +19,7 @@ internal actual object PlatformColorScheme {
         get() = MaterialTheme.colorScheme.error
     actual val caption: Color
         @Composable
-        get() = MaterialTheme.colorScheme.onSurfaceVariant
+        get() = MaterialTheme.colorScheme.outline
     actual val outline: Color
         @Composable
         get() = MaterialTheme.colorScheme.outlineVariant

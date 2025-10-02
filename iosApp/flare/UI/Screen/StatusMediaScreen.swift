@@ -47,16 +47,25 @@ struct StatusMediaScreen: View {
         .zoomable(min: 1, max: 5)
         .background(.black.opacity(opacity))
         .background(ClearFullScreenBackground())
-        .overlay(alignment: .topLeading) {
-            Button {
-                dismiss()
-            } label: {
-                Image("fa-xmark")
+//        .overlay(alignment: .topLeading) {
+//            Button {
+//                dismiss()
+//            } label: {
+//                Image("fa-xmark")
+//            }
+//            .buttonStyle(.glass)
+//            .padding()
+//        }
+        .ignoresSafeArea()
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image("fa-xmark")
+                }
             }
-            .buttonStyle(.glass)
-            .padding()
         }
-        .colorScheme(.dark)
     }
 }
 

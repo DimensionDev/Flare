@@ -1,6 +1,7 @@
 import SwiftUI
 import KotlinSharedUI
 import TipKit
+import LazyPager
 
 struct StatusMediaView: View {
     let data: [any UiMedia]
@@ -68,11 +69,13 @@ struct StatusMediaView: View {
                 }
             }
         }
-        .fullScreenCover(isPresented: $showFullScreen, onDismiss: {
-            showFullScreen = false
-        }, content: {
-            StatusMediaScreen(data: data, selectedIndex: data.firstIndex(where: { $0.url == selectedItem?.url }) ?? 0)
-        })
+        .fullScreenCover(isPresented: $showFullScreen) {
+            NavigationStack {
+                StatusMediaScreen(data: data, selectedIndex: data.firstIndex(where: { $0.url == selectedItem?.url }) ?? 0)
+            }
+            .background(ClearFullScreenBackground())
+            .colorScheme(.dark)
+        }
         .blur(radius: isBlur ? 20 : 0)
         .overlay(
             alignment: isBlur ? .center : .topLeading

@@ -3,7 +3,9 @@ import KotlinSharedUI
 import Kingfisher
 
 struct FeedView: View {
+    @Environment(\.openURL) private var openURL
     let data: UiTimeline.ItemContentFeed
+    @State private var showDetail = false
     var body: some View {
         VStack(
             alignment: .leading
@@ -23,6 +25,7 @@ struct FeedView: View {
                 Text(desc)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .lineLimit(2)
             }
             HStack {
                 NetworkImage(data: data.sourceIcon)
@@ -35,5 +38,18 @@ struct FeedView: View {
                 }
             }
         }
+        .onTapGesture {
+            showDetail = true
+        }
+        .sheet(isPresented: $showDetail) {
+            if let url = URL(string: data.url) {
+                SafariView(url: url)
+            } else {
+                Text("Invalid URL")
+            }
+        }
+//        .onTapGesture {
+//            data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+//        }
     }
 }

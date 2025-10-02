@@ -43,8 +43,8 @@ struct UserLoadingView: View {
             VStack(
                 alignment: .leading
             ) {
-                Text("user name")
-                Text("user handle")
+                Text("#loading")
+                Text("#loading")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

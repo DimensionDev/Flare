@@ -20,7 +20,7 @@ struct TimelineUserView: View {
                                 acceptFollowButton.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                             } label: {
                                 Label {
-                                    Text("Accept follow request")
+                                    Text("accept_follow_request")
                                 } icon: {
                                     Image("fa-check")
                                 }
@@ -30,7 +30,7 @@ struct TimelineUserView: View {
                                 rejectFollowButton.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                             } label: {
                                 Label {
-                                    Text("Reject follow request")
+                                    Text("reject_follow_request")
                                 } icon: {
                                     Image("fa-xmark")
                                 }

@@ -38,9 +38,9 @@ struct UiListPlaceholder: View {
                     .fill(.placeholder)
                     .frame(width: 24, height: 24)
                     .clipShape(.circle)
-                Text("list title")
+                Text("#loading")
             }
-            Text("list description")
+            Text("#loading")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

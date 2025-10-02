@@ -67,7 +67,7 @@ struct CommonProfileHeader: View {
                                         Text("relation_is_fans")
                                     }
                                 case .loading: Button(action: {}, label: {
-                                    Text("Button")
+                                    Text("#loading")
                                 })
                                 .buttonStyle(.borderless)
                                 .redacted(reason: .placeholder)

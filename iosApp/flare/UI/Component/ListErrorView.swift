@@ -12,7 +12,7 @@ struct ListErrorView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 64, height: 64)
-                Text("error_login_expired\(expiredError.accountKey)")
+                Text("error_login_expired \(expiredError.accountKey)")
                     .multilineTextAlignment(.center)
                     .font(.headline)
                 Button {

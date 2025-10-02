@@ -354,4 +354,13 @@
     <string name="social_title">Sosial</string>
     <string name="antenna_title">Antenne</string>
     <string name="mixed_timeline_title">Blandet</string>
+    <string name="settings_about_description">Den ultimate neste generasjonen med åpen AI drevet desentralisert sosial nettverksklient.</string>
+    <string name="settings_about_source_code">Kildekode</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Bli med i vår Telegram gruppe</string>
+    <string name="settings_about_discord_description">Bli med på vår Discord-server</string>
+    <string name="settings_about_line_description">Bli med i vår linjegruppe</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Hjelp oss å oversette Flare</string>
+    <string name="settings_privacy_policy">Retningslinjer for personvern</string>
 </resources>

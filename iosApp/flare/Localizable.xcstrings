@@ -465,7 +465,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "about_title"
+            "value" : "このアプリについて"
           }
         },
         "ko" : {
@@ -549,7 +549,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "about_title"
+            "value" : "关于"
           }
         },
         "zh-Hant" : {
@@ -815,7 +815,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "account_management_title"
+            "value" : "账户管理"
           }
         }
       }
@@ -2541,7 +2541,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "all_feed_section_explore_feeds"
+            "value" : "发现订阅源"
           }
         },
         "zh-Hant" : {
@@ -2725,7 +2725,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "all_feed_section_my_feeds"
+            "value" : "我的订阅"
           }
         },
         "zh-Hant" : {
@@ -2931,7 +2931,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Toutes les listes_titre"
+            "value" : "Liste"
           }
         },
         "he" : {
@@ -2949,7 +2949,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "tutti_liste_titolo"
+            "value" : "Elenco"
           }
         },
         "ja" : {
@@ -3039,7 +3039,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "所有列表标题"
+            "value" : "列表"
           }
         },
         "zh-Hant" : {
@@ -6291,7 +6291,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "显示标题"
+            "value" : "外观"
           }
         },
         "zh-Hant" : {
@@ -7495,7 +7495,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_notification_follow"
+            "value" : "があなたをフォローしました"
           }
         },
         "ko" : {
@@ -7579,7 +7579,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bluesky_notification_follow_"
+            "value" : "关注了你"
           }
         },
         "zh-Hant" : {
@@ -7863,7 +7863,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_notification_like"
+            "value" : "お気に入り"
           }
         },
         "ko" : {
@@ -7947,7 +7947,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_notification_like"
+            "value" : "收藏了"
           }
         },
         "zh-Hant" : {
@@ -7981,19 +7981,19 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_notifikace_mention"
+            "value" : "vás zmínil"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_notification_mention"
+            "value" : "nævnte dig"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_Benachrichtigung_Erwähnung"
+            "value" : "erwähnte dich"
           }
         },
         "el" : {
@@ -8017,13 +8017,13 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_notification_mention"
+            "value" : "mainitsi sinut"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mention de notification bleue"
+            "value" : "vous a mentionné"
           }
         },
         "he" : {
@@ -8041,13 +8041,13 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_notification_mention"
+            "value" : "ti ha menzionato"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_notification_member"
+            "value" : "にメンションされました"
           }
         },
         "ko" : {
@@ -8059,7 +8059,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_notification_mention"
+            "value" : "noemde je"
           }
         },
         "no" : {
@@ -8077,19 +8077,19 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "notificação_azul_de_referência"
+            "value" : "mencionou você"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "notificação_azul_de_referência"
+            "value" : "mencionou você"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_notification_mentionare"
+            "value" : "te-a menționat"
           }
         },
         "ru" : {
@@ -8107,7 +8107,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nämn"
+            "value" : "nämnde dig"
           }
         },
         "tr" : {
@@ -8131,7 +8131,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bruesky_notification_motice"
+            "value" : "提及了你"
           }
         },
         "zh-Hant" : {
@@ -8231,7 +8231,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_notification_quote"
+            "value" : "が引用しました"
           }
         },
         "ko" : {
@@ -8315,7 +8315,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bluesky_notification_引用"
+            "value" : "引用"
           }
         },
         "zh-Hant" : {
@@ -8415,7 +8415,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_notification_reply"
+            "value" : "があなたに返信しました"
           }
         },
         "ko" : {
@@ -8499,7 +8499,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bluesky_notification_reply"
+            "value" : "回复了你"
           }
         },
         "zh-Hant" : {
@@ -8683,7 +8683,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bruesky_notification_repose"
+            "value" : "转嘟了"
           }
         },
         "zh-Hant" : {
@@ -8867,7 +8867,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bluesky_notification_starterpackined"
+            "value" : "初始包"
           }
         },
         "zh-Hant" : {
@@ -9051,7 +9051,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bluesky_notification_unknown"
+            "value" : "未知"
           }
         },
         "zh-Hant" : {
@@ -9151,7 +9151,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "レポート"
+            "value" : "通報"
           }
         },
         "ko" : {
@@ -11727,7 +11727,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bookmark_add"
+            "value" : "ブックマークを追加"
           }
         },
         "ko" : {
@@ -11811,7 +11811,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "书签添加"
+            "value" : "添加书签"
           }
         },
         "zh-Hant" : {
@@ -11911,7 +11911,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bookmark_remove"
+            "value" : "ブックマークを削除"
           }
         },
         "ko" : {
@@ -11995,7 +11995,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "书签删除"
+            "value" : "删除书签"
           }
         },
         "zh-Hant" : {
@@ -12895,19 +12895,19 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "kompost_cw_zástupné_"
+            "value" : "Upozornění na obsah"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "komponist_cw_pladsholder"
+            "value" : "Advarsel om indhold"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_cw_placeholder"
+            "value" : "Inhaltswarnung"
           }
         },
         "el" : {
@@ -12931,13 +12931,13 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_cw_placeholder"
+            "value" : "Sisällön varoitus"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_cw_placeholder"
+            "value" : "Avertissement de contenu"
           }
         },
         "he" : {
@@ -12955,13 +12955,13 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "nome_cw_segnaposto"
+            "value" : "Avviso contenuto"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_cw_placeholder"
+            "value" : "閲覧注意:"
           }
         },
         "ko" : {
@@ -12973,7 +12973,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_cw_placeholder"
+            "value" : "Waarschuwing inhoud"
           }
         },
         "no" : {
@@ -12991,19 +12991,19 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "composto_cw_placeholder"
+            "value" : "Aviso de conteúdo"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "composto_cw_placeholder"
+            "value" : "Aviso de conteúdo"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Substituent"
+            "value" : "Avertisment conținut"
           }
         },
         "ru" : {
@@ -13021,7 +13021,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Platshållare"
+            "value" : "Varning för innehåll"
           }
         },
         "tr" : {
@@ -13045,7 +13045,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_cw_placeholder"
+            "value" : "内容警告"
           }
         },
         "zh-Hant" : {
@@ -13145,7 +13145,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_media_mark_sensitive"
+            "value" : "メディアを閲覧注意にする"
           }
         },
         "ko" : {
@@ -13229,7 +13229,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_media_mark_sensitive"
+            "value" : "将媒体标记为敏感内容"
           }
         },
         "zh-Hant" : {
@@ -13329,7 +13329,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_placeholder"
+            "value" : "何か起きているのでしょうか？"
           }
         },
         "ko" : {
@@ -13413,7 +13413,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_placeholder"
+            "value" : "发生什么事了？"
           }
         },
         "zh-Hant" : {
@@ -13549,7 +13549,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_poll_choice_placeholder"
+            "value" : "选项"
           }
         }
       }
@@ -13809,7 +13809,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_poll_type"
+            "value" : "投票类型"
           }
         }
       }
@@ -13903,7 +13903,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_poll_type_multiple"
+            "value" : "複数選択"
           }
         },
         "ko" : {
@@ -13987,7 +13987,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_poll_type_mult"
+            "value" : "多选"
           }
         },
         "zh-Hant" : {
@@ -14087,7 +14087,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_poll_type_single"
+            "value" : "単一選択"
           }
         },
         "ko" : {
@@ -14171,7 +14171,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_poll_type_single"
+            "value" : "单选"
           }
         },
         "zh-Hant" : {
@@ -14205,19 +14205,19 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_new"
+            "value" : "Napsat"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_new"
+            "value" : "Skriv"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_neu"
+            "value" : "Verfassen"
           }
         },
         "el" : {
@@ -14241,13 +14241,13 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_new"
+            "value" : "Luo"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nouveau titre"
+            "value" : "Composer"
           }
         },
         "he" : {
@@ -14265,13 +14265,13 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "composta_titolo_nuovo"
+            "value" : "Componi"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_new"
+            "value" : "作成"
           }
         },
         "ko" : {
@@ -14283,7 +14283,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "samenstellen_titel_nieuw"
+            "value" : "Samenstellen"
           }
         },
         "no" : {
@@ -14301,19 +14301,19 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "novo_título_de_comentário"
+            "value" : "Compor"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "novo_título_de_comentário"
+            "value" : "Compor"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "noul compus_titlu_"
+            "value" : "Compune"
           }
         },
         "ru" : {
@@ -14331,7 +14331,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nytt"
+            "value" : "Skriv"
           }
         },
         "tr" : {
@@ -14355,7 +14355,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_new"
+            "value" : "发帖"
           }
         },
         "zh-Hant" : {
@@ -14389,19 +14389,19 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_quote"
+            "value" : "Cenová nabídka"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_quote"
+            "value" : "Tilbud"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "komponiere_title_Zitat"
+            "value" : "Zitat"
           }
         },
         "el" : {
@@ -14425,13 +14425,13 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_quote"
+            "value" : "Tarjous"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Composer un titre de citation"
+            "value" : "Devis"
           }
         },
         "he" : {
@@ -14449,13 +14449,13 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "composta_titolo_citazione"
+            "value" : "Preventivo"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_quote"
+            "value" : "引用"
           }
         },
         "ko" : {
@@ -14467,7 +14467,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_quote"
+            "value" : "Offerte"
           }
         },
         "no" : {
@@ -14485,19 +14485,19 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "referência_da_título_cotação"
+            "value" : "Cotação"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "referência_da_título_cotação"
+            "value" : "Cotação"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_titlu_cota_"
+            "value" : "Ofertă"
           }
         },
         "ru" : {
@@ -14539,7 +14539,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_引用"
+            "value" : "引用"
           }
         },
         "zh-Hant" : {
@@ -14639,7 +14639,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_reply"
+            "value" : "返信"
           }
         },
         "ko" : {
@@ -14723,7 +14723,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "compose_title_reply"
+            "value" : "回复"
           }
         },
         "zh-Hant" : {
@@ -14751,13 +14751,13 @@
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "suprimir"
+            "value" : "Esborrar"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Smazat"
+            "value" : "Vymazat"
           }
         },
         "da" : {
@@ -14799,7 +14799,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Supprimer"
+            "value" : "Supprimez"
           }
         },
         "he" : {
@@ -14853,19 +14853,19 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eliminar"
+            "value" : "excluir"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Excluir"
+            "value" : "excluir"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Șterge"
+            "value" : "Ștergere"
           }
         },
         "ru" : {
@@ -14883,7 +14883,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ta bort"
+            "value" : "Radera"
           }
         },
         "tr" : {
@@ -15505,7 +15505,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "タグの検出"
+            "value" : "ハッシュタグトレンド"
           }
         },
         "ko" : {
@@ -15589,7 +15589,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "发现标签"
+            "value" : "热门话题标签"
           }
         },
         "zh-Hant" : {
@@ -15689,7 +15689,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "discover_title"
+            "value" : "見つける"
           }
         },
         "ko" : {
@@ -15773,7 +15773,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "discover_title"
+            "value" : "发现"
           }
         },
         "zh-Hant" : {
@@ -15873,7 +15873,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "discover_users"
+            "value" : "おすすめのユーザー"
           }
         },
         "ko" : {
@@ -15957,7 +15957,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "发现用户"
+            "value" : "推荐用户"
           }
         },
         "zh-Hant" : {
@@ -18257,7 +18257,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "首页"
+            "value" : "本站可见"
           }
         },
         "zh-Hant" : {
@@ -20631,7 +20631,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "local_filter_title"
+            "value" : "ローカルフィルター"
           }
         },
         "ko" : {
@@ -20715,7 +20715,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "本地筛选器标题"
+            "value" : "本地过滤器"
           }
         },
         "zh-Hant" : {
@@ -20828,6 +20828,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sök i cache…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在缓存中搜索…"
           }
         }
       }
@@ -21603,7 +21609,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "login_title"
+            "value" : "ログイン"
           }
         },
         "ko" : {
@@ -21687,7 +21693,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "login_title"
+            "value" : "登录"
           }
         },
         "zh-Hant" : {
@@ -22185,7 +22191,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_item_show_less"
+            "value" : "显示更少"
           }
         },
         "zh-Hant" : {
@@ -22369,7 +22375,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_item_show_more"
+            "value" : "显示更多"
           }
         },
         "zh-Hant" : {
@@ -22469,7 +22475,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_Favorite"
+            "value" : "お気に入り"
           }
         },
         "ko" : {
@@ -22553,7 +22559,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_收藏夹"
+            "value" : "收藏了"
           }
         },
         "zh-Hant" : {
@@ -22653,7 +22659,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_follow"
+            "value" : "があなたをフォローしました"
           }
         },
         "ko" : {
@@ -22737,7 +22743,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_follow"
+            "value" : "关注了你"
           }
         },
         "zh-Hant" : {
@@ -22837,7 +22843,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_follow_request"
+            "value" : "からのフォローリクエスト"
           }
         },
         "ko" : {
@@ -22921,7 +22927,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_follow_request"
+            "value" : "申请关注你"
           }
         },
         "zh-Hant" : {
@@ -22955,19 +22961,19 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notifikace_mention"
+            "value" : "vás zmínil"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_mention"
+            "value" : "nævnte dig"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_mention"
+            "value" : "erwähnte dich"
           }
         },
         "el" : {
@@ -22991,13 +22997,13 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_mention"
+            "value" : "mainitsi sinut"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mention_mastodon_notification_fr"
+            "value" : "vous a mentionné"
           }
         },
         "he" : {
@@ -23015,13 +23021,13 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "menzione mastodon_notification_"
+            "value" : "ti ha menzionato"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_<unk>"
+            "value" : "にメンションされました"
           }
         },
         "ko" : {
@@ -23033,7 +23039,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_mention"
+            "value" : "noemde je"
           }
         },
         "no" : {
@@ -23051,19 +23057,19 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "menção_menção_de_notificação"
+            "value" : "mencionou você"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "menção_menção_de_notificação"
+            "value" : "mencionou você"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_menționare"
+            "value" : "te-a menționat"
           }
         },
         "ru" : {
@@ -23081,7 +23087,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notifiering"
+            "value" : "nämnde dig"
           }
         },
         "tr" : {
@@ -23105,7 +23111,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_reference"
+            "value" : "提及了你"
           }
         },
         "zh-Hant" : {
@@ -23139,19 +23145,19 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notifikace_anketa"
+            "value" : "Anketa, kterou jste se zúčastnili, skončila"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_poll"
+            "value" : "En afstemning, du deltog i, er afsluttet"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_Umfrage"
+            "value" : "Eine Umfrage, an der Sie teilgenommen haben, ist beendet"
           }
         },
         "el" : {
@@ -23175,13 +23181,13 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_poll"
+            "value" : "Kysely johon osallistuit on päättynyt"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_sondage_fr"
+            "value" : "Un sondage auquel vous participiez est terminé"
           }
         },
         "he" : {
@@ -23199,13 +23205,13 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_poll"
+            "value" : "Un sondaggio a cui partecipavi è terminato"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_poll"
+            "value" : "参加していたアンケートが終了しました"
           }
         },
         "ko" : {
@@ -23217,7 +23223,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_poll"
+            "value" : "Een poll waaraan u deelnam, is beëindigd"
           }
         },
         "no" : {
@@ -23235,19 +23241,19 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "comunicação_de_mstodon_enquete"
+            "value" : "Uma enquete em que você participou acabou"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "comunicação_de_mstodon_enquete"
+            "value" : "Uma enquete em que você participou acabou"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "sondaj_mastodon_notification_sondaj"
+            "value" : "Un sondaj la care participați s-a încheiat"
           }
         },
         "ru" : {
@@ -23265,7 +23271,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Meddelande"
+            "value" : "En enkät som du deltog i har avslutats"
           }
         },
         "tr" : {
@@ -23289,7 +23295,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_poll"
+            "value" : "你参与的一个投票已经结束"
           }
         },
         "zh-Hant" : {
@@ -23389,7 +23395,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_reblog"
+            "value" : "リブログ"
           }
         },
         "ko" : {
@@ -23473,7 +23479,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_reblog"
+            "value" : "转发了"
           }
         },
         "zh-Hant" : {
@@ -23573,7 +23579,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_status"
+            "value" : "がブーストしました"
           }
         },
         "ko" : {
@@ -23657,7 +23663,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_状态"
+            "value" : "更新了一条嘟文"
           }
         },
         "zh-Hant" : {
@@ -23757,7 +23763,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon_notification_update"
+            "value" : "がトゥートを更新しました"
           }
         },
         "ko" : {
@@ -23841,7 +23847,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "mastodon通知更新"
+            "value" : "更新了一条嘟文"
           }
         },
         "zh-Hant" : {
@@ -24125,7 +24131,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "レポート"
+            "value" : "通報"
           }
         },
         "ko" : {
@@ -24569,7 +24575,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "matrix_フォロワー"
+            "value" : "フォロワー"
           }
         },
         "ko" : {
@@ -24653,7 +24659,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "矩阵关注者"
+            "value" : "粉丝"
           }
         },
         "zh-Hant" : {
@@ -24753,7 +24759,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "matrix_following"
+            "value" : "フォロー中"
           }
         },
         "ko" : {
@@ -24837,7 +24843,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "矩阵关注量"
+            "value" : "正在关注"
           }
         },
         "zh-Hant" : {
@@ -25493,7 +25499,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "同時にバブルゲームで最大の2つのオブジェクトを使用"
+            "value" : "同バブルゲームで最大のオブジェクトを2つ同時に出した"
           }
         },
         "ko" : {
@@ -25678,7 +25684,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : ":exploing_head: :exploing_head: 少し弁当を入れることができます。"
+            "value" : "これくらいの　おべんとばこに　🤯　🤯　ちょっとつめて"
           }
         },
         "ko" : {
@@ -25863,7 +25869,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Double:exploing_head:"
+            "value" : "ダブル🤯"
           }
         },
         "ko" : {
@@ -26048,7 +26054,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バブルゲームで最大のオブジェクト"
+            "value" : "バブルゲームで最大のオブジェクトを出した"
           }
         },
         "ko" : {
@@ -26973,7 +26979,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "短い休憩時間"
+            "value" : "ひとやすみ"
           }
         },
         "ko" : {
@@ -27713,7 +27719,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アチーブメントのコレクション"
+            "value" : "実績コレクター"
           }
         },
         "ko" : {
@@ -28083,7 +28089,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "待ってください、あなたは正しいウェブサイトにいますか?"
+            "value" : "ソフト間違ってない？"
           }
         },
         "ko" : {
@@ -28268,7 +28274,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cookieをクリックしたゲーム"
+            "value" : "クッキーをクリックするゲーム"
           }
         },
         "ko" : {
@@ -29008,7 +29014,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最初のフォロワー"
+            "value" : "はじめてのフォロワー"
           }
         },
         "ko" : {
@@ -29378,7 +29384,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ついてきて！"
+            "value" : "フォローミー！"
           }
         },
         "ko" : {
@@ -29748,7 +29754,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "群衆の中に来る"
+            "value" : "ぞろぞろ"
           }
         },
         "ko" : {
@@ -30118,7 +30124,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "人気"
+            "value" : "人気者"
           }
         },
         "ko" : {
@@ -30488,7 +30494,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1行を入力してください"
+            "value" : "1列でお並びください"
           }
         },
         "ko" : {
@@ -30858,7 +30864,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "電波塔"
+            "value" : "基地局"
           }
         },
         "ko" : {
@@ -31598,7 +31604,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最初のユーザーをフォローしています"
+            "value" : "はじめてのフォロー"
           }
         },
         "ko" : {
@@ -32338,7 +32344,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "たくさんの友達"
+            "value" : "友達たくさん"
           }
         },
         "ko" : {
@@ -32708,7 +32714,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "100人の友達"
+            "value" : "友達100人"
           }
         },
         "ko" : {
@@ -33078,7 +33084,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "友達がオーバーロード"
+            "value" : "友達過多"
           }
         },
         "ko" : {
@@ -33448,7 +33454,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "トレジャーハント"
+            "value" : "宝探し"
           }
         },
         "ko" : {
@@ -33633,7 +33639,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ホームタイムラインの速度が 20 npm (1 分あたりのノート) を超えています。"
+            "value" : "ホームタイムラインの速度が20npmを越す"
           }
         },
         "ko" : {
@@ -33818,7 +33824,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "流れているタイムライン"
+            "value" : "流れるTL"
           }
         },
         "ko" : {
@@ -34689,7 +34695,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ラッキーなだけです"
+            "value" : "単なるラッキー"
           }
         },
         "ko" : {
@@ -35059,7 +35065,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "誕生日おめでとう"
+            "value" : "ハッピーバースデー"
           }
         },
         "ko" : {
@@ -35244,7 +35250,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "年の最初の日にログインしました"
+            "value" : "元日にログインしました"
           }
         },
         "ko" : {
@@ -35429,7 +35435,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このインスタンスの別の素晴らしい年に"
+            "value" : "今年も弊サーバーをよろしくお願いします"
           }
         },
         "ko" : {
@@ -35614,7 +35620,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "新年おめでとうございます！"
+            "value" : "あけましておめでとうございます"
           }
         },
         "ko" : {
@@ -35984,7 +35990,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "今日から、Misskist と呼んでください。"
+            "value" : "今日からね僕は ミスキストってことで"
           }
         },
         "ko" : {
@@ -38204,7 +38210,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "暴力的なMisskist"
+            "value" : "そのユーザー、ミスキストにつき"
           }
         },
         "ko" : {
@@ -38759,7 +38765,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "レギュラーLv.1"
+            "value" : "常連Lv.1"
           }
         },
         "ko" : {
@@ -39129,7 +39135,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "レギュラーII"
+            "value" : "常連II"
           }
         },
         "ko" : {
@@ -39499,7 +39505,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "レギュラーIII"
+            "value" : "常連III"
           }
         },
         "ko" : {
@@ -39869,7 +39875,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "私の友人は、私はノートが好きだとよく言われています。"
+            "value" : "諸君、私はノートが好きだ"
           }
         },
         "ko" : {
@@ -40054,7 +40060,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "エキスパートI"
+            "value" : "ベテランI"
           }
         },
         "ko" : {
@@ -40424,7 +40430,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "エキスパートII"
+            "value" : "ベテランII"
           }
         },
         "ko" : {
@@ -40794,7 +40800,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "エキスパートIII"
+            "value" : "ベテランIII"
           }
         },
         "ko" : {
@@ -41164,7 +41170,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "メモのマスター I"
+            "value" : "ノートマスターI"
           }
         },
         "ko" : {
@@ -41534,7 +41540,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "マスターオブノート II"
+            "value" : "ノートマスターII"
           }
         },
         "ko" : {
@@ -41904,7 +41910,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Misskeyをご利用いただきありがとうございます！"
+            "value" : "Misskeyを使ってくれてありがとう！"
           }
         },
         "ko" : {
@@ -42089,7 +42095,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "マスターオブノート III"
+            "value" : "ノートマスターIII"
           }
         },
         "ko" : {
@@ -42274,7 +42280,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "あなたのアカウントを猫としてマーク"
+            "value" : "アカウントをCatとして設定"
           }
         },
         "ko" : {
@@ -42644,7 +42650,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "私は猫です"
+            "value" : "我輩は猫である"
           }
         },
         "ko" : {
@@ -43014,7 +43020,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "星を探しています"
+            "value" : "星が欲しい"
           }
         },
         "ko" : {
@@ -43384,7 +43390,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "クリップchar@@0"
+            "value" : "クリップせずにはいられないな"
           }
         },
         "ko" : {
@@ -43754,7 +43760,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "気にしない"
+            "value" : "いまのなし"
           }
         },
         "ko" : {
@@ -43939,7 +43945,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最初のノートをお気に入りにする"
+            "value" : "初めてノートをお気に入りにする"
           }
         },
         "ko" : {
@@ -44309,7 +44315,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最初のメモを投稿する"
+            "value" : "最初のノートを投稿する"
           }
         },
         "ko" : {
@@ -44864,7 +44870,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "10 件のメモを投稿"
+            "value" : "10件のノートを投稿"
           }
         },
         "ko" : {
@@ -45049,7 +45055,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "いくつかのメモ"
+            "value" : "いくつかのノート"
           }
         },
         "ko" : {
@@ -45234,7 +45240,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "100 件のメモを投稿"
+            "value" : "100件のノートを投稿"
           }
         },
         "ko" : {
@@ -45419,7 +45425,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "沢山のノート"
+            "value" : "たくさんのノート"
           }
         },
         "ko" : {
@@ -45604,7 +45610,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "500件のメモを投稿"
+            "value" : "500件のノートを投稿"
           }
         },
         "ko" : {
@@ -45789,7 +45795,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "メモに覆われています"
+            "value" : "ノートまみれ"
           }
         },
         "ko" : {
@@ -45974,7 +45980,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1,000件のメモを投稿"
+            "value" : "1,000件のノートを投稿"
           }
         },
         "ko" : {
@@ -46159,7 +46165,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "音符の山"
+            "value" : "ノートの山"
           }
         },
         "ko" : {
@@ -46344,7 +46350,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "5,000件のメモを投稿"
+            "value" : "5,000件のノートを投稿"
           }
         },
         "ko" : {
@@ -46529,7 +46535,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "溢れるノート"
+            "value" : "湧き出るノート"
           }
         },
         "ko" : {
@@ -47084,7 +47090,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "2万件のメモを投稿"
+            "value" : "20,000件のノートを投稿"
           }
         },
         "ko" : {
@@ -47269,7 +47275,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "必要な...もっと多くのメモ..."
+            "value" : "ニードモアノート"
           }
         },
         "ko" : {
@@ -47639,7 +47645,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "メモのメモ！"
+            "value" : "ノートノートノート"
           }
         },
         "ko" : {
@@ -47824,7 +47830,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "40,000ノートの投稿"
+            "value" : "40,000件のノートを投稿"
           }
         },
         "ko" : {
@@ -48194,7 +48200,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "50,000件のメモを投稿"
+            "value" : "50,000件のノートを投稿"
           }
         },
         "ko" : {
@@ -48379,7 +48385,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "注記の惑星"
+            "value" : "ノートの惑星"
           }
         },
         "ko" : {
@@ -48934,7 +48940,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "7万通のノートを投稿"
+            "value" : "70,000件のノートを投稿"
           }
         },
         "ko" : {
@@ -49119,7 +49125,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "メモブラックホール"
+            "value" : "ブラックノートホール"
           }
         },
         "ko" : {
@@ -49304,7 +49310,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "8万件のノートを投稿"
+            "value" : "80,000件のノートを投稿"
           }
         },
         "ko" : {
@@ -49489,7 +49495,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "メモギャラクシー"
+            "value" : "ノートギャラクシー"
           }
         },
         "ko" : {
@@ -49674,7 +49680,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ノートを90,000個投稿する"
+            "value" : "90,000件のノートを投稿"
           }
         },
         "ko" : {
@@ -49859,7 +49865,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "音の宇宙"
+            "value" : "ノートバース"
           }
         },
         "ko" : {
@@ -50044,7 +50050,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "100,000件のメモを投稿"
+            "value" : "100,000件のノートを投稿"
           }
         },
         "ko" : {
@@ -50229,7 +50235,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "あなたは確かに言うことがたくさんあります。"
+            "value" : "そんなに書くことある？"
           }
         },
         "ko" : {
@@ -50414,7 +50420,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "すべてのお客様のノートは私たちに属しています"
+            "value" : "ALL YOUR NOTE ARE BELONG US"
           }
         },
         "ko" : {
@@ -51524,7 +51530,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1年"
+            "value" : "一周年"
           }
         },
         "ko" : {
@@ -51894,7 +51900,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "2周年記念"
+            "value" : "二周年"
           }
         },
         "ko" : {
@@ -52264,7 +52270,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "三周年記念"
+            "value" : "三周年"
           }
         },
         "ko" : {
@@ -52449,7 +52455,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "00:00にメモを投稿する"
+            "value" : "00:00にノートを投稿する"
           }
         },
         "ko" : {
@@ -52819,7 +52825,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "話している時計"
+            "value" : "時報"
           }
         },
         "ko" : {
@@ -53004,7 +53010,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "夜遅くにメモを投稿する"
+            "value" : "夜遅くにノートを投稿する"
           }
         },
         "ko" : {
@@ -53744,7 +53750,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "準備が整いました"
+            "value" : "準備万端"
           }
         },
         "ko" : {
@@ -54114,7 +54120,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "本当に読んだの？"
+            "value" : "ちゃんと読んだ？"
           }
         },
         "ko" : {
@@ -54299,7 +54305,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自分のメモを引用する"
+            "value" : "自分のノートを引用する"
           }
         },
         "ko" : {
@@ -54484,7 +54490,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自己参照"
+            "value" : "自己言及"
           }
         },
         "ko" : {
@@ -54854,7 +54860,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ゴッドコンプレックス"
+            "value" : "神様コンプレックス"
           }
         },
         "ko" : {
@@ -55224,7 +55230,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "テストオーバーフロー"
+            "value" : "テスト過剰"
           }
         },
         "ko" : {
@@ -55779,7 +55785,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "少なくとも3分間あなたの実績リストを見てください"
+            "value" : "実績一覧を3分以上眺め続けた"
           }
         },
         "ko" : {
@@ -55964,7 +55970,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "実績にいいね！する"
+            "value" : "実績好き"
           }
         },
         "ko" : {
@@ -56334,7 +56340,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アナリスト:"
+            "value" : "アナリスト"
           }
         },
         "ko" : {
@@ -56554,7 +56560,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_achievement_rewn"
+            "value" : "成就已解锁："
           }
         }
       }
@@ -56732,7 +56738,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_app"
+            "value" : "应用"
           }
         },
         "zh-Hant" : {
@@ -56832,7 +56838,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_follow"
+            "value" : "があなたをフォローしました"
           }
         },
         "ko" : {
@@ -56916,7 +56922,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_following"
+            "value" : "关注了你"
           }
         },
         "zh-Hant" : {
@@ -57016,7 +57022,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_follow_request_accepted"
+            "value" : "がフォローリクエストを承認しました"
           }
         },
         "ko" : {
@@ -57100,7 +57106,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_follow_request_accepted"
+            "value" : "接受了你的关注请求"
           }
         },
         "zh-Hant" : {
@@ -57134,19 +57140,19 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chybějící_notifikace_mention"
+            "value" : "vás zmínil"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_mention"
+            "value" : "nævnte dig"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_mention"
+            "value" : "erwähnte dich"
           }
         },
         "el" : {
@@ -57170,13 +57176,13 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_mention"
+            "value" : "mainitsi sinut"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mention_notification_misskey"
+            "value" : "vous a mentionné"
           }
         },
         "he" : {
@@ -57194,13 +57200,13 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_mention"
+            "value" : "ti ha menzionato"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_member"
+            "value" : "にメンションされました"
           }
         },
         "ko" : {
@@ -57212,7 +57218,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_mention"
+            "value" : "noemde je"
           }
         },
         "no" : {
@@ -57230,19 +57236,19 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "falta_notificação_de_erro"
+            "value" : "mencionou você"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "falta_notificação_de_erro"
+            "value" : "mencionou você"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_mentionare"
+            "value" : "te-a menționat"
           }
         },
         "ru" : {
@@ -57260,7 +57266,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Notifiering"
+            "value" : "nämnde dig"
           }
         },
         "tr" : {
@@ -57284,7 +57290,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_reference"
+            "value" : "提及了你"
           }
         },
         "zh-Hant" : {
@@ -57318,19 +57324,19 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chybějící_notifikace_anketa ukončena"
+            "value" : "Anketa, kterou jste se zúčastnili, skončila"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_poll_endt"
+            "value" : "En afstemning, du deltog i, er afsluttet"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_poll_beendet"
+            "value" : "Eine Umfrage, an der Sie teilgenommen haben, ist beendet"
           }
         },
         "el" : {
@@ -57354,13 +57360,13 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_poll_end"
+            "value" : "Kysely johon osallistuit on päättynyt"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le sondage de notification est terminé"
+            "value" : "Un sondage auquel vous participiez est terminé"
           }
         },
         "he" : {
@@ -57378,13 +57384,13 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_poll_ended"
+            "value" : "Un sondaggio a cui partecipavi è terminato"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_poll_ended"
+            "value" : "参加していたアンケートが終了しました"
           }
         },
         "ko" : {
@@ -57396,7 +57402,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_poll_eindigd"
+            "value" : "Een poll waaraan u deelnam, is beëindigd"
           }
         },
         "no" : {
@@ -57414,19 +57420,19 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "notificação_de_missão_enquete_encerrada"
+            "value" : "Uma enquete em que você participou acabou"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "notificação_de_missão_enquete_encerrada"
+            "value" : "Uma enquete em que você participou acabou"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_poll_end"
+            "value" : "Un sondaj la care participați s-a încheiat"
           }
         },
         "ru" : {
@@ -57444,7 +57450,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Avslutad"
+            "value" : "En enkät som du deltog i har avslutats"
           }
         },
         "tr" : {
@@ -57468,7 +57474,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_poll_end"
+            "value" : "你参与的一个投票已经结束"
           }
         },
         "zh-Hant" : {
@@ -57568,7 +57574,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_quote"
+            "value" : "が引用しました"
           }
         },
         "ko" : {
@@ -57652,7 +57658,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_引用"
+            "value" : "引用"
           }
         },
         "zh-Hant" : {
@@ -57752,7 +57758,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_reactions"
+            "value" : "がリノートしました"
           }
         },
         "ko" : {
@@ -57836,7 +57842,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_response"
+            "value" : "转发"
           }
         },
         "zh-Hant" : {
@@ -57936,7 +57942,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_receive_follow_request"
+            "value" : "がフォローをリクエストしました"
           }
         },
         "ko" : {
@@ -58020,7 +58026,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_receive_follow_request"
+            "value" : "向你发送了关注请求"
           }
         },
         "zh-Hant" : {
@@ -58096,7 +58102,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_renote"
+            "value" : "リノート"
           }
         },
         "nl" : {
@@ -58156,7 +58162,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_renote"
+            "value" : "转嘟"
           }
         }
       }
@@ -58250,7 +58256,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_reply"
+            "value" : "返信"
           }
         },
         "ko" : {
@@ -58334,7 +58340,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misskey_notification_reply"
+            "value" : "回复"
           }
         },
         "zh-Hant" : {
@@ -58878,7 +58884,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "レポート"
+            "value" : "通報"
           }
         },
         "ko" : {
@@ -61202,7 +61208,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "通知类型_标题"
+            "value" : "通知"
           }
         }
       }
@@ -61564,7 +61570,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "民意测验已过期"
+            "value" : "投票已过期"
           }
         },
         "zh-Hant" : {
@@ -61954,7 +61960,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "profile_tab_likes"
+            "value" : "J'aime"
           }
         },
         "he" : {
@@ -61972,13 +61978,13 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "profile_tab_likes"
+            "value" : "Mi Piace"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "profile_tab_likes"
+            "value" : "いいね"
           }
         },
         "ko" : {
@@ -62062,7 +62068,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "profile_tab_likes"
+            "value" : "点赞"
           }
         },
         "zh-Hant" : {
@@ -62246,7 +62252,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "配置文件标签媒体"
+            "value" : "媒体"
           }
         },
         "zh-Hant" : {
@@ -62614,7 +62620,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "profile_tab_status"
+            "value" : "帖子"
           }
         },
         "zh-Hant" : {
@@ -62648,19 +62654,19 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "cenová nabídka"
+            "value" : "Cenová nabídka"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "tilbud"
+            "value" : "Tilbud"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "zitat"
+            "value" : "Zitat"
           }
         },
         "el" : {
@@ -62684,13 +62690,13 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "tarjous"
+            "value" : "Tarjous"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "devis"
+            "value" : "Devis"
           }
         },
         "he" : {
@@ -62708,7 +62714,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "preventivo"
+            "value" : "Preventivo"
           }
         },
         "ja" : {
@@ -62726,7 +62732,7 @@
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "offerte"
+            "value" : "Offerte"
           }
         },
         "no" : {
@@ -62744,19 +62750,19 @@
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "cotação"
+            "value" : "Cotação"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "cotação"
+            "value" : "Cotação"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ofertă"
+            "value" : "Ofertă"
           }
         },
         "ru" : {
@@ -62774,7 +62780,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "offert"
+            "value" : "Offert"
           }
         },
         "tr" : {
@@ -62982,7 +62988,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "反应_添加"
+            "value" : "添加反应"
           }
         },
         "zh-Hant" : {
@@ -63166,7 +63172,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "反动_删除"
+            "value" : "移除反应"
           }
         },
         "zh-Hant" : {
@@ -63450,7 +63456,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "リレーション(_B)"
+            "value" : "ブロック中"
           }
         },
         "ko" : {
@@ -63534,7 +63540,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "关联已阻止"
+            "value" : "已屏蔽"
           }
         },
         "zh-Hant" : {
@@ -63634,7 +63640,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "relation_follow"
+            "value" : "フォロー"
           }
         },
         "ko" : {
@@ -63718,7 +63724,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "relation_follow-up"
+            "value" : "关注"
           }
         },
         "zh-Hant" : {
@@ -63818,7 +63824,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "リレーションのフォロー"
+            "value" : "フォロー中"
           }
         },
         "ko" : {
@@ -63902,7 +63908,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "关系关注"
+            "value" : "正在关注"
           }
         },
         "zh-Hant" : {
@@ -64186,7 +64192,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "リクエストされた"
+            "value" : "申請済み"
           }
         },
         "ko" : {
@@ -64270,7 +64276,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "关联请求"
+            "value" : "已申请"
           }
         },
         "zh-Hant" : {
@@ -64638,7 +64644,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "回复 @%@"
+            "value" : "回复 %@"
           }
         },
         "zh-Hant" : {
@@ -64666,7 +64672,7 @@
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "informe"
+            "value" : "Informar"
           }
         },
         "cs" : {
@@ -64678,13 +64684,13 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rapportér"
+            "value" : "Rapport"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Melden"
+            "value" : "Bericht"
           }
         },
         "el" : {
@@ -64708,13 +64714,13 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ilmoita"
+            "value" : "Raportoi"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Signaler"
+            "value" : "Rapporter"
           }
         },
         "he" : {
@@ -64738,7 +64744,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "報告"
+            "value" : "通報"
           }
         },
         "ko" : {
@@ -64780,7 +64786,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Raportează"
+            "value" : "Raport"
           }
         },
         "ru" : {
@@ -65190,7 +65196,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "反向删除"
+            "value" : "移除转推"
           }
         },
         "zh-Hant" : {
@@ -66752,7 +66758,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "搜索状态"
+            "value" : "推文"
           }
         }
       }
@@ -66822,7 +66828,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "chercher_titre"
+            "value" : "Chercher"
           }
         },
         "he" : {
@@ -66840,13 +66846,13 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ricerca_titolo"
+            "value" : "Cerca"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "検索タイトル"
+            "value" : "検索"
           }
         },
         "ko" : {
@@ -66930,7 +66936,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "搜索标题"
+            "value" : "搜索"
           }
         },
         "zh-Hant" : {
@@ -67114,7 +67120,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "搜索用户"
+            "value" : "用户"
           }
         },
         "zh-Hant" : {
@@ -68650,7 +68656,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "存储标题"
+            "value" : "存储"
           }
         },
         "zh-Hant" : {
@@ -71270,7 +71276,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "vvo_notification_like"
+            "value" : "喜欢了您的帖子"
           }
         },
         "zh-Hant" : {
@@ -71768,7 +71774,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "状态"
+            "value" : "帖子"
           }
         },
         "zh-Hant" : {
@@ -71868,7 +71874,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "xqt_notification_member"
+            "value" : "あなたをメンションする"
           }
         },
         "ko" : {
@@ -71952,7 +71958,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "xqt_notification_reference"
+            "value" : "提及了您"
           }
         },
         "zh-Hant" : {
@@ -72052,7 +72058,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "xqt_notification_retweet"
+            "value" : "リツイート"
           }
         },
         "ko" : {
@@ -72136,7 +72142,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "xqt_notification_retweets"
+            "value" : "转推了"
           }
         },
         "zh-Hant" : {

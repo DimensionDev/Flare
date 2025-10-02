@@ -10,9 +10,7 @@ import org.koin.dsl.binds
 import org.koin.dsl.module
 
 public object ComposeUIHelper {
-    public fun initialize(
-        inAppNotification: InAppNotification,
-    ) {
+    public fun initialize(inAppNotification: InAppNotification) {
         startKoin {
             modules(KoinHelper.modules())
             modules(

@@ -4,6 +4,8 @@ import SwiftUI
 struct ProfileScreen: View {
     let accountType: AccountType
     let userKey: MicroBlogKey?
+    let onFollowingClick: (MicroBlogKey) -> Void
+    let onFansClick: (MicroBlogKey) -> Void
     @StateObject private var presenter: KotlinPresenter<ProfileState>
     @State private var selectedTab: Int = 0
 
@@ -15,7 +17,9 @@ struct ProfileScreen: View {
                 isMe: presenter.state.isMe,
                 onFollowClick: { user, relation in
                     presenter.state.follow(userKey: user.key, data: relation)
-                }
+                },
+                onFollowingClick: onFollowingClick,
+                onFansClick: onFansClick
             )
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
@@ -64,9 +68,9 @@ struct ProfileScreen: View {
         .listStyle(.plain)
         .background(Color(.systemGroupedBackground))
         .toolbar {
-            Menu {
-                if case .success(let user) = onEnum(of: presenter.state.userState) {
-                    if case .success(let isMe) = onEnum(of: presenter.state.isMe), !isMe.data.boolValue {
+            if case .success(let user) = onEnum(of: presenter.state.userState) {
+                if case .success(let isMe) = onEnum(of: presenter.state.isMe), !isMe.data.boolValue {
+                    Menu {
                         if case .success(let relation) = onEnum(of: presenter.state.relationState),
                            case .success(let actionsArray) = onEnum(of: presenter.state.actions),
                            actionsArray.data.count > 0 {
@@ -109,10 +113,10 @@ struct ProfileScreen: View {
                         Button(action: { presenter.state.report(userKey: user.data.key) }, label: {
                             Label("report", systemImage: "exclamationmark.bubble")
                         })
+                    } label: {
+                        Image(systemName: "ellipsis")
                     }
                 }
-            } label: {
-                Image(systemName: "ellipsis")
             }
         }
         .refreshable {
@@ -126,9 +130,17 @@ struct ProfileScreen: View {
 extension ProfileScreen {
     init(
         accountType: AccountType,
-        userKey: MicroBlogKey?
+        userKey: MicroBlogKey?,
+        onFollowingClick: @escaping (MicroBlogKey) -> Void,
+        onFansClick: @escaping (MicroBlogKey) -> Void
     ) {
-        self.init(accountType: accountType, userKey: userKey, presenter: .init(presenter: ProfilePresenter(accountType: accountType, userKey: userKey)))
+        self.init(
+            accountType: accountType,
+            userKey: userKey,
+            onFollowingClick: onFollowingClick,
+            onFansClick: onFansClick,
+            presenter: .init(presenter: ProfilePresenter(accountType: accountType, userKey: userKey))
+        )
     }
 }
 
@@ -137,6 +149,8 @@ struct ProfileHeader: View {
     let relation: UiState<UiRelation>
     let isMe: UiState<KotlinBoolean>
     let onFollowClick: (UiUserV2, UiRelation) -> Void
+    let onFollowingClick: (MicroBlogKey) -> Void
+    let onFansClick: (MicroBlogKey) -> Void
     var body: some View {
         switch onEnum(of: user) {
         case .error:
@@ -146,7 +160,9 @@ struct ProfileHeader: View {
                 user: createSampleUser(),
                 relation: relation,
                 isMe: isMe,
-                onFollowClick: { _ in }
+                onFollowClick: { _ in },
+                onFollowingClick: {},
+                onFansClick: {}
             )
                 .redacted(reason: .placeholder)
         case .success(let data):
@@ -154,7 +170,9 @@ struct ProfileHeader: View {
                 user: data.data,
                 relation: relation,
                 isMe: isMe,
-                onFollowClick: { relation in onFollowClick(data.data, relation) }
+                onFollowClick: { relation in onFollowClick(data.data, relation) },
+                onFollowingClick: onFollowingClick,
+                onFansClick: onFansClick
             )
         }
     }
@@ -165,22 +183,39 @@ struct ProfileHeaderSuccess: View {
     let relation: UiState<UiRelation>
     let isMe: UiState<KotlinBoolean>
     let onFollowClick: (UiRelation) -> Void
+    let onFollowingClick: (MicroBlogKey) -> Void
+    let onFansClick: (MicroBlogKey) -> Void
     var body: some View {
-        CommonProfileHeader(user: user, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
+        CommonProfileHeader(
+            user: user,
+            relation: relation,
+            isMe: isMe,
+            onFollowClick: onFollowClick,
+            onFollowingClick: {
+                onFollowingClick(user.key)
+            },
+            onFansClick: {
+                onFansClick(user.key)
+            }
+        )
     }
 }
 
 struct ProfileWithUserNameAndHostScreen: View {
     @StateObject private var presenter: KotlinPresenter<UserState>
     let accountType: AccountType
+    let onFollowingClick: (MicroBlogKey) -> Void
+    let onFansClick: (MicroBlogKey) -> Void
     
-    init(userName: String, host: String, accountType: AccountType) {
+    init(userName: String, host: String, accountType: AccountType, onFollowingClick: @escaping (MicroBlogKey) -> Void, onFansClick: @escaping (MicroBlogKey) -> Void) {
         self.accountType = accountType
+        self.onFollowingClick = onFollowingClick
+        self.onFansClick = onFansClick
         self._presenter = .init(wrappedValue: .init(presenter: ProfileWithUserNameAndHostPresenter(userName: userName, host: host, accountType: accountType)))
     }
     var body: some View {
         StateView(state: presenter.state.user) { user in
-            ProfileScreen(accountType: accountType, userKey: user.key)
+            ProfileScreen(accountType: accountType, userKey: user.key, onFollowingClick: onFollowingClick, onFansClick: onFansClick)
         } loadingContent: {
             ProgressView()
         }

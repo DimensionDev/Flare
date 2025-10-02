@@ -130,20 +130,21 @@ public class EditRssSourcePresenter(
                         object : State.RssInputState.RssHub {
                             override val checkState = checkRssHubState.state
 
-                            override val actualUrl = buildUrl {
-                                serverStr
-                                    .removePrefix("https://")
-                                    .removePrefix("http://")
-                                    .let {
-                                        set(host = it)
-                                    }
-                                url
-                                    .removePrefix("rsshub://")
-                                    .let {
-                                        set(path = it)
-                                    }
-                                set(scheme = "https")
-                            }.toString()
+                            override val actualUrl =
+                                buildUrl {
+                                    serverStr
+                                        .removePrefix("https://")
+                                        .removePrefix("http://")
+                                        .let {
+                                            set(host = it)
+                                        }
+                                    url
+                                        .removePrefix("rsshub://")
+                                        .let {
+                                            set(path = it)
+                                        }
+                                    set(scheme = "https")
+                                }.toString()
 
                             override fun checkWithServer(server: String) {
                                 serverStr = server
@@ -192,12 +193,13 @@ public class EditRssSourcePresenter(
                 is UiState.Success ->
                     when (state.data) {
                         is RssState.RssFeed -> true
-                        RssState.RssHub -> when (val inputState = inputState) {
-                            is State.RssInputState.RssHub ->
-                                inputState.checkState is UiState.Success
+                        RssState.RssHub ->
+                            when (val inputState = inputState) {
+                                is State.RssInputState.RssHub ->
+                                    inputState.checkState is UiState.Success
 
-                            else -> false
-                        }
+                                else -> false
+                            }
 
                         is RssState.RssSources -> state.data.sources.isNotEmpty()
                     }

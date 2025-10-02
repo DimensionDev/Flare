@@ -1872,6 +1872,9 @@
         }
       }
     },
+    "antennas_lists_title" : {
+
+    },
     "appearance_avatar_shape" : {
 
     },
@@ -3347,6 +3350,48 @@
         }
       }
     },
+    "bluesky_report" : {
+
+    },
+    "bluesky_report_reason" : {
+
+    },
+    "bluesky_report_reason_misleading" : {
+
+    },
+    "bluesky_report_reason_misleading_description" : {
+
+    },
+    "bluesky_report_reason_other" : {
+
+    },
+    "bluesky_report_reason_other_description" : {
+
+    },
+    "bluesky_report_reason_rude" : {
+
+    },
+    "bluesky_report_reason_rude_description" : {
+
+    },
+    "bluesky_report_reason_sexual" : {
+
+    },
+    "bluesky_report_reason_sexual_description" : {
+
+    },
+    "bluesky_report_reason_spam" : {
+
+    },
+    "bluesky_report_reason_spam_description" : {
+
+    },
+    "bluesky_report_reason_violation" : {
+
+    },
+    "bluesky_report_reason_violation_description" : {
+
+    },
     "bookmark_add" : {
       "localizations" : {
         "ar" : {
@@ -3718,6 +3763,9 @@
           }
         }
       }
+    },
+    "cancel" : {
+
     },
     "Cancel" : {
 
@@ -5638,6 +5686,12 @@
           }
         }
       }
+    },
+    "delete_alert_title" : {
+
+    },
+    "delete_status_alert_message" : {
+
     },
     "Detail" : {
       "localizations" : {
@@ -10698,6 +10752,12 @@
           }
         }
       }
+    },
+    "mastodon_report_status_alert_message" : {
+
+    },
+    "mastodon_report_status_alert_title" : {
+
     },
     "mastodon_tab_local_title" : {
       "localizations" : {
@@ -32039,6 +32099,15 @@
         }
       }
     },
+    "misskey_report_reason" : {
+
+    },
+    "misskey_report_reason_placeholder" : {
+
+    },
+    "misskey_report_title" : {
+
+    },
     "mixed_timeline_title" : {
       "localizations" : {
         "af" : {
@@ -32999,6 +33068,9 @@
           }
         }
       }
+    },
+    "Not implemented yet" : {
+
     },
     "notification_compose_error" : {
       "localizations" : {
@@ -38094,6 +38166,12 @@
         }
       }
     },
+    "user_list_title_fans" : {
+
+    },
+    "user_list_title_following" : {
+
+    },
     "vvo_notification_like" : {
       "localizations" : {
         "ar" : {
@@ -38217,6 +38295,15 @@
           }
         }
       }
+    },
+    "vvo_status_comments" : {
+
+    },
+    "vvo_status_reposts" : {
+
+    },
+    "vvo_status_title" : {
+
     },
     "xqt_notification_mention" : {
       "localizations" : {

@@ -157,12 +157,12 @@ struct StatusView: View {
                         VStack {
                             ForEach(data.quote, id: \.itemKey) { quote in
                                 StatusView(data: quote, isQuote: true)
-                                    .padding()
                                 if data.quote.last != quote {
                                     Divider()
                                 }
                             }
                         }
+                        .padding()
                         .clipShape(.rect(cornerRadius: 16))
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)

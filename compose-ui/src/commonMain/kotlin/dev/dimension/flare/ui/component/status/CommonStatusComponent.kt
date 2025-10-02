@@ -309,7 +309,7 @@ public fun CommonStatusComponent(
                 Spacer(modifier = Modifier.height(8.dp))
                 if (isDetail) {
                     CompositionLocalProvider(
-                        PlatformContentColor provides PlatformTheme.colorScheme.caption,
+//                        PlatformContentColor provides PlatformTheme.colorScheme.caption,
                     ) {
                         StatusActions(
                             item.actions,
@@ -323,7 +323,7 @@ public fun CommonStatusComponent(
                     }
                 } else {
                     CompositionLocalProvider(
-                        PlatformContentColor provides PlatformTheme.colorScheme.caption.copy(alpha = MediumAlpha),
+                        PlatformContentColor provides PlatformTheme.colorScheme.caption,
                         PlatformTextStyle provides PlatformTheme.typography.caption,
                     ) {
                         StatusActions(

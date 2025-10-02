@@ -11,6 +11,8 @@ struct CommonProfileHeader: View {
     let relation: UiState<UiRelation>
     let isMe: UiState<KotlinBoolean>
     let onFollowClick: (UiRelation) -> Void
+    let onFollowingClick: () -> Void
+    let onFansClick: () -> Void
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -127,7 +129,12 @@ struct CommonProfileHeader: View {
                             }
                         }
 
-                        MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
+                        MatrixView(
+                            followCount: user.matrices.followsCountHumanized,
+                            fansCount: user.matrices.fansCountHumanized,
+                            onFollowingClick: onFollowingClick,
+                            onFansClick: onFansClick
+                        )
                     }
                     .padding()
                 }
@@ -140,13 +147,25 @@ struct CommonProfileHeader: View {
 struct MatrixView: View {
     let followCount: String
     let fansCount: String
+    let onFollowingClick: () -> Void
+    let onFansClick: () -> Void
     var body: some View {
         HStack {
-            Text(followCount)
-            Text("matrix_following")
+            HStack {
+                Text(followCount)
+                Text("matrix_following")
+            }
+            .onTapGesture {
+                onFollowingClick()
+            }
             Divider()
-            Text(fansCount)
-            Text("matrix_followers")
+            HStack {
+                Text(fansCount)
+                Text("matrix_followers")
+            }
+            .onTapGesture {
+                onFansClick()
+            }
         }
         .font(.caption)
         .foregroundStyle(.secondary)

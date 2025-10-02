@@ -354,4 +354,13 @@
     <string name="social_title">Społeczność</string>
     <string name="antenna_title">Antena</string>
     <string name="mixed_timeline_title">Mieszane</string>
+    <string name="settings_about_description">Najnowszy klient nowej generacji oparty na zdecentralizowanej sieci społecznościowej.</string>
+    <string name="settings_about_source_code">Kod źródłowy</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Dołącz do naszej grupy Telegram</string>
+    <string name="settings_about_discord_description">Dołącz do naszego serwera Discorda</string>
+    <string name="settings_about_line_description">Dołącz do naszej grupy linii</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Pomóż nam przetłumaczyć Flare</string>
+    <string name="settings_privacy_policy">Polityka prywatności</string>
 </resources>

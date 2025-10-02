@@ -75,6 +75,8 @@ struct EditRssSheet: View {
         Form {
             Section {
                 TextField("rss_url_placeholder", text: $url)
+                    .textContentType(.URL)
+                    .keyboardType(.URL)
                     .safeAreaInset(edge: .trailing) {
                         StateView(state: presenter.state.checkState) { state in
                             switch onEnum(of: state) {
@@ -143,6 +145,8 @@ struct EditRssSheet: View {
                         TextField(text: $rssHubHost) {
                             Text("rss_hub_host_placeholder")
                         }
+                        .textContentType(.URL)
+                        .keyboardType(.URL)
                         .safeAreaInset(edge: .trailing) {
                             StateView(state: presenter.state.inputState) { inputState in
                                 if case .rssHub(let rssHub) = onEnum(of: inputState) {
@@ -159,7 +163,7 @@ struct EditRssSheet: View {
                         .onChange(of: presenter.state.inputState, { oldValue, newValue in
                             print("Input state changed: \(newValue)")
                             if case .success(let success) = onEnum(of: newValue),
-                                case .rssHub(let rssHubState) = onEnum(of: success.data),
+                               case .rssHub(let rssHubState) = onEnum(of: success.data),
                                case .success(let checkSuccess) = onEnum(of: rssHubState.checkState),
                                case .rssFeed(let feed) = onEnum(of: checkSuccess.data) {
                                 title = feed.title
@@ -240,7 +244,6 @@ struct EditRssSheet: View {
                         Image("fa-check")
                     }
                 }
-                .disabled(!presenter.state.canSave)
             }
         }
         .onAppear {

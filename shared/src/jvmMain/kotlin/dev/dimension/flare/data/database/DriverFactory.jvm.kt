@@ -22,6 +22,19 @@ internal actual class DriverFactory {
         )
     }
 
-    actual fun deleteDatabase(name: String) {
+    actual fun deleteDatabase(
+        name: String,
+        isCache: Boolean,
+    ) {
+        val dbFolder =
+            if (isCache) {
+                FileSystemUtilsExt.flareCacheDirectory()
+            } else {
+                FileSystemUtilsExt.flareDirectory()
+            }
+        val dbFile = File(dbFolder, name)
+        if (dbFile.exists()) {
+            dbFile.delete()
+        }
     }
 }

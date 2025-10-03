@@ -13,9 +13,11 @@ internal fun provideAppDatabase(driverFactory: DriverFactory): AppDatabase =
         .setQueryCoroutineContext(Dispatchers.IO)
         .build()
 
+internal const val CACHE_DATABASE_NAME = "cache.db"
+
 internal fun provideCacheDatabase(driverFactory: DriverFactory): CacheDatabase =
     driverFactory
-        .createBuilder<CacheDatabase>("cache.db", isCache = true)
+        .createBuilder<CacheDatabase>(CACHE_DATABASE_NAME, isCache = true)
         .fallbackToDestructiveMigration(dropAllTables = true)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)

@@ -31,20 +31,19 @@ struct NotificationScreen: View {
         .toolbar {
             ToolbarItem(placement: .principal) {
                 StateView(state: presenter.state.allTypes) { allTypes in
+                    let allTypes = allTypes.cast(NotificationFilter.self)
                     if allTypes.count > 1 {
                         Picker("notification_type_title", selection: $selectedType) {
-                            ForEach(0..<allTypes.count) { index in
-                                if let type = allTypes[index] as? NotificationFilter {
-                                    switch type {
-                                    case .all:
-                                        Text("notification_type_all").tag(type)
-                                    case .comment:
-                                        Text("notification_type_comments").tag(type)
-                                    case .like:
-                                        Text("notification_type_likes").tag(type)
-                                    case .mention:
-                                        Text("notification_type_mentions").tag(type)
-                                    }
+                            ForEach(allTypes, id: \.self) { type in
+                                switch type {
+                                case .all:
+                                    Text("notification_type_all").tag(type)
+                                case .comment:
+                                    Text("notification_type_comments").tag(type)
+                                case .like:
+                                    Text("notification_type_likes").tag(type)
+                                case .mention:
+                                    Text("notification_type_mentions").tag(type)
                                 }
                             }
                         }

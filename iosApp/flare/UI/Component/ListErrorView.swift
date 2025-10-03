@@ -35,6 +35,11 @@ struct ListErrorView: View {
                     Text("action_retry")
                 }
                 .buttonStyle(.glassProminent)
+                if let message = error.message {
+                    Text(message)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .padding()

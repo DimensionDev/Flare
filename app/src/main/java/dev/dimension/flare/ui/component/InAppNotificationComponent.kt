@@ -108,7 +108,7 @@ internal fun InAppNotificationComponent(
                                 Row {
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Text(
-                                        stringResource(it.messageId),
+                                        stringResource(it.messageId, *it.args.toTypedArray()),
                                     )
                                 }
                             }

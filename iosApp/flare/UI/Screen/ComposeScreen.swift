@@ -25,14 +25,18 @@ struct ComposeScreen: View {
                             let item = users.get(index: index)
                             if let userState = item.first, let account = item.second {
                                 StateView(state: userState) { user in
-                                    UserOnelineView(data: user)
-                                        .padding(.horizontal)
-                                        .padding(.vertical, 8)
-                                        .background(Color(.secondarySystemBackground))
-                                        .clipShape(.rect(cornerRadius: 16))
-                                        .onTapGesture {
-                                            presenter.state.selectAccount(account: account)
-                                        }
+                                    HStack {
+                                        AvatarView(data: user.avatar)
+                                            .frame(width: 20, height: 20)
+                                        Text(user.handle)
+                                    }
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 8)
+                                    .background(Color(.secondarySystemBackground))
+                                    .clipShape(.rect(cornerRadius: 16))
+                                    .onTapGesture {
+                                        presenter.state.selectAccount(account: account)
+                                    }
                                 }
                             }
                         }

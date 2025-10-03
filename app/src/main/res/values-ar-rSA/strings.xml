@@ -238,7 +238,7 @@
     <string name="dm_sending">إرسال</string>
     <string name="dm_leave">مغادرة المحادثة</string>
     <string name="dm_to_profile">إظهار الملف الشخصي</string>
-    <string name="notification_login_expired">انتهت صلاحية تسجيل الدخول، الرجاء تسجيل الدخول مرة أخرى</string>
+    <string name="notification_login_expired">انتهت صلاحية تسجيل الدخول ل %1$s</string>
     <string name="following_title">تابع</string>
     <string name="fans_title">متابع</string>
     <string name="local_history_search_placeholder">البحث عن ذاكرة التخزين المؤقت المحلية</string>

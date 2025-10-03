@@ -234,7 +234,7 @@
     <string name="tab_settings_default">Standard</string>
     <string name="tab_settings_list">Liste</string>
     <string name="tab_settings_feed">Strøm</string>
-    <string name="notification_login_expired">Innlogging utløpt, vennligst logg inn igjen</string>
+    <string name="notification_login_expired">Innlogging utgått for %1$s</string>
     <string name="dm_list_empty">Ingen direkte meldinger</string>
     <string name="dm_list_error">Kunne ikke laste direkte meldinger</string>
     <string name="send">Sende</string>

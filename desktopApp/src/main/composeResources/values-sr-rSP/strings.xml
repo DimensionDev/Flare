@@ -217,7 +217,6 @@
     <string name="tab_settings_default">Дефолт</string>
     <string name="tab_settings_list">Листа</string>
     <string name="tab_settings_feed">Извори</string>
-    <string name="notification_login_expired">Пријава је истекла, молимо поново пријава</string>
     <string name="dm_list_empty">Нема директних порука</string>
     <string name="dm_list_error">Неуспех учитавања директних порука</string>
     <string name="send">Пошаљи</string>

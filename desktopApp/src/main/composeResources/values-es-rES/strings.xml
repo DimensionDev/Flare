@@ -234,7 +234,7 @@
     <string name="tab_settings_default">Por defecto</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Alimentos</string>
-    <string name="notification_login_expired">Inicio de sesión expirado, por favor inicie sesión de nuevo</string>
+    <string name="notification_login_expired">Inicio de sesión expirado para %1$s</string>
     <string name="dm_list_empty">No hay mensajes directos</string>
     <string name="dm_list_error">Error al cargar mensajes directos</string>
     <string name="send">Enviar</string>

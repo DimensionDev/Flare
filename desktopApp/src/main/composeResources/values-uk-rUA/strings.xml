@@ -234,7 +234,6 @@
     <string name="tab_settings_default">Типово</string>
     <string name="tab_settings_list">Список</string>
     <string name="tab_settings_feed">Стрічки новин</string>
-    <string name="notification_login_expired">Вхід закінчився, будь ласка, увійдіть знову</string>
     <string name="dm_list_empty">Нема особистих повідомлень</string>
     <string name="dm_list_error">Не вдалося завантажити особисті повідомлення</string>
     <string name="send">Відправити</string>

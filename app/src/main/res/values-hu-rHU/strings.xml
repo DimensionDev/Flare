@@ -230,7 +230,6 @@
     <string name="dm_sending">Küldés</string>
     <string name="dm_leave">Hagyd el a beszélgetést</string>
     <string name="dm_to_profile">Profil megjelenítése</string>
-    <string name="notification_login_expired">A bejelentkezési időszak lejárt, kérjük, belépjen újra</string>
     <string name="following_title">Követés</string>
     <string name="fans_title">Követő</string>
     <string name="local_history_search_placeholder">Helyi gyorsítótár keresése</string>

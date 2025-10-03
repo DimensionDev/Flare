@@ -238,7 +238,7 @@
     <string name="dm_sending">Skickar</string>
     <string name="dm_leave">Lämna konversationen</string>
     <string name="dm_to_profile">Visa profil</string>
-    <string name="notification_login_expired">Inloggning löpte ut, vänligen logga in igen</string>
+    <string name="notification_login_expired">Inloggning löpte ut för %1$s</string>
     <string name="following_title">Följer</string>
     <string name="fans_title">Följare</string>
     <string name="local_history_search_placeholder">Sök lokal cache</string>

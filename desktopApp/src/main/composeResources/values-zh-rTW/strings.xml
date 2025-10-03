@@ -222,7 +222,6 @@
     <string name="tab_settings_default">預設</string>
     <string name="tab_settings_list">清單</string>
     <string name="tab_settings_feed">動態</string>
-    <string name="notification_login_expired">登入已過期，請重新登入</string>
     <string name="dm_list_empty">沒有直接消息</string>
     <string name="dm_list_error">載入直接消息失敗</string>
     <string name="send">發送</string>

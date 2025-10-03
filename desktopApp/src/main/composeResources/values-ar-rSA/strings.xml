@@ -234,7 +234,7 @@
     <string name="tab_settings_default">الافتراضي</string>
     <string name="tab_settings_list">قائمة</string>
     <string name="tab_settings_feed">التحديثات</string>
-    <string name="notification_login_expired">انتهت صلاحية تسجيل الدخول، الرجاء تسجيل الدخول مرة أخرى</string>
+    <string name="notification_login_expired">انتهت صلاحية تسجيل الدخول ل %1$s</string>
     <string name="dm_list_empty">لا توجد رسائل مباشرة</string>
     <string name="dm_list_error">فشل في تحميل الرسائل المباشرة</string>
     <string name="send">إرسال</string>

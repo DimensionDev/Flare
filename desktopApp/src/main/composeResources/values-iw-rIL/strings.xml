@@ -217,7 +217,6 @@
     <string name="tab_settings_default">ברירת מחדל</string>
     <string name="tab_settings_list">רשימה</string>
     <string name="tab_settings_feed">פידים</string>
-    <string name="notification_login_expired">מנוי פג, אנא התחבר שוב</string>
     <string name="dm_list_empty">אין הודעות ישירות</string>
     <string name="dm_list_error">ניסיון לטעון הודעות ישירות נכשל</string>
     <string name="send">שלח</string>

@@ -238,7 +238,7 @@
     <string name="dm_sending">Lähetetään</string>
     <string name="dm_leave">Poistu keskustelusta</string>
     <string name="dm_to_profile">Näytä profiili</string>
-    <string name="notification_login_expired">Kirjautuminen vanhentunut, kirjaudu uudelleen</string>
+    <string name="notification_login_expired">Kirjautuminen vanhentui %1$s</string>
     <string name="following_title">Seurataan</string>
     <string name="fans_title">Seuraaja</string>
     <string name="local_history_search_placeholder">Etsi paikallista välimuistia</string>

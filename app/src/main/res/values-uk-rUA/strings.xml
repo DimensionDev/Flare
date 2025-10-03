@@ -238,7 +238,6 @@
     <string name="dm_sending">Надсилання</string>
     <string name="dm_leave">Вийти з розмови</string>
     <string name="dm_to_profile">Показати профіль</string>
-    <string name="notification_login_expired">Вхід закінчився, будь ласка, увійдіть знову</string>
     <string name="following_title">Слідкую</string>
     <string name="fans_title">Підписник</string>
     <string name="local_history_search_placeholder">Пошук в локальному кеші</string>

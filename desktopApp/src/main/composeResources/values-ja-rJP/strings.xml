@@ -234,7 +234,7 @@
     <string name="tab_settings_default">デフォルト</string>
     <string name="tab_settings_list">リスト</string>
     <string name="tab_settings_feed">フィード</string>
-    <string name="notification_login_expired">ログイン期限が切れました。もう一度ログインしてください。</string>
+    <string name="notification_login_expired">%1$s のログイン期限が切れました</string>
     <string name="dm_list_empty">ダイレクトメッセージはありません</string>
     <string name="dm_list_error">ダイレクトメッセージの読み込みに失敗しました</string>
     <string name="send">送信</string>

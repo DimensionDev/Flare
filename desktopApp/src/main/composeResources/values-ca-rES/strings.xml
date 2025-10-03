@@ -217,7 +217,6 @@
     <string name="tab_settings_default">Per defecte</string>
     <string name="tab_settings_list">Llista</string>
     <string name="tab_settings_feed">Fluxos</string>
-    <string name="notification_login_expired">La sessió d\'inici de sessió ha caducat, si us plau, inicieu sessió de nou</string>
     <string name="dm_list_empty">Sense missatges directes</string>
     <string name="dm_list_error">No s\'ha pogut carregar els missatges directes</string>
     <string name="send">Enviar</string>

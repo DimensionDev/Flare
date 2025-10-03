@@ -234,7 +234,7 @@
     <string name="tab_settings_default">Oletus</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Syötteet</string>
-    <string name="notification_login_expired">Kirjautuminen vanhentunut, kirjaudu uudelleen</string>
+    <string name="notification_login_expired">Kirjautuminen vanhentui %1$s</string>
     <string name="dm_list_empty">Ei suoria viestejä</string>
     <string name="dm_list_error">Suorien viestien lataaminen epäonnistui</string>
     <string name="send">Lähetä</string>

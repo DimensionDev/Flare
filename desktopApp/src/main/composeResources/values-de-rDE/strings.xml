@@ -234,7 +234,7 @@
     <string name="tab_settings_default">Standard</string>
     <string name="tab_settings_list">Liste</string>
     <string name="tab_settings_feed">Feeds</string>
-    <string name="notification_login_expired">Login abgelaufen, bitte erneut anmelden</string>
+    <string name="notification_login_expired">Login abgelaufen für %1$s</string>
     <string name="dm_list_empty">Keine direkten Nachrichten</string>
     <string name="dm_list_error">Fehler beim Laden der Direktnachrichten</string>
     <string name="send">Senden</string>

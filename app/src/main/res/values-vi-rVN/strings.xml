@@ -230,7 +230,6 @@
     <string name="dm_sending">Đang gửi</string>
     <string name="dm_leave">Rời cuộc trò chuyện</string>
     <string name="dm_to_profile">Hiển thị hồ sơ</string>
-    <string name="notification_login_expired">Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại</string>
     <string name="following_title">Đang theo dõi</string>
     <string name="fans_title">Người theo dõi</string>
     <string name="local_history_search_placeholder">Tìm kiếm bộ nhớ đệm địa phương</string>

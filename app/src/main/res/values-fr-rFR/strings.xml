@@ -238,7 +238,7 @@
     <string name="dm_sending">Envoi en cours</string>
     <string name="dm_leave">Quitter la conversation</string>
     <string name="dm_to_profile">Afficher le profil</string>
-    <string name="notification_login_expired">La connexion a expiré, veuillez vous reconnecter</string>
+    <string name="notification_login_expired">Connexion expirée pour %1$s</string>
     <string name="following_title">Abonnements</string>
     <string name="fans_title">Abonné</string>
     <string name="local_history_search_placeholder">Rechercher dans la cache locale</string>

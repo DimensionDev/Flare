@@ -234,7 +234,7 @@
     <string name="tab_settings_default">Standard</string>
     <string name="tab_settings_list">Liste</string>
     <string name="tab_settings_feed">Feeds</string>
-    <string name="notification_login_expired">Login er udløbet. Log venligst ind igen</string>
+    <string name="notification_login_expired">Login udløbet for %1$s</string>
     <string name="dm_list_empty">Ingen direkte beskeder</string>
     <string name="dm_list_error">Kunne ikke indlæse direkte beskeder</string>
     <string name="send">Send</string>

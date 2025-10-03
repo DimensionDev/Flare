@@ -230,7 +230,6 @@
     <string name="dm_sending">Stuur</string>
     <string name="dm_leave">Verlaat gesprek</string>
     <string name="dm_to_profile">Wys profiel</string>
-    <string name="notification_login_expired">Teken verval, teken asseblief weer in</string>
     <string name="following_title">Volgendes</string>
     <string name="fans_title">Volger</string>
     <string name="local_history_search_placeholder">Soek plaaslike kas</string>

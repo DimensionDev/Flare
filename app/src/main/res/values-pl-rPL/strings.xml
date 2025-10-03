@@ -238,7 +238,7 @@
     <string name="dm_sending">Wysyłanie</string>
     <string name="dm_leave">Opuść rozmowę</string>
     <string name="dm_to_profile">Pokaż profil</string>
-    <string name="notification_login_expired">Logowanie wygasło, zaloguj się ponownie</string>
+    <string name="notification_login_expired">Logowanie wygasło dla %1$s</string>
     <string name="following_title">Obserwowane</string>
     <string name="fans_title">Obserwujący</string>
     <string name="local_history_search_placeholder">Szukaj lokalnej pamięci podręcznej</string>

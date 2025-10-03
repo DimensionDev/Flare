@@ -238,7 +238,7 @@
     <string name="dm_sending">正在发送</string>
     <string name="dm_leave">离开对话</string>
     <string name="dm_to_profile">显示用户资料</string>
-    <string name="notification_login_expired">登录过期，请重新登录</string>
+    <string name="notification_login_expired">登录过期为 %1$s</string>
     <string name="following_title">正在关注</string>
     <string name="fans_title">粉丝</string>
     <string name="local_history_search_placeholder">搜索本地缓存</string>

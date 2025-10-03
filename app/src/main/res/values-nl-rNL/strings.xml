@@ -238,7 +238,7 @@
     <string name="dm_sending">Verzenden</string>
     <string name="dm_leave">Gesprek verlaten</string>
     <string name="dm_to_profile">Toon profiel</string>
-    <string name="notification_login_expired">Inloggen verlopen, gelieve opnieuw in te loggen</string>
+    <string name="notification_login_expired">De aanmelding is verlopen voor %1$s</string>
     <string name="following_title">Volgt</string>
     <string name="fans_title">Volger</string>
     <string name="local_history_search_placeholder">Zoek lokale cache</string>

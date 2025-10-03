@@ -217,7 +217,6 @@
     <string name="tab_settings_default">Mặc định</string>
     <string name="tab_settings_list">Danh sách</string>
     <string name="tab_settings_feed">Nguồn cấp dữ liệu</string>
-    <string name="notification_login_expired">Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại</string>
     <string name="dm_list_empty">Không có tin nhắn trực tiếp nào</string>
     <string name="dm_list_error">Tải tin nhắn trực tiếp thất bại</string>
     <string name="send">Gửi</string>

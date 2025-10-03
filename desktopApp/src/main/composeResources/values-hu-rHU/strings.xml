@@ -222,7 +222,6 @@
     <string name="tab_settings_default">Alapértelmezett</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Hírcsatornák</string>
-    <string name="notification_login_expired">A bejelentkezési időszak lejárt, kérjük, belépjen újra</string>
     <string name="dm_list_empty">Nincsenek közvetlen üzenetek</string>
     <string name="dm_list_error">Sikertelen közvetlen üzenetek betöltése</string>
     <string name="send">Küldés</string>

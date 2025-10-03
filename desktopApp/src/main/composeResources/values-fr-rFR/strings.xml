@@ -234,7 +234,7 @@
     <string name="tab_settings_default">Par défaut</string>
     <string name="tab_settings_list">Liste</string>
     <string name="tab_settings_feed">Flux</string>
-    <string name="notification_login_expired">La connexion a expiré, veuillez vous reconnecter</string>
+    <string name="notification_login_expired">Connexion expirée pour %1$s</string>
     <string name="dm_list_empty">Aucun message direct</string>
     <string name="dm_list_error">Impossible de charger les messages directs</string>
     <string name="send">Envoyer</string>

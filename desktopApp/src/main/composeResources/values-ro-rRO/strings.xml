@@ -234,7 +234,7 @@
     <string name="tab_settings_default">Implicit</string>
     <string name="tab_settings_list">Listă</string>
     <string name="tab_settings_feed">Fluxuri</string>
-    <string name="notification_login_expired">Logarea a expirat, te rugăm să te autentifici din nou</string>
+    <string name="notification_login_expired">Autentificarea a expirat pentru %1$s</string>
     <string name="dm_list_empty">Niciun mesaj direct</string>
     <string name="dm_list_error">Încărcarea mesajelor directe a eșuat</string>
     <string name="send">Trimite</string>

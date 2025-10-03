@@ -234,7 +234,7 @@
     <string name="tab_settings_default">Standard</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Flöden</string>
-    <string name="notification_login_expired">Inloggning löpte ut, vänligen logga in igen</string>
+    <string name="notification_login_expired">Inloggning löpte ut för %1$s</string>
     <string name="dm_list_empty">Inga direktmeddelanden</string>
     <string name="dm_list_error">Det gick inte att ladda direktmeddelanden</string>
     <string name="send">Skicka</string>

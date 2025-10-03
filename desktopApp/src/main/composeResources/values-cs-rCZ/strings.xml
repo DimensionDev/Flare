@@ -234,7 +234,7 @@
     <string name="tab_settings_default">Výchozí</string>
     <string name="tab_settings_list">Seznam</string>
     <string name="tab_settings_feed">Zdroje</string>
-    <string name="notification_login_expired">Přihlášení vypršelo, přihlaste se prosím znovu</string>
+    <string name="notification_login_expired">Přihlášení vypršelo pro %1$s</string>
     <string name="dm_list_empty">Žádné přímé zprávy</string>
     <string name="dm_list_error">Nepodařilo se načíst přímé zprávy</string>
     <string name="send">Poslat</string>

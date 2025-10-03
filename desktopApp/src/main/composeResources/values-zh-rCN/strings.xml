@@ -234,7 +234,7 @@
     <string name="tab_settings_default">默认设置</string>
     <string name="tab_settings_list">列表</string>
     <string name="tab_settings_feed">订阅源</string>
-    <string name="notification_login_expired">登录过期，请重新登录</string>
+    <string name="notification_login_expired">登录过期为 %1$s</string>
     <string name="dm_list_empty">没有私信</string>
     <string name="dm_list_error">加载私信失败</string>
     <string name="send">发送</string>

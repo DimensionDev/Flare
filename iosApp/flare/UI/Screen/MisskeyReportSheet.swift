@@ -33,7 +33,7 @@ struct MisskeyReportSheet: View {
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button(
-                    role: .confirm
+//                    role: .confirm
                 ) {
                     presenter.state.report(comment: reason)
                     dismiss()

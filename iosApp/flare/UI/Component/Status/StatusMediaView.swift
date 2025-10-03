@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 import TipKit
 import LazyPager
+import SwiftUIBackports
 
 struct StatusMediaView: View {
     let data: [any UiMedia]
@@ -94,7 +95,8 @@ struct StatusMediaView: View {
                                 .foregroundStyle(.white)
                         }
                     }
-                    .buttonStyle(.glassProminent)
+                    .backport
+                    .glassProminentButtonStyle()
                     .padding()
                 } else {
                     Button {
@@ -104,7 +106,8 @@ struct StatusMediaView: View {
                     } label: {
                         Image("fa-eye-slash")
                     }
-                    .buttonStyle(.glass)
+                    .backport
+                    .glassButtonStyle(fallbackStyle: .bordered)
                     .padding()
                 }
             } else {
@@ -133,7 +136,8 @@ struct AltTextOverlay: View {
             Text("ALT")
         }
         .padding()
-        .buttonStyle(.glass)
+        .backport
+        .glassButtonStyle(fallbackStyle: .bordered)
         .popover(isPresented: $showAltText) {
             Text(altText)
                 .padding()

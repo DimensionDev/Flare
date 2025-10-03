@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import SwiftUIBackports
 
 struct TabSettingsScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
@@ -100,7 +101,7 @@ struct TabSettingsScreen: View {
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button(
-                    role: .confirm
+//                    role: .confirm
                 ) {
                     presenter.state.updateTabSettings { current in
                         current.doCopy(secondaryItems: current.secondaryItems, enableMixedTimeline: enableMixedTimeline, mainTabs: tabItems)
@@ -228,7 +229,7 @@ struct EditTabSheet: View {
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button(
-                    role: .confirm
+//                    role: .confirm
                 ) {
                     onConfirm(tabItem.update(metaData: .init(title: .Text(content: text), icon: presenter.state.icon)))
                     dismiss()
@@ -272,7 +273,8 @@ struct AddTabSheet: View {
                     .padding(.horizontal)
                     .padding(.vertical, 8)
                     .foregroundStyle(selectedIndex == 0 ? Color.white : .primary)
-                    .glassEffect(selectedIndex == 0 ? .regular.tint(.accentColor) : .regular, in: .capsule)
+                    .backport
+                    .glassEffect(selectedIndex == 0 ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedIndex == 0 ? Color.accentColor : Color(.systemBackground))
                     
                     StateView(state: presenter.state.accountTabs) { accountTabs in
                         let tabs = accountTabs.cast(AllTabsPresenterStateAccountTabs.self)
@@ -292,7 +294,8 @@ struct AddTabSheet: View {
                             .padding(.horizontal)
                             .padding(.vertical, 8)
                             .foregroundStyle(selectedIndex == (index + 1) ? Color.white : .primary)
-                            .glassEffect(selectedIndex == (index + 1) ? .regular.tint(.accentColor) : .regular, in: .capsule)
+                            .backport
+                            .glassEffect(selectedIndex == (index + 1) ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedIndex == (index + 1) ? Color.accentColor : Color(.systemBackground))
                         }
                     }
                 }

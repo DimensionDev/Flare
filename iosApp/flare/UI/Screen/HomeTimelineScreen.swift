@@ -1,5 +1,6 @@
 import SwiftUI
 @preconcurrency import KotlinSharedUI
+import SwiftUIBackports
 
 struct HomeTimelineScreen: View {
     let toServiceSelect: () -> Void
@@ -82,7 +83,8 @@ struct HomeTimelineScreen: View {
                                     .padding(.horizontal)
                                     .padding(.vertical, 8)
                                     .foregroundStyle(selectedTabIndex == index ? Color.white : .primary)
-                                    .glassEffect(selectedTabIndex == index ? .regular.tint(.accentColor) : .regular, in: .capsule)
+                                    .backport
+                                    .glassEffect(selectedTabIndex == index ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedTabIndex == index ? Color.accentColor : Color(.systemBackground))
                                 }
                                 if case .success = onEnum(of: presenter.state.user) {
                                     Button {
@@ -90,14 +92,23 @@ struct HomeTimelineScreen: View {
                                     } label: {
                                         Image("fa-plus")
                                     }
-                                    .buttonStyle(.glass)
+                                    .backport
+                                    .glassButtonStyle()
                                 }
                             }
                             .padding(.horizontal)
                             .padding(.vertical, 8)
                         }
-                        .clipShape(.capsule)
-                        .glassEffect(.regular.interactive(), in: .capsule)
+                        .if({
+                            if #available(iOS 26, *) { return true } else { return false }
+                        }(), if: { view in
+                            view
+                                .clipShape(.capsule)
+                        }, else: { view in
+                            view
+                        })
+                        .backport
+                        .glassEffect(.regularInteractive, in: .capsule, fallbackBackground: Color.clear)
                         .scrollIndicators(.hidden)
                         Spacer()
                         if case .error = onEnum(of: presenter.state.user) {
@@ -106,7 +117,8 @@ struct HomeTimelineScreen: View {
                             } label: {
                                 Text("Login")
                             }
-                            .buttonStyle(.glass)
+                            .backport
+                            .glassButtonStyle(fallbackStyle: .bordered)
                             .padding()
                         } else {
                             Button {
@@ -115,9 +127,18 @@ struct HomeTimelineScreen: View {
                                 Image("fa-pen-to-square")
                                     .font(.title2)
                             }
-                            .buttonStyle(.glass)
+                            .backport
+                            .glassButtonStyle(fallbackStyle: .bordered)
                         }
                     }
+                    .if({
+                        if #available(iOS 26, *) { return true } else { return false }
+                    }(), if: { view in
+                        view
+                    }, else: { view in
+                        view
+                            .background(.regularMaterial)
+                    })
                     .padding(.horizontal)
                     .offset(y: -headerOffset)
                 }

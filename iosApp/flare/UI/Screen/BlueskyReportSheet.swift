@@ -39,7 +39,7 @@ struct BlueskyReportSheet: View {
             ToolbarItem(placement: .confirmationAction) {
                 StateView(state: presenter.state.status) { timeline in
                     Button(
-                        role: .confirm
+//                        role: .confirm
                     ) {
                         if let reason = selecedtReason {
                             presenter.state.selectReason(value: reason)

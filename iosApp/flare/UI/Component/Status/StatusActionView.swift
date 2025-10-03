@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import SwiftUIBackports
 
 struct StatusActionsView: View {
     let data: [StatusAction]
@@ -17,6 +18,7 @@ struct StatusActionsView: View {
 
             }
         }
+        .backport
         .labelIconToTitleSpacing(4)
     }
 }

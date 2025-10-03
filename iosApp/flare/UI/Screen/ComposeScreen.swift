@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 import PhotosUI
 import SwiftUIIntrospect
+import SwiftUIBackports
 
 struct ComposeScreen: View {
     @Environment(\.dismiss) var dismiss
@@ -287,7 +288,8 @@ struct ComposeScreen: View {
                     }
                 }
                 .padding()
-                .glassEffect()
+                .backport
+                .glassEffect(.regular, in: .capsule, fallbackBackground: .regularMaterial)
                 .padding()
             }
             

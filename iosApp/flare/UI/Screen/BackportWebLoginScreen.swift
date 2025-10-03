@@ -7,7 +7,7 @@ struct BackportWebLoginScreen: View {
     @StateObject private var viewModel: BackportWebLoginViewModel
     let url: String
     init(onCookie: @escaping (String) -> Void, url: String) {
-        self._viewModel = .init(wrappedValue: .init(onCookie: onCookie))
+        self._viewModel = .init(wrappedValue: .init(onCookie: onCookie, url: url))
         self.url = url
     }
     
@@ -15,8 +15,7 @@ struct BackportWebLoginScreen: View {
         NavigationStack {
             if viewModel.canShowWebView {
                 BackportWebView(url: URL(string: url), configuration: viewModel.configuration) { webView in
-                    webView.customUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1"
-                    viewModel.observe(webView: webView)
+                    webView.navigationDelegate = viewModel.delegate
                 }
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
@@ -36,13 +35,35 @@ struct BackportWebLoginScreen: View {
     }
 }
 
+class WKDelegate: NSObject, WKNavigationDelegate {
+    let decidePolicy: () -> Void
+    init(decidePolicy: @escaping () -> Void
+    ) {
+        self.decidePolicy = decidePolicy
+    }
+    
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
+        decidePolicy()
+        return .allow
+    }
+}
+
 class BackportWebLoginViewModel: ObservableObject {
     @Published
     var canShowWebView = false
+    let url: String
     let onCookie: (String) -> Void
+    let delegate: WKDelegate
     private var observers = [NSKeyValueObservation]()
-    init(onCookie: @escaping (String) -> Void) {
+    init(onCookie: @escaping (String) -> Void, url: String) {
         self.onCookie = onCookie
+        self.url = url
+        self.delegate = WKDelegate {
+            WKWebsiteDataStore.default().httpCookieStore.getAllCookies { (cookies) in
+                let cookieString = BackportWebLoginViewModel.cookieHeaderString(from: cookies, for: .init(string: url))
+                onCookie(cookieString)
+            }
+        }
         clearCookie()
     }
     var configuration: WKWebViewConfiguration {
@@ -62,19 +83,14 @@ class BackportWebLoginViewModel: ObservableObject {
             )
         }
     }
-    func observe(webView: WKWebView) {
-        observers.append(webView.observe(\.url, options: .new) { _, _ in
-            self.getCookies(webView: webView)
-        })
-    }
-    func getCookies(webView: WKWebView) {
-        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { (cookies) in
-            var cookieString = ""
-            for cookie in cookies {
-                cookieString += "\(cookie.name)=\(cookie.value); "
-            }
-            self.onCookie(cookieString)
+    private static func cookieHeaderString(from cookies: [HTTPCookie], for url: URL?) -> String {
+        let host = url?.host?.lowercased()
+        let filtered = cookies.filter { cookie in
+            guard let host = host else { return true }
+            let domain = cookie.domain.lowercased()
+            return domain == host || (domain.hasPrefix(".") && (domain.hasSuffix(host) || host.hasSuffix(domain)))
         }
+        return filtered.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
     }
     deinit {
         observers.removeAll()

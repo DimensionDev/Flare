@@ -474,7 +474,7 @@
 			repositoryURL = "https://github.com/gh123man/LazyPager";
 			requirement = {
 				kind = exactVersion;
-				version = 1.1.13;
+				version = 1.2.0;
 			};
 		};
 		06F36AAB2E8F7BEC00F5905F /* XCRemoteSwiftPackageReference "iOS-Backports" */ = {

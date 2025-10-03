@@ -30,6 +30,21 @@ struct AccountManagementScreen: View {
 
                                     }
                                 }
+                            } errorContent: { error in
+                                UserErrorView(error: error)
+                                    .swipeActions {
+                                        if let accountKey = account.first?.accountKey {
+                                            Button(role: .destructive) {
+                                                presenter.state.logout(accountKey: accountKey)
+                                            } label: {
+                                                Label {
+                                                    Text("logout_title")
+                                                } icon: {
+                                                    Image("fa-trash")
+                                                }
+                                            }
+                                        }
+                                    }
                             } loadingContent: {
                                 UserLoadingView()
                             }

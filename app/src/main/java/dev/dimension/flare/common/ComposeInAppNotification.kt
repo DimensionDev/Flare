@@ -2,6 +2,7 @@ package dev.dimension.flare.common
 
 import androidx.annotation.StringRes
 import dev.dimension.flare.R
+import dev.dimension.flare.data.repository.LoginExpiredException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -19,6 +20,7 @@ internal sealed interface Notification {
         @field:StringRes
         val messageId: Int,
         val success: Boolean,
+        val args: List<Any> = emptyList(),
     ) : Notification
 }
 
@@ -43,7 +45,21 @@ internal class ComposeInAppNotification : InAppNotification {
         message: Message,
         throwable: Throwable,
     ) {
-        _source.value = Event(Notification.StringNotification(message.title, success = false))
+        _source.value =
+            Event(
+                Notification.StringNotification(
+                    message.title,
+                    success = false,
+                    args =
+                        listOfNotNull(
+                            if (throwable is LoginExpiredException) {
+                                throwable.accountKey
+                            } else {
+                                null
+                            },
+                        ),
+                ),
+            )
     }
 }
 

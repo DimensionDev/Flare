@@ -25,7 +25,19 @@ internal actual class DriverFactory(
         )
     }
 
-    actual fun deleteDatabase(name: String) {
-        context.deleteDatabase(name)
+    actual fun deleteDatabase(
+        name: String,
+        isCache: Boolean,
+    ) {
+        val appContext = context.applicationContext
+        val dbFile =
+            if (isCache) {
+                File(appContext.cacheDir, name)
+            } else {
+                appContext.getDatabasePath(name)
+            }
+        if (dbFile.exists()) {
+            dbFile.delete()
+        }
     }
 }

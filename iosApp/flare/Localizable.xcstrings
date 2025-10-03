@@ -5923,7 +5923,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "亮色的"
+            "value" : "浅色"
           }
         },
         "zh-Hant" : {
@@ -9235,7 +9235,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "报告"
+            "value" : "举报"
           }
         },
         "zh-Hant" : {
@@ -9603,7 +9603,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "误导中"
+            "value" : "误导"
           }
         },
         "zh-Hant" : {
@@ -14355,7 +14355,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "撰写内容"
+            "value" : "发帖"
           }
         },
         "zh-Hant" : {
@@ -15589,7 +15589,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "推荐标签"
+            "value" : "热搜"
           }
         },
         "zh-Hant" : {
@@ -16591,7 +16591,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "您已经达到终点"
+            "value" : "没有更多了"
           }
         }
       }
@@ -18257,7 +18257,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "本站可见"
+            "value" : "首页"
           }
         },
         "zh-Hant" : {
@@ -19069,7 +19069,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "赞"
+            "value" : "点赞"
           }
         },
         "zh-Hant" : {
@@ -19881,7 +19881,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keyword"
+            "value" : "关键字"
           }
         },
         "zh-Hant" : {
@@ -22191,7 +22191,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "显示更少的"
+            "value" : "显示更少"
           }
         },
         "zh-Hant" : {
@@ -24215,7 +24215,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "报告"
+            "value" : "举报"
           }
         },
         "zh-Hant" : {
@@ -57842,7 +57842,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已重新发布"
+            "value" : "转发"
           }
         },
         "zh-Hant" : {
@@ -58968,7 +58968,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "报告"
+            "value" : "举报"
           }
         },
         "zh-Hant" : {
@@ -60942,7 +60942,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "赞"
+            "value" : "点赞"
           }
         },
         "zh-Hant" : {
@@ -62068,7 +62068,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "喜欢的"
+            "value" : "点赞"
           }
         },
         "zh-Hant" : {
@@ -64828,7 +64828,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "报告"
+            "value" : "举报"
           }
         },
         "zh-Hant" : {
@@ -70546,7 +70546,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "不匹配"
+            "value" : "取消点赞"
           }
         },
         "zh-Hant" : {

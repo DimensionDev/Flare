@@ -234,7 +234,7 @@
     <string name="tab_settings_default">Standaard</string>
     <string name="tab_settings_list">Klantenlijst</string>
     <string name="tab_settings_feed">Feeds</string>
-    <string name="notification_login_expired">Inloggen verlopen, gelieve opnieuw in te loggen</string>
+    <string name="notification_login_expired">De aanmelding is verlopen voor %1$s</string>
     <string name="dm_list_empty">Geen directe berichten</string>
     <string name="dm_list_error">Laden van privéberichten mislukt</string>
     <string name="send">Verzenden</string>

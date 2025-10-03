@@ -238,7 +238,7 @@
     <string name="dm_sending">Invio</string>
     <string name="dm_leave">Lascia la conversazione</string>
     <string name="dm_to_profile">Mostra profilo</string>
-    <string name="notification_login_expired">Login scaduto, effettua nuovamente il login</string>
+    <string name="notification_login_expired">Login scaduto per %1$s</string>
     <string name="following_title">Seguendo</string>
     <string name="fans_title">Follower</string>
     <string name="local_history_search_placeholder">Cerca nella cache locale</string>

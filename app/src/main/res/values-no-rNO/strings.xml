@@ -238,7 +238,7 @@
     <string name="dm_sending">Sender</string>
     <string name="dm_leave">Forlat samtale</string>
     <string name="dm_to_profile">Vis profil</string>
-    <string name="notification_login_expired">Innlogging utløpt, vennligst logg inn igjen</string>
+    <string name="notification_login_expired">Innlogging utgått for %1$s</string>
     <string name="following_title">Følger</string>
     <string name="fans_title">Følger</string>
     <string name="local_history_search_placeholder">Søk lokal cache</string>

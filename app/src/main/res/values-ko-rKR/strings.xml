@@ -230,7 +230,6 @@
     <string name="dm_sending">전송 중</string>
     <string name="dm_leave">대화 나가기</string>
     <string name="dm_to_profile">프로필 보기</string>
-    <string name="notification_login_expired">로그인 만료, 다시 로그인 해주세요</string>
     <string name="following_title">팔로잉</string>
     <string name="fans_title">팔로워</string>
     <string name="local_history_search_placeholder">로컬 캐시 검색</string>

@@ -238,7 +238,7 @@
     <string name="dm_sending">送信中</string>
     <string name="dm_leave">会話から出る</string>
     <string name="dm_to_profile">プロファイルを表示</string>
-    <string name="notification_login_expired">ログイン期限が切れました。もう一度ログインしてください。</string>
+    <string name="notification_login_expired">%1$s のログイン期限が切れました</string>
     <string name="following_title">フォロー中</string>
     <string name="fans_title">フォロワー</string>
     <string name="local_history_search_placeholder">ローカルキャッシュを検索</string>

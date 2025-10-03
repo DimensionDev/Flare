@@ -217,7 +217,6 @@
     <string name="tab_settings_default">Standaard</string>
     <string name="tab_settings_list">Lys</string>
     <string name="tab_settings_feed">Feeds</string>
-    <string name="notification_login_expired">Teken verval, teken asseblief weer in</string>
     <string name="dm_list_empty">Geen direkte boodskappe nie</string>
     <string name="dm_list_error">Kon nie direkte boodskappe laai nie</string>
     <string name="send">Stuur</string>

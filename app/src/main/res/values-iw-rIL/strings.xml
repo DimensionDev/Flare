@@ -230,7 +230,6 @@
     <string name="dm_sending">שולח</string>
     <string name="dm_leave">עזוב שיחה</string>
     <string name="dm_to_profile">הראה פרופיל</string>
-    <string name="notification_login_expired">מנוי פג, אנא התחבר שוב</string>
     <string name="following_title">עוקב</string>
     <string name="fans_title">עוקב</string>
     <string name="local_history_search_placeholder">חפש במטמון המקומי</string>

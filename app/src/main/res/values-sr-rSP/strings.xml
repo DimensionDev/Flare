@@ -230,7 +230,6 @@
     <string name="dm_sending">Слање</string>
     <string name="dm_leave">Напустите разговор</string>
     <string name="dm_to_profile">Прикажи профил</string>
-    <string name="notification_login_expired">Пријава је истекла, молимо поново пријава</string>
     <string name="following_title">Пратим</string>
     <string name="fans_title">Пратилац</string>
     <string name="local_history_search_placeholder">Претражите локални кеш</string>

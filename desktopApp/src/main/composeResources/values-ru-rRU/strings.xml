@@ -234,7 +234,7 @@
     <string name="tab_settings_default">По умолчанию</string>
     <string name="tab_settings_list">Список</string>
     <string name="tab_settings_feed">Ленты</string>
-    <string name="notification_login_expired">Срок действия входа истек, пожалуйста, войдите снова</string>
+    <string name="notification_login_expired">Вход просрочен для %1$s</string>
     <string name="dm_list_empty">Нет личных сообщений</string>
     <string name="dm_list_error">Не удалось загрузить личные сообщения</string>
     <string name="send">Отправить</string>

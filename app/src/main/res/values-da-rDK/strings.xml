@@ -238,7 +238,7 @@
     <string name="dm_sending">Sender</string>
     <string name="dm_leave">Forlad samtale</string>
     <string name="dm_to_profile">Vis profil</string>
-    <string name="notification_login_expired">Login er udløbet. Log venligst ind igen</string>
+    <string name="notification_login_expired">Login udløbet for %1$s</string>
     <string name="following_title">Følger</string>
     <string name="fans_title">Følger</string>
     <string name="local_history_search_placeholder">Søg i lokal cache</string>

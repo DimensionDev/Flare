@@ -234,7 +234,7 @@
     <string name="tab_settings_default">Προεπιλογή</string>
     <string name="tab_settings_list">Λίστα</string>
     <string name="tab_settings_feed">Ροές</string>
-    <string name="notification_login_expired">Η σύνδεση έληξε, παρακαλώ συνδεθείτε ξανά</string>
+    <string name="notification_login_expired">Η σύνδεση έληξε για %1$s</string>
     <string name="dm_list_empty">Δεν υπάρχουν άμεσα μηνύματα</string>
     <string name="dm_list_error">Αποτυχία φόρτωσης άμεσων μηνυμάτων</string>
     <string name="send">Αποστολή</string>

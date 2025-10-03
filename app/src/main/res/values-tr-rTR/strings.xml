@@ -230,7 +230,6 @@
     <string name="dm_sending">Gönderiliyor</string>
     <string name="dm_leave">Sohbeti terk et</string>
     <string name="dm_to_profile">Profili göster</string>
-    <string name="notification_login_expired">Giriş süresi doldu, lütfen yeniden giriş yapın</string>
     <string name="following_title">Takip Edilenler</string>
     <string name="fans_title">Takipçi</string>
     <string name="local_history_search_placeholder">Yerel önbellekte ara</string>

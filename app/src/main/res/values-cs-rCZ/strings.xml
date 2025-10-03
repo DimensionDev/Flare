@@ -238,7 +238,7 @@
     <string name="dm_sending">Odesílání</string>
     <string name="dm_leave">Opustit konverzaci</string>
     <string name="dm_to_profile">Zobrazit profil</string>
-    <string name="notification_login_expired">Přihlášení vypršelo, přihlaste se prosím znovu</string>
+    <string name="notification_login_expired">Přihlášení vypršelo pro %1$s</string>
     <string name="following_title">Sledovat</string>
     <string name="fans_title">Sledující</string>
     <string name="local_history_search_placeholder">Hledat místní keš</string>

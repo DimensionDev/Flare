@@ -230,7 +230,6 @@
     <string name="dm_sending">發送中</string>
     <string name="dm_leave">離開對話</string>
     <string name="dm_to_profile">顯示檔案</string>
-    <string name="notification_login_expired">登入已過期，請重新登入</string>
     <string name="following_title">追蹤中</string>
     <string name="fans_title">粉絲</string>
     <string name="local_history_search_placeholder">搜尋本地快取</string>

@@ -234,7 +234,7 @@
     <string name="tab_settings_default">Padrão</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Conteúdos</string>
-    <string name="notification_login_expired">Login expirado, faça o login novamente</string>
+    <string name="notification_login_expired">O login expirou para %1$s</string>
     <string name="dm_list_empty">Nenhuma mensagem direta</string>
     <string name="dm_list_error">Falha ao carregar mensagens diretas</string>
     <string name="send">Mandar</string>

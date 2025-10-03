@@ -230,7 +230,6 @@
     <string name="dm_sending">Enviant</string>
     <string name="dm_leave">Deixar la conversa</string>
     <string name="dm_to_profile">Mostrar perfil</string>
-    <string name="notification_login_expired">La sessió d\'inici de sessió ha caducat, si us plau, inicieu sessió de nou</string>
     <string name="following_title">Seguint</string>
     <string name="fans_title">Seguidor</string>
     <string name="local_history_search_placeholder">Cerca a la memòria cau local</string>

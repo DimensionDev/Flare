@@ -238,7 +238,7 @@
     <string name="dm_sending">Отправка</string>
     <string name="dm_leave">Покинуть разговор</string>
     <string name="dm_to_profile">Показать профиль</string>
-    <string name="notification_login_expired">Срок действия входа истек, пожалуйста, войдите снова</string>
+    <string name="notification_login_expired">Вход просрочен для %1$s</string>
     <string name="following_title">Подписка</string>
     <string name="fans_title">Фольклор</string>
     <string name="local_history_search_placeholder">Поиск локального кэша</string>

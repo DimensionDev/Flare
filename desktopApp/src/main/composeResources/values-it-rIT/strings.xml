@@ -234,7 +234,7 @@
     <string name="tab_settings_default">Predefinito</string>
     <string name="tab_settings_list">Elenco</string>
     <string name="tab_settings_feed">Feed</string>
-    <string name="notification_login_expired">Login scaduto, effettua nuovamente il login</string>
+    <string name="notification_login_expired">Login scaduto per %1$s</string>
     <string name="dm_list_empty">Nessun messaggio diretto</string>
     <string name="dm_list_error">Caricamento dei messaggi diretti non riuscito</string>
     <string name="send">Invia</string>

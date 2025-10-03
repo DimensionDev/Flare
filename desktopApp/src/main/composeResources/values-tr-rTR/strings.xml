@@ -222,7 +222,6 @@
     <string name="tab_settings_default">Varsayılan</string>
     <string name="tab_settings_list">Liste</string>
     <string name="tab_settings_feed">Beslemeler</string>
-    <string name="notification_login_expired">Giriş süresi doldu, lütfen yeniden giriş yapın</string>
     <string name="dm_list_empty">Hiç doğrudan mesaj yok</string>
     <string name="dm_list_error">Doğrudan mesajları yüklemekte başarısız olundu</string>
     <string name="send">Gönder</string>

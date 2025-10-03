@@ -27,7 +27,7 @@ struct ProfileScreen: View {
             StateView(state: presenter.state.tabs) { tabsArray in
                 let tabs = tabsArray.cast(ProfileState.Tab.self)
                 Picker(selection: $selectedTab) {
-                    ForEach(0..<tabs.count) { index in
+                    ForEach(0..<tabs.count, id: \.self) { index in
                         let tab = tabs[index]
                         let text = switch onEnum(of: tab) {
                         case .media: LocalizedStringResource(stringLiteral: "profile_tab_media")

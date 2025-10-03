@@ -1,12 +1,13 @@
 import SwiftUI
 import KotlinSharedUI
+import SwiftUIBackports
 
 struct StatusActionsView: View {
     let data: [StatusAction]
 
     var body: some View {
         HStack {
-            ForEach(0..<data.count) { index in
+            ForEach(0..<data.count, id: \.self) { index in
                 let item = data[index]
                 StatusActionView(data: item, useText: false, isFixedWidth: index != data.count - 1)
                     .if(index == data.count - 1) { view in
@@ -17,6 +18,7 @@ struct StatusActionsView: View {
 
             }
         }
+        .backport
         .labelIconToTitleSpacing(4)
     }
 }
@@ -32,7 +34,7 @@ struct StatusActionView: View {
             StatusActionItemView(data: item, useText: useText, isFixedWidth: isFixedWidth)
         case .group(let group):
             Menu {
-                ForEach(0..<group.actions.count) { index in
+                ForEach(0..<group.actions.count, id: \.self) { index in
                     let item = group.actions[index]
                     StatusActionView(data: item, useText: true, isFixedWidth: false)
                 }

@@ -3,6 +3,7 @@ import KotlinSharedUI
 import WebKit
 import Combine
 
+@available(iOS 26.0, *)
 struct WebLoginScreen: View {
     @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel: WebLoginViewModel
@@ -36,6 +37,7 @@ struct WebLoginScreen: View {
     }
 }
 
+@available(iOS 26.0, *)
 struct NavigationDecider: WebPage.NavigationDeciding {
     let onCookie: (String) -> Void
     let config: WebPage.Configuration
@@ -61,6 +63,7 @@ struct NavigationDecider: WebPage.NavigationDeciding {
     }
 }
 
+@available(iOS 26.0, *)
 class WebLoginViewModel: ObservableObject {
     @Published
     var config: WebPage.Configuration

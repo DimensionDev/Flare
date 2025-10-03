@@ -474,6 +474,17 @@ private fun UserListContent(
                         ).clip(
                             shape = PlatformTheme.shapes.medium,
                         ),
+                onMediaClick = { media ->
+                    status.onMediaClicked.invoke(
+                        ClickContext(
+                            launcher = {
+                                uriHandler.openUri(it)
+                            },
+                        ),
+                        media,
+                        status.images.indexOf(media),
+                    )
+                },
             )
         }
     }

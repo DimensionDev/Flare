@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import SwiftUIBackports
 
 struct StatusView: View {
     @Environment(\.themeSettings) private var themeSettings
@@ -106,7 +107,8 @@ struct StatusView: View {
                                 Text("mastodon_item_show_more")
                             }
                         }
-                        .buttonStyle(.glassProminent)
+                        .backport
+                        .glassProminentButtonStyle()
                     }
 
                     if expand || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
@@ -141,7 +143,8 @@ struct StatusView: View {
                                     Image("fa-image")
                                 }
                             }
-                            .buttonStyle(.glass)
+                            .backport
+                            .glassButtonStyle(fallbackStyle: .bordered)
                         }
                     }
 

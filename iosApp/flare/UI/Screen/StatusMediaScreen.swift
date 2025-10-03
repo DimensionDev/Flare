@@ -6,6 +6,7 @@ import AVKit
 struct StatusMediaScreen: View {
     @Environment(\.dismiss) var dismiss
     let data: [UiMedia]
+    let initialIndex: Int
     @State private var selectedIndex: Int = 0
     @State var opacity: CGFloat = 1 // Dismiss gesture background opacity
     var body: some View {
@@ -45,17 +46,11 @@ struct StatusMediaScreen: View {
             dismiss()
         }
         .zoomable(min: 1, max: 5)
+        .settings { config in
+            config.preloadAmount = 99
+        }
         .background(.black.opacity(opacity))
         .background(ClearFullScreenBackground())
-//        .overlay(alignment: .topLeading) {
-//            Button {
-//                dismiss()
-//            } label: {
-//                Image("fa-xmark")
-//            }
-//            .buttonStyle(.glass)
-//            .padding()
-//        }
         .ignoresSafeArea()
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
@@ -66,6 +61,9 @@ struct StatusMediaScreen: View {
                 }
             }
         }
+        .onAppear {
+            selectedIndex = initialIndex
+        }
     }
 }
 
@@ -73,5 +71,6 @@ extension StatusMediaScreen {
     init(data: [UiMedia], selectedIndex: Int) {
         self.data = data
         self.selectedIndex = selectedIndex
+        self.initialIndex = selectedIndex
     }
 }

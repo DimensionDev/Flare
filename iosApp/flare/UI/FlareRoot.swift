@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import SwiftUIBackports
 
 struct FlareRoot: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -112,6 +113,7 @@ struct FlareRoot: View {
                 }
             }
             .tabViewStyle(.sidebarAdaptable)
+            .backport
             .tabBarMinimizeBehavior(.onScrollDown)
             .tabViewSidebarHeader {
                 if let profileRoute = tabs.extraProfileRoute {

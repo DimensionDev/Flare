@@ -600,7 +600,8 @@ private fun DriveFile.toUi(): UiMedia? {
     if (type.startsWith("image/")) {
         return UiMedia.Image(
             url = url.orEmpty(),
-            previewUrl = thumbnailUrl.orEmpty(),
+            // thumbnailUrl is not always present
+            previewUrl = thumbnailUrl?.takeIf { it.isNotEmpty() } ?: url.orEmpty(),
             description = comment,
             width = properties.width?.toFloat() ?: 0f,
             height = properties.height?.toFloat() ?: 0f,

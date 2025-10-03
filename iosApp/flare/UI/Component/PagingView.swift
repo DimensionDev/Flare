@@ -19,7 +19,7 @@ struct PagingView<T: AnyObject, EmptyContent: View, ErrorContent: View, LoadingC
             _ = error.onRetry()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        case .loading: ForEach(0..<loadingCount) { index in
+        case .loading: ForEach(0..<loadingCount, id: \.self) { index in
             loadingContent()
         }
         case .success(let success):
@@ -44,7 +44,7 @@ struct PagingView<T: AnyObject, EmptyContent: View, ErrorContent: View, LoadingC
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
             case .loading:
-                ForEach(0..<loadingCount) { index in
+                ForEach(0..<loadingCount, id: \.self) { index in
                     loadingContent()
                }
             case .notLoading(let notLoading):

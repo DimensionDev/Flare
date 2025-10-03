@@ -224,7 +224,7 @@ struct EditRssSheet: View {
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button(
-                    role: .confirm
+//                    role: .confirm
                 ) {
                     if case .success(let success) = onEnum(of: presenter.state.inputState) {
                         switch onEnum(of: success.data) {

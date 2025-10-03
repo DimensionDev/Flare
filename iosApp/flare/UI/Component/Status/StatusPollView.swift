@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import SwiftUIBackports
 
 struct StatusPollView: View {
     let data: UiPoll
@@ -85,7 +86,8 @@ struct StatusPollView: View {
                 } label: {
                     Text("poll_vote")
                 }
-                .buttonStyle(.glassProminent)
+                .backport
+                .glassProminentButtonStyle()
             }
         }
     }

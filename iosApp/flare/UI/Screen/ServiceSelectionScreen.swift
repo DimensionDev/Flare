@@ -42,20 +42,36 @@ struct ServiceSelectionScreen : View {
         .sheet(isPresented: $showVVOLoginSheet, onDismiss: {
             showVVOLoginSheet = false
         }, content: {
-            WebLoginScreen(onCookie: { cookie in
-                if vvoLoginPresenter.state.checkChocolate(cookie: cookie) {
-                    vvoLoginPresenter.state.login(chocolate: cookie)
-                }
-            }, url: UiApplicationVVo.shared.loginUrl)
+            if #available(iOS 26.0, *) {
+                WebLoginScreen(onCookie: { cookie in
+                    if vvoLoginPresenter.state.checkChocolate(cookie: cookie) {
+                        vvoLoginPresenter.state.login(chocolate: cookie)
+                    }
+                }, url: UiApplicationVVo.shared.loginUrl)
+            } else {
+                BackportWebLoginScreen(onCookie: { cookie in
+                    if vvoLoginPresenter.state.checkChocolate(cookie: cookie) {
+                        vvoLoginPresenter.state.login(chocolate: cookie)
+                    }
+                }, url: UiApplicationVVo.shared.loginUrl)
+            }
         })
         .sheet(isPresented: $showXQTLoginSheet) {
             showXQTLoginSheet = false
         } content: {
-            WebLoginScreen(onCookie: { cookie in
-                if xqtLoginPresenter.state.checkChocolate(cookie: cookie) {
-                    xqtLoginPresenter.state.login(chocolate: cookie)
-                }
-            }, url: "https://" + UiApplicationXQT.shared.host)
+            if #available(iOS 26.0, *) {
+                WebLoginScreen(onCookie: { cookie in
+                    if xqtLoginPresenter.state.checkChocolate(cookie: cookie) {
+                        xqtLoginPresenter.state.login(chocolate: cookie)
+                    }
+                }, url: "https://" + UiApplicationXQT.shared.host)
+            } else {
+                BackportWebLoginScreen(onCookie: { cookie in
+                    if xqtLoginPresenter.state.checkChocolate(cookie: cookie) {
+                        xqtLoginPresenter.state.login(chocolate: cookie)
+                    }
+                }, url: "https://" + UiApplicationXQT.shared.host)
+            }
         }
 
     }

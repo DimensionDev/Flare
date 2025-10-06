@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Flare (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Flare (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

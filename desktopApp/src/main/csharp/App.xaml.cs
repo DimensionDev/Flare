@@ -1,0 +1,139 @@
+﻿using Microsoft.UI.Xaml;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Flare
+{
+    public partial class App : Application
+    {
+        //private Window? _window;
+        private int _kotlinPort;
+        private int _csharpPort;
+        private Process? _composeProcess;
+
+        public static App Instance { get; private set; }
+
+        public App()
+        {
+            InitializeComponent();
+
+            _kotlinPort = GetFreeTcpPort();  
+            _csharpPort = GetFreeTcpPort();  
+            var cts = new CancellationTokenSource();
+            _ = RunCSharpIpcServerAsync(IPAddress.Loopback, _csharpPort, cts.Token);
+            StartComposeWithArgs(_kotlinPort, _csharpPort);
+            Instance = this;
+        }
+
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
+        {
+            //_window = new MainWindow();
+            //_window.Activate();
+        }
+
+        private int GetFreeTcpPort()
+        {
+            var l = new TcpListener(IPAddress.Loopback, 0);
+            l.Start();
+            int port = ((IPEndPoint)l.LocalEndpoint).Port;
+            l.Stop();
+            return port;
+        }
+
+        private void StartComposeWithArgs(int kotlinRecvPort, int csharpRecvPort)
+        {
+            var installPath = Windows.ApplicationModel.Package.Current.InstalledLocation.Path;
+            var exePath = Path.Combine(installPath, "Assets", "compose", "Flare", "Flare.exe");
+            var psi = new ProcessStartInfo
+            {
+                FileName = exePath,
+                Arguments = $"--kotlin-recv {kotlinRecvPort} --csharp-recv {csharpRecvPort}",
+                UseShellExecute = false,
+                WorkingDirectory = Path.GetDirectoryName(exePath)!
+            };
+            _composeProcess = Process.Start(psi);
+        }
+
+        private async Task RunCSharpIpcServerAsync(IPAddress ip, int port, CancellationToken ct)
+        {
+            var listener = new TcpListener(ip, port);
+            listener.Start();
+            Debug.WriteLine($"[C# IPC] Listening on {ip}:{port}");
+
+            try
+            {
+                while (!ct.IsCancellationRequested)
+                {
+                    var client = await listener.AcceptTcpClientAsync(ct);
+                    _ = HandleClientAsync(client, ct);
+                }
+            }
+            catch (OperationCanceledException) { }
+            finally
+            {
+                listener.Stop();
+            }
+        }
+
+        private async Task HandleClientAsync(TcpClient client, CancellationToken ct)
+        {
+            using (client)
+            await using (var stream = client.GetStream())
+            using (var reader = new StreamReader(stream, Encoding.UTF8, false, 8192, leaveOpen: true))
+            {
+                while (!ct.IsCancellationRequested && await reader.ReadLineAsync(ct) is { } line)
+                {
+                    Debug.WriteLine($"[C# IPC] <- {line}");
+                    var jsonObject = System.Text.Json.JsonDocument.Parse(line);
+                    if (jsonObject.RootElement.TryGetProperty("Type", out var typeElement))
+                    {
+                        var type = typeElement.GetString();
+                        switch (type)
+                        {
+                            case "shutdown":
+                                {
+                                    Debug.WriteLine("[C# IPC] Shutdown command received.");
+                                    Exit();
+                                    break;
+                                }
+                        }
+                    }
+                }
+            }
+        }
+        private async Task SendMessage(string message)
+        {
+            var sender = new TcpClient();
+            await sender.ConnectAsync(IPAddress.Loopback, _kotlinPort);
+            await using var stream = sender.GetStream();
+            await using var writer = new StreamWriter(stream, new UTF8Encoding(false));
+            writer.AutoFlush = true;
+            await writer.WriteAsync(message);
+        }
+
+        public void OnDeeplink(string deeplink)
+        {
+            Debug.WriteLine($"[C# IPC] -> {deeplink}");
+            var message = new IPCEvent<DeeplinkData>("deeplink", new DeeplinkData(deeplink));
+            var json = System.Text.Json.JsonSerializer.Serialize(message);
+            _ = SendMessage(json);
+        }
+    }
+
+    internal class IPCEvent<T>(string Type, T? Data)
+    {
+        public string Type { get; init; } = Type;
+        public T? Data { get; init; } = Data;
+    }
+
+    internal class DeeplinkData(string Deeplink)
+    {
+        public string Deeplink { get; init; } = Deeplink;
+    }
+}

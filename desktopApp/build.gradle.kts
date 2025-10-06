@@ -47,7 +47,7 @@ compose.desktop {
         mainClass = "dev.dimension.flare.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Pkg)
+            targetFormats(TargetFormat.Pkg, TargetFormat.Exe)
             packageName = "Flare"
             packageVersion = "1.0.1"
             macOS {
@@ -81,6 +81,9 @@ compose.desktop {
                 }
 
                 iconFile.set(project.file("resources/ic_launcher.icns"))
+            }
+            windows {
+                iconFile.set(project.file("resources/ic_launcher.ico"))
             }
             linux {
                 modules("jdk.security.auth")

@@ -1,0 +1,89 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>Flare</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x86;x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    <PublishProfile>win-$(Platform).pubxml</PublishProfile>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <Nullable>enable</Nullable>
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+
+      <ComposeDist>..\..\..\build\compose\binaries\main-release\app\Flare</ComposeDist>
+      <ComposeStage>$(ProjectDir)Assets\compose\Flare</ComposeStage>
+      <EnableComposeAutoBuild>true</EnableComposeAutoBuild>
+  </PropertyGroup>
+
+    <Target Name="BuildCompose" Condition="'$(EnableComposeAutoBuild)' == 'true'" BeforeTargets="PreBuildEvent">
+        <Message Text="[BuildCompose] Running Gradle in $(GradleWorkingDir)" Importance="high" />
+        <Exec Command="cd ..\..\..\..\&#xD;&#xA;./gradlew :desktop:createReleaseDistributable" IgnoreExitCode="false" />
+    </Target>
+
+
+    <ItemGroup>
+        <ComposeFiles Include="$(ComposeDist)\**\*" Condition="Exists('$(ComposeDist)')" />
+    </ItemGroup>
+
+
+    <Target Name="StageCompose" DependsOnTargets="BuildCompose" BeforeTargets="PreBuildEvent" Inputs="@(ComposeFiles)" Outputs="$(ComposeStage)">
+        <Message Text="[StageCompose] From $(ComposeDist) to $(ComposeStage)" Importance="high" />
+        <RemoveDir Directories="$(ComposeStage)" Condition="Exists('$(ComposeStage)')" />
+        <MakeDir Directories="$(ComposeStage)" />
+        <Copy SourceFiles="@(ComposeFiles)" DestinationFiles="@(ComposeFiles->'$(ComposeStage)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    </Target>
+
+    <ItemGroup>
+        <Content Include="$(ComposeStage)\**\*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <PackagePath>Assets\compose\Flare</PackagePath>
+        </Content>
+    </ItemGroup>
+    
+  <ItemGroup>
+    <Content Include="Assets\SplashScreen.scale-200.png" />
+    <Content Include="Assets\LockScreenLogo.scale-200.png" />
+    <Content Include="Assets\Square150x150Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+    <Content Include="Assets\StoreLogo.png" />
+    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+
+  <!--
+    Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
+    Tools extension to be activated for this project even if the Windows App SDK Nuget
+    package has not yet been restored.
+  -->
+  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <ProjectCapability Include="Msix" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.6584" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250916003" />
+  </ItemGroup>
+
+  <!--
+    Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
+    Explorer "Package and Publish" context menu entry to be enabled for this project even if
+    the Windows App SDK Nuget package has not yet been restored.
+  -->
+  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+  </PropertyGroup>
+
+  <!-- Publish Properties -->
+  <PropertyGroup>
+    <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+    <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
+    <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+  </PropertyGroup>
+</Project>

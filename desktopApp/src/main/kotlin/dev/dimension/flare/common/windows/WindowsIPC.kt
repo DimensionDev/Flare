@@ -1,10 +1,10 @@
 package dev.dimension.flare.common.windows
 
+import dev.dimension.flare.common.IPCEvent
+import dev.dimension.flare.common.PlatformIPC
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -19,21 +19,7 @@ import kotlin.concurrent.thread
 internal class WindowsIPC(
     private val ports: Ports,
     private val onDeeplink: (String) -> Unit,
-) {
-    @Serializable
-    data class IPCEvent<T>(
-        @SerialName("Type")
-        val type: String,
-        @SerialName("Data")
-        val data: T?,
-    ) {
-        @Serializable
-        data class DeeplinkData(
-            @SerialName("Deeplink")
-            val deeplink: String,
-        )
-    }
-
+) : PlatformIPC {
     companion object {
         fun parsePorts(args: Array<String>): Ports {
             var kRecv = -1
@@ -87,7 +73,6 @@ internal class WindowsIPC(
                 val type = jsonObject.jsonObject["Type"]?.jsonPrimitive?.content
                 when (type) {
                     "deeplink" -> {
-                        val data = jsonObject.jsonObject["Data"] ?: continue
                         val dataObj =
                             line
                                 .decodeJson(
@@ -103,7 +88,7 @@ internal class WindowsIPC(
         }
     }
 
-    fun <T> send(
+    private fun <T> send(
         event: IPCEvent<T>,
         serializer: KSerializer<T>,
     ) {
@@ -111,8 +96,16 @@ internal class WindowsIPC(
         sender.send(json)
     }
 
-    fun sendShutdown() {
-        send(IPCEvent<Unit>("shutdown", null), Unit.serializer())
+    override fun <T> sendData(
+        type: String,
+        data: T,
+        serializer: KSerializer<T>,
+    ) {
+        send(IPCEvent(type, data), serializer)
+    }
+
+    override fun sendShutdown() {
+        sendData("shutdown", Unit, Unit.serializer())
     }
 
     private class IpcSender(

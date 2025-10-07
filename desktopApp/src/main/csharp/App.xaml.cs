@@ -1,12 +1,17 @@
 ﻿using Microsoft.UI.Xaml;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Media.Core;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace Flare
 {
@@ -22,7 +27,7 @@ namespace Flare
         public App()
         {
             InitializeComponent();
-
+            DispatcherShutdownMode = DispatcherShutdownMode.OnExplicitShutdown;
             _kotlinPort = GetFreeTcpPort();  
             _csharpPort = GetFreeTcpPort();  
             var cts = new CancellationTokenSource();
@@ -55,7 +60,7 @@ namespace Flare
                 FileName = exePath,
                 Arguments = $"--kotlin-recv {kotlinRecvPort} --csharp-recv {csharpRecvPort}",
                 UseShellExecute = false,
-                WorkingDirectory = Path.GetDirectoryName(exePath)!
+                WorkingDirectory = Path.GetDirectoryName(exePath)!,
             };
             _composeProcess = Process.Start(psi);
         }
@@ -97,11 +102,102 @@ namespace Flare
                         switch (type)
                         {
                             case "shutdown":
+                            {
+                                Debug.WriteLine("[C# IPC] Shutdown command received.");
+                                Exit();
+                                break;
+                            }
+                            case "open-image-viewer":
                                 {
-                                    Debug.WriteLine("[C# IPC] Shutdown command received.");
-                                    Exit();
+                                    if (jsonObject.RootElement.TryGetProperty("Data", out var dataElement))
+                                    {
+                                        var data = dataElement.GetString();
+                                        if (data != null)
+                                        {
+                                            Debug.WriteLine($"[C# IPC] Open image viewer command received: {data}");
+                                            new Window
+                                            {
+                                                Content = new ScrollViewer
+                                                {
+                                                    Content = new Image
+                                                    {
+                                                        Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(new Uri(data)),
+                                                        Stretch = Stretch.Uniform,
+                                                    },
+                                                    HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                                                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                                                    ZoomMode = ZoomMode.Enabled,
+                                                    HorizontalScrollMode = ScrollMode.Auto,
+                                                    VerticalScrollMode = ScrollMode.Auto,
+                                                },
+                                                ExtendsContentIntoTitleBar = true,
+                                                SystemBackdrop = new MicaBackdrop(),
+                                                Title = "Image Viewer",
+                                                AppWindow =
+                                                {
+                                                    IsShownInSwitchers = false,
+                                                },
+                                            }.Activate();
+                                        }
+                                    }
                                     break;
                                 }
+                            case "open-status-image-viewer":
+                            {
+                                var data = System.Text.Json.JsonSerializer.Deserialize<OpenStatusImageData>(jsonObject.RootElement.GetProperty("Data").GetRawText());
+                                if (data != null)
+                                {
+                                    Debug.WriteLine($"[C# IPC] Open status image viewer command received: {data.Index}");
+                                    var flipView = new FlipView();
+                                    foreach (var media in data.Medias)
+                                    {
+                                        switch (media.Type)
+                                        {
+                                            case "image":
+                                                var image = new Image
+                                                {
+                                                    Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(new Uri(media.Url)),
+                                                    Stretch = Stretch.Uniform,
+                                                };
+                                                var scrollViewer = new ScrollViewer
+                                                {
+                                                    Content = image,
+                                                    HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                                                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                                                    ZoomMode = ZoomMode.Enabled,
+                                                    HorizontalScrollMode = ScrollMode.Auto,
+                                                    VerticalScrollMode = ScrollMode.Auto,
+                                                };
+                                                flipView.Items.Add(scrollViewer);
+                                                break;
+                                            case "video":
+                                            case "gif":
+                                            case "audio":
+                                                var mediaPlayerElement = new MediaPlayerElement
+                                                {
+                                                    Source = MediaSource.CreateFromUri(new Uri(media.Url)),
+                                                    AreTransportControlsEnabled = true,
+                                                    Stretch = Stretch.Uniform,
+                                                };
+                                                flipView.Items.Add(mediaPlayerElement);
+                                                break;
+                                        }
+                                    }
+                                    new Window
+                                    {
+                                        Content = flipView,
+                                        ExtendsContentIntoTitleBar = true,
+                                        SystemBackdrop = new MicaBackdrop(),
+                                        Title = "Media Viewer",
+                                        AppWindow =
+                                        {
+                                            IsShownInSwitchers = false,
+                                        },
+                                    }.Activate();
+                                }
+                                
+                                break;
+                            }
                         }
                     }
                 }
@@ -135,5 +231,25 @@ namespace Flare
     internal class DeeplinkData(string Deeplink)
     {
         public string Deeplink { get; init; } = Deeplink;
+    }
+
+    internal class OpenStatusImageData(int Index, List<StatusMediaItem> Medias)
+    {
+        [JsonPropertyName("index")]
+        public int Index { get; init; } = Index;
+        [JsonPropertyName("medias")]
+        public List<StatusMediaItem> Medias { get; init; } = Medias;
+    }
+
+    internal class StatusMediaItem(string Url, string Type, string? Placeholder)
+    {
+        [JsonPropertyName("url")]
+        public string Url { get; init; } = Url;
+        
+        [JsonPropertyName("type")]
+        public string Type { get; init; } = Type;
+        
+        [JsonPropertyName("placeholder")]
+        public string? Placeholder { get; init; } = Placeholder;
     }
 }

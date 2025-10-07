@@ -17,6 +17,7 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.DeeplinkHandler
 import dev.dimension.flare.common.NativeWindowBridge
+import dev.dimension.flare.common.NoopIPC
 import dev.dimension.flare.common.SandboxHelper
 import dev.dimension.flare.common.windows.WindowsIPC
 import dev.dimension.flare.di.KoinHelper
@@ -37,7 +38,7 @@ import java.awt.Desktop
 
 fun main(args: Array<String>) {
     SandboxHelper.configureSandboxArgs()
-    val windowsIPC =
+    val platformIPC =
         if (SystemUtils.IS_OS_WINDOWS) {
             WindowsIPC(
                 WindowsIPC.parsePorts(args),
@@ -46,20 +47,14 @@ fun main(args: Array<String>) {
                 },
             )
         } else {
-            null
+            NoopIPC
         }
     startKoin {
         modules(
             desktopModule + KoinHelper.modules() + composeUiModule +
-                listOfNotNull(
-                    if (windowsIPC != null) {
-                        module {
-                            single { windowsIPC }
-                        }
-                    } else {
-                        null
-                    },
-                ),
+                module {
+                    single { platformIPC }
+                },
         )
     }
     if (SystemUtils.IS_OS_MAC_OSX) {
@@ -98,7 +93,7 @@ fun main(args: Array<String>) {
             Window(
                 onCloseRequest = {
                     exitApplication()
-                    windowsIPC?.sendShutdown()
+                    platformIPC.sendShutdown()
                 },
                 title = stringResource(Res.string.app_name),
                 icon = painterResource(Res.drawable.flare_logo),

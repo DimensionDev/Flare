@@ -1,6 +1,7 @@
 package dev.dimension.flare.common
 
 import dev.dimension.flare.common.macos.MacosBridge
+import dev.dimension.flare.common.windows.WindowsBridge
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.takeSuccess
@@ -17,10 +18,13 @@ import org.apache.commons.lang3.SystemUtils
 
 internal class NativeWindowBridge(
     private val scope: CoroutineScope,
+    private val windowsBridge: WindowsBridge,
 ) {
     fun openImageImageViewer(url: String) {
         if (SystemUtils.IS_OS_MAC_OSX) {
             MacosBridge.openImageViewer(url)
+        } else if (SystemUtils.IS_OS_WINDOWS) {
+            windowsBridge.openImageViewer(url)
         } else {
             // TODO: Implement for other platforms
         }
@@ -44,6 +48,8 @@ internal class NativeWindowBridge(
             if (medias != null) {
                 if (SystemUtils.IS_OS_MAC_OSX) {
                     MacosBridge.openStatusImageViewer(medias, selectedIndex = route.index)
+                } else if (SystemUtils.IS_OS_WINDOWS) {
+                    windowsBridge.openStatusImageViewer(medias, selectedIndex = route.index)
                 } else {
                     // TODO: Implement for other platforms
                 }

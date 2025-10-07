@@ -22,34 +22,15 @@
         <Message Text="[BuildCompose] Running Gradle in $(GradleWorkingDir)" Importance="high" />
         <Exec Command="cd ..\..\..\..\&#xD;&#xA;./gradlew :desktop:createReleaseDistributable" IgnoreExitCode="false" />
     </Target>
-
-
     <ItemGroup>
-        <ComposeFiles Include="$(ComposeDist)\**\*" Condition="Exists('$(ComposeDist)')" />
+      <None Include="$(ProjectDir)..\..\..\build\compose\binaries\main-release\app\Flare\**\*" CopyToOutputDirectory="Always" LinkBase="Assets\compose\Flare"/>
     </ItemGroup>
-
-
-    <Target Name="StageCompose" DependsOnTargets="BuildCompose" BeforeTargets="PreBuildEvent" Inputs="@(ComposeFiles)" Outputs="$(ComposeStage)">
-        <Message Text="[StageCompose] From $(ComposeDist) to $(ComposeStage)" Importance="high" />
-        <RemoveDir Directories="$(ComposeStage)" Condition="Exists('$(ComposeStage)')" />
-        <MakeDir Directories="$(ComposeStage)" />
-        <Copy SourceFiles="@(ComposeFiles)" DestinationFiles="@(ComposeFiles->'$(ComposeStage)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-    </Target>
-
-    <ItemGroup>
-        <Content Include="$(ComposeStage)\**\*">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-            <PackagePath>Assets\compose\Flare</PackagePath>
-        </Content>
-    </ItemGroup>
-    
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\Square150x150Logo.scale-200.png" />
     <Content Include="Assets\Square44x44Logo.scale-200.png" />
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
 

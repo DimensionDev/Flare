@@ -3,8 +3,8 @@ package dev.dimension.flare.common.macos
 import com.sun.jna.Callback
 import com.sun.jna.Library
 import com.sun.jna.Native
+import dev.dimension.flare.common.IPCEvent
 import dev.dimension.flare.ui.model.UiMedia
-import kotlinx.serialization.Serializable
 
 internal object MacosBridge {
     private interface Bridge : Library {
@@ -102,7 +102,7 @@ internal object MacosBridge {
     ) {
         val medias =
             data.map {
-                StatusMediaItem(
+                IPCEvent.OpenStatusImageData.StatusMediaItem(
                     url = it.url,
                     type =
                         when (it) {
@@ -121,26 +121,13 @@ internal object MacosBridge {
                 )
             }
         val model =
-            OpenStatusImageModel(
+            IPCEvent.OpenStatusImageData(
                 index = selectedIndex,
                 medias = medias,
             )
         val modelJson =
             kotlinx.serialization.json.Json
-                .encodeToString(OpenStatusImageModel.serializer(), model)
+                .encodeToString(IPCEvent.OpenStatusImageData.serializer(), model)
         lib.open_status_image_viewer(modelJson)
     }
-
-    @Serializable
-    data class OpenStatusImageModel(
-        val index: Int,
-        val medias: List<StatusMediaItem>,
-    )
-
-    @Serializable
-    data class StatusMediaItem(
-        val url: String,
-        val type: String,
-        val placeholder: String?,
-    )
 }

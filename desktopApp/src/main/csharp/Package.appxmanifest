@@ -8,14 +8,14 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="381378e9-b4a5-45cb-8e29-330f80266aee"
-    Publisher="CN=Tlaster"
+    Name="51945Tlaster.FlareApp"
+    Publisher="CN=F82B0EE7-EF8D-4515-BEAB-DD968D07D67F"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="381378e9-b4a5-45cb-8e29-330f80266aee" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="41c320a3-e557-4743-b941-89a8a7c94021" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>Flare</DisplayName>
+    <DisplayName>FlareApp</DisplayName>
     <PublisherDisplayName>Tlaster</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -34,7 +34,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="Flare"
+        DisplayName="FlareApp"
         Description="Flare"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
@@ -54,5 +54,6 @@
 
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
+    <Capability Name="internetClient"/>
   </Capabilities>
 </Package>

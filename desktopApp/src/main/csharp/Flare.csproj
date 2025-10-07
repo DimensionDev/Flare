@@ -12,10 +12,7 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-
-      <ComposeDist>..\..\..\build\compose\binaries\main-release\app\Flare</ComposeDist>
-      <ComposeStage>$(ProjectDir)Assets\compose\Flare</ComposeStage>
-      <EnableComposeAutoBuild>true</EnableComposeAutoBuild>
+    <EnableComposeAutoBuild>true</EnableComposeAutoBuild>
   </PropertyGroup>
 
     <Target Name="BuildCompose" Condition="'$(EnableComposeAutoBuild)' == 'true'" BeforeTargets="PreBuildEvent">

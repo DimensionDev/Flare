@@ -12,6 +12,13 @@ internal interface PlatformIPC {
         data: T,
         serializer: KSerializer<T>,
     )
+
+    fun registerReceiver(
+        id: String,
+        onReceive: (String) -> Unit,
+    )
+
+    fun unregisterReceiver(id: String)
 }
 
 internal data object NoopIPC : PlatformIPC {
@@ -22,6 +29,13 @@ internal data object NoopIPC : PlatformIPC {
         data: T,
         serializer: KSerializer<T>,
     ) {}
+
+    override fun registerReceiver(
+        id: String,
+        onReceive: (String) -> Unit,
+    ) {}
+
+    override fun unregisterReceiver(id: String) {}
 }
 
 @Serializable
@@ -49,4 +63,16 @@ data class IPCEvent<T>(
             val placeholder: String?,
         )
     }
+
+    @Serializable
+    data class OpenWebViewData(
+        val id: String,
+        val url: String,
+    )
+
+    @Serializable
+    data class OnCookieReceivedData(
+        val id: String,
+        val cookie: String,
+    )
 }

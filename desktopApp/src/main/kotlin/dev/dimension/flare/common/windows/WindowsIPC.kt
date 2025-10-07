@@ -6,6 +6,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.BufferedReader
@@ -45,6 +46,8 @@ internal class WindowsIPC(
         IpcSender("127.0.0.1", ports.csharpRecv)
     }
 
+    private val receivers = mutableMapOf<String, (String) -> Unit>()
+
     init {
         thread(isDaemon = true, name = "kotlin-ipc-server") {
             runKotlinServer(ports.kotlinRecv)
@@ -82,6 +85,9 @@ internal class WindowsIPC(
                     }
 
                     else -> {
+                        val receiver = receivers[type] ?: continue
+                        val data = jsonObject.jsonObject["Data"]?.encodeJson(JsonElement.serializer()) ?: continue
+                        receiver(data)
                     }
                 }
             }
@@ -102,6 +108,17 @@ internal class WindowsIPC(
         serializer: KSerializer<T>,
     ) {
         send(IPCEvent(type, data), serializer)
+    }
+
+    override fun registerReceiver(
+        id: String,
+        onReceive: (String) -> Unit,
+    ) {
+        receivers[id] = onReceive
+    }
+
+    override fun unregisterReceiver(id: String) {
+        receivers.remove(id)
     }
 
     override fun sendShutdown() {

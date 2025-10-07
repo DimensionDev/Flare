@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -12,12 +13,13 @@ using System.Threading.Tasks;
 using Windows.Media.Core;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.Web.WebView2.Core;
 
 namespace Flare
 {
     public partial class App : Application
     {
-        //private Window? _window;
+        private Dictionary<string, Window> _openWindows = new();
         private int _kotlinPort;
         private int _csharpPort;
         private Process? _composeProcess;
@@ -34,12 +36,6 @@ namespace Flare
             _ = RunCSharpIpcServerAsync(IPAddress.Loopback, _csharpPort, cts.Token);
             StartComposeWithArgs(_kotlinPort, _csharpPort);
             Instance = this;
-        }
-
-        protected override void OnLaunched(LaunchActivatedEventArgs args)
-        {
-            //_window = new MainWindow();
-            //_window.Activate();
         }
 
         private int GetFreeTcpPort()
@@ -69,8 +65,6 @@ namespace Flare
         {
             var listener = new TcpListener(ip, port);
             listener.Start();
-            Debug.WriteLine($"[C# IPC] Listening on {ip}:{port}");
-
             try
             {
                 while (!ct.IsCancellationRequested)
@@ -94,7 +88,6 @@ namespace Flare
             {
                 while (!ct.IsCancellationRequested && await reader.ReadLineAsync(ct) is { } line)
                 {
-                    Debug.WriteLine($"[C# IPC] <- {line}");
                     var jsonObject = System.Text.Json.JsonDocument.Parse(line);
                     if (jsonObject.RootElement.TryGetProperty("Type", out var typeElement))
                     {
@@ -103,7 +96,6 @@ namespace Flare
                         {
                             case "shutdown":
                             {
-                                Debug.WriteLine("[C# IPC] Shutdown command received.");
                                 Exit();
                                 break;
                             }
@@ -114,7 +106,6 @@ namespace Flare
                                         var data = dataElement.GetString();
                                         if (data != null)
                                         {
-                                            Debug.WriteLine($"[C# IPC] Open image viewer command received: {data}");
                                             new Window
                                             {
                                                 Content = new ScrollViewer
@@ -147,7 +138,6 @@ namespace Flare
                                 var data = System.Text.Json.JsonSerializer.Deserialize<OpenStatusImageData>(jsonObject.RootElement.GetProperty("Data").GetRawText());
                                 if (data != null)
                                 {
-                                    Debug.WriteLine($"[C# IPC] Open status image viewer command received: {data.Index}");
                                     var flipView = new FlipView();
                                     foreach (var media in data.Medias)
                                     {
@@ -198,6 +188,65 @@ namespace Flare
                                 
                                 break;
                             }
+                            case "open-and-wait-cookies":
+                            {
+                                var data = System.Text.Json.JsonSerializer.Deserialize<OpenWebViewData>(jsonObject.RootElement.GetProperty("Data").GetRawText());
+                                if (data != null)
+                                {
+                                    var webView = new WebView2
+                                    {
+                                        Source = new Uri(data.Url),
+                                    };
+                                    webView.CoreWebView2Initialized += (sender, args) =>
+                                    {
+                                        sender.CoreWebView2.CookieManager.DeleteAllCookies();
+                                    };
+
+                                    async void NavigationCompletedHandler(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
+                                    {
+                                        if (args.IsSuccess)
+                                        {
+                                            var cookies = await sender.CoreWebView2.CookieManager.GetCookiesAsync(data.Url);
+                                            var cookieString = string.Join("; ", cookies.Select(c => $"{c.Name}={c.Value}"));
+                                            var message = new IPCEvent<OnCookieReceivedData>(data.Id, new OnCookieReceivedData(data.Id, cookieString));
+                                            var json = System.Text.Json.JsonSerializer.Serialize(message);
+                                            await SendMessage(json);
+                                        }
+                                    }
+
+                                    webView.NavigationCompleted += NavigationCompletedHandler;
+                                    var window = new Window
+                                    {
+                                        Content = webView,
+                                        ExtendsContentIntoTitleBar = true,
+                                        SystemBackdrop = new MicaBackdrop(),
+                                        Title = "Login",
+                                        AppWindow =
+                                        {
+                                            IsShownInSwitchers = false,
+                                        },
+                                    };
+                                    window.Activate();
+                                    _openWindows[data.Id] = window;
+                                }
+                                break;
+                            }
+                            case "close-webview":
+                            {
+                                if (jsonObject.RootElement.TryGetProperty("Data", out var dataElement))
+                                {
+                                    var data = dataElement.GetString();
+                                    if (data != null)
+                                    {
+                                        if (_openWindows.TryGetValue(data, out var window))
+                                        {
+                                            window.Close();
+                                            _openWindows.Remove(data);
+                                        }
+                                    }
+                                }
+                                break;
+                            }
                         }
                     }
                 }
@@ -215,7 +264,6 @@ namespace Flare
 
         public void OnDeeplink(string deeplink)
         {
-            Debug.WriteLine($"[C# IPC] -> {deeplink}");
             var message = new IPCEvent<DeeplinkData>("deeplink", new DeeplinkData(deeplink));
             var json = System.Text.Json.JsonSerializer.Serialize(message);
             _ = SendMessage(json);
@@ -251,5 +299,21 @@ namespace Flare
         
         [JsonPropertyName("placeholder")]
         public string? Placeholder { get; init; } = Placeholder;
+    }
+    
+    internal class OpenWebViewData(string Url, string Id)
+    {
+        [JsonPropertyName("url")]
+        public string Url { get; init; } = Url;
+        [JsonPropertyName("id")]
+        public string Id { get; init; } = Id;
+    }
+    
+    internal class OnCookieReceivedData(string Id, string Cookie)
+    {
+        [JsonPropertyName("id")]
+        public string Id { get; init; } = Id;
+        [JsonPropertyName("cookie")]
+        public string Cookie { get; init; } = Cookie;
     }
 }

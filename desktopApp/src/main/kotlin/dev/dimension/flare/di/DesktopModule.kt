@@ -2,6 +2,7 @@ package dev.dimension.flare.di
 
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.NativeWindowBridge
+import dev.dimension.flare.common.WebViewBridge
 import dev.dimension.flare.common.windows.WindowsBridge
 import dev.dimension.flare.ui.component.ComposeInAppNotification
 import org.koin.core.module.dsl.singleOf
@@ -13,4 +14,5 @@ val desktopModule =
         single { ComposeInAppNotification() } binds arrayOf(InAppNotification::class)
         singleOf(::NativeWindowBridge)
         singleOf(::WindowsBridge)
+        singleOf(::WebViewBridge)
     }

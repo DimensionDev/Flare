@@ -12,10 +12,12 @@ import dev.dimension.flare.ui.presenter.login.VVOLoginPresenter
 import dev.dimension.flare.ui.presenter.login.XQTLoginPresenter
 import dev.dimension.flare.ui.screen.login.ServiceSelectionScreenContent
 import moe.tlaster.precompose.molecule.producePresenter
+import org.koin.compose.koinInject
 
 @Composable
 internal fun ServiceSelectScreen(onBack: () -> Unit) {
     val uriHandler = LocalUriHandler.current
+    val webviewBridge = koinInject<WebViewBridge>()
     val xqtLoginState by producePresenter("xqt_login_state") {
         remember {
             XQTLoginPresenter(toHome = onBack)
@@ -29,7 +31,7 @@ internal fun ServiceSelectScreen(onBack: () -> Unit) {
     ServiceSelectionScreenContent(
         contentPadding = LocalWindowPadding.current,
         onXQT = {
-            WebViewBridge.openAndWaitCookies(
+            webviewBridge.openAndWaitCookies(
                 "https://${UiApplication.XQT.host}",
                 callback = { cookies ->
                     if (cookies.isNullOrEmpty()) {
@@ -45,7 +47,7 @@ internal fun ServiceSelectScreen(onBack: () -> Unit) {
             )
         },
         onVVO = {
-            WebViewBridge.openAndWaitCookies(
+            webviewBridge.openAndWaitCookies(
                 UiApplication.VVo.loginUrl,
                 callback = { cookies ->
                     if (cookies.isNullOrEmpty()) {

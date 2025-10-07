@@ -17,7 +17,9 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.DeeplinkHandler
 import dev.dimension.flare.common.NativeWindowBridge
+import dev.dimension.flare.common.NoopIPC
 import dev.dimension.flare.common.SandboxHelper
+import dev.dimension.flare.common.windows.WindowsIPC
 import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.di.composeUiModule
 import dev.dimension.flare.di.desktopModule
@@ -31,12 +33,29 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import java.awt.Desktop
 
 fun main(args: Array<String>) {
     SandboxHelper.configureSandboxArgs()
+    val platformIPC =
+        if (SystemUtils.IS_OS_WINDOWS) {
+            WindowsIPC(
+                WindowsIPC.parsePorts(args),
+                onDeeplink = {
+                    DeeplinkHandler.handleDeeplink(it)
+                },
+            )
+        } else {
+            NoopIPC
+        }
     startKoin {
-        modules(desktopModule + KoinHelper.modules() + composeUiModule)
+        modules(
+            desktopModule + KoinHelper.modules() + composeUiModule +
+                module {
+                    single { platformIPC }
+                },
+        )
     }
     if (SystemUtils.IS_OS_MAC_OSX) {
         Desktop.getDesktop().setOpenURIHandler {
@@ -72,7 +91,10 @@ fun main(args: Array<String>) {
         }
         ProvideThemeSettings {
             Window(
-                onCloseRequest = ::exitApplication,
+                onCloseRequest = {
+                    exitApplication()
+                    platformIPC.sendShutdown()
+                },
                 title = stringResource(Res.string.app_name),
                 icon = painterResource(Res.drawable.flare_logo),
                 state =

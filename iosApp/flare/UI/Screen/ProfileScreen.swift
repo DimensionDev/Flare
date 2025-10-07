@@ -8,7 +8,7 @@ struct ProfileScreen: View {
     let onFansClick: (MicroBlogKey) -> Void
     @StateObject private var presenter: KotlinPresenter<ProfileState>
     @State private var selectedTab: Int = 0
-
+    
     var body: some View {
         List {
             ProfileHeader(
@@ -40,10 +40,9 @@ struct ProfileScreen: View {
                         }
                         Text(text)
                             .tag(index)
-
                     }
                 } label: {
-
+                    
                 }
                 .pickerStyle(.segmented)
                 .listRowSeparator(.hidden)
@@ -53,13 +52,11 @@ struct ProfileScreen: View {
                 let selectedTabItem = tabs[selectedTab]
                 switch onEnum(of: selectedTabItem) {
                 case .timeline(let timeline):
-                    TimelinePagingView(data: timeline.data)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                        .padding(.horizontal)
-                        .listRowBackground(Color.clear)
+                    ProfileTimelineView(presenter: timeline.presenter)
+                        .id(timeline.type.name)
                 case .media(let media):
-                    EmptyView()
+                    ProfileTimelineView(presenter: media.presenter.getMediaTimelinePresenter())
+                        .id("media")
                 }
             }
         }
@@ -118,9 +115,6 @@ struct ProfileScreen: View {
                     }
                 }
             }
-        }
-        .refreshable {
-            try? await presenter.state.refresh()
         }
         .edgesIgnoringSafeArea(.top)
         .background(Color(.systemGroupedBackground))
@@ -219,5 +213,24 @@ struct ProfileWithUserNameAndHostScreen: View {
         } loadingContent: {
             ProgressView()
         }
+    }
+}
+
+struct ProfileTimelineView: View {
+    @StateObject private var presenter: KotlinPresenter<TimelineState>
+    
+    init(presenter: TimelinePresenter) {
+        self._presenter = .init(wrappedValue: .init(presenter: presenter))
+    }
+    
+    var body: some View {
+        TimelinePagingView(data: presenter.state.listState)
+            .listRowSeparator(.hidden)
+            .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+            .padding(.horizontal)
+            .listRowBackground(Color.clear)
+//            .refreshable {
+//                try? await presenter.state.refresh()
+//            }
     }
 }

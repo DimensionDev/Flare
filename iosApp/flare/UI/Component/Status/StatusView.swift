@@ -186,7 +186,7 @@ struct StatusView: View {
                     }
 
                     if !isQuote, (themeSettings.appearanceSettings.showActions || isDetail) {
-                        StatusActionsView(data: data.actions)
+                        StatusActionsView(data: data.actions, useText: false)
                             .font(isDetail ? .body : .footnote)
                             .foregroundStyle(isDetail ? .primary : .secondary)
                     }
@@ -197,7 +197,11 @@ struct StatusView: View {
                     stack
                 })
             }
+            .contextMenu {
+                StatusActionsView(data: data.actions, useText: true)
+            }
         }
+        .contentShape(.rect)
         .onTapGesture {
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         }

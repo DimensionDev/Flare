@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import SwiftUIBackports
 
 enum CommonProfileHeaderConstants {
     static let headerHeight: CGFloat = 200
@@ -61,14 +62,16 @@ struct CommonProfileHeader: View {
                                         }
                                         Text(text)
                                     })
-                                    .buttonStyle(.borderless)
+                                    .backport
+                                    .glassProminentButtonStyle()
                                     if relationState.data.isFans {
                                         Text("relation_is_fans")
                                     }
                                 case .loading: Button(action: {}, label: {
                                     Text("#loading")
                                 })
-                                .buttonStyle(.borderless)
+                                .backport
+                                .glassProminentButtonStyle()
                                 .redacted(reason: .placeholder)
                                 case .error: EmptyView()
                                 }

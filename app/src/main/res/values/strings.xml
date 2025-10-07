@@ -167,6 +167,10 @@
     <string name="settings_appearance_theme_color_description">Change the theme color of the app</string>
     <string name="settings_appearance_theme_pure_color">High contrast Mode</string>
     <string name="settings_appearance_theme_pure_color_description">Increase contrast between background and text</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Change the font size of the app</string>
+    <string name="settings_appearance_font_size_diff_decrease">Decrease</string>
+    <string name="settings_appearance_font_size_diff_increase">Increase</string>
 
     <string name="settings_storage_clear_image_cache">Clear image cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB of images will be removed</string>

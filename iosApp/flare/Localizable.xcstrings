@@ -67915,6 +67915,26 @@
         }
       }
     },
+    "status_tldr" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summary post"
+          }
+        }
+      }
+    },
+    "status_translate" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Translate post"
+          }
+        }
+      }
+    },
     "storage_clear_database_cache_confirm" : {
       "localizations" : {
         "ar" : {

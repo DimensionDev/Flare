@@ -124,6 +124,11 @@ struct StatusView: View {
 
                         }
                     }
+                    
+                    if isDetail {
+                        StatusTranslateView(content: data.content, contentWarning: data.contentWarning)
+                    }
+                    
                     if let poll = data.poll, showMedia {
                         StatusPollView(data: poll)
                     }

@@ -23,13 +23,18 @@ class ThemeSettings {
     init() {
         self.presenter = SettingsPresenter()
         self.appearanceSettings = AppearanceSettings.companion.Default
+        self.aiConfig = .init(translation: false, tldr: true)
         self.presenter.models.toPublisher().receive(on: DispatchQueue.main).sink { [weak self] newState in
             if case .success(let appearanceSettings) = onEnum(of: newState.appearance) {
                 self?.appearanceSettings = appearanceSettings.data
             }
+            if case .success(let appSettings) = onEnum(of: newState.appSettings) {
+                self?.aiConfig = appSettings.data.aiConfig
+            }
         }.store(in: &subscribers)
     }
     var appearanceSettings: AppearanceSettings
+    var aiConfig: AppSettings.AiConfig
 
     @MainActor
     deinit {

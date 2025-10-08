@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		06310D712E96120700B6E081 /* VideoPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 06310D702E96120700B6E081 /* VideoPlayer */; };
 		0646B2622E7151A700535A3E /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0646B2612E7151A700535A3E /* Kingfisher */; };
 		0672EE122E8689C70092AD1F /* Drops in Frameworks */ = {isa = PBXBuildFile; productRef = 0672EE112E8689C70092AD1F /* Drops */; };
 		068923482E82A80700981D8E /* Flow in Frameworks */ = {isa = PBXBuildFile; productRef = 068923472E82A80700981D8E /* Flow */; };
@@ -53,6 +54,7 @@
 				06C6B5482E853AAF00CCD388 /* SwiftUIIntrospect in Frameworks */,
 				0646B2622E7151A700535A3E /* Kingfisher in Frameworks */,
 				06F36AAD2E8F7BEC00F5905F /* SwiftUIBackports in Frameworks */,
+				06310D712E96120700B6E081 /* VideoPlayer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,6 +105,7 @@
 				06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */,
 				0672EE112E8689C70092AD1F /* Drops */,
 				06F36AAC2E8F7BEC00F5905F /* SwiftUIBackports */,
+				06310D702E96120700B6E081 /* VideoPlayer */,
 			);
 			productName = flare;
 			productReference = 06E433FE2E6A9A2600CD0826 /* Flare.app */;
@@ -141,6 +144,7 @@
 				06C6B5462E853AAF00CCD388 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 				0672EE102E8689C70092AD1F /* XCRemoteSwiftPackageReference "Drops" */,
 				06F36AAB2E8F7BEC00F5905F /* XCRemoteSwiftPackageReference "iOS-Backports" */,
+				06310D6F2E96120700B6E081 /* XCRemoteSwiftPackageReference "VideoPlayer" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 06E433FF2E6A9A2600CD0826 /* Products */;
@@ -421,6 +425,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		06310D6F2E96120700B6E081 /* XCRemoteSwiftPackageReference "VideoPlayer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/wxxsw/VideoPlayer";
+			requirement = {
+				kind = exactVersion;
+				version = 1.2.5;
+			};
+		};
 		0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
@@ -488,6 +500,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		06310D702E96120700B6E081 /* VideoPlayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 06310D6F2E96120700B6E081 /* XCRemoteSwiftPackageReference "VideoPlayer" */;
+			productName = VideoPlayer;
+		};
 		0646B2612E7151A700535A3E /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */;

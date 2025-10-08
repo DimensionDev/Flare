@@ -44,6 +44,7 @@ struct LocalHistoryScreen: View {
                 }
             }
         }
+        .detectScrolling()
         .background(Color(.systemGroupedBackground))
         .navigationTitle("local_history_title")
         .searchable(text: $searchText, prompt: Text("local_history_search_prompt"))

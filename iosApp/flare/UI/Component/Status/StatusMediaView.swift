@@ -29,15 +29,15 @@ struct StatusMediaView: View {
                                 AltTextOverlay(altText: alt)
                             }
                         }
-                        .overlay(alignment: .bottomLeading) {
-                            if case .video = onEnum(of: item) {
-                                Image("fa-circle-play")
-                                    .foregroundStyle(Color(.white))
-                                    .padding(8)
-                                    .background(.black, in: .rect(cornerRadius: 16))
-                                    .padding()
-                            }
-                        }
+//                        .overlay(alignment: .bottomLeading) {
+//                            if case .video = onEnum(of: item) {
+//                                Image("fa-circle-play")
+//                                    .foregroundStyle(Color(.white))
+//                                    .padding(8)
+//                                    .background(.black, in: .rect(cornerRadius: 16))
+//                                    .padding()
+//                            }
+//                        }
                 } else {
                     Color.gray
                         .opacity(0.2)
@@ -57,15 +57,15 @@ struct StatusMediaView: View {
                                 AltTextOverlay(altText: alt)
                             }
                         }
-                        .overlay(alignment: .bottomLeading) {
-                            if case .video = onEnum(of: item) {
-                                Image("fa-circle-play")
-                                    .foregroundStyle(Color(.white))
-                                    .padding(8)
-                                    .background(.black, in: .rect(cornerRadius: 16))
-                                    .padding()
-                            }
-                        }
+//                        .overlay(alignment: .bottomLeading) {
+//                            if case .video = onEnum(of: item) {
+//                                Image("fa-circle-play")
+//                                    .foregroundStyle(Color(.white))
+//                                    .padding(8)
+//                                    .background(.black, in: .rect(cornerRadius: 16))
+//                                    .padding()
+//                            }
+//                        }
                         .clipped()
                 }
             }

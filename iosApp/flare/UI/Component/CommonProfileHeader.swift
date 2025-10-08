@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import SwiftUIBackports
 
 enum CommonProfileHeaderConstants {
     static let headerHeight: CGFloat = 200
@@ -7,6 +8,7 @@ enum CommonProfileHeaderConstants {
 }
 
 struct CommonProfileHeader: View {
+    @Environment(\.openURL) private var openURL
     let user: UiProfile
     let relation: UiState<UiRelation>
     let isMe: UiState<KotlinBoolean>
@@ -20,6 +22,9 @@ struct CommonProfileHeader: View {
                 Color.clear.overlay {
                     NetworkImage(data: banner)
                         .frame(height: CommonProfileHeaderConstants.headerHeight)
+                        .onTapGesture {
+                            openURL.callAsFunction(.init(string: AppDeepLink.RawImage.shared.invoke(url: banner))!)
+                        }
                 }
                 .frame(height: CommonProfileHeaderConstants.headerHeight)
                 .clipped()
@@ -39,12 +44,14 @@ struct CommonProfileHeader: View {
                             )
                         AvatarView(data: user.avatar)
                             .frame(width: CommonProfileHeaderConstants.avatarSize, height: CommonProfileHeaderConstants.avatarSize)
+                            .onTapGesture {
+                                openURL.callAsFunction(.init(string: AppDeepLink.RawImage.shared.invoke(url: user.avatar))!)
+                            }
                     }
                     Spacer()
                     VStack {
                         Spacer()
                             .frame(height: CommonProfileHeaderConstants.headerHeight)
-
                             if case .success(let data) = onEnum(of: isMe), !data.data.boolValue {
                                 switch onEnum(of: relation) {
                                 case .success(let relationState):
@@ -62,14 +69,16 @@ struct CommonProfileHeader: View {
                                         }
                                         Text(text)
                                     })
-                                    .buttonStyle(.borderless)
+                                    .backport
+                                    .glassProminentButtonStyle()
                                     if relationState.data.isFans {
                                         Text("relation_is_fans")
                                     }
                                 case .loading: Button(action: {}, label: {
                                     Text("#loading")
                                 })
-                                .buttonStyle(.borderless)
+                                .backport
+                                .glassProminentButtonStyle()
                                 .redacted(reason: .placeholder)
                                 case .error: EmptyView()
                                 }
@@ -108,24 +117,7 @@ struct CommonProfileHeader: View {
                             case .fields(let data):
                                 FieldsView(fields: data.fields)
                             case .iconify(let data):
-                                ForEach(Array(data.items.keys), id: \.name) { key in
-                                    let value = data.items[key]
-                                    Label(
-                                        title: {
-                                            if let text = value {
-                                                RichText(text: text)
-                                                    .font(.body)
-                                            }
-                                        },
-                                        icon: {
-                                            switch key {
-                                            case .location: Image("fa-location-dot")
-                                            case .url:      Image("fa-globe")
-                                            case .verify:   Image("fa-circle-check")
-                                            }
-                                        }
-                                    )
-                                }
+                                IconFieldView(data: data)
                             }
                         }
 
@@ -172,6 +164,32 @@ struct MatrixView: View {
     }
 }
 
+struct IconFieldView: View {
+    let data: UiProfileBottomContentIconify
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(Array(data.items.keys), id: \.name) { key in
+                let value = data.items[key]
+                Label(
+                    title: {
+                        if let text = value {
+                            RichText(text: text)
+                                .font(.body)
+                        }
+                    },
+                    icon: {
+                        switch key {
+                        case .location: Image("fa-location-dot")
+                        case .url:      Image("fa-globe")
+                        case .verify:   Image("fa-circle-check")
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
 struct FieldsView: View {
     let fields: [String: UiRichText]
     var body: some View {
@@ -196,11 +214,7 @@ struct FieldsView: View {
                 .padding(.horizontal)
             }
             .padding(.vertical)
-            #if os(iOS)
-            .background(Color(UIColor.secondarySystemBackground))
-            #else
-            .background(Color(NSColor.windowBackgroundColor))
-            #endif
+            .background(Color(.secondarySystemBackground))
             .clipShape(RoundedRectangle(cornerRadius: 8))
         } else {
             EmptyView()

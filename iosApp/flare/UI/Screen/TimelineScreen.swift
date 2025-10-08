@@ -27,6 +27,7 @@ struct TimelineScreen: View {
                 .padding(.horizontal)
                 .listRowBackground(Color.clear)
         }
+        .detectScrolling()
         .scrollContentBackground(.hidden)
         .listRowSpacing(2)
         .listStyle(.plain)

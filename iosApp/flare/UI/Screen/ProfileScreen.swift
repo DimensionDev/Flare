@@ -60,6 +60,7 @@ struct ProfileScreen: View {
                 }
             }
         }
+        .detectScrolling()
         .scrollContentBackground(.hidden)
         .listRowSpacing(2)
         .listStyle(.plain)

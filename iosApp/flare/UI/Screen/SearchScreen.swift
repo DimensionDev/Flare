@@ -69,6 +69,7 @@ struct SearchScreen: View {
         .onSubmit(of: .search) {
             searchPresenter.state.search(new: searchText)
         }
+        .detectScrolling()
         .onChange(of: searchText) {
             if searchText.isEmpty {
                 searchPresenter.state.search(new: "")

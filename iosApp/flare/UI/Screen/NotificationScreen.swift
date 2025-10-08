@@ -28,6 +28,7 @@ struct NotificationScreen: View {
         .onAppear {
             selectedType = presenter.state.notificationType
         }
+        .detectScrolling()
         .toolbar {
             ToolbarItem(placement: .principal) {
                 StateView(state: presenter.state.allTypes) { allTypes in

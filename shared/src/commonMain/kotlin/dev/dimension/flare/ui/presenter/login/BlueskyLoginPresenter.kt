@@ -20,7 +20,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import sh.christian.ozone.api.response.AtpException
 import sh.christian.ozone.api.response.AtpResponse
-import sh.christian.ozone.api.xrpc.BSKY_SOCIAL
 
 public class BlueskyLoginPresenter(
     private val toHome: () -> Unit,
@@ -51,7 +50,7 @@ public class BlueskyLoginPresenter(
                     error = null
                     runCatching {
                         blueskyLoginUseCase(
-                            baseUrl = BSKY_SOCIAL.toString(),
+                            baseUrl = "https://$baseUrl",
                             username = username,
                             password = password,
                             authFactorToken = authFactorToken,

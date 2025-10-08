@@ -10,7 +10,8 @@
 
 ![badge-Android](https://img.shields.io/badge/Android-6.0-3DDC84)
 ![badge-iOS](https://img.shields.io/badge/iOS-18.0-black)
-![badge-macOS](https://img.shields.io/badge/macOS-Monterey-black)
+![badge-Windows](https://img.shields.io/badge/Windows_10-1809-black)
+![badge-macOS](https://img.shields.io/badge/macOS-Sonoma-black)
 
 Flare is an open-source social client that merges your feeds from Mastodon, Misskey, Bluesky, X, and RSS into a single timeline, turning it into your personal information hub, with Android/iOS and macOS/Windows Support.
 
@@ -81,8 +82,8 @@ Here're some features we've done before.
  - You can open the project in Android Studio or IntelliJ IDEA if you want
 
 ### iOS
- - Make sure you have a Mac with Xcode 16 installed
- - open `iosApp/iosApp.xcodeproj` in Xcode
+ - Make sure you have a Mac with Xcode 26 installed
+ - open `iosApp/Flare.xcodeproj` in Xcode
  - Build and run the app
 
 ### Server
@@ -105,8 +106,13 @@ If you prefer using Docker, you can use Docker Compose to run prebuild Server Im
 
 ### Desktop
  - Make sure you have JDK 21 installed, JBR-21 is recommended.
- - Depends on your build target, you might need to have Xcode 16 (macOS target) or .Net 9 (Windows target) installed.
- - Run `./gradlew runDistributable` to build and run the debug version of the desktop app.
+#### macOS
+ - Make sure you have Xcode 26 installed
+ - Run `./gradlew run` to build and run the debug version of the desktop app.
+#### Windows
+ - Make sure you have Visual Studio 2022 installed with Windows App development installed
+ - Open `desktopApp/src/main/csharp/Flare.csproj` with Visual Studio
+ - Click Run and you should able to build and run the app.
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.

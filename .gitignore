@@ -20,9 +20,9 @@ signing.properties
 build/
 iosApp/Podfile.lock
 iosApp/Pods/*
-iosApp/iosApp.xcworkspace/*
-iosApp/iosApp.xcodeproj/*
-!iosApp/iosApp.xcodeproj/project.pbxproj
+iosApp/Flare.xcworkspace/*
+iosApp/Flare.xcodeproj/*
+!iosApp/Flare.xcodeproj/project.pbxproj
 shared/shared.podspec
 .kotlin
 .history

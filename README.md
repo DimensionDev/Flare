@@ -1,16 +1,13 @@
 # Flare
 [![license](https://img.shields.io/github/license/DimensionDev/Flare)](https://github.com/DimensionDev/Flare/blob/master/LICENSE)
 [![Crowdin](https://badges.crowdin.net/flareapp/localized.svg)](https://crowdin.com/project/flareapp)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/DimensionDev/Flare)
 [![Telegram](https://img.shields.io/badge/-telegram-blue?logo=telegram&color=white)](https://t.me/+0UtcP6_qcDoyOWE1)
 [![Discord](https://img.shields.io/badge/-discord-blue?logo=discord&color=white)](https://discord.gg/De9NhXBryT)
-[![Line](https://img.shields.io/badge/-Line_Group-green?logo=line&color=white)](https://line.me/ti/g/hf95HyGJ9k)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/DimensionDev/Flare)
-
-![badge-Platform](https://img.shields.io/badge/Supported%20Platform-Mastodon%20|%20Misskey%20|%20Bluesky%20|%20X%20-black)
 
 ![badge-Android](https://img.shields.io/badge/Android-6.0-3DDC84)
 ![badge-iOS](https://img.shields.io/badge/iOS-18.0-black)
-![badge-Windows](https://img.shields.io/badge/Windows_10-1809-black)
+![badge-Windows](https://img.shields.io/badge/Windows_10-1809-blue)
 ![badge-macOS](https://img.shields.io/badge/macOS-Sonoma-black)
 
 Flare is an open-source social client that merges your feeds from Mastodon, Misskey, Bluesky, X, and RSS into a single timeline, turning it into your personal information hub, with Android/iOS and macOS/Windows Support.

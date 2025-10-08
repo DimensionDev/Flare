@@ -8,6 +8,7 @@ enum CommonProfileHeaderConstants {
 }
 
 struct CommonProfileHeader: View {
+    @Environment(\.openURL) private var openURL
     let user: UiProfile
     let relation: UiState<UiRelation>
     let isMe: UiState<KotlinBoolean>
@@ -21,6 +22,9 @@ struct CommonProfileHeader: View {
                 Color.clear.overlay {
                     NetworkImage(data: banner)
                         .frame(height: CommonProfileHeaderConstants.headerHeight)
+                        .onTapGesture {
+                            openURL.callAsFunction(.init(string: AppDeepLink.RawImage.shared.invoke(url: banner))!)
+                        }
                 }
                 .frame(height: CommonProfileHeaderConstants.headerHeight)
                 .clipped()
@@ -40,6 +44,9 @@ struct CommonProfileHeader: View {
                             )
                         AvatarView(data: user.avatar)
                             .frame(width: CommonProfileHeaderConstants.avatarSize, height: CommonProfileHeaderConstants.avatarSize)
+                            .onTapGesture {
+                                openURL.callAsFunction(.init(string: AppDeepLink.RawImage.shared.invoke(url: user.avatar))!)
+                            }
                     }
                     Spacer()
                     VStack {

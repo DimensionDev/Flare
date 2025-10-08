@@ -30,3 +30,5 @@ shared/shared.podspec
 iosApp/K_D/
 *.sh
 .env
+
+GoogleService-Info.plist

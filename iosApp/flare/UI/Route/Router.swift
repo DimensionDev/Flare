@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import LazyPager
 
 struct Router<Root: View>: View {
     @ViewBuilder let root: (@escaping (Route) -> Void) -> Root
@@ -9,6 +10,7 @@ struct Router<Root: View>: View {
     @State private var showDeleteStatusAlert = false
     @State private var showMastodonReportStatusAlert = false
     @State private var mastodonReportStatusData: (AccountType, MicroBlogKey, MicroBlogKey?)? = nil
+    @State private var selectedMediaItem: String? = nil
     var body: some View {
         NavigationStack(path: $backStack) {
             root({ route in
@@ -53,10 +55,19 @@ struct Router<Root: View>: View {
                 return .systemAction
             }
         })
+        .fullScreenCover(item: $selectedMediaItem) { item in
+            NavigationStack {
+                MediaScreen(url: item)
+            }
+            .background(ClearFullScreenBackground())
+            .colorScheme(.dark)
+        }
     }
 
     func navigate(route: Route) {
-        if case .statusDeleteConfirm(let accountType, let statusKey) = route {
+        if case .mediaImage(let url, let preview) = route {
+            self.selectedMediaItem = url
+        } else if case .statusDeleteConfirm(let accountType, let statusKey) = route {
             deleteStatusData = (accountType, statusKey)
             showDeleteStatusAlert = true
         } else if case .statusMastodonReport(let accountType, let userKey, let statusKey) = route {

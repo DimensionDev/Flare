@@ -20,7 +20,8 @@ For those able & willing to help fix issues and/or implement features ...
 
 Make sure you have
  - JDK 21
- - Xcode 16 if you're building for iOS
+ - Xcode 26 if you're building for iOS or macOS
+ - Visual Studio 2022 with Windows App development if you're building for Windows
 
 ### Code guidelines
 Flare uses [ktlint](https://github.com/pinterest/ktlint) to check the code style for Kotlin, so make sure run `./gradlew ktlintFormat` and fix the errors before you submit any PR.
@@ -32,8 +33,8 @@ Flare uses [ktlint](https://github.com/pinterest/ktlint) to check the code style
  - You can open the project in Android Studio or IntelliJ IDEA if you want
 
 ### iOS
- - Make sure you have a Mac with Xcode 16 installed
- - open `iosApp/iosApp.xcodeproj` in Xcode
+ - Make sure you have a Mac with Xcode 26 installed
+ - open `iosApp/Flare.xcodeproj` in Xcode
  - Build and run the app
 
 ### Server
@@ -42,16 +43,26 @@ Flare uses [ktlint](https://github.com/pinterest/ktlint) to check the code style
  - Run `./gradlew :server:runDebugExecutableMacosArm64 -PrunArgs="--config-path=path/to/server/src/commonMain/resources/application.yaml"` to build and run the server, remember to replace `path/to/server/src/commonMain/resources/application.yaml` with the path to your config file
  - The server will run on `http://localhost:8080` by default
 
+### Desktop
+ - Make sure you have JDK 21 installed, JBR-21 is recommended.
+#### macOS
+ - Make sure you have Xcode 26 installed
+ - Run `./gradlew run` to build and run the debug version of the desktop app.
+#### Windows
+ - Make sure you have Visual Studio 2022 installed with Windows App development installed
+ - Open `desktopApp/src/main/csharp/Flare.csproj` with Visual Studio
+ - Click Run and you should able to build and run the app.
+
 ### Project structure
 The project is split into 3 parts:
- - `shared`: The common code shared between Android and iOS and Server
-   - `shared/ui`: Compose Multiplatform UI that shared between Android/JVM and iOS
-   - `shared/ui/Component`: Compose Multiplatform UI that shared between Android JVM
+ - `shared`: The common code, including bussiness logic.
    - `shared/commonMain`: Bussiness logic without any UI.
    - `shared/api`: Shared API definition for the server and client
- - `app`: The Android app
- - `iosApp`: The iOS app
- - `server`: The server
+ - `compose-ui`: The Compose UI code that shared between Android, iOS, Desktop.
+ - `app`: The Android app.
+ - `iosApp`: The iOS app.
+ - `server`: The server.
+ - `desktopApp`: The desktop app for Windows/macOS.  
 
 Most of the business logic is in `shared`, and the platform specific code and UI is in `app` and `iosApp`.
 Flare uses [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) to share code between platforms, [Jetpack Compose](https://developer.android.com/jetpack/compose) for the UI on Android, [SwiftUI](https://developer.apple.com/xcode/swiftui/) for the UI on iOS.

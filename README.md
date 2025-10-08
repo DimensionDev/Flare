@@ -1,21 +1,25 @@
 # Flare
 [![license](https://img.shields.io/github/license/DimensionDev/Flare)](https://github.com/DimensionDev/Flare/blob/master/LICENSE)
 [![Crowdin](https://badges.crowdin.net/flareapp/localized.svg)](https://crowdin.com/project/flareapp)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/DimensionDev/Flare)
 [![Telegram](https://img.shields.io/badge/-telegram-blue?logo=telegram&color=white)](https://t.me/+0UtcP6_qcDoyOWE1)
 [![Discord](https://img.shields.io/badge/-discord-blue?logo=discord&color=white)](https://discord.gg/De9NhXBryT)
-[![Line](https://img.shields.io/badge/-Line_Group-green?logo=line&color=white)](https://line.me/ti/g/hf95HyGJ9k)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/DimensionDev/Flare)
-
-![badge-Platform](https://img.shields.io/badge/Supported%20Platform-Mastodon%20|%20Misskey%20|%20Bluesky%20|%20X%20-black)
 
 ![badge-Android](https://img.shields.io/badge/Android-6.0-3DDC84)
 ![badge-iOS](https://img.shields.io/badge/iOS-18.0-black)
-![badge-macOS](https://img.shields.io/badge/macOS-Monterey-black)
+![badge-Windows](https://img.shields.io/badge/Windows_10-1809-blue)
+![badge-macOS](https://img.shields.io/badge/macOS-Sonoma-black)
 
 Flare is an open-source social client that merges your feeds from Mastodon, Misskey, Bluesky, X, and RSS into a single timeline, turning it into your personal information hub, with Android/iOS and macOS/Windows Support.
 
-<a href='https://testflight.apple.com/join/iYP7QZME'><img alt='Get it on Google Play' src='https://developer.apple.com/app-store/marketing/guidelines/images/badge-example-preferred_2x.png' height=50/></a>
-<a href='https://play.google.com/store/apps/details?id=dev.dimension.flare&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_EN.svg/2880px-Google_Play_Store_badge_EN.svg.png' height=50/></a>
+
+
+<a href="https://apps.microsoft.com/detail/9NLRN0BKZ357?referrer=appbadge&mode=direct">
+	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="190"/>
+</a>
+<a href='https://testflight.apple.com/join/iYP7QZME'><img alt='Get it on Google Play' src='https://developer.apple.com/app-store/marketing/guidelines/images/badge-example-preferred_2x.png' width=150/></a>
+<a href='https://play.google.com/store/apps/details?id=dev.dimension.flare&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_EN.svg/2880px-Google_Play_Store_badge_EN.svg.png' width=170/></a>
+<a href='https://f-droid.org/packages/dev.dimension.flare'><img alt='Get it on F-Droid' src='https://f-droid.org/badge/get-it-on.svg' width=150/></a>
 
 ## Features
  - Consolidate all your social networks into one client, featuring Mastodon, Misskey, Bluesky and more to come.
@@ -75,8 +79,8 @@ Here're some features we've done before.
  - You can open the project in Android Studio or IntelliJ IDEA if you want
 
 ### iOS
- - Make sure you have a Mac with Xcode 16 installed
- - open `iosApp/iosApp.xcodeproj` in Xcode
+ - Make sure you have a Mac with Xcode 26 installed
+ - open `iosApp/Flare.xcodeproj` in Xcode
  - Build and run the app
 
 ### Server
@@ -99,8 +103,13 @@ If you prefer using Docker, you can use Docker Compose to run prebuild Server Im
 
 ### Desktop
  - Make sure you have JDK 21 installed, JBR-21 is recommended.
- - Depends on your build target, you might need to have Xcode 16 (macOS target) or .Net 9 (Windows target) installed.
- - Run `./gradlew runDistributable` to build and run the debug version of the desktop app.
+#### macOS
+ - Make sure you have Xcode 26 installed
+ - Run `./gradlew run` to build and run the debug version of the desktop app.
+#### Windows
+ - Make sure you have Visual Studio 2022 installed with Windows App development installed
+ - Open `desktopApp/src/main/csharp/Flare.csproj` with Visual Studio
+ - Click Run and you should able to build and run the app.
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.

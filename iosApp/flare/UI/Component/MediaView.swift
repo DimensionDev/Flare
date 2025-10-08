@@ -21,13 +21,26 @@ struct MediaView: View {
 }
 
 struct MediaVideoView: View {
+    @Environment(\.themeSettings) private var themeSettings
+    @Environment(\.networkKind) private var networkKind
     @Environment(\.isScrolling) private var isScrolling
     @State private var play: Bool = false
     @State private var videoState: VideoState = .idle
     @State private var time: CMTime = .zero
     @State private var isAppeared: Bool = false
-    
     let data: UiMediaVideo
+    
+    func canPlay() -> Bool {
+        switch themeSettings.appearanceSettings.videoAutoplay {
+        case .always:
+            return true
+        case .wifi:
+            return networkKind == .wifi
+        case .never:
+            return false
+        }
+    }
+    
     var body: some View {
         VideoPlayer(url: .init(string: data.url)!, play: $play, time: $time)
             .mute(true)
@@ -42,13 +55,13 @@ struct MediaVideoView: View {
             }
             .contentMode(.scaleAspectFill)
             .onChange(of: isScrolling, { oldValue, newValue in
-                if !newValue, !play, isAppeared {
+                if !newValue, !play, isAppeared, canPlay() {
                     play = true
                 }
             })
             .onAppear {
                 isAppeared = true
-                if !isScrolling {
+                if !isScrolling, canPlay() {
                     play = true
                 }
             }

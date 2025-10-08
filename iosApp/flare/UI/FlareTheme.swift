@@ -8,6 +8,7 @@ struct FlareTheme<Content: View>: View {
     @State private var themeSettings = ThemeSettings()
     var body: some View {
         content()
+            .networkStatus()
             .environment(\.themeSettings, themeSettings)
             .preferredColorScheme(
                 themeSettings.appearanceSettings.theme == .system ? nil : (themeSettings.appearanceSettings.theme == .dark ? .dark : .light)

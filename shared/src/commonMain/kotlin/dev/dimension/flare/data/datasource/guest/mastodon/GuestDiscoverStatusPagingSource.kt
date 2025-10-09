@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.guest.mastodon
 
+import SnowflakeIdGenerator
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.data.network.mastodon.api.TrendsResources
@@ -20,7 +21,12 @@ internal class GuestDiscoverStatusPagingSource(
             )
 
         return LoadResult.Page(
-            data = result.map { it.renderGuest(host = host) },
+            data =
+                result.map {
+                    it
+                        .renderGuest(host = host)
+                        .copy(dbKey = "guest_${SnowflakeIdGenerator.nextId()}")
+                },
             prevKey = null,
             nextKey = result.size + (params.key ?: 0),
         )

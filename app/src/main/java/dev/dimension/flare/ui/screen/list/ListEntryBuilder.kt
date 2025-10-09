@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.screen.list
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.remember
-import androidx.navigation3.runtime.EntryProviderBuilder
+import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
 import dev.dimension.flare.data.model.IconType
@@ -14,7 +14,7 @@ import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-internal fun EntryProviderBuilder<NavKey>.listEntryBuilder(
+internal fun EntryProviderScope<NavKey>.listEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
 ) {

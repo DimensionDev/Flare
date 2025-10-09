@@ -15,59 +15,19 @@ struct StatusMediaView: View {
     var body: some View {
         AdaptiveGrid(singleFollowsImageAspect: themeSettings.appearanceSettings.expandMediaSize, spacing: 4, maxColumns: 3) {
             ForEach(data, id: \.url) { item in
-                if themeSettings.appearanceSettings.expandMediaSize, data.count == 1 {
-                    MediaView(data: item)
-                        .onTapGesture {
-                            if !sensitive || !isBlur {
-                                // Only allow tap if not sensitive or already unblurred
-                                selectedItem = item
-                                showFullScreen = true
-                            }
+                MediaView(data: item, expandToFullSize: themeSettings.appearanceSettings.expandMediaSize && data.count == 1)
+                    .onTapGesture {
+                        if !sensitive || !isBlur {
+                            // Only allow tap if not sensitive or already unblurred
+                            selectedItem = item
+                            showFullScreen = true
                         }
-                        .overlay(alignment: .bottomTrailing) {
-                            if let alt = item.description_, !alt.isEmpty {
-                                AltTextOverlay(altText: alt)
-                            }
+                    }
+                    .overlay(alignment: .bottomTrailing) {
+                        if let alt = item.description_, !alt.isEmpty {
+                            AltTextOverlay(altText: alt)
                         }
-//                        .overlay(alignment: .bottomLeading) {
-//                            if case .video = onEnum(of: item) {
-//                                Image("fa-circle-play")
-//                                    .foregroundStyle(Color(.white))
-//                                    .padding(8)
-//                                    .background(.black, in: .rect(cornerRadius: 16))
-//                                    .padding()
-//                            }
-//                        }
-                } else {
-                    Color.gray
-                        .opacity(0.2)
-                        .onTapGesture {
-                            if !sensitive || !isBlur {
-                                // Only allow tap if not sensitive or already unblurred
-                                selectedItem = item
-                                showFullScreen = true
-                            }
-                        }
-                        .overlay {
-                            MediaView(data: item)
-                                .allowsHitTesting(false)
-                        }
-                        .overlay(alignment: .bottomTrailing) {
-                            if let alt = item.description_, !alt.isEmpty {
-                                AltTextOverlay(altText: alt)
-                            }
-                        }
-//                        .overlay(alignment: .bottomLeading) {
-//                            if case .video = onEnum(of: item) {
-//                                Image("fa-circle-play")
-//                                    .foregroundStyle(Color(.white))
-//                                    .padding(8)
-//                                    .background(.black, in: .rect(cornerRadius: 16))
-//                                    .padding()
-//                            }
-//                        }
-                        .clipped()
-                }
+                    }
             }
         }
         .fullScreenCover(isPresented: $showFullScreen) {

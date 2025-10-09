@@ -22,7 +22,7 @@ internal class WindowsIPC(
     private val onDeeplink: (String) -> Unit,
 ) : PlatformIPC {
     companion object {
-        fun parsePorts(args: Array<String>): Ports {
+        fun parsePorts(args: Array<String>): Ports? {
             var kRecv = -1
             var cRecv = -1
             val it = args.iterator()
@@ -32,7 +32,10 @@ internal class WindowsIPC(
                     "--csharp-recv" -> cRecv = it.next().toInt()
                 }
             }
-            require(kRecv > 0 && cRecv > 0) { "Missing --kotlin-recv/--csharp-recv" }
+            if (kRecv <= 0 || cRecv <= 0) {
+                return null
+            }
+//            require(kRecv > 0 && cRecv > 0) { "Missing --kotlin-recv/--csharp-recv" }
             return Ports(kRecv, cRecv)
         }
     }

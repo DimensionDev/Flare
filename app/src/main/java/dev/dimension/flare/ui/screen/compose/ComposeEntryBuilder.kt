@@ -1,7 +1,7 @@
 package dev.dimension.flare.ui.screen.compose
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.navigation3.runtime.EntryProviderBuilder
+import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
 import dev.dimension.flare.model.AccountType
@@ -9,7 +9,7 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.route.Route
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-internal fun EntryProviderBuilder<NavKey>.composeEntryBuilder(
+internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
 ) {

@@ -3,13 +3,13 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
-import androidx.navigation3.runtime.EntryProviderBuilder
+import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.route.Route
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
-internal fun EntryProviderBuilder<NavKey>.homeEntryBuilder(
+internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
     openDrawer: () -> Unit,

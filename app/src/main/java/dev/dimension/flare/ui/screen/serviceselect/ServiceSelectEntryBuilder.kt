@@ -1,10 +1,10 @@
 package dev.dimension.flare.ui.screen.serviceselect
 
-import androidx.navigation3.runtime.EntryProviderBuilder
+import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.ui.route.Route
 
-internal fun EntryProviderBuilder<NavKey>.serviceSelectEntryBuilder(
+internal fun EntryProviderScope<NavKey>.serviceSelectEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit
 ) {

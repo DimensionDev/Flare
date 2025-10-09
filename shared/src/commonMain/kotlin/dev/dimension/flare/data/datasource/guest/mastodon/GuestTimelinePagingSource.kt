@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.guest.mastodon
 
+import SnowflakeIdGenerator
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.data.network.mastodon.api.TrendsResources
@@ -18,7 +19,11 @@ internal class GuestTimelinePagingSource(
         val statuses = service.trendsStatuses(limit = limit, offset = offset).distinctBy { it.id }
         return LoadResult.Page(
             data =
-                statuses.map { it.renderGuest(host = host) },
+                statuses.map {
+                    it
+                        .renderGuest(host = host)
+                        .copy(dbKey = "guest_${SnowflakeIdGenerator.nextId()}")
+                },
             prevKey = null,
             nextKey = offset + limit,
         )

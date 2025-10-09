@@ -49,7 +49,9 @@ internal class GuestUserTimelinePagingSource(
         return LoadResult.Page(
             data =
                 statuses.map {
-                    it.renderGuest(host = host)
+                    it
+                        .renderGuest(host = host)
+                        .copy(dbKey = "guest_${SnowflakeIdGenerator.nextId()}")
                 },
             prevKey = null,
             nextKey = statuses.lastOrNull()?.id,

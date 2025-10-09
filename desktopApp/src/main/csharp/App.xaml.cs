@@ -109,10 +109,9 @@ namespace Flare
                                     if (data != null)
                                     {
                                         
-                                        var image = new Image
+                                        var image = new ImageEx2
                                         {
-                                            Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(
-                                                new Uri(data)),
+                                            Source = data,
                                             Stretch = Stretch.Uniform,
                                         };
                                         var scrollViewer = new ScrollViewer
@@ -128,7 +127,7 @@ namespace Flare
                                         {
                                             if (sender is ScrollViewer sv)
                                             {
-                                                var img = sv.Content as Image;
+                                                var img = sv.Content as FrameworkElement;
                                                 if (img != null)
                                                 {
                                                     img.Height = sv.ViewportHeight;
@@ -141,10 +140,6 @@ namespace Flare
                                             ExtendsContentIntoTitleBar = true,
                                             SystemBackdrop = new MicaBackdrop(),
                                             Title = "Image Viewer",
-                                            AppWindow =
-                                            {
-                                                IsShownInSwitchers = false,
-                                            },
                                         }.Activate();
                                     }
                                 }
@@ -163,10 +158,9 @@ namespace Flare
                                         switch (media.Type)
                                         {
                                             case "image":
-                                                var image = new Image
+                                                var image = new ImageEx2
                                                 {
-                                                    Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(
-                                                        new Uri(media.Url)),
+                                                    Source = media.Url,
                                                     Stretch = Stretch.Uniform,
                                                 };
                                                 var scrollViewer = new ScrollViewer
@@ -183,7 +177,7 @@ namespace Flare
                                                 {
                                                     if (sender is ScrollViewer sv)
                                                     {
-                                                        var img = sv.Content as Image;
+                                                        var img = sv.Content as FrameworkElement;
                                                         if (img != null)
                                                         {
                                                             img.Height = sv.ViewportHeight;
@@ -245,10 +239,6 @@ namespace Flare
                                         ExtendsContentIntoTitleBar = true,
                                         SystemBackdrop = new MicaBackdrop(),
                                         Title = "Media Viewer",
-                                        AppWindow =
-                                        {
-                                            IsShownInSwitchers = false,
-                                        },
                                     };
                                     window.Closed += (sender, args) =>
                                     {
@@ -305,10 +295,6 @@ namespace Flare
                                         ExtendsContentIntoTitleBar = true,
                                         SystemBackdrop = new MicaBackdrop(),
                                         Title = "Login",
-                                        AppWindow =
-                                        {
-                                            IsShownInSwitchers = false,
-                                        },
                                     };
                                     window.Activate();
                                     _openWindows[data.Id] = window;

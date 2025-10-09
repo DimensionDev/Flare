@@ -38,10 +38,11 @@ import java.awt.Desktop
 
 fun main(args: Array<String>) {
     SandboxHelper.configureSandboxArgs()
+    val ports = WindowsIPC.parsePorts(args)
     val platformIPC =
-        if (SystemUtils.IS_OS_WINDOWS) {
+        if (ports != null) {
             WindowsIPC(
-                WindowsIPC.parsePorts(args),
+                ports,
                 onDeeplink = {
                     DeeplinkHandler.handleDeeplink(it)
                 },

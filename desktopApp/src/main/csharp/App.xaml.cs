@@ -30,8 +30,8 @@ namespace Flare
         {
             InitializeComponent();
             DispatcherShutdownMode = DispatcherShutdownMode.OnExplicitShutdown;
-            _kotlinPort = GetFreeTcpPort();  
-            _csharpPort = GetFreeTcpPort();  
+            _kotlinPort = GetFreeTcpPort();
+            _csharpPort = GetFreeTcpPort();
             var cts = new CancellationTokenSource();
             _ = RunCSharpIpcServerAsync(IPAddress.Loopback, _csharpPort, cts.Token);
             StartComposeWithArgs(_kotlinPort, _csharpPort);
@@ -73,7 +73,9 @@ namespace Flare
                     _ = HandleClientAsync(client, ct);
                 }
             }
-            catch (OperationCanceledException) { }
+            catch (OperationCanceledException)
+            {
+            }
             finally
             {
                 listener.Stop();
@@ -100,42 +102,59 @@ namespace Flare
                                 break;
                             }
                             case "open-image-viewer":
+                            {
+                                if (jsonObject.RootElement.TryGetProperty("Data", out var dataElement))
                                 {
-                                    if (jsonObject.RootElement.TryGetProperty("Data", out var dataElement))
+                                    var data = dataElement.GetString();
+                                    if (data != null)
                                     {
-                                        var data = dataElement.GetString();
-                                        if (data != null)
+                                        
+                                        var image = new Image
                                         {
-                                            new Window
+                                            Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(
+                                                new Uri(data)),
+                                            Stretch = Stretch.Uniform,
+                                        };
+                                        var scrollViewer = new ScrollViewer
+                                        {
+                                            Content = image,
+                                            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                                            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                                            ZoomMode = ZoomMode.Enabled,
+                                            HorizontalScrollMode = ScrollMode.Auto,
+                                            VerticalScrollMode = ScrollMode.Auto,
+                                        };
+                                        scrollViewer.Loaded += (sender, __) =>
+                                        {
+                                            if (sender is ScrollViewer sv)
                                             {
-                                                Content = new ScrollViewer
+                                                var img = sv.Content as Image;
+                                                if (img != null)
                                                 {
-                                                    Content = new Image
-                                                    {
-                                                        Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(new Uri(data)),
-                                                        Stretch = Stretch.Uniform,
-                                                    },
-                                                    HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-                                                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-                                                    ZoomMode = ZoomMode.Enabled,
-                                                    HorizontalScrollMode = ScrollMode.Auto,
-                                                    VerticalScrollMode = ScrollMode.Auto,
-                                                },
-                                                ExtendsContentIntoTitleBar = true,
-                                                SystemBackdrop = new MicaBackdrop(),
-                                                Title = "Image Viewer",
-                                                AppWindow =
-                                                {
-                                                    IsShownInSwitchers = false,
-                                                },
-                                            }.Activate();
-                                        }
+                                                    img.Height = sv.ViewportHeight;
+                                                }
+                                            }
+                                        };
+                                        new Window
+                                        {
+                                            Content = scrollViewer,
+                                            ExtendsContentIntoTitleBar = true,
+                                            SystemBackdrop = new MicaBackdrop(),
+                                            Title = "Image Viewer",
+                                            AppWindow =
+                                            {
+                                                IsShownInSwitchers = false,
+                                            },
+                                        }.Activate();
                                     }
-                                    break;
                                 }
+
+                                break;
+                            }
                             case "open-status-image-viewer":
                             {
-                                var data = System.Text.Json.JsonSerializer.Deserialize<OpenStatusImageData>(jsonObject.RootElement.GetProperty("Data").GetRawText());
+                                var data = System.Text.Json.JsonSerializer.Deserialize<OpenStatusImageData>(
+                                    jsonObject.RootElement.GetProperty("Data").GetRawText());
                                 if (data != null)
                                 {
                                     var flipView = new FlipView();
@@ -146,7 +165,8 @@ namespace Flare
                                             case "image":
                                                 var image = new Image
                                                 {
-                                                    Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(new Uri(media.Url)),
+                                                    Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(
+                                                        new Uri(media.Url)),
                                                     Stretch = Stretch.Uniform,
                                                 };
                                                 var scrollViewer = new ScrollViewer
@@ -157,6 +177,18 @@ namespace Flare
                                                     ZoomMode = ZoomMode.Enabled,
                                                     HorizontalScrollMode = ScrollMode.Auto,
                                                     VerticalScrollMode = ScrollMode.Auto,
+                                                };
+
+                                                scrollViewer.Loaded += (sender, __) =>
+                                                {
+                                                    if (sender is ScrollViewer sv)
+                                                    {
+                                                        var img = sv.Content as Image;
+                                                        if (img != null)
+                                                        {
+                                                            img.Height = sv.ViewportHeight;
+                                                        }
+                                                    }
                                                 };
                                                 flipView.Items.Add(scrollViewer);
                                                 break;
@@ -173,7 +205,41 @@ namespace Flare
                                                 break;
                                         }
                                     }
-                                    new Window
+
+                                    flipView.Loaded += (sender, args) =>
+                                    {
+                                        if (sender is FlipView fv)
+                                        {
+                                            if (fv.Items.Count > data.Index && data.Index >= 0)
+                                            {
+                                                fv.SelectedIndex = data.Index;
+                                            }
+
+                                            if (fv.SelectedItem is MediaPlayerElement mpe)
+                                            {
+                                                mpe.MediaPlayer?.Play();
+                                            }
+                                        }
+                                    };
+                                    flipView.SelectionChanged += (sender, args) =>
+                                    {
+                                        if (sender is FlipView fv)
+                                        {
+                                            foreach (var item in fv.Items)
+                                            {
+                                                if (item is MediaPlayerElement oldmpe)
+                                                {
+                                                    oldmpe.MediaPlayer?.Pause();
+                                                }
+                                            }
+
+                                            if (fv.SelectedItem is MediaPlayerElement mpe)
+                                            {
+                                                mpe.MediaPlayer?.Play();
+                                            }
+                                        }
+                                    };
+                                    var window = new Window
                                     {
                                         Content = flipView,
                                         ExtendsContentIntoTitleBar = true,
@@ -183,14 +249,28 @@ namespace Flare
                                         {
                                             IsShownInSwitchers = false,
                                         },
-                                    }.Activate();
+                                    };
+                                    window.Closed += (sender, args) =>
+                                    {
+                                        foreach (var item in flipView.Items)
+                                        {
+                                            if (item is MediaPlayerElement mpe)
+                                            {
+                                                var player = mpe.MediaPlayer;
+                                                mpe.SetMediaPlayer(null);
+                                                player?.Dispose();
+                                            }
+                                        }
+                                    };
+                                    window.Activate();
                                 }
-                                
+
                                 break;
                             }
                             case "open-and-wait-cookies":
                             {
-                                var data = System.Text.Json.JsonSerializer.Deserialize<OpenWebViewData>(jsonObject.RootElement.GetProperty("Data").GetRawText());
+                                var data = System.Text.Json.JsonSerializer.Deserialize<OpenWebViewData>(jsonObject
+                                    .RootElement.GetProperty("Data").GetRawText());
                                 if (data != null)
                                 {
                                     var webView = new WebView2
@@ -202,13 +282,17 @@ namespace Flare
                                         sender.CoreWebView2.CookieManager.DeleteAllCookies();
                                     };
 
-                                    async void NavigationCompletedHandler(WebView2 sender, CoreWebView2NavigationCompletedEventArgs args)
+                                    async void NavigationCompletedHandler(WebView2 sender,
+                                        CoreWebView2NavigationCompletedEventArgs args)
                                     {
                                         if (args.IsSuccess)
                                         {
-                                            var cookies = await sender.CoreWebView2.CookieManager.GetCookiesAsync(data.Url);
-                                            var cookieString = string.Join("; ", cookies.Select(c => $"{c.Name}={c.Value}"));
-                                            var message = new IPCEvent<OnCookieReceivedData>(data.Id, new OnCookieReceivedData(data.Id, cookieString));
+                                            var cookies =
+                                                await sender.CoreWebView2.CookieManager.GetCookiesAsync(data.Url);
+                                            var cookieString = string.Join("; ",
+                                                cookies.Select(c => $"{c.Name}={c.Value}"));
+                                            var message = new IPCEvent<OnCookieReceivedData>(data.Id,
+                                                new OnCookieReceivedData(data.Id, cookieString));
                                             var json = System.Text.Json.JsonSerializer.Serialize(message);
                                             await SendMessage(json);
                                         }
@@ -229,6 +313,7 @@ namespace Flare
                                     window.Activate();
                                     _openWindows[data.Id] = window;
                                 }
+
                                 break;
                             }
                             case "close-webview":
@@ -245,6 +330,7 @@ namespace Flare
                                         }
                                     }
                                 }
+
                                 break;
                             }
                         }
@@ -252,6 +338,7 @@ namespace Flare
                 }
             }
         }
+
         private async Task SendMessage(string message)
         {
             var sender = new TcpClient();
@@ -283,37 +370,28 @@ namespace Flare
 
     internal class OpenStatusImageData(int Index, List<StatusMediaItem> Medias)
     {
-        [JsonPropertyName("index")]
-        public int Index { get; init; } = Index;
-        [JsonPropertyName("medias")]
-        public List<StatusMediaItem> Medias { get; init; } = Medias;
+        [JsonPropertyName("index")] public int Index { get; init; } = Index;
+        [JsonPropertyName("medias")] public List<StatusMediaItem> Medias { get; init; } = Medias;
     }
 
     internal class StatusMediaItem(string Url, string Type, string? Placeholder)
     {
-        [JsonPropertyName("url")]
-        public string Url { get; init; } = Url;
-        
-        [JsonPropertyName("type")]
-        public string Type { get; init; } = Type;
-        
-        [JsonPropertyName("placeholder")]
-        public string? Placeholder { get; init; } = Placeholder;
+        [JsonPropertyName("url")] public string Url { get; init; } = Url;
+
+        [JsonPropertyName("type")] public string Type { get; init; } = Type;
+
+        [JsonPropertyName("placeholder")] public string? Placeholder { get; init; } = Placeholder;
     }
-    
+
     internal class OpenWebViewData(string Url, string Id)
     {
-        [JsonPropertyName("url")]
-        public string Url { get; init; } = Url;
-        [JsonPropertyName("id")]
-        public string Id { get; init; } = Id;
+        [JsonPropertyName("url")] public string Url { get; init; } = Url;
+        [JsonPropertyName("id")] public string Id { get; init; } = Id;
     }
-    
+
     internal class OnCookieReceivedData(string Id, string Cookie)
     {
-        [JsonPropertyName("id")]
-        public string Id { get; init; } = Id;
-        [JsonPropertyName("cookie")]
-        public string Cookie { get; init; } = Cookie;
+        [JsonPropertyName("id")] public string Id { get; init; } = Id;
+        [JsonPropertyName("cookie")] public string Cookie { get; init; } = Cookie;
     }
 }

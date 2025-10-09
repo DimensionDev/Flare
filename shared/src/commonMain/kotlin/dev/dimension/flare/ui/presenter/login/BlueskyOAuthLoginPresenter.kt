@@ -18,7 +18,6 @@ import io.ktor.http.takeFrom
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import sh.christian.ozone.api.xrpc.BSKY_SOCIAL
 import sh.christian.ozone.oauth.OAuthApi
 import sh.christian.ozone.oauth.OAuthAuthorizationRequest
 import sh.christian.ozone.oauth.OAuthClient
@@ -32,16 +31,7 @@ public class BlueskyOAuthLoginPresenter(
 ) : PresenterBase<BlueskyOAuthLoginPresenter.State>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
-    private val oauthApi by lazy {
-        OAuthApi(
-            ktorClient {
-                install(DefaultRequest) {
-                    url.takeFrom(BSKY_SOCIAL)
-                }
-            },
-            { OAuthCodeChallengeMethodS256 },
-        )
-    }
+    private var oauthApi: OAuthApi? = null
 
     private val oauthClient by lazy {
         OAuthClient(
@@ -57,6 +47,7 @@ public class BlueskyOAuthLoginPresenter(
         public val error: String?
 
         public fun login(
+            baseUrl: String,
             userName: String,
             launchUrl: (String) -> Unit,
         )
@@ -76,6 +67,7 @@ public class BlueskyOAuthLoginPresenter(
             override val error = error
 
             override fun login(
+                baseUrl: String,
                 userName: String,
                 launchUrl: (String) -> Unit,
             ) {
@@ -83,12 +75,20 @@ public class BlueskyOAuthLoginPresenter(
                     loading = true
                     error = null
                     request = null
+                    oauthApi =
+                        OAuthApi(
+                            ktorClient {
+                                install(DefaultRequest) {
+                                    url.takeFrom("https://$baseUrl")
+                                }
+                            },
+                            { OAuthCodeChallengeMethodS256 },
+                        )
 
                     request =
                         try {
                             login(userName)
                         } catch (e: Exception) {
-                            e.printStackTrace()
                             error = e.message
                             null
                         }
@@ -130,8 +130,8 @@ public class BlueskyOAuthLoginPresenter(
         }
     }
 
-    private suspend fun login(userName: String) =
-        oauthApi.buildAuthorizationRequest(
+    private suspend fun login(userName: String): OAuthAuthorizationRequest? =
+        oauthApi?.buildAuthorizationRequest(
             oauthClient = oauthClient,
             scopes =
                 listOf(
@@ -158,12 +158,15 @@ public class BlueskyOAuthLoginPresenter(
         }
         val host = Url(iss).host
         val token =
-            oauthApi.requestToken(
+            oauthApi?.requestToken(
                 oauthClient = oauthClient,
                 code = code,
                 nonce = request.nonce,
                 codeVerifier = request.codeVerifier,
             )
+        requireNotNull(token) {
+            "Failed to obtain access token from $iss"
+        }
         val credential =
             UiAccount.Bluesky.Credential.OAuthCredential(
                 baseUrl = iss,

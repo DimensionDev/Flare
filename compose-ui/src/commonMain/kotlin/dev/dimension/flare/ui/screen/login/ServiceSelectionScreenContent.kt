@@ -256,6 +256,7 @@ public fun ServiceSelectionScreenContent(
                                     onKeyboardAction = {
                                         if (!state.blueskyInputState.usePasswordLogin) {
                                             state.blueskyOauthLoginState.login(
+                                                baseUrl = state.instanceInputState.text.toString(),
                                                 userName =
                                                     state.blueskyInputState.username.text
                                                         .toString(),
@@ -351,6 +352,7 @@ public fun ServiceSelectionScreenContent(
                                             )
                                         } else {
                                             state.blueskyOauthLoginState.login(
+                                                baseUrl = state.instanceInputState.text.toString(),
                                                 userName =
                                                     state.blueskyInputState.username.text
                                                         .toString(),

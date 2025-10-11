@@ -96,10 +96,10 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
     )
 }
 
-internal fun List<Status>.toDbPagingTimeline(
+internal suspend fun List<Status>.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (Status) -> Long = {
+    sortIdProvider: suspend (Status) -> Long = {
         if (it.pinned == true) {
             Long.MAX_VALUE
         } else {

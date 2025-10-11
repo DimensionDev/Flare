@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.zIndex
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -343,7 +344,7 @@ private fun ItemContentComponent(
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        item.button.forEach { button ->
+                        item.button.fastForEach { button ->
                             when (button) {
                                 is UiTimeline.ItemContent.User.Button.AcceptFollowRequest ->
                                     PlatformFilledTonalButton(
@@ -507,7 +508,7 @@ private fun StatusContent(
                     Column(
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
-                        data.parents.forEach {
+                        data.parents.fastForEach {
                             CommonStatusComponent(
                                 item = it,
                                 isDetail = false,

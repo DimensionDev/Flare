@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Cat
@@ -180,7 +181,7 @@ private fun ProfileHeaderSuccess(
             user.banner?.let { uriLauncher.openUri(AppDeepLink.RawImage.invoke(it)) }
         },
         handleTrailing = {
-            user.mark.forEach {
+            user.mark.fastForEach {
                 when (it) {
                     UiProfile.Mark.Verified ->
                         FAIcon(

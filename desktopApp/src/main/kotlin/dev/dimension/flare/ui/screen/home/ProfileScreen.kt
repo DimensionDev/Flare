@@ -80,6 +80,7 @@ import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.Text
 import io.github.composefluent.surface.Card
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
@@ -464,6 +465,7 @@ private fun presenter(
                     .groupBy { it.first.platformType }
                     .map { it.key to (it.value.map { it.second }.toImmutableList()) }
                     .toMap()
+                    .toImmutableMap()
             }
         val selectedTabIndex = selectedTabIndex
         val selectedTabItem = selectedTab

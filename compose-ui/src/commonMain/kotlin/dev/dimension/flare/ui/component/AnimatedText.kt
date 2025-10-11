@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.util.fastForEach
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.model.Digit
@@ -54,7 +55,7 @@ internal fun AnimatedNumber(
                 .animateContentSize(),
     ) {
         digits
-            .forEach { digit ->
+            .fastForEach { digit ->
                 AnimatedContent(
                     targetState = digit,
                     transitionSpec = {

@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Endre temafargen på appen</string>
     <string name="settings_appearance_theme_pure_color">Høy kontrastmodus</string>
     <string name="settings_appearance_theme_pure_color_description">Øk kontrast mellom bakgrunn og tekst</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Endre skriftstørrelsen på appen</string>
+    <string name="settings_appearance_font_size_diff_decrease">Reduser</string>
+    <string name="settings_appearance_font_size_diff_increase">Øk</string>
     <string name="settings_storage_clear_image_cache">Tøm bildebuffer</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder vil bli fjernet</string>
     <string name="settings_storage_clear_database">Slett mellomlagerdatabase</string>

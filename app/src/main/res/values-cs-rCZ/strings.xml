@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Změnit barvu motivu aplikace</string>
     <string name="settings_appearance_theme_pure_color">Režim vysokého kontrastu</string>
     <string name="settings_appearance_theme_pure_color_description">Zvýšit kontrast mezi pozadím a textem</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Změnit velikost písma aplikace</string>
+    <string name="settings_appearance_font_size_diff_decrease">Snížit</string>
+    <string name="settings_appearance_font_size_diff_increase">Zvýšit</string>
     <string name="settings_storage_clear_image_cache">Vymazat cache obrázků</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB obrázků bude odstraněno</string>
     <string name="settings_storage_clear_database">Vymazat databázi mezipaměti</string>

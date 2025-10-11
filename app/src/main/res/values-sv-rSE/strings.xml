@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Ändra temafärgen på appen</string>
     <string name="settings_appearance_theme_pure_color">Hög kontrast läge</string>
     <string name="settings_appearance_theme_pure_color_description">Öka kontrasten mellan bakgrund och text</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Ändra typsnittsstorleken på appen</string>
+    <string name="settings_appearance_font_size_diff_decrease">Minska</string>
+    <string name="settings_appearance_font_size_diff_increase">Öka</string>
     <string name="settings_storage_clear_image_cache">Rensa bildcache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder kommer att tas bort</string>
     <string name="settings_storage_clear_database">Rensa cache-databas</string>

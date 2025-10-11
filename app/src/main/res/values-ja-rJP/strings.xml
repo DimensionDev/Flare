@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">アプリのテーマカラーを変更する</string>
     <string name="settings_appearance_theme_pure_color">ハイコントラストモード</string>
     <string name="settings_appearance_theme_pure_color_description">背景とテキストのコントラストを上げる</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">アプリのフォントサイズを変更する</string>
+    <string name="settings_appearance_font_size_diff_decrease">減らす</string>
+    <string name="settings_appearance_font_size_diff_increase">増加</string>
     <string name="settings_storage_clear_image_cache">画像キャッシュをクリア</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MBの画像が削除されます</string>
     <string name="settings_storage_clear_database">キャッシュデータベースをクリア</string>

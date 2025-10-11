@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">تغيير لون السمة للتطبيق</string>
     <string name="settings_appearance_theme_pure_color">وضع التباين العالي</string>
     <string name="settings_appearance_theme_pure_color_description">زيادة التباين بين الخلفية والنص</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">تغيير حجم الخط للتطبيق</string>
+    <string name="settings_appearance_font_size_diff_decrease">تقلص</string>
+    <string name="settings_appearance_font_size_diff_increase">زيادة</string>
     <string name="settings_storage_clear_image_cache">مسح ذاكرة التخزين المؤقت للصورة</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB من الصور سيتم إزالتها</string>
     <string name="settings_storage_clear_database">مسح قاعدة بيانات ذاكرة التخزين المؤقت</string>

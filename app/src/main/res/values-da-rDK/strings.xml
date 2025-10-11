@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Skift temafarven på app\'en</string>
     <string name="settings_appearance_theme_pure_color">Høj kontrast tilstand</string>
     <string name="settings_appearance_theme_pure_color_description">Forøg kontrasten mellem baggrund og tekst</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Skift skrifttypestørrelse for appen</string>
+    <string name="settings_appearance_font_size_diff_decrease">Formindsk</string>
+    <string name="settings_appearance_font_size_diff_increase">Forøg</string>
     <string name="settings_storage_clear_image_cache">Ryd billed-cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB billeder vil blive fjernet</string>
     <string name="settings_storage_clear_database">Ryd cache database</string>

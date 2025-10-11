@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Schimbă culoarea aplicației pentru temă</string>
     <string name="settings_appearance_theme_pure_color">Mod contrast mare</string>
     <string name="settings_appearance_theme_pure_color_description">Mărește contrastul dintre fundal și text</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Schimbați dimensiunea fontului aplicației</string>
+    <string name="settings_appearance_font_size_diff_decrease">Scade</string>
+    <string name="settings_appearance_font_size_diff_increase">Creștere</string>
     <string name="settings_storage_clear_image_cache">Golire cache imagine</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB de imagini vor fi eliminate</string>
     <string name="settings_storage_clear_database">Goliţi baza de date cache</string>

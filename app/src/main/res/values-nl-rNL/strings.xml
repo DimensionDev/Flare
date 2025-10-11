@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Verander de themakleur van de app</string>
     <string name="settings_appearance_theme_pure_color">Modus hoog contrast</string>
     <string name="settings_appearance_theme_pure_color_description">Vergroot contrast tussen achtergrond en tekst</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">De lettergrootte van de app wijzigen</string>
+    <string name="settings_appearance_font_size_diff_decrease">Verlaag</string>
+    <string name="settings_appearance_font_size_diff_increase">Verhogen</string>
     <string name="settings_storage_clear_image_cache">Afbeeldingencache legen</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB van afbeeldingen zal worden verwijderd</string>
     <string name="settings_storage_clear_database">Cache database wissen</string>

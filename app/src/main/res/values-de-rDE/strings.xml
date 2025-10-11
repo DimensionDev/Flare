@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Ändern Sie die Designfarbe der App</string>
     <string name="settings_appearance_theme_pure_color">Kontrastmodus</string>
     <string name="settings_appearance_theme_pure_color_description">Kontrast zwischen Hintergrund und Text erhöhen</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Schriftgröße der App ändern</string>
+    <string name="settings_appearance_font_size_diff_decrease">Verkleinern</string>
+    <string name="settings_appearance_font_size_diff_increase">Erhöhen</string>
     <string name="settings_storage_clear_image_cache">Bildercache leeren</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB Bilder werden entfernt</string>
     <string name="settings_storage_clear_database">Cache-Datenbank leeren</string>

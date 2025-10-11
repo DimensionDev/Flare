@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">更改应用的主题颜色</string>
     <string name="settings_appearance_theme_pure_color">高对比度模式</string>
     <string name="settings_appearance_theme_pure_color_description">增加背景和文本之间的对比度</string>
+    <string name="settings_appearance_font_size_diff">字体大小</string>
+    <string name="settings_appearance_font_size_diff_description">更改应用程序的字体大小</string>
+    <string name="settings_appearance_font_size_diff_decrease">减少</string>
+    <string name="settings_appearance_font_size_diff_increase">增加</string>
     <string name="settings_storage_clear_image_cache">清除图片缓存</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB的图片将被删除</string>
     <string name="settings_storage_clear_database">清除缓存数据库</string>

@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Змінити колір теми програми</string>
     <string name="settings_appearance_theme_pure_color">Висококонтрастний режим</string>
     <string name="settings_appearance_theme_pure_color_description">Збільшити контраст між тлом і текстом</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Змінити розмір шрифту програми</string>
+    <string name="settings_appearance_font_size_diff_decrease">Зменшити</string>
+    <string name="settings_appearance_font_size_diff_increase">Збільшити</string>
     <string name="settings_storage_clear_image_cache">Очистити кеш зображень</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB із зображень буде видалено</string>
     <string name="settings_storage_clear_database">Очистити базу даних кешу</string>

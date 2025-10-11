@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Zmień kolor motywu aplikacji</string>
     <string name="settings_appearance_theme_pure_color">Tryb wysokiego kontrastu</string>
     <string name="settings_appearance_theme_pure_color_description">Zwiększ kontrast między tłem i tekstem</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Zmień rozmiar czcionki aplikacji</string>
+    <string name="settings_appearance_font_size_diff_decrease">Zmniejsz</string>
+    <string name="settings_appearance_font_size_diff_increase">Zwiększ</string>
     <string name="settings_storage_clear_image_cache">Usuń pamięć podręczną obrazów</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB obrazów zostanie usunięte</string>
     <string name="settings_storage_clear_database">Wyczyść bazę pamięci podręcznej</string>

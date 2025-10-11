@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Изменить цвет темы приложения</string>
     <string name="settings_appearance_theme_pure_color">Режим высокой контрастности</string>
     <string name="settings_appearance_theme_pure_color_description">Увеличить контраст между фоном и текстом</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Изменить размер шрифта приложения</string>
+    <string name="settings_appearance_font_size_diff_decrease">Уменьшить</string>
+    <string name="settings_appearance_font_size_diff_increase">Увеличить</string>
     <string name="settings_storage_clear_image_cache">Очистить кэш изображений</string>
     <string name="settings_storage_clear_image_cache_description">%1$s МБ изображений будет удалено</string>
     <string name="settings_storage_clear_database">Очистить базу данных кэша</string>

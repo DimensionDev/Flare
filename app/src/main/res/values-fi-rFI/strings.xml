@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Muuta sovelluksen teeman väriä</string>
     <string name="settings_appearance_theme_pure_color">Korkea kontrastitila</string>
     <string name="settings_appearance_theme_pure_color_description">Lisää taustan ja tekstin välistä kontrastia</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Muuta sovelluksen kirjasimen kokoa</string>
+    <string name="settings_appearance_font_size_diff_decrease">Vähennä</string>
+    <string name="settings_appearance_font_size_diff_increase">Lisää</string>
     <string name="settings_storage_clear_image_cache">Tyhjennä kuvien välimuisti</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB kuvia poistetaan</string>
     <string name="settings_storage_clear_database">Tyhjennä välimuistin tietokanta</string>

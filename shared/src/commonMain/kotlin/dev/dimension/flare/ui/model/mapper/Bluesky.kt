@@ -54,6 +54,14 @@ import kotlinx.serialization.json.jsonPrimitive
 import moe.tlaster.twitter.parser.TwitterParser
 import sh.christian.ozone.api.model.JsonContent
 
+private val sensitiveLabels =
+    listOf(
+        "!warn",
+        "porn",
+        "sexual",
+        "graphic-media",
+        "nudity",
+    )
 internal val bskyJson by lazy {
     Json {
         ignoreUnknownKeys = true
@@ -410,6 +418,11 @@ internal fun PostView.renderStatus(
             }
         }
 
+    val sensitive =
+        this.labels.any {
+            it.`val` in sensitiveLabels
+        }
+
     return UiTimeline.ItemContent.Status(
         platformType = PlatformType.Bluesky,
         user = user,
@@ -533,7 +546,7 @@ internal fun PostView.renderStatus(
                 ),
             ).toImmutableList(),
         createdAt = indexedAt.toStdlibInstant().toUi(),
-        sensitive = false,
+        sensitive = sensitive,
         onClicked = {
             launcher.launch(
                 AppDeepLink.StatusDetail(
@@ -1000,7 +1013,10 @@ private fun render(
                     record.value.indexedAt
                         .toStdlibInstant()
                         .toUi(),
-                sensitive = false,
+                sensitive =
+                    record.value.labels.any {
+                        it.`val` in sensitiveLabels
+                    },
                 onClicked = {
                     launcher.launch(
                         AppDeepLink.StatusDetail(

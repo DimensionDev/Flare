@@ -153,6 +153,7 @@ dependencies {
     implementation(libs.bundles.navigation3)
     implementation(libs.haze)
     implementation(libs.haze.materials)
+    implementation('org.rust-nostr', name: 'nostr-sdk-jvm', version: '0.43.0')
 
     // START Non-FOSS component
     if (project.file("google-services.json").exists()) {

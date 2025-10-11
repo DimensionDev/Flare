@@ -97,6 +97,7 @@ import dev.dimension.flare.ui.screen.home.RegisterTabCallback
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.launch
 import moe.tlaster.nestedscrollview.VerticalNestedScrollView
 import moe.tlaster.nestedscrollview.rememberNestedScrollViewState
@@ -664,6 +665,7 @@ private fun profilePresenter(
                     .groupBy { it.first.platformType }
                     .map { it.key to (it.value.map { it.second }.toImmutableList()) }
                     .toMap()
+                    .toImmutableMap()
             }
         val showMoreMenus = showMoreMenus
         val isRefreshing = isRefreshing

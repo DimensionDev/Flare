@@ -216,13 +216,16 @@ internal fun HomeTimelineScreen(
                         tabState.getOrNull(index)?.key ?: "timeline_$index"
                     },
                 ) { index ->
-                    TimelineItemContent(
-                        item = tabState[index],
-                        contentPadding = contentPadding,
-                        modifier = Modifier.fillMaxWidth(),
-                        changeLogState = state.changeLogState,
-                        isCurrentlyVisible = pagerState.currentPage == index,
-                    )
+                    val item = tabState.getOrNull(index)
+                    if (item != null) {
+                        TimelineItemContent(
+                            item = item,
+                            contentPadding = contentPadding,
+                            modifier = Modifier.fillMaxWidth(),
+                            changeLogState = state.changeLogState,
+                            isCurrentlyVisible = pagerState.currentPage == index,
+                        )
+                    }
                 }
             }
         }

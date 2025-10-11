@@ -46,6 +46,7 @@ internal data object NodeInfoService {
             "mastodon",
             "kmyblue",
             "fedibird",
+            "snac",
         ) + pleromaNodeInfoName
 
     private val misskeyNodeInfoName =

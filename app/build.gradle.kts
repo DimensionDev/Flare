@@ -3,7 +3,6 @@ import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
 // END Non-FOSS component
 import com.google.gms.googleservices.GoogleServicesPlugin
 import java.util.Properties
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")

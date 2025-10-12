@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.mastodon
 
+import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -50,6 +51,9 @@ internal class BookmarkTimelineRemoteMediator(
                 response.toDbPagingTimeline(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
+                    sortIdProvider = {
+                        -SnowflakeIdGenerator.nextId()
+                    },
                 ),
             nextKey = response.next,
         )

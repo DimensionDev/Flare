@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.platform.PlatformCard
-import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.theme.PlatformTheme
 
 @Composable
@@ -18,7 +17,7 @@ public fun AdaptiveCard(
     totalCount: Int = 0,
     content: @Composable () -> Unit,
 ) {
-    val bigScreen = isBigScreen()
+    val bigScreen = LocalMultipleColumns.current
     if (bigScreen) {
         PlatformCard(
             modifier =

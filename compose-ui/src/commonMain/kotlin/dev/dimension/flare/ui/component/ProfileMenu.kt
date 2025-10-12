@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.util.fastForEach
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleExclamation
@@ -33,12 +34,13 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 public fun ProfileMenu(
     profileState: ProfileState,
-    accountsState: UiState<Map<PlatformType, ImmutableList<UiState<UiProfile>>>>,
+    accountsState: UiState<ImmutableMap<PlatformType, ImmutableList<UiState<UiProfile>>>>,
     setShowMoreMenus: (Boolean) -> Unit,
     showMoreMenus: Boolean,
     toEditAccountList: () -> Unit,
@@ -118,7 +120,7 @@ public fun ProfileMenu(
                             profileState.myAccountKey.onSuccess { myKey ->
                                 if (accounts.size > 1) {
                                     accounts.forEach { (_, value) ->
-                                        value.forEach { account ->
+                                        value.fastForEach { account ->
                                             account.onSuccess { accountData ->
                                                 if (accountData.key != user.key &&
                                                     accountData.key != myKey &&

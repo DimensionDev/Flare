@@ -99,12 +99,6 @@ public fun ServiceSelectionScreenContent(
         modifier =
             Modifier.fillMaxSize(),
         columns = StaggeredGridCells.Adaptive(300.dp),
-        horizontalArrangement =
-            Arrangement.spacedBy(
-                8.dp,
-                Alignment.CenterHorizontally,
-            ),
-        verticalItemSpacing = 0.dp,
         contentPadding = contentPadding,
     ) {
         item(

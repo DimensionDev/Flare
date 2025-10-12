@@ -33,10 +33,10 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.AnimatedNumber
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenu
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuScope
-import dev.dimension.flare.ui.component.platform.PlatformIcon
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.platform.rippleIndication
 import dev.dimension.flare.ui.model.Digit
@@ -89,7 +89,7 @@ public fun StatusActionButton(
                 }.using(SizeTransform(clip = false))
             },
         ) { color ->
-            PlatformIcon(
+            FAIcon(
                 imageVector = icon,
                 contentDescription = contentDescription,
                 modifier =

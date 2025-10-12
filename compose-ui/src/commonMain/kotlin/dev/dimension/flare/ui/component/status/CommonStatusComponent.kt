@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import coil3.compose.LocalPlatformContext
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Regular
@@ -674,7 +675,7 @@ internal fun StatusActions(
                                 },
                             )
                         }
-                        action.actions.forEach { subActions ->
+                        action.actions.fastForEach { subActions ->
                             when (subActions) {
                                 is StatusAction.Item -> {
                                     StatusActionItemMenu(subActions, closeMenu, launcher)

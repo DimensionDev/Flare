@@ -2,14 +2,13 @@ package dev.dimension.flare.ui.component
 
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withLink
-import androidx.compose.ui.unit.ExperimentalUnitApi
+import androidx.compose.ui.text.withAnnotation
+import androidx.compose.ui.util.fastForEach
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
@@ -78,7 +77,7 @@ private fun AnnotatedString.Builder.renderElement(
         }
 
         "p" -> {
-            element.childNodes().forEach {
+            element.childNodes().fastForEach {
                 renderNode(node = it, styleData = styleData, imageId = imageId)
             }
             val parent = element.parent()
@@ -88,7 +87,7 @@ private fun AnnotatedString.Builder.renderElement(
         }
 
         "span" -> {
-            element.childNodes().forEach {
+            element.childNodes().fastForEach {
                 renderNode(node = it, styleData = styleData, imageId = imageId)
             }
         }
@@ -114,7 +113,7 @@ private fun AnnotatedString.Builder.renderElement(
             pushStyle(
                 styleData.textStyle.copy(fontWeight = FontWeight.Bold).toSpanStyle(),
             )
-            element.childNodes().forEach {
+            element.childNodes().fastForEach {
                 renderNode(node = it, styleData = styleData, imageId = imageId)
             }
             pop()
@@ -124,7 +123,7 @@ private fun AnnotatedString.Builder.renderElement(
             pushStyle(
                 styleData.textStyle.copy(fontStyle = FontStyle.Italic).toSpanStyle(),
             )
-            element.childNodes().forEach {
+            element.childNodes().fastForEach {
                 renderNode(node = it, styleData = styleData, imageId = imageId)
             }
             pop()
@@ -134,7 +133,7 @@ private fun AnnotatedString.Builder.renderElement(
             pushStyle(
                 styleData.textStyle.copy(textDecoration = TextDecoration.LineThrough).toSpanStyle(),
             )
-            element.childNodes().forEach {
+            element.childNodes().fastForEach {
                 renderNode(node = it, styleData = styleData, imageId = imageId)
             }
             pop()
@@ -144,7 +143,7 @@ private fun AnnotatedString.Builder.renderElement(
             pushStyle(
                 styleData.textStyle.copy(textDecoration = TextDecoration.Underline).toSpanStyle(),
             )
-            element.childNodes().forEach {
+            element.childNodes().fastForEach {
                 renderNode(node = it, styleData = styleData, imageId = imageId)
             }
             pop()
@@ -154,14 +153,14 @@ private fun AnnotatedString.Builder.renderElement(
             pushStyle(
                 styleData.textStyle.copy(fontSize = styleData.textStyle.fontSize * 0.8).toSpanStyle(),
             )
-            element.childNodes().forEach {
+            element.childNodes().fastForEach {
                 renderNode(node = it, styleData = styleData, imageId = imageId)
             }
             pop()
         }
 
         else -> {
-            element.childNodes().forEach {
+            element.childNodes().fastForEach {
                 renderNode(node = it, styleData = styleData, imageId = imageId)
             }
         }
@@ -176,14 +175,16 @@ private fun AnnotatedString.Builder.renderLink(
 //    val href = element.attributes["href"]
     val href = element.attribute("href")?.value
     if (!href.isNullOrEmpty()) {
-        withLink(LinkAnnotation.Url(href)) {
-            element.childNodes().forEach {
+        withAnnotation(tag = TAG_URL, annotation = href) {
+//        withLink(LinkAnnotation.Url(href)) {
+            element.childNodes().fastForEach {
                 renderNode(
                     node = it,
                     styleData = styleData.copy(textStyle = styleData.linkStyle),
                     imageId = imageId,
                 )
             }
+//        }
         }
     }
 }

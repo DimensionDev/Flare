@@ -87,24 +87,24 @@ jobs:
         run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
         env:
           Configuration: Release
-      # - name: Create the app package
-      #   working-directory: desktopApp/src/main/csharp
-      #   run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true /p:AppxPackageSigningEnabled=false /p:CertificateThumbprint="" /p:GenerateAppInstallerFile=false /p:BuildAppxUploadPackageForUap=true /p:PackageCertificateThumbprint="" 
+      - name: Create the app package
+        working-directory: desktopApp/src/main/csharp
+        run: msbuild $env:Solution_Name /t:Build /p:Configuration=Release /p:Platform=x64 /p:UapAppxPackageBuildMode=StoreUpload /p:GenerateAppInstallerFile=false /p:AppxPackageSigningEnabled=false /p:BuildAppxUploadPackageForUap=true /verbosity:minimal 
       #   env:
       #     Appx_Bundle: Never
       #     Appx_Package_Build_Mode: StoreUpload
       #     Appx_Package_Dir: Packages\
       #     Configuration: Release
       #     Platform: x64
-      - uses: buildalon/unity-uwp-builder@v1
-        id: uwp-build
-        with:
-          project-path: 'desktopApp/src/main/csharp'
-          architecture: 'x64'
-          package-type: 'upload'
-          configuration: 'Release'
+      # - uses: buildalon/unity-uwp-builder@v1
+      #   id: uwp-build
+      #   with:
+      #     project-path: 'desktopApp/src/main/csharp'
+      #     architecture: 'x64'
+      #     package-type: 'upload'
+      #     configuration: 'Release'
       - name: Upload MSIX package
         uses: actions/upload-artifact@v4
         with:
           name: Windows-package
-          path: ${{ steps.uwp-build.outputs.output-directory }}
+          path: desktopApp/src/main/csharp/AppPackages/*.msixupload

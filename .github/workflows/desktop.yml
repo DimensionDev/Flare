@@ -90,6 +90,7 @@ jobs:
           project-path: 'desktopApp/src/main/csharp'
           architecture: 'x64'
           package-type: 'upload'
+          configuration: 'Release'
       # - name: Restore the application
       #   working-directory: desktopApp/src/main/csharp
       #   run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration

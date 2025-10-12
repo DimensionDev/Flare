@@ -24,14 +24,6 @@ public fun NetworkImage(
     model: Any?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
-//    placeholder: @Composable BoxScope.() -> Unit = {
-//        Box(
-//            modifier =
-//                Modifier
-//                    .matchParentSize()
-//                    .placeholder(true),
-//        )
-//    },
     alignment: Alignment = Alignment.Center,
     contentScale: ContentScale = ContentScale.Crop,
     alpha: Float = DefaultAlpha,
@@ -78,7 +70,7 @@ public fun NetworkImage(
         modifier = modifier,
         filterQuality = filterQuality,
         placeholder =
-            remember {
+            remember(placeholderColor) {
                 ColorPainter(placeholderColor)
             },
     )
@@ -94,43 +86,4 @@ internal fun EmojiImage(
         modifier = modifier,
         contentDescription = null,
     )
-//    val context = LocalPlatformContext.current
-//    val painter =
-//        rememberAsyncImagePainter(
-//            model =
-//                remember(uri, context) {
-//                    ImageRequest
-//                        .Builder(context)
-//                        .data(uri)
-//                        .size(Size.ORIGINAL)
-//                        .build()
-//                },
-//        )
-//    val state by painter.state.collectAsState(AsyncImagePainter.State.Loading(painter))
-//    if (state is AsyncImagePainter.State.Success) {
-//        val aspectRatio =
-//            remember(painter.intrinsicSize) {
-//                val size = painter.intrinsicSize
-//                if (size.isUnspecified) {
-//                    1f
-//                } else {
-//                    (size.width / size.height).takeUnless { it.isNaN() } ?: 1f
-//                }
-//            }
-//        Image(
-//            painter = painter,
-//            contentDescription = null,
-//            modifier =
-//                modifier
-//                    .aspectRatio(aspectRatio)
-//                    .fillMaxSize(),
-//        )
-//    } else {
-//        Box(
-//            modifier =
-//                modifier
-//                    .size(24.dp)
-//                    .placeholder(true),
-//        )
-//    }
 }

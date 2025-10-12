@@ -1,6 +1,5 @@
 
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -49,7 +48,11 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Pkg, TargetFormat.Exe)
             packageName = "Flare"
-            packageVersion = System.getenv("BUILD_VERSION")?.toString() ?: "1.0.0"
+            val buildVersion = System.getenv("BUILD_VERSION")?.toString()?.takeIf {
+                // match semantic versioning
+                Regex("""\d+\.\d+\.\d+(-\S+)?""").matches(it)
+            } ?: "1.0.0"
+            packageVersion = buildVersion
             macOS {
                 val hasSigningProps = project.file("embedded.provisionprofile").exists() && project.file("runtime.provisionprofile").exists()
                 packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "1"

@@ -1,4 +1,4 @@
-name: macOS CI
+name: Desktop CI
 
 on:
   push:
@@ -18,7 +18,7 @@ on:
       - develop
 
 jobs:
-  build:
+  build-macos:
     runs-on: [macos-latest]
     timeout-minutes: 30
 
@@ -58,5 +58,48 @@ jobs:
       - name: Archive macOS artifacts Product
         uses: actions/upload-artifact@v4
         with:
-          name: macOS-release
+          name: macOS-package
           path: desktopApp/build/compose/binaries/main-release/pkg/*.pkg
+  
+  build-windows:
+    runs-on: [windows-latest]
+    timeout-minutes: 30
+    env:
+      Solution_Name: Flare.sln
+    steps:
+      - uses: yumis-coconudge/clean-workspace-action@v1
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: "jetbrains"
+          java-version: 21
+      - name: Install .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v2
+      - name: Restore the application
+        working-directory: desktopApp/src/main/csharp
+        run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
+        env:
+          Configuration: Release
+      - name: Create the app package
+        working-directory: desktopApp/src/main/csharp
+        run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
+        env:
+          Appx_Bundle: Never
+          Appx_Package_Build_Mode: StoreUpload
+          Appx_Package_Dir: Packages\
+          Configuration: Release
+          Platform: x64
+      - name: Upload MSIX package
+        working-directory: desktopApp/src/main/csharp
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-package
+          path: ${{ env.Solution_Name }}\\Packages

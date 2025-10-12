@@ -626,12 +626,7 @@ internal class XQTDataSource(
     override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(280),
-            media =
-                if (statusKey != null) {
-                    null
-                } else {
-                    ComposeConfig.Media(4, true)
-                },
+            media = ComposeConfig.Media(4, true),
         )
 
     override suspend fun follow(

@@ -1,0 +1,59 @@
+name: macOS CI
+
+on:
+  push:
+    branches:
+      - master
+      - release
+      - develop
+    tags:
+      - "**"
+    paths-ignore:
+      - "**.md"
+      - "**.yml"
+  pull_request:
+    branches:
+      - master
+      - release
+      - develop
+
+jobs:
+  build:
+    runs-on: [macos-latest]
+    timeout-minutes: 30
+
+    steps:
+      - uses: yumis-coconudge/clean-workspace-action@v1
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: "jetbrains"
+          java-version: 21
+      - name: import certs
+        uses: apple-actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.MACOS_CERT_BASE64 }}
+          p12-password: ${{ secrets.MACOS_CERT_PASSWORD }}
+      - name: Create Embedded Provision Profile
+        run: |
+          echo "$MACOS_EMBEDDED_PROVISION" > desktopApp/embedded.provisionprofile.b64
+          base64 -d -i desktopApp/embedded.provisionprofile.b64 > desktopApp/embedded.provisionprofile    
+        env:
+          MACOS_EMBEDDED_PROVISION: ${{ secrets.MACOS_EMBEDDED_PROVISION }}
+
+      - name: Create Runtime Provision Profile
+        run: |
+          echo "$MACOS_RUNTIME_PROVISION" > desktopApp/runtime.provisionprofile.b64
+          base64 -d -i desktopApp/runtime.provisionprofile.b64 > desktopApp/runtime.provisionprofile    
+        env:
+          MACOS_RUNTIME_PROVISION: ${{ secrets.MACOS_RUNTIME_PROVISION }}
+
+      - name: Build with Gradle
+        env:
+          BUILD_NUMBER: ${{github.run_number}}
+          BUILD_VERSION: ${{github.ref_name}}
+        run: ./gradlew :desktop:build :desktop:check packageReleasePkg -PmacOsAppStoreRelease=true --stacktrace

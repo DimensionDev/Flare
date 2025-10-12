@@ -31,7 +31,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
-          distribution: "jetbrains"
+          distribution: "microsoft"
           java-version: 21
       - name: import certs
         uses: apple-actions/import-codesign-certs@v2

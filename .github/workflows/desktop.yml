@@ -20,7 +20,6 @@ on:
 jobs:
   build-macos:
     runs-on: [macos-latest]
-    timeout-minutes: 30
 
     steps:
       - uses: yumis-coconudge/clean-workspace-action@v1
@@ -63,7 +62,6 @@ jobs:
   
   build-windows:
     runs-on: [windows-latest]
-    timeout-minutes: 30
     env:
       Solution_Name: Flare.csproj
     steps:

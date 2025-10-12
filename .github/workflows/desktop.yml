@@ -65,7 +65,7 @@ jobs:
     runs-on: [windows-latest]
     timeout-minutes: 30
     env:
-      Solution_Name: Flare.sln
+      Solution_Name: Flare.csproj
     steps:
       - uses: yumis-coconudge/clean-workspace-action@v1
 
@@ -83,22 +83,29 @@ jobs:
           dotnet-version: '9'
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
-      - name: Restore the application
-        working-directory: desktopApp/src/main/csharp
-        run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
-        env:
-          Configuration: Release
-      - name: Create the app package
-        working-directory: desktopApp/src/main/csharp
-        run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true /p:AppxPackageSigningEnabled=false /p:CertificateThumbprint=""
-        env:
-          Appx_Bundle: Never
-          Appx_Package_Build_Mode: StoreUpload
-          Appx_Package_Dir: Packages\
-          Configuration: Release
-          Platform: x64
+        
+      - uses: buildalon/unity-uwp-builder@v1
+        id: uwp-build
+        with:
+          project-path: 'desktopApp/src/main/csharp'
+          architecture: 'x64'
+          package-type: 'upload'
+      # - name: Restore the application
+      #   working-directory: desktopApp/src/main/csharp
+      #   run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
+      #   env:
+      #     Configuration: Release
+      # - name: Create the app package
+      #   working-directory: desktopApp/src/main/csharp
+      #   run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true /p:AppxPackageSigningEnabled=false /p:CertificateThumbprint="" /p:GenerateAppInstallerFile=false /p:BuildAppxUploadPackageForUap=true /p:PackageCertificateThumbprint="" 
+      #   env:
+      #     Appx_Bundle: Never
+      #     Appx_Package_Build_Mode: StoreUpload
+      #     Appx_Package_Dir: Packages\
+      #     Configuration: Release
+      #     Platform: x64
       - name: Upload MSIX package
         uses: actions/upload-artifact@v4
         with:
           name: Windows-package
-          path: desktopApp/src/main/csharp/Packages
+          path: ${{ steps.uwp-build.outputs.output-directory }}

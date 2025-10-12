@@ -80,7 +80,7 @@ jobs:
       - name: Install .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '9'
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
       - name: Restore the application
@@ -90,7 +90,7 @@ jobs:
           Configuration: Release
       - name: Create the app package
         working-directory: desktopApp/src/main/csharp
-        run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true
+        run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true /p:AppxPackageSigningEnabled=false
         env:
           Appx_Bundle: Never
           Appx_Package_Build_Mode: StoreUpload
@@ -101,4 +101,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Windows-package
-          path: desktopApp/src/main/csharp/${{ env.Solution_Name }}/Packages
+          path: desktopApp/src/main/csharp/Packages

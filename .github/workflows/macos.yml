@@ -56,4 +56,4 @@ jobs:
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
-        run: ./gradlew :desktop:build :desktop:check packageReleasePkg -PmacOsAppStoreRelease=true --stacktrace
+        run: ./gradlew :desktop:check packageReleasePkg --stacktrace

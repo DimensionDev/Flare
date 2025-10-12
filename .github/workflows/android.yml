@@ -8,9 +8,6 @@ on:
       - develop
     tags:
       - '**'
-    paths-ignore:
-      - '**.md'
-      - '**.yml'
   pull_request:
     branches:
       - master
@@ -53,15 +50,6 @@ jobs:
           BUILD_VERSION: ${{github.ref_name}}
         run: ./gradlew :app:assembleRelease :app:bundleRelease :app:check :app:lint --stacktrace
 
-      # Archive android artifacts
-      - name: Archive android artifacts Product
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-release
-          path: |
-            **/*.aab
-            
       - name: Publish to Google Play
         uses: r0adkll/upload-google-play@v1
         with:
@@ -72,16 +60,4 @@ jobs:
           mappingFile: app/build/outputs/mapping/release/mapping.txt
           debugSymbols: app/intermediates/merged_native_libs/release/out/lib
 
-  upload:
-    if: startsWith(github.ref, 'refs/tags/')
-    runs-on: [ubuntu-latest]
-    needs: [build]
-    timeout-minutes: 30
-    steps:
-      - uses: actions/download-artifact@v4
 
-      - name: Draft a new release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            **/*.apk

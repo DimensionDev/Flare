@@ -57,3 +57,10 @@ jobs:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
         run: ./gradlew :desktop:check packageReleasePkg --stacktrace
+
+      - name: Upload build log
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: desktopApp/build/compose/logs/

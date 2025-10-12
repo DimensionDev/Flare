@@ -56,7 +56,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: dev.dimension.flare
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
-          track: qa
+          track: internal
           mappingFile: app/build/outputs/mapping/release/mapping.txt
           debugSymbols: app/intermediates/merged_native_libs/release/out/lib
 

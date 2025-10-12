@@ -98,8 +98,7 @@ jobs:
           Configuration: Release
           Platform: x64
       - name: Upload MSIX package
-        working-directory: desktopApp/src/main/csharp
         uses: actions/upload-artifact@v4
         with:
           name: Windows-package
-          path: ${{ env.Solution_Name }}\\Packages
+          path: desktopApp/src/main/csharp/${{ env.Solution_Name }}/Packages

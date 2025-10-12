@@ -53,7 +53,7 @@ jobs:
       - name: Publish to Google Play
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJsonPlainText: ${{ SERVICE_ACCOUNT_JSON }}
+          serviceAccountJsonPlainText: ${{ github.SERVICE_ACCOUNT_JSON }}
           packageName: dev.dimension.flare
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           track: qa

@@ -4,6 +4,8 @@ import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -18,6 +20,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.common.plus
@@ -36,11 +39,17 @@ public fun LazyStatusVerticalStaggeredGrid(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     reverseLayout: Boolean = false,
     verticalItemSpacing: Dp = 0.dp,
-    horizontalArrangement: Arrangement.Horizontal = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+    horizontalArrangement: Arrangement.Horizontal =
+        Arrangement.spacedBy(
+            8.dp,
+            Alignment.CenterHorizontally,
+        ),
     flingBehavior: FlingBehavior = ScrollableDefaults.flingBehavior(),
     userScrollEnabled: Boolean = true,
     content: LazyStaggeredGridScope.() -> Unit,
 ) {
+    val padding = contentPadding + PaddingValues(horizontal = screenHorizontalPadding)
+    val layoutDirection = LocalLayoutDirection.current
     val density = LocalDensity.current
     val columnCount by remember(state) {
         snapshotFlow { state.layoutInfo.viewportSize.width }
@@ -48,13 +57,16 @@ public fun LazyStatusVerticalStaggeredGrid(
             .map {
                 with(density) {
                     with(columns) {
-                        calculateCrossAxisCellSizes(it, 8.dp.roundToPx())
+                        calculateCrossAxisCellSizes(
+                            it - padding.calculateStartPadding(layoutDirection).roundToPx() -
+                                padding.calculateEndPadding(layoutDirection).roundToPx(),
+                            8.dp.roundToPx(),
+                        )
                     }
                 }.size
             }.distinctUntilChanged()
     }.collectAsState(1)
     val bigScreen = columnCount > 1
-    val padding = contentPadding + PaddingValues(horizontal = screenHorizontalPadding)
     val actualVerticalSpacing =
         if (bigScreen) {
             verticalItemSpacing

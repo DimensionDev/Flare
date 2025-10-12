@@ -20,7 +20,7 @@ on:
 jobs:
   build-macos:
     runs-on: [macos-latest]
-
+    timeout-minutes: 30
     steps:
       - uses: yumis-coconudge/clean-workspace-action@v1
 
@@ -62,6 +62,7 @@ jobs:
   
   build-windows:
     runs-on: [windows-latest]
+    timeout-minutes: 30
     env:
       Solution_Name: Flare.csproj
     steps:
@@ -81,19 +82,11 @@ jobs:
           dotnet-version: '9'
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v2
-        
-      - uses: buildalon/unity-uwp-builder@v1
-        id: uwp-build
-        with:
-          project-path: 'desktopApp/src/main/csharp'
-          architecture: 'x64'
-          package-type: 'upload'
-          configuration: 'Release'
-      # - name: Restore the application
-      #   working-directory: desktopApp/src/main/csharp
-      #   run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
-      #   env:
-      #     Configuration: Release
+      - name: Restore the application
+        working-directory: desktopApp/src/main/csharp
+        run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
+        env:
+          Configuration: Release
       # - name: Create the app package
       #   working-directory: desktopApp/src/main/csharp
       #   run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:AppxPackageDir="$env:Appx_Package_Dir" /p:GenerateAppxPackageOnBuild=true /p:AppxPackageSigningEnabled=false /p:CertificateThumbprint="" /p:GenerateAppInstallerFile=false /p:BuildAppxUploadPackageForUap=true /p:PackageCertificateThumbprint="" 
@@ -103,6 +96,13 @@ jobs:
       #     Appx_Package_Dir: Packages\
       #     Configuration: Release
       #     Platform: x64
+      - uses: buildalon/unity-uwp-builder@v1
+        id: uwp-build
+        with:
+          project-path: 'desktopApp/src/main/csharp'
+          architecture: 'x64'
+          package-type: 'upload'
+          configuration: 'Release'
       - name: Upload MSIX package
         uses: actions/upload-artifact@v4
         with:

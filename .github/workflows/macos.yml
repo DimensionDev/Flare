@@ -38,32 +38,25 @@ jobs:
         with:
           p12-file-base64: ${{ secrets.MACOS_CERT_BASE64 }}
           p12-password: ${{ secrets.MACOS_CERT_PASSWORD }}
-      - name: debug
-        run: |
-          security find-identity -v -p codesigning
       - name: Create Embedded Provision Profile
         run: |
           echo "$MACOS_EMBEDDED_PROVISION" > desktopApp/embedded.provisionprofile.b64
           base64 -d -i desktopApp/embedded.provisionprofile.b64 > desktopApp/embedded.provisionprofile    
         env:
           MACOS_EMBEDDED_PROVISION: ${{ secrets.MACOS_EMBEDDED_PROVISION }}
-
       - name: Create Runtime Provision Profile
         run: |
           echo "$MACOS_RUNTIME_PROVISION" > desktopApp/runtime.provisionprofile.b64
           base64 -d -i desktopApp/runtime.provisionprofile.b64 > desktopApp/runtime.provisionprofile    
         env:
           MACOS_RUNTIME_PROVISION: ${{ secrets.MACOS_RUNTIME_PROVISION }}
-
       - name: Build with Gradle
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
         run: ./gradlew :desktop:check packageReleasePkg --stacktrace
-
-      - name: Upload build logs
-        if: ${{ always() }}
+      - name: Archive macOS artifacts Product
         uses: actions/upload-artifact@v4
         with:
-          name: build-log
-          path: desktopApp/build/compose/logs/
+          name: macOS-release
+          path: desktopApp/build/compose/binaries/main-release/pkg/*.pkg

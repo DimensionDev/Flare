@@ -107,4 +107,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Windows-package
-          path: desktopApp/src/main/csharp/AppPackages/*.msixupload
+          path: desktopApp/src/main/csharp/AppPackages/

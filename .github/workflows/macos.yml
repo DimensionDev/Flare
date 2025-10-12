@@ -38,6 +38,9 @@ jobs:
         with:
           p12-file-base64: ${{ secrets.MACOS_CERT_BASE64 }}
           p12-password: ${{ secrets.MACOS_CERT_PASSWORD }}
+      - name: debug
+        run: |
+          security find-identity -v -p codesigning
       - name: Create Embedded Provision Profile
         run: |
           echo "$MACOS_EMBEDDED_PROVISION" > desktopApp/embedded.provisionprofile.b64

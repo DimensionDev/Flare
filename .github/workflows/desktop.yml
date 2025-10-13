@@ -104,7 +104,7 @@ jobs:
           mkdir desktopApp/src/main/csharp/AppPackages/OnlyMsixFilesFolder
           cp desktopApp/src/main/csharp/AppPackages/**/*.msix desktopApp/src/main/csharp/AppPackages/OnlyMsixFilesFolder -Force
       - name: Make msixbundle
-        if: !startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/') == false
         uses: LanceMcCarthy/Action-MsixBundler@v3
         with:
           msix-folder: "desktopApp/src/main/csharp/AppPackages/OnlyMsixFilesFolder"

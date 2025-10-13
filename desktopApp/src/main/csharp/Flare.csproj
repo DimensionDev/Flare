@@ -15,13 +15,9 @@
     <EnableComposeAutoBuild>true</EnableComposeAutoBuild>
   </PropertyGroup>
 
-    <Target Name="BuildCompose" Condition="'$(EnableComposeAutoBuild)' == 'true'" BeforeTargets="PreBuildEvent">
-        <Message Text="[BuildCompose] Running Gradle in $(GradleWorkingDir)" Importance="high" />
-        <Exec Command="cd ..\..\..\..\&#xD;&#xA;./gradlew :desktop:createReleaseDistributable" IgnoreExitCode="false" />
-    </Target>
-    <ItemGroup>
-      <None Include="$(ProjectDir)..\..\..\build\compose\binaries\main-release\app\Flare\**\*" CopyToOutputDirectory="Always" LinkBase="Assets\compose\Flare" />
-    </ItemGroup>
+  <Target Name="BuildCompose" Condition="'$(EnableComposeAutoBuild)' == 'true'" BeforeTargets="PreBuildEvent">
+      <Exec Command="cd ..\..\..\..\&#xD;&#xA;./gradlew :desktop:createReleaseDistributable" IgnoreExitCode="false" />
+  </Target>
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -29,6 +25,7 @@
     <Content Include="Assets\Square44x44Logo.scale-200.png" />
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+    <Content Include="$(ProjectDir)..\..\..\build\compose\binaries\main-release\app\Flare\**\*" CopyToOutputDirectory="Always" LinkBase="Assets\compose\Flare" />
   </ItemGroup>
 
   <ItemGroup>
@@ -68,9 +65,11 @@
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <GenerateTestArtifacts>False</GenerateTestArtifacts>
-    <AppxBundle>Never</AppxBundle>
+    <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+    <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
+    <UapAppxPackageBuildMode>StoreUpload</UapAppxPackageBuildMode>
+    <UseSubFolderForOutputDirDuringMultiPlatformBuild>False</UseSubFolderForOutputDirDuringMultiPlatformBuild>
   </PropertyGroup>
 </Project>

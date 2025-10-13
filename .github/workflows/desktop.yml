@@ -98,7 +98,7 @@ jobs:
           Configuration: Release
       - name: Create the app package
         working-directory: desktopApp/src/main/csharp
-        run: msbuild $env:Solution_Name /t:Build /p:Configuration=Release /p:Platform=x64 /p:UapAppxPackageBuildMode=StoreUpload /p:GenerateAppInstallerFile=false /p:AppxPackageSigningEnabled=false /p:BuildAppxUploadPackageForUap=true /p:EnableComposeAutoBuild=false
+        run: msbuild $env:Solution_Name /t:Build /p:Configuration=Release;AppxBundle=Always;AppxBundlePlatforms="x64" /p:Platform=x64 /p:UapAppxPackageBuildMode=StoreUpload /p:GenerateAppInstallerFile=false /p:AppxPackageSigningEnabled=false /p:BuildAppxUploadPackageForUap=true /p:EnableComposeAutoBuild=false
       - name: Upload MSIX package
         uses: actions/upload-artifact@v4
         with:

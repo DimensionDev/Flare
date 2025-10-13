@@ -20,7 +20,7 @@
         <Exec Command="cd ..\..\..\..\&#xD;&#xA;./gradlew :desktop:createReleaseDistributable" IgnoreExitCode="false" />
     </Target>
     <ItemGroup>
-      <None Include="$(ProjectDir)..\..\..\build\compose\binaries\main-release\app\Flare\**\*" CopyToOutputDirectory="Always" LinkBase="Assets\compose\Flare" />
+      <Content Include="$(ProjectDir)..\..\..\build\compose\binaries\main-release\app\Flare\**\*" CopyToOutputDirectory="Always" LinkBase="Assets\compose\Flare" />
     </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />

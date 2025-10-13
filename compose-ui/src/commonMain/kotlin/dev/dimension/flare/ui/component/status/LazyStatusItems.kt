@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Dp
@@ -46,7 +45,6 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
@@ -70,9 +68,9 @@ public fun LazyStaggeredGridScope.status(
             ) { index ->
                 val item = get(index)
                 AdaptiveCard(
-                    modifier =
-                        Modifier
-                            .animateItem(),
+//                    modifier =
+//                        Modifier
+//                            .animateItem(),
                     index = index,
                     totalCount = itemCount,
                     content = {
@@ -109,7 +107,7 @@ public fun LazyStaggeredGridScope.status(
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
                         OnError(
-                            modifier = Modifier.animateItem(),
+//                            modifier = Modifier.animateItem(),
                             error = it,
                             onRetry = { retry() },
                         )
@@ -122,7 +120,7 @@ public fun LazyStaggeredGridScope.status(
                             },
                             index = it,
                             totalCount = 10,
-                            modifier = Modifier.animateItem(),
+//                            modifier = Modifier.animateItem(),
                         )
                     }
                 }.onEndOfList {
@@ -132,7 +130,7 @@ public fun LazyStaggeredGridScope.status(
                         Column(
                             modifier =
                                 Modifier
-                                    .animateItem()
+//                                    .animateItem()
                                     .fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
@@ -150,7 +148,7 @@ public fun LazyStaggeredGridScope.status(
                 span = StaggeredGridItemSpan.FullLine,
             ) {
                 OnError(
-                    modifier = Modifier.animateItem(),
+//                    modifier = Modifier.animateItem(),
                     error = it,
                     onRetry = onRetry,
                 )
@@ -159,7 +157,7 @@ public fun LazyStaggeredGridScope.status(
         onLoading {
             items(10) {
                 AdaptiveCard(
-                    modifier = Modifier.animateItem(),
+//                    modifier = Modifier.animateItem(),
                     index = it,
                     totalCount = 10,
                     content = {
@@ -175,7 +173,7 @@ public fun LazyStaggeredGridScope.status(
                 Column(
                     modifier =
                         Modifier
-                            .animateItem()
+//                            .animateItem()
                             .clickable {
                                 refresh()
                             },
@@ -352,9 +350,9 @@ public fun UserPlaceholder(modifier: Modifier = Modifier) {
             PlatformText(
                 text = "username@Placeholder",
                 style = PlatformTheme.typography.caption,
+                color = PlatformTheme.colorScheme.caption,
                 modifier =
                     Modifier
-                        .alpha(MediumAlpha)
                         .placeholder(true),
             )
         }

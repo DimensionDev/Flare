@@ -15,6 +15,7 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
 
 @Composable
@@ -24,6 +25,7 @@ internal fun StatusRetweetHeaderComponent(
     text: String,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = PlatformTheme.typography.caption,
+    color: androidx.compose.ui.graphics.Color = PlatformContentColor.current,
 ) {
     Row(
         modifier = modifier,
@@ -35,6 +37,7 @@ internal fun StatusRetweetHeaderComponent(
             modifier =
                 Modifier
                     .size(textStyle.fontSize.value.dp),
+            tint = color,
         )
         if (user != null) {
             Spacer(modifier = Modifier.width(8.dp))
@@ -47,6 +50,7 @@ internal fun StatusRetweetHeaderComponent(
                         .alignByBaseline()
                         .weight(1f, fill = false),
                 maxLines = 1,
+                color = color,
             )
         }
         Spacer(modifier = Modifier.width(8.dp))
@@ -55,6 +59,7 @@ internal fun StatusRetweetHeaderComponent(
             style = textStyle,
             modifier =
                 Modifier.alignByBaseline(),
+            color = color,
         )
     }
 }

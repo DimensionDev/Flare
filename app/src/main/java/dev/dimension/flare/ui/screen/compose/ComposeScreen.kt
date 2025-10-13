@@ -88,6 +88,7 @@ import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.status.QuotedStatus
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
@@ -532,13 +533,21 @@ internal fun ComposeScreen(
                     val content = state.content
                     if (content is UiTimeline.ItemContent.Status) {
                         Card {
-                            QuotedStatus(
-                                data = content,
-                                modifier =
-                                    Modifier
-                                        .padding(horizontal = screenHorizontalPadding)
-                                        .fillMaxWidth(),
-                            )
+                            CompositionLocalProvider(
+                                LocalComponentAppearance provides
+                                    LocalComponentAppearance.current.copy(
+                                        showMedia = false,
+                                        expandMediaSize = false,
+                                    ),
+                            ) {
+                                QuotedStatus(
+                                    data = content,
+                                    modifier =
+                                        Modifier
+                                            .padding(horizontal = screenHorizontalPadding)
+                                            .fillMaxWidth(),
+                                )
+                            }
                         }
                     }
                 }

@@ -22,7 +22,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -55,7 +54,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toTabItem
 import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
 import dev.dimension.flare.ui.screen.settings.AllTabsPresenter
-import dev.dimension.flare.ui.theme.MediumAlpha
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.CardExpanderItem
@@ -162,9 +160,7 @@ internal fun AddTabDialog(
                                     Text(
                                         text = tab.profile.handle,
                                         style = FluentTheme.typography.caption,
-                                        modifier =
-                                            Modifier
-                                                .alpha(MediumAlpha),
+                                        color = FluentTheme.colors.text.text.tertiary,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                     )

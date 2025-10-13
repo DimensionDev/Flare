@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -245,7 +244,7 @@ import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
-import dev.dimension.flare.ui.theme.MediumAlpha
+import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.StringResource
@@ -765,6 +764,12 @@ private fun TopMessageComponent(
             icon = icon,
             user = data.user,
             text = text,
+            color =
+                if (topMessageOnly) {
+                    PlatformContentColor.current
+                } else {
+                    PlatformTheme.colorScheme.caption
+                },
             textStyle =
                 if (topMessageOnly) {
                     PlatformTextStyle.current
@@ -773,13 +778,7 @@ private fun TopMessageComponent(
                 },
             modifier =
                 Modifier
-                    .let {
-                        if (topMessageOnly) {
-                            it
-                        } else {
-                            it.alpha(MediumAlpha)
-                        }
-                    }.clickable {
+                    .clickable {
                         data.onClicked.invoke(
                             ClickContext(
                                 launcher = {

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -25,7 +24,6 @@ import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
-import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformTheme
 
 @Composable
@@ -60,9 +58,7 @@ public fun QuotedStatus(
                     DateTimeText(
                         data.createdAt,
                         style = PlatformTheme.typography.caption,
-                        modifier =
-                            Modifier
-                                .alpha(MediumAlpha),
+                        color = PlatformTheme.colorScheme.caption,
                         maxLines = 1,
                     )
                 }
@@ -75,10 +71,9 @@ public fun QuotedStatus(
             }
         }
         if (!data.images.isEmpty() && LocalComponentAppearance.current.showMedia) {
-            StatusMediaComponent(
-                data = data.images,
+            StatusMediasComponent(
+                item = data,
                 onMediaClick = onMediaClick,
-                sensitive = data.sensitive,
             )
         }
         if (showActions) {
@@ -126,9 +121,7 @@ internal fun UserCompat(
                 PlatformText(
                     text = handle,
                     style = PlatformTheme.typography.caption,
-                    modifier =
-                        Modifier
-                            .alpha(MediumAlpha),
+                    color = PlatformTheme.colorScheme.caption,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

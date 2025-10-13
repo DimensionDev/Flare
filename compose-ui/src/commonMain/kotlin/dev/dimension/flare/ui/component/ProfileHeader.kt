@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
@@ -49,7 +48,6 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.profile.ProfileState
-import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
@@ -189,8 +187,7 @@ private fun ProfileHeaderSuccess(
                             contentDescription = null,
                             modifier =
                                 Modifier
-                                    .size(12.dp)
-                                    .alpha(MediumAlpha),
+                                    .size(12.dp),
                             tint = Color.Blue,
                         )
 
@@ -198,30 +195,30 @@ private fun ProfileHeaderSuccess(
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.Cat,
                             contentDescription = null,
+                            tint = PlatformTheme.colorScheme.caption,
                             modifier =
                                 Modifier
-                                    .size(12.dp)
-                                    .alpha(MediumAlpha),
+                                    .size(12.dp),
                         )
 
                     UiProfile.Mark.Bot ->
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.Robot,
                             contentDescription = null,
+                            tint = PlatformTheme.colorScheme.caption,
                             modifier =
                                 Modifier
-                                    .size(12.dp)
-                                    .alpha(MediumAlpha),
+                                    .size(12.dp),
                         )
 
                     UiProfile.Mark.Locked ->
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.Lock,
                             contentDescription = null,
+                            tint = PlatformTheme.colorScheme.caption,
                             modifier =
                                 Modifier
-                                    .size(12.dp)
-                                    .alpha(MediumAlpha),
+                                    .size(12.dp),
                         )
                 }
             }

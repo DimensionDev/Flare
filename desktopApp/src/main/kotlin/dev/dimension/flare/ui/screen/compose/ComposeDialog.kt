@@ -88,6 +88,7 @@ import dev.dimension.flare.navigate_back
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.status.QuotedStatus
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
@@ -540,14 +541,22 @@ fun ComposeDialog(
                                     .padding(horizontal = screenHorizontalPadding)
                                     .sizeIn(maxWidth = 300.dp),
                         ) {
-                            QuotedStatus(
-                                data = content,
-                                modifier =
-                                    Modifier
-                                        .padding(horizontal = screenHorizontalPadding)
-                                        .padding(vertical = 8.dp)
-                                        .fillMaxWidth(),
-                            )
+                            CompositionLocalProvider(
+                                LocalComponentAppearance provides
+                                    LocalComponentAppearance.current.copy(
+                                        showMedia = false,
+                                        expandMediaSize = false,
+                                    ),
+                            ) {
+                                QuotedStatus(
+                                    data = content,
+                                    modifier =
+                                        Modifier
+                                            .padding(horizontal = screenHorizontalPadding)
+                                            .padding(vertical = 8.dp)
+                                            .fillMaxWidth(),
+                                )
+                            }
                         }
                     }
                 }

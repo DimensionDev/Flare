@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -32,7 +31,6 @@ import dev.dimension.flare.ui.component.platform.PlatformListItem
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.model.UiList
-import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
@@ -168,9 +166,7 @@ public fun UiListItem(
                                 item.creator?.handle ?: "Unknown",
                             ),
                         style = PlatformTheme.typography.caption,
-                        modifier =
-                            Modifier
-                                .alpha(MediumAlpha),
+                        color = PlatformTheme.colorScheme.caption,
                     )
                 }
             },

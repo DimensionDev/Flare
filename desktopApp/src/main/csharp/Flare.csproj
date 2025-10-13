@@ -16,11 +16,10 @@
   </PropertyGroup>
 
     <Target Name="BuildCompose" Condition="'$(EnableComposeAutoBuild)' == 'true'" BeforeTargets="PreBuildEvent">
-        <Message Text="[BuildCompose] Running Gradle in $(GradleWorkingDir)" Importance="high" />
         <Exec Command="cd ..\..\..\..\&#xD;&#xA;./gradlew :desktop:createReleaseDistributable" IgnoreExitCode="false" />
     </Target>
     <ItemGroup>
-      <Content Include="$(ProjectDir)..\..\..\build\compose\binaries\main-release\app\Flare\**\*" CopyToOutputDirectory="Always" LinkBase="Assets\compose\Flare" />
+      <EmbeddedResource Include="$(ProjectDir)..\..\..\build\compose\binaries\main-release\app\Flare\**\*" CopyToOutputDirectory="Always" LinkBase="Assets\compose\Flare" />
     </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />

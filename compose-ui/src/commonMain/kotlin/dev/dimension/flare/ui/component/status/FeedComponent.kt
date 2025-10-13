@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.isBigScreen
@@ -76,7 +77,15 @@ internal fun FeedComponent(
                 PlatformText(
                     text = data.source,
                     style = PlatformTheme.typography.caption,
+                    modifier = Modifier.weight(1f),
                 )
+                data.createdAt?.let {
+                    DateTimeText(
+                        it,
+                        style = PlatformTheme.typography.caption,
+                        color = PlatformTheme.colorScheme.caption,
+                    )
+                }
             }
             PlatformText(
                 text = data.title,

@@ -771,7 +771,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         }
 
         is CodeBlockNode -> {
-            Element("pre").apply {
+            Element("p").apply {
                 appendChild(
                     Element("code").apply {
                         language?.let {
@@ -785,7 +785,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         }
 
         is MathBlockNode -> {
-            Element("pre").apply {
+            Element("p").apply {
                 appendChild(
                     Element("code").apply {
 //                        attributes["lang"] = "math"

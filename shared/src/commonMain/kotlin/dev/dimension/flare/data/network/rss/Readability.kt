@@ -2,7 +2,10 @@ package dev.dimension.flare.data.network.rss
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.ui.render.UiDateTime
+import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -49,6 +52,13 @@ public data class DocumentData(
     val publishedTime: String?,
 ) {
     val publishDateTime: UiDateTime? by lazy {
-        publishedTime?.let { Instant.parse(it).toUi() }
+        publishedTime?.let {
+            tryRun {
+                Instant.parse(it)
+            }.getOrNull()?.toUi()
+        }
+    }
+    val richText: UiRichText by lazy {
+        parseHtml(content).toUi()
     }
 }

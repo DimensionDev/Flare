@@ -103,7 +103,7 @@ internal fun parseBlueskyJson(
                 accountKey = accountKey,
             )
         } else {
-            return Element("p")
+            return Element("span")
                 .apply {
                     if (text != null) {
                         appendText(text)
@@ -128,7 +128,7 @@ private fun parseBluesky(
     facets: List<Facet>,
     accountKey: MicroBlogKey,
 ): UiRichText {
-    val element = Element("p")
+    val element = Element("span")
 
     val codePoints = text.toByteArray(charset = Charsets.UTF_8)
     var codePointIndex = 0

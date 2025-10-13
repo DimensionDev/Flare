@@ -15,4 +15,22 @@ internal actual object PlatformTypography {
     actual val headline: TextStyle
         @Composable
         get() = FluentTheme.typography.title
+    actual val h1: TextStyle
+        @Composable
+        get() = FluentTheme.typography.display
+    actual val h2: TextStyle
+        @Composable
+        get() = FluentTheme.typography.titleLarge
+    actual val h3: TextStyle
+        @Composable
+        get() = FluentTheme.typography.title
+    actual val h4: TextStyle
+        @Composable
+        get() = FluentTheme.typography.subtitle
+    actual val h5: TextStyle
+        @Composable
+        get() = FluentTheme.typography.bodyStrong
+    actual val h6: TextStyle
+        @Composable
+        get() = FluentTheme.typography.bodyLarge
 }

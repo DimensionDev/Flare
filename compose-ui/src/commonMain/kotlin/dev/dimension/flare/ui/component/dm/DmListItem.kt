@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
@@ -39,7 +38,6 @@ import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.platform.PlatformListItem
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiDMRoom
-import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformTheme
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.min
@@ -131,9 +129,7 @@ public fun LazyListScope.dmList(
                                         PlatformText(
                                             text = user.handle,
                                             style = PlatformTheme.typography.caption,
-                                            modifier =
-                                                Modifier
-                                                    .alpha(MediumAlpha),
+                                            color = PlatformTheme.colorScheme.caption,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
                                         )
@@ -146,9 +142,7 @@ public fun LazyListScope.dmList(
                             DateTimeText(
                                 lastMessage.timestamp,
                                 style = PlatformTheme.typography.caption,
-                                modifier =
-                                    Modifier
-                                        .alpha(MediumAlpha),
+                                color = PlatformTheme.colorScheme.caption,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )

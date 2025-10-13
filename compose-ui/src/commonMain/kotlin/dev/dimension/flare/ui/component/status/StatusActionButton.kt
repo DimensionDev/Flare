@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.component.status
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
@@ -16,8 +15,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -56,7 +55,6 @@ public fun StatusActionButton(
     content: @Composable RowScope.() -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val animatedColor by animateColorAsState(color)
     val appearanceSettings = LocalComponentAppearance.current
     val textMinWidth =
         if (withTextMinWidth) {
@@ -68,33 +66,55 @@ public fun StatusActionButton(
         modifier =
             modifier
                 .padding(vertical = 4.dp, horizontal = 8.dp),
-//                .height(with(LocalDensity.current) { PlatformTextStyle.current.fontSize.toDp() + 4.dp }),
         verticalAlignment = Alignment.Bottom,
     ) {
-        val contentColor = PlatformContentColor.current
-        AnimatedContent(
-            color,
-            transitionSpec = {
-                if (targetState == contentColor) {
-                    fadeIn() togetherWith fadeOut()
-                } else {
-                    fadeIn() +
-                        scaleIn(
-                            animationSpec =
-                                spring(
-                                    stiffness = Spring.StiffnessMediumLow,
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                ),
-                        ) togetherWith scaleOut() + fadeOut()
-                }.using(SizeTransform(clip = false))
-            },
-        ) { color ->
+        if (!LocalIsScrollingInProgress.current) {
+            val contentColor = PlatformContentColor.current
+            AnimatedContent(
+                color,
+                transitionSpec = {
+                    if (targetState == contentColor) {
+                        fadeIn() togetherWith fadeOut()
+                    } else {
+                        fadeIn() +
+                            scaleIn(
+                                animationSpec =
+                                    spring(
+                                        stiffness = Spring.StiffnessMediumLow,
+                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    ),
+                            ) togetherWith scaleOut() + fadeOut()
+                    }.using(SizeTransform(clip = false))
+                },
+            ) { color ->
+                FAIcon(
+                    imageVector = icon,
+                    contentDescription = contentDescription,
+                    modifier =
+                        Modifier
+                            .height(with(LocalDensity.current) { PlatformTextStyle.current.fontSize.toDp() + 4.dp })
+                            .pointerHoverIcon(PointerIcon.Hand)
+                            .clickable(
+                                onClick = onClicked,
+                                enabled = enabled,
+                                interactionSource = interactionSource,
+                                indication =
+                                    rippleIndication(
+                                        bounded = false,
+                                        radius = 20.dp,
+                                        color = Color.Unspecified,
+                                    ),
+                            ),
+                    tint = color,
+                )
+            }
+        } else {
             FAIcon(
                 imageVector = icon,
                 contentDescription = contentDescription,
                 modifier =
                     Modifier
-                        .size(with(LocalDensity.current) { PlatformTextStyle.current.fontSize.toDp() + 4.dp })
+                        .height(with(LocalDensity.current) { PlatformTextStyle.current.fontSize.toDp() + 4.dp })
                         .pointerHoverIcon(PointerIcon.Hand)
                         .clickable(
                             onClick = onClicked,
@@ -115,7 +135,7 @@ public fun StatusActionButton(
             AnimatedNumber(
                 digits = digits,
 //                style = MaterialTheme.typography.bodySmall,
-                color = animatedColor,
+                color = color,
                 modifier =
                     Modifier
                         .width(textMinWidth)

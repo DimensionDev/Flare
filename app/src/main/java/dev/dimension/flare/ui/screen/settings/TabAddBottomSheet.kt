@@ -34,7 +34,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -68,7 +67,6 @@ import dev.dimension.flare.ui.presenter.home.rss.RssSourcesPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
-import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -171,9 +169,7 @@ internal fun TabAddBottomSheet(
                                     Text(
                                         text = tab.profile.handle,
                                         style = MaterialTheme.typography.bodySmall,
-                                        modifier =
-                                            Modifier
-                                                .alpha(MediumAlpha),
+                                        color = MaterialTheme.colorScheme.outline,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                     )

@@ -73,6 +73,7 @@
     <string name="status_empty">Nothing to see here</string>
     <string name="status_sensitive_media">Sensitive media</string>
     <string name="show_media">Show media</string>
+    <string name="hide_media">Hide media</string>
     <string name="login_expired">Login session expired</string>
     <string name="login_expired_message">Click to login again</string>
     <string name="login_expired_relogin">Login again</string>

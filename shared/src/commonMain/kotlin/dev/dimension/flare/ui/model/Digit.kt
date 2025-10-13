@@ -5,6 +5,8 @@ public data class Digit internal constructor(
     val place: Int,
     val fullNumber: Long,
 ) {
+    val digitString: String = digitChar.toString()
+
     override fun equals(other: Any?): Boolean =
         when (other) {
             is Digit -> digitChar == other.digitChar

@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextOverflow
@@ -22,7 +21,6 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiUserV2
-import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformTheme
 
 @Composable
@@ -64,10 +62,10 @@ public fun CommonStatusHeaderComponent(
             PlatformText(
                 text = data.handle,
                 style = PlatformTheme.typography.caption,
+                color = PlatformTheme.colorScheme.caption,
                 modifier =
                     Modifier
                         .pointerHoverIcon(PointerIcon.Hand)
-                        .alpha(MediumAlpha)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,

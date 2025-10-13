@@ -32,7 +32,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
@@ -76,6 +75,7 @@ import dev.dimension.flare.compose.ui.bookmark_add
 import dev.dimension.flare.compose.ui.bookmark_remove
 import dev.dimension.flare.compose.ui.comment
 import dev.dimension.flare.compose.ui.delete
+import dev.dimension.flare.compose.ui.hide_media
 import dev.dimension.flare.compose.ui.like
 import dev.dimension.flare.compose.ui.mastodon_item_show_less
 import dev.dimension.flare.compose.ui.mastodon_item_show_more
@@ -105,7 +105,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.PlatformShare
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
-import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.FAIcon
@@ -127,6 +126,7 @@ import dev.dimension.flare.ui.component.rememberFormattedDateTime
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.Digit
 import dev.dimension.flare.ui.model.UiCard
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -134,7 +134,6 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.render.UiRichText
-import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableList
@@ -194,8 +193,8 @@ public fun CommonStatusComponent(
                                 visibility = content.visibility,
                                 modifier =
                                     Modifier
-                                        .size(14.dp)
-                                        .alpha(MediumAlpha),
+                                        .size(14.dp),
+                                tint = PlatformTheme.colorScheme.caption,
                             )
                         }
 
@@ -263,7 +262,20 @@ public fun CommonStatusComponent(
 
             if (item.images.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                StatusMediasComponent(appearanceSettings, item)
+                StatusMediasComponent(
+                    item,
+                    onMediaClick = { media ->
+                        item.onMediaClicked.invoke(
+                            ClickContext(
+                                launcher = {
+                                    uriHandler.openUri(it)
+                                },
+                            ),
+                            media,
+                            item.images.indexOf(media),
+                        )
+                    },
+                )
             }
             item.card?.let { card ->
                 if (appearanceSettings.showLinkPreview && item.images.isEmpty() && item.quote.isEmpty()) {
@@ -344,26 +356,42 @@ public fun CommonStatusComponent(
 }
 
 @Composable
-private fun StatusMediasComponent(
-    appearanceSettings: ComponentAppearance,
+internal fun StatusMediasComponent(
     item: UiTimeline.ItemContent.Status,
+    onMediaClick: (UiMedia) -> Unit,
 ) {
-    val uriLauncher = LocalUriHandler.current
+    val appearanceSettings = LocalComponentAppearance.current
     var showMedia by remember { mutableStateOf(false) }
     if (appearanceSettings.showMedia || showMedia) {
+        if (!appearanceSettings.showMedia) {
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showMedia = false
+                        },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.Image,
+                    contentDescription = stringResource(resource = Res.string.hide_media),
+                    modifier =
+                        Modifier
+                            .size(12.dp),
+                    tint = PlatformTheme.colorScheme.caption,
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                PlatformText(
+                    text = stringResource(resource = Res.string.hide_media),
+                    style = PlatformTheme.typography.caption,
+                    color = PlatformTheme.colorScheme.caption,
+                )
+            }
+        }
         StatusMediaComponent(
             data = item.images,
-            onMediaClick = { media ->
-                item.onMediaClicked.invoke(
-                    ClickContext(
-                        launcher = {
-                            uriLauncher.openUri(it)
-                        },
-                    ),
-                    media,
-                    item.images.indexOf(media),
-                )
-            },
+            onMediaClick = onMediaClick,
             sensitive = item.sensitive,
         )
     } else {
@@ -381,16 +409,14 @@ private fun StatusMediasComponent(
                 contentDescription = stringResource(resource = Res.string.show_media),
                 modifier =
                     Modifier
-                        .size(12.dp)
-                        .alpha(MediumAlpha),
+                        .size(12.dp),
+                tint = PlatformTheme.colorScheme.caption,
             )
             Spacer(modifier = Modifier.width(4.dp))
             PlatformText(
                 text = stringResource(resource = Res.string.show_media),
                 style = PlatformTheme.typography.caption,
-                modifier =
-                    Modifier
-                        .alpha(MediumAlpha),
+                color = PlatformTheme.colorScheme.caption,
             )
         }
     }
@@ -607,6 +633,7 @@ private fun TranslationComponent(
 @Composable
 public fun StatusVisibilityComponent(
     visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type,
+    tint: Color = PlatformContentColor.current,
     modifier: Modifier = Modifier,
 ) {
     when (visibility) {
@@ -615,6 +642,7 @@ public fun StatusVisibilityComponent(
                 imageVector = FontAwesomeIcons.Solid.Globe,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_public),
                 modifier = modifier,
+                tint = tint,
             )
 
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
@@ -622,6 +650,7 @@ public fun StatusVisibilityComponent(
                 imageVector = FontAwesomeIcons.Solid.LockOpen,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_unlisted),
                 modifier = modifier,
+                tint = tint,
             )
 
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
@@ -629,6 +658,7 @@ public fun StatusVisibilityComponent(
                 imageVector = FontAwesomeIcons.Solid.Lock,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_private),
                 modifier = modifier,
+                tint = tint,
             )
 
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
@@ -636,6 +666,7 @@ public fun StatusVisibilityComponent(
                 imageVector = FontAwesomeIcons.Solid.At,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_direct),
                 modifier = modifier,
+                tint = tint,
             )
     }
 }
@@ -663,7 +694,7 @@ internal fun StatusActions(
                 is StatusAction.Group -> {
                     StatusActionGroup(
                         icon = action.displayItem.icon,
-                        digits = action.displayItem.iconText,
+                        digits = action.displayItem.iconDigit,
                         color = statusActionItemColor(item = action.displayItem),
                         withTextMinWidth = index != items.lastIndex,
                     ) { closeMenu, isMenuShown ->
@@ -733,7 +764,7 @@ internal fun StatusActions(
                 is StatusAction.Item -> {
                     StatusActionButton(
                         icon = action.icon,
-                        digits = action.iconText,
+                        digits = action.iconDigit,
                         color = statusActionItemColor(item = action),
                         withTextMinWidth = index != items.lastIndex,
                         onClicked = {
@@ -856,7 +887,7 @@ private val StatusAction.Item.icon: ImageVector
             is StatusAction.Item.Comment -> FontAwesomeIcons.Regular.CommentDots
         }
 
-private val StatusAction.Item.iconText: ImmutableList<Digit>?
+private val StatusAction.Item.iconDigit: ImmutableList<Digit>?
     get() =
         when (this) {
             is StatusAction.Item.Bookmark -> digits
@@ -933,15 +964,13 @@ private fun StatusReplyComponent(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier =
-            modifier
-                .alpha(MediumAlpha),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         FAIcon(
             imageVector = FontAwesomeIcons.Solid.Reply,
             contentDescription = stringResource(resource = Res.string.reply_to),
+            tint = PlatformTheme.colorScheme.caption,
             modifier =
                 Modifier
                     .size(12.dp),
@@ -949,6 +978,7 @@ private fun StatusReplyComponent(
         PlatformText(
             text = stringResource(resource = Res.string.reply_to, replyHandle),
             style = PlatformTheme.typography.caption,
+            color = PlatformTheme.colorScheme.caption,
             maxLines = 1,
         )
     }
@@ -1056,9 +1086,9 @@ private fun StatusPollComponent(
                 text = stringResource(resource = Res.string.poll_expired),
                 modifier =
                     Modifier
-                        .align(Alignment.End)
-                        .alpha(MediumAlpha),
+                        .align(Alignment.End),
                 style = PlatformTheme.typography.caption,
+                color = PlatformTheme.colorScheme.caption,
             )
         } else {
             poll.expiredAt?.let { expiredAt ->
@@ -1072,9 +1102,9 @@ private fun StatusPollComponent(
                         ),
                     modifier =
                         Modifier
-                            .align(Alignment.End)
-                            .alpha(MediumAlpha),
+                            .align(Alignment.End),
                     style = PlatformTheme.typography.caption,
+                    color = PlatformTheme.colorScheme.caption,
                 )
             }
         }
@@ -1171,12 +1201,12 @@ private fun PollOption(
                     }
                 } else {
                     // keep the height consist
-                    PlatformRadioButton(
-                        selected = false,
-                        onClick = {},
-                        enabled = false,
-                        modifier = Modifier.alpha(0f),
-                    )
+//                    PlatformRadioButton(
+//                        selected = false,
+//                        onClick = {},
+//                        enabled = false,
+//                        modifier = Modifier.alpha(0f),
+//                    )
                 }
             },
         )
@@ -1249,10 +1279,8 @@ private fun ExpandedCard(
                 PlatformText(
                     text = it,
                     style = PlatformTheme.typography.caption,
+                    color = PlatformTheme.colorScheme.caption,
                     maxLines = 2,
-                    modifier =
-                        Modifier
-                            .alpha(MediumAlpha),
                 )
             }
         }
@@ -1298,9 +1326,7 @@ private fun CompatCard(
                 PlatformText(
                     text = it,
                     style = PlatformTheme.typography.caption,
-                    modifier =
-                        Modifier
-                            .alpha(MediumAlpha),
+                    color = PlatformTheme.colorScheme.caption,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )

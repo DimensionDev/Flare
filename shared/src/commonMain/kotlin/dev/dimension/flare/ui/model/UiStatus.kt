@@ -18,7 +18,7 @@ import moe.tlaster.twitter.parser.UserNameToken
 import kotlin.time.Clock
 
 internal fun List<Token>.toHtml(accountKey: MicroBlogKey): Element {
-    val body = Element("p")
+    val body = Element("span")
     forEach {
         body.appendChild(it.toHtml(accountKey))
     }

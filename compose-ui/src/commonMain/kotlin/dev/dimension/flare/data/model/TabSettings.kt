@@ -968,6 +968,7 @@ public object Bluesky {
 public data class RssTimelineTabItem(
     val feedUrl: String,
     override val metaData: TabMetaData,
+    val favIcon: String? = null,
 ) : TimelineTabItem() {
     // This is a special case for RSS feeds, which are not tied to a specific account.
     override val account: AccountType = AccountType.Guest
@@ -981,24 +982,27 @@ public data class RssTimelineTabItem(
 
     public constructor(data: UiRssSource) : this(
         data.url,
+        favIcon = data.favIcon,
         metaData =
             TabMetaData(
                 title = TitleType.Text(data.title ?: data.url),
-                icon = IconType.Url(data.favIcon),
+                icon =
+                    data.favIcon ?.let {
+                        IconType.Url(it)
+                    } ?: IconType.Material(IconType.Material.MaterialIcon.Rss),
             ),
     )
-
-    public constructor(
-        feedUrl: String,
-        title: String,
-    ) : this(
-        feedUrl,
-        metaData =
-            TabMetaData(
-                title = TitleType.Text(title),
-                icon = IconType.Url(UiRssSource.favIconUrl(feedUrl)),
-            ),
-    )
+//    public constructor(
+//        feedUrl: String,
+//        title: String,
+//    ) : this(
+//        feedUrl,
+//        metaData =
+//            TabMetaData(
+//                title = TitleType.Text(title),
+//                icon = IconType.Url(UiRssSource.favIconUrl(feedUrl)),
+//            ),
+//    )
 }
 
 @Serializable
@@ -1082,7 +1086,8 @@ public object TabSettingsSerializer : OkioSerializer<TabSettings> {
                 ProtoBuf.decodeFromByteArray(source.readByteArray())
             }
         } catch (e: SerializationException) {
-            throw androidx.datastore.core.CorruptionException("Cannot read proto.", e)
+//            throw androidx.datastore.core.CorruptionException("Cannot read proto.", e)
+            defaultValue
         }
 
     override suspend fun writeTo(

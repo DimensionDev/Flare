@@ -36,12 +36,18 @@ public class EditRssSourcePresenter(
         public sealed interface RssInputState {
             @Immutable
             public interface RssFeed : RssInputState {
-                public fun save(title: String)
+                public fun save(
+                    title: String,
+                    openInBrowser: Boolean,
+                ): UiRssSource
             }
 
             @Immutable
             public interface RssSources : RssInputState {
-                public fun save(sources: List<UiRssSource>)
+                public fun save(
+                    sources: List<UiRssSource>,
+                    openInBrowser: Boolean,
+                )
             }
 
             @Immutable
@@ -50,7 +56,10 @@ public class EditRssSourcePresenter(
 
                 public fun checkWithServer(server: String)
 
-                public fun save(title: String)
+                public fun save(
+                    title: String,
+                    openInBrowser: Boolean,
+                ): UiRssSource
 
                 public val actualUrl: String
             }
@@ -90,19 +99,25 @@ public class EditRssSourcePresenter(
                 when (it) {
                     is RssState.RssFeed ->
                         object : State.RssInputState.RssFeed {
-                            override fun save(title: String) {
+                            override fun save(
+                                title: String,
+                                openInBrowser: Boolean,
+                            ): UiRssSource {
+                                val data =
+                                    DbRssSources(
+                                        id = id ?: 0,
+                                        url = it.url,
+                                        title = title,
+                                        lastUpdate = 0,
+                                        openInBrowser = openInBrowser,
+                                        icon = it.icon,
+                                    )
                                 scope.launch {
                                     appDatabase
                                         .rssSourceDao()
-                                        .insert(
-                                            DbRssSources(
-                                                id = id ?: 0,
-                                                url = url,
-                                                title = title,
-                                                lastUpdate = 0,
-                                            ),
-                                        )
+                                        .insert(data)
                                 }
+                                return data.render()
                             }
                         }
 
@@ -150,26 +165,35 @@ public class EditRssSourcePresenter(
                                 serverStr = server
                             }
 
-                            override fun save(title: String) {
+                            override fun save(
+                                title: String,
+                                openInBrowser: Boolean,
+                            ): UiRssSource {
+                                val data =
+                                    DbRssSources(
+                                        id = 0,
+                                        url = actualUrl,
+                                        title = title,
+                                        lastUpdate = 0,
+                                        openInBrowser = openInBrowser,
+                                        icon = UiRssSource.favIconUrl(actualUrl),
+                                    )
                                 scope.launch {
                                     appDatabase
                                         .rssSourceDao()
-                                        .insert(
-                                            DbRssSources(
-                                                id = 0,
-                                                url = actualUrl,
-                                                title = title,
-                                                lastUpdate = 0,
-                                            ),
-                                        )
+                                        .insert(data)
                                 }
+                                return data.render()
                             }
                         }
                     }
 
                     is RssState.RssSources ->
                         object : State.RssInputState.RssSources {
-                            override fun save(sources: List<UiRssSource>) {
+                            override fun save(
+                                sources: List<UiRssSource>,
+                                openInBrowser: Boolean,
+                            ) {
                                 scope.launch {
                                     appDatabase
                                         .rssSourceDao()
@@ -180,6 +204,8 @@ public class EditRssSourcePresenter(
                                                     url = it.url,
                                                     title = it.title ?: "",
                                                     lastUpdate = 0,
+                                                    openInBrowser = openInBrowser,
+                                                    icon = it.favIcon,
                                                 )
                                             },
                                         )

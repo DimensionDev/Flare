@@ -15,8 +15,8 @@ struct UiRssView: View {
                     Text(data.host)
                 }
             } icon: {
-                if !data.favIcon.isEmpty {
-                    AvatarView(data: data.favIcon)
+                if let favIcon = data.favIcon, !favIcon.isEmpty {
+                    AvatarView(data: favIcon)
                         .frame(width: 24, height: 24)
                 } else {
                     Image("fa-square-rss")

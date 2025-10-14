@@ -74,7 +74,7 @@ public class EditTabPresenter(
                             } +
                             if (tabItem is RssTimelineTabItem) {
                                 listOfNotNull(
-                                    IconType.Url(UiRssSource.favIconUrl(tabItem.feedUrl)),
+                                    tabItem.favIcon?.let { IconType.Url(it) },
                                 )
                             } else {
                                 emptyList()

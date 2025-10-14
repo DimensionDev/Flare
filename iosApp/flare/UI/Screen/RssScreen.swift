@@ -229,11 +229,11 @@ struct EditRssSheet: View {
                     if case .success(let success) = onEnum(of: presenter.state.inputState) {
                         switch onEnum(of: success.data) {
                         case .rssFeed(let feed):
-                            feed.save(title: title)
+                            feed.save(title: title, openInBrowser: false)
                         case .rssHub(let rssHub):
-                            rssHub.save(title: title)
+                            rssHub.save(title: title, openInBrowser: false)
                         case .rssSources(let rssSources):
-                            rssSources.save(sources: selectedRssSources)
+                            rssSources.save(sources: selectedRssSources, openInBrowser: false)
                         }
                     }
                     dismiss()

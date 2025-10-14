@@ -28,8 +28,10 @@ struct FeedView: View {
                     .lineLimit(2)
             }
             HStack {
-                NetworkImage(data: data.sourceIcon)
-                    .frame(width: 20, height: 20)
+                if let sourceIcon = data.sourceIcon, !sourceIcon.isEmpty {
+                    NetworkImage(data: sourceIcon)
+                        .frame(width: 20, height: 20)
+                }
                 Text(data.source)
                     .font(.footnote)
                 Spacer()

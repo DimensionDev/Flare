@@ -1,10 +1,12 @@
 package dev.dimension.flare.ui.render
 
+import androidx.compose.runtime.Immutable
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 
+@Immutable
 public data class UiRichText(
     val data: Element,
     val isRtl: Boolean,

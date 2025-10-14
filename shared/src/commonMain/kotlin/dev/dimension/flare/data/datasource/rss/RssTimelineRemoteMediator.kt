@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datasource.rss
 
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.createDbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
@@ -23,6 +24,7 @@ import kotlin.time.Instant
 internal class RssTimelineRemoteMediator(
     private val url: String,
     private val cacheDatabase: CacheDatabase,
+    private val appDatabase: AppDatabase,
 ) : BaseTimelineRemoteMediator(
         database = cacheDatabase,
     ) {
@@ -37,7 +39,14 @@ internal class RssTimelineRemoteMediator(
         pageSize: Int,
         request: Request,
     ): Result {
+        val rssSource =
+            appDatabase
+                .rssSourceDao()
+                .getByUrl(url)
+                .firstOrNull()
         val response = RssService.fetch(url)
+        val title = rssSource?.title ?: response.title
+        val icon = rssSource?.icon ?: RssService.fetchIcon(url)
         val content =
             when (response) {
                 is Feed.Atom ->
@@ -45,7 +54,9 @@ internal class RssTimelineRemoteMediator(
                         .map {
                             StatusContent.Rss.RssContent.Atom(
                                 it,
-                                source = response.title.value,
+                                source = title,
+                                icon = icon,
+                                openInBrowser = rssSource?.openInBrowser ?: false,
                             )
                         }.map {
                             DbStatusWithUser(
@@ -78,7 +89,9 @@ internal class RssTimelineRemoteMediator(
                         .map {
                             StatusContent.Rss.RssContent.RDF(
                                 it,
-                                source = response.title,
+                                source = title,
+                                icon = icon,
+                                openInBrowser = rssSource?.openInBrowser ?: false,
                             )
                         }.map {
                             DbStatusWithUser(
@@ -108,7 +121,9 @@ internal class RssTimelineRemoteMediator(
                         .map {
                             StatusContent.Rss.RssContent.Rss20(
                                 it,
-                                source = response.title,
+                                source = title,
+                                icon = icon,
+                                openInBrowser = rssSource?.openInBrowser ?: false,
                             )
                         }.map {
                             DbStatusWithUser(

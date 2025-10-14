@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.model
 
+import androidx.compose.runtime.Immutable
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.model.vvo
@@ -10,18 +11,21 @@ import dev.dimension.flare.ui.render.UiDateTime
 import io.ktor.http.Url
 import sh.christian.ozone.api.xrpc.BSKY_SOCIAL
 
+@Immutable
 public data class UiRssSource internal constructor(
     val id: Int,
     val url: String,
     val title: String?,
     val lastUpdate: UiDateTime,
+    val favIcon: String?,
+    val openInBrowser: Boolean,
 ) {
     val host: String by lazy {
         Url(url).host
     }
-    val favIcon: String by lazy {
-        favIconUrl(url)
-    }
+//    val favIcon: String by lazy {
+//        favIconUrl(url)
+//    }
 
     public companion object {
         public fun favIconUrl(url: String): String {

@@ -13,8 +13,10 @@ import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -28,12 +30,14 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -61,10 +65,13 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun RssSourceEditSheet(
     onDismissRequest: () -> Unit,
@@ -156,7 +163,18 @@ internal fun RssSourceEditSheet(
                             KeyboardOptions(
                                 imeAction = ImeAction.Done,
                                 autoCorrectEnabled = false,
+                                keyboardType = KeyboardType.Uri,
                             ),
+                        leadingIcon =
+                            rssState.icon?.let {
+                                {
+                                    NetworkImage(
+                                        it,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                }
+                            },
                     )
                 }
 
@@ -285,6 +303,27 @@ internal fun RssSourceEditSheet(
         }
 
         state.inputState.onSuccess { inputState ->
+            val openInBrowserString = stringResource(id = R.string.rss_sources_open_in_browser)
+            val openInAppString = stringResource(id = R.string.rss_sources_open_in_app)
+            ButtonGroup(
+                overflowIndicator = {},
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
+            ) {
+                toggleableItem(
+                    checked = state.openInBrowser,
+                    onCheckedChange = { state.setOpenInBrowser(it) },
+                    label = openInBrowserString,
+                    weight = 1f,
+                )
+                toggleableItem(
+                    checked = !state.openInBrowser,
+                    onCheckedChange = { state.setOpenInBrowser(!it) },
+                    label = openInAppString,
+                    weight = 1f,
+                )
+            }
             Row(
                 horizontalArrangement =
                     androidx.compose.foundation.layout.Arrangement
@@ -309,17 +348,13 @@ internal fun RssSourceEditSheet(
                 is EditRssSourcePresenter.State.RssInputState.RssFeed -> {
                     Button(
                         onClick = {
-                            inputState.save(
-                                title = state.title.text.toString(),
-                            )
+                            val data =
+                                inputState.save(
+                                    title = state.title.text.toString(),
+                                    openInBrowser = state.openInBrowser,
+                                )
                             state.save(
-                                sources =
-                                    listOf(
-                                        state.url.text.toString() to
-                                            state.title.text.toString().ifEmpty {
-                                                null
-                                            },
-                                    ),
+                                sources = listOf(data),
                             )
                             onDismissRequest.invoke()
                         },
@@ -356,17 +391,14 @@ internal fun RssSourceEditSheet(
                             inputState.checkState.isSuccess &&
                                 inputState.checkState.takeSuccess() is CheckRssSourcePresenter.State.RssState.RssFeed,
                         onClick = {
-                            inputState.save(
-                                title = state.title.text.toString(),
-                            )
+                            val data =
+                                inputState.save(
+                                    title = state.title.text.toString(),
+                                    openInBrowser = state.openInBrowser,
+                                )
                             state.save(
                                 sources =
-                                    listOf(
-                                        inputState.actualUrl to
-                                            state.title.text.toString().ifEmpty {
-                                                null
-                                            },
-                                    ),
+                                    listOf(data),
                             )
                             onDismissRequest.invoke()
                         },
@@ -382,12 +414,10 @@ internal fun RssSourceEditSheet(
                         onClick = {
                             inputState.save(
                                 sources = state.selectedSource,
+                                openInBrowser = state.openInBrowser,
                             )
                             state.save(
-                                sources =
-                                    state.selectedSource.map { source ->
-                                        source.url to source.title
-                                    },
+                                sources = state.selectedSource,
                             )
                             onDismissRequest.invoke()
                         },
@@ -411,6 +441,7 @@ internal fun RssSourceEditSheet(
     }
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun presenter(
     id: Int?,
@@ -425,6 +456,7 @@ private fun presenter(
     val rssHubHostText = rememberTextFieldState()
     val selectedSource = remember { mutableStateListOf<UiRssSource>() }
     var pinnedInTabs by remember { mutableStateOf(false) }
+    var openInBrowser by remember { mutableStateOf(false) }
     state.data.onSuccess {
         LaunchedEffect(Unit) {
             titleText.edit {
@@ -433,6 +465,7 @@ private fun presenter(
             urlText.edit {
                 append(it.url)
             }
+            openInBrowser = it.openInBrowser
         }
     }
 
@@ -470,13 +503,22 @@ private fun presenter(
             }
         }
     }
-    LaunchedEffect(urlText.text) {
-        state.checkUrl(urlText.text.toString())
+    LaunchedEffect(Unit) {
+        snapshotFlow { urlText.text }
+            .debounce(666)
+            .collect {
+                state.checkUrl(it.toString())
+            }
     }
     object : EditRssSourcePresenter.State by state {
         val pinnedInTabs = pinnedInTabs
         val selectedSource = selectedSource
         val rssHubHostText = rssHubHostText
+        val openInBrowser = openInBrowser
+
+        fun setOpenInBrowser(value: Boolean) {
+            openInBrowser = value
+        }
 
         fun setPinnedInTabs(value: Boolean) {
             pinnedInTabs = value
@@ -490,7 +532,7 @@ private fun presenter(
             }
         }
 
-        fun save(sources: List<Pair<String, String?>>) {
+        fun save(sources: List<UiRssSource>) {
             appScope.launch {
                 settingsRepository.updateTabSettings {
                     if (pinnedInTabs) {
@@ -498,13 +540,10 @@ private fun presenter(
                             mainTabs =
                                 mainTabs
                                     .filterNot { tab ->
-                                        tab is RssTimelineTabItem && sources.any { it.first == tab.feedUrl }
+                                        tab is RssTimelineTabItem && sources.any { it.url == tab.feedUrl }
                                     } +
                                     sources.map { source ->
-                                        RssTimelineTabItem(
-                                            feedUrl = source.first,
-                                            title = source.second.orEmpty(),
-                                        )
+                                        RssTimelineTabItem(source)
                                     },
                         )
                     } else {
@@ -512,7 +551,7 @@ private fun presenter(
                             mainTabs =
                                 mainTabs
                                     .filterNot { tab ->
-                                        tab is RssTimelineTabItem && sources.any { it.first == tab.feedUrl }
+                                        tab is RssTimelineTabItem && sources.any { it.url == tab.feedUrl }
                                     },
                         )
                     }

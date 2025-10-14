@@ -99,6 +99,8 @@ internal sealed interface StatusContent {
             data class Atom internal constructor(
                 internal val data: Feed.Atom.Entry,
                 internal val source: String,
+                internal val icon: String?,
+                internal val openInBrowser: Boolean,
             ) : RssContent
 
             @Serializable
@@ -106,6 +108,8 @@ internal sealed interface StatusContent {
             data class Rss20 internal constructor(
                 internal val data: Feed.Rss20.Item,
                 internal val source: String,
+                internal val icon: String?,
+                internal val openInBrowser: Boolean,
             ) : RssContent
 
             @Serializable
@@ -113,6 +117,8 @@ internal sealed interface StatusContent {
             data class RDF internal constructor(
                 internal val data: Feed.RDF.Item,
                 internal val source: String,
+                internal val icon: String?,
+                internal val openInBrowser: Boolean,
             ) : RssContent
         }
     }

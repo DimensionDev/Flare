@@ -436,6 +436,13 @@ private fun RichTextScope.RenderElement(
                     }
                 }
             }
+            with(context) {
+                RenderTextAndReset(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(),
+                )
+            }
         }
 
         "p", "div" -> {

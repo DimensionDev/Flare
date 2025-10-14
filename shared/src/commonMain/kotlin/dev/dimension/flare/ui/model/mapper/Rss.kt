@@ -29,6 +29,14 @@ internal val Feed.title: String
             is Feed.RDF -> this.channel.title
         }
 
+internal val Feed.link: String?
+    get() =
+        when (this) {
+            is Feed.Atom -> this.links.firstOrNull()?.href
+            is Feed.Rss20 -> this.channel.link
+            is Feed.RDF -> this.channel.link
+        }
+
 internal fun StatusContent.Rss.RssContent.Atom.render(): UiTimeline =
     with(data) {
         val descHtml =
@@ -42,9 +50,11 @@ internal fun StatusContent.Rss.RssContent.Atom.render(): UiTimeline =
                 UiTimeline.ItemContent.Feed(
                     title = title.value,
                     description = descHtml?.text(),
-                    url = links.first().href,
+                    url = links.first().href.replace("http://", "https://"),
                     image = img,
                     source = this@render.source,
+                    sourceIcon = this@render.icon,
+                    openInBrowser = this@render.openInBrowser,
                     createdAt =
                         published
                             ?.let { input -> parseRssDateToInstant(input) }
@@ -66,9 +76,11 @@ internal fun StatusContent.Rss.RssContent.Rss20.render(): UiTimeline =
                 UiTimeline.ItemContent.Feed(
                     title = title,
                     description = descHtml?.text(),
-                    url = link,
+                    url = link.replace("http://", "https://"),
                     image = img?.attr("src"),
                     source = this@render.source,
+                    sourceIcon = this@render.icon,
+                    openInBrowser = this@render.openInBrowser,
                     createdAt =
                         pubDate
                             ?.let { input -> parseRssDateToInstant(input) }
@@ -90,9 +102,11 @@ internal fun StatusContent.Rss.RssContent.RDF.render(): UiTimeline =
                 UiTimeline.ItemContent.Feed(
                     title = title,
                     description = descHtml.text(),
-                    url = link,
+                    url = link.replace("http://", "https://"),
                     image = img?.attr("src"),
                     source = source,
+                    sourceIcon = this@render.icon,
+                    openInBrowser = this@render.openInBrowser,
                     createdAt =
                         date
                             ?.let { input -> parseRssDateToInstant(input) }
@@ -112,6 +126,8 @@ private fun parseRssDateToInstant(input: String): Instant? =
         Instant.parse(input)
     }.getOrNull() ?: tryRun {
         parseRfc2822LikeToInstant(input)
+    }.getOrNull() ?: tryRun {
+        parseRfc1123ToInstant(input)
     }.getOrNull()
 
 private fun parseRfc2822LikeToInstant(input: String): Instant {
@@ -194,4 +210,68 @@ private fun parseZoneOffset(z: String): UtcOffset {
         }
     require(h in 0..18 && m in 0..59) { "Out-of-range zone: $z" }
     return UtcOffset(hours = sign * h, minutes = sign * m)
+}
+
+private fun parseRfc1123ToInstant(input: String): Instant {
+    var text = input.trim()
+    val comma = text.indexOf(',')
+    if (comma in 1..5) text = text.substring(comma + 1).trimStart()
+    val parts = text.split(' ', '\t').filter { it.isNotEmpty() }
+    require(parts.size >= 5) { "Invalid RFC1123: $input" }
+    val day = parts[0].toIntOrNull() ?: error("Bad day: ${parts[0]}")
+    val month =
+        when (parts[1].uppercase()) {
+            "JAN" -> Month.JANUARY
+            "FEB" -> Month.FEBRUARY
+            "MAR" -> Month.MARCH
+            "APR" -> Month.APRIL
+            "MAY" -> Month.MAY
+            "JUN" -> Month.JUNE
+            "JUL" -> Month.JULY
+            "AUG" -> Month.AUGUST
+            "SEP", "SEPT" -> Month.SEPTEMBER
+            "OCT" -> Month.OCTOBER
+            "NOV" -> Month.NOVEMBER
+            "DEC" -> Month.DECEMBER
+            else -> error("Bad month: ${parts[1]}")
+        }
+    val year = parts[2].toIntOrNull() ?: error("Bad year: ${parts[2]}")
+
+    val (h, m, s) =
+        run {
+            val t = parts[3].split(':')
+            require(t.size == 2 || t.size == 3) { "Bad time: ${parts[3]}" }
+            val hh = t[0].toInt()
+            val mm = t[1].toInt()
+            val ss = if (t.size == 3) t[2].toInt() else 0
+            require(hh in 0..23 && mm in 0..59 && ss in 0..59) { "Out-of-range time: ${parts[3]}" }
+            Triple(hh, mm, ss)
+        }
+
+    val zoneToken = parts[4].uppercase()
+    val offset: UtcOffset =
+        when (zoneToken) {
+            "GMT", "UTC", "UT" -> UtcOffset.ZERO
+            else -> parseZoneOffsetFlexible(zoneToken)
+        }
+
+    val ldt = LocalDateTime(year, month, day, h, m, s)
+    return ldt.toInstant(offset)
+}
+
+private fun parseZoneOffsetFlexible(z: String): UtcOffset {
+    require(z.isNotEmpty() && (z[0] == '+' || z[0] == '-')) { "Bad zone: $z" }
+    val sign = if (z[0] == '-') -1 else 1
+    val body = z.substring(1)
+    val (hh, mm) =
+        if (':' in body) {
+            val seg = body.split(':')
+            require(seg.size == 2) { "Bad zone: $z" }
+            seg[0].toInt() to seg[1].toInt()
+        } else {
+            val p = body.padStart(4, '0')
+            p.substring(0, 2).toInt() to p.substring(2, 4).toInt()
+        }
+    require(hh in 0..18 && mm in 0..59) { "Out-of-range zone: $z" }
+    return UtcOffset(hours = sign * hh, minutes = sign * mm)
 }

@@ -207,4 +207,6 @@ internal fun DbRssSources.render() =
         title = title,
         lastUpdate = Instant.fromEpochMilliseconds(lastUpdate).toUi(),
         id = id,
+        favIcon = icon,
+        openInBrowser = openInBrowser,
     )

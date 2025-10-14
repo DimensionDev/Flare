@@ -313,6 +313,8 @@
     <string name="rss_sources_rss_hub_host_hint">You need to set the RssHub host if you want to use RssHub, or select the public RssHub server</string>
     <string name="rss_sources_discovered_rss_sources">Discovered Rss Sources</string>
     <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
+    <string name="rss_sources_open_in_browser">Open in browser</string>
+    <string name="rss_sources_open_in_app">Open in app</string>
 
     <string name="rss_detail_open_in_browser">Open in browser</string>
     <string name="rss_detail_share">Share</string>

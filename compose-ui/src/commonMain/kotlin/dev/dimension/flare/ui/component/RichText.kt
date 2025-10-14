@@ -132,7 +132,7 @@ public fun RichText(
                                                 .getStringAnnotations(start = it, end = it)
                                                 .firstOrNull()
                                         }
-                                    if (annotation != null) {
+                                    if (annotation != null && annotation.tag == TAG_URL) {
                                         if (change.pressed != change.previousPressed) change.consume()
                                         val up =
                                             waitForUpOrCancellation()?.also {
@@ -180,7 +180,7 @@ public fun RichText(
                                             .getStringAnnotations(start = it, end = it)
                                             .firstOrNull()
                                     }
-                                if (annotation != null) {
+                                if (annotation != null && annotation.tag == TAG_URL) {
                                     if (change.pressed != change.previousPressed) change.consume()
                                     val up =
                                         waitForUpOrCancellation()?.also {

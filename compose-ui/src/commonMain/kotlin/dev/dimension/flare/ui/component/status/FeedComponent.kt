@@ -73,7 +73,13 @@ internal fun FeedComponent(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
             ) {
-                NetworkImage(data.sourceIcon, contentDescription = data.source, modifier = Modifier.size(16.dp))
+                data.sourceIcon?.let {
+                    NetworkImage(
+                        it,
+                        contentDescription = data.source,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
                 PlatformText(
                     text = data.source,
                     style = PlatformTheme.typography.caption,

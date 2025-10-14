@@ -187,13 +187,6 @@ private fun AnnotatedString.Builder.renderElement(
                     }
                 }
             }
-//            element.childNodes().fastForEach {
-//                renderNode(node = it, styleData = styleData, context = context)
-//            }
-//            val parent = element.parent()
-//            if (parent != null && parent.lastElementChild() != element) {
-//                appendLine()
-//            }
         }
 
         "span" -> {
@@ -203,10 +196,8 @@ private fun AnnotatedString.Builder.renderElement(
         }
 
         "emoji" -> {
-//            val target = element.attributes["target"]
             val target = element.attribute("target")?.value
             if (!target.isNullOrEmpty()) {
-//                appendInlineContent(imageId, target)
                 val imageId = context.appendImageInlineContent(target)
                 appendInlineContent(imageId, target)
             }
@@ -214,8 +205,6 @@ private fun AnnotatedString.Builder.renderElement(
 
         "img" -> {
             val src = element.attribute("src")?.value
-//            val dataOriginal = element.attribute("data-original")?.value
-//            val alt = element.attribute("alt")?.value
             if (!src.isNullOrEmpty()) {
                 if (context.isInBlockState()) {
                     appendLine()
@@ -409,7 +398,6 @@ private fun AnnotatedString.Builder.renderLink(
     styleData: StyleData,
     context: BuildContentAnnotatedStringContext,
 ) {
-//    val href = element.attributes["href"]
     val href = element.attribute("href")?.value
     if (!href.isNullOrEmpty()) {
         withAnnotation(tag = TAG_URL, annotation = href) {

@@ -28,6 +28,7 @@ ktor = "3.3.1"
 platformtoolsDarkmodedetector = "0.7.3"
 prettytime = "5.0.9.Final"
 reorderable = "3.0.0"
+richtextUiMaterial3 = "1.0.0-alpha03"
 stately = "2.1.0"
 twitter-parser = "0.5.5"
 molecule = "2.2.0"
@@ -82,6 +83,7 @@ openai-client = { module = "com.aallam.openai:openai-client", version.ref = "ope
 platformtools-darkmodedetector = { module = "io.github.kdroidfilter:platformtools.darkmodedetector", version.ref = "platformtoolsDarkmodedetector" }
 prettytime = { module = "org.ocpsoft.prettytime:prettytime", version.ref = "prettytime" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
+richtext-ui-material3 = { module = "com.halilibo.compose-richtext:richtext-ui-material3", version.ref = "richtextUiMaterial3" }
 stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }

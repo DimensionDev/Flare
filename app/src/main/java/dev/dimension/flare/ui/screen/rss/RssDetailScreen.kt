@@ -55,7 +55,7 @@ import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.RssRichText
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -65,9 +65,10 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.rss.RssDetailPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.server.AiTLDRPresenter
-import dev.dimension.flare.ui.theme.isLight
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
+import io.ktor.http.Url
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.flow.map
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
@@ -82,7 +83,6 @@ internal fun RssDetailScreen(
     val state by producePresenter(url) { presenter(url) }
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
-    val isLightMode = MaterialTheme.colorScheme.isLight()
     FlareScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -240,14 +240,16 @@ internal fun RssDetailScreen(
                             }
                         }
                     }
-                    SelectionContainer {
-                        RichText(
-                            data.richText,
-                            modifier =
-                                Modifier
-                                    .listCard()
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
+                    SelectionContainer(
+                        modifier =
+                            Modifier
+                                .listCard()
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
+                    ) {
+                        RssRichText(
+                            element = data.richText.data,
+                            imageHeader = state.headers,
                         )
                     }
                 }.onLoading {
@@ -265,27 +267,6 @@ internal fun RssDetailScreen(
     }
 }
 
-internal fun getHtmlData(bodyHTML: String): String =
-    """
-<!DOCTYPE html>
-<html>
-<head>
-  <style type="text/css">
-    img {
-        max-width: 100%;
-        width: auto;
-        height: auto;
-    }
-  </style>
-</head>
-<body>
-    <div class="content">
-        $bodyHTML
-    </div>
-</body>
-</html>
-    """.trimIndent()
-
 @Composable
 private fun presenter(
     url: String,
@@ -295,6 +276,14 @@ private fun presenter(
         remember(url) {
             RssDetailPresenter(url)
         }.invoke()
+    val headers =
+        remember(url) {
+            persistentMapOf(
+                "Referer" to "https:${Url(url).host}/",
+                "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) " +
+                    "Ubuntu Chromium/70.0.3538.77 Chrome/70.0.3538.77 Safari/537.36",
+            )
+        }
     val enableTldr by remember {
         settingsRepository.appSettings.map { it.aiConfig.tldr }
     }.collectAsUiState()
@@ -314,6 +303,7 @@ private fun presenter(
             null
         }
     object : RssDetailPresenter.State by state {
+        val headers = headers
         val enableTldr = enableTldr
         val tldrState = tldrState
         val showTldr = showTldr

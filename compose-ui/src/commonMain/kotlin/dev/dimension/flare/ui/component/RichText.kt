@@ -43,8 +43,7 @@ import dev.dimension.flare.ui.model.direction
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.isLightTheme
-import io.ktor.http.Url
-import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.ImmutableMap
 
 internal const val TAG_URL = "url"
 private val lightLinkColor = Color(0xff0066cc)
@@ -73,6 +72,7 @@ public fun RichText(
             color = if (isLightTheme()) lightLinkColor else darkLinkColor,
             textDecoration = TextDecoration.None,
         ),
+    imageHeaders: ImmutableMap<String, String>? = null,
 ) {
     val h1 = PlatformTheme.typography.h1
     val h2 = PlatformTheme.typography.h2
@@ -118,6 +118,7 @@ public fun RichText(
                                         content = value,
                                         constraints = constraints,
                                         density = LocalDensity.current,
+                                        imageHeaders = imageHeaders,
                                     )
                             }.toMap()
                     PlatformText(
@@ -280,6 +281,7 @@ private fun renderInlineContentWithConstraint(
     content: BuildContentAnnotatedStringContext.InlineType,
     constraints: Constraints,
     density: Density,
+    imageHeaders: ImmutableMap<String, String>?,
 ): InlineTextContent {
     var size by remember {
         mutableStateOf<IntSize?>(
@@ -304,25 +306,7 @@ private fun renderInlineContentWithConstraint(
                                 modifier = Modifier.fillMaxSize(),
                                 model = altText,
                                 contentDescription = altText,
-                                customHeaders =
-                                    persistentMapOf(
-                                        "Referer" to
-                                            Url(altText).host.let {
-                                                if (it.count { c -> c == '.' } >= 2) {
-                                                    // trim a.b.c to b.c or a.b.c.d to c.d
-                                                    buildString {
-                                                        append("https://")
-                                                        val parts = it.split('.')
-                                                        append(parts[parts.size - 2])
-                                                        append('.')
-                                                        append(parts[parts.size - 1])
-                                                        append("/")
-                                                    }
-                                                } else {
-                                                    it
-                                                }
-                                            },
-                                    ),
+                                customHeaders = imageHeaders,
                             )
                         },
                     ) { measurables, _ ->

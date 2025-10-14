@@ -549,7 +549,6 @@ private fun TranslationComponent(
                 text =
                     stringResource(
                         resource = Res.string.status_detail_translate,
-                        Locale.current.language,
                     ),
             )
         }

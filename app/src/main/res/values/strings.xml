@@ -9,7 +9,7 @@
     <string name="home_tab_me_title">Me</string>
     <string name="home_tab_discover_title">Discover</string>
 
-    <string name="home_timeline_new_toots">New toots</string>
+    <string name="home_timeline_new_toots">New Posts</string>
 
     <string name="notification_tab_all_title">All</string>
     <string name="notification_tab_mentions_title">Mentions</string>
@@ -35,7 +35,7 @@
     <string name="compose_poll_expiration_7_days">7 days</string>
     <string name="compose_content_warning_hint">Content warning</string>
     <string name="compose_media_sensitive">Mark media as sensitive</string>
-    <string name="compose_notification_title">Sending toot</string>
+    <string name="compose_notification_title">Sending Post</string>
 
     <string name="settings_title">Settings</string>
 
@@ -123,7 +123,7 @@
 
     <string name="discover_search_placeholder">Search</string>
     <string name="discover_users">Recommend Users</string>
-    <string name="discover_status">Trending Toots</string>
+    <string name="discover_status">Trending Posts</string>
     <string name="discover_hashtags">Trending Hashtags</string>
 
     <string name="search_users">Users</string>

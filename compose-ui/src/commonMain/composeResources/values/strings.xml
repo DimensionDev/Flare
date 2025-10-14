@@ -4,8 +4,8 @@
     
     <string name="profile_header_following_count">%1$s Following</string>
     <string name="profile_header_fans_count">%1$s Followers</string>
-    <string name="profile_header_toots_count">%1$s Toots</string>
-    <string name="profile_misskey_header_status_count">%1$s Status</string>
+    <string name="profile_header_toots_count">%1$s Posts</string>
+    <string name="profile_misskey_header_status_count">%1$s Posts</string>
 
     <string name="profile_header_button_follow">Follow</string>
     <string name="profile_header_button_following">Following</string>
@@ -67,8 +67,8 @@
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_notifications_subtitle">Customize how Flare notifies you</string>
 
-    <string name="status_loadmore_end">No more toots</string>
-    <string name="status_loadmore_error">Error loading more toots</string>
+    <string name="status_loadmore_end">No more posts</string>
+    <string name="status_loadmore_error">Error loading more posts</string>
     <string name="status_loadmore_error_retry">Retry</string>
     <string name="status_empty">Nothing to see here</string>
     <string name="status_sensitive_media">Sensitive media</string>
@@ -121,8 +121,8 @@
     <string name="user_unmute">Unmute %1$s</string>
     <string name="mastodon_item_content_warning">Content warning</string>
     <string name="reply_to">Reply to %1$s</string>
-    <string name="status_detail_translate">Translate to %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Translate Post</string>
+    <string name="status_detail_tldr">Summary Post</string>
 
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>

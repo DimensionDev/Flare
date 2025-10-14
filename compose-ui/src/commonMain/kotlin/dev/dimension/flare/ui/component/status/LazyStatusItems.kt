@@ -105,6 +105,7 @@ public fun LazyStaggeredGridScope.status(
                 .onError {
                     item(
                         span = StaggeredGridItemSpan.FullLine,
+                        key = "error",
                     ) {
                         OnError(
 //                            modifier = Modifier.animateItem(),
@@ -113,7 +114,10 @@ public fun LazyStaggeredGridScope.status(
                         )
                     }
                 }.onLoading {
-                    items(10) {
+                    items(
+                        10,
+                        key = { "loading-$it" },
+                    ) {
                         AdaptiveCard(
                             content = {
                                 OnLoading()
@@ -126,6 +130,7 @@ public fun LazyStaggeredGridScope.status(
                 }.onEndOfList {
                     item(
                         span = StaggeredGridItemSpan.FullLine,
+                        key = "end",
                     ) {
                         Column(
                             modifier =
@@ -146,6 +151,7 @@ public fun LazyStaggeredGridScope.status(
         onError {
             item(
                 span = StaggeredGridItemSpan.FullLine,
+                key = "error",
             ) {
                 OnError(
 //                    modifier = Modifier.animateItem(),
@@ -155,7 +161,10 @@ public fun LazyStaggeredGridScope.status(
             }
         }
         onLoading {
-            items(10) {
+            items(
+                10,
+                key = { "loading-$it" },
+            ) {
                 AdaptiveCard(
 //                    modifier = Modifier.animateItem(),
                     index = it,
@@ -169,6 +178,7 @@ public fun LazyStaggeredGridScope.status(
         onEmpty {
             item(
                 span = StaggeredGridItemSpan.FullLine,
+                key = "empty",
             ) {
                 Column(
                     modifier =

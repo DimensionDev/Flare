@@ -22,7 +22,7 @@
     <string name="home_tab_list_title">List</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Direct Messages</string>
-    <string name="home_timeline_new_toots">New toots</string>
+    <string name="home_timeline_new_toots">New Posts</string>
 
     <string name="navigate_back">Back</string>
     <string name="service_select_instance_input_placeholder">Instance URL</string>

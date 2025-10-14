@@ -11,6 +11,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -36,6 +37,7 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenu
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuScope
+import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.platform.rippleIndication
 import dev.dimension.flare.ui.model.Digit
@@ -56,17 +58,12 @@ public fun StatusActionButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val appearanceSettings = LocalComponentAppearance.current
-    val textMinWidth =
-        if (withTextMinWidth) {
-            with(LocalDensity.current) { PlatformTextStyle.current.fontSize.toDp() * 3.5f }
-        } else {
-            0.dp
-        }
     Row(
         modifier =
             modifier
                 .padding(vertical = 4.dp, horizontal = 8.dp),
-        verticalAlignment = Alignment.Bottom,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         if (!LocalIsScrollingInProgress.current) {
             val contentColor = PlatformContentColor.current
@@ -130,30 +127,32 @@ public fun StatusActionButton(
                 tint = color,
             )
         }
-        if (digits != null && appearanceSettings.showNumbers) {
-            Spacer(modifier = Modifier.width(4.dp))
-            AnimatedNumber(
-                digits = digits,
-//                style = MaterialTheme.typography.bodySmall,
-                color = color,
-                modifier =
-                    Modifier
-                        .width(textMinWidth)
-                        .pointerHoverIcon(PointerIcon.Hand)
-                        .clickable(
-                            onClick = onClicked,
-                            enabled = enabled,
-                            interactionSource = interactionSource,
-                            indication = null,
-                        ),
-            )
-        } else {
+        Box {
             if (withTextMinWidth) {
-                Spacer(modifier = Modifier.width(4.dp))
+                PlatformText(
+                    "00000",
+                    color = Color.Transparent,
+                )
             }
-            Box(
-                modifier = Modifier.width(textMinWidth),
-            )
+            if (digits != null && appearanceSettings.showNumbers) {
+                AnimatedNumber(
+                    digits = digits,
+                    color = color,
+                    modifier =
+                        Modifier
+                            .pointerHoverIcon(PointerIcon.Hand)
+                            .clickable(
+                                onClick = onClicked,
+                                enabled = enabled,
+                                interactionSource = interactionSource,
+                                indication = null,
+                            ),
+                )
+            } else {
+                if (withTextMinWidth) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+            }
         }
         content.invoke(this)
     }

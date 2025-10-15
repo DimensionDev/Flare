@@ -35,6 +35,6 @@ struct TimelineScreen: View {
             try? await presenter.state.refreshSuspend()
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle(tabItem.metaData.title.text)
+//        .navigationTitle(tabItem.metaData.title.text)
     }
 }

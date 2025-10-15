@@ -14,6 +14,7 @@ extension TabItem {
                 HomeTimelineScreen(accountType: homeTimelineTabItem.account, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew(homeTimelineTabItem.account) ) }, toTabSetting: { onNavigate(.tabSettings) } )
             default:
                 TimelineScreen(tabItem: timelineTabItem)
+                    .navigationTitle(timelineTabItem.metaData.title.text)
             }
         case .notificationTabItem:
             NotificationScreen(accountType: self.account)

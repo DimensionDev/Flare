@@ -116,7 +116,9 @@ struct StatusActionItemView: View {
     let useText: Bool
     let isFixedWidth: Bool
     var body: some View {
-        Button {
+        Button(
+            role: data.role,
+        ) {
             if let clickable = data as? StatusActionItemClickable {
                 clickable.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
             }
@@ -182,6 +184,26 @@ extension StatusActionItem {
             case .error: Color(.systemRed)
             case .primaryColor: Color.accentColor
             case .red: Color(.systemRed)
+            }
+        } else {
+            nil
+        }
+    }
+    var role: ButtonRole? {
+        if let colorized = self as? StatusActionItemColorized {
+            switch colorized.color {
+            case .red:
+                    .destructive
+            case .error:
+                    .destructive
+            case .contentColor:
+                    nil
+            case .primaryColor:
+                if #available(iOS 26.0, *) {
+                    .confirm
+                } else {
+                    nil
+                }
             }
         } else {
             nil

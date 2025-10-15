@@ -205,13 +205,17 @@ struct ComposeScreen: View {
                             spacing: 16,
                         ) {
                             if !viewModel.pollViewModel.enabled {
-                                PhotosPicker(selection: Binding(get: {
-                                    viewModel.mediaViewModel.selectedItems
-                                }, set: { value in
-                                    viewModel.mediaViewModel.selectedItems = value
-                                    viewModel.mediaViewModel.update()
-                                }), matching: .any(of: [.images, .videos, .livePhotos])) {
-                                    Image("fa-image")
+                                StateView(state: presenter.state.composeConfig) { config in
+                                    if config.media != nil {
+                                        PhotosPicker(selection: Binding(get: {
+                                            viewModel.mediaViewModel.selectedItems
+                                        }, set: { value in
+                                            viewModel.mediaViewModel.selectedItems = value
+                                            viewModel.mediaViewModel.update()
+                                        }), matching: .any(of: [.images, .videos, .livePhotos])) {
+                                            Image("fa-image")
+                                        }
+                                    }
                                 }
                             }
                             if viewModel.mediaViewModel.selectedItems.count == 0 {

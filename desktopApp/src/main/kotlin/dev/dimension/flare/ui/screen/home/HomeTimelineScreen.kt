@@ -6,6 +6,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ArrowsRotate
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
@@ -28,7 +30,9 @@ import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.materials.FluentMaterials
 import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.LocalWindowPadding
+import dev.dimension.flare.Res
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.refresh
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabTitle
@@ -43,7 +47,9 @@ import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.LiteFilter
 import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.ProgressBar
+import io.github.composefluent.component.SubtleButton
 import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
@@ -90,7 +96,7 @@ internal fun HomeTimelineScreen(
                         enter = slideInVertically { -it },
                         exit = slideOutVertically { -it },
                     ) {
-                        LiteFilter(
+                        Row(
                             modifier =
                                 Modifier
                                     .hazeEffect(
@@ -100,47 +106,63 @@ internal fun HomeTimelineScreen(
                                                 FluentTheme.colors.background.mica.base
                                                     .luminance() < 0.5f,
                                             ),
-                                    ).fillMaxWidth()
+                                    ).fillMaxWidth(1f)
                                     .padding(LocalWindowPadding.current)
                                     .padding(horizontal = screenHorizontalPadding),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            tabState.forEachIndexed { index, tab ->
-                                PillButton(
-                                    selected = tab.key == currentTab.key,
-                                    onSelectedChanged = {
-                                        if (tab.key == currentTab.key) {
-                                            if (currentTabTimelineState.lazyListState.firstVisibleItemIndex == 0) {
-                                                currentTabTimelineState.refreshSync()
+                            LiteFilter(
+                                modifier =
+                                    Modifier
+                                        .weight(1f),
+                            ) {
+                                tabState.forEachIndexed { index, tab ->
+                                    PillButton(
+                                        selected = tab.key == currentTab.key,
+                                        onSelectedChanged = {
+                                            if (tab.key == currentTab.key) {
+                                                if (currentTabTimelineState.lazyListState.firstVisibleItemIndex == 0) {
+                                                    currentTabTimelineState.refreshSync()
+                                                } else {
+                                                    currentTabTimelineState.lazyListState.requestScrollToItem(
+                                                        0,
+                                                    )
+                                                }
                                             } else {
-                                                currentTabTimelineState.lazyListState.requestScrollToItem(
-                                                    0,
-                                                )
+                                                state.setSelectedIndex(index)
                                             }
-                                        } else {
-                                            state.setSelectedIndex(index)
-                                        }
-                                    },
-                                ) {
-                                    TabIcon(
-                                        tabItem = tab,
-                                    )
-                                    TabTitle(
-                                        title = tab.metaData.title,
-                                    )
+                                        },
+                                    ) {
+                                        TabIcon(
+                                            tabItem = tab,
+                                        )
+                                        TabTitle(
+                                            title = tab.metaData.title,
+                                        )
+                                    }
+                                }
+                                if (accountType !is AccountType.Guest) {
+                                    PillButton(
+                                        selected = false,
+                                        onSelectedChanged = {
+                                            onAddTab.invoke()
+                                        },
+                                    ) {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Plus,
+                                            contentDescription = null,
+                                        )
+                                    }
                                 }
                             }
-                            if (accountType !is AccountType.Guest) {
-                                PillButton(
-                                    selected = false,
-                                    onSelectedChanged = {
-                                        onAddTab.invoke()
-                                    },
-                                ) {
-                                    FAIcon(
-                                        FontAwesomeIcons.Solid.Plus,
-                                        contentDescription = null,
-                                    )
-                                }
+
+                            SubtleButton(onClick = {
+                                currentTabTimelineState.refreshSync()
+                            }) {
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.ArrowsRotate,
+                                    contentDescription = stringResource(Res.string.refresh),
+                                )
                             }
                         }
                     }

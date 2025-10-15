@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -83,6 +84,11 @@ internal fun InAppNotificationComponent(
                         shadowElevation = 8.dp,
                         tonalElevation = 8.dp,
                         hazeState = hazeState,
+                        modifier =
+                            Modifier.clickable {
+                                showText = false
+                                showNotification = false
+                            },
                     ) {
                         Row(
                             modifier =

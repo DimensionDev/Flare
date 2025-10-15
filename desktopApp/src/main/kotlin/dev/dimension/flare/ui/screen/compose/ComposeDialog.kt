@@ -112,7 +112,6 @@ import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.CheckBox
 import io.github.composefluent.component.FlyoutContainer
-import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.PillButton
@@ -680,7 +679,6 @@ fun ComposeDialog(
                 state.state.emojiState.onSuccess { emojis ->
                     AnimatedVisibility(emojis.size > 0) {
                         FlyoutContainer(
-                            placement = FlyoutPlacement.Bottom,
                             flyout = {
                                 val actualAccountType =
                                     remember(

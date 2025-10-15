@@ -198,7 +198,7 @@ precompose-molecule = { module = "moe.tlaster:precompose-molecule", version = "1
 
 xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91.2" }
 
-fluent-ui = { module = "io.github.compose-fluent:fluent", version = "v0.1.0" }
+fluent-ui = { module = "io.github.compose-fluent:fluent", version = "0.2.0-SNAPSHOT" }
 
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.19.0" }
 

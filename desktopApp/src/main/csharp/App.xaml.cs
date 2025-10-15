@@ -1,4 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.Web.WebView2.Core;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,14 +9,12 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Media.Core;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.Web.WebView2.Core;
 
 namespace Flare
 {
@@ -108,7 +109,6 @@ namespace Flare
                                     var data = dataElement.GetString();
                                     if (data != null)
                                     {
-                                        
                                         var image = new ImageEx2
                                         {
                                             Source = data,
@@ -122,6 +122,7 @@ namespace Flare
                                             ZoomMode = ZoomMode.Enabled,
                                             HorizontalScrollMode = ScrollMode.Auto,
                                             VerticalScrollMode = ScrollMode.Auto,
+                                            RequestedTheme = ElementTheme.Dark,
                                         };
                                         scrollViewer.Loaded += (sender, __) =>
                                         {
@@ -134,13 +135,21 @@ namespace Flare
                                                 }
                                             }
                                         };
-                                        new Window
+                                        var window = new Window
                                         {
                                             Content = scrollViewer,
                                             ExtendsContentIntoTitleBar = true,
                                             SystemBackdrop = new MicaBackdrop(),
                                             Title = "Image Viewer",
-                                        }.Activate();
+                                        };
+                                        scrollViewer.KeyDown += (_, e) =>
+                                        {
+                                            if (e.Key == Windows.System.VirtualKey.Escape)
+                                            {
+                                                window.Close();
+                                            }
+                                        };
+                                        window.Activate();
                                     }
                                 }
 
@@ -152,7 +161,10 @@ namespace Flare
                                     jsonObject.RootElement.GetProperty("Data").GetRawText());
                                 if (data != null)
                                 {
-                                    var flipView = new FlipView();
+                                    var flipView = new FlipView
+                                    {
+                                        RequestedTheme = ElementTheme.Dark,
+                                    };
                                     foreach (var media in data.Medias)
                                     {
                                         switch (media.Type)
@@ -252,6 +264,13 @@ namespace Flare
                                             }
                                         }
                                     };
+                                    flipView.KeyDown += (_, e) =>
+                                    {
+                                        if (e.Key == Windows.System.VirtualKey.Escape)
+                                        {
+                                            window.Close();
+                                        }
+                                    };
                                     window.Activate();
                                 }
 
@@ -266,6 +285,7 @@ namespace Flare
                                     var webView = new WebView2
                                     {
                                         Source = new Uri(data.Url),
+                                        RequestedTheme = ElementTheme.Dark,
                                     };
                                     webView.CoreWebView2Initialized += (sender, args) =>
                                     {

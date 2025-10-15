@@ -394,7 +394,7 @@ internal class MisskeyDataSource(
                 localOnly = data.localOnly,
             ),
         )
-        progress(ComposeProgress(maxProgress, maxProgress))
+//        progress(ComposeProgress(maxProgress, maxProgress))
     }
 
     override fun renote(statusKey: MicroBlogKey) {

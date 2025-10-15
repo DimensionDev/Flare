@@ -84,6 +84,8 @@ import dev.dimension.flare.settings_appearance_expand_media
 import dev.dimension.flare.settings_appearance_expand_media_description
 import dev.dimension.flare.settings_appearance_show_actions
 import dev.dimension.flare.settings_appearance_show_actions_description
+import dev.dimension.flare.settings_appearance_show_compose_in_home_timeline
+import dev.dimension.flare.settings_appearance_show_compose_in_home_timeline_description
 import dev.dimension.flare.settings_appearance_show_cw_img
 import dev.dimension.flare.settings_appearance_show_cw_img_description
 import dev.dimension.flare.settings_appearance_show_link_previews
@@ -364,6 +366,26 @@ internal fun SettingsScreen(
                     Text(stringResource(Res.string.settings_status_appearance_subtitle))
                 },
             ) {
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_appearance_show_compose_in_home_timeline))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_show_compose_in_home_timeline_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = LocalAppearanceSettings.current.showComposeInHomeTimeline,
+                            {
+                                state.appearanceState.updateSettings {
+                                    copy(showComposeInHomeTimeline = it)
+                                }
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+                ExpanderItemSeparator()
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_appearance_avatar_shape))

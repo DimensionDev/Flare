@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,17 +32,20 @@ import dev.chrisbanes.haze.materials.FluentMaterials
 import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.refresh
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.component.floatingToolbarVerticalNestedScroll
+import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
 import dev.dimension.flare.ui.presenter.TimelineItemPresenterWithLazyListState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.screen.compose.ComposeDialog
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.LiteFilter
@@ -61,7 +65,6 @@ internal fun HomeTimelineScreen(
     val state by producePresenter(key = "home_timeline_$accountType") {
         presenter(accountType)
     }
-
     state.tabState.onSuccess { tabState ->
         state.selectedTabTimelineState.onSuccess { currentTabTimelineState ->
             state.selectedTab.onSuccess { currentTab ->
@@ -84,6 +87,29 @@ internal fun HomeTimelineScreen(
                         onScrollToTop = {
                             state.setTopBarExpanded(true)
                         },
+                        header =
+                            if (LocalAppearanceSettings.current.showComposeInHomeTimeline) {
+                                {
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        AdaptiveCard(
+                                            modifier =
+                                                Modifier
+                                                    .widthIn(max = 600.dp),
+                                        ) {
+                                            ComposeDialog(
+                                                onBack = null,
+                                                accountType = accountType,
+                                                focusOnOpen = false,
+                                                modifier = Modifier.padding(top = 16.dp),
+                                            )
+                                        }
+                                    }
+                                }
+                            } else {
+                                null
+                            },
                     )
                     AnimatedVisibility(
                         visible = state.isTopBarExpanded,

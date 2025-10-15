@@ -263,6 +263,11 @@ public class ComposePresenter(
             override fun setVisibility(value: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type) {
                 visibility = value
             }
+
+            override fun clear() {
+                visibility = UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public
+                showVisibilityMenu = false
+            }
         }
     }
 }
@@ -278,6 +283,8 @@ public interface VisibilityState {
     public fun hideVisibilityMenu()
 
     public fun setVisibility(value: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type)
+
+    public fun clear()
 }
 
 @Immutable

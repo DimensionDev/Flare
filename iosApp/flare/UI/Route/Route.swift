@@ -19,6 +19,7 @@ enum Route: Hashable, Identifiable {
         switch self {
         case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew(accountType)) }, toTabSetting: { onNavigate(.tabSettings) })
         case .timeline(let item): TimelineScreen(tabItem: item)
+                .navigationTitle(item.metaData.title.text)
         case .serviceSelect:
             ServiceSelectionScreen(toHome: { clearToHome() })
         case .statusDetail(let accountType, let statusKey):

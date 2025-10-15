@@ -9,18 +9,16 @@ struct StatusMediaView: View {
     let sensitive: Bool
     @Environment(\.themeSettings) private var themeSettings
     @State private var isBlur: Bool
-    @State private var showFullScreen: Bool = false
-    @State private var selectedItem: (any UiMedia)?
+    @State private var selectedIndex: Int? = nil
 
     var body: some View {
         AdaptiveGrid(singleFollowsImageAspect: themeSettings.appearanceSettings.expandMediaSize, spacing: 4, maxColumns: 3) {
-            ForEach(data, id: \.url) { item in
+            ForEach(0..<data.count, id: \.self) { index in
+                let item = data[index]
                 MediaView(data: item, expandToFullSize: themeSettings.appearanceSettings.expandMediaSize && data.count == 1)
                     .onTapGesture {
                         if !sensitive || !isBlur {
-                            // Only allow tap if not sensitive or already unblurred
-                            selectedItem = item
-                            showFullScreen = true
+                            selectedIndex = index
                         }
                     }
                     .overlay(alignment: .bottomTrailing) {
@@ -30,9 +28,9 @@ struct StatusMediaView: View {
                     }
             }
         }
-        .fullScreenCover(isPresented: $showFullScreen) {
+        .fullScreenCover(item: $selectedIndex) { index in
             NavigationStack {
-                StatusMediaScreen(data: data, selectedIndex: data.firstIndex(where: { $0.url == selectedItem?.url }) ?? 0)
+                StatusMediaScreen(data: data, selectedIndex: index)
             }
             .background(ClearFullScreenBackground())
             .colorScheme(.dark)

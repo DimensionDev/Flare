@@ -348,7 +348,10 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Bug fixes and performance improvements</li>
+                <li>Added font settings.</li>
+                <li>Significantly revamped the RSS feature. Article content is now rendered natively instead of using a WebView.</li>
+                <li>Optimized rich-text rendering logic for better performance.</li>
+                <li>Bug fixes and performance improvements.</li>
             </ul>
         ]]>
     </string>

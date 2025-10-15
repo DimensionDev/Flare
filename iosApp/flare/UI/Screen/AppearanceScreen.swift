@@ -151,7 +151,8 @@ extension AppearanceSettings {
         expandMediaSize: Bool? = nil,
         compatLinkPreview: Bool? = nil,
         fontSizeDiff: Float? = nil,
-        lineHeightDiff: Float? = nil
+        lineHeightDiff: Float? = nil,
+        showComposeInHomeTimeline: Bool? = nil
     ) -> AppearanceSettings {
         AppearanceSettings(
             theme: theme ?? self.theme,
@@ -168,7 +169,8 @@ extension AppearanceSettings {
             expandMediaSize: expandMediaSize ?? self.expandMediaSize,
             compatLinkPreview: compatLinkPreview ?? self.compatLinkPreview,
             fontSizeDiff: fontSizeDiff ?? self.fontSizeDiff,
-            lineHeightDiff: lineHeightDiff ?? self.lineHeightDiff
+            lineHeightDiff: lineHeightDiff ?? self.lineHeightDiff,
+            showComposeInHomeTimeline: showComposeInHomeTimeline ?? self.showComposeInHomeTimeline
         )
     }
 }

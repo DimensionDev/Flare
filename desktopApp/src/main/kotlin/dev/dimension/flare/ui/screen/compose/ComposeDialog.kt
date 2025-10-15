@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.insert
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
@@ -42,6 +43,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
@@ -112,7 +117,6 @@ import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.CheckBox
 import io.github.composefluent.component.FlyoutContainer
-import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.PillButton
@@ -140,10 +144,12 @@ private val pickerFileExtensions = imageExtensions + videoExtensions
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalUuidApi::class)
 @Composable
 fun ComposeDialog(
-    onBack: () -> Unit,
+    onBack: (() -> Unit)?,
     accountType: AccountType,
+    modifier: Modifier = Modifier,
     status: ComposeStatus? = null,
     initialText: String = "",
+    focusOnOpen: Boolean = true,
 ) {
     val state by producePresenter(key = "compose_$accountType") {
         composePresenter(
@@ -155,23 +161,25 @@ fun ComposeDialog(
     val composeWindow = LocalComposeWindow.current
     val focusRequester = remember { FocusRequester() }
     val contentWarningFocusRequester = remember { FocusRequester() }
-    state.contentWarningState
-        .onSuccess {
-            LaunchedEffect(it.enabled) {
-                if (it.enabled) {
-                    contentWarningFocusRequester.requestFocus()
-                } else {
+    if (focusOnOpen) {
+        state.contentWarningState
+            .onSuccess {
+                LaunchedEffect(it.enabled) {
+                    if (it.enabled) {
+                        contentWarningFocusRequester.requestFocus()
+                    } else {
+                        focusRequester.requestFocus()
+                    }
+                }
+            }.onError {
+                LaunchedEffect(Unit) {
                     focusRequester.requestFocus()
                 }
             }
-        }.onError {
-            LaunchedEffect(Unit) {
-                focusRequester.requestFocus()
-            }
-        }
+    }
     Column(
         modifier =
-            Modifier
+            modifier
                 .dragAndDropTarget(
                     shouldStartDragAndDrop = {
                         true
@@ -187,18 +195,20 @@ fun ComposeDialog(
                     },
                 ),
     ) {
-        SubtleButton(
-            onClick = onBack,
-            modifier =
-                Modifier
-                    .align(Alignment.Start)
-                    .padding(8.dp),
-            iconOnly = true,
-        ) {
-            FAIcon(
-                imageVector = FontAwesomeIcons.Solid.Xmark,
-                contentDescription = stringResource(Res.string.navigate_back),
-            )
+        if (onBack != null) {
+            SubtleButton(
+                onClick = onBack,
+                modifier =
+                    Modifier
+                        .align(Alignment.Start)
+                        .padding(8.dp),
+                iconOnly = true,
+            ) {
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.Xmark,
+                    contentDescription = stringResource(Res.string.navigate_back),
+                )
+            }
         }
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -362,7 +372,17 @@ fun ComposeDialog(
                                 .heightIn(min = 120.dp)
                                 .focusRequester(
                                     focusRequester = focusRequester,
-                                ),
+                                ).onKeyEvent {
+                                    if (it.isCtrlPressed && it.key == Key.Enter) {
+                                        if (state.canSend) {
+                                            state.send()
+                                            onBack?.invoke()
+                                        }
+                                        true
+                                    } else {
+                                        false
+                                    }
+                                },
                         textStyle = LocalTextStyle.current.copy(color = FluentTheme.colors.text.text.primary),
                         cursorBrush = SolidColor(FluentTheme.colors.text.text.primary),
                     )
@@ -680,7 +700,6 @@ fun ComposeDialog(
                 state.state.emojiState.onSuccess { emojis ->
                     AnimatedVisibility(emojis.size > 0) {
                         FlyoutContainer(
-                            placement = FlyoutPlacement.Bottom,
                             flyout = {
                                 val actualAccountType =
                                     remember(
@@ -733,7 +752,7 @@ fun ComposeDialog(
                 AccentButton(
                     onClick = {
                         state.send()
-                        onBack.invoke()
+                        onBack?.invoke()
                     },
                     disabled = !state.canSend,
                 ) {
@@ -909,6 +928,15 @@ private fun composePresenter(
                             },
                     )
                 state.send(data)
+                // cleanup
+
+                textFieldState.edit {
+                    this.delete(0, this.length)
+                }
+                mediaState.takeSuccess()?.clear()
+                pollState.takeSuccess()?.clear()
+                contentWarningState.takeSuccess()?.clear()
+                state.visibilityState.takeSuccess()?.clear()
             }
         }
     }
@@ -929,6 +957,13 @@ private fun contentWarningPresenter() =
 
             fun toggle() {
                 enabled = !enabled
+            }
+
+            fun clear() {
+                enabled = false
+                textFieldState.edit {
+                    this.delete(0, this.length)
+                }
             }
         }
     }
@@ -963,6 +998,11 @@ private fun mediaPresenter(config: ComposeConfig.Media) =
 
             fun setMediaSensitive(value: Boolean) {
                 isMediaSensitive = value
+            }
+
+            fun clear() {
+                medias = emptyList()
+                isMediaSensitive = false
             }
         }
     }
@@ -1017,6 +1057,13 @@ private fun pollPresenter(config: ComposeConfig.Poll) =
 
             fun setExpiredAt(value: PollExpiration) {
                 expiredAt = value
+            }
+
+            fun clear() {
+                enabled = false
+                options = listOf(TextFieldState(), TextFieldState())
+                pollSingleChoice = true
+                expiredAt = PollExpiration.Minutes5
             }
         }
     }

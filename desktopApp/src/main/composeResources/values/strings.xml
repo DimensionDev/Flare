@@ -167,7 +167,8 @@
 
 
     <string name="settings_appearance_generic">Generic</string>
-
+    <string name="settings_appearance_show_compose_in_home_timeline">Show compose box in home timeline</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Show compose box in the top of home timeline</string>
     <string name="settings_appearance_show_actions">Show actions</string>
     <string name="settings_appearance_show_actions_description">Show actions on the bottom of the status</string>
     <string name="settings_appearance_show_media">Show media</string>

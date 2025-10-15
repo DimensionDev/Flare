@@ -3,8 +3,8 @@
     <string name="delete">Slett</string>
     <string name="profile_header_following_count">%1$s Følger</string>
     <string name="profile_header_fans_count">%1$s følgere</string>
-    <string name="profile_header_toots_count">%1$s toots</string>
-    <string name="profile_misskey_header_status_count">%1$s Status</string>
+    <string name="profile_header_toots_count">%1$s innlegg</string>
+    <string name="profile_misskey_header_status_count">%1$s innlegg</string>
     <string name="profile_header_button_follow">Følg</string>
     <string name="profile_header_button_following">Følger</string>
     <string name="profile_header_button_requested">Forespurt</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Bare nevnte brukere kan se dette tootet</string>
     <string name="settings_notifications_title">Varsler</string>
     <string name="settings_notifications_subtitle">Tilpass hvordan Flare varsler deg</string>
-    <string name="status_loadmore_end">Ingen flere toots</string>
-    <string name="status_loadmore_error">Feil ved lasting av flere toots</string>
+    <string name="status_loadmore_end">Ingen flere innlegg</string>
+    <string name="status_loadmore_error">Feil ved lasting av flere innlegg</string>
     <string name="status_loadmore_error_retry">Prøv igjen</string>
     <string name="status_empty">Ingenting å se her</string>
     <string name="status_sensitive_media">Sensitive medier</string>
     <string name="show_media">Vis media</string>
+    <string name="hide_media">Skjul media</string>
     <string name="login_expired">Innloggingsøkten har utløpt</string>
     <string name="login_expired_message">Trykk for å logge inn igjen</string>
     <string name="login_expired_relogin">Logg inn på nytt</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Udemp %1$s</string>
     <string name="mastodon_item_content_warning">Advarsel for innhold</string>
     <string name="reply_to">Svar til %1$s</string>
-    <string name="status_detail_translate">Oversett til %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Oversett innlegg</string>
+    <string name="status_detail_tldr">Sammendrag innlegg</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy H:mm</string>

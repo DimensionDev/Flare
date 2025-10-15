@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">قائمة</string>
     <string name="home_tab_feeds_title">التحديثات</string>
     <string name="dm_list_title">الرسائل المباشرة</string>
-    <string name="home_timeline_new_toots">تبويقات جديدة</string>
+    <string name="home_timeline_new_toots">مشاركات جديدة</string>
     <string name="navigate_back">الرجوع</string>
     <string name="service_select_instance_input_placeholder">رابط مثيل</string>
     <string name="service_select_next_button">التالي</string>

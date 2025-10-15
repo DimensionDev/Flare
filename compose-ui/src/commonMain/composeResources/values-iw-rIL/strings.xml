@@ -3,8 +3,6 @@
     <string name="delete">מחק</string>
     <string name="profile_header_following_count">%1$s עוקבים אחרי</string>
     <string name="profile_header_fans_count">%1$s עוקבים</string>
-    <string name="profile_header_toots_count">%1$s טוויטים</string>
-    <string name="profile_misskey_header_status_count">סטטוס של %1$s</string>
     <string name="profile_header_button_follow">לעקוב</string>
     <string name="profile_header_button_following">עוקב</string>
     <string name="profile_header_button_requested">הבקשה התקבלה</string>
@@ -58,8 +56,6 @@
     <string name="mastodon_visibility_direct_description">רק משתמשים שהוזכרו יכולים לראות טוויט זה</string>
     <string name="settings_notifications_title">התראות</string>
     <string name="settings_notifications_subtitle">התאם את ההתראות של Flare</string>
-    <string name="status_loadmore_end">אין עוד טוויטים</string>
-    <string name="status_loadmore_error">שגיאה בטעינת טוויטים נוספים</string>
     <string name="status_loadmore_error_retry">ניסיון שוב</string>
     <string name="status_empty">אין מה לראות כאן</string>
     <string name="status_sensitive_media">מדיה רגישה</string>
@@ -104,8 +100,6 @@
     <string name="user_unmute">בטל ריסון של %1$s</string>
     <string name="mastodon_item_content_warning">אזהרת תוכן</string>
     <string name="reply_to">ענה ל%1$s</string>
-    <string name="status_detail_translate">תרגם ל%1$s</string>
-    <string name="status_detail_tldr">סיכום</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>

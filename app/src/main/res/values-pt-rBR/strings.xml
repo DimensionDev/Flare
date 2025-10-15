@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">notificações</string>
     <string name="home_tab_me_title">Eu</string>
     <string name="home_tab_discover_title">Pendentes</string>
-    <string name="home_timeline_new_toots">Novos toots</string>
+    <string name="home_timeline_new_toots">Novas postagens</string>
     <string name="notification_tab_all_title">TODOS</string>
     <string name="notification_tab_mentions_title">Menciona</string>
     <string name="notification_tab_comments_title">comentários</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 dias</string>
     <string name="compose_content_warning_hint">Aviso de conteúdo</string>
     <string name="compose_media_sensitive">Marcar mídia como sensível</string>
-    <string name="compose_notification_title">Enviando toot</string>
+    <string name="compose_notification_title">Enviando Postagem</string>
     <string name="settings_title">Confirgurações</string>
     <string name="settings_accounts_title">Gerenciamento da conta</string>
     <string name="settings_appearance_title">Aparência</string>
@@ -103,7 +103,7 @@
     <string name="more">MAIS</string>
     <string name="discover_search_placeholder">Pesquisa</string>
     <string name="discover_users">Recomendar usuários</string>
-    <string name="discover_status">Toots em alta</string>
+    <string name="discover_status">Posts em Tendência</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Utilizadores</string>
     <string name="search_status">SItuação</string>
@@ -260,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">Você precisa definir o host do RssHub se você quiser usar RssHub, ou selecionar o servidor público do RssHub</string>
     <string name="rss_sources_discovered_rss_sources">Fontes RSS Descobertas</string>
     <string name="rss_sources_pinned_in_tabs">Fixar em abas iniciais</string>
+    <string name="rss_sources_open_in_browser">Abrir no navegador</string>
+    <string name="rss_sources_open_in_app">Abrir no aplicativo</string>
     <string name="rss_detail_open_in_browser">Abrir no navegador</string>
     <string name="rss_detail_share">Compartilhar</string>
     <string name="rss_detail_tldr">Summarize</string>

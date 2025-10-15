@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Сповіщення</string>
     <string name="home_tab_me_title">Ме</string>
     <string name="home_tab_discover_title">Відкрийте для себе</string>
-    <string name="home_timeline_new_toots">Нові дмухи</string>
+    <string name="home_timeline_new_toots">Нові повідомлення</string>
     <string name="notification_tab_all_title">Всі</string>
     <string name="notification_tab_mentions_title">Згадки</string>
     <string name="notification_tab_comments_title">Коментарі</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 днів</string>
     <string name="compose_content_warning_hint">Попередження про вміст</string>
     <string name="compose_media_sensitive">Позначити медіа як дражливе</string>
-    <string name="compose_notification_title">Надсилання дмуху</string>
+    <string name="compose_notification_title">Надсилання повідомлення</string>
     <string name="settings_title">Налаштування</string>
     <string name="settings_accounts_title">Особистий кабінет</string>
     <string name="settings_appearance_title">Зовнішній вигляд</string>
@@ -103,7 +103,7 @@
     <string name="more">Більше</string>
     <string name="discover_search_placeholder">Пошук</string>
     <string name="discover_users">Рекомендовані користувачі</string>
-    <string name="discover_status">Популярні казки</string>
+    <string name="discover_status">Популярні повідомлення</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Спільноти</string>
     <string name="search_status">Статус</string>
@@ -259,6 +259,8 @@
     <string name="rss_sources_rss_hub_host_hint">Ви повинні встановити RssHub якщо ви хочете використовувати RsHub, або вибрати публічний сервер RsHub</string>
     <string name="rss_sources_discovered_rss_sources">Виявлені Rss джерела</string>
     <string name="rss_sources_pinned_in_tabs">Закріпити на домашніх вкладках</string>
+    <string name="rss_sources_open_in_browser">Відкрити у браузері</string>
+    <string name="rss_sources_open_in_app">Відкрити у додатку</string>
     <string name="rss_detail_open_in_browser">Відкрити у браузері</string>
     <string name="rss_detail_share">Поділитись</string>
     <string name="rss_detail_tldr">Summarize</string>

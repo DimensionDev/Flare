@@ -3,8 +3,6 @@
     <string name="delete">Διαγραφή</string>
     <string name="profile_header_following_count">%1$s Ακολουθήσεις</string>
     <string name="profile_header_fans_count">%1$s Ακολούθοι</string>
-    <string name="profile_header_toots_count">%1$s Toots</string>
-    <string name="profile_misskey_header_status_count">%1$s Καταστάσεις</string>
     <string name="profile_header_button_follow">Ακολουθήστε</string>
     <string name="profile_header_button_following">Ακολουθεί</string>
     <string name="profile_header_button_requested">Ζητήθηκε</string>
@@ -58,12 +56,13 @@
     <string name="mastodon_visibility_direct_description">Μόνο οι αναφερόμενοι χρήστες μπορούν να δουν αυτή την φωνή</string>
     <string name="settings_notifications_title">Ειδοποιήσεις</string>
     <string name="settings_notifications_subtitle">Προσαρμόστε πώς το Flare σας ειδοποιεί</string>
-    <string name="status_loadmore_end">Όχι άλλες φωνές</string>
-    <string name="status_loadmore_error">Σφάλμα φόρτωσης περισσότερων φωνών</string>
+    <string name="status_loadmore_end">Δεν υπάρχουν άλλες δημοσιεύσεις</string>
+    <string name="status_loadmore_error">Σφάλμα φόρτωσης περισσότερων δημοσιεύσεων</string>
     <string name="status_loadmore_error_retry">Επανάληψη</string>
     <string name="status_empty">Τίποτα για να δείτε εδώ</string>
     <string name="status_sensitive_media">Ευαίσθητα μέσα</string>
     <string name="show_media">Εμφάνιση πολυμέσων</string>
+    <string name="hide_media">Απόκρυψη πολυμέσων</string>
     <string name="login_expired">Η συνεδρία σύνδεσης έχει λήξει</string>
     <string name="login_expired_message">Κάντε κλικ για να συνδεθείτε ξανά</string>
     <string name="login_expired_relogin">Είσοδος ξανά</string>
@@ -104,8 +103,8 @@
     <string name="user_unmute">Κατάργηση Σίγασης %1$s</string>
     <string name="mastodon_item_content_warning">Προειδοποίηση περιεχομένου</string>
     <string name="reply_to">Απάντηση σε %1$s</string>
-    <string name="status_detail_translate">Μετάφραση σε %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Μετάφραση Ανάρτησης</string>
+    <string name="status_detail_tldr">Περίληψη Άρθρου</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>

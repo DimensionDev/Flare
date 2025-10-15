@@ -3,8 +3,6 @@
     <string name="delete">Xóa</string>
     <string name="profile_header_following_count">%1$s Đang theo dõi</string>
     <string name="profile_header_fans_count">%1$s Người theo dõi</string>
-    <string name="profile_header_toots_count">%1$s Toots</string>
-    <string name="profile_misskey_header_status_count">%1$s Trạng thái</string>
     <string name="profile_header_button_follow">Theo dõi</string>
     <string name="profile_header_button_following">Đang theo dõi</string>
     <string name="profile_header_button_requested">Đã yêu cầu</string>
@@ -58,8 +56,6 @@
     <string name="mastodon_visibility_direct_description">Chỉ những người được đề cập mới có thể xem toot này</string>
     <string name="settings_notifications_title">Thông báo</string>
     <string name="settings_notifications_subtitle">Tùy chỉnh cách Flare thông báo cho bạn</string>
-    <string name="status_loadmore_end">Không còn toots</string>
-    <string name="status_loadmore_error">Lỗi khi tải thêm toots</string>
     <string name="status_loadmore_error_retry">Thử lại</string>
     <string name="status_empty">Không có gì để xem ở đây</string>
     <string name="status_sensitive_media">Media nhạy cảm</string>
@@ -104,8 +100,6 @@
     <string name="user_unmute">Bỏ im lặng %1$s</string>
     <string name="mastodon_item_content_warning">Cảnh báo nội dung</string>
     <string name="reply_to">Trả lời %1$s</string>
-    <string name="status_detail_translate">Dịch sang %1$s</string>
-    <string name="status_detail_tldr">Tóm tắt</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>

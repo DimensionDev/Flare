@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Liste</string>
     <string name="home_tab_feeds_title">Flux</string>
     <string name="dm_list_title">Messages directs</string>
-    <string name="home_timeline_new_toots">Nouveaux pouets</string>
+    <string name="home_timeline_new_toots">Nouveaux messages</string>
     <string name="navigate_back">Précédent</string>
     <string name="service_select_instance_input_placeholder">URL de l\'instance</string>
     <string name="service_select_next_button">Suivant</string>

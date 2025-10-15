@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Aviseringar</string>
     <string name="home_tab_me_title">Jag</string>
     <string name="home_tab_discover_title">Upptäck</string>
-    <string name="home_timeline_new_toots">Nya toots</string>
+    <string name="home_timeline_new_toots">Nya inlägg</string>
     <string name="notification_tab_all_title">Alla</string>
     <string name="notification_tab_mentions_title">Omnämningar</string>
     <string name="notification_tab_comments_title">Kommentarer</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 dagar</string>
     <string name="compose_content_warning_hint">Varning för innehåll</string>
     <string name="compose_media_sensitive">Markera media som känslig</string>
-    <string name="compose_notification_title">Skickar toot</string>
+    <string name="compose_notification_title">Skickar inlägg</string>
     <string name="settings_title">Inställningar</string>
     <string name="settings_accounts_title">Hantering av konto</string>
     <string name="settings_appearance_title">Utseende</string>
@@ -103,7 +103,7 @@
     <string name="more">Mer</string>
     <string name="discover_search_placeholder">Sök</string>
     <string name="discover_users">Rekommendera användare</string>
-    <string name="discover_status">Trendande Toots</string>
+    <string name="discover_status">Trendande inlägg</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Användare</string>
     <string name="search_status">Status</string>
@@ -260,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">Du måste ställa in RssHub värd om du vill använda RssHub, eller välja den publika RssHub servern</string>
     <string name="rss_sources_discovered_rss_sources">Upptäckta RSS-källor</string>
     <string name="rss_sources_pinned_in_tabs">Fäst på fliken hem</string>
+    <string name="rss_sources_open_in_browser">Öppna i webbläsare</string>
+    <string name="rss_sources_open_in_app">Öppna i app</string>
     <string name="rss_detail_open_in_browser">Öppna i webbläsare</string>
     <string name="rss_detail_share">Dela</string>
     <string name="rss_detail_tldr">Summarize</string>

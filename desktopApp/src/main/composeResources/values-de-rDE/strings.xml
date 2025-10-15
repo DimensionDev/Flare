@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Liste</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Direkte Nachrichten</string>
-    <string name="home_timeline_new_toots">Neue toots</string>
+    <string name="home_timeline_new_toots">Neue Beiträge</string>
     <string name="navigate_back">Zurück</string>
     <string name="service_select_instance_input_placeholder">Instanz URL</string>
     <string name="service_select_next_button">Nächste</string>

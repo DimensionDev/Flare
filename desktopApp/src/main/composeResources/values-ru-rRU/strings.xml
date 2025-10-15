@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Список</string>
     <string name="home_tab_feeds_title">Ленты</string>
     <string name="dm_list_title">Прямые сообщения</string>
-    <string name="home_timeline_new_toots">Новые зубы</string>
+    <string name="home_timeline_new_toots">Новые сообщения</string>
     <string name="navigate_back">Назад</string>
     <string name="service_select_instance_input_placeholder">URL экземпляра</string>
     <string name="service_select_next_button">Следующий</string>

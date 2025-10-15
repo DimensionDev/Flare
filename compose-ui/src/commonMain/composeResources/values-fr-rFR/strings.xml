@@ -3,8 +3,8 @@
     <string name="delete">Supprimez</string>
     <string name="profile_header_following_count">%1$s abonné</string>
     <string name="profile_header_fans_count">%1$s Abonné(e)s</string>
-    <string name="profile_header_toots_count">Pouets %1$s</string>
-    <string name="profile_misskey_header_status_count">Statut %1$s</string>
+    <string name="profile_header_toots_count">Publications %1$s</string>
+    <string name="profile_misskey_header_status_count">Publications %1$s</string>
     <string name="profile_header_button_follow">Suivre</string>
     <string name="profile_header_button_following">Abonnements</string>
     <string name="profile_header_button_requested">Demandé</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Seuls les utilisateurs mentionnés peuvent voir ce pouet</string>
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_notifications_subtitle">Personnaliser la façon dont Flare vous avertit</string>
-    <string name="status_loadmore_end">Plus de pouets</string>
-    <string name="status_loadmore_error">Erreur lors du chargement de plusieurs pouets</string>
+    <string name="status_loadmore_end">Plus aucun message</string>
+    <string name="status_loadmore_error">Erreur lors du chargement de plus de messages</string>
     <string name="status_loadmore_error_retry">Réessayer</string>
     <string name="status_empty">Rien à voir ici</string>
     <string name="status_sensitive_media">Média sensible</string>
     <string name="show_media">Afficher les médias</string>
+    <string name="hide_media">Cacher les médias</string>
     <string name="login_expired">Session de connexion expirée</string>
     <string name="login_expired_message">Cliquez pour vous connecter à nouveau</string>
     <string name="login_expired_relogin">Reconnectez-vous</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Rétablir le son %1$s</string>
     <string name="mastodon_item_content_warning">Avertissement de contenu</string>
     <string name="reply_to">Répondre à %1$s</string>
-    <string name="status_detail_translate">Traduire en %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Traduire le message</string>
+    <string name="status_detail_tldr">Résumé de la publication</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">jj MMM Yy HH:mm</string>

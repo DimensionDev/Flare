@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Lista</string>
     <string name="home_tab_feeds_title">Alimentos</string>
     <string name="dm_list_title">Mensajes directos</string>
-    <string name="home_timeline_new_toots">Nuevos toots</string>
+    <string name="home_timeline_new_toots">Nuevos posts</string>
     <string name="navigate_back">Atrás</string>
     <string name="service_select_instance_input_placeholder">URL de instancia</string>
     <string name="service_select_next_button">Siguiente</string>

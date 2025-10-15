@@ -3,7 +3,7 @@
     <string name="delete">删除</string>
     <string name="profile_header_following_count">%1$s 关注</string>
     <string name="profile_header_fans_count">%1$s 粉丝</string>
-    <string name="profile_header_toots_count">%1$s 嘟文</string>
+    <string name="profile_header_toots_count">%1$s 帖子</string>
     <string name="profile_misskey_header_status_count">%1$s 帖子</string>
     <string name="profile_header_button_follow">关注</string>
     <string name="profile_header_button_following">正在关注</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">只有提到的人可以看到这条嘟文</string>
     <string name="settings_notifications_title">通知</string>
     <string name="settings_notifications_subtitle">自定义Flare如何通知您</string>
-    <string name="status_loadmore_end">没有更多嘟文了</string>
-    <string name="status_loadmore_error">加载失败</string>
+    <string name="status_loadmore_end">没有更多帖子</string>
+    <string name="status_loadmore_error">加载更多帖子出错</string>
     <string name="status_loadmore_error_retry">重试</string>
     <string name="status_empty">这里什么都没有</string>
     <string name="status_sensitive_media">敏感内容</string>
     <string name="show_media">显示媒体</string>
+    <string name="hide_media">隐藏媒体</string>
     <string name="login_expired">登录会话已过期</string>
     <string name="login_expired_message">点击重新登录</string>
     <string name="login_expired_relogin">重新登录</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">取消静音 %1$s</string>
     <string name="mastodon_item_content_warning">内容警告</string>
     <string name="reply_to">回复 %1$s</string>
-    <string name="status_detail_translate">翻译为 %1$s</string>
-    <string name="status_detail_tldr">摘要</string>
+    <string name="status_detail_translate">翻译帖子</string>
+    <string name="status_detail_tldr">摘要员额</string>
     <string name="date_format_year_month_day">yyyy年MMMdd日</string>
     <string name="date_format_month_day">MMMdd日</string>
     <string name="date_format_full">yyyy年MMMdd日 HH:mm</string>
@@ -324,7 +325,7 @@
     <string name="empty_rss_sources">无 rss 源</string>
     <string name="service_select_welcome_title">欢迎使用 Flare</string>
     <string name="service_select_welcome_message">请输入服务器以开始操作。</string>
-    <string name="service_select_welcome_hint">闪光支持Mastodon, Misskey, Bluesky 和 X。</string>
+    <string name="service_select_welcome_hint">Flare支持Mastodon, Misskey, Bluesky 和 X。</string>
     <string name="service_select_welcome_list_hint">或者从这些服务器中选择</string>
     <string name="bluesky_login_username_hint">用户名</string>
     <string name="bluesky_login_password_hint">密码</string>
@@ -337,7 +338,7 @@
     <string name="service_select_instance_input_placeholder">实例地址</string>
     <string name="service_select_next_button">下一步</string>
     <string name="service_select_empty_message">没有找到实例</string>
-    <string name="service_select_compatibility_warning">此服务器使用 %1$s，闪光将以兼容模式运行。有些功能可能无法正常工作。</string>
+    <string name="service_select_compatibility_warning">此服务器使用 %1$s，Flare将以兼容模式运行。有些功能可能无法正常工作。</string>
     <string name="home_tab_home_title">首页</string>
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">我</string>
@@ -351,7 +352,7 @@
     <string name="home_tab_list_title">列表</string>
     <string name="home_tab_feeds_title">订阅源</string>
     <string name="dm_list_title">私信</string>
-    <string name="social_title">社交活动</string>
+    <string name="social_title">社交</string>
     <string name="antenna_title">天线</string>
     <string name="mixed_timeline_title">混合</string>
     <string name="settings_about_description">下一代开放源码的 AI 为分散的社交网络客户端提供动力。</string>

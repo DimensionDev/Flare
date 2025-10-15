@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">התראות</string>
     <string name="home_tab_me_title">אני</string>
     <string name="home_tab_discover_title">גלה</string>
-    <string name="home_timeline_new_toots">טוויטים חדשים</string>
     <string name="notification_tab_all_title">הכל</string>
     <string name="notification_tab_mentions_title">הזכרת</string>
     <string name="notification_tab_comments_title">תגובות</string>
@@ -30,7 +29,6 @@
     <string name="compose_poll_expiration_7_days">7 ימים</string>
     <string name="compose_content_warning_hint">אזהרת תוכן</string>
     <string name="compose_media_sensitive">סמן מדיה כהרגשה</string>
-    <string name="compose_notification_title">שולח טוויט</string>
     <string name="settings_title">הגדרות</string>
     <string name="settings_accounts_title">ניהול חשבון</string>
     <string name="settings_appearance_title">מראה</string>
@@ -99,7 +97,6 @@
     <string name="more">עוד</string>
     <string name="discover_search_placeholder">חיפוש</string>
     <string name="discover_users">המלץ על משתמשים</string>
-    <string name="discover_status">טוויטים חמים</string>
     <string name="discover_hashtags">האשטגים חמים</string>
     <string name="search_users">משתמשים</string>
     <string name="search_status">סטטוס</string>
@@ -243,6 +240,7 @@
     <string name="rss_sources_url_label">כתובת URL</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">אין מקורות rss</string>
+    <string name="rss_sources_open_in_browser">פתח בדפדפן</string>
     <string name="rss_detail_open_in_browser">פתח בדפדפן</string>
     <string name="rss_detail_share">שתף</string>
     <string name="rss_detail_tldr">סכם</string>

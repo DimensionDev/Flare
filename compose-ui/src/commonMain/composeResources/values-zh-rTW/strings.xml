@@ -3,8 +3,6 @@
     <string name="delete">刪除</string>
     <string name="profile_header_following_count">%1$s 追蹤中</string>
     <string name="profile_header_fans_count">%1$s 追蹤者</string>
-    <string name="profile_header_toots_count">%1$s 提要</string>
-    <string name="profile_misskey_header_status_count">%1$s 狀態</string>
     <string name="profile_header_button_follow">追蹤</string>
     <string name="profile_header_button_following">追蹤中</string>
     <string name="profile_header_button_requested">已請求</string>
@@ -58,8 +56,6 @@
     <string name="mastodon_visibility_direct_description">只有被提及的用戶可以看到此消息</string>
     <string name="settings_notifications_title">通知</string>
     <string name="settings_notifications_subtitle">自定義 Flare 通知你</string>
-    <string name="status_loadmore_end">沒有更多提要</string>
-    <string name="status_loadmore_error">加載更多提要時出錯</string>
     <string name="status_loadmore_error_retry">重試</string>
     <string name="status_empty">這裡什麼都沒有</string>
     <string name="status_sensitive_media">敏感媒體</string>
@@ -104,8 +100,6 @@
     <string name="user_unmute">解除靜音 %1$s</string>
     <string name="mastodon_item_content_warning">內容警告</string>
     <string name="reply_to">回覆 %1$s</string>
-    <string name="status_detail_translate">翻譯成 %1$s</string>
-    <string name="status_detail_tldr">摘要</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>

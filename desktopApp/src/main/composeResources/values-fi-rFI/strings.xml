@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Lista</string>
     <string name="home_tab_feeds_title">Syötteet</string>
     <string name="dm_list_title">Suorat Viestit</string>
-    <string name="home_timeline_new_toots">Uudet tootit</string>
+    <string name="home_timeline_new_toots">Uudet Viestit</string>
     <string name="navigate_back">Takaisin</string>
     <string name="service_select_instance_input_placeholder">Ilmentymän URL</string>
     <string name="service_select_next_button">Seuraava</string>

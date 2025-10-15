@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">リスト</string>
     <string name="home_tab_feeds_title">フィード</string>
     <string name="dm_list_title">ダイレクトメッセージ</string>
-    <string name="home_timeline_new_toots">新しいトゥート</string>
+    <string name="home_timeline_new_toots">新しい投稿</string>
     <string name="navigate_back">戻る</string>
     <string name="service_select_instance_input_placeholder">インスタンス URL</string>
     <string name="service_select_next_button">次へ</string>

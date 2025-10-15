@@ -3,8 +3,8 @@
     <string name="delete">Löschen</string>
     <string name="profile_header_following_count">%1$s folgen</string>
     <string name="profile_header_fans_count">%1$s Follower</string>
-    <string name="profile_header_toots_count">%1$s Toots</string>
-    <string name="profile_misskey_header_status_count">%1$s Status</string>
+    <string name="profile_header_toots_count">%1$s Beiträge</string>
+    <string name="profile_misskey_header_status_count">%1$s Beiträge</string>
     <string name="profile_header_button_follow">Folgen</string>
     <string name="profile_header_button_following">Folgt</string>
     <string name="profile_header_button_requested">Angefragt</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Nur erwähnte Benutzer können diesen toot sehen</string>
     <string name="settings_notifications_title">Benachrichtigungen</string>
     <string name="settings_notifications_subtitle">Anpassen, wie Leuchtsignale dich benachrichtigt</string>
-    <string name="status_loadmore_end">Keine weiteren toots</string>
-    <string name="status_loadmore_error">Fehler beim Laden von weiteren toots</string>
+    <string name="status_loadmore_end">Keine weiteren Beiträge</string>
+    <string name="status_loadmore_error">Fehler beim Laden weiterer Beiträge</string>
     <string name="status_loadmore_error_retry">Wiederholen</string>
     <string name="status_empty">Nichts zu sehen</string>
     <string name="status_sensitive_media">Sensitive Medien</string>
     <string name="show_media">Medien anzeigen</string>
+    <string name="hide_media">Medien ausblenden</string>
     <string name="login_expired">Die Anmeldesitzung ist abgelaufen</string>
     <string name="login_expired_message">Zum erneuten Anmelden klicken</string>
     <string name="login_expired_relogin">Erneut anmelden</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Entmute %1$s</string>
     <string name="mastodon_item_content_warning">Inhaltswarnung</string>
     <string name="reply_to">Auf %1$s antworten</string>
-    <string name="status_detail_translate">Übersetzen nach %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Beitrag übersetzen</string>
+    <string name="status_detail_tldr">Zusammenfassung Beitrag</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM Yy HH:mm</string>

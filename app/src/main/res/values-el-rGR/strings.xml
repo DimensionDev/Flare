@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Ειδοποιήσεις</string>
     <string name="home_tab_me_title">Εγώ</string>
     <string name="home_tab_discover_title">Ανακαλύψτε</string>
-    <string name="home_timeline_new_toots">Νέα φωνές</string>
+    <string name="home_timeline_new_toots">Νέες Δημοσιεύσεις</string>
     <string name="notification_tab_all_title">Όλα</string>
     <string name="notification_tab_mentions_title">Αναφορές</string>
     <string name="notification_tab_comments_title">Σχόλια</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 ημέρες</string>
     <string name="compose_content_warning_hint">Προειδοποίηση περιεχομένου</string>
     <string name="compose_media_sensitive">Σημείωση πολυμέσων ως ευαίσθητα</string>
-    <string name="compose_notification_title">Αποστολή φωνής</string>
+    <string name="compose_notification_title">Αποστολή Δημοσίευσης</string>
     <string name="settings_title">Ρυθμίσεις</string>
     <string name="settings_accounts_title">Διαχείριση Λογαριασμού</string>
     <string name="settings_appearance_title">Εμφάνιση</string>
@@ -103,7 +103,7 @@
     <string name="more">Περισσότερα</string>
     <string name="discover_search_placeholder">Αναζήτηση</string>
     <string name="discover_users">Προτείνετε Τους Χρήστες</string>
-    <string name="discover_status">Δημοφιλείς Τάσεις</string>
+    <string name="discover_status">Δημοφιλή Άρθρα</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Χρήστες</string>
     <string name="search_status">Κατάσταση</string>
@@ -260,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">Θα πρέπει να ορίσετε το διακομιστή RssHub αν θέλετε να χρησιμοποιήσετε RssHub, ή επιλέξτε το δημόσιο διακομιστή RssHub</string>
     <string name="rss_sources_discovered_rss_sources">Ανακαλύφθηκε Πηγές Rss</string>
     <string name="rss_sources_pinned_in_tabs">Καρφίτσωμα στις καρτέλες του σπιτιού</string>
+    <string name="rss_sources_open_in_browser">Άνοιγμα σε πρόγραμμα περιήγησης</string>
+    <string name="rss_sources_open_in_app">Άνοιγμα σε εφαρμογή</string>
     <string name="rss_detail_open_in_browser">Άνοιγμα σε πρόγραμμα περιήγησης</string>
     <string name="rss_detail_share">Κοινοποίηση</string>
     <string name="rss_detail_tldr">Summarize</string>

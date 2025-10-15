@@ -3,8 +3,6 @@
     <string name="delete">삭제</string>
     <string name="profile_header_following_count">%1$s 팔로잉</string>
     <string name="profile_header_fans_count">%1$s 팔로워</string>
-    <string name="profile_header_toots_count">%1$s 투트</string>
-    <string name="profile_misskey_header_status_count">%1$s 상태</string>
     <string name="profile_header_button_follow">팔로우</string>
     <string name="profile_header_button_following">팔로잉</string>
     <string name="profile_header_button_requested">요청됨</string>
@@ -58,8 +56,6 @@
     <string name="mastodon_visibility_direct_description">멘션된 사용자만 이 투트를 볼 수 있습니다</string>
     <string name="settings_notifications_title">알림</string>
     <string name="settings_notifications_subtitle">플레어가 알리는 방법을 사용자 지정합니다</string>
-    <string name="status_loadmore_end">더 이상 투트가 없습니다</string>
-    <string name="status_loadmore_error">투트를 더 로드하는 중 오류 발생</string>
     <string name="status_loadmore_error_retry">재시도</string>
     <string name="status_empty">여기서 볼 것이 없습니다</string>
     <string name="status_sensitive_media">민감한 미디어</string>
@@ -104,8 +100,6 @@
     <string name="user_unmute">음소거 해제 %1$s</string>
     <string name="mastodon_item_content_warning">컨텐츠 경고</string>
     <string name="reply_to">%1$s에게 답글</string>
-    <string name="status_detail_translate">%1$s로 번역하기</string>
-    <string name="status_detail_tldr">요약</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>

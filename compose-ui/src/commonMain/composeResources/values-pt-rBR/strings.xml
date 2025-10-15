@@ -3,8 +3,8 @@
     <string name="delete">excluir</string>
     <string name="profile_header_following_count">%1$s Seguindo</string>
     <string name="profile_header_fans_count">%1$s Seguidores</string>
-    <string name="profile_header_toots_count">%1$s Toots</string>
-    <string name="profile_misskey_header_status_count">Estado %1$s</string>
+    <string name="profile_header_toots_count">Postagens %1$s</string>
+    <string name="profile_misskey_header_status_count">Postagens %1$s</string>
     <string name="profile_header_button_follow">Seguir</string>
     <string name="profile_header_button_following">Seguinte</string>
     <string name="profile_header_button_requested">Solicitado</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Somente usuários mencionados podem ver este toot</string>
     <string name="settings_notifications_title">notificações</string>
     <string name="settings_notifications_subtitle">Personalize como o Sinalizador notifica você</string>
-    <string name="status_loadmore_end">Sem mais toots</string>
-    <string name="status_loadmore_error">Erro ao carregar mais toots</string>
+    <string name="status_loadmore_end">Não há mais postagens</string>
+    <string name="status_loadmore_error">Erro ao carregar mais postagens</string>
     <string name="status_loadmore_error_retry">Repetir</string>
     <string name="status_empty">Nada para ver aqui</string>
     <string name="status_sensitive_media">Mídia sensível</string>
     <string name="show_media">Mostrar mídia</string>
+    <string name="hide_media">Ocultar mídia</string>
     <string name="login_expired">Sessão de login expirada</string>
     <string name="login_expired_message">Clique para entrar novamente</string>
     <string name="login_expired_relogin">Entrar novamente</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Reativar %1$s</string>
     <string name="mastodon_item_content_warning">Aviso de conteúdo</string>
     <string name="reply_to">Responder à %1$s</string>
-    <string name="status_detail_translate">Traduzir para %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Traduzir Post</string>
+    <string name="status_detail_tldr">Resumo da postagem</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>

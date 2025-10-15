@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Список</string>
     <string name="home_tab_feeds_title">Стрічки новин</string>
     <string name="dm_list_title">Миттєві повідомлення</string>
-    <string name="home_timeline_new_toots">Нові дмухи</string>
+    <string name="home_timeline_new_toots">Нові повідомлення</string>
     <string name="navigate_back">Відмінити</string>
     <string name="service_select_instance_input_placeholder">URL-адреса інстансу</string>
     <string name="service_select_next_button">Уперед</string>

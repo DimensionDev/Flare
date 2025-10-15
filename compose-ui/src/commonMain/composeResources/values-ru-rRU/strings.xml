@@ -3,8 +3,8 @@
     <string name="delete">Удалить</string>
     <string name="profile_header_following_count">Подписка на %1$s</string>
     <string name="profile_header_fans_count">%1$s подписчики</string>
-    <string name="profile_header_toots_count">%1$s кастрюли</string>
-    <string name="profile_misskey_header_status_count">%1$s статус</string>
+    <string name="profile_header_toots_count">%1$s постов</string>
+    <string name="profile_misskey_header_status_count">%1$s постов</string>
     <string name="profile_header_button_follow">Подписаться</string>
     <string name="profile_header_button_following">Подписка</string>
     <string name="profile_header_button_requested">Запрошено</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Только упомянутые пользователи могут видеть это тоже</string>
     <string name="settings_notifications_title">Уведомления</string>
     <string name="settings_notifications_subtitle">Настройте как сигнал оповещает вас</string>
-    <string name="status_loadmore_end">Нет больше зубов</string>
-    <string name="status_loadmore_error">Ошибка загрузки зубов</string>
+    <string name="status_loadmore_end">Больше нет записей</string>
+    <string name="status_loadmore_error">Ошибка загрузки больше сообщений</string>
     <string name="status_loadmore_error_retry">Повторить</string>
     <string name="status_empty">Здесь нечего видеть</string>
     <string name="status_sensitive_media">Конфиденциальные медиа</string>
     <string name="show_media">Показать медиа</string>
+    <string name="hide_media">Скрыть медиа</string>
     <string name="login_expired">Сессия входа истекла</string>
     <string name="login_expired_message">Нажмите, чтобы войти снова</string>
     <string name="login_expired_relogin">Войти снова</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Включить звук %1$s</string>
     <string name="mastodon_item_content_warning">Предупреждение о контенте</string>
     <string name="reply_to">Ответить %1$s</string>
-    <string name="status_detail_translate">Перевести на %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Перевести пост</string>
+    <string name="status_detail_tldr">Краткое сообщение</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy H:mm</string>

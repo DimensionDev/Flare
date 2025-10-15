@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">Обавештења</string>
     <string name="home_tab_me_title">Ја</string>
     <string name="home_tab_discover_title">Откријте</string>
-    <string name="home_timeline_new_toots">Нови објаве</string>
     <string name="notification_tab_all_title">Сва</string>
     <string name="notification_tab_mentions_title">Спомињања</string>
     <string name="notification_tab_comments_title">Коментари</string>
@@ -30,7 +29,6 @@
     <string name="compose_poll_expiration_7_days">7 дана</string>
     <string name="compose_content_warning_hint">Упозорење на садржај</string>
     <string name="compose_media_sensitive">Означите медије као осетљиве</string>
-    <string name="compose_notification_title">Слање објаве</string>
     <string name="settings_title">Подешавања</string>
     <string name="settings_accounts_title">Управљање рачунима</string>
     <string name="settings_appearance_title">Изглед</string>
@@ -99,7 +97,6 @@
     <string name="more">Више</string>
     <string name="discover_search_placeholder">Претрага</string>
     <string name="discover_users">Препоручите кориснике</string>
-    <string name="discover_status">Популарне објаве</string>
     <string name="discover_hashtags">Популарни хаштагови</string>
     <string name="search_users">Корисници</string>
     <string name="search_status">Статус</string>
@@ -243,6 +240,7 @@
     <string name="rss_sources_url_label">Урл</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">Нема rss извора</string>
+    <string name="rss_sources_open_in_browser">Отворите у прегледаћу</string>
     <string name="rss_detail_open_in_browser">Отворите у прегледаћу</string>
     <string name="rss_detail_share">Делите</string>
     <string name="rss_detail_tldr">Сажмите</string>

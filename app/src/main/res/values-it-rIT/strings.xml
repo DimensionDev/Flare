@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Notifiche</string>
     <string name="home_tab_me_title">Io</string>
     <string name="home_tab_discover_title">Scopri</string>
-    <string name="home_timeline_new_toots">Nuovi toots</string>
+    <string name="home_timeline_new_toots">Nuovi Post</string>
     <string name="notification_tab_all_title">Tutti</string>
     <string name="notification_tab_mentions_title">Menzioni</string>
     <string name="notification_tab_comments_title">Commenti</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 giorni</string>
     <string name="compose_content_warning_hint">Avviso contenuto</string>
     <string name="compose_media_sensitive">Segna il media come sensibile</string>
-    <string name="compose_notification_title">Invio toot</string>
+    <string name="compose_notification_title">Invio Post</string>
     <string name="settings_title">Impostazioni</string>
     <string name="settings_accounts_title">Gestione Account</string>
     <string name="settings_appearance_title">Aspetto</string>
@@ -103,7 +103,7 @@
     <string name="more">Altro</string>
     <string name="discover_search_placeholder">Cerca</string>
     <string name="discover_users">Consiglia Utenti</string>
-    <string name="discover_status">Toot Di Tendenza</string>
+    <string name="discover_status">Post Di Tendenza</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Utenti</string>
     <string name="search_status">Stato</string>
@@ -260,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">È necessario impostare l\'host RssHub se si desidera utilizzare RssHub, o selezionare il server RsssHub pubblico</string>
     <string name="rss_sources_discovered_rss_sources">Scoperte Sorgenti Rss</string>
     <string name="rss_sources_pinned_in_tabs">Aggiungi alle schede home</string>
+    <string name="rss_sources_open_in_browser">Apri nel browser</string>
+    <string name="rss_sources_open_in_app">Apri in app</string>
     <string name="rss_detail_open_in_browser">Apri nel browser</string>
     <string name="rss_detail_share">Condividi</string>
     <string name="rss_detail_tldr">Summarize</string>

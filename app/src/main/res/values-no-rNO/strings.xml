@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Varsler</string>
     <string name="home_tab_me_title">Meg</string>
     <string name="home_tab_discover_title">Oppdag</string>
-    <string name="home_timeline_new_toots">Nye toots</string>
+    <string name="home_timeline_new_toots">Nye innlegg</string>
     <string name="notification_tab_all_title">Alle</string>
     <string name="notification_tab_mentions_title">Omtalelser</string>
     <string name="notification_tab_comments_title">Kommentarer</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 dager</string>
     <string name="compose_content_warning_hint">Advarsel for innhold</string>
     <string name="compose_media_sensitive">Merk media som sensitivt</string>
-    <string name="compose_notification_title">Sender toot</string>
+    <string name="compose_notification_title">Sender innlegg</string>
     <string name="settings_title">Innstillinger</string>
     <string name="settings_accounts_title">Konto administrasjon</string>
     <string name="settings_appearance_title">Utseende</string>
@@ -103,7 +103,7 @@
     <string name="more">Mer</string>
     <string name="discover_search_placeholder">Søk</string>
     <string name="discover_users">Anbefal brukere</string>
-    <string name="discover_status">Populære tilkoblinger</string>
+    <string name="discover_status">Populære innlegg</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Brukere</string>
     <string name="search_status">Status:</string>
@@ -260,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">Du må angi RssHUB-vert hvis du vil bruke RsssHub, eller velge den offentlige RssHUB-serveren</string>
     <string name="rss_sources_discovered_rss_sources">Oppdaget Rss kilder</string>
     <string name="rss_sources_pinned_in_tabs">Fest til hovedsidemerkene</string>
+    <string name="rss_sources_open_in_browser">Åpne i nettleser</string>
+    <string name="rss_sources_open_in_app">Åpne i app</string>
     <string name="rss_detail_open_in_browser">Åpne i nettleser</string>
     <string name="rss_detail_share">Del</string>
     <string name="rss_detail_tldr">Summarize</string>

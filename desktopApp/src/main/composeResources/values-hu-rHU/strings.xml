@@ -20,7 +20,6 @@
     <string name="home_tab_list_title">Lista</string>
     <string name="home_tab_feeds_title">Hírcsatornák</string>
     <string name="dm_list_title">Közvetlen üzenetek</string>
-    <string name="home_timeline_new_toots">Új tootok</string>
     <string name="navigate_back">Vissza</string>
     <string name="service_select_instance_input_placeholder">Példány URL</string>
     <string name="service_select_next_button">Következő</string>

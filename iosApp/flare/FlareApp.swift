@@ -11,7 +11,11 @@ struct FlareApp: App {
     var body: some Scene {
         WindowGroup {
             FlareTheme {
-                FlareRoot()
+                if #available(iOS 18.0, *) {
+                    FlareRoot()
+                } else {
+                    BackportFlareRoot()
+                }
             }
         }
     }

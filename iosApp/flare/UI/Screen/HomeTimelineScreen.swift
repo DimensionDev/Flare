@@ -29,7 +29,12 @@ struct HomeTimelineScreen: View {
                         .id(tab.key)
                 }
                 .toolbar {
-                    ToolbarItem(placement: .automatic) {
+                    let placement = if #available(iOS 26.0, *) {
+                        ToolbarItemPlacement.automatic
+                    } else {
+                        ToolbarItemPlacement.title
+                    }
+                    ToolbarItem(placement: placement) {
                         ScrollView(.horizontal) {
                             HStack(
                                 spacing: 8,
@@ -63,7 +68,7 @@ struct HomeTimelineScreen: View {
                                     .glassButtonStyle()
                                 }
                             }
-                            .padding(.horizontal)
+//                            .padding(.horizontal)
                             .padding(.vertical, 8)
                         }
                         .scrollIndicators(.hidden)

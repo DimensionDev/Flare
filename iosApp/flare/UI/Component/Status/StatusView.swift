@@ -161,7 +161,7 @@ struct StatusView: View {
                         }
                     }
 
-                    if !data.quote.isEmpty {
+                    if !data.quote.isEmpty, !isQuote {
                         VStack {
                             ForEach(data.quote, id: \.itemKey) { quote in
                                 StatusView(data: quote, isQuote: true)

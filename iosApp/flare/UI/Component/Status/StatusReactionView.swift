@@ -12,6 +12,7 @@ struct StatusReactionView: View {
                     } label: {
                         Label {
                             Text(item.humanizedCount)
+                                .foregroundStyle(Color(.label))
                         } icon: {
                             if item.isUnicode {
                                 Text(item.name)

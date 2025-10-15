@@ -35,17 +35,20 @@ jobs:
           distribution: "jetbrains"
           java-version: 21
       - name: import certs
+        if: startsWith(github.ref, 'refs/tags/')
         uses: apple-actions/import-codesign-certs@v5
         with:
           p12-file-base64: ${{ secrets.MACOS_CERT_BASE64 }}
           p12-password: ${{ secrets.MACOS_CERT_PASSWORD }}
       - name: Create Embedded Provision Profile
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           echo "$MACOS_EMBEDDED_PROVISION" > desktopApp/embedded.provisionprofile.b64
           base64 -d -i desktopApp/embedded.provisionprofile.b64 > desktopApp/embedded.provisionprofile    
         env:
           MACOS_EMBEDDED_PROVISION: ${{ secrets.MACOS_EMBEDDED_PROVISION }}
       - name: Create Runtime Provision Profile
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           echo "$MACOS_RUNTIME_PROVISION" > desktopApp/runtime.provisionprofile.b64
           base64 -d -i desktopApp/runtime.provisionprofile.b64 > desktopApp/runtime.provisionprofile    
@@ -55,8 +58,15 @@ jobs:
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
-        run: ./gradlew :desktop:check packageReleasePkg --stacktrace
+        run: ./gradlew :desktop:check :desktop:build --stacktrace
+      - name: Package with Gradle
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          BUILD_NUMBER: ${{github.run_number}}
+          BUILD_VERSION: ${{github.ref_name}}
+        run: ./gradlew :desktop:packageReleasePkg --stacktrace
       - name: Archive macOS artifacts Product
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
           name: macOS-package
@@ -100,17 +110,10 @@ jobs:
         working-directory: desktopApp/src/main/csharp
         run: msbuild $env:Solution_Name /t:Build /p:Configuration=Release /p:Platform=x64 /p:EnableComposeAutoBuild=false
       - name: Copy MSIX files
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           mkdir desktopApp/src/main/csharp/AppPackages/OnlyMsixFilesFolder
           cp desktopApp/src/main/csharp/AppPackages/**/*.msix desktopApp/src/main/csharp/AppPackages/OnlyMsixFilesFolder -Force
-      - name: Make msixbundle
-        if: startsWith(github.ref, 'refs/tags/') == false
-        uses: LanceMcCarthy/Action-MsixBundler@v3
-        with:
-          msix-folder: "desktopApp/src/main/csharp/AppPackages/OnlyMsixFilesFolder"
-          msixbundle-filepath: "desktopApp/src/main/csharp/AppPackages/Flare.msixbundle"
-          msixbundle-version: "1.0.1.0"
-
       - name: Make msixbundle with Tag name
         if: startsWith(github.ref, 'refs/tags/')
         uses: LanceMcCarthy/Action-MsixBundler@v3
@@ -118,13 +121,11 @@ jobs:
           msix-folder: "desktopApp/src/main/csharp/AppPackages/OnlyMsixFilesFolder"
           msixbundle-filepath: "desktopApp/src/main/csharp/AppPackages/Flare.msixbundle"
           msixbundle-version: ${{ format('{0}.0', github.ref_name) }}
-
       - name: Upload MSIX package
         uses: actions/upload-artifact@v4
         with:
           name: Windows-package
           path: desktopApp/src/main/csharp/AppPackages/Flare.msixbundle
-
   upload:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: [ubuntu-latest]

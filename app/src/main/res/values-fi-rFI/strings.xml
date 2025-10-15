@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Ilmoitukset</string>
     <string name="home_tab_me_title">Minä</string>
     <string name="home_tab_discover_title">Löydä</string>
-    <string name="home_timeline_new_toots">Uudet tootit</string>
+    <string name="home_timeline_new_toots">Uudet Viestit</string>
     <string name="notification_tab_all_title">Kaikki</string>
     <string name="notification_tab_mentions_title">Maininnat</string>
     <string name="notification_tab_comments_title">Kommentit</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 päivää</string>
     <string name="compose_content_warning_hint">Sisällön varoitus</string>
     <string name="compose_media_sensitive">Merkitse media tuntevaksi</string>
-    <string name="compose_notification_title">Lähetetään toottia</string>
+    <string name="compose_notification_title">Lähetetään Viestiä</string>
     <string name="settings_title">Asetukset</string>
     <string name="settings_accounts_title">Tilin Hallinta</string>
     <string name="settings_appearance_title">Ulkoasu</string>
@@ -103,7 +103,7 @@
     <string name="more">Lisää</string>
     <string name="discover_search_placeholder">Etsi</string>
     <string name="discover_users">Suosittele Käyttäjiä</string>
-    <string name="discover_status">Suositut Juuret</string>
+    <string name="discover_status">Suositut Viestit</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Käyttäjät</string>
     <string name="search_status">Tila</string>
@@ -260,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">Sinun täytyy asettaa RssHub isäntä, jos haluat käyttää RssHub, tai valitse julkinen RssHub palvelin</string>
     <string name="rss_sources_discovered_rss_sources">Löydetty RSS-lähteet</string>
     <string name="rss_sources_pinned_in_tabs">Kiinnitä kotiin välilehdet</string>
+    <string name="rss_sources_open_in_browser">Avaa selaimessa</string>
+    <string name="rss_sources_open_in_app">Avaa sovelluksessa</string>
     <string name="rss_detail_open_in_browser">Avaa selaimessa</string>
     <string name="rss_detail_share">Jaa</string>
     <string name="rss_detail_tldr">Summarize</string>

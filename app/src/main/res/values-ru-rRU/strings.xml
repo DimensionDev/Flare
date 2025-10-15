@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Уведомления</string>
     <string name="home_tab_me_title">Я</string>
     <string name="home_tab_discover_title">Узнайте</string>
-    <string name="home_timeline_new_toots">Новые зубы</string>
+    <string name="home_timeline_new_toots">Новые сообщения</string>
     <string name="notification_tab_all_title">Все</string>
     <string name="notification_tab_mentions_title">Упоминания</string>
     <string name="notification_tab_comments_title">Комментарии</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 дней</string>
     <string name="compose_content_warning_hint">Предупреждение о контенте</string>
     <string name="compose_media_sensitive">Пометить медиа как чувствительный</string>
-    <string name="compose_notification_title">Отправка зуба</string>
+    <string name="compose_notification_title">Отправка сообщения</string>
     <string name="settings_title">Настройки</string>
     <string name="settings_accounts_title">Управление аккаунтом</string>
     <string name="settings_appearance_title">Внешний вид</string>
@@ -103,7 +103,7 @@
     <string name="more">Ещё</string>
     <string name="discover_search_placeholder">Искать</string>
     <string name="discover_users">Рекомендовать пользователям</string>
-    <string name="discover_status">Популярные одеяния</string>
+    <string name="discover_status">Популярные сообщения</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Пользователи</string>
     <string name="search_status">Статус</string>
@@ -260,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">Если вы хотите использовать RssHub или выберите публичный сервер RssHub</string>
     <string name="rss_sources_discovered_rss_sources">Найденные Rss источники</string>
     <string name="rss_sources_pinned_in_tabs">Закрепить на главные вкладки</string>
+    <string name="rss_sources_open_in_browser">Открыть в браузере</string>
+    <string name="rss_sources_open_in_app">Открыть в приложении</string>
     <string name="rss_detail_open_in_browser">Открыть в браузере</string>
     <string name="rss_detail_share">Поделиться</string>
     <string name="rss_detail_tldr">Summarize</string>

@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">Kenmerke</string>
     <string name="home_tab_me_title">Ek</string>
     <string name="home_tab_discover_title">Ontdek</string>
-    <string name="home_timeline_new_toots">Nuwe toots</string>
     <string name="notification_tab_all_title">Alle</string>
     <string name="notification_tab_mentions_title">Verwysings</string>
     <string name="notification_tab_comments_title">Kommentaar</string>
@@ -30,7 +29,6 @@
     <string name="compose_poll_expiration_7_days">7 dae</string>
     <string name="compose_content_warning_hint">Inhoud waarskuwing</string>
     <string name="compose_media_sensitive">Merk media as sensitief</string>
-    <string name="compose_notification_title">Stuur toot</string>
     <string name="settings_title">Instellings</string>
     <string name="settings_accounts_title">Rekeningbestuur</string>
     <string name="settings_appearance_title">Uiterlik</string>
@@ -99,7 +97,6 @@
     <string name="more">Meer</string>
     <string name="discover_search_placeholder">Soek</string>
     <string name="discover_users">Raadpleeg Gebruikers</string>
-    <string name="discover_status">Tendense Toots</string>
     <string name="discover_hashtags">Tendense Hashtags</string>
     <string name="search_users">Gebruikers</string>
     <string name="search_status">Status</string>
@@ -243,6 +240,7 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">Geen rss bronne</string>
+    <string name="rss_sources_open_in_browser">Open in blaai</string>
     <string name="rss_detail_open_in_browser">Open in blaai</string>
     <string name="rss_detail_share">Deel</string>
     <string name="rss_detail_tldr">Som op</string>

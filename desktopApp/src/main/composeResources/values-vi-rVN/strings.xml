@@ -20,7 +20,6 @@
     <string name="home_tab_list_title">Danh sách</string>
     <string name="home_tab_feeds_title">Nguồn cấp dữ liệu</string>
     <string name="dm_list_title">Tin nhắn trực tiếp</string>
-    <string name="home_timeline_new_toots">Chưa có sản phẩm mới</string>
     <string name="navigate_back">Quay lại</string>
     <string name="service_select_instance_input_placeholder">URL phiên bản</string>
     <string name="service_select_next_button">Tiếp theo</string>

@@ -3,8 +3,6 @@
     <string name="delete">Törlés</string>
     <string name="profile_header_following_count">%1$s Követés</string>
     <string name="profile_header_fans_count">%1$s Követő</string>
-    <string name="profile_header_toots_count">%1$s Toots</string>
-    <string name="profile_misskey_header_status_count">%1$s Állapot</string>
     <string name="profile_header_button_follow">Követés</string>
     <string name="profile_header_button_following">Követés</string>
     <string name="profile_header_button_requested">Kérés</string>
@@ -58,8 +56,6 @@
     <string name="mastodon_visibility_direct_description">Csak a megemlített felhasználók láthatják ezt a tootot</string>
     <string name="settings_notifications_title">Értesítések</string>
     <string name="settings_notifications_subtitle">Testreszabhatod, hogyan értesít a Flare</string>
-    <string name="status_loadmore_end">Nincsenek többé toots</string>
-    <string name="status_loadmore_error">Hiba történt a további toots betöltésekor</string>
     <string name="status_loadmore_error_retry">Újrapróbálás</string>
     <string name="status_empty">Nincs itt semmi látnivaló</string>
     <string name="status_sensitive_media">Érzékeny média</string>
@@ -104,8 +100,6 @@
     <string name="user_unmute">Némítás eltávolítása %1$s</string>
     <string name="mastodon_item_content_warning">Tartalom figyelmeztetés</string>
     <string name="reply_to">Válasz %1$s</string>
-    <string name="status_detail_translate">Fordítás %1$s-ra</string>
-    <string name="status_detail_tldr">Összefoglalás</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>

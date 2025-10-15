@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">الإشعارات</string>
     <string name="home_tab_me_title">أنا</string>
     <string name="home_tab_discover_title">اكتشف</string>
-    <string name="home_timeline_new_toots">تبويقات جديدة</string>
+    <string name="home_timeline_new_toots">مشاركات جديدة</string>
     <string name="notification_tab_all_title">الكل</string>
     <string name="notification_tab_mentions_title">الإشارات</string>
     <string name="notification_tab_comments_title">تعليقات</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 أيام</string>
     <string name="compose_content_warning_hint">تحذير المحتوى</string>
     <string name="compose_media_sensitive">تحديد الوسائط كوسائط حساسة</string>
-    <string name="compose_notification_title">إرسال التبويق</string>
+    <string name="compose_notification_title">إرسال الرد</string>
     <string name="settings_title">الإعدادات</string>
     <string name="settings_accounts_title">إدارة الحساب</string>
     <string name="settings_appearance_title">المظهر</string>
@@ -103,7 +103,7 @@
     <string name="more">المزيد</string>
     <string name="discover_search_placeholder">البحث</string>
     <string name="discover_users">المستخدمين الموصى بهم</string>
-    <string name="discover_status">التبويقات الشائعة</string>
+    <string name="discover_status">المشاركات المتداولة</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">المستخدمون</string>
     <string name="search_status">الحالة</string>
@@ -260,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">تحتاج إلى تعيين مضيف RssHub إذا كنت ترغب في استخدام RssHub، أو تحديد خادم RssHub العام</string>
     <string name="rss_sources_discovered_rss_sources">مصادر Rss المكتشفة</string>
     <string name="rss_sources_pinned_in_tabs">تثبيت إلى علامات التبويب الرئيسية</string>
+    <string name="rss_sources_open_in_browser">فتح في المتصفح</string>
+    <string name="rss_sources_open_in_app">فتح في التطبيق</string>
     <string name="rss_detail_open_in_browser">فتح في المتصفح</string>
     <string name="rss_detail_share">مشاركة</string>
     <string name="rss_detail_tldr">Summarize</string>

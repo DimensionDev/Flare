@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Listă</string>
     <string name="home_tab_feeds_title">Fluxuri</string>
     <string name="dm_list_title">Mesaje directe</string>
-    <string name="home_timeline_new_toots">Notițe noi</string>
+    <string name="home_timeline_new_toots">Postări noi</string>
     <string name="navigate_back">Înapoi</string>
     <string name="service_select_instance_input_placeholder">URL Instanță</string>
     <string name="service_select_next_button">Următoarea</string>

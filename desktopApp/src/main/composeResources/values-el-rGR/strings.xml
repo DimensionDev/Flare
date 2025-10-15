@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Λίστα</string>
     <string name="home_tab_feeds_title">Ροές</string>
     <string name="dm_list_title">Άμεσα Μηνύματα</string>
-    <string name="home_timeline_new_toots">Νέα φωνές</string>
+    <string name="home_timeline_new_toots">Νέες Δημοσιεύσεις</string>
     <string name="navigate_back">Πίσω</string>
     <string name="service_select_instance_input_placeholder">Διεύθυνση Url Παρουσίας</string>
     <string name="service_select_next_button">Επόμενο</string>

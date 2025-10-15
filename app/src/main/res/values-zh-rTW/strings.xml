@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">我</string>
     <string name="home_tab_discover_title">探索</string>
-    <string name="home_timeline_new_toots">新消息</string>
     <string name="notification_tab_all_title">所有</string>
     <string name="notification_tab_mentions_title">提及</string>
     <string name="notification_tab_comments_title">評論</string>
@@ -30,7 +29,6 @@
     <string name="compose_poll_expiration_7_days">7天</string>
     <string name="compose_content_warning_hint">內容警告</string>
     <string name="compose_media_sensitive">將媒體標記為敏感</string>
-    <string name="compose_notification_title">發送消息</string>
     <string name="settings_title">設定</string>
     <string name="settings_accounts_title">帳號管理</string>
     <string name="settings_appearance_title">外觀</string>
@@ -99,7 +97,6 @@
     <string name="more">更多</string>
     <string name="discover_search_placeholder">搜尋</string>
     <string name="discover_users">推薦用戶</string>
-    <string name="discover_status">熱門消息</string>
     <string name="discover_hashtags">熱門標籤</string>
     <string name="search_users">用戶</string>
     <string name="search_status">狀態</string>
@@ -247,6 +244,7 @@
     <string name="rss_sources_rss_hub_host_hint">如果要使用 RssHub，您需要設定 RssHub 主機，或選擇公共 RssHub 伺服器</string>
     <string name="rss_sources_discovered_rss_sources">發現的 Rss 來源</string>
     <string name="rss_sources_pinned_in_tabs">釘選到首頁標籤</string>
+    <string name="rss_sources_open_in_browser">在瀏覽器中打開</string>
     <string name="rss_detail_open_in_browser">在瀏覽器中打開</string>
     <string name="rss_detail_share">分享</string>
     <string name="rss_detail_tldr">總結</string>

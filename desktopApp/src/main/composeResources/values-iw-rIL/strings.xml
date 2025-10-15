@@ -20,7 +20,6 @@
     <string name="home_tab_list_title">רשימה</string>
     <string name="home_tab_feeds_title">פידים</string>
     <string name="dm_list_title">הודעות ישירות</string>
-    <string name="home_timeline_new_toots">טוויטים חדשים</string>
     <string name="navigate_back">הקודם</string>
     <string name="service_select_instance_input_placeholder">כתובת URL של מופע</string>
     <string name="service_select_next_button">הבא</string>

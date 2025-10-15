@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Elenco</string>
     <string name="home_tab_feeds_title">Feed</string>
     <string name="dm_list_title">Messaggi Diretti</string>
-    <string name="home_timeline_new_toots">Nuovi toots</string>
+    <string name="home_timeline_new_toots">Nuovi Post</string>
     <string name="navigate_back">Indietro</string>
     <string name="service_select_instance_input_placeholder">Url Istanza</string>
     <string name="service_select_next_button">Successivo</string>

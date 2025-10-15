@@ -20,7 +20,6 @@
     <string name="home_tab_list_title">Llista</string>
     <string name="home_tab_feeds_title">Fluxos</string>
     <string name="dm_list_title">Missatges directes</string>
-    <string name="home_timeline_new_toots">Nous toots</string>
     <string name="navigate_back">Torna</string>
     <string name="service_select_instance_input_placeholder">URL de la instància</string>
     <string name="service_select_next_button">Següent</string>

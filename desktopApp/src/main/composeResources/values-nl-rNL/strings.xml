@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Klantenlijst</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Directe Berichten</string>
-    <string name="home_timeline_new_toots">Nieuwe toots</string>
+    <string name="home_timeline_new_toots">Nieuwe berichten</string>
     <string name="navigate_back">Achterzijde</string>
     <string name="service_select_instance_input_placeholder">Aanleg URL</string>
     <string name="service_select_next_button">Volgende</string>

@@ -3,8 +3,8 @@
     <string name="delete">削除</string>
     <string name="profile_header_following_count">%1$sフォロー中</string>
     <string name="profile_header_fans_count">%1$sフォロワー</string>
-    <string name="profile_header_toots_count">%1$sトゥート</string>
-    <string name="profile_misskey_header_status_count">%1$sノート</string>
+    <string name="profile_header_toots_count">%1$s 投稿</string>
+    <string name="profile_misskey_header_status_count">%1$s 投稿</string>
     <string name="profile_header_button_follow">フォロー</string>
     <string name="profile_header_button_following">フォロー中</string>
     <string name="profile_header_button_requested">申請済み</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">メンションされたユーザーのみがこのノートを見ることができます。</string>
     <string name="settings_notifications_title">通知</string>
     <string name="settings_notifications_subtitle">Flareの通知方法をカスタマイズします</string>
-    <string name="status_loadmore_end">トゥートはありません</string>
-    <string name="status_loadmore_error">トゥートの読み込みエラー</string>
+    <string name="status_loadmore_end">これ以上の投稿はありません</string>
+    <string name="status_loadmore_error">他の投稿の読み込み中にエラーが発生しました</string>
     <string name="status_loadmore_error_retry">再試行する</string>
     <string name="status_empty">ここに表示するものはありません</string>
     <string name="status_sensitive_media">敏感なメディア</string>
     <string name="show_media">メディアを表示</string>
+    <string name="hide_media">メディアを隠す</string>
     <string name="login_expired">ログインセッションの有効期限が切れました</string>
     <string name="login_expired_message">クリックして再度ログインする</string>
     <string name="login_expired_relogin">再度ログインする</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">%1$sのミュートを解除</string>
     <string name="mastodon_item_content_warning">閲覧注意:</string>
     <string name="reply_to">%1$sに返信</string>
-    <string name="status_detail_translate">%1$sに翻訳</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">投稿を翻訳</string>
+    <string name="status_detail_tldr">概要投稿</string>
     <string name="date_format_year_month_day">yyyy年M月d日</string>
     <string name="date_format_month_day">M月d日</string>
     <string name="date_format_full">dd MMM yy HHH:mm</string>

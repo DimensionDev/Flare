@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">Thông báo</string>
     <string name="home_tab_me_title">Tôi</string>
     <string name="home_tab_discover_title">Khám phá</string>
-    <string name="home_timeline_new_toots">Chưa có sản phẩm mới</string>
     <string name="notification_tab_all_title">Tất cả</string>
     <string name="notification_tab_mentions_title">Đề cập</string>
     <string name="notification_tab_comments_title">Bình luận</string>
@@ -30,7 +29,6 @@
     <string name="compose_poll_expiration_7_days">7 ngày</string>
     <string name="compose_content_warning_hint">Cảnh báo nội dung</string>
     <string name="compose_media_sensitive">Đánh dấu phương tiện là nhạy cảm</string>
-    <string name="compose_notification_title">Đang gửi toot</string>
     <string name="settings_title">Cài đặt</string>
     <string name="settings_accounts_title">Quản lý tài khoản</string>
     <string name="settings_appearance_title">Giao diện</string>
@@ -99,7 +97,6 @@
     <string name="more">Thêm</string>
     <string name="discover_search_placeholder">Tìm kiếm</string>
     <string name="discover_users">Đề xuất người dùng</string>
-    <string name="discover_status">Toots đang trending</string>
     <string name="discover_hashtags">Hashtags đang trending</string>
     <string name="search_users">Người dùng</string>
     <string name="search_status">Trạng thái</string>
@@ -243,6 +240,7 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">Không có nguồn rss nào</string>
+    <string name="rss_sources_open_in_browser">Mở trong trình duyệt</string>
     <string name="rss_detail_open_in_browser">Mở trong trình duyệt</string>
     <string name="rss_detail_share">Chia sẻ</string>
     <string name="rss_detail_tldr">Tóm tắt</string>

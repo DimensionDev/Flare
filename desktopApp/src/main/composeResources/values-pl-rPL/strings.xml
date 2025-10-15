@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Lista</string>
     <string name="home_tab_feeds_title">Kanały</string>
     <string name="dm_list_title">Wiadomości bezpośrednie</string>
-    <string name="home_timeline_new_toots">Nowe wpisy</string>
+    <string name="home_timeline_new_toots">Nowe posty</string>
     <string name="navigate_back">Powrót</string>
     <string name="service_select_instance_input_placeholder">Adres URL instancji</string>
     <string name="service_select_next_button">Następny</string>

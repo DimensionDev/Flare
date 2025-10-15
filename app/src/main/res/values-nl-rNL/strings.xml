@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Notificaties</string>
     <string name="home_tab_me_title">IK</string>
     <string name="home_tab_discover_title">Ontdek</string>
-    <string name="home_timeline_new_toots">Nieuwe toots</string>
+    <string name="home_timeline_new_toots">Nieuwe berichten</string>
     <string name="notification_tab_all_title">Allemaal</string>
     <string name="notification_tab_mentions_title">Vermeldingen</string>
     <string name="notification_tab_comments_title">Opmerkingen</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 dagen</string>
     <string name="compose_content_warning_hint">Waarschuwing inhoud</string>
     <string name="compose_media_sensitive">Media als gevoelig markeren</string>
-    <string name="compose_notification_title">Toot verzenden</string>
+    <string name="compose_notification_title">Bericht verzenden</string>
     <string name="settings_title">Instellingen</string>
     <string name="settings_accounts_title">Account beheer</string>
     <string name="settings_appearance_title">Uiterlijk</string>
@@ -103,7 +103,7 @@
     <string name="more">Meer</string>
     <string name="discover_search_placeholder">Zoeken</string>
     <string name="discover_users">Gebruikers aanbevelen</string>
-    <string name="discover_status">Populaire Toots</string>
+    <string name="discover_status">Populaire berichten</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Gebruikers</string>
     <string name="search_status">status</string>
@@ -260,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">U moet de RssHub host instellen als u RssHub wilt gebruiken, of selecteer de publieke RssHub server</string>
     <string name="rss_sources_discovered_rss_sources">Ontdekte Rss Bronnen</string>
     <string name="rss_sources_pinned_in_tabs">Vastmaken aan home tabbladen</string>
+    <string name="rss_sources_open_in_browser">Openen in browser</string>
+    <string name="rss_sources_open_in_app">Openen in app</string>
     <string name="rss_detail_open_in_browser">Openen in browser</string>
     <string name="rss_detail_share">Delen</string>
     <string name="rss_detail_tldr">Summarize</string>

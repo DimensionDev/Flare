@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">Bildirimler</string>
     <string name="home_tab_me_title">Ben</string>
     <string name="home_tab_discover_title">Keşfet</string>
-    <string name="home_timeline_new_toots">Yeni paylaşım</string>
     <string name="notification_tab_all_title">Hepsi</string>
     <string name="notification_tab_mentions_title">Bahsedilenler</string>
     <string name="notification_tab_comments_title">Yorumlar</string>
@@ -30,7 +29,6 @@
     <string name="compose_poll_expiration_7_days">7 gün</string>
     <string name="compose_content_warning_hint">İçerik uyarısı</string>
     <string name="compose_media_sensitive">Medya duyarlı olarak işaretle</string>
-    <string name="compose_notification_title">Gönderi gönderiliyor</string>
     <string name="settings_title">Ayarlar</string>
     <string name="settings_accounts_title">Hesap Yönetimi</string>
     <string name="settings_appearance_title">Görünüm</string>
@@ -99,7 +97,6 @@
     <string name="more">Daha fazlası</string>
     <string name="discover_search_placeholder">Ara</string>
     <string name="discover_users">Kullanıcıları öner</string>
-    <string name="discover_status">Gündemdeki Paylaşımlar</string>
     <string name="discover_hashtags">Gündemdeki Etiketler</string>
     <string name="search_users">Kullanıcılar</string>
     <string name="search_status">Durum</string>
@@ -247,6 +244,7 @@
     <string name="rss_sources_rss_hub_host_hint">RssHub kullanmak istiyorsanız RssHub ana bilgisayarını ayarlamanız veya genel RssHub sunucusunu seçmeniz gerekir</string>
     <string name="rss_sources_discovered_rss_sources">Keşfedilen Rss Kaynakları</string>
     <string name="rss_sources_pinned_in_tabs">Ana sekmelere sabitleyin</string>
+    <string name="rss_sources_open_in_browser">Tarayıcıda aç</string>
     <string name="rss_detail_open_in_browser">Tarayıcıda aç</string>
     <string name="rss_detail_share">Paylaş</string>
     <string name="rss_detail_tldr">Özetle</string>

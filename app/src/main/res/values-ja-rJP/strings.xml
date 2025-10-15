@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">自分</string>
     <string name="home_tab_discover_title">見つける</string>
-    <string name="home_timeline_new_toots">新しいトゥート</string>
+    <string name="home_timeline_new_toots">新しい投稿</string>
     <string name="notification_tab_all_title">全て</string>
     <string name="notification_tab_mentions_title">メンション</string>
     <string name="notification_tab_comments_title">コメント</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7日</string>
     <string name="compose_content_warning_hint">閲覧注意:</string>
     <string name="compose_media_sensitive">メディアを閲覧注意にする</string>
-    <string name="compose_notification_title">トゥートを送信中</string>
+    <string name="compose_notification_title">投稿を送信中</string>
     <string name="settings_title">設定</string>
     <string name="settings_accounts_title">アカウント管理</string>
     <string name="settings_appearance_title">外観</string>
@@ -103,7 +103,7 @@
     <string name="more">もっと見る</string>
     <string name="discover_search_placeholder">検索</string>
     <string name="discover_users">おすすめのユーザー</string>
-    <string name="discover_status">話題のトゥート</string>
+    <string name="discover_status">人気の投稿</string>
     <string name="discover_hashtags">ハッシュタグトレンド</string>
     <string name="search_users">ユーザー</string>
     <string name="search_status">ステータス</string>
@@ -260,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">RssHubを使用する場合は、RssHubホストを設定するか、RssHubサーバーを選択する必要があります。</string>
     <string name="rss_sources_discovered_rss_sources">検出された RSS ソース</string>
     <string name="rss_sources_pinned_in_tabs">ホームタブに固定</string>
+    <string name="rss_sources_open_in_browser">ブラウザで開く</string>
+    <string name="rss_sources_open_in_app">アプリで開く</string>
     <string name="rss_detail_open_in_browser">ブラウザで開く</string>
     <string name="rss_detail_share">共有</string>
     <string name="rss_detail_tldr">Summarize</string>

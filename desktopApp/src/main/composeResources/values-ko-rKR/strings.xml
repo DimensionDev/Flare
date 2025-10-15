@@ -20,7 +20,6 @@
     <string name="home_tab_list_title">목록</string>
     <string name="home_tab_feeds_title">피드</string>
     <string name="dm_list_title">다이렉트 메시지</string>
-    <string name="home_timeline_new_toots">새로운 투트</string>
     <string name="navigate_back">뒤로</string>
     <string name="service_select_instance_input_placeholder">인스턴스 URL</string>
     <string name="service_select_next_button">다음</string>

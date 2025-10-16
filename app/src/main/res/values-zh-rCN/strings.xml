@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">我</string>
     <string name="home_tab_discover_title">发现</string>
-    <string name="home_timeline_new_toots">新员额</string>
+    <string name="home_timeline_new_toots">新帖子</string>
     <string name="notification_tab_all_title">全部</string>
     <string name="notification_tab_mentions_title">提及</string>
     <string name="notification_tab_comments_title">评论</string>
@@ -287,7 +287,10 @@
     <string name="home_tab_social_timeline_title">社交</string>
     <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
             <ul>
-                <li>Bug 修复和性能改进</li>
+                <li>添加的字体设置。</li>
+                <li>对RSS功能进行了重大修改。 文章内容是原生化的，而不是使用 Web View。</li>
+                <li>优化富文本渲染逻辑以提高性能。</li>
+                <li>Bug 修复和性能改进。</li>
             </ul>
         ]]></string>
 </resources>

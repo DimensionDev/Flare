@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Увімкнути підсумок ШІ</string>
     <string name="settings_ai_config_tldr_description">Увімкнути підсумок ШІ для довгих постів, доступних тільки в повідомленнях, більше ніж 500 символів</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Показувати композицію на домашній стрічці</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Показати композицію у верхній частині домашньої часової шкали</string>
     <string name="settings_appearance_show_actions">Показати дії</string>
     <string name="settings_appearance_show_actions_description">Показати дії внизу статусу</string>
     <string name="settings_appearance_show_media">Показати медіа</string>

@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Povolit souhrn AI</string>
     <string name="settings_ai_config_tldr_description">Povolit AI shrnutí pro dlouhé příspěvky, dostupné pouze v příspěvku, který je delší než 500 znaků</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Zobrazit složené pole v domácí časové ose</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Zobrazit složené pole v horní části domácí časové osy</string>
     <string name="settings_appearance_show_actions">Zobrazit akce</string>
     <string name="settings_appearance_show_actions_description">Zobrazit akce v dolní části stavu</string>
     <string name="settings_appearance_show_media">Zobrazit média</string>

@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Aktiver AI sammendrag</string>
     <string name="settings_ai_config_tldr_description">Aktiver oppsummering av AI for lange innlegg, kun tilgjengelig i innlegg som er lengre enn 500 tegn</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Vis pose boks i hjemmetidslinjen</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Vis pose boksen i toppen av hjemme tidslinjen</string>
     <string name="settings_appearance_show_actions">Vis handlinger</string>
     <string name="settings_appearance_show_actions_description">Vis handlinger på bunnen av statusen</string>
     <string name="settings_appearance_show_media">Vis media</string>

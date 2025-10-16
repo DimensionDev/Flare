@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">列表</string>
     <string name="home_tab_feeds_title">订阅源</string>
     <string name="dm_list_title">私信</string>
-    <string name="home_timeline_new_toots">新员额</string>
+    <string name="home_timeline_new_toots">新帖子</string>
     <string name="navigate_back">后退</string>
     <string name="service_select_instance_input_placeholder">实例地址</string>
     <string name="service_select_next_button">下一步</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">启用 AI 摘要</string>
     <string name="settings_ai_config_tldr_description">对长篇文章启用 AI 摘要，仅在超过 500 个字符的帖子中可用</string>
     <string name="settings_appearance_generic">通用</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">在首页时间轴顶部显示撰写框</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">在首页时间轴顶部显示撰写框</string>
     <string name="settings_appearance_show_actions">显示操作</string>
     <string name="settings_appearance_show_actions_description">在状态的底部显示操作</string>
     <string name="settings_appearance_show_media">显示媒体</string>

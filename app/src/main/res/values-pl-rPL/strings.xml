@@ -287,7 +287,10 @@
     <string name="home_tab_social_timeline_title">Społeczność</string>
     <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
-                <li>Poprawki błędów i ulepszenia wydajności</li>
+                <li>Dodane ustawienia czcionek.</li>
+                <li>Znacznie zmodernizowano funkcję RSS. Zawartość artykułu jest teraz wyświetlana native zamiast używać WebView.</li>
+                <li>Zoptymalizowana logika renderowania bogatych tekstów dla lepszej wydajności.</li>
+                <li>Poprawki błędów i ulepszenia wydajności.</li>
             </ul>
         ]]></string>
 </resources>

@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">KI-Zusammenfassung aktivieren</string>
     <string name="settings_ai_config_tldr_description">KI-Zusammenfassung für lange Beiträge aktivieren, nur verfügbar in Beiträgen, die länger als 500 Zeichen sind</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Kompositionsbox in der Home-Zeitleiste anzeigen</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Kompositionsbox im oberen Teil der Home-Zeitleiste anzeigen</string>
     <string name="settings_appearance_show_actions">Aktionen anzeigen</string>
     <string name="settings_appearance_show_actions_description">Aktionen am unteren Ende des Status anzeigen</string>
     <string name="settings_appearance_show_media">Medien anzeigen</string>

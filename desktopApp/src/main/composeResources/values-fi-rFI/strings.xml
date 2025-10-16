@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Ota Käyttöön tekoälyn Yhteenveto</string>
     <string name="settings_ai_config_tldr_description">Ota käyttöön tekoälyn yhteenveto pitkiä viestejä, saatavilla vain post että yli 500 merkkiä</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Näytä säveltää laatikko kotona aikajanalla</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Näytä säveltää laatikko yläreunassa kodin aikajanalla</string>
     <string name="settings_appearance_show_actions">Näytä toiminnot</string>
     <string name="settings_appearance_show_actions_description">Näytä toiminnot tilan alareunassa</string>
     <string name="settings_appearance_show_media">Näytä media</string>

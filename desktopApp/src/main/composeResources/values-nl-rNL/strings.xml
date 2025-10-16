@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">AI samenvatting inschakelen</string>
     <string name="settings_ai_config_tldr_description">AI samenvatting inschakelen voor lange berichten, alleen beschikbaar in post van meer dan 500 tekens</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Toon opstelveld in de home tijdlijn</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Toon opstelveld boven de thuistijdlijn</string>
     <string name="settings_appearance_show_actions">Toon acties</string>
     <string name="settings_appearance_show_actions_description">Acties weergeven onderaan de status</string>
     <string name="settings_appearance_show_media">Media tonen</string>

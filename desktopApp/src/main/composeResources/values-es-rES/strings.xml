@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Activar resumen de IA</string>
     <string name="settings_ai_config_tldr_description">Habilitar resumen de IA para mensajes largos, sólo disponible en post de más de 500 caracteres</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Mostrar cuadro de composición en la línea de tiempo de inicio</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Mostrar cuadro de composición en la parte superior de la línea de tiempo</string>
     <string name="settings_appearance_show_actions">Mostrar acciones</string>
     <string name="settings_appearance_show_actions_description">Mostrar acciones en la parte inferior del estado</string>
     <string name="settings_appearance_show_media">Mostrar medios</string>

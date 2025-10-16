@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Włącz podsumowanie AI</string>
     <string name="settings_ai_config_tldr_description">Włącz podsumowanie AI dla długich postów, dostępne tylko w postach dłuższych niż 500 znaków</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Pokaż pole kompozycji na głównej osi czasu</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Pokaż pole kompozycji w górnej części głównej osi czasu</string>
     <string name="settings_appearance_show_actions">Pokaż akcje</string>
     <string name="settings_appearance_show_actions_description">Pokaż akcje na dole stanu</string>
     <string name="settings_appearance_show_media">Pokaż media</string>

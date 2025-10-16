@@ -287,7 +287,10 @@
     <string name="home_tab_social_timeline_title">Sociale</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
-                <li>Remedierea erorilor şi îmbunătăţirea performanţei</li>
+                <li>Setările de font adăugate.</li>
+                <li>A a restructurat semnificativ caracteristica RSS. Conținutul articolului este acum afișat nativ în loc să folosească un WebView.</li>
+                <li>Logică optimizată de randare a textului bogat pentru o performanță mai bună.</li>
+                <li>Remedierea erorilor şi îmbunătăţirea performanţei.</li>
             </ul>
         ]]></string>
 </resources>

@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Activer le résumé de l\'IA</string>
     <string name="settings_ai_config_tldr_description">Activer le résumé de l\'IA pour les publications longues, uniquement disponible pour les publications de plus de 500 caractères</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Afficher la zone de composition dans le fil d\'accueil</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Afficher la zone de composition en haut de la page d\'accueil</string>
     <string name="settings_appearance_show_actions">Afficher les actions</string>
     <string name="settings_appearance_show_actions_description">Afficher les actions en bas du statut</string>
     <string name="settings_appearance_show_media">Afficher les médias</string>

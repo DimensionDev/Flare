@@ -122,6 +122,7 @@ jobs:
           msixbundle-filepath: "desktopApp/src/main/csharp/AppPackages/Flare.msixbundle"
           msixbundle-version: ${{ format('{0}.0', github.ref_name) }}
       - name: Upload MSIX package
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v4
         with:
           name: Windows-package

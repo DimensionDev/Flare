@@ -287,7 +287,10 @@
     <string name="home_tab_social_timeline_title">Sociaal</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
-                <li>Bug fixes and performance verbeteringen</li>
+                <li>lettertype-instellingen.</li>
+                <li>Vermeldt de RSS functie aanzienlijk opnieuw. Artikelinhoud wordt nu weergegeven in plaats van een WebView.</li>
+                <li>Geoptimaliseerde rijken logica voor betere prestaties.</li>
+                <li>bugfixes en prestatieverbeteringen.</li>
             </ul>
         ]]></string>
 </resources>

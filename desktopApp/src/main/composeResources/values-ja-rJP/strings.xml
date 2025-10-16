@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">AIサマリー化を有効にする</string>
     <string name="settings_ai_config_tldr_description">長い投稿のAIサマリー化を有効にします。500文字以上の投稿でのみ利用できます</string>
     <string name="settings_appearance_generic">全般</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">ホームタイムラインに作成ボックスを表示</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">ホームタイムライン上部にメッセージ作成ボックスを表示</string>
     <string name="settings_appearance_show_actions">アクションを表示</string>
     <string name="settings_appearance_show_actions_description">ステータスの下部にアクションを表示する</string>
     <string name="settings_appearance_show_media">メディアを表示</string>

@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Ενεργοποίηση Περίληψης Τεχνητής Νοημοσύνης</string>
     <string name="settings_ai_config_tldr_description">Ενεργοποίηση περιλήψεων τεχνητής νοημοσύνης για μεγάλες δημοσιεύσεις, μόνο διαθέσιμη σε ανάρτηση που υπερβαίνει τους 500 χαρακτήρες</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Εμφάνιση πλαισίου σύνθεσης στην αρχική χρονολογική γραμμή</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Εμφάνιση πλαισίου σύνθεσης στην κορυφή του αρχικού χρονολογίου</string>
     <string name="settings_appearance_show_actions">Εμφάνιση ενεργειών</string>
     <string name="settings_appearance_show_actions_description">Εμφάνιση ενεργειών στο κάτω μέρος της κατάστασης</string>
     <string name="settings_appearance_show_media">Εμφάνιση πολυμέσων</string>

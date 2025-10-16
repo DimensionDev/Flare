@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Habilitar resumo de IA</string>
     <string name="settings_ai_config_tldr_description">Ativar o resumo de IA para publicações longas, somente disponíveis na publicação com mais de 500 caracteres</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Mostrar caixa de composição na linha do tempo inicial</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Mostrar caixa de composição no topo da linha do tempo inicial</string>
     <string name="settings_appearance_show_actions">Mostrar ações</string>
     <string name="settings_appearance_show_actions_description">Mostrar ações na parte inferior do status</string>
     <string name="settings_appearance_show_media">Mostrar mídia</string>

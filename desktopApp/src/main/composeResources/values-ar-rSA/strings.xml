@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">تمكين ملخص الذكاء الاصطناعي</string>
     <string name="settings_ai_config_tldr_description">تمكين تلخيص الذكاء الاصطناعي لمشاركات طويلة، فقط متاح في المشاركة التي تزيد عن 500 حرف</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">إظهار مربع تكوين في الخيط الزمني الرئيسي</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">إظهار مربع تكوين في الجزء العلوي من الخيط الزمني الرئيسي</string>
     <string name="settings_appearance_show_actions">إظهار الإجراءات</string>
     <string name="settings_appearance_show_actions_description">إظهار الإجراءات في الجزء السفلي من الحالة</string>
     <string name="settings_appearance_show_media">إظهار الوسائط</string>

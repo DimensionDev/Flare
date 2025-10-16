@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Включить ИИ сворачивание</string>
     <string name="settings_ai_config_tldr_description">Включить ИИ резюме для длинных записей, доступных только в сообщении, длиннее 500 символов</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Показать поле компоновки в домашней шкале времени</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Показать поле создания в верхней части домашней ленты времени</string>
     <string name="settings_appearance_show_actions">Показать действия</string>
     <string name="settings_appearance_show_actions_description">Показать действия внизу статуса</string>
     <string name="settings_appearance_show_media">Показать медиа</string>

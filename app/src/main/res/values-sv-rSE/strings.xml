@@ -287,7 +287,10 @@
     <string name="home_tab_social_timeline_title">Socialt</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Felrättelser och prestandaförbättringar</li>
+                <li>Lade till teckensnittsinställningar.</li>
+                <li>Betydligt förnyade RSS-funktionen. Artikelinnehållet renderas nu direkt i stället för att använda en WebView.</li>
+                <li>Optimerad logik för textrendering för bättre prestanda.</li>
+                <li>Felrättelser och prestandaförbättringar.</li>
             </ul>
         ]]></string>
 </resources>

@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Aktivera AI-sammanfattning</string>
     <string name="settings_ai_config_tldr_description">Aktivera AI-sammanfattning för långa inlägg, endast tillgängligt i inlägg som är längre än 500 tecken</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Visa komponera rutan i hemtidslinjen</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Visa komponera rutan i toppen av hemtidslinjen</string>
     <string name="settings_appearance_show_actions">Visa åtgärder</string>
     <string name="settings_appearance_show_actions_description">Visa åtgärder längst ner på statusen</string>
     <string name="settings_appearance_show_media">Visa media</string>

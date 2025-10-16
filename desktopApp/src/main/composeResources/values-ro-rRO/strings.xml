@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Activează rezumarea AI</string>
     <string name="settings_ai_config_tldr_description">Activează sumarizarea AI pentru postările lungi, disponibile doar în postarea care depășește 500 de caractere</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Arată caseta de compunere în cronologia principală</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Arată caseta de compunere în partea de sus a cronologiei principale</string>
     <string name="settings_appearance_show_actions">Afișare acțiuni</string>
     <string name="settings_appearance_show_actions_description">Arată acțiunile în partea de jos a stării</string>
     <string name="settings_appearance_show_media">Arată media</string>

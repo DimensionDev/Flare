@@ -10,7 +10,7 @@
   <Identity
     Name="51945Tlaster.FlareApp"
     Publisher="CN=F82B0EE7-EF8D-4515-BEAB-DD968D07D67F"
-    Version="1.0.4.0" />
+    Version="1.0.5.0" />
 
   <mp:PhoneIdentity PhoneProductId="41c320a3-e557-4743-b941-89a8a7c94021" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

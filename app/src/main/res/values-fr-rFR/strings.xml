@@ -288,7 +288,7 @@
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
                 <li>Ajout de paramètres de police.</li>
-                <li>a remanié significativement la fonctionnalité RSS. Le contenu de l'article est maintenant rendu nativement au lieu d'utiliser une WebView.</li>
+                <li>a remanié significativement la fonctionnalité RSS. Le contenu de l\'article est maintenant rendu nativement au lieu d\'utiliser une WebView.</li>
                 <li>Une logique optimisée de rendu en texte riche pour de meilleures performances.</li>
                 <li>Corrections de bugs et améliorations des performances.</li>
             </ul>

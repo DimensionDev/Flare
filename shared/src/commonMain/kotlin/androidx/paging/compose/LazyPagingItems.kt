@@ -22,7 +22,8 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
-import nostr.
+import nostr.keys.PagingPlaceholderContentType
+
 
 /**
  * The class responsible for accessing the data from a [Flow] of [PagingData].

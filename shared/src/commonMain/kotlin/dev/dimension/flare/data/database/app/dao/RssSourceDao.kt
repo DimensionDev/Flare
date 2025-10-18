@@ -22,4 +22,7 @@ internal interface RssSourceDao {
 
     @Query("SELECT * FROM DbRssSources WHERE id = :id")
     fun get(id: Int): Flow<DbRssSources>
+
+    @Query("SELECT * FROM DbRssSources WHERE url = :url")
+    suspend fun getByUrl(url: String): List<DbRssSources>
 }

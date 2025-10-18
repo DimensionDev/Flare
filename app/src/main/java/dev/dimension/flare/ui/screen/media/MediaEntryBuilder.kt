@@ -2,14 +2,14 @@ package dev.dimension.flare.ui.screen.media
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.window.DialogProperties
-import androidx.navigation3.runtime.EntryProviderBuilder
+import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.route.Route
 
 @OptIn(ExperimentalMaterial3Api::class)
-internal fun EntryProviderBuilder<NavKey>.mediaEntryBuilder(
+internal fun EntryProviderScope<NavKey>.mediaEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
 ) {

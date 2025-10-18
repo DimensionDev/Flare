@@ -1,3 +1,4 @@
 resources/*
 signing/*
 signing.properties
+.provisionprofile

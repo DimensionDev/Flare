@@ -397,7 +397,7 @@ internal open class MastodonDataSource(
                 quoteID = quoteID,
             ),
         )
-        progress(ComposeProgress(maxProgress, maxProgress))
+//        progress(ComposeProgress(maxProgress, maxProgress))
     }
 
     override fun like(

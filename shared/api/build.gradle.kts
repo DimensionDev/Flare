@@ -14,11 +14,9 @@ kotlin {
         minSdk = libs.versions.minSdk.get().toInt()
     }
     jvm()
-    macosX64()
     macosArm64()
     linuxX64()
     mingwX64()
-    iosX64()
     iosArm64()
     iosSimulatorArm64()
 

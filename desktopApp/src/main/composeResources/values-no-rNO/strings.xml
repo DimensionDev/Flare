@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Liste</string>
     <string name="home_tab_feeds_title">Strøm</string>
     <string name="dm_list_title">Direkte meldinger</string>
-    <string name="home_timeline_new_toots">Nye toots</string>
+    <string name="home_timeline_new_toots">Nye innlegg</string>
     <string name="navigate_back">Tilbake</string>
     <string name="service_select_instance_input_placeholder">Instans URL</string>
     <string name="service_select_next_button">Neste</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Aktiver AI sammendrag</string>
     <string name="settings_ai_config_tldr_description">Aktiver oppsummering av AI for lange innlegg, kun tilgjengelig i innlegg som er lengre enn 500 tegn</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Vis pose boks i hjemmetidslinjen</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Vis pose boksen i toppen av hjemme tidslinjen</string>
     <string name="settings_appearance_show_actions">Vis handlinger</string>
     <string name="settings_appearance_show_actions_description">Vis handlinger på bunnen av statusen</string>
     <string name="settings_appearance_show_media">Vis media</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">Standard</string>
     <string name="tab_settings_list">Liste</string>
     <string name="tab_settings_feed">Strøm</string>
-    <string name="notification_login_expired">Innlogging utløpt, vennligst logg inn igjen</string>
+    <string name="notification_login_expired">Innlogging utgått for %1$s</string>
     <string name="dm_list_empty">Ingen direkte meldinger</string>
     <string name="dm_list_error">Kunne ikke laste direkte meldinger</string>
     <string name="send">Sende</string>

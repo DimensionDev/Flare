@@ -14,6 +14,3 @@ internal data object PlatformTheme {
     val shapes: PlatformShapes = PlatformShapes
     val colorScheme: PlatformColorScheme = PlatformColorScheme
 }
-
-public val DisabledAlpha: Float = 0.38f
-public val MediumAlpha: Float = 0.75f

@@ -3,8 +3,8 @@
     <string name="delete">Видалити</string>
     <string name="profile_header_following_count">%1$s Підписки</string>
     <string name="profile_header_fans_count">%1$s Підписників</string>
-    <string name="profile_header_toots_count">%1$s казанок</string>
-    <string name="profile_misskey_header_status_count">%1$s статус</string>
+    <string name="profile_header_toots_count">%1$s Posts</string>
+    <string name="profile_misskey_header_status_count">%1$s Posts</string>
     <string name="profile_header_button_follow">Слідкувати</string>
     <string name="profile_header_button_following">Слідкую</string>
     <string name="profile_header_button_requested">Запитано</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Тільки згадані користувачі можуть бачити цей дмух</string>
     <string name="settings_notifications_title">Сповіщення</string>
     <string name="settings_notifications_subtitle">Налаштуйте, як покращує прошивку</string>
-    <string name="status_loadmore_end">Більше дмухів немає</string>
-    <string name="status_loadmore_error">Помилка при завантаженні дмухів</string>
+    <string name="status_loadmore_end">Повідомлень більше немає</string>
+    <string name="status_loadmore_error">Помилка при завантаженні повідомлень</string>
     <string name="status_loadmore_error_retry">Повторити спробу</string>
     <string name="status_empty">Тут немає чого бачити</string>
     <string name="status_sensitive_media">Дражливе медіа</string>
     <string name="show_media">Показати медіа</string>
+    <string name="hide_media">Приховати медіа</string>
     <string name="login_expired">Сесію входу закрито</string>
     <string name="login_expired_message">Нажміть кнопку для входу знову</string>
     <string name="login_expired_relogin">Знову увійти в систему</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Увімкнути звук %1$s</string>
     <string name="mastodon_item_content_warning">Попередження про вміст</string>
     <string name="reply_to">Відповісти %1$s</string>
-    <string name="status_detail_translate">Перекласти на %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Перекласти повідомлення</string>
+    <string name="status_detail_tldr">Анонс</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">дд MMM H:mm</string>
@@ -354,4 +355,13 @@
     <string name="social_title">Соціальні мережі</string>
     <string name="antenna_title">Антена</string>
     <string name="mixed_timeline_title">Змішаний</string>
+    <string name="settings_about_description">На основі децентралізованого клієнта соціальної мережі під час наступного покоління.</string>
+    <string name="settings_about_source_code">Початковий код</string>
+    <string name="settings_about_telegram">Телеграма</string>
+    <string name="settings_about_telegram_description">Приєднатися до нашої групи в Telegram</string>
+    <string name="settings_about_discord_description">Приєднатися до нашого сервера Discord</string>
+    <string name="settings_about_line_description">Приєднатися до нашої групи ліній</string>
+    <string name="settings_about_localization">Кравдін</string>
+    <string name="settings_about_localization_description">Допоможіть нам перекласти Flare</string>
+    <string name="settings_privacy_policy">Політика конфіденційності</string>
 </resources>

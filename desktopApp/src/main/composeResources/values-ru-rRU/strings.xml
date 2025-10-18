@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Список</string>
     <string name="home_tab_feeds_title">Ленты</string>
     <string name="dm_list_title">Прямые сообщения</string>
-    <string name="home_timeline_new_toots">Новые зубы</string>
+    <string name="home_timeline_new_toots">Новые сообщения</string>
     <string name="navigate_back">Назад</string>
     <string name="service_select_instance_input_placeholder">URL экземпляра</string>
     <string name="service_select_next_button">Следующий</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Включить ИИ сворачивание</string>
     <string name="settings_ai_config_tldr_description">Включить ИИ резюме для длинных записей, доступных только в сообщении, длиннее 500 символов</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Показать поле компоновки в домашней шкале времени</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Показать поле создания в верхней части домашней ленты времени</string>
     <string name="settings_appearance_show_actions">Показать действия</string>
     <string name="settings_appearance_show_actions_description">Показать действия внизу статуса</string>
     <string name="settings_appearance_show_media">Показать медиа</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">По умолчанию</string>
     <string name="tab_settings_list">Список</string>
     <string name="tab_settings_feed">Ленты</string>
-    <string name="notification_login_expired">Срок действия входа истек, пожалуйста, войдите снова</string>
+    <string name="notification_login_expired">Вход просрочен для %1$s</string>
     <string name="dm_list_empty">Нет личных сообщений</string>
     <string name="dm_list_error">Не удалось загрузить личные сообщения</string>
     <string name="send">Отправить</string>

@@ -3,8 +3,8 @@
     <string name="delete">Ștergere</string>
     <string name="profile_header_following_count">%1$s urmărită</string>
     <string name="profile_header_fans_count">%1$s Urmăritori</string>
-    <string name="profile_header_toots_count">Notițe %1$s</string>
-    <string name="profile_misskey_header_status_count">Stare %1$s</string>
+    <string name="profile_header_toots_count">%1$s Postări</string>
+    <string name="profile_misskey_header_status_count">%1$s Postări</string>
     <string name="profile_header_button_follow">Urmărește</string>
     <string name="profile_header_button_following">Urmăriți</string>
     <string name="profile_header_button_requested">Solicitat</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Numai utilizatorii menționați pot vedea această notiță</string>
     <string name="settings_notifications_title">Notificări</string>
     <string name="settings_notifications_subtitle">Personalizați modul în care Flare vă notifică</string>
-    <string name="status_loadmore_end">Nu mai sunt notițe</string>
-    <string name="status_loadmore_error">Eroare la încărcarea mai multor notițe</string>
+    <string name="status_loadmore_end">Nu mai sunt postări</string>
+    <string name="status_loadmore_error">Eroare la încărcarea mai multor postări</string>
     <string name="status_loadmore_error_retry">Reîncercați</string>
     <string name="status_empty">Nimic de văzut aici</string>
     <string name="status_sensitive_media">Media sensibilă</string>
     <string name="show_media">Arată media</string>
+    <string name="hide_media">Ascunde media</string>
     <string name="login_expired">Sesiunea de autentificare a expirat</string>
     <string name="login_expired_message">Faceți clic pentru a vă reconecta</string>
     <string name="login_expired_relogin">Conectează-te din nou</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Demutizează %1$s</string>
     <string name="mastodon_item_content_warning">Avertisment conținut</string>
     <string name="reply_to">Răspunde la %1$s</string>
-    <string name="status_detail_translate">Tradu în %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Tradu Postare</string>
+    <string name="status_detail_tldr">Rezumat Postare</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
@@ -354,4 +355,13 @@
     <string name="social_title">Sociale</string>
     <string name="antenna_title">Antenă</string>
     <string name="mixed_timeline_title">Amestecat</string>
+    <string name="settings_about_description">Cea mai importantă generaţie de AI open-sourced a oferit un client descentralizat al reţelei sociale.</string>
+    <string name="settings_about_source_code">Cod sursă</string>
+    <string name="settings_about_telegram">Telegramă</string>
+    <string name="settings_about_telegram_description">Alătură-te grupului nostru de telegramă</string>
+    <string name="settings_about_discord_description">Alătură-te serverului nostru de Discord</string>
+    <string name="settings_about_line_description">Alătură-te grupului nostru de linii</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Ajută-ne să traducem Flare</string>
+    <string name="settings_privacy_policy">Politica de confidenţialitate</string>
 </resources>

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -23,6 +22,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.zIndex
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -244,7 +244,7 @@ import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
-import dev.dimension.flare.ui.theme.MediumAlpha
+import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.StringResource
@@ -343,7 +343,7 @@ private fun ItemContentComponent(
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        item.button.forEach { button ->
+                        item.button.fastForEach { button ->
                             when (button) {
                                 is UiTimeline.ItemContent.User.Button.AcceptFollowRequest ->
                                     PlatformFilledTonalButton(
@@ -474,6 +474,17 @@ private fun UserListContent(
                         ).clip(
                             shape = PlatformTheme.shapes.medium,
                         ),
+                onMediaClick = { media ->
+                    status.onMediaClicked.invoke(
+                        ClickContext(
+                            launcher = {
+                                uriHandler.openUri(it)
+                            },
+                        ),
+                        media,
+                        status.images.indexOf(media),
+                    )
+                },
             )
         }
     }
@@ -496,7 +507,7 @@ private fun StatusContent(
                     Column(
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
-                        data.parents.forEach {
+                        data.parents.fastForEach {
                             CommonStatusComponent(
                                 item = it,
                                 isDetail = false,
@@ -753,6 +764,12 @@ private fun TopMessageComponent(
             icon = icon,
             user = data.user,
             text = text,
+            color =
+                if (topMessageOnly) {
+                    PlatformContentColor.current
+                } else {
+                    PlatformTheme.colorScheme.caption
+                },
             textStyle =
                 if (topMessageOnly) {
                     PlatformTextStyle.current
@@ -761,13 +778,7 @@ private fun TopMessageComponent(
                 },
             modifier =
                 Modifier
-                    .let {
-                        if (topMessageOnly) {
-                            it
-                        } else {
-                            it.alpha(MediumAlpha)
-                        }
-                    }.clickable {
+                    .clickable {
                         data.onClicked.invoke(
                             ClickContext(
                                 launcher = {

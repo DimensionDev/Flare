@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Lista</string>
     <string name="home_tab_feeds_title">Syötteet</string>
     <string name="dm_list_title">Suorat Viestit</string>
-    <string name="home_timeline_new_toots">Uudet tootit</string>
+    <string name="home_timeline_new_toots">Uudet Viestit</string>
     <string name="navigate_back">Takaisin</string>
     <string name="service_select_instance_input_placeholder">Ilmentymän URL</string>
     <string name="service_select_next_button">Seuraava</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Ota Käyttöön tekoälyn Yhteenveto</string>
     <string name="settings_ai_config_tldr_description">Ota käyttöön tekoälyn yhteenveto pitkiä viestejä, saatavilla vain post että yli 500 merkkiä</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Näytä säveltää laatikko kotona aikajanalla</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Näytä säveltää laatikko yläreunassa kodin aikajanalla</string>
     <string name="settings_appearance_show_actions">Näytä toiminnot</string>
     <string name="settings_appearance_show_actions_description">Näytä toiminnot tilan alareunassa</string>
     <string name="settings_appearance_show_media">Näytä media</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">Oletus</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Syötteet</string>
-    <string name="notification_login_expired">Kirjautuminen vanhentunut, kirjaudu uudelleen</string>
+    <string name="notification_login_expired">Kirjautuminen vanhentui %1$s</string>
     <string name="dm_list_empty">Ei suoria viestejä</string>
     <string name="dm_list_error">Suorien viestien lataaminen epäonnistui</string>
     <string name="send">Lähetä</string>

@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Klantenlijst</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Directe Berichten</string>
-    <string name="home_timeline_new_toots">Nieuwe toots</string>
+    <string name="home_timeline_new_toots">Nieuwe berichten</string>
     <string name="navigate_back">Achterzijde</string>
     <string name="service_select_instance_input_placeholder">Aanleg URL</string>
     <string name="service_select_next_button">Volgende</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">AI samenvatting inschakelen</string>
     <string name="settings_ai_config_tldr_description">AI samenvatting inschakelen voor lange berichten, alleen beschikbaar in post van meer dan 500 tekens</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Toon opstelveld in de home tijdlijn</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Toon opstelveld boven de thuistijdlijn</string>
     <string name="settings_appearance_show_actions">Toon acties</string>
     <string name="settings_appearance_show_actions_description">Acties weergeven onderaan de status</string>
     <string name="settings_appearance_show_media">Media tonen</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">Standaard</string>
     <string name="tab_settings_list">Klantenlijst</string>
     <string name="tab_settings_feed">Feeds</string>
-    <string name="notification_login_expired">Inloggen verlopen, gelieve opnieuw in te loggen</string>
+    <string name="notification_login_expired">De aanmelding is verlopen voor %1$s</string>
     <string name="dm_list_empty">Geen directe berichten</string>
     <string name="dm_list_error">Laden van privéberichten mislukt</string>
     <string name="send">Verzenden</string>

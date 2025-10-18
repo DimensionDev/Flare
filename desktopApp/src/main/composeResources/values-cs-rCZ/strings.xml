@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Seznam</string>
     <string name="home_tab_feeds_title">Zdroje</string>
     <string name="dm_list_title">Přímé zprávy</string>
-    <string name="home_timeline_new_toots">Nové tooty</string>
+    <string name="home_timeline_new_toots">Nové příspěvky</string>
     <string name="navigate_back">Zpět</string>
     <string name="service_select_instance_input_placeholder">URL instance</string>
     <string name="service_select_next_button">Další</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Povolit souhrn AI</string>
     <string name="settings_ai_config_tldr_description">Povolit AI shrnutí pro dlouhé příspěvky, dostupné pouze v příspěvku, který je delší než 500 znaků</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Zobrazit složené pole v domácí časové ose</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Zobrazit složené pole v horní části domácí časové osy</string>
     <string name="settings_appearance_show_actions">Zobrazit akce</string>
     <string name="settings_appearance_show_actions_description">Zobrazit akce v dolní části stavu</string>
     <string name="settings_appearance_show_media">Zobrazit média</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">Výchozí</string>
     <string name="tab_settings_list">Seznam</string>
     <string name="tab_settings_feed">Zdroje</string>
-    <string name="notification_login_expired">Přihlášení vypršelo, přihlaste se prosím znovu</string>
+    <string name="notification_login_expired">Přihlášení vypršelo pro %1$s</string>
     <string name="dm_list_empty">Žádné přímé zprávy</string>
     <string name="dm_list_error">Nepodařilo se načíst přímé zprávy</string>
     <string name="send">Poslat</string>

@@ -10,11 +10,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
-import androidx.navigation3.scene.rememberSceneSetupNavEntryDecorator
+import androidx.navigation3.scene.Scene
+import androidx.navigation3.scene.SceneStrategy
+import androidx.navigation3.scene.SceneStrategyScope
 import androidx.navigation3.ui.NavDisplay
 import dev.dimension.flare.ui.common.ProxyUriHandler
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
@@ -72,17 +75,16 @@ internal fun Router(
                 }
             },
     ) {
-        NavDisplay(
+        NavDisplay<NavKey>(
             sceneStrategy =
                 remember {
                     DialogSceneStrategy<NavKey>()
-                        .then(BottomSheetSceneStrategy())
-                        .then(listDetailStrategy)
+                        .with(BottomSheetSceneStrategy())
+                        .with(listDetailStrategy)
                 },
             entryDecorators =
                 listOf(
-                    rememberSceneSetupNavEntryDecorator(),
-                    rememberSavedStateNavEntryDecorator(),
+                    rememberSaveableStateHolderNavEntryDecorator(),
                     rememberViewModelStoreNavEntryDecorator(),
                 ),
             backStack = topLevelBackStack.backStack,
@@ -129,3 +131,12 @@ internal fun Router(
         )
     }
 }
+
+// https://github.com/androidx/androidx/blob/570e2309e8c14729e22845d4d013b04c5a3fdd2a/navigation3/navigation3-ui/src/commonMain/kotlin/androidx/navigation3/scene/SceneStrategy.kt#L73
+// it will cause infinite loop when using the official implementation
+private fun <T : Any> SceneStrategy<T>.with(sceneStrategy: SceneStrategy<T>): SceneStrategy<T> =
+    object : SceneStrategy<T> {
+        override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T>? =
+            with(this@with) { calculateScene(entries) }
+                ?: with(sceneStrategy) { calculateScene(entries) }
+    }

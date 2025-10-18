@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import SwiftUIBackports
 
 struct StatusView: View {
     @Environment(\.themeSettings) private var themeSettings
@@ -106,7 +107,8 @@ struct StatusView: View {
                                 Text("mastodon_item_show_more")
                             }
                         }
-                        .buttonStyle(.glassProminent)
+                        .backport
+                        .glassProminentButtonStyle()
                     }
 
                     if expand || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
@@ -122,6 +124,11 @@ struct StatusView: View {
 
                         }
                     }
+                    
+                    if isDetail {
+                        StatusTranslateView(content: data.content, contentWarning: data.contentWarning)
+                    }
+                    
                     if let poll = data.poll, showMedia {
                         StatusPollView(data: poll)
                     }
@@ -141,7 +148,8 @@ struct StatusView: View {
                                     Image("fa-image")
                                 }
                             }
-                            .buttonStyle(.glass)
+                            .backport
+                            .glassButtonStyle(fallbackStyle: .bordered)
                         }
                     }
 
@@ -153,16 +161,16 @@ struct StatusView: View {
                         }
                     }
 
-                    if !data.quote.isEmpty {
+                    if !data.quote.isEmpty, !isQuote {
                         VStack {
                             ForEach(data.quote, id: \.itemKey) { quote in
                                 StatusView(data: quote, isQuote: true)
-                                    .padding()
                                 if data.quote.last != quote {
                                     Divider()
                                 }
                             }
                         }
+                        .padding()
                         .clipShape(.rect(cornerRadius: 16))
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
@@ -183,7 +191,7 @@ struct StatusView: View {
                     }
 
                     if !isQuote, (themeSettings.appearanceSettings.showActions || isDetail) {
-                        StatusActionsView(data: data.actions)
+                        StatusActionsView(data: data.actions, useText: false)
                             .font(isDetail ? .body : .footnote)
                             .foregroundStyle(isDetail ? .primary : .secondary)
                     }
@@ -194,7 +202,11 @@ struct StatusView: View {
                     stack
                 })
             }
+            .contextMenu {
+                StatusActionsView(data: data.actions, useText: true)
+            }
         }
+        .contentShape(.rect)
         .onTapGesture {
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         }

@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Notifications</string>
     <string name="home_tab_me_title">Moi</string>
     <string name="home_tab_discover_title">Découvrir</string>
-    <string name="home_timeline_new_toots">Nouveaux pouets</string>
+    <string name="home_timeline_new_toots">Nouveaux messages</string>
     <string name="notification_tab_all_title">Tous</string>
     <string name="notification_tab_mentions_title">Mentions</string>
     <string name="notification_tab_comments_title">Commentaires</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 jours</string>
     <string name="compose_content_warning_hint">Avertissement de contenu</string>
     <string name="compose_media_sensitive">Marquer le média comme sensible</string>
-    <string name="compose_notification_title">Envoi du pouet</string>
+    <string name="compose_notification_title">Envoi du message</string>
     <string name="settings_title">Réglages</string>
     <string name="settings_accounts_title">Gestion du compte</string>
     <string name="settings_appearance_title">Apparence</string>
@@ -103,7 +103,7 @@
     <string name="more">En savoir plus</string>
     <string name="discover_search_placeholder">Chercher</string>
     <string name="discover_users">Recommander les utilisateurs</string>
-    <string name="discover_status">Pouets tendances</string>
+    <string name="discover_status">Publications tendances</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Utilisateurs</string>
     <string name="search_status">Statut</string>
@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Changer la couleur du thème de l\'application</string>
     <string name="settings_appearance_theme_pure_color">Mode contraste élevé</string>
     <string name="settings_appearance_theme_pure_color_description">Augmenter le contraste entre l\'arrière-plan et le texte</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Changer la taille de police de l\'application</string>
+    <string name="settings_appearance_font_size_diff_decrease">Diminuer</string>
+    <string name="settings_appearance_font_size_diff_increase">Agrandir</string>
     <string name="settings_storage_clear_image_cache">Vider le cache des images</string>
     <string name="settings_storage_clear_image_cache_description">%1$s Mo d\'images seront supprimés</string>
     <string name="settings_storage_clear_database">Vider la base de données du cache</string>
@@ -238,7 +242,7 @@
     <string name="dm_sending">Envoi en cours</string>
     <string name="dm_leave">Quitter la conversation</string>
     <string name="dm_to_profile">Afficher le profil</string>
-    <string name="notification_login_expired">La connexion a expiré, veuillez vous reconnecter</string>
+    <string name="notification_login_expired">Connexion expirée pour %1$s</string>
     <string name="following_title">Abonnements</string>
     <string name="fans_title">Abonné</string>
     <string name="local_history_search_placeholder">Rechercher dans la cache locale</string>
@@ -256,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">Vous devez définir l\'hôte RssHub si vous voulez utiliser RssHub, ou sélectionner le serveur RssHub public</string>
     <string name="rss_sources_discovered_rss_sources">Sources RSS découvertes</string>
     <string name="rss_sources_pinned_in_tabs">Épingler aux onglets d\'accueil</string>
+    <string name="rss_sources_open_in_browser">Ouvrir dans le navigateur</string>
+    <string name="rss_sources_open_in_app">Ouvrir dans l\'application</string>
     <string name="rss_detail_open_in_browser">Ouvrir dans le navigateur</string>
     <string name="rss_detail_share">Partager</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -281,7 +287,10 @@
     <string name="home_tab_social_timeline_title">Réseaux sociaux</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Corrections de bugs et améliorations de performances</li>
+                <li>Ajout de paramètres de police.</li>
+                <li>a remanié significativement la fonctionnalité RSS. Le contenu de l\'article est maintenant rendu nativement au lieu d\'utiliser une WebView.</li>
+                <li>Une logique optimisée de rendu en texte riche pour de meilleures performances.</li>
+                <li>Corrections de bugs et améliorations des performances.</li>
             </ul>
         ]]></string>
 </resources>

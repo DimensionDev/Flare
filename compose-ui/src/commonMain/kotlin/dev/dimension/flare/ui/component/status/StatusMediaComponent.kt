@@ -27,6 +27,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
@@ -76,7 +77,7 @@ internal fun StatusMediaComponent(
     ) {
         AdaptiveGrid(
             content = {
-                data.forEach { media ->
+                data.fastForEach { media ->
                     Box {
                         CompositionLocalProvider(
                             LocalComponentAppearance provides

@@ -3,8 +3,8 @@
     <string name="delete">حذف</string>
     <string name="profile_header_following_count">%1$s متابعة</string>
     <string name="profile_header_fans_count">%1$s متابعين</string>
-    <string name="profile_header_toots_count">تبويبات %1$s</string>
-    <string name="profile_misskey_header_status_count">حالة %1$s</string>
+    <string name="profile_header_toots_count">منشورات %1$s</string>
+    <string name="profile_misskey_header_status_count">منشورات %1$s</string>
     <string name="profile_header_button_follow">اتبع</string>
     <string name="profile_header_button_following">تابع</string>
     <string name="profile_header_button_requested">مطلوب</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">يمكن للمستخدمين المذكورين فقط رؤية هذا التبويق</string>
     <string name="settings_notifications_title">الإشعارات</string>
     <string name="settings_notifications_subtitle">تخصيص كيف يخبرك Felle</string>
-    <string name="status_loadmore_end">لا مزيد من التبويقات</string>
-    <string name="status_loadmore_error">خطأ في تحميل المزيد من التبويقات</string>
+    <string name="status_loadmore_end">لا مزيد من المشاركات</string>
+    <string name="status_loadmore_error">خطأ في تحميل المزيد من المشاركات</string>
     <string name="status_loadmore_error_retry">إعادة المحاولة</string>
     <string name="status_empty">لا شيء لرؤيته هنا</string>
     <string name="status_sensitive_media">الوسائط الحساسة</string>
     <string name="show_media">إظهار الوسائط</string>
+    <string name="hide_media">إخفاء الوسائط</string>
     <string name="login_expired">انتهت صلاحية جلسة تسجيل الدخول</string>
     <string name="login_expired_message">انقر لتسجيل الدخول مرة أخرى</string>
     <string name="login_expired_relogin">تسجيل الدخول مرة أخرى</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">إلغاء كتم %1$s</string>
     <string name="mastodon_item_content_warning">تحذير المحتوى</string>
     <string name="reply_to">الرد على %1$s</string>
-    <string name="status_detail_translate">ترجم إلى %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">ترجمة المنشور</string>
+    <string name="status_detail_tldr">ملخص المنشور</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
@@ -354,4 +355,13 @@
     <string name="social_title">إجتماعي</string>
     <string name="antenna_title">هوائي</string>
     <string name="mixed_timeline_title">مختلطة</string>
+    <string name="settings_about_description">الجيل القادم النهائي مفتوح المصدر من AI زبون الشبكة الاجتماعية اللامركزية.</string>
+    <string name="settings_about_source_code">الكود المصدري</string>
+    <string name="settings_about_telegram">تيليجرام</string>
+    <string name="settings_about_telegram_description">انضم إلى مجموعة تيليجرام</string>
+    <string name="settings_about_discord_description">انضم إلى خادم ديسكورد</string>
+    <string name="settings_about_line_description">انضم إلى مجموعة الخط</string>
+    <string name="settings_about_localization">كرودن</string>
+    <string name="settings_about_localization_description">ساعدنا في ترجمة الشفق</string>
+    <string name="settings_privacy_policy">سياسة الخصوصية</string>
 </resources>

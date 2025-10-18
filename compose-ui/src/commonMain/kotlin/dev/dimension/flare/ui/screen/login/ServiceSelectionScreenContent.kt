@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -99,12 +100,6 @@ public fun ServiceSelectionScreenContent(
         modifier =
             Modifier.fillMaxSize(),
         columns = StaggeredGridCells.Adaptive(300.dp),
-        horizontalArrangement =
-            Arrangement.spacedBy(
-                8.dp,
-                Alignment.CenterHorizontally,
-            ),
-        verticalItemSpacing = 0.dp,
         contentPadding = contentPadding,
     ) {
         item(
@@ -133,6 +128,7 @@ public fun ServiceSelectionScreenContent(
                         KeyboardOptions(
                             imeAction = ImeAction.Done,
                             autoCorrectEnabled = false,
+                            keyboardType = KeyboardType.Uri,
                         ),
                     placeholder = {
                         PlatformText(
@@ -256,6 +252,7 @@ public fun ServiceSelectionScreenContent(
                                     onKeyboardAction = {
                                         if (!state.blueskyInputState.usePasswordLogin) {
                                             state.blueskyOauthLoginState.login(
+                                                baseUrl = state.instanceInputState.text.toString(),
                                                 userName =
                                                     state.blueskyInputState.username.text
                                                         .toString(),
@@ -351,6 +348,7 @@ public fun ServiceSelectionScreenContent(
                                             )
                                         } else {
                                             state.blueskyOauthLoginState.login(
+                                                baseUrl = state.instanceInputState.text.toString(),
                                                 userName =
                                                     state.blueskyInputState.username.text
                                                         .toString(),

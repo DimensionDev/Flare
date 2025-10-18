@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Notificări</string>
     <string name="home_tab_me_title">Eu</string>
     <string name="home_tab_discover_title">Descoperă</string>
-    <string name="home_timeline_new_toots">Notițe noi</string>
+    <string name="home_timeline_new_toots">Postări noi</string>
     <string name="notification_tab_all_title">Toate</string>
     <string name="notification_tab_mentions_title">Menționează</string>
     <string name="notification_tab_comments_title">Comentarii</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 zile</string>
     <string name="compose_content_warning_hint">Avertisment conținut</string>
     <string name="compose_media_sensitive">Marchează fișierele media ca fiind sensibile</string>
-    <string name="compose_notification_title">Trimitere notiță</string>
+    <string name="compose_notification_title">Se trimite postarea</string>
     <string name="settings_title">Setări</string>
     <string name="settings_accounts_title">Administrare cont</string>
     <string name="settings_appearance_title">Aspectul</string>
@@ -103,7 +103,7 @@
     <string name="more">Mai</string>
     <string name="discover_search_placeholder">Caută</string>
     <string name="discover_users">Recomandare utilizatori</string>
-    <string name="discover_status">Notițe populare</string>
+    <string name="discover_status">Postări populare</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Utilizatori</string>
     <string name="search_status">Status</string>
@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Schimbă culoarea aplicației pentru temă</string>
     <string name="settings_appearance_theme_pure_color">Mod contrast mare</string>
     <string name="settings_appearance_theme_pure_color_description">Mărește contrastul dintre fundal și text</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Schimbați dimensiunea fontului aplicației</string>
+    <string name="settings_appearance_font_size_diff_decrease">Scade</string>
+    <string name="settings_appearance_font_size_diff_increase">Creștere</string>
     <string name="settings_storage_clear_image_cache">Golire cache imagine</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB de imagini vor fi eliminate</string>
     <string name="settings_storage_clear_database">Goliţi baza de date cache</string>
@@ -238,7 +242,7 @@
     <string name="dm_sending">Trimitere</string>
     <string name="dm_leave">Părăsește conversația</string>
     <string name="dm_to_profile">Afișare profil</string>
-    <string name="notification_login_expired">Logarea a expirat, te rugăm să te autentifici din nou</string>
+    <string name="notification_login_expired">Autentificarea a expirat pentru %1$s</string>
     <string name="following_title">Urmăriți</string>
     <string name="fans_title">Urmăritor</string>
     <string name="local_history_search_placeholder">Caută cache local</string>
@@ -256,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">Trebuie să setezi gazda RsHub dacă vrei să folosești RssHub, sau să selectezi serverul RsHub public</string>
     <string name="rss_sources_discovered_rss_sources">Surse RSS descoperite</string>
     <string name="rss_sources_pinned_in_tabs">Fixează în filele principale</string>
+    <string name="rss_sources_open_in_browser">Deschide în browser</string>
+    <string name="rss_sources_open_in_app">Deschide în aplicație</string>
     <string name="rss_detail_open_in_browser">Deschide în browser</string>
     <string name="rss_detail_share">Distribuie</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -281,7 +287,10 @@
     <string name="home_tab_social_timeline_title">Sociale</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
-                <li>Remedierea erorilor şi îmbunătăţirea performanţei</li>
+                <li>Setările de font adăugate.</li>
+                <li>A a restructurat semnificativ caracteristica RSS. Conținutul articolului este acum afișat nativ în loc să folosească un WebView.</li>
+                <li>Logică optimizată de randare a textului bogat pentru o performanță mai bună.</li>
+                <li>Remedierea erorilor şi îmbunătăţirea performanţei.</li>
             </ul>
         ]]></string>
 </resources>

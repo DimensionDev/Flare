@@ -3,8 +3,6 @@
     <string name="delete">Изабери</string>
     <string name="profile_header_following_count">%1$s Следећи</string>
     <string name="profile_header_fans_count">%1$s Фанови</string>
-    <string name="profile_header_toots_count">%1$s Тутости</string>
-    <string name="profile_misskey_header_status_count">%1$s Статус</string>
     <string name="profile_header_button_follow">Следите</string>
     <string name="profile_header_button_following">Пратим</string>
     <string name="profile_header_button_requested">Захтевано</string>
@@ -58,8 +56,6 @@
     <string name="mastodon_visibility_direct_description">Само споменути корисници могу видети ову објаву</string>
     <string name="settings_notifications_title">Обавештења</string>
     <string name="settings_notifications_subtitle">Прилагодите како Flare вас обавештава</string>
-    <string name="status_loadmore_end">Нема више тута</string>
-    <string name="status_loadmore_error">Грешка приликом учитавања више тута</string>
     <string name="status_loadmore_error_retry">Поновите</string>
     <string name="status_empty">Ништа за видети овде</string>
     <string name="status_sensitive_media">Сензитивни медији</string>
@@ -104,8 +100,6 @@
     <string name="user_unmute">Омогући звук %1$s</string>
     <string name="mastodon_item_content_warning">Упозорење на садржај</string>
     <string name="reply_to">Одговори на %1$s</string>
-    <string name="status_detail_translate">Преведи на %1$s</string>
-    <string name="status_detail_tldr">Сажетак</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
@@ -345,4 +339,12 @@
     <string name="dm_list_title">Директне поруке</string>
     <string name="antenna_title">Антена</string>
     <string name="mixed_timeline_title">Мешано</string>
+    <string name="settings_about_description">Крајње елитни отворени, децентрализовани клијент социјалне мреже покретан вештачком интелигенцијом.</string>
+    <string name="settings_about_source_code">Изворни код</string>
+    <string name="settings_about_telegram">Телеграм</string>
+    <string name="settings_about_telegram_description">Пријате, придружите се нашој Телеграм групи</string>
+    <string name="settings_about_line_description">Пријате, придружите се нашој Лине групи</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Помозите нам да преведемо Flare</string>
+    <string name="settings_privacy_policy">Политика приватности</string>
 </resources>

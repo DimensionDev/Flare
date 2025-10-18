@@ -3,8 +3,8 @@
     <string name="delete">Slet</string>
     <string name="profile_header_following_count">%1$s Følger</string>
     <string name="profile_header_fans_count">%1$s Følgere</string>
-    <string name="profile_header_toots_count">%1$s Toots</string>
-    <string name="profile_misskey_header_status_count">%1$s Status</string>
+    <string name="profile_header_toots_count">%1$s Indlæg</string>
+    <string name="profile_misskey_header_status_count">%1$s Indlæg</string>
     <string name="profile_header_button_follow">Følg</string>
     <string name="profile_header_button_following">Følger</string>
     <string name="profile_header_button_requested">Anmodet</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Kun nævnte brugere kan se dette toot</string>
     <string name="settings_notifications_title">Notifikationer</string>
     <string name="settings_notifications_subtitle">Tilpas hvordan Flare underretter dig</string>
-    <string name="status_loadmore_end">Ikke flere toots</string>
-    <string name="status_loadmore_error">Fejl ved indlæsning af flere toots</string>
+    <string name="status_loadmore_end">Ikke flere indlæg</string>
+    <string name="status_loadmore_error">Fejl ved indlæsning af flere indlæg</string>
     <string name="status_loadmore_error_retry">Forsøg igen</string>
     <string name="status_empty">Intet at se her</string>
     <string name="status_sensitive_media">Følsomme medier</string>
     <string name="show_media">Vis medier</string>
+    <string name="hide_media">Skjul medier</string>
     <string name="login_expired">Login-sessionen er udløbet</string>
     <string name="login_expired_message">Klik for at logge ind igen</string>
     <string name="login_expired_relogin">Log ind igen</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Slå %1$s Fra</string>
     <string name="mastodon_item_content_warning">Advarsel om indhold</string>
     <string name="reply_to">Svar på %1$s</string>
-    <string name="status_detail_translate">Oversæt til %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Oversæt Indlæg</string>
+    <string name="status_detail_tldr">Opsummering Indlæg</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
@@ -354,4 +355,13 @@
     <string name="social_title">Social</string>
     <string name="antenna_title">Antenne</string>
     <string name="mixed_timeline_title">Blandet</string>
+    <string name="settings_about_description">Den ultimative næste generation open sourced AI drevet decentraliserede sociale netværk klient.</string>
+    <string name="settings_about_source_code">Kilde kode</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Tilmeld dig vores Telegram gruppe</string>
+    <string name="settings_about_discord_description">Tilmeld dig vores Discord server</string>
+    <string name="settings_about_line_description">Tilmeld dig vores linje gruppe</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Hjælp os med at oversætte Flare</string>
+    <string name="settings_privacy_policy">Privat Politik</string>
 </resources>

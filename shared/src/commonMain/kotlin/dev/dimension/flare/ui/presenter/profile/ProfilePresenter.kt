@@ -6,9 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.BaseTimelineLoader
-import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
@@ -23,7 +21,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -135,17 +132,43 @@ public class ProfilePresenter(
                         null
                     } ?: throw NoActiveAccountException
 
-            service.profileTabs(actualUserKey)
+            service
+                .profileTabs(actualUserKey)
+                .map {
+                    when (it) {
+                        ProfileTab.Media ->
+                            ProfileState.Tab.Media(
+                                presenter =
+                                    ProfileMediaPresenter(
+                                        accountType = accountType,
+                                        userKey = actualUserKey,
+                                    ),
+                            )
+
+                        is ProfileTab.Timeline -> {
+                            ProfileState.Tab.Timeline(
+                                type = it.type,
+                                presenter =
+                                    object : TimelinePresenter() {
+                                        override val loader: Flow<BaseTimelineLoader>
+                                            get() = flowOf(it.loader)
+                                    },
+                            )
+                        }
+                    }
+                }.toImmutableList()
         }
     }
 
     @Composable
     override fun body(): ProfileState {
         val scope = rememberCoroutineScope()
-        val accountServiceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val accountServiceState =
+            accountServiceProvider(accountType = accountType, repository = accountRepository)
         val userState by userStateFlow.flattenUiState()
         accountServiceState.onSuccess {
-            val userKey = userKey ?: if (it is AuthenticatedMicroblogDataSource) it.accountKey else null
+            val userKey =
+                userKey ?: if (it is AuthenticatedMicroblogDataSource) it.accountKey else null
             if (userKey != null) {
                 remember { LogUserHistoryPresenter(accountType, userKey) }.body()
             }
@@ -160,32 +183,7 @@ public class ProfilePresenter(
         val actions by profileActionsFlow.collectAsUiState()
         val canSendMessage by canSendMessageFlow.collectAsUiState()
         val myAccountKey by myAccountKeyFlow.collectAsUiState()
-
-        val tabs =
-            tabsFlow.collectAsUiState().value.map {
-                it
-                    .map {
-                        when (it) {
-                            is ProfileTab.Media ->
-                                ProfileState.Tab.Media(
-                                    data = mediaState,
-                                )
-                            is ProfileTab.Timeline -> {
-                                ProfileState.Tab.Timeline(
-                                    type = it.type,
-                                    data =
-                                        remember(it.loader) {
-                                            object : TimelinePresenter() {
-                                                override val loader: Flow<BaseTimelineLoader>
-                                                    get() = flowOf(it.loader)
-                                            }
-                                        }.body().listState,
-                                )
-                            }
-                        }
-                    }.toImmutableList()
-            }
-
+        val tabs by tabsFlow.collectAsUiState()
         return object : ProfileState(
             userState = userState,
             relationState = relationState,
@@ -200,21 +198,6 @@ public class ProfilePresenter(
             canSendMessage = canSendMessage,
             tabs = tabs,
         ) {
-            override suspend fun refresh() {
-                tabs.onSuccess {
-                    it.toImmutableList().forEach {
-                        when (it) {
-                            is ProfileState.Tab.Media -> {
-                                it.data.refreshSuspend()
-                            }
-                            is ProfileState.Tab.Timeline -> {
-                                it.data.refreshSuspend()
-                            }
-                        }
-                    }
-                }
-            }
-
             override fun onProfileActionClick(
                 userKey: MicroBlogKey,
                 relation: UiRelation,
@@ -256,8 +239,6 @@ public abstract class ProfileState(
     public val canSendMessage: UiState<Boolean>,
     public val tabs: UiState<ImmutableList<Tab>>,
 ) {
-    public abstract suspend fun refresh()
-
     public abstract fun follow(
         userKey: MicroBlogKey,
         data: UiRelation,
@@ -276,12 +257,12 @@ public abstract class ProfileState(
         @Immutable
         public data class Timeline internal constructor(
             val type: ProfileTab.Timeline.Type,
-            val data: PagingState<UiTimeline>,
+            val presenter: TimelinePresenter,
         ) : Tab()
 
         @Immutable
         public data class Media internal constructor(
-            val data: PagingState<ProfileMedia>,
+            val presenter: ProfileMediaPresenter,
         ) : Tab()
     }
 }
@@ -297,7 +278,10 @@ public class ProfileWithUserNameAndHostPresenter(
     @Composable
     override fun body(): UserState {
         val userState =
-            accountServiceProvider(accountType = accountType, repository = accountRepository).flatMap { service ->
+            accountServiceProvider(
+                accountType = accountType,
+                repository = accountRepository,
+            ).flatMap { service ->
                 remember(service) {
                     service.userByAcct("$userName@$host")
                 }.collectAsState().toUi()

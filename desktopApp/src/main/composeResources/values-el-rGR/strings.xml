@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Λίστα</string>
     <string name="home_tab_feeds_title">Ροές</string>
     <string name="dm_list_title">Άμεσα Μηνύματα</string>
-    <string name="home_timeline_new_toots">Νέα φωνές</string>
+    <string name="home_timeline_new_toots">Νέες Δημοσιεύσεις</string>
     <string name="navigate_back">Πίσω</string>
     <string name="service_select_instance_input_placeholder">Διεύθυνση Url Παρουσίας</string>
     <string name="service_select_next_button">Επόμενο</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Ενεργοποίηση Περίληψης Τεχνητής Νοημοσύνης</string>
     <string name="settings_ai_config_tldr_description">Ενεργοποίηση περιλήψεων τεχνητής νοημοσύνης για μεγάλες δημοσιεύσεις, μόνο διαθέσιμη σε ανάρτηση που υπερβαίνει τους 500 χαρακτήρες</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Εμφάνιση πλαισίου σύνθεσης στην αρχική χρονολογική γραμμή</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Εμφάνιση πλαισίου σύνθεσης στην κορυφή του αρχικού χρονολογίου</string>
     <string name="settings_appearance_show_actions">Εμφάνιση ενεργειών</string>
     <string name="settings_appearance_show_actions_description">Εμφάνιση ενεργειών στο κάτω μέρος της κατάστασης</string>
     <string name="settings_appearance_show_media">Εμφάνιση πολυμέσων</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">Προεπιλογή</string>
     <string name="tab_settings_list">Λίστα</string>
     <string name="tab_settings_feed">Ροές</string>
-    <string name="notification_login_expired">Η σύνδεση έληξε, παρακαλώ συνδεθείτε ξανά</string>
+    <string name="notification_login_expired">Η σύνδεση έληξε για %1$s</string>
     <string name="dm_list_empty">Δεν υπάρχουν άμεσα μηνύματα</string>
     <string name="dm_list_error">Αποτυχία φόρτωσης άμεσων μηνυμάτων</string>
     <string name="send">Αποστολή</string>

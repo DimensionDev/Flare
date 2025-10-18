@@ -20,7 +20,6 @@
     <string name="home_tab_list_title">Liste</string>
     <string name="home_tab_feeds_title">Beslemeler</string>
     <string name="dm_list_title">Doğrudan Mesajlar</string>
-    <string name="home_timeline_new_toots">Yeni paylaşım</string>
     <string name="navigate_back">Geri</string>
     <string name="service_select_instance_input_placeholder">Örnek URL\'si</string>
     <string name="service_select_next_button">İleri</string>
@@ -222,7 +221,6 @@
     <string name="tab_settings_default">Varsayılan</string>
     <string name="tab_settings_list">Liste</string>
     <string name="tab_settings_feed">Beslemeler</string>
-    <string name="notification_login_expired">Giriş süresi doldu, lütfen yeniden giriş yapın</string>
     <string name="dm_list_empty">Hiç doğrudan mesaj yok</string>
     <string name="dm_list_error">Doğrudan mesajları yüklemekte başarısız olundu</string>
     <string name="send">Gönder</string>

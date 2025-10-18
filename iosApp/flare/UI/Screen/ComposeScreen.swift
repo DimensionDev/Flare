@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 import PhotosUI
 import SwiftUIIntrospect
+import SwiftUIBackports
 
 struct ComposeScreen: View {
     @Environment(\.dismiss) var dismiss
@@ -25,14 +26,18 @@ struct ComposeScreen: View {
                             let item = users.get(index: index)
                             if let userState = item.first, let account = item.second {
                                 StateView(state: userState) { user in
-                                    UserOnelineView(data: user)
-                                        .padding(.horizontal)
-                                        .padding(.vertical, 8)
-                                        .background(Color(.secondarySystemBackground))
-                                        .clipShape(.rect(cornerRadius: 16))
-                                        .onTapGesture {
-                                            presenter.state.selectAccount(account: account)
-                                        }
+                                    HStack {
+                                        AvatarView(data: user.avatar)
+                                            .frame(width: 20, height: 20)
+                                        Text(user.handle)
+                                    }
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 8)
+                                    .background(Color(.secondarySystemBackground))
+                                    .clipShape(.rect(cornerRadius: 16))
+                                    .onTapGesture {
+                                        presenter.state.selectAccount(account: account)
+                                    }
                                 }
                             }
                         }
@@ -200,13 +205,17 @@ struct ComposeScreen: View {
                             spacing: 16,
                         ) {
                             if !viewModel.pollViewModel.enabled {
-                                PhotosPicker(selection: Binding(get: {
-                                    viewModel.mediaViewModel.selectedItems
-                                }, set: { value in
-                                    viewModel.mediaViewModel.selectedItems = value
-                                    viewModel.mediaViewModel.update()
-                                }), matching: .any(of: [.images, .videos, .livePhotos])) {
-                                    Image("fa-image")
+                                StateView(state: presenter.state.composeConfig) { config in
+                                    if config.media != nil {
+                                        PhotosPicker(selection: Binding(get: {
+                                            viewModel.mediaViewModel.selectedItems
+                                        }, set: { value in
+                                            viewModel.mediaViewModel.selectedItems = value
+                                            viewModel.mediaViewModel.update()
+                                        }), matching: .any(of: [.images, .videos, .livePhotos])) {
+                                            Image("fa-image")
+                                        }
+                                    }
                                 }
                             }
                             if viewModel.mediaViewModel.selectedItems.count == 0 {
@@ -283,7 +292,8 @@ struct ComposeScreen: View {
                     }
                 }
                 .padding()
-                .glassEffect()
+                .backport
+                .glassEffect(.regular, in: .capsule, fallbackBackground: .regularMaterial)
                 .padding()
             }
             

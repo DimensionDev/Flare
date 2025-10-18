@@ -7,7 +7,6 @@ kotlin {
     explicitApi()
     applyDefaultHierarchyTemplate()
     listOf(
-        macosX64(),
         macosArm64(),
         linuxX64(),
     ).forEach { nativeTarget ->

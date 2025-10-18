@@ -3,8 +3,8 @@
     <string name="delete">Verwijderen</string>
     <string name="profile_header_following_count">%1$s volgers</string>
     <string name="profile_header_fans_count">%1$s volgers</string>
-    <string name="profile_header_toots_count">%1$s Toots</string>
-    <string name="profile_misskey_header_status_count">%1$s Status</string>
+    <string name="profile_header_toots_count">%1$s berichten</string>
+    <string name="profile_misskey_header_status_count">%1$s berichten</string>
     <string name="profile_header_button_follow">Volgen</string>
     <string name="profile_header_button_following">Volgt</string>
     <string name="profile_header_button_requested">Aangevraagd</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Alleen vermelde gebruikers kunnen deze toot zien</string>
     <string name="settings_notifications_title">Notificaties</string>
     <string name="settings_notifications_subtitle">Aanpassen hoe Flare u informeert</string>
-    <string name="status_loadmore_end">Geen toots meer</string>
-    <string name="status_loadmore_error">Fout bij laden van meer toots</string>
+    <string name="status_loadmore_end">Geen berichten meer</string>
+    <string name="status_loadmore_error">Fout bij laden van meer berichten</string>
     <string name="status_loadmore_error_retry">Opnieuw</string>
     <string name="status_empty">Niets te zien hier</string>
     <string name="status_sensitive_media">Gevoelige media</string>
     <string name="show_media">Media tonen</string>
+    <string name="hide_media">Media verbergen</string>
     <string name="login_expired">Inlogsessie verlopen</string>
     <string name="login_expired_message">Klik om opnieuw in te loggen</string>
     <string name="login_expired_relogin">Opnieuw inloggen</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Deblokkeer %1$s</string>
     <string name="mastodon_item_content_warning">Waarschuwing inhoud</string>
     <string name="reply_to">Antwoord aan %1$s</string>
-    <string name="status_detail_translate">Vertalen naar %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Post vertalen</string>
+    <string name="status_detail_tldr">Samenvatting bericht</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
@@ -354,4 +355,13 @@
     <string name="social_title">Sociaal</string>
     <string name="antenna_title">Antenne</string>
     <string name="mixed_timeline_title">Gemengd</string>
+    <string name="settings_about_description">De ultieme volgende generatie open-sourced AI stuurde gedecentraliseerde sociale netwerkclient.</string>
+    <string name="settings_about_source_code">Bron code</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Deelnemen aan onze Telegram-groep</string>
+    <string name="settings_about_discord_description">Word lid van onze Discord server</string>
+    <string name="settings_about_line_description">Deelnemen aan onze Lijngroep</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Help ons Flare te vertalen</string>
+    <string name="settings_privacy_policy">Privacy Beleid</string>
 </resources>

@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Ειδοποιήσεις</string>
     <string name="home_tab_me_title">Εγώ</string>
     <string name="home_tab_discover_title">Ανακαλύψτε</string>
-    <string name="home_timeline_new_toots">Νέα φωνές</string>
+    <string name="home_timeline_new_toots">Νέες Δημοσιεύσεις</string>
     <string name="notification_tab_all_title">Όλα</string>
     <string name="notification_tab_mentions_title">Αναφορές</string>
     <string name="notification_tab_comments_title">Σχόλια</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 ημέρες</string>
     <string name="compose_content_warning_hint">Προειδοποίηση περιεχομένου</string>
     <string name="compose_media_sensitive">Σημείωση πολυμέσων ως ευαίσθητα</string>
-    <string name="compose_notification_title">Αποστολή φωνής</string>
+    <string name="compose_notification_title">Αποστολή Δημοσίευσης</string>
     <string name="settings_title">Ρυθμίσεις</string>
     <string name="settings_accounts_title">Διαχείριση Λογαριασμού</string>
     <string name="settings_appearance_title">Εμφάνιση</string>
@@ -103,7 +103,7 @@
     <string name="more">Περισσότερα</string>
     <string name="discover_search_placeholder">Αναζήτηση</string>
     <string name="discover_users">Προτείνετε Τους Χρήστες</string>
-    <string name="discover_status">Δημοφιλείς Τάσεις</string>
+    <string name="discover_status">Δημοφιλή Άρθρα</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Χρήστες</string>
     <string name="search_status">Κατάσταση</string>
@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Αλλαγή του χρώματος του θέματος της εφαρμογής</string>
     <string name="settings_appearance_theme_pure_color">Λειτουργία υψηλής αντίθεσης</string>
     <string name="settings_appearance_theme_pure_color_description">Αύξηση της αντίθεσης μεταξύ φόντου και κειμένου</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Αλλαγή μεγέθους γραμματοσειράς της εφαρμογής</string>
+    <string name="settings_appearance_font_size_diff_decrease">Μείωση</string>
+    <string name="settings_appearance_font_size_diff_increase">Αύξηση</string>
     <string name="settings_storage_clear_image_cache">Εκκαθάριση προσωρινής μνήμης εικόνας</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB εικόνων θα αφαιρεθούν</string>
     <string name="settings_storage_clear_database">Εκκαθάριση βάσης δεδομένων προσωρινής μνήμης</string>
@@ -238,7 +242,7 @@
     <string name="dm_sending">Αποστολή</string>
     <string name="dm_leave">Έξοδος από συνομιλία</string>
     <string name="dm_to_profile">Εμφάνιση προφίλ</string>
-    <string name="notification_login_expired">Η σύνδεση έληξε, παρακαλώ συνδεθείτε ξανά</string>
+    <string name="notification_login_expired">Η σύνδεση έληξε για %1$s</string>
     <string name="following_title">Ακολουθεί</string>
     <string name="fans_title">Ακόλουθος</string>
     <string name="local_history_search_placeholder">Αναζήτηση τοπικής προσωρινής μνήμης</string>
@@ -256,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">Θα πρέπει να ορίσετε το διακομιστή RssHub αν θέλετε να χρησιμοποιήσετε RssHub, ή επιλέξτε το δημόσιο διακομιστή RssHub</string>
     <string name="rss_sources_discovered_rss_sources">Ανακαλύφθηκε Πηγές Rss</string>
     <string name="rss_sources_pinned_in_tabs">Καρφίτσωμα στις καρτέλες του σπιτιού</string>
+    <string name="rss_sources_open_in_browser">Άνοιγμα σε πρόγραμμα περιήγησης</string>
+    <string name="rss_sources_open_in_app">Άνοιγμα σε εφαρμογή</string>
     <string name="rss_detail_open_in_browser">Άνοιγμα σε πρόγραμμα περιήγησης</string>
     <string name="rss_detail_share">Κοινοποίηση</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -281,7 +287,10 @@
     <string name="home_tab_social_timeline_title">Κοινωνικά</string>
     <string name="changelog_current"><![CDATA[            <span>Έκδοση %1$s:</span>
             <ul>
-                <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης</li>
+                <li>Ρυθμίσεις γραμματοσειράς.</li>
+                <li>Αναβαθμίστε σημαντικά τη λειτουργία RSS. Το περιεχόμενο του άρθρου είναι τώρα εγγενώς αντί να χρησιμοποιεί μια Προβολή.</li>
+                <li>Βελτιστοποιημένη απόδοση πλούτου κειμένου για καλύτερη απόδοση.</li>
+                <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης.</li>
             </ul>
         ]]></string>
 </resources>

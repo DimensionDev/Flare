@@ -34,20 +34,32 @@ public class EditRssSourcePresenter(
     public interface State {
         @Immutable
         public sealed interface RssInputState {
+            @Immutable
             public interface RssFeed : RssInputState {
-                public fun save(title: String)
+                public fun save(
+                    title: String,
+                    openInBrowser: Boolean,
+                ): UiRssSource
             }
 
+            @Immutable
             public interface RssSources : RssInputState {
-                public fun save(sources: List<UiRssSource>)
+                public fun save(
+                    sources: List<UiRssSource>,
+                    openInBrowser: Boolean,
+                )
             }
 
+            @Immutable
             public interface RssHub : RssInputState {
                 public val checkState: UiState<RssState>
 
                 public fun checkWithServer(server: String)
 
-                public fun save(title: String)
+                public fun save(
+                    title: String,
+                    openInBrowser: Boolean,
+                ): UiRssSource
 
                 public val actualUrl: String
             }
@@ -59,6 +71,8 @@ public class EditRssSourcePresenter(
 
         public val data: UiState<UiRssSource>
         public val checkState: UiState<CheckRssSourcePresenter.State.RssState>
+
+        public val canSave: Boolean
     }
 
     @Composable
@@ -85,21 +99,28 @@ public class EditRssSourcePresenter(
                 when (it) {
                     is RssState.RssFeed ->
                         object : State.RssInputState.RssFeed {
-                            override fun save(title: String) {
+                            override fun save(
+                                title: String,
+                                openInBrowser: Boolean,
+                            ): UiRssSource {
+                                val data =
+                                    DbRssSources(
+                                        id = id ?: 0,
+                                        url = it.url,
+                                        title = title,
+                                        lastUpdate = 0,
+                                        openInBrowser = openInBrowser,
+                                        icon = it.icon,
+                                    )
                                 scope.launch {
                                     appDatabase
                                         .rssSourceDao()
-                                        .insert(
-                                            DbRssSources(
-                                                id = id ?: 0,
-                                                url = url,
-                                                title = title,
-                                                lastUpdate = 0,
-                                            ),
-                                        )
+                                        .insert(data)
                                 }
+                                return data.render()
                             }
                         }
+
                     RssState.RssHub -> {
                         var serverStr by remember { mutableStateOf("") }
                         val checkRssHubState =
@@ -122,49 +143,57 @@ public class EditRssSourcePresenter(
                                 CheckRssSourcePresenter(actualUrl)
                             }.body()
                         object : State.RssInputState.RssHub {
-                            override val checkState: UiState<RssState>
-                                get() = checkRssHubState.state
+                            override val checkState = checkRssHubState.state
 
-                            override val actualUrl: String
-                                get() =
-                                    buildUrl {
-                                        serverStr
-                                            .removePrefix("https://")
-                                            .removePrefix("http://")
-                                            .let {
-                                                set(host = it)
-                                            }
-                                        url
-                                            .removePrefix("rsshub://")
-                                            .let {
-                                                set(path = it)
-                                            }
-                                        set(scheme = "https")
-                                    }.toString()
+                            override val actualUrl =
+                                buildUrl {
+                                    serverStr
+                                        .removePrefix("https://")
+                                        .removePrefix("http://")
+                                        .let {
+                                            set(host = it)
+                                        }
+                                    url
+                                        .removePrefix("rsshub://")
+                                        .let {
+                                            set(path = it)
+                                        }
+                                    set(scheme = "https")
+                                }.toString()
 
                             override fun checkWithServer(server: String) {
                                 serverStr = server
                             }
 
-                            override fun save(title: String) {
+                            override fun save(
+                                title: String,
+                                openInBrowser: Boolean,
+                            ): UiRssSource {
+                                val data =
+                                    DbRssSources(
+                                        id = 0,
+                                        url = actualUrl,
+                                        title = title,
+                                        lastUpdate = 0,
+                                        openInBrowser = openInBrowser,
+                                        icon = UiRssSource.favIconUrl(actualUrl),
+                                    )
                                 scope.launch {
                                     appDatabase
                                         .rssSourceDao()
-                                        .insert(
-                                            DbRssSources(
-                                                id = 0,
-                                                url = actualUrl,
-                                                title = title,
-                                                lastUpdate = 0,
-                                            ),
-                                        )
+                                        .insert(data)
                                 }
+                                return data.render()
                             }
                         }
                     }
+
                     is RssState.RssSources ->
                         object : State.RssInputState.RssSources {
-                            override fun save(sources: List<UiRssSource>) {
+                            override fun save(
+                                sources: List<UiRssSource>,
+                                openInBrowser: Boolean,
+                            ) {
                                 scope.launch {
                                     appDatabase
                                         .rssSourceDao()
@@ -175,6 +204,8 @@ public class EditRssSourcePresenter(
                                                     url = it.url,
                                                     title = it.title ?: "",
                                                     lastUpdate = 0,
+                                                    openInBrowser = openInBrowser,
+                                                    icon = it.favIcon,
                                                 )
                                             },
                                         )
@@ -183,10 +214,30 @@ public class EditRssSourcePresenter(
                         }
                 }
             }
+        val canSave =
+            when (val state = checkRssSourcePresenterState.state) {
+                is UiState.Success ->
+                    when (state.data) {
+                        is RssState.RssFeed -> true
+                        RssState.RssHub ->
+                            when (val inputState = inputState) {
+                                is State.RssInputState.RssHub ->
+                                    inputState.checkState is UiState.Success
+
+                                else -> false
+                            }
+
+                        is RssState.RssSources -> state.data.sources.isNotEmpty()
+                    }
+
+                else -> false
+            }
         return object : State {
             override val checkState = checkRssSourcePresenterState.state
 
             override val inputState = inputState
+
+            override val canSave = canSave
 
             override fun checkUrl(value: String) {
                 url = value

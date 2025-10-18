@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Powiadomienia</string>
     <string name="home_tab_me_title">Pr</string>
     <string name="home_tab_discover_title">Odkryj</string>
-    <string name="home_timeline_new_toots">Nowe wpisy</string>
+    <string name="home_timeline_new_toots">Nowe posty</string>
     <string name="notification_tab_all_title">Wszystkie</string>
     <string name="notification_tab_mentions_title">Wzmianki</string>
     <string name="notification_tab_comments_title">Komentarze</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 dni</string>
     <string name="compose_content_warning_hint">Ostrzeżenie o zawartości</string>
     <string name="compose_media_sensitive">Oznacz media jako wrażliwe</string>
-    <string name="compose_notification_title">Wysyłanie wpisu</string>
+    <string name="compose_notification_title">Wysyłanie posta</string>
     <string name="settings_title">Ustawienia</string>
     <string name="settings_accounts_title">Zarządzanie kontem</string>
     <string name="settings_appearance_title">Wygląd</string>
@@ -103,7 +103,7 @@
     <string name="more">Więcej</string>
     <string name="discover_search_placeholder">Szukaj</string>
     <string name="discover_users">Polecane Użytkownicy</string>
-    <string name="discover_status">Popularne wpisy</string>
+    <string name="discover_status">Popularne posty</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Użytkownicy</string>
     <string name="search_status">Status</string>
@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Zmień kolor motywu aplikacji</string>
     <string name="settings_appearance_theme_pure_color">Tryb wysokiego kontrastu</string>
     <string name="settings_appearance_theme_pure_color_description">Zwiększ kontrast między tłem i tekstem</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Zmień rozmiar czcionki aplikacji</string>
+    <string name="settings_appearance_font_size_diff_decrease">Zmniejsz</string>
+    <string name="settings_appearance_font_size_diff_increase">Zwiększ</string>
     <string name="settings_storage_clear_image_cache">Usuń pamięć podręczną obrazów</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB obrazów zostanie usunięte</string>
     <string name="settings_storage_clear_database">Wyczyść bazę pamięci podręcznej</string>
@@ -238,7 +242,7 @@
     <string name="dm_sending">Wysyłanie</string>
     <string name="dm_leave">Opuść rozmowę</string>
     <string name="dm_to_profile">Pokaż profil</string>
-    <string name="notification_login_expired">Logowanie wygasło, zaloguj się ponownie</string>
+    <string name="notification_login_expired">Logowanie wygasło dla %1$s</string>
     <string name="following_title">Obserwowane</string>
     <string name="fans_title">Obserwujący</string>
     <string name="local_history_search_placeholder">Szukaj lokalnej pamięci podręcznej</string>
@@ -256,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">Musisz ustawić host RssHub jeśli chcesz używać RssHub, lub wybrać publiczny serwer RssHub</string>
     <string name="rss_sources_discovered_rss_sources">Odkryte źródła RSS</string>
     <string name="rss_sources_pinned_in_tabs">Przypnij do zakładek domowych</string>
+    <string name="rss_sources_open_in_browser">Otwórz w przeglądarce</string>
+    <string name="rss_sources_open_in_app">Otwórz w aplikacji</string>
     <string name="rss_detail_open_in_browser">Otwórz w przeglądarce</string>
     <string name="rss_detail_share">Udostępnij</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -281,7 +287,10 @@
     <string name="home_tab_social_timeline_title">Społeczność</string>
     <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
-                <li>Poprawki błędów i ulepszenia wydajności</li>
+                <li>Dodane ustawienia czcionek.</li>
+                <li>Znacznie zmodernizowano funkcję RSS. Zawartość artykułu jest teraz wyświetlana native zamiast używać WebView.</li>
+                <li>Zoptymalizowana logika renderowania bogatych tekstów dla lepszej wydajności.</li>
+                <li>Poprawki błędów i ulepszenia wydajności.</li>
             </ul>
         ]]></string>
 </resources>

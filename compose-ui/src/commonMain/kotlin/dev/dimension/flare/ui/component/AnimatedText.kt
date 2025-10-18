@@ -22,8 +22,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastForEach
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
+import dev.dimension.flare.ui.component.status.LocalIsScrollingInProgress
 import dev.dimension.flare.ui.model.Digit
 import kotlinx.collections.immutable.ImmutableList
 
@@ -48,31 +51,20 @@ internal fun AnimatedNumber(
     onTextLayout: (TextLayoutResult) -> Unit = {},
     style: TextStyle = PlatformTextStyle.current,
 ) {
-    Row(
-        modifier =
-            modifier
-                .animateContentSize(),
-    ) {
-        digits
-            .forEach { digit ->
-                AnimatedContent(
-                    targetState = digit,
-                    transitionSpec = {
-                        if (targetState > initialState) {
-                            fadeIn() + slideInVertically { it } togetherWith fadeOut() + slideOutVertically { -it }
-                        } else {
-                            fadeIn() + slideInVertically { -it } togetherWith fadeOut() + slideOutVertically { it }
-                        }.using(SizeTransform(clip = false))
-                    },
-                ) { digit ->
+    if (LocalIsScrollingInProgress.current) {
+        Row(
+            modifier = modifier,
+        ) {
+            digits
+                .fastForEach { digit ->
                     PlatformText(
-                        "${digit.digitChar}",
+                        digit.digitString,
                         color = color,
                         fontSize = fontSize,
                         fontStyle = fontStyle,
                         fontWeight = fontWeight,
                         fontFamily = fontFamily,
-                        letterSpacing = letterSpacing,
+                        letterSpacing = 0.sp,
                         textDecoration = textDecoration,
                         textAlign = textAlign,
                         lineHeight = lineHeight,
@@ -85,7 +77,47 @@ internal fun AnimatedNumber(
                         style = style,
                     )
                 }
-            }
+        }
+    } else {
+        Row(
+            modifier =
+                modifier
+                    .animateContentSize(),
+        ) {
+            digits
+                .fastForEach { digit ->
+                    AnimatedContent(
+                        targetState = digit,
+                        transitionSpec = {
+                            if (targetState > initialState) {
+                                fadeIn() + slideInVertically { it } togetherWith fadeOut() + slideOutVertically { -it }
+                            } else {
+                                fadeIn() + slideInVertically { -it } togetherWith fadeOut() + slideOutVertically { it }
+                            }.using(SizeTransform(clip = false))
+                        },
+                    ) { digit ->
+                        PlatformText(
+                            digit.digitString,
+                            color = color,
+                            fontSize = fontSize,
+                            fontStyle = fontStyle,
+                            fontWeight = fontWeight,
+                            fontFamily = fontFamily,
+                            letterSpacing = 0.sp,
+                            textDecoration = textDecoration,
+                            textAlign = textAlign,
+                            lineHeight = lineHeight,
+                            overflow = overflow,
+                            softWrap = softWrap,
+                            maxLines = maxLines,
+                            minLines = minLines,
+                            inlineContent = inlineContent,
+                            onTextLayout = onTextLayout,
+                            style = style,
+                        )
+                    }
+                }
+        }
     }
 }
 

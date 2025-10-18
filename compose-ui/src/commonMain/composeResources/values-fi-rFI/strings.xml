@@ -3,8 +3,8 @@
     <string name="delete">Poista</string>
     <string name="profile_header_following_count">%1$s Seurattu</string>
     <string name="profile_header_fans_count">%1$s Seuraajaa</string>
-    <string name="profile_header_toots_count">%1$s Juuret</string>
-    <string name="profile_misskey_header_status_count">%1$s Tila</string>
+    <string name="profile_header_toots_count">%1$s Viestit</string>
+    <string name="profile_misskey_header_status_count">%1$s Viestit</string>
     <string name="profile_header_button_follow">Seuraa</string>
     <string name="profile_header_button_following">Seurataan</string>
     <string name="profile_header_button_requested">Pyydetty</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Vain mainitut käyttäjät voivat nähdä tämän tootin.</string>
     <string name="settings_notifications_title">Ilmoitukset</string>
     <string name="settings_notifications_subtitle">Muokkaa Flare ilmoittaa sinulle</string>
-    <string name="status_loadmore_end">Ei enää toosia</string>
-    <string name="status_loadmore_error">Virhe ladattaessa lisää toosia</string>
+    <string name="status_loadmore_end">Ei enempää viestejä</string>
+    <string name="status_loadmore_error">Virhe ladattaessa lisää viestejä</string>
     <string name="status_loadmore_error_retry">Yritä Uudelleen</string>
     <string name="status_empty">Ei mitään nähtävää tässä</string>
     <string name="status_sensitive_media">Herkkä media</string>
     <string name="show_media">Näytä media</string>
+    <string name="hide_media">Piilota media</string>
     <string name="login_expired">Kirjautumissessio on vanhentunut</string>
     <string name="login_expired_message">Klikkaa kirjautuaksesi uudelleen</string>
     <string name="login_expired_relogin">Kirjaudu uudelleen</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Poista Mykistys %1$s</string>
     <string name="mastodon_item_content_warning">Sisällön varoitus</string>
     <string name="reply_to">Vastaa %1$s</string>
-    <string name="status_detail_translate">Käännä kielelle %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Käännä Viesti</string>
+    <string name="status_detail_tldr">Yhteenveto Viesti</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">pp MMM yy HH:mm</string>
@@ -354,4 +355,13 @@
     <string name="social_title">Sosiaalinen</string>
     <string name="antenna_title">Antenni</string>
     <string name="mixed_timeline_title">Sekoitettu</string>
+    <string name="settings_about_description">Lopullinen seuraavan sukupolven avoimen lähdekoodin tekoälyn voimanlähteenä hajautettu sosiaalinen verkostoasiakas.</string>
+    <string name="settings_about_source_code">Lähdekoodi</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Liity meidän Telegram ryhmään</string>
+    <string name="settings_about_discord_description">Liity Discord-palvelimeemme</string>
+    <string name="settings_about_line_description">Liity Riviryhmäämme</string>
+    <string name="settings_about_localization">Crowdiini</string>
+    <string name="settings_about_localization_description">Auta meitä kääntämään Flare</string>
+    <string name="settings_privacy_policy">Yksityisyyden Suoja</string>
 </resources>

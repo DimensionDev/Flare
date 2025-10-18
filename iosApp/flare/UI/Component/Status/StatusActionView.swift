@@ -1,14 +1,16 @@
 import SwiftUI
 import KotlinSharedUI
+import SwiftUIBackports
 
 struct StatusActionsView: View {
     let data: [StatusAction]
+    let useText: Bool
 
     var body: some View {
         HStack {
-            ForEach(0..<data.count) { index in
+            ForEach(0..<data.count, id: \.self) { index in
                 let item = data[index]
-                StatusActionView(data: item, useText: false, isFixedWidth: index != data.count - 1)
+                StatusActionView(data: item, useText: useText, isFixedWidth: index != data.count - 1)
                     .if(index == data.count - 1) { view in
                         view.frame(maxWidth: .infinity, alignment: .trailing)
                     } else: { view in
@@ -17,6 +19,7 @@ struct StatusActionsView: View {
 
             }
         }
+        .backport
         .labelIconToTitleSpacing(4)
     }
 }
@@ -31,43 +34,58 @@ struct StatusActionView: View {
         case .item(let item):
             StatusActionItemView(data: item, useText: useText, isFixedWidth: isFixedWidth)
         case .group(let group):
-            Menu {
-                ForEach(0..<group.actions.count) { index in
+            if useText {
+                Divider()
+                ForEach(0..<group.actions.count, id: \.self) { index in
                     let item = group.actions[index]
                     StatusActionView(data: item, useText: true, isFixedWidth: false)
                 }
-            } label: {
-                if !isFixedWidth && group.displayItem.countText == nil {
-                    if let color = group.displayItem.color {
-                        StatusActionIcon(item: group.displayItem)
-                            .foregroundStyle(color)
-                    } else {
-                        StatusActionIcon(item: group.displayItem)
+                Divider()
+            } else {
+                Menu {
+                    ForEach(0..<group.actions.count, id: \.self) { index in
+                        let item = group.actions[index]
+                        StatusActionView(data: item, useText: true, isFixedWidth: false)
                     }
-                } else {
-                    Label {
-                        ZStack(
-                            alignment: .leading
-                        ) {
-                            if isFixedWidth {
-                                Text("0000")
-                                    .opacity(0.0)
-                            }
-                            if let text = group.displayItem.countText, themeSettings.appearanceSettings.showNumbers {
-                                if let color = group.displayItem.color {
-                                    Text(text)
-                                        .foregroundStyle(color)
-                                } else {
-                                    Text(text)
-                                }
-                            }
-                        }
-                    } icon: {
+                } label: {
+                    if !isFixedWidth && group.displayItem.countText == nil {
                         if let color = group.displayItem.color {
                             StatusActionIcon(item: group.displayItem)
                                 .foregroundStyle(color)
+                                .scaledToFit()
+                                .frame(width: 32, alignment: .center)
+                                .contentShape(.rect)
                         } else {
                             StatusActionIcon(item: group.displayItem)
+                                .scaledToFit()
+                                .frame(width: 32, alignment: .center)
+                                .contentShape(.rect)
+                        }
+                    } else {
+                        Label {
+                            ZStack(
+                                alignment: .leading
+                            ) {
+                                if isFixedWidth, !useText {
+                                    Text("0000")
+                                        .opacity(0.0)
+                                }
+                                if let text = group.displayItem.countText, themeSettings.appearanceSettings.showNumbers {
+                                    if let color = group.displayItem.color {
+                                        Text(text)
+                                            .foregroundStyle(color)
+                                    } else {
+                                        Text(text)
+                                    }
+                                }
+                            }
+                        } icon: {
+                            if let color = group.displayItem.color {
+                                StatusActionIcon(item: group.displayItem)
+                                    .foregroundStyle(color)
+                            } else {
+                                StatusActionIcon(item: group.displayItem)
+                            }
                         }
                     }
                 }
@@ -98,7 +116,9 @@ struct StatusActionItemView: View {
     let useText: Bool
     let isFixedWidth: Bool
     var body: some View {
-        Button {
+        Button(
+            role: data.role,
+        ) {
             if let clickable = data as? StatusActionItemClickable {
                 clickable.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
             }
@@ -107,7 +127,7 @@ struct StatusActionItemView: View {
                 ZStack(
                     alignment: .leading
                 ) {
-                    if isFixedWidth {
+                    if isFixedWidth, !useText {
                         Text("0000")
                             .opacity(0.0)
                     }
@@ -164,6 +184,26 @@ extension StatusActionItem {
             case .error: Color(.systemRed)
             case .primaryColor: Color.accentColor
             case .red: Color(.systemRed)
+            }
+        } else {
+            nil
+        }
+    }
+    var role: ButtonRole? {
+        if let colorized = self as? StatusActionItemColorized {
+            switch colorized.color {
+            case .red:
+                    .destructive
+            case .error:
+                    .destructive
+            case .contentColor:
+                    nil
+            case .primaryColor:
+                if #available(iOS 26.0, *) {
+                    .confirm
+                } else {
+                    nil
+                }
             }
         } else {
             nil

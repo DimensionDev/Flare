@@ -1,78 +1,40 @@
 import SwiftUI
 import KotlinSharedUI
 import TipKit
+import LazyPager
+import SwiftUIBackports
 
 struct StatusMediaView: View {
     let data: [any UiMedia]
     let sensitive: Bool
     @Environment(\.themeSettings) private var themeSettings
     @State private var isBlur: Bool
-    @State private var showFullScreen: Bool = false
-    @State private var selectedItem: (any UiMedia)?
+    @State private var selectedIndex: Int? = nil
 
     var body: some View {
         AdaptiveGrid(singleFollowsImageAspect: themeSettings.appearanceSettings.expandMediaSize, spacing: 4, maxColumns: 3) {
-            ForEach(data, id: \.url) { item in
-                if themeSettings.appearanceSettings.expandMediaSize, data.count == 1 {
-                    MediaView(data: item)
-                        .onTapGesture {
-                            if !sensitive || !isBlur {
-                                // Only allow tap if not sensitive or already unblurred
-                                selectedItem = item
-                                showFullScreen = true
-                            }
+            ForEach(0..<data.count, id: \.self) { index in
+                let item = data[index]
+                MediaView(data: item, expandToFullSize: themeSettings.appearanceSettings.expandMediaSize && data.count == 1)
+                    .onTapGesture {
+                        if !sensitive || !isBlur {
+                            selectedIndex = index
                         }
-                        .overlay(alignment: .bottomTrailing) {
-                            if let alt = item.description_, !alt.isEmpty {
-                                AltTextOverlay(altText: alt)
-                            }
+                    }
+                    .overlay(alignment: .bottomTrailing) {
+                        if let alt = item.description_, !alt.isEmpty {
+                            AltTextOverlay(altText: alt)
                         }
-                        .overlay(alignment: .bottomLeading) {
-                            if case .video = onEnum(of: item) {
-                                Image("fa-circle-play")
-                                    .foregroundStyle(Color(.white))
-                                    .padding(8)
-                                    .background(.black, in: .rect(cornerRadius: 16))
-                                    .padding()
-                            }
-                        }
-                } else {
-                    Color.gray
-                        .opacity(0.2)
-                        .onTapGesture {
-                            if !sensitive || !isBlur {
-                                // Only allow tap if not sensitive or already unblurred
-                                selectedItem = item
-                                showFullScreen = true
-                            }
-                        }
-                        .overlay {
-                            MediaView(data: item)
-                                .allowsHitTesting(false)
-                        }
-                        .overlay(alignment: .bottomTrailing) {
-                            if let alt = item.description_, !alt.isEmpty {
-                                AltTextOverlay(altText: alt)
-                            }
-                        }
-                        .overlay(alignment: .bottomLeading) {
-                            if case .video = onEnum(of: item) {
-                                Image("fa-circle-play")
-                                    .foregroundStyle(Color(.white))
-                                    .padding(8)
-                                    .background(.black, in: .rect(cornerRadius: 16))
-                                    .padding()
-                            }
-                        }
-                        .clipped()
-                }
+                    }
             }
         }
-        .fullScreenCover(isPresented: $showFullScreen, onDismiss: {
-            showFullScreen = false
-        }, content: {
-            StatusMediaScreen(data: data, selectedIndex: data.firstIndex(where: { $0.url == selectedItem?.url }) ?? 0)
-        })
+        .fullScreenCover(item: $selectedIndex) { index in
+            NavigationStack {
+                StatusMediaScreen(data: data, selectedIndex: index)
+            }
+            .background(ClearFullScreenBackground())
+            .colorScheme(.dark)
+        }
         .blur(radius: isBlur ? 20 : 0)
         .overlay(
             alignment: isBlur ? .center : .topLeading
@@ -91,7 +53,8 @@ struct StatusMediaView: View {
                                 .foregroundStyle(.white)
                         }
                     }
-                    .buttonStyle(.glassProminent)
+                    .backport
+                    .glassProminentButtonStyle()
                     .padding()
                 } else {
                     Button {
@@ -101,7 +64,8 @@ struct StatusMediaView: View {
                     } label: {
                         Image("fa-eye-slash")
                     }
-                    .buttonStyle(.glass)
+                    .backport
+                    .glassButtonStyle(fallbackStyle: .bordered)
                     .padding()
                 }
             } else {
@@ -130,7 +94,8 @@ struct AltTextOverlay: View {
             Text("ALT")
         }
         .padding()
-        .buttonStyle(.glass)
+        .backport
+        .glassButtonStyle(fallbackStyle: .bordered)
         .popover(isPresented: $showAltText) {
             Text(altText)
                 .padding()

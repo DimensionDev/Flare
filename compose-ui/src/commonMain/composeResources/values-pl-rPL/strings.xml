@@ -3,8 +3,8 @@
     <string name="delete">Usuń</string>
     <string name="profile_header_following_count">%1$s Obserwujący</string>
     <string name="profile_header_fans_count">%1$s Obserwujących</string>
-    <string name="profile_header_toots_count">%1$s Wpisy</string>
-    <string name="profile_misskey_header_status_count">Status %1$s</string>
+    <string name="profile_header_toots_count">Wiadomości %1$s</string>
+    <string name="profile_misskey_header_status_count">Wiadomości %1$s</string>
     <string name="profile_header_button_follow">Śledź</string>
     <string name="profile_header_button_following">Obserwowane</string>
     <string name="profile_header_button_requested">Żądane</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Tylko wspomniani użytkownicy mogą zobaczyć ten wpis</string>
     <string name="settings_notifications_title">Powiadomienia</string>
     <string name="settings_notifications_subtitle">Dostosuj jak Flara powiadomi Cię</string>
-    <string name="status_loadmore_end">Nie ma więcej wpisów</string>
-    <string name="status_loadmore_error">Błąd ładowania więcej wpisów</string>
+    <string name="status_loadmore_end">Brak więcej postów</string>
+    <string name="status_loadmore_error">Błąd ładowania więcej postów</string>
     <string name="status_loadmore_error_retry">Ponów próbę</string>
     <string name="status_empty">Nie ma nic do zobaczenia tutaj</string>
     <string name="status_sensitive_media">Wrażliwe media</string>
     <string name="show_media">Pokaż media</string>
+    <string name="hide_media">Ukryj media</string>
     <string name="login_expired">Sesja logowania wygasła</string>
     <string name="login_expired_message">Kliknij, aby zalogować się ponownie</string>
     <string name="login_expired_relogin">Zaloguj się ponownie</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Wyłącz wyciszenie %1$s</string>
     <string name="mastodon_item_content_warning">Ostrzeżenie o zawartości</string>
     <string name="reply_to">Odpowiedz %1$s</string>
-    <string name="status_detail_translate">Przetłumacz na %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Przetłumacz post</string>
+    <string name="status_detail_tldr">Podsumowanie postu</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy GG:mm</string>
@@ -354,4 +355,13 @@
     <string name="social_title">Społeczność</string>
     <string name="antenna_title">Antena</string>
     <string name="mixed_timeline_title">Mieszane</string>
+    <string name="settings_about_description">Najnowszy klient nowej generacji oparty na zdecentralizowanej sieci społecznościowej.</string>
+    <string name="settings_about_source_code">Kod źródłowy</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Dołącz do naszej grupy Telegram</string>
+    <string name="settings_about_discord_description">Dołącz do naszego serwera Discorda</string>
+    <string name="settings_about_line_description">Dołącz do naszej grupy linii</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Pomóż nam przetłumaczyć Flare</string>
+    <string name="settings_privacy_policy">Polityka prywatności</string>
 </resources>

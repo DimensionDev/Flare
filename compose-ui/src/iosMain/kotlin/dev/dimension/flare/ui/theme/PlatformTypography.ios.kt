@@ -14,4 +14,22 @@ internal actual object PlatformTypography {
     actual val headline: TextStyle
         @Composable
         get() = CupertinoTheme.typography.headline
+    actual val h1: TextStyle
+        @Composable
+        get() = CupertinoTheme.typography.headline
+    actual val h2: TextStyle
+        @Composable
+        get() = CupertinoTheme.typography.subhead
+    actual val h3: TextStyle
+        @Composable
+        get() = CupertinoTheme.typography.largeTitle
+    actual val h4: TextStyle
+        @Composable
+        get() = CupertinoTheme.typography.title1
+    actual val h5: TextStyle
+        @Composable
+        get() = CupertinoTheme.typography.title2
+    actual val h6: TextStyle
+        @Composable
+        get() = CupertinoTheme.typography.title3
 }

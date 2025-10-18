@@ -1,13 +1,13 @@
-import KotlinSharedUI
+@preconcurrency import KotlinSharedUI
 import Foundation
-import Combine
+@preconcurrency import Combine
 
 // using @Observable might init presenter multiple times
 // which is a heavy work since Kotlin Presenter is not designed to do so
 // so we keep using the old ObservableObject and @StateObject
 // see: https://github.com/Dimillian/IceCubesApp/issues/2033
 final class KotlinPresenter<T: AnyObject>: ObservableObject {
-    var subscribers = Set<AnyCancellable>()
+    private var subscribers = Set<AnyCancellable>()
     var presenter: PresenterBase<T>
     let key = UUID().uuidString
 
@@ -22,7 +22,7 @@ final class KotlinPresenter<T: AnyObject>: ObservableObject {
     @Published
     var state: T
 
-    @MainActor
+//    @MainActor
     deinit {
         subscribers.forEach { cancleable in
             cancleable.cancel()

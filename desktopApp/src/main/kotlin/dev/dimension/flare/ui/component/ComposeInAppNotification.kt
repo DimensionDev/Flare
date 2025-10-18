@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import dev.dimension.flare.common.Event
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.compose_notification_title
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.notification_login_expired
 import io.github.composefluent.component.InfoBar
 import io.github.composefluent.component.InfoBarSeverity
@@ -46,6 +48,7 @@ internal sealed interface Notification {
     data class StringNotification(
         val messageId: StringResource,
         val success: Boolean,
+        val args: List<Any> = emptyList(),
     ) : Notification
 }
 
@@ -70,7 +73,21 @@ internal class ComposeInAppNotification : InAppNotification {
         message: Message,
         throwable: Throwable,
     ) {
-        _source.value = Event(Notification.StringNotification(message.title, success = false))
+        _source.value =
+            Event(
+                Notification.StringNotification(
+                    message.title,
+                    success = false,
+                    args =
+                        listOfNotNull(
+                            if (throwable is LoginExpiredException) {
+                                throwable.accountKey
+                            } else {
+                                null
+                            },
+                        ),
+                ),
+            )
     }
 }
 
@@ -99,6 +116,7 @@ internal fun InAppNotificationComponent(
                             .fillMaxWidth(),
                 )
             }
+
             is Notification.StringNotification -> {
                 var showNotification by remember { mutableStateOf(false) }
                 LaunchedEffect(source) {
@@ -119,7 +137,10 @@ internal fun InAppNotificationComponent(
                     InfoBar(
                         title = {
                             Text(
-                                stringResource(it.messageId),
+                                stringResource(
+                                    it.messageId,
+                                    *it.args.toTypedArray(),
+                                ),
                             )
                         },
                         message = {
@@ -129,6 +150,10 @@ internal fun InAppNotificationComponent(
                                 InfoBarSeverity.Success
                             } else {
                                 InfoBarSeverity.Critical
+                            },
+                        modifier =
+                            Modifier.clickable {
+                                showNotification = false
                             },
                     )
                 }

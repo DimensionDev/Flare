@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Lista</string>
     <string name="home_tab_feeds_title">Flöden</string>
     <string name="dm_list_title">Direkta meddelanden</string>
-    <string name="home_timeline_new_toots">Nya toots</string>
+    <string name="home_timeline_new_toots">Nya inlägg</string>
     <string name="navigate_back">Tillbaka</string>
     <string name="service_select_instance_input_placeholder">Instans URL</string>
     <string name="service_select_next_button">Nästa</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Aktivera AI-sammanfattning</string>
     <string name="settings_ai_config_tldr_description">Aktivera AI-sammanfattning för långa inlägg, endast tillgängligt i inlägg som är längre än 500 tecken</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Visa komponera rutan i hemtidslinjen</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Visa komponera rutan i toppen av hemtidslinjen</string>
     <string name="settings_appearance_show_actions">Visa åtgärder</string>
     <string name="settings_appearance_show_actions_description">Visa åtgärder längst ner på statusen</string>
     <string name="settings_appearance_show_media">Visa media</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">Standard</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Flöden</string>
-    <string name="notification_login_expired">Inloggning löpte ut, vänligen logga in igen</string>
+    <string name="notification_login_expired">Inloggning löpte ut för %1$s</string>
     <string name="dm_list_empty">Inga direktmeddelanden</string>
     <string name="dm_list_error">Det gick inte att ladda direktmeddelanden</string>
     <string name="send">Skicka</string>

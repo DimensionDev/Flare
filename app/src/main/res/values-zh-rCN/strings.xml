@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">我</string>
     <string name="home_tab_discover_title">发现</string>
-    <string name="home_timeline_new_toots">有新嘟文</string>
+    <string name="home_timeline_new_toots">新帖子</string>
     <string name="notification_tab_all_title">全部</string>
     <string name="notification_tab_mentions_title">提及</string>
     <string name="notification_tab_comments_title">评论</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 天后</string>
     <string name="compose_content_warning_hint">内容警告</string>
     <string name="compose_media_sensitive">将媒体标记为敏感内容</string>
-    <string name="compose_notification_title">正在发送</string>
+    <string name="compose_notification_title">正在发送帖子</string>
     <string name="settings_title">设置</string>
     <string name="settings_accounts_title">账号管理</string>
     <string name="settings_appearance_title">外观</string>
@@ -103,7 +103,7 @@
     <string name="more">更多</string>
     <string name="discover_search_placeholder">搜索</string>
     <string name="discover_users">推荐用户</string>
-    <string name="discover_status">热门嘟嘟</string>
+    <string name="discover_status">热门帖子</string>
     <string name="discover_hashtags">热门话题标签</string>
     <string name="search_users">用户</string>
     <string name="search_status">状态</string>
@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">更改应用的主题颜色</string>
     <string name="settings_appearance_theme_pure_color">高对比度模式</string>
     <string name="settings_appearance_theme_pure_color_description">增加背景和文本之间的对比度</string>
+    <string name="settings_appearance_font_size_diff">字体大小</string>
+    <string name="settings_appearance_font_size_diff_description">更改应用程序的字体大小</string>
+    <string name="settings_appearance_font_size_diff_decrease">减少</string>
+    <string name="settings_appearance_font_size_diff_increase">增加</string>
     <string name="settings_storage_clear_image_cache">清除图片缓存</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB的图片将被删除</string>
     <string name="settings_storage_clear_database">清除缓存数据库</string>
@@ -238,7 +242,7 @@
     <string name="dm_sending">正在发送</string>
     <string name="dm_leave">离开对话</string>
     <string name="dm_to_profile">显示用户资料</string>
-    <string name="notification_login_expired">登录过期，请重新登录</string>
+    <string name="notification_login_expired">登录过期为 %1$s</string>
     <string name="following_title">正在关注</string>
     <string name="fans_title">粉丝</string>
     <string name="local_history_search_placeholder">搜索本地缓存</string>
@@ -256,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">如果你想要使用 RssHub ，你需要设置RssHub 主机或选择公共RssHub 服务器</string>
     <string name="rss_sources_discovered_rss_sources">发现的 Rss 源</string>
     <string name="rss_sources_pinned_in_tabs">固定到主标签页</string>
+    <string name="rss_sources_open_in_browser">在浏览器中打开</string>
+    <string name="rss_sources_open_in_app">在应用程序中打开</string>
     <string name="rss_detail_open_in_browser">在浏览器中打开</string>
     <string name="rss_detail_share">分享</string>
     <string name="rss_detail_tldr">总结摘要</string>
@@ -278,10 +284,13 @@
     <string name="home_tab_mixed_timeline_title">混合</string>
     <string name="tab_settings_mixed_timeline">添加混合时间线标签</string>
     <string name="tab_settings_mixed_timeline_desc">混合时间线将混合所有标签页的时间线结果</string>
-    <string name="home_tab_social_timeline_title">社交活动</string>
+    <string name="home_tab_social_timeline_title">社交</string>
     <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
             <ul>
-                <li>Bug 修复和性能改进</li>
+                <li>添加的字体设置。</li>
+                <li>对RSS功能进行了重大修改。 文章内容是原生化的，而不是使用 Web View。</li>
+                <li>优化富文本渲染逻辑以提高性能。</li>
+                <li>Bug 修复和性能改进。</li>
             </ul>
         ]]></string>
 </resources>

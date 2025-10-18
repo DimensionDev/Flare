@@ -20,7 +20,6 @@
     <string name="home_tab_list_title">Листа</string>
     <string name="home_tab_feeds_title">Извори</string>
     <string name="dm_list_title">Директне поруке</string>
-    <string name="home_timeline_new_toots">Нови објаве</string>
     <string name="navigate_back">Назад</string>
     <string name="service_select_instance_input_placeholder">URL инстанце</string>
     <string name="service_select_next_button">Следеће</string>
@@ -217,7 +216,6 @@
     <string name="tab_settings_default">Дефолт</string>
     <string name="tab_settings_list">Листа</string>
     <string name="tab_settings_feed">Извори</string>
-    <string name="notification_login_expired">Пријава је истекла, молимо поново пријава</string>
     <string name="dm_list_empty">Нема директних порука</string>
     <string name="dm_list_error">Неуспех учитавања директних порука</string>
     <string name="send">Пошаљи</string>

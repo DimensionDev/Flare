@@ -10,7 +10,8 @@ struct UserListView: View {
                 HStack {
                     ForEach(data.users, id: \.key) { user in
                         UserCompatView(data: user)
-                            .padding()
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
                             .frame(width: 280)
                             .clipShape(.rect(cornerRadius: 16))
                             .overlay(

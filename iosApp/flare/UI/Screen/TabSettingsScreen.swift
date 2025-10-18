@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import SwiftUIBackports
 
 struct TabSettingsScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
@@ -10,12 +11,14 @@ struct TabSettingsScreen: View {
     @State private var editItem: TabItem? = nil
     var body: some View {
         List {
-            Section {
-                Toggle(isOn: $enableMixedTimeline) {
-                    Text("tab_settings_enable_mixed_timeline_title")
-                    Text("tab_settings_enable_mixed_timeline_desc")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+            if tabItems.count > 1 {
+                Section {
+                    Toggle(isOn: $enableMixedTimeline) {
+                        Text("tab_settings_enable_mixed_timeline_title")
+                        Text("tab_settings_enable_mixed_timeline_desc")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
             Section {
@@ -98,7 +101,7 @@ struct TabSettingsScreen: View {
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button(
-                    role: .confirm
+//                    role: .confirm
                 ) {
                     presenter.state.updateTabSettings { current in
                         current.doCopy(secondaryItems: current.secondaryItems, enableMixedTimeline: enableMixedTimeline, mainTabs: tabItems)
@@ -128,9 +131,6 @@ struct TabSettingsScreen: View {
                             tabItems.append(tabItem)
                         }
                     },
-                    onAddRssSource: {
-                        
-                    }
                 )
             }
         }
@@ -229,7 +229,7 @@ struct EditTabSheet: View {
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button(
-                    role: .confirm
+//                    role: .confirm
                 ) {
                     onConfirm(tabItem.update(metaData: .init(title: .Text(content: text), icon: presenter.state.icon)))
                     dismiss()
@@ -251,7 +251,7 @@ struct AddTabSheet: View {
     let selectedTabs: [TabItem]
     let onDelete: (TabItem) -> Void
     let onAdd: (TabItem) -> Void
-    let onAddRssSource: () -> Void
+    @State private var showAddRssSource = false
     @State private var selectedIndex = 0
     var body: some View {
         VStack {
@@ -273,7 +273,8 @@ struct AddTabSheet: View {
                     .padding(.horizontal)
                     .padding(.vertical, 8)
                     .foregroundStyle(selectedIndex == 0 ? Color.white : .primary)
-                    .glassEffect(selectedIndex == 0 ? .regular.tint(.accentColor) : .regular, in: .capsule)
+                    .backport
+                    .glassEffect(selectedIndex == 0 ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedIndex == 0 ? Color.accentColor : Color(.systemBackground))
                     
                     StateView(state: presenter.state.accountTabs) { accountTabs in
                         let tabs = accountTabs.cast(AllTabsPresenterStateAccountTabs.self)
@@ -293,7 +294,8 @@ struct AddTabSheet: View {
                             .padding(.horizontal)
                             .padding(.vertical, 8)
                             .foregroundStyle(selectedIndex == (index + 1) ? Color.white : .primary)
-                            .glassEffect(selectedIndex == (index + 1) ? .regular.tint(.accentColor) : .regular, in: .capsule)
+                            .backport
+                            .glassEffect(selectedIndex == (index + 1) ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedIndex == (index + 1) ? Color.accentColor : Color(.systemBackground))
                         }
                     }
                 }
@@ -333,7 +335,7 @@ struct AddTabSheet: View {
                         }
                     }
                     Button {
-                        onAddRssSource()
+                        showAddRssSource = true
                     } label: {
                         Label {
                             Text("rss_add_source")
@@ -371,6 +373,11 @@ struct AddTabSheet: View {
                         Image("fa-xmark")
                     }
                 }
+            }
+        }
+        .sheet(isPresented: $showAddRssSource) {
+            NavigationStack {
+                EditRssSheet(id: nil)
             }
         }
     }
@@ -471,12 +478,10 @@ extension AddTabSheet {
         filterIsTimeline: Bool,
         onDelete: @escaping (TabItem) -> Void,
         onAdd: @escaping (TabItem) -> Void,
-        onAddRssSource: @escaping () -> Void
     ) {
         self.selectedTabs = selectedTabs
         self.onDelete = onDelete
         self.onAdd = onAdd
-        self.onAddRssSource = onAddRssSource
         self._presenter = .init(wrappedValue: .init(presenter: AllTabsPresenter(filterIsTimeline: filterIsTimeline)))
     }
 }

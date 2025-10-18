@@ -3,8 +3,6 @@
     <string name="delete">Verwyder</string>
     <string name="profile_header_following_count">%1$s Volg</string>
     <string name="profile_header_fans_count">%1$s Volgers</string>
-    <string name="profile_header_toots_count">%1$s Toots</string>
-    <string name="profile_misskey_header_status_count">%1$s Status</string>
     <string name="profile_header_button_follow">Volg</string>
     <string name="profile_header_button_following">Volgendes</string>
     <string name="profile_header_button_requested">Aangesoek</string>
@@ -58,8 +56,6 @@
     <string name="mastodon_visibility_direct_description">Slegs genoem gebruikers kan hierdie toot sien</string>
     <string name="settings_notifications_title">Kenmerke</string>
     <string name="settings_notifications_subtitle">Pas aan hoe Flare jou kennisgewing gee</string>
-    <string name="status_loadmore_end">Geen meer toots</string>
-    <string name="status_loadmore_error">Fout met die laai van meer toots</string>
     <string name="status_loadmore_error_retry">Probeer weer</string>
     <string name="status_empty">Niks om hier te sien nie</string>
     <string name="status_sensitive_media">Sensitiewe media</string>
@@ -104,8 +100,6 @@
     <string name="user_unmute">Ontstil %1$s</string>
     <string name="mastodon_item_content_warning">Inhoud waarskuwing</string>
     <string name="reply_to">Antwoord aan %1$s</string>
-    <string name="status_detail_translate">Vertaal na %1$s</string>
-    <string name="status_detail_tldr">Samevatting</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
@@ -345,4 +339,12 @@
     <string name="dm_list_title">Direkte Boodskappe</string>
     <string name="antenna_title">Antenna</string>
     <string name="mixed_timeline_title">Gemengde</string>
+    <string name="settings_about_description">Die uiteindelike volgende generasie oopbron, KI aangedrewe, gedesentraliseerde sosiale netwerk kliënt.</string>
+    <string name="settings_about_source_code">Bronkode</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Sluit aan by ons Telegram-groep</string>
+    <string name="settings_about_line_description">Sluit aan by ons Line-groep</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Help ons om Flare te vertaal</string>
+    <string name="settings_privacy_policy">Privaatheidsbeleid</string>
 </resources>

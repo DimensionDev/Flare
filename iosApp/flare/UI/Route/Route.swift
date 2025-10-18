@@ -19,12 +19,13 @@ enum Route: Hashable, Identifiable {
         switch self {
         case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew(accountType)) }, toTabSetting: { onNavigate(.tabSettings) })
         case .timeline(let item): TimelineScreen(tabItem: item)
+                .navigationTitle(item.metaData.title.text)
         case .serviceSelect:
             ServiceSelectionScreen(toHome: { clearToHome() })
         case .statusDetail(let accountType, let statusKey):
             StatusDetailScreen(accountType: accountType, statusKey: statusKey)
         case .profileUser(let accountType, let userKey):
-            ProfileScreen(accountType: accountType, userKey: userKey)
+            ProfileScreen(accountType: accountType, userKey: userKey, onFollowingClick: { key in onNavigate(.userFollowing(accountType, key)) }, onFansClick: { key in onNavigate(.userFans(accountType, key)) })
         case .settings:
             SettingsScreen()
         case .tabItem(let tabItem):
@@ -42,7 +43,7 @@ enum Route: Hashable, Identifiable {
         case .composeVVOReplyComment(let accountType, let statueKey, let rootId):
             ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.VVOComment(statusKey: statueKey, rootId: rootId))
         case .profileUserNameWithHost(let accountType, let userName, let host):
-            ProfileWithUserNameAndHostScreen(userName: userName, host: host, accountType: accountType)
+            ProfileWithUserNameAndHostScreen(userName: userName, host: host, accountType: accountType, onFollowingClick: { key in onNavigate(.userFollowing(accountType, key)) }, onFansClick: { key in onNavigate(.userFans(accountType, key)) })
         case .appearance:
             AppearanceScreen()
         case .about:
@@ -57,6 +58,22 @@ enum Route: Hashable, Identifiable {
             AiConfigScreen()
         case .tabSettings:
             TabSettingsScreen()
+        case .rssDetail(let url):
+            RssDetailScreen(url: url)
+        case .statusVVOStatus(let accountType, let statusKey):
+            VVOStatusScreen(accountType: accountType, statusKey: statusKey)
+        case .statusVVOComment(let accountType, let statusKey):
+            VVOCommentScreen(accountType: accountType, statusKey: statusKey)
+        case .statusBlueskyReport(let accountType, let statusKey):
+            BlueskyReportSheet(accountType: accountType, statusKey: statusKey)
+        case .statusMisskeyReport(let accountType, let userKey, let statusKey):
+            MisskeyReportSheet(accountType: accountType, userKey: userKey, statusKey: statusKey)
+        case .statusAddReaction(let accountType, let statusKey):
+            StatusAddReactionSheet(accountType: accountType, statusKey: statusKey)
+        case .userFans(let account, let userKey):
+            UserListScreen(accountType: account, userKey: userKey, isFollowing: false)
+        case .userFollowing(let account, let userKey):
+            UserListScreen(accountType: account, userKey: userKey, isFollowing: true)
         default:
             Text("Not done yet for \(self)")
         }
@@ -96,6 +113,8 @@ enum Route: Hashable, Identifiable {
     case about
     case tabItem(TabItem)
     case tabSettings
+    case userFollowing(AccountType, MicroBlogKey)
+    case userFans(AccountType, MicroBlogKey)
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {

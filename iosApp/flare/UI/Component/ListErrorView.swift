@@ -1,5 +1,6 @@
 import SwiftUI
 import KotlinSharedUI
+import SwiftUIBackports
 
 struct ListErrorView: View {
     let error: KotlinThrowable
@@ -12,7 +13,7 @@ struct ListErrorView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 64, height: 64)
-                Text("error_login_expired\(expiredError.accountKey)")
+                Text("error_login_expired \(expiredError.accountKey)")
                     .multilineTextAlignment(.center)
                     .font(.headline)
                 Button {
@@ -20,7 +21,8 @@ struct ListErrorView: View {
                 } label: {
                     Text("error_login_expired_action")
                 }
-                .buttonStyle(.glassProminent)
+                .backport
+                .glassProminentButtonStyle()
             } else {
                 Image(systemName: "exclamationmark.triangle.text.page")
                     .resizable()
@@ -34,7 +36,13 @@ struct ListErrorView: View {
                 } label: {
                     Text("action_retry")
                 }
-                .buttonStyle(.glassProminent)
+                .backport
+                .glassProminentButtonStyle()
+                if let message = error.message {
+                    Text(message)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .padding()

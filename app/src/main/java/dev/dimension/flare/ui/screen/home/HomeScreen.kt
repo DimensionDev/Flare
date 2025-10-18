@@ -46,7 +46,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -98,7 +97,6 @@ import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
 import dev.dimension.flare.ui.route.accountTypeOr
 import dev.dimension.flare.ui.screen.splash.SplashScreen
-import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -431,9 +429,7 @@ private fun HomeRailHeader(
                                     Text(
                                         user.handle,
                                         style = MaterialTheme.typography.bodySmall,
-                                        modifier =
-                                            Modifier
-                                                .alpha(MediumAlpha),
+                                        color = MaterialTheme.colorScheme.outline,
                                     )
                                 }
                             }

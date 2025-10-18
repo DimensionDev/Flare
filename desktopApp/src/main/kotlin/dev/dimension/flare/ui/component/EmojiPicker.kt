@@ -72,7 +72,7 @@ internal fun EmojiPicker(
             modifier = Modifier.fillMaxWidth(),
         )
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(48.dp),
+            columns = GridCells.Adaptive(24.dp),
             state = gridListState,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -99,7 +99,7 @@ internal fun EmojiPicker(
                             contentDescription = emoji.shortcode,
                             modifier =
                                 Modifier
-                                    .size(48.dp)
+                                    .size(24.dp)
                                     .clickable {
                                         onEmojiSelected(emoji)
                                         state.addHistory(emoji)
@@ -137,7 +137,7 @@ internal fun EmojiPicker(
                             contentDescription = emoji.shortcode,
                             modifier =
                                 Modifier
-                                    .size(48.dp)
+                                    .size(24.dp)
                                     .clickable {
                                         onEmojiSelected(emoji)
                                         state.addHistory(emoji)

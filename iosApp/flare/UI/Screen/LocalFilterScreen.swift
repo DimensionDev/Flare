@@ -89,7 +89,7 @@ struct LocalFilterEditSheet: View {
         }
         .navigationTitle("local_filter_edit_title")
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
+            ToolbarItem(placement: .cancellationAction) {
                 Button {
                     dismiss()
                 } label: {
@@ -98,12 +98,11 @@ struct LocalFilterEditSheet: View {
                     } icon: {
                         Image("fa-xmark")
                     }
-
                 }
             }
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .confirmationAction) {
                 Button(
-                    role: .confirm
+//                    role: .confirm
                 ) {
                     onConfirm(keyword, forTimeline, forNotification, forSearch)
                     dismiss()

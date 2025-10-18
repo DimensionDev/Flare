@@ -3,11 +3,14 @@ package dev.dimension.flare.data.network.rss
 import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.rss.model.Feed
+import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.ui.model.mapper.link
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.xml.xml
 import nl.adaptivity.xmlutil.serialization.XML
 
@@ -45,4 +48,43 @@ internal object RssService {
             .distinct()
             .takeIf { it.isNotEmpty() }
             ?: throw IllegalArgumentException("No RSS or Atom feeds found at the provided URL: $url")
+
+    suspend fun fetchIcon(url: String): String? {
+        val feedLink = fetch(url).link ?: return null
+        val parsedUrl = Url(feedLink)
+        val favIcon = "https://${parsedUrl.host}/favicon.ico"
+        val hasFavIcon =
+            tryRun {
+                val response = ktorClient().get(favIcon)
+                if (response.status.value !in 200..299) {
+                    throw Exception("Failed to fetch favicon: ${response.status}")
+                }
+            }
+        if (hasFavIcon.isSuccess) {
+            return favIcon
+        }
+        val html =
+            tryRun {
+                ktorClient().get(feedLink).bodyAsText()
+            }.getOrNull() ?: return null
+        val document = Ksoup.parse(html)
+        val iconLink =
+            document
+                .select(
+                    """
+                    link[rel~=(?i)(?:^|\s)(?:icon|apple-touch-icon(?:-precomposed)?|mask-icon)(?:\s|$)],
+                    link[rel~=(?i)^(?=.*\bshortcut\b)(?=.*\bicon\b).*$]
+                    
+                    """.trimIndent(),
+                ).firstOrNull()
+                ?: return null
+        val iconHref = iconLink.attr("href").ifBlank { return null }
+        return if (iconHref.startsWith("http")) {
+            iconHref
+        } else if (iconHref.startsWith("/")) {
+            "https://${parsedUrl.host}$iconHref"
+        } else {
+            "https://${parsedUrl.host}/$iconHref"
+        }
+    }
 }

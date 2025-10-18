@@ -27,6 +27,7 @@ public class RssSourcesPresenter :
         public fun add(
             url: String,
             title: String,
+            iconUrl: String?,
         )
 
         public fun delete(id: Int)
@@ -48,9 +49,17 @@ public class RssSourcesPresenter :
             override fun add(
                 url: String,
                 title: String,
+                iconUrl: String?,
             ) {
                 scope.launch {
-                    appDatabase.rssSourceDao().insert(DbRssSources(url = url, title = title, lastUpdate = 0))
+                    appDatabase.rssSourceDao().insert(
+                        DbRssSources(
+                            url = url,
+                            title = title,
+                            lastUpdate = 0,
+                            icon = iconUrl,
+                        ),
+                    )
                 }
             }
 

@@ -20,7 +20,6 @@
     <string name="home_tab_list_title">Lys</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Direkte Boodskappe</string>
-    <string name="home_timeline_new_toots">Nuwe toots</string>
     <string name="navigate_back">Terug</string>
     <string name="service_select_instance_input_placeholder">Instansie URL</string>
     <string name="service_select_next_button">Volgende</string>
@@ -217,7 +216,6 @@
     <string name="tab_settings_default">Standaard</string>
     <string name="tab_settings_list">Lys</string>
     <string name="tab_settings_feed">Feeds</string>
-    <string name="notification_login_expired">Teken verval, teken asseblief weer in</string>
     <string name="dm_list_empty">Geen direkte boodskappe nie</string>
     <string name="dm_list_error">Kon nie direkte boodskappe laai nie</string>
     <string name="send">Stuur</string>

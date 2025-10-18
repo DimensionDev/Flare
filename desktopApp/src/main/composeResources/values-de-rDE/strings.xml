@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Liste</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Direkte Nachrichten</string>
-    <string name="home_timeline_new_toots">Neue toots</string>
+    <string name="home_timeline_new_toots">Neue Beiträge</string>
     <string name="navigate_back">Zurück</string>
     <string name="service_select_instance_input_placeholder">Instanz URL</string>
     <string name="service_select_next_button">Nächste</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">KI-Zusammenfassung aktivieren</string>
     <string name="settings_ai_config_tldr_description">KI-Zusammenfassung für lange Beiträge aktivieren, nur verfügbar in Beiträgen, die länger als 500 Zeichen sind</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Kompositionsbox in der Home-Zeitleiste anzeigen</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Kompositionsbox im oberen Teil der Home-Zeitleiste anzeigen</string>
     <string name="settings_appearance_show_actions">Aktionen anzeigen</string>
     <string name="settings_appearance_show_actions_description">Aktionen am unteren Ende des Status anzeigen</string>
     <string name="settings_appearance_show_media">Medien anzeigen</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">Standard</string>
     <string name="tab_settings_list">Liste</string>
     <string name="tab_settings_feed">Feeds</string>
-    <string name="notification_login_expired">Login abgelaufen, bitte erneut anmelden</string>
+    <string name="notification_login_expired">Login abgelaufen für %1$s</string>
     <string name="dm_list_empty">Keine direkten Nachrichten</string>
     <string name="dm_list_error">Fehler beim Laden der Direktnachrichten</string>
     <string name="send">Senden</string>

@@ -1,7 +1,7 @@
 package dev.dimension.flare.ui.screen.status
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.navigation3.runtime.EntryProviderBuilder
+import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.DialogSceneStrategy
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
@@ -14,7 +14,7 @@ import dev.dimension.flare.ui.screen.status.action.MastodonReportDialog
 import dev.dimension.flare.ui.screen.status.action.MisskeyReportDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
-internal fun EntryProviderBuilder<NavKey>.statusEntryBuilder(
+internal fun EntryProviderScope<NavKey>.statusEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit
 ) {

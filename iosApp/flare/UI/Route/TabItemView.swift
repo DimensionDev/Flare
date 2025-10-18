@@ -14,6 +14,7 @@ extension TabItem {
                 HomeTimelineScreen(accountType: homeTimelineTabItem.account, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew(homeTimelineTabItem.account) ) }, toTabSetting: { onNavigate(.tabSettings) } )
             default:
                 TimelineScreen(tabItem: timelineTabItem)
+                    .navigationTitle(timelineTabItem.metaData.title.text)
             }
         case .notificationTabItem:
             NotificationScreen(accountType: self.account)
@@ -26,9 +27,13 @@ extension TabItem {
         case .feedsTabItem(let feedsTabItem):
             AllFeedScreen(accountType: feedsTabItem.account)
         case .profileTabItem(let profileTabItem):
-            ProfileScreen(accountType: profileTabItem.account, userKey: nil)
-        default:
-            Text("Not done yet for \(self)")
+            ProfileScreen(accountType: profileTabItem.account, userKey: nil, onFollowingClick: { key in onNavigate(.userFollowing(profileTabItem.account, key)) }, onFansClick: { key in onNavigate(.userFans(profileTabItem.account, key)) })
+        case .rssTabItem(let rssTabItem):
+            RssScreen()
+        case .directMessageTabItem(_):
+            Text("Not implemented yet")
+        case .antennasListTabItem(let antennasListTabItem):
+            AntennasListScreen(accountType: antennasListTabItem.account)
         }
     }
 }

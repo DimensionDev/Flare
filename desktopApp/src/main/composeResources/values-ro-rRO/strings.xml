@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Listă</string>
     <string name="home_tab_feeds_title">Fluxuri</string>
     <string name="dm_list_title">Mesaje directe</string>
-    <string name="home_timeline_new_toots">Notițe noi</string>
+    <string name="home_timeline_new_toots">Postări noi</string>
     <string name="navigate_back">Înapoi</string>
     <string name="service_select_instance_input_placeholder">URL Instanță</string>
     <string name="service_select_next_button">Următoarea</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Activează rezumarea AI</string>
     <string name="settings_ai_config_tldr_description">Activează sumarizarea AI pentru postările lungi, disponibile doar în postarea care depășește 500 de caractere</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Arată caseta de compunere în cronologia principală</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Arată caseta de compunere în partea de sus a cronologiei principale</string>
     <string name="settings_appearance_show_actions">Afișare acțiuni</string>
     <string name="settings_appearance_show_actions_description">Arată acțiunile în partea de jos a stării</string>
     <string name="settings_appearance_show_media">Arată media</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">Implicit</string>
     <string name="tab_settings_list">Listă</string>
     <string name="tab_settings_feed">Fluxuri</string>
-    <string name="notification_login_expired">Logarea a expirat, te rugăm să te autentifici din nou</string>
+    <string name="notification_login_expired">Autentificarea a expirat pentru %1$s</string>
     <string name="dm_list_empty">Niciun mesaj direct</string>
     <string name="dm_list_error">Încărcarea mesajelor directe a eșuat</string>
     <string name="send">Trimite</string>

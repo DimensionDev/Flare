@@ -23,7 +23,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -53,7 +52,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedPresenter
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
@@ -154,9 +152,7 @@ internal fun BlueskyFeedScreen(
                                                     item.creator?.handle ?: "Unknown",
                                                 ),
                                             style = MaterialTheme.typography.bodySmall,
-                                            modifier =
-                                                Modifier
-                                                    .alpha(MediumAlpha),
+                                            color = MaterialTheme.colorScheme.outline,
                                         )
                                     },
                                 )

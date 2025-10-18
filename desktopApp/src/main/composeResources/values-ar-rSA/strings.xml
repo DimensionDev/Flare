@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">قائمة</string>
     <string name="home_tab_feeds_title">التحديثات</string>
     <string name="dm_list_title">الرسائل المباشرة</string>
-    <string name="home_timeline_new_toots">تبويقات جديدة</string>
+    <string name="home_timeline_new_toots">مشاركات جديدة</string>
     <string name="navigate_back">الرجوع</string>
     <string name="service_select_instance_input_placeholder">رابط مثيل</string>
     <string name="service_select_next_button">التالي</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">تمكين ملخص الذكاء الاصطناعي</string>
     <string name="settings_ai_config_tldr_description">تمكين تلخيص الذكاء الاصطناعي لمشاركات طويلة، فقط متاح في المشاركة التي تزيد عن 500 حرف</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">إظهار مربع تكوين في الخيط الزمني الرئيسي</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">إظهار مربع تكوين في الجزء العلوي من الخيط الزمني الرئيسي</string>
     <string name="settings_appearance_show_actions">إظهار الإجراءات</string>
     <string name="settings_appearance_show_actions_description">إظهار الإجراءات في الجزء السفلي من الحالة</string>
     <string name="settings_appearance_show_media">إظهار الوسائط</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">الافتراضي</string>
     <string name="tab_settings_list">قائمة</string>
     <string name="tab_settings_feed">التحديثات</string>
-    <string name="notification_login_expired">انتهت صلاحية تسجيل الدخول، الرجاء تسجيل الدخول مرة أخرى</string>
+    <string name="notification_login_expired">انتهت صلاحية تسجيل الدخول ل %1$s</string>
     <string name="dm_list_empty">لا توجد رسائل مباشرة</string>
     <string name="dm_list_error">فشل في تحميل الرسائل المباشرة</string>
     <string name="send">إرسال</string>

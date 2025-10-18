@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -67,6 +68,8 @@ import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
@@ -96,17 +99,13 @@ fun EditRssSourceScreen(
                     state.inputState.onSuccess { inputState ->
                         when (inputState) {
                             is EditRssSourcePresenter.State.RssInputState.RssFeed -> {
-                                inputState.save(
-                                    title = state.title.text.toString(),
-                                )
+                                val data =
+                                    inputState.save(
+                                        title = state.title.text.toString(),
+                                        openInBrowser = false,
+                                    )
                                 state.save(
-                                    sources =
-                                        listOf(
-                                            state.url.text.toString() to
-                                                state.title.text.toString().ifEmpty {
-                                                    null
-                                                },
-                                        ),
+                                    sources = listOf(data),
                                 )
                                 onDismissRequest.invoke()
                             }
@@ -115,17 +114,13 @@ fun EditRssSourceScreen(
                                 if (inputState.checkState.isSuccess &&
                                     inputState.checkState.takeSuccess() is CheckRssSourcePresenter.State.RssState.RssFeed
                                 ) {
-                                    inputState.save(
-                                        title = state.title.text.toString(),
-                                    )
+                                    val data =
+                                        inputState.save(
+                                            title = state.title.text.toString(),
+                                            openInBrowser = false,
+                                        )
                                     state.save(
-                                        sources =
-                                            listOf(
-                                                inputState.actualUrl to
-                                                    state.title.text.toString().ifEmpty {
-                                                        null
-                                                    },
-                                            ),
+                                        sources = listOf(data),
                                     )
                                     onDismissRequest.invoke()
                                 }
@@ -135,12 +130,10 @@ fun EditRssSourceScreen(
                                 if (state.selectedSource.isNotEmpty()) {
                                     inputState.save(
                                         sources = state.selectedSource,
+                                        openInBrowser = false,
                                     )
                                     state.save(
-                                        sources =
-                                            state.selectedSource.map { source ->
-                                                source.url to source.title
-                                            },
+                                        sources = state.selectedSource,
                                     )
                                     onDismissRequest.invoke()
                                 }
@@ -226,6 +219,16 @@ fun EditRssSourceScreen(
                                         imeAction = ImeAction.Done,
                                         autoCorrectEnabled = false,
                                     ),
+                                leadingIcon =
+                                    rssState.icon?.let {
+                                        {
+                                            NetworkImage(
+                                                it,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(24.dp),
+                                            )
+                                        }
+                                    },
                             )
                         }
 
@@ -398,6 +401,7 @@ fun EditRssSourceScreen(
     )
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 private fun presenter(
     id: Int?,
@@ -457,8 +461,12 @@ private fun presenter(
             }
         }
     }
-    LaunchedEffect(urlText.text) {
-        state.checkUrl(urlText.text.toString())
+    LaunchedEffect(Unit) {
+        snapshotFlow { urlText.text }
+            .debounce(666)
+            .collect {
+                state.checkUrl(it.toString())
+            }
     }
     object : EditRssSourcePresenter.State by state {
         val pinnedInTabs = pinnedInTabs
@@ -477,7 +485,7 @@ private fun presenter(
             }
         }
 
-        fun save(sources: List<Pair<String, String?>>) {
+        fun save(sources: List<UiRssSource>) {
             appScope.launch {
                 settingsRepository.updateTabSettings {
                     if (pinnedInTabs) {
@@ -485,13 +493,10 @@ private fun presenter(
                             mainTabs =
                                 mainTabs
                                     .filterNot { tab ->
-                                        tab is RssTimelineTabItem && sources.any { it.first == tab.feedUrl }
+                                        tab is RssTimelineTabItem && sources.any { it.url == tab.feedUrl }
                                     } +
                                     sources.map { source ->
-                                        RssTimelineTabItem(
-                                            feedUrl = source.first,
-                                            title = source.second.orEmpty(),
-                                        )
+                                        RssTimelineTabItem(source)
                                     },
                         )
                     } else {
@@ -499,7 +504,7 @@ private fun presenter(
                             mainTabs =
                                 mainTabs
                                     .filterNot { tab ->
-                                        tab is RssTimelineTabItem && sources.any { it.first == tab.feedUrl }
+                                        tab is RssTimelineTabItem && sources.any { it.url == tab.feedUrl }
                                     },
                         )
                     }

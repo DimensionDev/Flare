@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">notificações</string>
     <string name="home_tab_me_title">Eu</string>
     <string name="home_tab_discover_title">Pendentes</string>
-    <string name="home_timeline_new_toots">Novos toots</string>
+    <string name="home_timeline_new_toots">Novas postagens</string>
     <string name="notification_tab_all_title">TODOS</string>
     <string name="notification_tab_mentions_title">Menciona</string>
     <string name="notification_tab_comments_title">comentários</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 dias</string>
     <string name="compose_content_warning_hint">Aviso de conteúdo</string>
     <string name="compose_media_sensitive">Marcar mídia como sensível</string>
-    <string name="compose_notification_title">Enviando toot</string>
+    <string name="compose_notification_title">Enviando Postagem</string>
     <string name="settings_title">Confirgurações</string>
     <string name="settings_accounts_title">Gerenciamento da conta</string>
     <string name="settings_appearance_title">Aparência</string>
@@ -103,7 +103,7 @@
     <string name="more">MAIS</string>
     <string name="discover_search_placeholder">Pesquisa</string>
     <string name="discover_users">Recomendar usuários</string>
-    <string name="discover_status">Toots em alta</string>
+    <string name="discover_status">Posts em Tendência</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Utilizadores</string>
     <string name="search_status">SItuação</string>
@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Alterar a cor do tema do aplicativo</string>
     <string name="settings_appearance_theme_pure_color">Modo de Alto Contraste</string>
     <string name="settings_appearance_theme_pure_color_description">Aumentar o contraste entre plano de fundo e texto</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Alterar o tamanho da fonte do aplicativo</string>
+    <string name="settings_appearance_font_size_diff_decrease">Diminuir</string>
+    <string name="settings_appearance_font_size_diff_increase">Aumentar</string>
     <string name="settings_storage_clear_image_cache">Limpar cache de imagens</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB de imagens serão removidas</string>
     <string name="settings_storage_clear_database">Limpar banco de dados de cache</string>
@@ -238,7 +242,7 @@
     <string name="dm_sending">Enviando</string>
     <string name="dm_leave">Sair da conversa</string>
     <string name="dm_to_profile">Exibir perfil</string>
-    <string name="notification_login_expired">Login expirado, faça o login novamente</string>
+    <string name="notification_login_expired">O login expirou para %1$s</string>
     <string name="following_title">Seguinte</string>
     <string name="fans_title">Seguidor</string>
     <string name="local_history_search_placeholder">Pesquisar cache local</string>
@@ -256,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">Você precisa definir o host do RssHub se você quiser usar RssHub, ou selecionar o servidor público do RssHub</string>
     <string name="rss_sources_discovered_rss_sources">Fontes RSS Descobertas</string>
     <string name="rss_sources_pinned_in_tabs">Fixar em abas iniciais</string>
+    <string name="rss_sources_open_in_browser">Abrir no navegador</string>
+    <string name="rss_sources_open_in_app">Abrir no aplicativo</string>
     <string name="rss_detail_open_in_browser">Abrir no navegador</string>
     <string name="rss_detail_share">Compartilhar</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -279,9 +285,4 @@
     <string name="tab_settings_mixed_timeline">Adicionar guia de timeline mista</string>
     <string name="tab_settings_mixed_timeline_desc">Linha do tempo mista irá misturar todas as abas que resultam em uma aba</string>
     <string name="home_tab_social_timeline_title">Sócio</string>
-    <string name="changelog_current"><![CDATA[            <span>Versão %1$s:</span>
-            <ul>
-                <li>Correções de erros e melhorias de desempenho</li>
-            </ul>
-        ]]></string>
 </resources>

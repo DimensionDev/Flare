@@ -9,7 +9,7 @@
     <string name="home_tab_me_title">Me</string>
     <string name="home_tab_discover_title">Discover</string>
 
-    <string name="home_timeline_new_toots">New toots</string>
+    <string name="home_timeline_new_toots">New Posts</string>
 
     <string name="notification_tab_all_title">All</string>
     <string name="notification_tab_mentions_title">Mentions</string>
@@ -35,7 +35,7 @@
     <string name="compose_poll_expiration_7_days">7 days</string>
     <string name="compose_content_warning_hint">Content warning</string>
     <string name="compose_media_sensitive">Mark media as sensitive</string>
-    <string name="compose_notification_title">Sending toot</string>
+    <string name="compose_notification_title">Sending Post</string>
 
     <string name="settings_title">Settings</string>
 
@@ -123,7 +123,7 @@
 
     <string name="discover_search_placeholder">Search</string>
     <string name="discover_users">Recommend Users</string>
-    <string name="discover_status">Trending Toots</string>
+    <string name="discover_status">Trending Posts</string>
     <string name="discover_hashtags">Trending Hashtags</string>
 
     <string name="search_users">Users</string>
@@ -167,6 +167,10 @@
     <string name="settings_appearance_theme_color_description">Change the theme color of the app</string>
     <string name="settings_appearance_theme_pure_color">High contrast Mode</string>
     <string name="settings_appearance_theme_pure_color_description">Increase contrast between background and text</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Change the font size of the app</string>
+    <string name="settings_appearance_font_size_diff_decrease">Decrease</string>
+    <string name="settings_appearance_font_size_diff_increase">Increase</string>
 
     <string name="settings_storage_clear_image_cache">Clear image cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB of images will be removed</string>
@@ -287,7 +291,7 @@
     <string name="dm_to_profile">Show profile</string>
 
 
-    <string name="notification_login_expired">Login expired, please login again</string>
+    <string name="notification_login_expired">Login expired for %1$s</string>
 
     <string name="following_title">Following</string>
     <string name="fans_title">Follower</string>
@@ -309,6 +313,8 @@
     <string name="rss_sources_rss_hub_host_hint">You need to set the RssHub host if you want to use RssHub, or select the public RssHub server</string>
     <string name="rss_sources_discovered_rss_sources">Discovered Rss Sources</string>
     <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
+    <string name="rss_sources_open_in_browser">Open in browser</string>
+    <string name="rss_sources_open_in_app">Open in app</string>
 
     <string name="rss_detail_open_in_browser">Open in browser</string>
     <string name="rss_detail_share">Share</string>
@@ -342,7 +348,10 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Bug fixes and performance improvements</li>
+                <li>Added font settings.</li>
+                <li>Significantly revamped the RSS feature. Article content is now rendered natively instead of using a WebView.</li>
+                <li>Optimized rich-text rendering logic for better performance.</li>
+                <li>Bug fixes and performance improvements.</li>
             </ul>
         ]]>
     </string>

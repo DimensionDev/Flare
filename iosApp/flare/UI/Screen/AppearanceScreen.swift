@@ -149,7 +149,10 @@ extension AppearanceSettings {
         showSensitiveContent: Bool? = nil,
         videoAutoplay: VideoAutoplay? = nil,
         expandMediaSize: Bool? = nil,
-        compatLinkPreview: Bool? = nil
+        compatLinkPreview: Bool? = nil,
+        fontSizeDiff: Float? = nil,
+        lineHeightDiff: Float? = nil,
+        showComposeInHomeTimeline: Bool? = nil
     ) -> AppearanceSettings {
         AppearanceSettings(
             theme: theme ?? self.theme,
@@ -164,7 +167,10 @@ extension AppearanceSettings {
             showSensitiveContent: showSensitiveContent ?? self.showSensitiveContent,
             videoAutoplay: videoAutoplay ?? self.videoAutoplay,
             expandMediaSize: expandMediaSize ?? self.expandMediaSize,
-            compatLinkPreview: compatLinkPreview ?? self.compatLinkPreview
+            compatLinkPreview: compatLinkPreview ?? self.compatLinkPreview,
+            fontSizeDiff: fontSizeDiff ?? self.fontSizeDiff,
+            lineHeightDiff: lineHeightDiff ?? self.lineHeightDiff,
+            showComposeInHomeTimeline: showComposeInHomeTimeline ?? self.showComposeInHomeTimeline
         )
     }
 }

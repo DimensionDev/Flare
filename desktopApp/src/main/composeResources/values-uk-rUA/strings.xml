@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Список</string>
     <string name="home_tab_feeds_title">Стрічки новин</string>
     <string name="dm_list_title">Миттєві повідомлення</string>
-    <string name="home_timeline_new_toots">Нові дмухи</string>
+    <string name="home_timeline_new_toots">Нові повідомлення</string>
     <string name="navigate_back">Відмінити</string>
     <string name="service_select_instance_input_placeholder">URL-адреса інстансу</string>
     <string name="service_select_next_button">Уперед</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Увімкнути підсумок ШІ</string>
     <string name="settings_ai_config_tldr_description">Увімкнути підсумок ШІ для довгих постів, доступних тільки в повідомленнях, більше ніж 500 символів</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Показувати композицію на домашній стрічці</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Показати композицію у верхній частині домашньої часової шкали</string>
     <string name="settings_appearance_show_actions">Показати дії</string>
     <string name="settings_appearance_show_actions_description">Показати дії внизу статусу</string>
     <string name="settings_appearance_show_media">Показати медіа</string>
@@ -234,7 +236,6 @@
     <string name="tab_settings_default">Типово</string>
     <string name="tab_settings_list">Список</string>
     <string name="tab_settings_feed">Стрічки новин</string>
-    <string name="notification_login_expired">Вхід закінчився, будь ласка, увійдіть знову</string>
     <string name="dm_list_empty">Нема особистих повідомлень</string>
     <string name="dm_list_error">Не вдалося завантажити особисті повідомлення</string>
     <string name="send">Відправити</string>

@@ -474,11 +474,7 @@ internal fun WindowScope.RouteContent(
             RssListScreen(
                 toItem = {
                     navigate(
-                        RssTimeline(
-                            url = it.url,
-                            title = it.title,
-                            id = it.id,
-                        ),
+                        RssTimeline(it),
                     )
                 },
                 onEdit = {
@@ -496,8 +492,7 @@ internal fun WindowScope.RouteContent(
         is Route.RssTimeline -> {
             TimelineScreen(
                 RssTimelineTabItem(
-                    feedUrl = route.url,
-                    title = route.title.orEmpty(),
+                    route.data,
                 ),
             )
         }

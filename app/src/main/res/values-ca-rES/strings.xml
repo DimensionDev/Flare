@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">Notifications</string>
     <string name="home_tab_me_title">Jo</string>
     <string name="home_tab_discover_title">Descobreix</string>
-    <string name="home_timeline_new_toots">Nous toots</string>
     <string name="notification_tab_all_title">Tot</string>
     <string name="notification_tab_mentions_title">Esmenta</string>
     <string name="notification_tab_comments_title">Comentaris</string>
@@ -30,7 +29,6 @@
     <string name="compose_poll_expiration_7_days">7 dies</string>
     <string name="compose_content_warning_hint">Avís de contingut</string>
     <string name="compose_media_sensitive">Marcar mitjans com a sensibles</string>
-    <string name="compose_notification_title">Enviant toot</string>
     <string name="settings_title">Configuració</string>
     <string name="settings_accounts_title">Gestió del compte</string>
     <string name="settings_appearance_title">Aparença</string>
@@ -99,7 +97,6 @@
     <string name="more">Més</string>
     <string name="discover_search_placeholder">Cerca</string>
     <string name="discover_users">Recomanar usuaris</string>
-    <string name="discover_status">Toots tendents</string>
     <string name="discover_hashtags">Etiquetes tendents</string>
     <string name="search_users">Usuaris</string>
     <string name="search_status">Estat</string>
@@ -230,7 +227,6 @@
     <string name="dm_sending">Enviant</string>
     <string name="dm_leave">Deixar la conversa</string>
     <string name="dm_to_profile">Mostrar perfil</string>
-    <string name="notification_login_expired">La sessió d\'inici de sessió ha caducat, si us plau, inicieu sessió de nou</string>
     <string name="following_title">Seguint</string>
     <string name="fans_title">Seguidor</string>
     <string name="local_history_search_placeholder">Cerca a la memòria cau local</string>
@@ -244,6 +240,7 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">No hi ha fonts rss</string>
+    <string name="rss_sources_open_in_browser">Obre al navegador</string>
     <string name="rss_detail_open_in_browser">Obre al navegador</string>
     <string name="rss_detail_share">Compartir</string>
     <string name="rss_detail_tldr">Resumir</string>

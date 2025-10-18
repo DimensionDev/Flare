@@ -3,8 +3,8 @@
     <string name="delete">Eliminar</string>
     <string name="profile_header_following_count">%1$s siguiendo</string>
     <string name="profile_header_fans_count">Seguidores %1$s</string>
-    <string name="profile_header_toots_count">%1$s Toots</string>
-    <string name="profile_misskey_header_status_count">Estado de %1$s</string>
+    <string name="profile_header_toots_count">Entradas %1$s</string>
+    <string name="profile_misskey_header_status_count">Entradas %1$s</string>
     <string name="profile_header_button_follow">Seguir</string>
     <string name="profile_header_button_following">Siguiendo</string>
     <string name="profile_header_button_requested">Solicitado</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Sólo los usuarios mencionados pueden ver este toot</string>
     <string name="settings_notifications_title">Notificaciones</string>
     <string name="settings_notifications_subtitle">Personaliza cómo te notifica la bengala</string>
-    <string name="status_loadmore_end">No más toots</string>
-    <string name="status_loadmore_error">Error al cargar más toots</string>
+    <string name="status_loadmore_end">No hay más mensajes</string>
+    <string name="status_loadmore_error">Error al cargar más entradas</string>
     <string name="status_loadmore_error_retry">Reintentar</string>
     <string name="status_empty">Nada que ver aquí</string>
     <string name="status_sensitive_media">Medios sensitivos</string>
     <string name="show_media">Mostrar medios</string>
+    <string name="hide_media">Ocultar medios</string>
     <string name="login_expired">La sesión de inicio ha expirado</string>
     <string name="login_expired_message">Haga clic para volver a iniciar sesión</string>
     <string name="login_expired_relogin">Iniciar sesión de nuevo</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Dejar de silenciar %1$s</string>
     <string name="mastodon_item_content_warning">Advertencia de contenido</string>
     <string name="reply_to">Responder a %1$s</string>
-    <string name="status_detail_translate">Traducir a %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Traducir Post</string>
+    <string name="status_detail_tldr">Resumen del post</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMMM yy HH:mm</string>
@@ -354,4 +355,13 @@
     <string name="social_title">Social</string>
     <string name="antenna_title">Antena</string>
     <string name="mixed_timeline_title">Mixto</string>
+    <string name="settings_about_description">La última generación de AI de código abierto impulsó al cliente descentralizado de la red social.</string>
+    <string name="settings_about_source_code">Código fuente</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Únete a nuestro grupo de Telegram</string>
+    <string name="settings_about_discord_description">Únete a nuestro servidor de Discord</string>
+    <string name="settings_about_line_description">Únete a nuestro grupo de línea</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Ayúdanos a traducir bengala</string>
+    <string name="settings_privacy_policy">Política de privacidad</string>
 </resources>

@@ -33,6 +33,7 @@ public class CheckRssSourcePresenter(
             public data class RssFeed(
                 val title: String,
                 val url: String,
+                val icon: String?,
             ) : RssState
 
             public data class RssSources(
@@ -47,25 +48,46 @@ public class CheckRssSourcePresenter(
             runCatching {
                 if (url.startsWith("rsshub://", ignoreCase = true)) {
                     State.RssState.RssHub
-                } else if (url.startsWith("https://", ignoreCase = true) || url.startsWith("http://", ignoreCase = true)) {
-                    // Valid URL, proceed to fetch
+                } else {
+                    val actualUrl =
+                        if (url.startsWith("http://", ignoreCase = true)) {
+                            url.replaceFirst("http://", "https://", ignoreCase = true)
+                        } else if (!url.startsWith("https://", ignoreCase = true)) {
+                            "https://$url"
+                        } else {
+                            url
+                        }
                     val feed =
                         runCatching {
-                            RssService.fetch(url)
+                            RssService.fetch(actualUrl)
                         }
                     if (feed.isSuccess) {
-                        RssState.RssFeed(feed.getOrThrow().title.trim(), url)
+                        val icon =
+                            runCatching {
+                                RssService.fetchIcon(actualUrl)
+                            }.getOrNull()
+                        RssState.RssFeed(
+                            feed.getOrThrow().title.trim(),
+                            actualUrl,
+                            icon,
+                        )
                     } else {
                         coroutineScope {
                             RssService
-                                .detectLinkSources(url)
+                                .detectLinkSources(actualUrl)
                                 .map {
                                     async {
+                                        val icon =
+                                            runCatching {
+                                                RssService.fetchIcon(it)
+                                            }.getOrNull()
                                         UiRssSource(
                                             id = 0, // ID will be set later when saving to the database
                                             url = it,
                                             title = RssService.fetch(it).title.trim(),
                                             lastUpdate = Instant.DISTANT_PAST.toUi(), // Last update will be set later
+                                            favIcon = icon,
+                                            openInBrowser = false,
                                         )
                                     }
                                 }.awaitAll()
@@ -75,9 +97,6 @@ public class CheckRssSourcePresenter(
                                 }
                         }
                     }
-                } else {
-                    // Invalid URL format
-                    throw IllegalArgumentException("Invalid URL format: $url")
                 }
             }.onFailure {
                 emit(UiState.Error(it))

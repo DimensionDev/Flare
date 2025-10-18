@@ -1,6 +1,5 @@
 
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -47,13 +46,16 @@ compose.desktop {
         mainClass = "dev.dimension.flare.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Pkg)
+            targetFormats(TargetFormat.Pkg, TargetFormat.Exe)
             packageName = "Flare"
-            packageVersion = "1.0.1"
+            val buildVersion = System.getenv("BUILD_VERSION")?.toString()?.takeIf {
+                // match semantic versioning
+                Regex("""\d+\.\d+\.\d+(-\S+)?""").matches(it)
+            } ?: "1.0.0"
+            packageVersion = buildVersion
             macOS {
-                val file = project.file("signing.properties")
-                val hasSigningProps = file.exists()
-                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "26"
+                val hasSigningProps = project.file("embedded.provisionprofile").exists() && project.file("runtime.provisionprofile").exists()
+                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "1"
                 bundleID = "dev.dimension.flare"
                 minimumSystemVersion = "14.0"
                 appStore = hasSigningProps
@@ -67,20 +69,21 @@ compose.desktop {
                 }
 
                 if (hasSigningProps) {
-                    val signingProp = Properties()
-                    signingProp.load(file.inputStream())
                     signing {
                         sign.set(true)
-                        identity.set(signingProp.getProperty("identity"))
+                        identity.set("SUJITEKU LIMITED LIABILITY CO.")
                     }
 
-                    entitlementsFile.set(project.file(signingProp.getProperty("entitlementsFile")))
-                    runtimeEntitlementsFile.set(project.file(signingProp.getProperty("runtimeEntitlementsFile")))
-                    provisioningProfile.set(project.file(signingProp.getProperty("provisioningProfile")))
-                    runtimeProvisioningProfile.set(project.file(signingProp.getProperty("runtimeProvisioningProfile")))
+                    entitlementsFile.set(project.file("entitlements.plist"))
+                    runtimeEntitlementsFile.set(project.file("runtime-entitlements.plist"))
+                    provisioningProfile.set(project.file("embedded.provisionprofile"))
+                    runtimeProvisioningProfile.set(project.file("runtime.provisionprofile"))
                 }
 
                 iconFile.set(project.file("resources/ic_launcher.icns"))
+            }
+            windows {
+                iconFile.set(project.file("resources/ic_launcher.ico"))
             }
             linux {
                 modules("jdk.security.auth")

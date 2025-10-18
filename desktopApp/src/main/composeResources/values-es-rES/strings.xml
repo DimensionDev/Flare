@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Lista</string>
     <string name="home_tab_feeds_title">Alimentos</string>
     <string name="dm_list_title">Mensajes directos</string>
-    <string name="home_timeline_new_toots">Nuevos toots</string>
+    <string name="home_timeline_new_toots">Nuevos posts</string>
     <string name="navigate_back">Atrás</string>
     <string name="service_select_instance_input_placeholder">URL de instancia</string>
     <string name="service_select_next_button">Siguiente</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Activar resumen de IA</string>
     <string name="settings_ai_config_tldr_description">Habilitar resumen de IA para mensajes largos, sólo disponible en post de más de 500 caracteres</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Mostrar cuadro de composición en la línea de tiempo de inicio</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Mostrar cuadro de composición en la parte superior de la línea de tiempo</string>
     <string name="settings_appearance_show_actions">Mostrar acciones</string>
     <string name="settings_appearance_show_actions_description">Mostrar acciones en la parte inferior del estado</string>
     <string name="settings_appearance_show_media">Mostrar medios</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">Por defecto</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Alimentos</string>
-    <string name="notification_login_expired">Inicio de sesión expirado, por favor inicie sesión de nuevo</string>
+    <string name="notification_login_expired">Inicio de sesión expirado para %1$s</string>
     <string name="dm_list_empty">No hay mensajes directos</string>
     <string name="dm_list_error">Error al cargar mensajes directos</string>
     <string name="send">Enviar</string>

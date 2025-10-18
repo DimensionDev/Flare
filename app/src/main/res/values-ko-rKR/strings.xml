@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">알림</string>
     <string name="home_tab_me_title">내 정보</string>
     <string name="home_tab_discover_title">발견하기</string>
-    <string name="home_timeline_new_toots">새로운 투트</string>
     <string name="notification_tab_all_title">모두</string>
     <string name="notification_tab_mentions_title">멘션</string>
     <string name="notification_tab_comments_title">댓글</string>
@@ -30,7 +29,6 @@
     <string name="compose_poll_expiration_7_days">7 일</string>
     <string name="compose_content_warning_hint">컨텐츠 경고</string>
     <string name="compose_media_sensitive">미디어를 민감한 내용으로 표시하기</string>
-    <string name="compose_notification_title">투트 보내기</string>
     <string name="settings_title">설정</string>
     <string name="settings_accounts_title">계정 관리</string>
     <string name="settings_appearance_title">모양</string>
@@ -99,7 +97,6 @@
     <string name="more">더보기</string>
     <string name="discover_search_placeholder">검색</string>
     <string name="discover_users">사용자 추천</string>
-    <string name="discover_status">트렌딩 투트</string>
     <string name="discover_hashtags">트렌딩 해시태그</string>
     <string name="search_users">사용자</string>
     <string name="search_status">상태</string>
@@ -230,7 +227,6 @@
     <string name="dm_sending">전송 중</string>
     <string name="dm_leave">대화 나가기</string>
     <string name="dm_to_profile">프로필 보기</string>
-    <string name="notification_login_expired">로그인 만료, 다시 로그인 해주세요</string>
     <string name="following_title">팔로잉</string>
     <string name="fans_title">팔로워</string>
     <string name="local_history_search_placeholder">로컬 캐시 검색</string>
@@ -248,6 +244,7 @@
     <string name="rss_sources_rss_hub_host_hint">RssHub를 사용하려면 RssHub 호스트를 설정하거나 공개 RssHub 서버를 선택해야 합니다.</string>
     <string name="rss_sources_discovered_rss_sources">검색된 RSS 소스</string>
     <string name="rss_sources_pinned_in_tabs">홈 탭에 고정</string>
+    <string name="rss_sources_open_in_browser">브라우저에서 열기</string>
     <string name="rss_detail_open_in_browser">브라우저에서 열기</string>
     <string name="rss_detail_share">공유</string>
     <string name="rss_detail_tldr">요약하기</string>

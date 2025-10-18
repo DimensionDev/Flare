@@ -3,8 +3,8 @@
     <string name="delete">Vymazat</string>
     <string name="profile_header_following_count">%1$s následuje</string>
     <string name="profile_header_fans_count">%1$s následovníci</string>
-    <string name="profile_header_toots_count">%1$s Tooty</string>
-    <string name="profile_misskey_header_status_count">Stav %1$s</string>
+    <string name="profile_header_toots_count">%1$s příspěvky</string>
+    <string name="profile_misskey_header_status_count">%1$s příspěvky</string>
     <string name="profile_header_button_follow">Sledovat</string>
     <string name="profile_header_button_following">Sledovat</string>
     <string name="profile_header_button_requested">Požadováno</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Pouze zmínění uživatelé mohou vidět tento toot</string>
     <string name="settings_notifications_title">Oznámení</string>
     <string name="settings_notifications_subtitle">Přizpůsobte si, jak vás Flare upozorňuje</string>
-    <string name="status_loadmore_end">Žádné další tooty</string>
-    <string name="status_loadmore_error">Chyba při načítání dalších tootů</string>
+    <string name="status_loadmore_end">Žádné další příspěvky</string>
+    <string name="status_loadmore_error">Chyba při načítání dalších příspěvků</string>
     <string name="status_loadmore_error_retry">Opakovat</string>
     <string name="status_empty">Nic zde k zobrazení</string>
     <string name="status_sensitive_media">Citlivá média</string>
     <string name="show_media">Zobrazit média</string>
+    <string name="hide_media">Skrýt média</string>
     <string name="login_expired">Relace přihlášení vypršela</string>
     <string name="login_expired_message">Klikněte pro přihlášení znovu</string>
     <string name="login_expired_relogin">Přihlásit se znovu</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Zrušit ztlumení %1$s</string>
     <string name="mastodon_item_content_warning">Upozornění na obsah</string>
     <string name="reply_to">Odpovědět %1$s</string>
-    <string name="status_detail_translate">Přeložit do %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Přeložit příspěvek</string>
+    <string name="status_detail_tldr">Shrnutí příspěvku</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
@@ -354,4 +355,13 @@
     <string name="social_title">Sociální</string>
     <string name="antenna_title">Antény</string>
     <string name="mixed_timeline_title">Smíšená</string>
+    <string name="settings_about_description">Konečná generace AI s otevřeným zdrojem napájí decentralizovaný klient sociální sítě.</string>
+    <string name="settings_about_source_code">Zdrojový kód</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Připojte se k naší skupině Telegram</string>
+    <string name="settings_about_discord_description">Připojte se k našemu Discord serveru</string>
+    <string name="settings_about_line_description">Připojte se k naší liniové skupině</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Pomozte nám přeložit Flare</string>
+    <string name="settings_privacy_policy">Ochrana osobních údajů</string>
 </resources>

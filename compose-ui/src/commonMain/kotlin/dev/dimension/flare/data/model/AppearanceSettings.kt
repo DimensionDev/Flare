@@ -32,6 +32,9 @@ public data class AppearanceSettings(
     val videoAutoplay: VideoAutoplay = VideoAutoplay.WIFI,
     val expandMediaSize: Boolean = false,
     val compatLinkPreview: Boolean = false,
+    val fontSizeDiff: Float = 0f,
+    val lineHeightDiff: Float = 0f,
+    val showComposeInHomeTimeline: Boolean = true,
 ) {
     public companion object {
         // for iOS

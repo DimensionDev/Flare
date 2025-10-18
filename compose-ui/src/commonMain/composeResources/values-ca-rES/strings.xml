@@ -3,8 +3,6 @@
     <string name="delete">Esborrar</string>
     <string name="profile_header_following_count">%1$s Seguint</string>
     <string name="profile_header_fans_count">%1$s Seguidors</string>
-    <string name="profile_header_toots_count">%1$s Toots</string>
-    <string name="profile_misskey_header_status_count">%1$s Estat</string>
     <string name="profile_header_button_follow">Seguir</string>
     <string name="profile_header_button_following">Seguint</string>
     <string name="profile_header_button_requested">Sol·licitat</string>
@@ -58,8 +56,6 @@
     <string name="mastodon_visibility_direct_description">Només els usuaris esmentats poden veure aquest toot</string>
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_notifications_subtitle">Personalitza com Flare et notifica</string>
-    <string name="status_loadmore_end">No hi ha més toots</string>
-    <string name="status_loadmore_error">Error carregant més toots</string>
     <string name="status_loadmore_error_retry">Reintenteu</string>
     <string name="status_empty">No hi ha res a veure aquí</string>
     <string name="status_sensitive_media">Mitjans sensibles</string>
@@ -104,8 +100,6 @@
     <string name="user_unmute">Desilenciar %1$s</string>
     <string name="mastodon_item_content_warning">Avís de contingut</string>
     <string name="reply_to">Respondre a %1$s</string>
-    <string name="status_detail_translate">Tradueix a %1$s</string>
-    <string name="status_detail_tldr">Resum</string>
     <string name="date_format_year_month_day">dd MMM aa</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM aa HH:mm</string>
@@ -345,4 +339,12 @@
     <string name="dm_list_title">Missatges directes</string>
     <string name="antenna_title">Antena</string>
     <string name="mixed_timeline_title">Mixt</string>
+    <string name="settings_about_description">El client de xarxa social descentralitzat de nova generació obert i impulsat per IA.</string>
+    <string name="settings_about_source_code">Codi font</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Uneix-te al nostre grup de Telegram</string>
+    <string name="settings_about_line_description">Uneix-te al nostre grup de Line</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Ajuda\'ns a traduir Flare</string>
+    <string name="settings_privacy_policy">Política de privadesa</string>
 </resources>

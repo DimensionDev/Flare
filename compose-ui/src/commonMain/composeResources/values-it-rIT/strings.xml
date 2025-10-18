@@ -3,8 +3,8 @@
     <string name="delete">Elimina</string>
     <string name="profile_header_following_count">%1$s Seguenti</string>
     <string name="profile_header_fans_count">%1$s Follower</string>
-    <string name="profile_header_toots_count">Toot %1$s</string>
-    <string name="profile_misskey_header_status_count">Stato %1$s</string>
+    <string name="profile_header_toots_count">%1$s Post</string>
+    <string name="profile_misskey_header_status_count">%1$s Post</string>
     <string name="profile_header_button_follow">Segui</string>
     <string name="profile_header_button_following">Seguendo</string>
     <string name="profile_header_button_requested">Richiesto</string>
@@ -58,12 +58,13 @@
     <string name="mastodon_visibility_direct_description">Solo gli utenti menzionati possono vedere questo toot</string>
     <string name="settings_notifications_title">Notifiche</string>
     <string name="settings_notifications_subtitle">Personalizza il modo in cui la luminosità ti avvisa</string>
-    <string name="status_loadmore_end">Nessun altro toots</string>
-    <string name="status_loadmore_error">Errore nel caricare altri toots</string>
+    <string name="status_loadmore_end">Nessun altro post</string>
+    <string name="status_loadmore_error">Errore nel caricare altri post</string>
     <string name="status_loadmore_error_retry">Riprova</string>
     <string name="status_empty">Niente da vedere qui</string>
     <string name="status_sensitive_media">Media sensibili</string>
     <string name="show_media">Mostra media</string>
+    <string name="hide_media">Nascondi media</string>
     <string name="login_expired">Sessione di accesso scaduta</string>
     <string name="login_expired_message">Clicca di nuovo per effettuare il login</string>
     <string name="login_expired_relogin">Accedi di nuovo</string>
@@ -104,8 +105,8 @@
     <string name="user_unmute">Riattiva %1$s</string>
     <string name="mastodon_item_content_warning">Avviso contenuto</string>
     <string name="reply_to">Rispondi a %1$s</string>
-    <string name="status_detail_translate">Traduci in %1$s</string>
-    <string name="status_detail_tldr">Summary</string>
+    <string name="status_detail_translate">Traduci Post</string>
+    <string name="status_detail_tldr">Riepilogo Post</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
@@ -354,4 +355,13 @@
     <string name="social_title">Social</string>
     <string name="antenna_title">Antenna</string>
     <string name="mixed_timeline_title">Misto</string>
+    <string name="settings_about_description">Il client di social network decentralizzato basato su AI di ultima generazione.</string>
+    <string name="settings_about_source_code">Codice sorgente</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Unisciti al nostro gruppo Telegram</string>
+    <string name="settings_about_discord_description">Unisciti al nostro server Discord</string>
+    <string name="settings_about_line_description">Unisciti al nostro gruppo Linea</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Aiutaci a tradurre il chiarore</string>
+    <string name="settings_privacy_policy">Politica Sulla Privacy</string>
 </resources>

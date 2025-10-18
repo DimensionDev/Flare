@@ -7,12 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		06310D712E96120700B6E081 /* VideoPlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 06310D702E96120700B6E081 /* VideoPlayer */; };
 		0646B2622E7151A700535A3E /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0646B2612E7151A700535A3E /* Kingfisher */; };
 		0672EE122E8689C70092AD1F /* Drops in Frameworks */ = {isa = PBXBuildFile; productRef = 0672EE112E8689C70092AD1F /* Drops */; };
 		068923482E82A80700981D8E /* Flow in Frameworks */ = {isa = PBXBuildFile; productRef = 068923472E82A80700981D8E /* Flow */; };
 		068F7CD12E75405A00B5FB40 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 068F7CD02E75405A00B5FB40 /* MarkdownUI */; };
 		06C6B5482E853AAF00CCD388 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */; };
 		06C7FC172E7D474900A0D01A /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = 06C7FC162E7D474900A0D01A /* LazyPager */; };
+		06F36AAD2E8F7BEC00F5905F /* SwiftUIBackports in Frameworks */ = {isa = PBXBuildFile; productRef = 06F36AAC2E8F7BEC00F5905F /* SwiftUIBackports */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +53,8 @@
 				0672EE122E8689C70092AD1F /* Drops in Frameworks */,
 				06C6B5482E853AAF00CCD388 /* SwiftUIIntrospect in Frameworks */,
 				0646B2622E7151A700535A3E /* Kingfisher in Frameworks */,
+				06F36AAD2E8F7BEC00F5905F /* SwiftUIBackports in Frameworks */,
+				06310D712E96120700B6E081 /* VideoPlayer in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,6 +104,8 @@
 				068923472E82A80700981D8E /* Flow */,
 				06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */,
 				0672EE112E8689C70092AD1F /* Drops */,
+				06F36AAC2E8F7BEC00F5905F /* SwiftUIBackports */,
+				06310D702E96120700B6E081 /* VideoPlayer */,
 			);
 			productName = flare;
 			productReference = 06E433FE2E6A9A2600CD0826 /* Flare.app */;
@@ -137,6 +143,8 @@
 				068923462E82A80700981D8E /* XCRemoteSwiftPackageReference "SwiftUI-Flow" */,
 				06C6B5462E853AAF00CCD388 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 				0672EE102E8689C70092AD1F /* XCRemoteSwiftPackageReference "Drops" */,
+				06F36AAB2E8F7BEC00F5905F /* XCRemoteSwiftPackageReference "iOS-Backports" */,
+				06310D6F2E96120700B6E081 /* XCRemoteSwiftPackageReference "VideoPlayer" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 06E433FF2E6A9A2600CD0826 /* Products */;
@@ -322,7 +330,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 7LFDZ96332;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -331,17 +339,18 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Flare;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Flare requesting the ability to add to the photo library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.dimension.flare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -361,7 +370,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = 7LFDZ96332;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -370,17 +379,18 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Flare;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Flare requesting the ability to add to the photo library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.dimension.flare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -417,6 +427,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		06310D6F2E96120700B6E081 /* XCRemoteSwiftPackageReference "VideoPlayer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/wxxsw/VideoPlayer";
+			requirement = {
+				kind = exactVersion;
+				version = 1.2.5;
+			};
+		};
 		0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
@@ -470,12 +488,25 @@
 			repositoryURL = "https://github.com/gh123man/LazyPager";
 			requirement = {
 				kind = exactVersion;
-				version = 1.1.13;
+				version = 1.2.0;
+			};
+		};
+		06F36AAB2E8F7BEC00F5905F /* XCRemoteSwiftPackageReference "iOS-Backports" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/superwall/iOS-Backports";
+			requirement = {
+				kind = exactVersion;
+				version = 0.1.6;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		06310D702E96120700B6E081 /* VideoPlayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 06310D6F2E96120700B6E081 /* XCRemoteSwiftPackageReference "VideoPlayer" */;
+			productName = VideoPlayer;
+		};
 		0646B2612E7151A700535A3E /* Kingfisher */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */;
@@ -505,6 +536,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 06C7FC152E7D474900A0D01A /* XCRemoteSwiftPackageReference "LazyPager" */;
 			productName = LazyPager;
+		};
+		06F36AAC2E8F7BEC00F5905F /* SwiftUIBackports */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 06F36AAB2E8F7BEC00F5905F /* XCRemoteSwiftPackageReference "iOS-Backports" */;
+			productName = SwiftUIBackports;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

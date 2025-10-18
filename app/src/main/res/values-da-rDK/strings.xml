@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Notifikationer</string>
     <string name="home_tab_me_title">Mig</string>
     <string name="home_tab_discover_title">Opdag</string>
-    <string name="home_timeline_new_toots">Nye toots</string>
+    <string name="home_timeline_new_toots">Nye Indlæg</string>
     <string name="notification_tab_all_title">Alle</string>
     <string name="notification_tab_mentions_title">Omtaler</string>
     <string name="notification_tab_comments_title">Kommentarer</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 dage</string>
     <string name="compose_content_warning_hint">Advarsel om indhold</string>
     <string name="compose_media_sensitive">Markér medier som følsomme</string>
-    <string name="compose_notification_title">Sender toot</string>
+    <string name="compose_notification_title">Sender Indlæg</string>
     <string name="settings_title">Indstillinger</string>
     <string name="settings_accounts_title">Konto Administration</string>
     <string name="settings_appearance_title">Udseende</string>
@@ -103,7 +103,7 @@
     <string name="more">Mere</string>
     <string name="discover_search_placeholder">Søg</string>
     <string name="discover_users">Anbefal Brugere</string>
-    <string name="discover_status">Populære Toots</string>
+    <string name="discover_status">Populære Indlæg</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Brugere</string>
     <string name="search_status">Status</string>
@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Skift temafarven på app\'en</string>
     <string name="settings_appearance_theme_pure_color">Høj kontrast tilstand</string>
     <string name="settings_appearance_theme_pure_color_description">Forøg kontrasten mellem baggrund og tekst</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Skift skrifttypestørrelse for appen</string>
+    <string name="settings_appearance_font_size_diff_decrease">Formindsk</string>
+    <string name="settings_appearance_font_size_diff_increase">Forøg</string>
     <string name="settings_storage_clear_image_cache">Ryd billed-cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB billeder vil blive fjernet</string>
     <string name="settings_storage_clear_database">Ryd cache database</string>
@@ -238,7 +242,7 @@
     <string name="dm_sending">Sender</string>
     <string name="dm_leave">Forlad samtale</string>
     <string name="dm_to_profile">Vis profil</string>
-    <string name="notification_login_expired">Login er udløbet. Log venligst ind igen</string>
+    <string name="notification_login_expired">Login udløbet for %1$s</string>
     <string name="following_title">Følger</string>
     <string name="fans_title">Følger</string>
     <string name="local_history_search_placeholder">Søg i lokal cache</string>
@@ -256,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">Du skal indstille RssHub vært hvis du vil bruge RssHub, eller vælge den offentlige RssHub server</string>
     <string name="rss_sources_discovered_rss_sources">Opdagede Rss Kilder</string>
     <string name="rss_sources_pinned_in_tabs">Fastgør til faner i hjemmet</string>
+    <string name="rss_sources_open_in_browser">Åbn i browser</string>
+    <string name="rss_sources_open_in_app">Åbn i app</string>
     <string name="rss_detail_open_in_browser">Åbn i browser</string>
     <string name="rss_detail_share">Del</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -281,7 +287,10 @@
     <string name="home_tab_social_timeline_title">Social</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Fejlrettelser og ydelsesforbedringer</li>
+                <li>Tilføjet skrifttypeindstillinger.</li>
+                <li>Betydeligt moderniserede RSS-funktionen. Artikel indhold er nu gengives indbygget i stedet for at bruge en WebView.</li>
+                <li>Optimeret rich-text rendering logik for bedre ydeevne.</li>
+                <li>Fejlrettelser og forbedringer af ydeevnen.</li>
             </ul>
         ]]></string>
 </resources>

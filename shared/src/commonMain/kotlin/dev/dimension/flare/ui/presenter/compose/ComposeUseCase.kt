@@ -44,9 +44,13 @@ internal class ComposeUseCase(
                     },
                 )
             }.onSuccess {
-                progress.invoke(ComposeProgressState.Success)
+                scope.launch {
+                    progress.invoke(ComposeProgressState.Success)
+                }
             }.onFailure {
-                progress.invoke(ComposeProgressState.Error(it))
+                scope.launch {
+                    progress.invoke(ComposeProgressState.Error(it))
+                }
             }
         }
     }

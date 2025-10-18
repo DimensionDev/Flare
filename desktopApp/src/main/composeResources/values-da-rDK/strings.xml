@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Liste</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Direkte Beskeder</string>
-    <string name="home_timeline_new_toots">Nye toots</string>
+    <string name="home_timeline_new_toots">Nye Indlæg</string>
     <string name="navigate_back">Tilbage</string>
     <string name="service_select_instance_input_placeholder">Instance URL</string>
     <string name="service_select_next_button">Næste</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Aktiver AI Opsummering</string>
     <string name="settings_ai_config_tldr_description">Aktiver AI opsummering for lange indlæg, kun tilgængelig i indlæg, der er længere end 500 tegn</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Vis kompositfelt i starttidslinjen</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Vis kompositfelt i toppen af starttidslinjen</string>
     <string name="settings_appearance_show_actions">Vis handlinger</string>
     <string name="settings_appearance_show_actions_description">Vis handlinger i bunden af status</string>
     <string name="settings_appearance_show_media">Vis medier</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">Standard</string>
     <string name="tab_settings_list">Liste</string>
     <string name="tab_settings_feed">Feeds</string>
-    <string name="notification_login_expired">Login er udløbet. Log venligst ind igen</string>
+    <string name="notification_login_expired">Login udløbet for %1$s</string>
     <string name="dm_list_empty">Ingen direkte beskeder</string>
     <string name="dm_list_error">Kunne ikke indlæse direkte beskeder</string>
     <string name="send">Send</string>

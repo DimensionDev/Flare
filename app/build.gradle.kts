@@ -3,7 +3,6 @@ import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
 // END Non-FOSS component
 import com.google.gms.googleservices.GoogleServicesPlugin
 import java.util.Properties
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -153,7 +152,7 @@ dependencies {
     implementation(libs.bundles.navigation3)
     implementation(libs.haze)
     implementation(libs.haze.materials)
-    implementation('org.rust-nostr', name: 'nostr-sdk-jvm', version: '0.43.0')
+    implementation(libs.richtext.ui.material3)
 
     // START Non-FOSS component
     if (project.file("google-services.json").exists()) {

@@ -19,6 +19,7 @@ struct StatusDetailScreen: View {
                 .padding(.horizontal)
                 .listRowBackground(Color.clear)
         }
+        .detectScrolling()
         .scrollContentBackground(.hidden)
         .listRowSpacing(2)
         .listStyle(.plain)
@@ -26,6 +27,6 @@ struct StatusDetailScreen: View {
         .refreshable {
             try? await presenter.state.refresh()
         }
-        .navigationTitle("Detail")
+        .navigationTitle("status_detail_title")
     }
 }

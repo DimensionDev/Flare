@@ -6,7 +6,7 @@
     <string name="home_tab_notifications_title">Benachrichtigungen</string>
     <string name="home_tab_me_title">Ich</string>
     <string name="home_tab_discover_title">Entdecken</string>
-    <string name="home_timeline_new_toots">Neue toots</string>
+    <string name="home_timeline_new_toots">Neue Beiträge</string>
     <string name="notification_tab_all_title">Alle</string>
     <string name="notification_tab_mentions_title">Erwähnungen</string>
     <string name="notification_tab_comments_title">Kommentare</string>
@@ -30,7 +30,7 @@
     <string name="compose_poll_expiration_7_days">7 Tage</string>
     <string name="compose_content_warning_hint">Inhaltswarnung</string>
     <string name="compose_media_sensitive">Medien als sensibel markieren</string>
-    <string name="compose_notification_title">Toot senden</string>
+    <string name="compose_notification_title">Beitrag wird gesendet</string>
     <string name="settings_title">Einstellungen</string>
     <string name="settings_accounts_title">Kontoverwaltung</string>
     <string name="settings_appearance_title">Erscheinung</string>
@@ -103,7 +103,7 @@
     <string name="more">Mehr</string>
     <string name="discover_search_placeholder">Suchen</string>
     <string name="discover_users">Empfohlen Benutzer</string>
-    <string name="discover_status">Interessante Toots</string>
+    <string name="discover_status">Interessante Beiträge</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Benutzer</string>
     <string name="search_status">Status</string>
@@ -143,6 +143,10 @@
     <string name="settings_appearance_theme_color_description">Ändern Sie die Designfarbe der App</string>
     <string name="settings_appearance_theme_pure_color">Kontrastmodus</string>
     <string name="settings_appearance_theme_pure_color_description">Kontrast zwischen Hintergrund und Text erhöhen</string>
+    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff_description">Schriftgröße der App ändern</string>
+    <string name="settings_appearance_font_size_diff_decrease">Verkleinern</string>
+    <string name="settings_appearance_font_size_diff_increase">Erhöhen</string>
     <string name="settings_storage_clear_image_cache">Bildercache leeren</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB Bilder werden entfernt</string>
     <string name="settings_storage_clear_database">Cache-Datenbank leeren</string>
@@ -238,7 +242,7 @@
     <string name="dm_sending">Senden</string>
     <string name="dm_leave">Gespräch verlassen</string>
     <string name="dm_to_profile">Profil anzeigen</string>
-    <string name="notification_login_expired">Login abgelaufen, bitte erneut anmelden</string>
+    <string name="notification_login_expired">Login abgelaufen für %1$s</string>
     <string name="following_title">Folgt</string>
     <string name="fans_title">Follower</string>
     <string name="local_history_search_placeholder">Lokalen Cache suchen</string>
@@ -256,6 +260,8 @@
     <string name="rss_sources_rss_hub_host_hint">Sie müssen den RssHub Host setzen, wenn Sie RssHub verwenden möchten, oder den öffentlichen RssHub Server auswählen</string>
     <string name="rss_sources_discovered_rss_sources">Entdeckte Rss Quellen</string>
     <string name="rss_sources_pinned_in_tabs">An Home-Tabs anheften</string>
+    <string name="rss_sources_open_in_browser">Im Browser öffnen</string>
+    <string name="rss_sources_open_in_app">In App öffnen</string>
     <string name="rss_detail_open_in_browser">Im Browser öffnen</string>
     <string name="rss_detail_share">Teilen</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -281,7 +287,10 @@
     <string name="home_tab_social_timeline_title">Soziale</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Fehlerbehebungen und Leistungsverbesserungen</li>
+                <li>Schriftarteinstellungen hinzugefügt.</li>
+                <li>Das RSS-Feature wurde deutlich überarbeitet. Artikelinhalte werden nun nativ statt mit einem WebView dargestellt.</li>
+                <li>Optimierte Rich-Text-Rendering-Logik für eine bessere Performance.</li>
+                <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
             </ul>
         ]]></string>
 </resources>

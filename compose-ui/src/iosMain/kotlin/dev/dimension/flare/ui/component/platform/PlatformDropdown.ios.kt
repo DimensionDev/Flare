@@ -1,48 +1,19 @@
 package dev.dimension.flare.ui.component.platform
 
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.displayCutoutPadding
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
-import com.composables.core.DragIndication
-import com.composables.core.ModalBottomSheet
-import com.composables.core.Scrim
-import com.composables.core.Sheet
-import com.composables.core.SheetDetent
-import com.composables.core.rememberModalBottomSheetState
 import com.slapps.cupertino.ExperimentalCupertinoApi
 import com.slapps.cupertino.LocalContentColor
 import com.slapps.cupertino.ProvideTextStyle
 import com.slapps.cupertino.theme.CupertinoTheme
 import dev.dimension.flare.ui.theme.PlatformTheme
-import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 internal actual typealias PlatformDropdownMenuScope = ColumnScope
 
@@ -60,87 +31,87 @@ internal actual fun PlatformDropdownMenu(
     modifier: Modifier,
     content: @Composable (PlatformDropdownMenuScope.() -> Unit),
 ) {
-    val sheetState =
-        rememberModalBottomSheetState(
-            initialDetent =
-                if (expanded) {
-                    SheetDetent.FullyExpanded
-                } else {
-                    SheetDetent.Hidden
-                },
-        )
-
-    LaunchedEffect(expanded) {
-        if (expanded) {
-            sheetState.animateTo(SheetDetent.FullyExpanded)
-        } else {
-            sheetState.animateTo(SheetDetent.Hidden)
-        }
-    }
-
-    ModalBottomSheet(
-        state = sheetState,
-        onDismiss = {
-            onDismissRequest.invoke()
-        },
-        content = {
-            Scrim(
-                enter = fadeIn(),
-                exit = fadeOut(),
-            )
-            val isCompact = !isBigScreen()
-
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .padding(top = 12.dp)
-                    .let { if (isCompact) it else it.padding(horizontal = 56.dp) }
-                    .displayCutoutPadding()
-                    .statusBarsPadding()
-                    .padding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal).asPaddingValues()),
-            ) {
-                Sheet(
-                    modifier =
-                        Modifier
-                            .shadow(4.dp, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-                            .widthIn(max = 640.dp)
-                            .fillMaxWidth(),
-                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                    backgroundColor = CupertinoTheme.colorScheme.systemGroupedBackground,
-                    contentColor = CupertinoTheme.colorScheme.label,
-                ) {
-                    Column(
-                        modifier = Modifier.padding(vertical = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement =
-                            androidx.compose.foundation.layout.Arrangement
-                                .spacedBy(16.dp),
-                    ) {
-                        DragIndication(
-                            modifier =
-                                Modifier
-                                    .background(CupertinoTheme.colorScheme.separator, RoundedCornerShape(100))
-                                    .width(32.dp)
-                                    .height(4.dp),
-                        )
-                        Column(
-                            modifier =
-                                Modifier
-                                    .padding(horizontal = screenHorizontalPadding)
-                                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
-                                    .clip(PlatformTheme.shapes.listCardContainerShape)
-                                    .background(CupertinoTheme.colorScheme.systemGroupedBackground),
-                            verticalArrangement =
-                                androidx.compose.foundation.layout.Arrangement
-                                    .spacedBy(2.dp),
-                        ) {
-                            content.invoke(this)
-                        }
-                    }
-                }
-            }
-        },
-    )
+//    val sheetState =
+//        rememberModalBottomSheetState(
+//            initialDetent =
+//                if (expanded) {
+//                    SheetDetent.FullyExpanded
+//                } else {
+//                    SheetDetent.Hidden
+//                },
+//        )
+//
+//    LaunchedEffect(expanded) {
+//        if (expanded) {
+//            sheetState.animateTo(SheetDetent.FullyExpanded)
+//        } else {
+//            sheetState.animateTo(SheetDetent.Hidden)
+//        }
+//    }
+//
+//    ModalBottomSheet(
+//        state = sheetState,
+//        onDismiss = {
+//            onDismissRequest.invoke()
+//        },
+//        content = {
+//            Scrim(
+//                enter = fadeIn(),
+//                exit = fadeOut(),
+//            )
+//            val isCompact = !isBigScreen()
+//
+//            Box(
+//                Modifier
+//                    .fillMaxSize()
+//                    .padding(top = 12.dp)
+//                    .let { if (isCompact) it else it.padding(horizontal = 56.dp) }
+//                    .displayCutoutPadding()
+//                    .statusBarsPadding()
+//                    .padding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal).asPaddingValues()),
+//            ) {
+//                Sheet(
+//                    modifier =
+//                        Modifier
+//                            .shadow(4.dp, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+//                            .widthIn(max = 640.dp)
+//                            .fillMaxWidth(),
+//                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+//                    backgroundColor = CupertinoTheme.colorScheme.systemGroupedBackground,
+//                    contentColor = CupertinoTheme.colorScheme.label,
+//                ) {
+//                    Column(
+//                        modifier = Modifier.padding(vertical = 16.dp),
+//                        horizontalAlignment = Alignment.CenterHorizontally,
+//                        verticalArrangement =
+//                            androidx.compose.foundation.layout.Arrangement
+//                                .spacedBy(16.dp),
+//                    ) {
+//                        DragIndication(
+//                            modifier =
+//                                Modifier
+//                                    .background(CupertinoTheme.colorScheme.separator, RoundedCornerShape(100))
+//                                    .width(32.dp)
+//                                    .height(4.dp),
+//                        )
+//                        Column(
+//                            modifier =
+//                                Modifier
+//                                    .padding(horizontal = screenHorizontalPadding)
+//                                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+//                                    .clip(PlatformTheme.shapes.listCardContainerShape)
+//                                    .background(CupertinoTheme.colorScheme.systemGroupedBackground),
+//                            verticalArrangement =
+//                                androidx.compose.foundation.layout.Arrangement
+//                                    .spacedBy(2.dp),
+//                        ) {
+//                            content.invoke(this)
+//                        }
+//                    }
+//                }
+//            }
+//        },
+//    )
 //    CupertinoDropdownMenu(
 //        expanded = expanded,
 //        onDismissRequest = onDismissRequest,

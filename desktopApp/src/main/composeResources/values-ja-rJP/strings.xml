@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">リスト</string>
     <string name="home_tab_feeds_title">フィード</string>
     <string name="dm_list_title">ダイレクトメッセージ</string>
-    <string name="home_timeline_new_toots">新しいトゥート</string>
+    <string name="home_timeline_new_toots">新しい投稿</string>
     <string name="navigate_back">戻る</string>
     <string name="service_select_instance_input_placeholder">インスタンス URL</string>
     <string name="service_select_next_button">次へ</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">AIサマリー化を有効にする</string>
     <string name="settings_ai_config_tldr_description">長い投稿のAIサマリー化を有効にします。500文字以上の投稿でのみ利用できます</string>
     <string name="settings_appearance_generic">全般</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">ホームタイムラインに作成ボックスを表示</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">ホームタイムライン上部にメッセージ作成ボックスを表示</string>
     <string name="settings_appearance_show_actions">アクションを表示</string>
     <string name="settings_appearance_show_actions_description">ステータスの下部にアクションを表示する</string>
     <string name="settings_appearance_show_media">メディアを表示</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">デフォルト</string>
     <string name="tab_settings_list">リスト</string>
     <string name="tab_settings_feed">フィード</string>
-    <string name="notification_login_expired">ログイン期限が切れました。もう一度ログインしてください。</string>
+    <string name="notification_login_expired">%1$s のログイン期限が切れました</string>
     <string name="dm_list_empty">ダイレクトメッセージはありません</string>
     <string name="dm_list_error">ダイレクトメッセージの読み込みに失敗しました</string>
     <string name="send">送信</string>

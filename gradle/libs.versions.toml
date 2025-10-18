@@ -3,8 +3,8 @@ clikt = "5.0.3"
 collection = "1.5.0"
 compileSdk = "36"
 haze = "1.6.10"
-jna = "5.18.0"
-lifecycleViewmodelComposeVersion = "2.9.4"
+jna = "5.18.1"
+lifecycleViewmodelComposeVersion = "2.9.5"
 minSdk = "23"
 java = "21"
 agp = "8.13.0"
@@ -15,8 +15,8 @@ androidx-test-ext-junit = "1.3.0"
 espresso-core = "3.7.0"
 lifecycle-runtime-ktx = "2.9.4"
 activity-compose = "1.11.0"
-compose-bom = "2025.09.01"
-ksp = "2.2.20-2.0.3"
+compose-bom = "2025.10.00"
+ksp = "2.2.20-2.0.4"
 openaiClient = "4.0.1"
 paging = "3.3.6"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
@@ -24,19 +24,20 @@ kotlinx-collections-immutable = "0.4.0"
 kotlinx-serialization = "1.9.0"
 coil3 = "3.3.0"
 ktorfit = "2.6.4"
-ktor = "3.3.0"
-platformtoolsDarkmodedetector = "0.7.1"
+ktor = "3.3.1"
+platformtoolsDarkmodedetector = "0.7.3"
 prettytime = "5.0.9.Final"
 reorderable = "3.0.0"
+richtextUiMaterial3 = "1.0.0-alpha03"
 stately = "2.1.0"
-twitter-parser = "0.5.5"
+twitter-parser = "0.5.7"
 molecule = "2.2.0"
 accompanist = "0.37.3"
 compose-lint-checks = "1.4.2"
 ktlintPlugin = "13.1.0"
 apng-android = "3.0.5"
 ktlint = "1.5.0"
-okio = "3.16.0"
+okio = "3.16.2"
 skie = "0.10.6"
 ksoup = "0.2.0"
 versionUpdate = "0.53.0"
@@ -46,16 +47,16 @@ koin = "4.1.1"
 composeIcons = "1.3.0"
 media3 = "1.8.0"
 desugar_jdk_libs = "2.1.5"
-firebase-bom = "34.3.0"
-google-services = "4.4.3"
+firebase-bom = "34.4.0"
+google-services = "4.4.4"
 firebase-crashlytics = "3.0.6"
 materialKolor = "3.0.1"
-room = "2.8.1"
+room = "2.8.2"
 sqlite = "2.6.1"
-compose-multiplatform = "1.9.0"
-logback = "1.5.18"
-navigation3 = "1.0.0-alpha10"
-zoomable = "0.17.0"
+compose-multiplatform = "1.9.1"
+logback = "1.5.19"
+navigation3 = "1.0.0-alpha11"
+zoomable = "0.18.0"
 bouncycastle = "1.82"
 cupertino = "2.3.1"
 nostr-sdk-jvm = "0.43.0"
@@ -83,6 +84,7 @@ openai-client = { module = "com.aallam.openai:openai-client", version.ref = "ope
 platformtools-darkmodedetector = { module = "io.github.kdroidfilter:platformtools.darkmodedetector", version.ref = "platformtoolsDarkmodedetector" }
 prettytime = { module = "org.ocpsoft.prettytime:prettytime", version.ref = "prettytime" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
+richtext-ui-material3 = { module = "com.halilibo.compose-richtext:richtext-ui-material3", version.ref = "richtextUiMaterial3" }
 stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
@@ -93,7 +95,7 @@ ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha04" }
+material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha06" }
 material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
 material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive" }
@@ -173,7 +175,7 @@ material3-navigation = { group = "io.github.stefanoq21", name = "material3-navig
 
 compose-lint-checks = { group = "com.slack.lint.compose", name = "compose-lint-checks", version.ref = "compose-lint-checks" }
 
-mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.1.2-SNAPSHOT"
+mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.2.0"
 
 compose-webview = { group = "io.github.kevinnzou", name = "compose-webview", version = "0.33.6" }
 compose-webview-multiplatform = { group = "io.github.kevinnzou", name = "compose-webview-multiplatform", version = "2.0.3" }
@@ -197,7 +199,7 @@ precompose-molecule = { module = "moe.tlaster:precompose-molecule", version = "1
 
 xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91.2" }
 
-fluent-ui = { module = "io.github.compose-fluent:fluent", version = "v0.1.0" }
+fluent-ui = { module = "io.github.compose-fluent:fluent", version = "0.2.0-SNAPSHOT" }
 
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.19.0" }
 
@@ -205,8 +207,8 @@ jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector"
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
-androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version = "1.0.0-alpha03" }
-androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version = "2.10.0-alpha04" }
+androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version = "1.3.0-alpha01" }
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version = "2.10.0-alpha05" }
 
 bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }

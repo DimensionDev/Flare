@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Elenco</string>
     <string name="home_tab_feeds_title">Feed</string>
     <string name="dm_list_title">Messaggi Diretti</string>
-    <string name="home_timeline_new_toots">Nuovi toots</string>
+    <string name="home_timeline_new_toots">Nuovi Post</string>
     <string name="navigate_back">Indietro</string>
     <string name="service_select_instance_input_placeholder">Url Istanza</string>
     <string name="service_select_next_button">Successivo</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Abilita Riepilogo AI</string>
     <string name="settings_ai_config_tldr_description">Abilita il riepilogo IA per i post lunghi, disponibile solo in post con più di 500 caratteri</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Mostra la casella di composizione nella timeline home</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Mostra la casella di composizione nella parte superiore della timeline home</string>
     <string name="settings_appearance_show_actions">Mostra azioni</string>
     <string name="settings_appearance_show_actions_description">Mostra le azioni in fondo allo stato</string>
     <string name="settings_appearance_show_media">Mostra media</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">Predefinito</string>
     <string name="tab_settings_list">Elenco</string>
     <string name="tab_settings_feed">Feed</string>
-    <string name="notification_login_expired">Login scaduto, effettua nuovamente il login</string>
+    <string name="notification_login_expired">Login scaduto per %1$s</string>
     <string name="dm_list_empty">Nessun messaggio diretto</string>
     <string name="dm_list_error">Caricamento dei messaggi diretti non riuscito</string>
     <string name="send">Invia</string>

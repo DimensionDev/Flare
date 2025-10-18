@@ -6,18 +6,18 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.SHA256
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpClientPlugin
+import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.request.HttpRequestPipeline
-import io.ktor.http.takeFrom
+import io.ktor.http.Url
 import io.ktor.util.AttributeKey
 import io.ktor.util.encodeBase64
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import sh.christian.ozone.BlueskyApi
 import sh.christian.ozone.XrpcBlueskyApi
-import sh.christian.ozone.api.xrpc.BSKY_SOCIAL
 import sh.christian.ozone.oauth.OAuthApi
 import sh.christian.ozone.oauth.OAuthCodeChallengeMethod
 
@@ -55,8 +55,8 @@ internal data class BlueskyService private constructor(
                     OAuthApi(
                         httpClient =
                             ktorClient {
-                                install(DefaultRequest) {
-                                    url.takeFrom(BSKY_SOCIAL)
+                                install(BaseUrlPlugin) {
+                                    this.baseUrlFlow = baseUrlFlow
                                 }
                             },
                         challengeSelector = { OAuthCodeChallengeMethodS256 },
@@ -107,3 +107,19 @@ private class AtprotoProxyPlugin {
         }
     }
 }
+
+private class BaseUrlConfig {
+    var baseUrlFlow: Flow<String>? = null
+}
+
+private val BaseUrlPlugin =
+    createClientPlugin("BaseUrlPlugin", ::BaseUrlConfig) {
+        val baseUrlFlow = pluginConfig.baseUrlFlow ?: error("BaseUrlPlugin: baseUrlFlow is not set")
+        onRequest { request, _ ->
+            baseUrlFlow.firstOrNull()?.let { baseUrl ->
+                request.url.protocol = Url(baseUrl).protocol
+                request.url.host = Url(baseUrl).host
+                request.url.port = Url(baseUrl).port
+            }
+        }
+    }

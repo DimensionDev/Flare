@@ -27,6 +27,7 @@ struct TimelineScreen: View {
                 .padding(.horizontal)
                 .listRowBackground(Color.clear)
         }
+        .detectScrolling()
         .scrollContentBackground(.hidden)
         .listRowSpacing(2)
         .listStyle(.plain)
@@ -34,6 +35,6 @@ struct TimelineScreen: View {
             try? await presenter.state.refreshSuspend()
         }
         .background(Color(.systemGroupedBackground))
-        .navigationTitle(tabItem.metaData.title.text)
+//        .navigationTitle(tabItem.metaData.title.text)
     }
 }

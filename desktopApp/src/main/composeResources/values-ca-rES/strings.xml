@@ -20,7 +20,6 @@
     <string name="home_tab_list_title">Llista</string>
     <string name="home_tab_feeds_title">Fluxos</string>
     <string name="dm_list_title">Missatges directes</string>
-    <string name="home_timeline_new_toots">Nous toots</string>
     <string name="navigate_back">Torna</string>
     <string name="service_select_instance_input_placeholder">URL de la instància</string>
     <string name="service_select_next_button">Següent</string>
@@ -217,7 +216,6 @@
     <string name="tab_settings_default">Per defecte</string>
     <string name="tab_settings_list">Llista</string>
     <string name="tab_settings_feed">Fluxos</string>
-    <string name="notification_login_expired">La sessió d\'inici de sessió ha caducat, si us plau, inicieu sessió de nou</string>
     <string name="dm_list_empty">Sense missatges directes</string>
     <string name="dm_list_error">No s\'ha pogut carregar els missatges directes</string>
     <string name="send">Enviar</string>

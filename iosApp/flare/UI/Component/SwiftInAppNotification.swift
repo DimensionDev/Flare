@@ -1,6 +1,7 @@
 import KotlinSharedUI
 import Drops
 import Foundation
+import SwiftUI
 
 class SwiftInAppNotification: InAppNotification {
     private init() {}
@@ -9,9 +10,25 @@ class SwiftInAppNotification: InAppNotification {
     func onError(message: Message, throwable: KotlinThrowable) {
         switch message {
         case .compose:
-            Drops.show(.init(stringLiteral: .init(localized: "notification_compose_error")))
+            Drops.show(
+                .init(
+                    title: .init(localized: "notification_compose_error"),
+                    icon: .faCircleExclamation
+
+                )
+            )
         case .loginExpired:
-            Drops.show(.init(stringLiteral: .init(localized: "notification_login_expired")))
+            if let expiredError = throwable as? LoginExpiredException {
+                Drops.show(
+                    .init(
+                        title: .init(localized: "notification_login_expired"),
+                        subtitle: .init(localized: "error_login_expired \(expiredError.accountKey)"),
+                        icon: UIImage(systemName: "person.badge.shield.exclamationmark")
+                    )
+                )
+            } else {
+                Drops.show(.init(stringLiteral: .init(localized: "notification_login_expired")))
+            }
         }
     }
 
@@ -22,7 +39,12 @@ class SwiftInAppNotification: InAppNotification {
     func onSuccess(message: Message) {
         switch message {
         case .compose:
-            Drops.show(.init(stringLiteral: .init(localized: "notification_compose_success")))
+            Drops.show(
+                .init(
+                    title: .init(localized: "notification_compose_success"),
+                    icon: .faCircleCheck
+                )
+            )
         case .loginExpired:
             // do nothing
             break

@@ -4,6 +4,8 @@ import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -17,14 +19,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.common.plus
-import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 @OptIn(FlowPreview::class)
 @Composable
@@ -35,18 +39,34 @@ public fun LazyStatusVerticalStaggeredGrid(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     reverseLayout: Boolean = false,
     verticalItemSpacing: Dp = 0.dp,
-    horizontalArrangement: Arrangement.Horizontal = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+    horizontalArrangement: Arrangement.Horizontal =
+        Arrangement.spacedBy(
+            8.dp,
+            Alignment.CenterHorizontally,
+        ),
     flingBehavior: FlingBehavior = ScrollableDefaults.flingBehavior(),
     userScrollEnabled: Boolean = true,
     content: LazyStaggeredGridScope.() -> Unit,
 ) {
-    val bigScreen = isBigScreen()
-    val padding =
-        if (bigScreen) {
-            contentPadding + PaddingValues(horizontal = screenHorizontalPadding)
-        } else {
-            contentPadding + PaddingValues(horizontal = screenHorizontalPadding)
-        }
+    val padding = contentPadding + PaddingValues(horizontal = screenHorizontalPadding)
+    val layoutDirection = LocalLayoutDirection.current
+    val density = LocalDensity.current
+    val columnCount by remember(state) {
+        snapshotFlow { state.layoutInfo.viewportSize.width }
+            .distinctUntilChanged()
+            .map {
+                with(density) {
+                    with(columns) {
+                        calculateCrossAxisCellSizes(
+                            it - padding.calculateStartPadding(layoutDirection).roundToPx() -
+                                padding.calculateEndPadding(layoutDirection).roundToPx(),
+                            8.dp.roundToPx(),
+                        )
+                    }
+                }.size
+            }.distinctUntilChanged()
+    }.collectAsState(1)
+    val bigScreen = columnCount > 1
     val actualVerticalSpacing =
         if (bigScreen) {
             verticalItemSpacing
@@ -60,6 +80,7 @@ public fun LazyStatusVerticalStaggeredGrid(
     }.collectAsState(false)
     CompositionLocalProvider(
         LocalIsScrollingInProgress provides isScrollInProgressDebounced,
+        LocalMultipleColumns provides bigScreen,
     ) {
         LazyVerticalStaggeredGrid(
             modifier = modifier,
@@ -77,4 +98,7 @@ public fun LazyStatusVerticalStaggeredGrid(
 }
 
 internal val LocalIsScrollingInProgress =
+    androidx.compose.runtime.compositionLocalOf { false }
+
+internal val LocalMultipleColumns =
     androidx.compose.runtime.compositionLocalOf { false }

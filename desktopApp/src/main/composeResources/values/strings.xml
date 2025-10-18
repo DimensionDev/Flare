@@ -22,7 +22,7 @@
     <string name="home_tab_list_title">List</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Direct Messages</string>
-    <string name="home_timeline_new_toots">New toots</string>
+    <string name="home_timeline_new_toots">New Posts</string>
 
     <string name="navigate_back">Back</string>
     <string name="service_select_instance_input_placeholder">Instance URL</string>
@@ -167,7 +167,8 @@
 
 
     <string name="settings_appearance_generic">Generic</string>
-
+    <string name="settings_appearance_show_compose_in_home_timeline">Show compose box in home timeline</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Show compose box in the top of home timeline</string>
     <string name="settings_appearance_show_actions">Show actions</string>
     <string name="settings_appearance_show_actions_description">Show actions on the bottom of the status</string>
     <string name="settings_appearance_show_media">Show media</string>
@@ -267,7 +268,7 @@
     <string name="tab_settings_list">List</string>
     <string name="tab_settings_feed">Feeds</string>
 
-    <string name="notification_login_expired">Login expired, please login again</string>
+    <string name="notification_login_expired">Login expired for %1$s</string>
 
     <string name="dm_list_empty">No direct messages</string>
     <string name="dm_list_error">Failed to load direct messages</string>

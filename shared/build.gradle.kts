@@ -36,17 +36,9 @@ kotlin {
         minSdk = libs.versions.minSdk.get().toInt()
     }
     jvm()
+    iosArm64()
+    iosSimulatorArm64()
 
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64(),
-    ).forEach { appleTarget ->
-        appleTarget.binaries.framework {
-            baseName = "shared"
-//            isStatic = true
-        }
-    }
     targets.forEach { target ->
         target.name.takeIf {
             it != "metadata"

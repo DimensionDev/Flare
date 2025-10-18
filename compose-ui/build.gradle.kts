@@ -23,7 +23,6 @@ kotlin {
     }
     jvm()
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64(),
     ).forEach { appleTarget ->
@@ -91,8 +90,7 @@ kotlin {
                 api(projects.shared)
                 implementation(libs.cupertino)
                 api(compose.uiUtil)
-                implementation("com.composables:core:1.44.0")
-                implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
+                implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.9.5")
             }
         }
     }

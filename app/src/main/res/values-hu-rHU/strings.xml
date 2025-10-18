@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">Értesítések</string>
     <string name="home_tab_me_title">Én</string>
     <string name="home_tab_discover_title">Felfedezés</string>
-    <string name="home_timeline_new_toots">Új tootok</string>
     <string name="notification_tab_all_title">Összes</string>
     <string name="notification_tab_mentions_title">Megemlítések</string>
     <string name="notification_tab_comments_title">Hozzászólások</string>
@@ -30,7 +29,6 @@
     <string name="compose_poll_expiration_7_days">7 nap</string>
     <string name="compose_content_warning_hint">Tartalom figyelmeztetés</string>
     <string name="compose_media_sensitive">Jelöld meg a médiát érzékenyként</string>
-    <string name="compose_notification_title">Toot küldése</string>
     <string name="settings_title">Beállítások</string>
     <string name="settings_accounts_title">Fiók kezelés</string>
     <string name="settings_appearance_title">Megjelenés</string>
@@ -99,7 +97,6 @@
     <string name="more">Több</string>
     <string name="discover_search_placeholder">Keresés</string>
     <string name="discover_users">Felhasználók ajánlása</string>
-    <string name="discover_status">Trendi tootok</string>
     <string name="discover_hashtags">Trendi hashtagok</string>
     <string name="search_users">Felhasználók</string>
     <string name="search_status">Állapot</string>
@@ -230,7 +227,6 @@
     <string name="dm_sending">Küldés</string>
     <string name="dm_leave">Hagyd el a beszélgetést</string>
     <string name="dm_to_profile">Profil megjelenítése</string>
-    <string name="notification_login_expired">A bejelentkezési időszak lejárt, kérjük, belépjen újra</string>
     <string name="following_title">Követés</string>
     <string name="fans_title">Követő</string>
     <string name="local_history_search_placeholder">Helyi gyorsítótár keresése</string>
@@ -248,6 +244,7 @@
     <string name="rss_sources_rss_hub_host_hint">Be kell állítania az RssHub hosztot, ha az RssHubot szeretné használni, vagy ki kell választania a nyilvános RssHub szervert.</string>
     <string name="rss_sources_discovered_rss_sources">Felfedezett Rss források</string>
     <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
+    <string name="rss_sources_open_in_browser">Megnyitás a böngészőben</string>
     <string name="rss_detail_open_in_browser">Megnyitás a böngészőben</string>
     <string name="rss_detail_share">Megosztás</string>
     <string name="rss_detail_tldr">Összefoglalás</string>

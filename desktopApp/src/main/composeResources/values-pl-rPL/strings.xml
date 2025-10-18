@@ -20,7 +20,7 @@
     <string name="home_tab_list_title">Lista</string>
     <string name="home_tab_feeds_title">Kanały</string>
     <string name="dm_list_title">Wiadomości bezpośrednie</string>
-    <string name="home_timeline_new_toots">Nowe wpisy</string>
+    <string name="home_timeline_new_toots">Nowe posty</string>
     <string name="navigate_back">Powrót</string>
     <string name="service_select_instance_input_placeholder">Adres URL instancji</string>
     <string name="service_select_next_button">Następny</string>
@@ -146,6 +146,8 @@
     <string name="settings_ai_config_enable_tldr">Włącz podsumowanie AI</string>
     <string name="settings_ai_config_tldr_description">Włącz podsumowanie AI dla długich postów, dostępne tylko w postach dłuższych niż 500 znaków</string>
     <string name="settings_appearance_generic">Generic</string>
+    <string name="settings_appearance_show_compose_in_home_timeline">Pokaż pole kompozycji na głównej osi czasu</string>
+    <string name="settings_appearance_show_compose_in_home_timeline_description">Pokaż pole kompozycji w górnej części głównej osi czasu</string>
     <string name="settings_appearance_show_actions">Pokaż akcje</string>
     <string name="settings_appearance_show_actions_description">Pokaż akcje na dole stanu</string>
     <string name="settings_appearance_show_media">Pokaż media</string>
@@ -234,7 +236,7 @@
     <string name="tab_settings_default">Domyślny</string>
     <string name="tab_settings_list">Lista</string>
     <string name="tab_settings_feed">Kanały</string>
-    <string name="notification_login_expired">Logowanie wygasło, zaloguj się ponownie</string>
+    <string name="notification_login_expired">Logowanie wygasło dla %1$s</string>
     <string name="dm_list_empty">Brak bezpośrednich wiadomości</string>
     <string name="dm_list_error">Nie udało się załadować bezpośrednich wiadomości</string>
     <string name="send">Wyślij</string>

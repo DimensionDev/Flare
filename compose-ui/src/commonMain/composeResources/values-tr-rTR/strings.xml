@@ -3,8 +3,6 @@
     <string name="delete">Sil</string>
     <string name="profile_header_following_count">%1$s Takip Edilenler</string>
     <string name="profile_header_fans_count">%1$s Takipçi</string>
-    <string name="profile_header_toots_count">%1$s Toot</string>
-    <string name="profile_misskey_header_status_count">%1$s Durum</string>
     <string name="profile_header_button_follow">Takip Et</string>
     <string name="profile_header_button_following">Takip Edilenler</string>
     <string name="profile_header_button_requested">İstek Gönderildi</string>
@@ -58,8 +56,6 @@
     <string name="mastodon_visibility_direct_description">Sadece bahsedilen kullanıcılar bu paylaşımı görebilir</string>
     <string name="settings_notifications_title">Bildirimler</string>
     <string name="settings_notifications_subtitle">Flare\'ın size nasıl bildirim göndereceğini özelleştirin</string>
-    <string name="status_loadmore_end">Daha fazla toot yok</string>
-    <string name="status_loadmore_error">Daha fazla toot yüklenirken hata oluştu</string>
     <string name="status_loadmore_error_retry">Yeniden dene</string>
     <string name="status_empty">Burada görülecek bir şey yok</string>
     <string name="status_sensitive_media">Hassas medya</string>
@@ -104,8 +100,6 @@
     <string name="user_unmute">%1$s susturmasını kaldır</string>
     <string name="mastodon_item_content_warning">İçerik uyarısı</string>
     <string name="reply_to">%1$s\'ye yanıtla</string>
-    <string name="status_detail_translate">%1$s\'a çevir</string>
-    <string name="status_detail_tldr">Özet</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
@@ -346,4 +340,12 @@
     <string name="social_title">Sosyal</string>
     <string name="antenna_title">Anten</string>
     <string name="mixed_timeline_title">Karışık</string>
+    <string name="settings_about_description">Son nesil açık kaynaklı yapay zeka destekli merkeziyetsiz sosyal ağ istemcisi.</string>
+    <string name="settings_about_source_code">Kaynak kodu</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Telegram grubumuza katılın</string>
+    <string name="settings_about_line_description">Line grubumuza katılın</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Flare\'ı çevirmemize yardım edin</string>
+    <string name="settings_privacy_policy">Gizlilik Politikası</string>
 </resources>

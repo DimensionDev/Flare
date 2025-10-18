@@ -58,12 +58,17 @@ internal class TopLevelBackStack<T : NavKey>(
     }
 
     fun removeLast() {
+        if (!canRemoveLast()) {
+            return
+        }
         val removedKey = topLevelStacks[topLevelKey]?.removeLastOrNull()
         // If the removed key was a top level key, remove the associated top level stack
         topLevelStacks.remove(removedKey)
         topLevelKey = topLevelStacks.keys.last()
         updateBackStack()
     }
+
+    fun canRemoveLast(): Boolean = (topLevelStacks[topLevelKey]?.size ?: 0) > 1 || topLevelStacks.size > 1
 
     fun isInBackStack(key: T): Boolean =
         topLevelStacks.values.any { stack ->

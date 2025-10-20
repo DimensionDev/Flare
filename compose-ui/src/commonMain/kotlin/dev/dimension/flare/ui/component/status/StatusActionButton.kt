@@ -170,28 +170,29 @@ internal fun StatusActionGroup(
     subMenus: @Composable PlatformDropdownMenuScope.(closeMenu: () -> Unit, isMenuShown: Boolean) -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    StatusActionButton(
-        icon = icon,
-        digits = digits,
+    Box(
         modifier = modifier,
-        contentDescription = contentDescription,
-        onClicked = {
-            showMenu = true
-        },
-        color = color,
-        enabled = enabled,
-        withTextMinWidth = withTextMinWidth,
-        content = {
-            PlatformDropdownMenu(
-                expanded = showMenu,
-                onDismissRequest = { showMenu = false },
-            ) {
-                subMenus.invoke(
-                    this,
-                    { showMenu = false },
-                    showMenu,
-                )
-            }
-        },
-    )
+    ) {
+        StatusActionButton(
+            icon = icon,
+            digits = digits,
+            contentDescription = contentDescription,
+            onClicked = {
+                showMenu = true
+            },
+            color = color,
+            enabled = enabled,
+            withTextMinWidth = withTextMinWidth,
+        )
+        PlatformDropdownMenu(
+            expanded = showMenu,
+            onDismissRequest = { showMenu = false },
+        ) {
+            subMenus.invoke(
+                this,
+                { showMenu = false },
+                showMenu,
+            )
+        }
+    }
 }

@@ -60,13 +60,20 @@ internal fun ScrollToTopHandler(scrollState: ScrollState) {
 }
 
 @Composable
-internal fun ScrollToTopHandler(listState: LazyListState) {
+internal fun ScrollToTopHandler(
+    listState: LazyListState,
+    reverseLayout: Boolean = false,
+) {
     val coroutineScope = rememberCoroutineScope()
     val scrollViewDelegate =
         remember(coroutineScope, listState) {
             createDelegate {
                 coroutineScope.launch {
-                    listState.animateScrollToItem(0)
+                    if (reverseLayout) {
+                        listState.animateScrollToItem(listState.layoutInfo.totalItemsCount - 1)
+                    } else {
+                        listState.animateScrollToItem(0)
+                    }
                 }
             }
         }

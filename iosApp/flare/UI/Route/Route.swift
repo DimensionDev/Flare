@@ -74,6 +74,9 @@ enum Route: Hashable, Identifiable {
             UserListScreen(accountType: account, userKey: userKey, isFollowing: false)
         case .userFollowing(let account, let userKey):
             UserListScreen(accountType: account, userKey: userKey, isFollowing: true)
+        case .dmConversation(let accountType, let roomKey, let title):
+            DMConversationScreen(accountType: accountType, roomKey: roomKey)
+                .navigationTitle(title)
         default:
             Text("Not done yet for \(self)")
         }
@@ -115,6 +118,7 @@ enum Route: Hashable, Identifiable {
     case tabSettings
     case userFollowing(AccountType, MicroBlogKey)
     case userFans(AccountType, MicroBlogKey)
+    case dmConversation(AccountType, MicroBlogKey, String)
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {

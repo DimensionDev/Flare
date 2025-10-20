@@ -32,6 +32,7 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformIconButton
 import dev.dimension.flare.ui.component.platform.PlatformText
+import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.QuotedStatus
 import dev.dimension.flare.ui.model.UiDMItem
@@ -181,5 +182,33 @@ public fun DMItem(
                 )
             }
         }
+    }
+}
+
+@Composable
+public fun DMLoadingItem(modifier: Modifier = Modifier) {
+    Box(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        PlatformText(
+            text =
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit." +
+                    " Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+            modifier =
+                Modifier
+                    .placeholder(true)
+                    .background(
+                        color = PlatformTheme.colorScheme.card,
+                        shape = PlatformTheme.shapes.dmShapeFromOther,
+                    ).padding(
+                        vertical = 8.dp,
+                        horizontal = 16.dp,
+                    ),
+            color = PlatformTheme.colorScheme.onCard,
+        )
     }
 }

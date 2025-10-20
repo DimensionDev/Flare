@@ -17,8 +17,8 @@ public fun <T : Any> LazyListScope.items(
     errorContent: @Composable LazyItemScope.(Throwable) -> Unit = {},
     loadingContent: @Composable LazyItemScope.() -> Unit = {},
     loadingCount: Int = 10,
-    key: (PagingState.Success<T>.(index: Int) -> Any)? = null,
-    contentType: PagingState.Success<T>.(index: Int) -> Any? = { null },
+    key: ((item: T) -> Any)? = null,
+    contentType: ((item: T) -> Any?)? = { null },
     itemContent: @Composable LazyItemScope.(T) -> Unit,
 ) {
     state
@@ -28,11 +28,17 @@ public fun <T : Any> LazyListScope.items(
                 key =
                     key?.let {
                         {
-                            it(this, it)
+                            this.itemKey {
+                                key(it)
+                            }
                         }
                     },
                 contentType = {
-                    contentType(this, it)
+                    contentType?.let {
+                        this.itemContentType {
+                            contentType(it)
+                        }
+                    }
                 },
             ) { index ->
                 val item = get(index)
@@ -61,8 +67,8 @@ public fun <T : Any> LazyListScope.itemsIndexed(
     errorContent: @Composable LazyItemScope.(Throwable) -> Unit = {},
     loadingContent: @Composable LazyItemScope.(index: Int, itemCount: Int) -> Unit = { _, _ -> },
     loadingCount: Int = 10,
-    key: (PagingState.Success<T>.(index: Int) -> Any)? = null,
-    contentType: PagingState.Success<T>.(index: Int) -> Any? = { null },
+    key: ((item: T) -> Any)? = null,
+    contentType: ((item: T) -> Any?)? = { null },
     itemContent: @Composable LazyItemScope.(index: Int, itemCount: Int, item: T) -> Unit,
 ) {
     state
@@ -72,11 +78,17 @@ public fun <T : Any> LazyListScope.itemsIndexed(
                 key =
                     key?.let {
                         {
-                            it(this, it)
+                            this.itemKey {
+                                key(it)
+                            }
                         }
                     },
                 contentType = {
-                    contentType(this, it)
+                    contentType?.let {
+                        this.itemContentType {
+                            contentType(it)
+                        }
+                    }
                 },
             ) { index ->
                 val item = get(index)
@@ -149,8 +161,8 @@ public fun <T : Any> LazyStaggeredGridScope.itemsIndexed(
     errorContent: @Composable LazyStaggeredGridItemScope.(Throwable) -> Unit = {},
     loadingContent: @Composable LazyStaggeredGridItemScope.() -> Unit = {},
     loadingCount: Int = 10,
-    key: (PagingState.Success<T>.(index: Int) -> Any)? = null,
-    contentType: PagingState.Success<T>.(index: Int) -> Any? = { null },
+    key: ((item: T) -> Any)? = null,
+    contentType: ((item: T) -> Any?)? = { null },
     itemContent: @Composable LazyStaggeredGridItemScope.(index: Int, itemCount: Int, item: T) -> Unit,
 ) {
     state
@@ -160,11 +172,17 @@ public fun <T : Any> LazyStaggeredGridScope.itemsIndexed(
                 key =
                     key?.let {
                         {
-                            it(this, it)
+                            this.itemKey {
+                                key(it)
+                            }
                         }
                     },
                 contentType = {
-                    contentType(this, it)
+                    contentType?.let {
+                        this.itemContentType {
+                            contentType(it)
+                        }
+                    }
                 },
             ) { index ->
                 val item = get(index)

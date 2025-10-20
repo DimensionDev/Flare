@@ -30,8 +30,8 @@ extension TabItem {
             ProfileScreen(accountType: profileTabItem.account, userKey: nil, onFollowingClick: { key in onNavigate(.userFollowing(profileTabItem.account, key)) }, onFansClick: { key in onNavigate(.userFans(profileTabItem.account, key)) })
         case .rssTabItem(let rssTabItem):
             RssScreen()
-        case .directMessageTabItem(_):
-            Text("Not implemented yet")
+        case .directMessageTabItem(let directMessageTabItem):
+            DMListScreen(accountType: directMessageTabItem.account)
         case .antennasListTabItem(let antennasListTabItem):
             AntennasListScreen(accountType: antennasListTabItem.account)
         }

@@ -172,7 +172,7 @@ struct AvatarTabIcon: View {
 
     var body: some View {
         StateView(state: presenter.state.user) { user in
-            NetworkImage(data: user.avatar)
+            AvatarView(data: user.avatar)
         }
     }
 }

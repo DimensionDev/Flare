@@ -15289,6 +15289,16 @@
         }
       }
     },
+    "direct_messages_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Direct Message"
+          }
+        }
+      }
+    },
     "discover_status" : {
       "localizations" : {
         "ar" : {

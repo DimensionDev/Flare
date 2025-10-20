@@ -44,10 +44,10 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.more
 import dev.dimension.flare.send
 import dev.dimension.flare.ui.common.items
-import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.dm.DMItem
+import dev.dimension.flare.ui.component.dm.DMLoadingItem
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.dm.DMConversationPresenter
@@ -234,7 +234,10 @@ fun DmConversationScreen(
                 items(
                     state.items,
                     key = {
-                        get(it)?.id ?: it
+                        it.id
+                    },
+                    loadingContent = {
+                        DMLoadingItem()
                     },
                     itemContent = { item ->
                         DMItem(

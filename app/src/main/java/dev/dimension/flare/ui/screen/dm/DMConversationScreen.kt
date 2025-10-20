@@ -62,6 +62,7 @@ import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.dm.DMItem
+import dev.dimension.flare.ui.component.dm.DMLoadingItem
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.dm.DMConversationPresenter
@@ -273,7 +274,7 @@ internal fun DMConversationScreen(
             items(
                 state.items,
                 key = {
-                    get(it)?.id ?: it
+                    it.id
                 },
 //                emptyContent = {
 //
@@ -281,9 +282,9 @@ internal fun DMConversationScreen(
 //                errorContent = {
 //
 //                },
-//                loadingContent = {
-//
-//                },
+                loadingContent = {
+                    DMLoadingItem()
+                },
                 itemContent = { item ->
                     DMItem(
                         item = item,

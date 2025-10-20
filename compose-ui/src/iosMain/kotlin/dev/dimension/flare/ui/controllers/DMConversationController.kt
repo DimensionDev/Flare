@@ -13,6 +13,7 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.ScrollToTopHandler
 import dev.dimension.flare.ui.component.dm.DMItem
+import dev.dimension.flare.ui.component.dm.DMLoadingItem
 import dev.dimension.flare.ui.presenter.dm.DMConversationState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import platform.UIKit.UIViewController
@@ -43,7 +44,7 @@ public fun DMConversationController(state: ComposeUIStateProxy<DMConversationSta
             items(
                 state.items,
                 key = {
-                    get(it)?.id ?: it
+                    it.id
                 },
 //                emptyContent = {
 //
@@ -51,9 +52,9 @@ public fun DMConversationController(state: ComposeUIStateProxy<DMConversationSta
 //                errorContent = {
 //
 //                },
-//                loadingContent = {
-//
-//                },
+                loadingContent = {
+                    DMLoadingItem()
+                },
                 itemContent = { item ->
                     DMItem(
                         item = item,

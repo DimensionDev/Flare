@@ -8,10 +8,7 @@ struct DMListScreen: View {
     var body: some View {
         List {
             PagingView(data: presenter.state.items) { item in
-                NavigationLink {
-                    DMConversationScreen(accountType: accountType, roomKey: item.key)
-                        .navigationTitle(item.users.count == 1 ? item.users.first?.name.markdown ?? "direct_messages_title" : "direct_messages_title")
-                } label: {
+                NavigationLink(value: Route.dmConversation(accountType, item.key, item.users.count == 1 ? item.users.first?.name.markdown ?? String(localized: "direct_messages_title") : String(localized: "direct_messages_title"))) {
                     HStack {
                         if item.hasUser, let image = item.users.first?.avatar {
                             AvatarView(data: image)

@@ -170,7 +170,7 @@ molecule-runtime = { group = "app.cash.molecule", name = "molecule-runtime", ver
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
 
-material3-navigation = { group = "io.github.stefanoq21", name = "material3-navigation", version = "1.0.4" }
+material3-navigation = { group = "io.github.stefanoq21", name = "material3-navigation", version = "1.0.5" }
 
 compose-lint-checks = { group = "com.slack.lint.compose", name = "compose-lint-checks", version.ref = "compose-lint-checks" }
 

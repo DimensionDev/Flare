@@ -96,6 +96,11 @@ struct StatusView: View {
                     }
                     if let contentWarning = data.contentWarning, !contentWarning.isEmpty {
                         RichText(text: contentWarning)
+                            .if(isDetail) { richText in
+                                richText
+                                    .textSelection(.enabled)
+                            }
+                        
                         Button {
                             withAnimation {
                                 expand = !expand
@@ -117,6 +122,7 @@ struct StatusView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .if(isDetail) { richText in
                                     richText
+                                        .textSelection(.enabled)
                                 } else: { richText in
                                     richText
                                         .lineLimit(5)
@@ -196,14 +202,15 @@ struct StatusView: View {
                             .foregroundStyle(isDetail ? .primary : .secondary)
                     }
                 }
-                .if(withLeadingPadding, if: { stack in
+                .if(withLeadingPadding) { stack in
                     stack.padding(.leading, 50)
-                }, else: { stack in
-                    stack
-                })
+                }
             }
-            .contextMenu {
-                StatusActionsView(data: data.actions, useText: true)
+            .if(!isDetail) { view in
+                view
+                    .contextMenu {
+                        StatusActionsView(data: data.actions, useText: true)
+                    }
             }
         }
         .contentShape(.rect)

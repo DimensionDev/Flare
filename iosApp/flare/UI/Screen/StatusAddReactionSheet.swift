@@ -2,11 +2,12 @@ import SwiftUI
 import KotlinSharedUI
 
 struct StatusAddReactionSheet: View {
+    let accountType: AccountType
     @Environment(\.dismiss) private var dismiss
     @StateObject private var presenter: KotlinPresenter<AddReactionState>
     var body: some View {
         StateView(state: presenter.state.emojis) { emojiData in
-            EmojiPopup(data: emojiData) { emoji in
+            EmojiPopup(accountType: accountType, data: emojiData) { emoji in
                 presenter.state.select(emoji: emoji)
                 dismiss()
             }
@@ -36,6 +37,7 @@ extension StatusAddReactionSheet {
         accountType: AccountType,
         statusKey: MicroBlogKey,
     ) {
+        self.accountType = accountType
         self._presenter = .init(wrappedValue: .init(presenter: AddReactionPresenter(accountType: accountType, statusKey: statusKey)))
     }
 }

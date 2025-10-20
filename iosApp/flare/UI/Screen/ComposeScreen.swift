@@ -272,9 +272,26 @@ struct ComposeScreen: View {
                                     Image("fa-face-smile")
                                 })
                                 .popover(isPresented: $viewModel.showEmoji) {
-                                    EmojiPopup(data: emojis) { item in
-                                        viewModel.addEmoji(emoji: item)
-                                        insert(item.insertText)
+                                    NavigationStack {
+                                        EmojiPopup(accountType: accountType,data: emojis) { item in
+                                            viewModel.addEmoji(emoji: item)
+                                            insert(item.insertText)
+                                        }
+                                        .toolbar {
+                                            ToolbarItem(placement: .cancellationAction) {
+                                                Button(
+                                                    role: .cancel
+                                                ) {
+                                                    viewModel.showEmoji = false
+                                                } label: {
+                                                    Label {
+                                                        Text("Cancel")
+                                                    } icon: {
+                                                        Image("fa-xmark")
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -419,30 +436,6 @@ struct ComposeScreen: View {
         return viewModel.visibility
     }
 
-}
-
-struct EmojiPopup: View {
-    let data: EmojiData
-    let onItemClicked: (UiEmoji) -> Void
-    var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 8) {
-                ForEach(data.data.sorted(by: { $0.key < $1.key }), id: \ .key) { key, value in
-                    Section(key) {
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
-                            ForEach(value, id: \.shortcode) { item in
-                                NetworkImage(data: item.url)
-                                    .frame(width: 32, height: 32)
-                                    .onTapGesture {
-                                        onItemClicked(item)
-                                    }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 @Observable

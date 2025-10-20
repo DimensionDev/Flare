@@ -29,6 +29,13 @@ struct MediaScreen: View {
                     Image("fa-xmark")
                 }
             }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    MediaSaver.shared.saveImage(url: url)
+                } label: {
+                    Image("fa-download")
+                }
+            }
         }
     }
 }

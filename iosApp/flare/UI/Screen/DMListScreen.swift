@@ -105,6 +105,7 @@ struct DMConversationScreen: View {
                     }
                     .backport
                     .glassProminentButtonStyle()
+                    .disabled(inputText.isEmpty)
                 }
                 .padding([.horizontal, .bottom])
                 .backport

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,11 +21,16 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
+import androidx.compose.ui.autofill.contentType
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -81,6 +87,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.persistentListOf
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
+import sh.christian.ozone.api.response.AtpException
 
 @Composable
 public fun ServiceSelectionScreenContent(
@@ -187,6 +194,9 @@ public fun ServiceSelectionScreenContent(
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier =
+                            Modifier
+                                .imePadding(),
                     ) {
                         state.detectedPlatformType.takeSuccess()?.let {
                             if (it.compatibleMode) {
@@ -199,275 +209,317 @@ public fun ServiceSelectionScreenContent(
                                 )
                             }
                         }
-                        when (state.detectedPlatformType.takeSuccess()?.platformType) {
-                            null -> Unit
-                            PlatformType.Bluesky -> {
-                                val oauthString =
-                                    stringResource(Res.string.bluesky_login_oauth_button)
-                                val passwordString =
-                                    stringResource(Res.string.bluesky_login_use_password_button)
-                                PlatformPicker(
-                                    options =
-                                        remember {
-                                            persistentListOf(
-                                                passwordString,
-                                                oauthString,
-                                            )
-                                        },
-                                    onSelected = {
-                                        when (it) {
-                                            0 -> {
-                                                state.blueskyLoginState.clear()
-                                                state.blueskyOauthLoginState.clear()
-                                                state.blueskyInputState.setUsePasswordLogin(true)
-                                            }
+                        state.detectedPlatformType.onSuccess { nodeData ->
+                            val passwordFocusRequester = remember { FocusRequester() }
+                            val pinCodeFocusRequester = remember { FocusRequester() }
+                            when (nodeData.platformType) {
+                                PlatformType.Bluesky -> {
+                                    val oauthString =
+                                        stringResource(Res.string.bluesky_login_oauth_button)
+                                    val passwordString =
+                                        stringResource(Res.string.bluesky_login_use_password_button)
+                                    PlatformPicker(
+                                        options =
+                                            remember {
+                                                persistentListOf(
+                                                    passwordString,
+                                                    oauthString,
+                                                )
+                                            },
+                                        onSelected = {
+                                            when (it) {
+                                                0 -> {
+                                                    state.blueskyLoginState.clear()
+                                                    state.blueskyOauthLoginState.clear()
+                                                    state.blueskyInputState.setUsePasswordLogin(true)
+                                                }
 
-                                            1 -> {
-                                                state.blueskyLoginState.clear()
-                                                state.blueskyOauthLoginState.clear()
-                                                state.blueskyInputState.setUsePasswordLogin(false)
-                                            }
+                                                1 -> {
+                                                    state.blueskyLoginState.clear()
+                                                    state.blueskyOauthLoginState.clear()
+                                                    state.blueskyInputState.setUsePasswordLogin(false)
+                                                }
 
-                                            else -> {}
-                                        }
-                                    },
-                                )
-                                PlatformTextField(
-                                    state = state.blueskyInputState.username,
-                                    label = {
-                                        PlatformText(text = stringResource(Res.string.bluesky_login_username_hint))
-                                    },
-                                    enabled =
-                                        !state.blueskyOauthLoginState.loading &&
-                                            !state.blueskyLoginState.loading,
-                                    modifier =
-                                        Modifier
-                                            .width(300.dp),
-                                    lineLimits = TextFieldLineLimits.SingleLine,
-                                    keyboardOptions =
-                                        KeyboardOptions(
-                                            imeAction = ImeAction.Done,
-                                            autoCorrectEnabled = false,
-                                        ),
-                                    onKeyboardAction = {
-                                        if (!state.blueskyInputState.usePasswordLogin) {
-                                            state.blueskyOauthLoginState.login(
-                                                baseUrl = state.instanceInputState.text.toString(),
-                                                userName =
-                                                    state.blueskyInputState.username.text
-                                                        .toString(),
-                                                launchUrl = openUri,
-                                            )
-                                        }
-                                    },
-                                )
-                                AnimatedVisibility(state.blueskyInputState.usePasswordLogin) {
-                                    PlatformSecureTextField(
-                                        state = state.blueskyInputState.password,
-                                        label = {
-                                            PlatformText(text = stringResource(Res.string.bluesky_login_password_hint))
-                                        },
-                                        enabled = !state.blueskyLoginState.loading,
-                                        modifier =
-                                            Modifier
-                                                .width(300.dp),
-                                        onKeyboardAction = {
-                                            state.blueskyLoginState.login(
-                                                baseUrl = state.instanceInputState.text.toString(),
-                                                username =
-                                                    state.blueskyInputState.username.text
-                                                        .toString(),
-                                                password =
-                                                    state.blueskyInputState.password.text
-                                                        .toString(),
-                                                authFactorToken =
-                                                    state.blueskyInputState.authFactorToken.text
-                                                        .toString(),
-                                            )
+                                                else -> {}
+                                            }
                                         },
                                     )
-                                }
-                                AnimatedVisibility(state.blueskyLoginState.require2FA && state.blueskyInputState.usePasswordLogin) {
                                     PlatformTextField(
-                                        state = state.blueskyInputState.authFactorToken,
+                                        state = state.blueskyInputState.username,
                                         label = {
-                                            PlatformText(text = stringResource(Res.string.bluesky_login_auth_factor_token_hint))
+                                            PlatformText(text = stringResource(Res.string.bluesky_login_username_hint))
                                         },
-                                        enabled = !state.blueskyLoginState.loading,
+                                        enabled =
+                                            !state.blueskyOauthLoginState.loading &&
+                                                !state.blueskyLoginState.loading,
                                         modifier =
                                             Modifier
-                                                .width(300.dp),
+                                                .width(300.dp)
+                                                .contentType(ContentType.Username + ContentType.EmailAddress),
                                         lineLimits = TextFieldLineLimits.SingleLine,
                                         keyboardOptions =
                                             KeyboardOptions(
+                                                keyboardType = KeyboardType.Email,
                                                 imeAction = ImeAction.Done,
                                                 autoCorrectEnabled = false,
                                             ),
                                         onKeyboardAction = {
-                                            state.blueskyLoginState.login(
-                                                baseUrl = state.instanceInputState.text.toString(),
-                                                username =
-                                                    state.blueskyInputState.username.text
-                                                        .toString(),
-                                                password =
-                                                    state.blueskyInputState.password.text
-                                                        .toString(),
-                                                authFactorToken =
-                                                    state.blueskyInputState.authFactorToken.text
-                                                        .toString(),
-                                            )
+                                            if (!state.blueskyInputState.usePasswordLogin) {
+                                                if (state.blueskyInputState.canLogin) {
+                                                    state.blueskyOauthLoginState.login(
+                                                        baseUrl = nodeData.host,
+                                                        userName =
+                                                            state.blueskyInputState.username.text
+                                                                .toString(),
+                                                        launchUrl = openUri,
+                                                    )
+                                                }
+                                            } else {
+                                                passwordFocusRequester.requestFocus()
+                                            }
                                         },
                                     )
-                                }
-                                AnimatedVisibility(!state.blueskyInputState.usePasswordLogin) {
-                                    PlatformText(stringResource(Res.string.bluesky_login_oauth_hint))
-                                }
-                                if (!state.blueskyInputState.usePasswordLogin) {
-                                    registerDeeplinkCallback.invoke { url ->
-                                        state.blueskyOauthLoginState.resume(url)
+                                    AnimatedVisibility(state.blueskyInputState.usePasswordLogin) {
+                                        PlatformSecureTextField(
+                                            state = state.blueskyInputState.password,
+                                            label = {
+                                                PlatformText(text = stringResource(Res.string.bluesky_login_password_hint))
+                                            },
+                                            enabled = !state.blueskyLoginState.loading,
+                                            keyboardOptions =
+                                                KeyboardOptions(
+                                                    keyboardType = KeyboardType.Password,
+                                                    imeAction = ImeAction.Done,
+                                                    autoCorrectEnabled = false,
+                                                ),
+                                            modifier =
+                                                Modifier
+                                                    .width(300.dp)
+                                                    .contentType(ContentType.Password)
+                                                    .focusRequester(passwordFocusRequester),
+                                            onKeyboardAction = {
+                                                if (state.blueskyInputState.canLogin) {
+                                                    state.blueskyLoginState.login(
+                                                        baseUrl = nodeData.host,
+                                                        username =
+                                                            state.blueskyInputState.username.text
+                                                                .toString(),
+                                                        password =
+                                                            state.blueskyInputState.password.text
+                                                                .toString(),
+                                                        authFactorToken =
+                                                            state.blueskyInputState.authFactorToken.text
+                                                                .toString(),
+                                                    )
+                                                }
+                                            },
+                                        )
                                     }
+                                    AnimatedVisibility(state.blueskyLoginState.require2FA && state.blueskyInputState.usePasswordLogin) {
+                                        LaunchedEffect(Unit) {
+                                            pinCodeFocusRequester.requestFocus()
+                                        }
+                                        PlatformTextField(
+                                            state = state.blueskyInputState.authFactorToken,
+                                            label = {
+                                                PlatformText(text = stringResource(Res.string.bluesky_login_auth_factor_token_hint))
+                                            },
+                                            enabled = !state.blueskyLoginState.loading,
+                                            modifier =
+                                                Modifier
+                                                    .width(300.dp)
+                                                    .focusRequester(pinCodeFocusRequester),
+                                            lineLimits = TextFieldLineLimits.SingleLine,
+                                            keyboardOptions =
+                                                KeyboardOptions(
+                                                    keyboardType = KeyboardType.Text,
+                                                    imeAction = ImeAction.Done,
+                                                    autoCorrectEnabled = false,
+                                                ),
+                                            onKeyboardAction = {
+                                                if (state.blueskyInputState.canLogin) {
+                                                    state.blueskyLoginState.login(
+                                                        baseUrl = nodeData.host,
+                                                        username =
+                                                            state.blueskyInputState.username.text
+                                                                .toString(),
+                                                        password =
+                                                            state.blueskyInputState.password.text
+                                                                .toString(),
+                                                        authFactorToken =
+                                                            state.blueskyInputState.authFactorToken.text
+                                                                .toString(),
+                                                    )
+                                                }
+                                            },
+                                        )
+                                    }
+                                    AnimatedVisibility(!state.blueskyInputState.usePasswordLogin) {
+                                        PlatformText(stringResource(Res.string.bluesky_login_oauth_hint))
+                                    }
+                                    if (!state.blueskyInputState.usePasswordLogin) {
+                                        registerDeeplinkCallback.invoke { url ->
+                                            state.blueskyOauthLoginState.resume(url)
+                                        }
 //                                    OnNewIntent {
 //                                        state.blueskyOauthLoginState.resume(it.dataString.orEmpty())
 //                                    }
-                                }
-
-                                PlatformFilledTonalButton(
-                                    onClick = {
-                                        if (state.blueskyInputState.usePasswordLogin) {
-                                            state.blueskyLoginState.login(
-                                                baseUrl = state.instanceInputState.text.toString(),
-                                                username =
-                                                    state.blueskyInputState.username.text
-                                                        .toString(),
-                                                password =
-                                                    state.blueskyInputState.password.text
-                                                        .toString(),
-                                                authFactorToken =
-                                                    state.blueskyInputState.authFactorToken.text
-                                                        .toString(),
-                                            )
-                                        } else {
-                                            state.blueskyOauthLoginState.login(
-                                                baseUrl = state.instanceInputState.text.toString(),
-                                                userName =
-                                                    state.blueskyInputState.username.text
-                                                        .toString(),
-                                                launchUrl = openUri,
+                                        if (state.blueskyOauthLoginState.error != null) {
+                                            PlatformText(
+                                                text = state.blueskyOauthLoginState.error.toString(),
                                             )
                                         }
-                                    },
-                                    modifier = Modifier.width(300.dp),
-                                    enabled =
-                                        state.blueskyInputState.canLogin &&
-                                            (
-                                                !state.blueskyOauthLoginState.loading &&
-                                                    !state.blueskyLoginState.loading
-                                            ),
-                                ) {
-                                    PlatformText(text = stringResource(Res.string.login_button))
+                                    } else {
+                                        state.blueskyLoginState.error?.let {
+                                            if (it is AtpException) {
+                                                PlatformText(
+                                                    text = it.error?.message ?: it.message.toString(),
+                                                )
+                                            } else {
+                                                PlatformText(
+                                                    text = it.message ?: "Unknown error",
+                                                )
+                                            }
+                                        }
+                                    }
+                                    PlatformFilledTonalButton(
+                                        onClick = {
+                                            if (state.blueskyInputState.usePasswordLogin) {
+                                                state.blueskyLoginState.login(
+                                                    baseUrl = nodeData.host,
+                                                    username =
+                                                        state.blueskyInputState.username.text
+                                                            .toString(),
+                                                    password =
+                                                        state.blueskyInputState.password.text
+                                                            .toString(),
+                                                    authFactorToken =
+                                                        state.blueskyInputState.authFactorToken.text
+                                                            .toString(),
+                                                )
+                                            } else {
+                                                state.blueskyOauthLoginState.login(
+                                                    baseUrl = nodeData.host,
+                                                    userName =
+                                                        state.blueskyInputState.username.text
+                                                            .toString(),
+                                                    launchUrl = openUri,
+                                                )
+                                            }
+                                        },
+                                        modifier = Modifier.width(300.dp),
+                                        enabled =
+                                            state.blueskyInputState.canLogin &&
+                                                (
+                                                    !state.blueskyOauthLoginState.loading &&
+                                                        !state.blueskyLoginState.loading
+                                                ),
+                                    ) {
+                                        PlatformText(text = stringResource(Res.string.login_button))
+                                    }
+                                    if (state.blueskyOauthLoginState.error != null) {
+                                        PlatformText(
+                                            text = state.blueskyOauthLoginState.error.toString(),
+                                        )
+                                    }
+                                    if (state.blueskyOauthLoginState.loading) {
+                                        PlatformLinearProgressIndicator()
+                                    }
                                 }
-                                if (state.blueskyOauthLoginState.error != null) {
-                                    PlatformText(
-                                        text = state.blueskyOauthLoginState.error.toString(),
+
+                                PlatformType.Misskey -> {
+                                    registerDeeplinkCallback {
+                                        state.misskeyLoginState.resume(it)
+                                    }
+                                    state.misskeyLoginState.resumedState
+                                        ?.onLoading {
+                                            PlatformText(
+                                                text = stringResource(Res.string.mastodon_login_verify_message),
+                                            )
+                                            PlatformLinearProgressIndicator()
+                                        }?.onError {
+                                            PlatformText(text = it.message ?: "Unknown error")
+                                        } ?: run {
+                                        PlatformFilledTonalButton(
+                                            onClick = {
+                                                state.misskeyLoginState.login(
+                                                    nodeData.host,
+                                                    launchUrl = openUri,
+                                                )
+                                            },
+                                            modifier = Modifier.width(300.dp),
+                                            enabled = !state.misskeyLoginState.loading,
+                                        ) {
+                                            PlatformText(
+                                                text = stringResource(Res.string.service_select_next_button),
+                                            )
+                                        }
+                                        state.misskeyLoginState.error?.let {
+                                            PlatformText(text = it)
+                                        }
+                                    }
+                                }
+
+                                PlatformType.Mastodon -> {
+                                    registerDeeplinkCallback {
+                                        state.mastodonLoginState.resume(it)
+                                    }
+                                    state.mastodonLoginState.resumedState
+                                        ?.onLoading {
+                                            PlatformText(
+                                                text = stringResource(Res.string.mastodon_login_verify_message),
+                                            )
+                                            PlatformLinearProgressIndicator()
+                                        }?.onError {
+                                            PlatformText(text = it.message ?: "Unknown error")
+                                        } ?: run {
+                                        PlatformFilledTonalButton(
+                                            onClick = {
+                                                state.mastodonLoginState.login(
+                                                    nodeData.host,
+                                                    launchUrl = openUri,
+                                                )
+                                            },
+                                            modifier = Modifier.width(300.dp),
+                                            enabled = !state.mastodonLoginState.loading,
+                                        ) {
+                                            PlatformText(
+                                                text = stringResource(Res.string.service_select_next_button),
+                                            )
+                                        }
+                                        state.mastodonLoginState.error?.let {
+                                            PlatformText(text = it)
+                                        }
+                                    }
+                                }
+
+                                PlatformType.xQt -> {
+                                    PlatformFilledTonalButton(
+                                        onClick = {
+                                            onXQT.invoke()
+                                        },
+                                        modifier = Modifier.width(300.dp),
+                                        content = {
+                                            PlatformText(
+                                                text = stringResource(Res.string.service_select_next_button),
+                                            )
+                                        },
                                     )
                                 }
-                                if (state.blueskyOauthLoginState.loading) {
-                                    PlatformLinearProgressIndicator()
-                                }
-                            }
 
-                            PlatformType.Misskey -> {
-                                registerDeeplinkCallback {
-                                    state.misskeyLoginState.resume(it)
-                                }
-                                state.misskeyLoginState.resumedState
-                                    ?.onLoading {
-                                        PlatformText(
-                                            text = stringResource(Res.string.mastodon_login_verify_message),
-                                        )
-                                        PlatformLinearProgressIndicator()
-                                    }?.onError {
-                                        PlatformText(text = it.message ?: "Unknown error")
-                                    } ?: run {
+                                PlatformType.VVo -> {
                                     PlatformFilledTonalButton(
                                         onClick = {
-                                            state.misskeyLoginState.login(
-                                                state.instanceInputState.text.toString(),
-                                                launchUrl = openUri,
-                                            )
+                                            onVVO.invoke()
                                         },
                                         modifier = Modifier.width(300.dp),
-                                        enabled = !state.misskeyLoginState.loading,
-                                    ) {
-                                        PlatformText(
-                                            text = stringResource(Res.string.service_select_next_button),
-                                        )
-                                    }
-                                    state.misskeyLoginState.error?.let {
-                                        PlatformText(text = it)
-                                    }
-                                }
-                            }
-
-                            PlatformType.Mastodon -> {
-                                registerDeeplinkCallback {
-                                    state.mastodonLoginState.resume(it)
-                                }
-                                state.mastodonLoginState.resumedState
-                                    ?.onLoading {
-                                        PlatformText(
-                                            text = stringResource(Res.string.mastodon_login_verify_message),
-                                        )
-                                        PlatformLinearProgressIndicator()
-                                    }?.onError {
-                                        PlatformText(text = it.message ?: "Unknown error")
-                                    } ?: run {
-                                    PlatformFilledTonalButton(
-                                        onClick = {
-                                            state.mastodonLoginState.login(
-                                                state.instanceInputState.text.toString(),
-                                                launchUrl = openUri,
+                                        content = {
+                                            PlatformText(
+                                                text = stringResource(Res.string.service_select_next_button),
                                             )
                                         },
-                                        modifier = Modifier.width(300.dp),
-                                        enabled = !state.mastodonLoginState.loading,
-                                    ) {
-                                        PlatformText(
-                                            text = stringResource(Res.string.service_select_next_button),
-                                        )
-                                    }
-                                    state.mastodonLoginState.error?.let {
-                                        PlatformText(text = it)
-                                    }
+                                    )
                                 }
-                            }
-
-                            PlatformType.xQt -> {
-                                PlatformFilledTonalButton(
-                                    onClick = {
-                                        onXQT.invoke()
-                                    },
-                                    modifier = Modifier.width(300.dp),
-                                    content = {
-                                        PlatformText(
-                                            text = stringResource(Res.string.service_select_next_button),
-                                        )
-                                    },
-                                )
-                            }
-
-                            PlatformType.VVo -> {
-                                PlatformFilledTonalButton(
-                                    onClick = {
-                                        onVVO.invoke()
-                                    },
-                                    modifier = Modifier.width(300.dp),
-                                    content = {
-                                        PlatformText(
-                                            text = stringResource(Res.string.service_select_next_button),
-                                        )
-                                    },
-                                )
                             }
                         }
                     }

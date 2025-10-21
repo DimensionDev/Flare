@@ -53,7 +53,7 @@ public class BlueskyLoginPresenter(
                             baseUrl = "https://$baseUrl",
                             username = username,
                             password = password,
-                            authFactorToken = authFactorToken,
+                            authFactorToken = authFactorToken?.takeIf { it.isNotEmpty() },
                             accountRepository = accountRepository,
                         )
                         toHome.invoke()
@@ -62,8 +62,8 @@ public class BlueskyLoginPresenter(
                             require2FA = true
                         } else {
                             require2FA = false
+                            error = it
                         }
-                        error = it
                     }
                     loading = false
                 }

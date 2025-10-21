@@ -1,8 +1,10 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -70,17 +72,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Pen
+import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.R
+import dev.dimension.flare.data.model.BottomBarBehavior
+import dev.dimension.flare.data.model.BottomBarStyle
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 
 val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { 0.dp }
 val LocalBottomBarShowing = androidx.compose.runtime.staticCompositionLocalOf<Boolean> { false }
@@ -114,6 +121,53 @@ fun NavigationSuiteScaffold2(
     val hazeState = rememberHazeState()
     var isPodcastShowing by remember { mutableStateOf(false) }
     var isBottomBarExpanded by remember { mutableStateOf(true) }
+    val bottomBarStyle = LocalAppearanceSettings.current.bottomBarStyle
+    val bottomBarBehavior = LocalAppearanceSettings.current.bottomBarBehavior
+    val bottomBarState =
+        remember(
+            bottomBarStyle,
+            bottomBarBehavior,
+            isBottomBarExpanded,
+            bottomBarAutoHideEnabled,
+        ) {
+            when (bottomBarStyle) {
+                BottomBarStyle.Floating ->
+                    when (bottomBarBehavior) {
+                        BottomBarBehavior.AlwaysShow -> BottomBarState.FloatingNormal
+                        BottomBarBehavior.HideOnScroll ->
+                            if (!isBottomBarExpanded && bottomBarAutoHideEnabled) {
+                                BottomBarState.FloatingHidden
+                            } else {
+                                BottomBarState.FloatingNormal
+                            }
+
+                        BottomBarBehavior.MinimizeOnScroll ->
+                            if (!isBottomBarExpanded && bottomBarAutoHideEnabled) {
+                                BottomBarState.FloatingMinimized
+                            } else {
+                                BottomBarState.FloatingNormal
+                            }
+                    }
+
+                BottomBarStyle.Classic ->
+                    when (bottomBarBehavior) {
+                        BottomBarBehavior.AlwaysShow -> BottomBarState.ClassicNormal
+                        BottomBarBehavior.HideOnScroll ->
+                            if (!isBottomBarExpanded && bottomBarAutoHideEnabled) {
+                                BottomBarState.ClassicHidden
+                            } else {
+                                BottomBarState.ClassicNormal
+                            }
+
+                        BottomBarBehavior.MinimizeOnScroll ->
+                            if (!isBottomBarExpanded && bottomBarAutoHideEnabled) {
+                                BottomBarState.ClassicHidden
+                            } else {
+                                BottomBarState.ClassicNormal
+                            }
+                    }
+            }
+        }
     Surface(
         modifier =
             modifier
@@ -286,9 +340,19 @@ fun NavigationSuiteScaffold2(
                             0.dp
                         } +
                         if (scope.itemList.any { item -> item.selected } && layoutType == NavigationSuiteType.NavigationBar) {
-                            56.dp
+                            when (bottomBarStyle) {
+                                BottomBarStyle.Floating -> 72.dp
+                                BottomBarStyle.Classic -> 64.dp
+                            }
                         } else {
                             0.dp
+                        } +
+                        with(LocalDensity.current) {
+                            WindowInsets.systemBars
+                                .only(
+                                    WindowInsetsSides.Bottom,
+                                ).getBottom(this)
+                                .toDp()
                         },
                     LocalBottomBarShowing provides (layoutType == NavigationSuiteType.NavigationBar),
                     LocalHazeState provides hazeState,
@@ -330,125 +394,282 @@ fun NavigationSuiteScaffold2(
                     )
                     androidx.compose.animation.AnimatedVisibility(
                         layoutType == NavigationSuiteType.NavigationBar &&
-                            scope.itemList.any { item -> item.selected },
+                            scope.itemList.any { item -> item.selected } &&
+                            (
+                                bottomBarState != BottomBarState.FloatingHidden &&
+                                    bottomBarState != BottomBarState.ClassicHidden
+                            ),
                         enter = slideInVertically { it },
                         exit = slideOutVertically { it },
                     ) {
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
+                        Box(
+//                            horizontalArrangement = Arrangement.SpaceBetween,
+//                            verticalAlignment = Alignment.Bottom,
+                            contentAlignment = Alignment.BottomCenter,
                             modifier =
                                 Modifier
-                                    .fillMaxWidth()
-                                    .windowInsetsPadding(
-                                        WindowInsets.systemBars.only(
-                                            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-                                        ),
-                                    ).padding(
-                                        horizontal = 16.dp,
-                                        vertical = 8.dp,
-                                    ),
+                                    .fillMaxWidth(),
+//                                    .windowInsetsPadding(
+//                                        WindowInsets.systemBars.only(
+//                                            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+//                                        ),
+//                                    )
+//                                    .padding(
+//                                        horizontal = 16.dp,
+//                                        vertical = 8.dp,
+//                                    ),
                         ) {
-                            SharedTransitionLayout {
+                            SharedTransitionLayout(
+                                modifier = Modifier.align(Alignment.BottomStart),
+                            ) {
                                 AnimatedContent(
-                                    isBottomBarExpanded,
-                                ) { isExpanded ->
-                                    Glassify(
-                                        shape = RoundedCornerShape(50),
-                                        shadowElevation = 8.dp,
-                                        tonalElevation = 8.dp,
+                                    bottomBarState,
+                                ) { bottomBarState ->
+                                    BottomBar(
+                                        state = bottomBarState,
+                                        provider = scope,
+                                        animatedVisibilityScope = this@AnimatedContent,
                                         hazeState = hazeState,
-                                        hazeStyle = HazeMaterials.thick(),
-                                        modifier =
-                                            Modifier
-                                                .sharedElement(
-                                                    rememberSharedContentState("bottom_surface"),
-                                                    animatedVisibilityScope = this@AnimatedContent,
-                                                ),
-                                    ) {
-                                        Row(
-                                            modifier =
-                                                Modifier
-                                                    .padding(
-                                                        horizontal = 12.dp,
-                                                        vertical = 4.dp,
-                                                    ),
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                        ) {
-                                            scope.itemList.forEachIndexed { index, it ->
-                                                if (isExpanded || it.selected) {
-                                                    ShortNavigationBarItem(
-                                                        modifier =
-                                                            it.modifier
-                                                                .sharedElement(
-                                                                    rememberSharedContentState("item_$index"),
-                                                                    animatedVisibilityScope = this@AnimatedContent,
-                                                                ),
-                                                        selected = it.selected,
-                                                        onClick = it.onClick,
-                                                        icon = {
-                                                            Box(
-                                                                modifier =
-                                                                    Modifier
-                                                                        .sharedElement(
-                                                                            rememberSharedContentState(
-                                                                                "item_icon_$index",
-                                                                            ),
-                                                                            animatedVisibilityScope = this@AnimatedContent,
-                                                                        ),
-                                                            ) {
-                                                                NavigationItemIcon(
-                                                                    badge = it.badge,
-                                                                    icon = it.icon,
-                                                                )
-                                                            }
-                                                        },
-                                                        enabled = it.enabled,
-                                                        label = if (isExpanded) it.label else null,
-                                                        interactionSource = it.interactionSource,
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
+                                    )
                                 }
                             }
                             if (showFab) {
-                                SharedTransitionLayout {
+                                SharedTransitionLayout(
+                                    modifier =
+                                        Modifier.align(
+                                            if (bottomBarStyle == BottomBarStyle.Classic) {
+                                                Alignment.BottomEnd
+                                            } else {
+                                                Alignment.CenterEnd
+                                            },
+                                        ),
+                                ) {
                                     AnimatedContent(
-                                        isBottomBarExpanded,
-                                    ) { isExpanded ->
-                                        Glassify(
-                                            onClick = onFabClicked,
-                                            shape = CircleShape,
-                                            shadowElevation = 8.dp,
-                                            tonalElevation = 8.dp,
-                                            color = MaterialTheme.colorScheme.primaryContainer,
+                                        bottomBarState,
+                                    ) { bottomBarState ->
+                                        BottomFab(
+                                            state = bottomBarState,
+                                            provider = scope,
+                                            animatedVisibilityScope = this@AnimatedContent,
                                             hazeState = hazeState,
-                                            modifier =
-                                                Modifier
-                                                    .sharedElement(
-                                                        rememberSharedContentState("compose_fab"),
-                                                        animatedVisibilityScope = this@AnimatedContent,
-                                                    ).size(
-                                                        if (isExpanded) {
-                                                            56.dp
-                                                        } else {
-                                                            40.dp
-                                                        },
-                                                    ),
-                                        ) {
-                                            Icon(
-                                                imageVector = FontAwesomeIcons.Solid.Pen,
-                                                contentDescription = stringResource(id = R.string.compose_title),
-                                                modifier = Modifier.size(20.dp),
-                                            )
-                                        }
+                                            onFabClicked = onFabClicked,
+                                        )
                                     }
                                 }
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+enum class BottomBarState {
+    FloatingNormal,
+    FloatingMinimized,
+    FloatingHidden,
+    ClassicNormal,
+    ClassicHidden,
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun SharedTransitionScope.BottomFab(
+    state: BottomBarState,
+    provider: NavigationSuiteItemProvider,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    hazeState: HazeState,
+    onFabClicked: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val isFloating =
+        remember(state) {
+            when (state) {
+                BottomBarState.FloatingNormal -> true
+                BottomBarState.FloatingMinimized -> true
+                BottomBarState.FloatingHidden -> true
+                BottomBarState.ClassicNormal -> false
+                BottomBarState.ClassicHidden -> false
+            }
+        }
+    val isExpanded =
+        remember(state) {
+            when (state) {
+                BottomBarState.FloatingNormal -> true
+                BottomBarState.FloatingMinimized -> false
+                BottomBarState.FloatingHidden -> true
+                BottomBarState.ClassicNormal -> true
+                BottomBarState.ClassicHidden -> true
+            }
+        }
+    Glassify(
+        onClick = onFabClicked,
+        shape = CircleShape,
+        shadowElevation = 8.dp,
+        tonalElevation = 8.dp,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        hazeState = hazeState,
+        modifier =
+            modifier
+                .sharedElement(
+                    rememberSharedContentState("compose_fab"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                ).padding(
+                    horizontal = 16.dp,
+                    vertical = 8.dp,
+                ).windowInsetsPadding(
+                    WindowInsets.systemBars.only(
+                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                    ),
+                ).let {
+                    if (isFloating) {
+                        it
+                    } else {
+                        it.padding(
+                            bottom = 80.dp,
+                        )
+                    }
+                }.size(
+                    if (isExpanded) {
+                        56.dp
+                    } else {
+                        40.dp
+                    },
+                ),
+    ) {
+        Icon(
+            imageVector = FontAwesomeIcons.Solid.Pen,
+            contentDescription = stringResource(id = R.string.compose_title),
+            modifier = Modifier.size(20.dp),
+        )
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalHazeMaterialsApi::class)
+@Composable
+private fun SharedTransitionScope.BottomBar(
+    state: BottomBarState,
+    provider: NavigationSuiteItemProvider,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    hazeState: HazeState,
+    modifier: Modifier = Modifier,
+) {
+    val containerShape =
+        remember(state) {
+            when (state) {
+                BottomBarState.FloatingNormal -> RoundedCornerShape(50)
+                BottomBarState.FloatingMinimized -> RoundedCornerShape(50)
+                BottomBarState.FloatingHidden -> RoundedCornerShape(50)
+                BottomBarState.ClassicNormal -> RoundedCornerShape(0)
+                BottomBarState.ClassicHidden -> RoundedCornerShape(0)
+            }
+        }
+    val isFloating =
+        remember(state) {
+            when (state) {
+                BottomBarState.FloatingNormal -> true
+                BottomBarState.FloatingMinimized -> true
+                BottomBarState.FloatingHidden -> true
+                BottomBarState.ClassicNormal -> false
+                BottomBarState.ClassicHidden -> false
+            }
+        }
+    val isExpanded =
+        remember(state) {
+            when (state) {
+                BottomBarState.FloatingNormal -> true
+                BottomBarState.FloatingMinimized -> false
+                BottomBarState.FloatingHidden -> true
+                BottomBarState.ClassicNormal -> true
+                BottomBarState.ClassicHidden -> true
+            }
+        }
+
+    Glassify(
+        shape = containerShape,
+        shadowElevation = 8.dp,
+        tonalElevation = 8.dp,
+        hazeState = hazeState,
+        hazeStyle = HazeMaterials.thick(),
+        modifier =
+            modifier
+                .sharedElement(
+                    rememberSharedContentState("bottom_surface"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                ).let {
+                    if (isFloating) {
+                        it
+                            .padding(
+                                horizontal = 16.dp,
+                                vertical = 8.dp,
+                            ).windowInsetsPadding(
+                                WindowInsets.systemBars.only(
+                                    WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                ),
+                            )
+                    } else {
+                        it
+                    }
+                },
+    ) {
+        Row(
+            modifier =
+                Modifier
+                    .let {
+                        if (isFloating) {
+                            it
+                        } else {
+                            it.windowInsetsPadding(
+                                WindowInsets.systemBars.only(
+                                    WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                ),
+                            )
+                        }
+                    }.padding(
+                        horizontal = 12.dp,
+                        vertical = 4.dp,
+                    ),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            provider.itemList.forEachIndexed { index, it ->
+                if (isExpanded || it.selected) {
+                    ShortNavigationBarItem(
+                        modifier =
+                            it.modifier
+                                .sharedElement(
+                                    rememberSharedContentState("item_$index"),
+                                    animatedVisibilityScope = animatedVisibilityScope,
+                                ).let {
+                                    if (isFloating) {
+                                        it
+                                    } else {
+                                        it.weight(1f)
+                                    }
+                                },
+                        selected = it.selected,
+                        onClick = it.onClick,
+                        icon = {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .sharedElement(
+                                            rememberSharedContentState(
+                                                "item_icon_$index",
+                                            ),
+                                            animatedVisibilityScope = animatedVisibilityScope,
+                                        ),
+                            ) {
+                                NavigationItemIcon(
+                                    badge = it.badge,
+                                    icon = it.icon,
+                                )
+                            }
+                        },
+                        enabled = it.enabled,
+                        label = if (isExpanded) it.label else null,
+                        interactionSource = it.interactionSource,
+                    )
                 }
             }
         }

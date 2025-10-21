@@ -35,11 +35,24 @@ public data class AppearanceSettings(
     val fontSizeDiff: Float = 0f,
     val lineHeightDiff: Float = 0f,
     val showComposeInHomeTimeline: Boolean = true,
+    val bottomBarStyle: BottomBarStyle = BottomBarStyle.Floating,
+    val bottomBarBehavior: BottomBarBehavior = BottomBarBehavior.MinimizeOnScroll,
 ) {
     public companion object {
         // for iOS
         public val Default: AppearanceSettings = AppearanceSettings()
     }
+}
+
+public enum class BottomBarStyle {
+    Floating,
+    Classic,
+}
+
+public enum class BottomBarBehavior {
+    AlwaysShow,
+    HideOnScroll,
+    MinimizeOnScroll,
 }
 
 @Serializable

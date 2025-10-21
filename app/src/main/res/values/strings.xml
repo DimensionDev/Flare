@@ -171,6 +171,15 @@
     <string name="settings_appearance_font_size_diff_description">Change the font size of the app</string>
     <string name="settings_appearance_font_size_diff_decrease">Decrease</string>
     <string name="settings_appearance_font_size_diff_increase">Increase</string>
+    <string name="settings_appearance_bottombar_style">Bottom bar style</string>
+    <string name="settings_appearance_bottombar_style_description">Change the style of the bottom bar</string>
+    <string name="settings_appearance_bottombar_style_floating">Floating</string>
+    <string name="settings_appearance_bottombar_style_classic">Classic</string>
+    <string name="settings_appearance_bottombar_behavior">Bottom bar behavior</string>
+    <string name="settings_appearance_bottombar_behavior_description">Change the behavior of the bottom bar</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Fixed</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Hide on scroll</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimize on scroll</string>
 
     <string name="settings_storage_clear_image_cache">Clear image cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB of images will be removed</string>

@@ -5,7 +5,7 @@ import Kingfisher
 struct FeedView: View {
     @Environment(\.openURL) private var openURL
     let data: UiTimeline.ItemContentFeed
-    @State private var showDetail = false
+//    @State private var showDetail = false
     var body: some View {
         VStack(
             alignment: .leading
@@ -37,21 +37,23 @@ struct FeedView: View {
                 Spacer()
                 if let date = data.createdAt {
                     DateTimeText(data: date)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
             }
         }
-        .onTapGesture {
-            showDetail = true
-        }
-        .sheet(isPresented: $showDetail) {
-            if let url = URL(string: data.url) {
-                SafariView(url: url)
-            } else {
-                Text("Invalid URL")
-            }
-        }
 //        .onTapGesture {
-//            data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+//            showDetail = true
 //        }
+//        .sheet(isPresented: $showDetail) {
+//            if let url = URL(string: data.url) {
+//                SafariView(url: url)
+//            } else {
+//                Text("Invalid URL")
+//            }
+//        }
+        .onTapGesture {
+            data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+        }
     }
 }

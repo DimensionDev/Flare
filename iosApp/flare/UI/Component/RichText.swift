@@ -15,9 +15,15 @@ struct RichText: View {
 }
 
 struct KFImageProvider: ImageProvider, InlineImageProvider {
+    let expandImageSize: Bool
     func makeImage(url: URL?) -> some View {
-        NetworkImage(data: url)
-            .frame(width: 14, height: 14)
+        if expandImageSize {
+            RichTextImage(url: url)
+        } else {
+            NetworkImage(data: url)
+                .scaledToFit()
+                .frame(height: 14)
+        }
     }
 
     func image(with url: URL, label: String) async throws -> Image {
@@ -30,15 +36,33 @@ struct KFImageProvider: ImageProvider, InlineImageProvider {
     }
 }
 
+struct RichTextImage: View {
+    let url: URL?
+    @State private var showFullImage = false
+    var body: some View {
+        NetworkImage(data: url)
+            .onTapGesture {
+                showFullImage = true
+            }
+            .sheet(isPresented: $showFullImage) {
+                if let url = url {
+                    NavigationStack {
+                        MediaScreen(url: url.absoluteString)
+                    }
+                }
+            }
+    }
+}
+
 extension ImageProvider where Self == KFImageProvider {
     static var kfImage: Self {
-        .init()
+        .init(expandImageSize: false)
     }
 }
 
 extension InlineImageProvider where Self == KFImageProvider {
     static var kfImage: Self {
-        KFImageProvider()
+        KFImageProvider(expandImageSize: false)
     }
 }
 

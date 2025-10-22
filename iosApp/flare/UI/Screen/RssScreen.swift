@@ -70,6 +70,7 @@ struct EditRssSheet: View {
     @State private var url: String = ""
     @State private var title: String = ""
     @State private var rssHubHost: String = ""
+    @State private var openInApp: Bool = true
     @State private var selectedRssSources: [UiRssSource] = []
     var body: some View {
         Form {
@@ -105,6 +106,14 @@ struct EditRssSheet: View {
                     Section {
                         TextField(text: $title) {
                             Text("rss_item_title")
+                        }
+                        .safeAreaInset(edge: .leading) {
+                            if let favIcon = rssFeed.icon, !favIcon.isEmpty {
+                                NetworkImage(data: favIcon)
+                                    .frame(width: 24, height: 24)
+                            } else {
+                                Image("fa-square-rss")
+                            }
                         }
                         Text(rssFeed.url)
                             .font(.caption)
@@ -191,6 +200,13 @@ struct EditRssSheet: View {
                         Text("rss_hub_server_header")
                     }
                 }
+                
+                Section {
+                    Picker("rss_open_in", selection: $openInApp) {
+                        Text("rss_open_in_app").tag(true)
+                        Text("rss_open_in_browser").tag(false)
+                    }
+                }
             }
          }
         .onChange(of: presenter.state.checkState, { oldValue, newValue in
@@ -229,11 +245,11 @@ struct EditRssSheet: View {
                     if case .success(let success) = onEnum(of: presenter.state.inputState) {
                         switch onEnum(of: success.data) {
                         case .rssFeed(let feed):
-                            feed.save(title: title, openInBrowser: false)
+                            feed.save(title: title, openInBrowser: !openInApp)
                         case .rssHub(let rssHub):
-                            rssHub.save(title: title, openInBrowser: false)
+                            rssHub.save(title: title, openInBrowser: !openInApp)
                         case .rssSources(let rssSources):
-                            rssSources.save(sources: selectedRssSources, openInBrowser: false)
+                            rssSources.save(sources: selectedRssSources, openInBrowser: !openInApp)
                         }
                     }
                     dismiss()

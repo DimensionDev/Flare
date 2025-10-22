@@ -18810,6 +18810,7 @@
       }
     },
     "Invalid URL" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19252,6 +19253,9 @@
           }
         }
       }
+    },
+    "Loading..." : {
+
     },
     "local_filter_delete" : {
       "localizations" : {
@@ -61576,6 +61580,16 @@
         }
       }
     },
+    "Open in Browser" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open in browder"
+          }
+        }
+      }
+    },
     "poll_expired" : {
       "localizations" : {
         "af" : {
@@ -66268,6 +66282,36 @@
         }
       }
     },
+    "rss_open_in" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open in"
+          }
+        }
+      }
+    },
+    "rss_open_in_app" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App"
+          }
+        }
+      }
+    },
+    "rss_open_in_browser" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Browser"
+          }
+        }
+      }
+    },
     "rss_sources_header" : {
       "localizations" : {
         "ar" : {
@@ -69108,6 +69152,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "儲存"
+          }
+        }
+      }
+    },
+    "Summarize this article" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summarize this article"
           }
         }
       }

@@ -152,7 +152,9 @@ extension AppearanceSettings {
         compatLinkPreview: Bool? = nil,
         fontSizeDiff: Float? = nil,
         lineHeightDiff: Float? = nil,
-        showComposeInHomeTimeline: Bool? = nil
+        showComposeInHomeTimeline: Bool? = nil,
+        bottomBarStyle: BottomBarStyle? = nil,
+        bottomBarBehavior: BottomBarBehavior? = nil,
     ) -> AppearanceSettings {
         AppearanceSettings(
             theme: theme ?? self.theme,
@@ -170,7 +172,9 @@ extension AppearanceSettings {
             compatLinkPreview: compatLinkPreview ?? self.compatLinkPreview,
             fontSizeDiff: fontSizeDiff ?? self.fontSizeDiff,
             lineHeightDiff: lineHeightDiff ?? self.lineHeightDiff,
-            showComposeInHomeTimeline: showComposeInHomeTimeline ?? self.showComposeInHomeTimeline
+            showComposeInHomeTimeline: showComposeInHomeTimeline ?? self.showComposeInHomeTimeline,
+            bottomBarStyle: bottomBarStyle ?? self.bottomBarStyle,
+            bottomBarBehavior: bottomBarBehavior ?? self.bottomBarBehavior,
         )
     }
 }

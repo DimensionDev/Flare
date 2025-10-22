@@ -47,6 +47,8 @@ import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
+import dev.dimension.flare.data.model.BottomBarBehavior
+import dev.dimension.flare.data.model.BottomBarStyle
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.VideoAutoplay
@@ -288,6 +290,168 @@ internal fun AppearanceScreen(
                                 },
                     )
                 }
+
+                BoxWithConstraints {
+                    var showMenu by remember { mutableStateOf(false) }
+                    ListItem(
+                        modifier =
+                            Modifier
+                                .listCardItem()
+                                .clickable {
+                                    if (maxWidth < 400.dp) {
+                                        showMenu = true
+                                    }
+                                },
+                        headlineContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_style))
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_style_description))
+                        },
+                        trailingContent = {
+                            val items =
+                                persistentMapOf(
+                                    BottomBarStyle.Floating to stringResource(id = R.string.settings_appearance_bottombar_style_floating),
+                                    BottomBarStyle.Classic to stringResource(id = R.string.settings_appearance_bottombar_style_classic),
+                                )
+
+                            if (maxWidth >= 400.dp) {
+                                ButtonGroup(
+                                    overflowIndicator = {},
+                                ) {
+                                    items.forEach { (value, label) ->
+                                        toggleableItem(
+                                            checked = appearanceSettings.bottomBarStyle == value,
+                                            onCheckedChange = {
+                                                state.updateSettings {
+                                                    copy(bottomBarStyle = value)
+                                                }
+                                            },
+                                            label = label,
+                                        )
+                                    }
+                                }
+                            } else {
+                                TextButton(onClick = {
+                                    showMenu = true
+                                }) {
+                                    when (appearanceSettings.bottomBarStyle) {
+                                        BottomBarStyle.Floating ->
+                                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_style_floating))
+
+                                        BottomBarStyle.Classic ->
+                                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_style_classic))
+                                    }
+                                }
+                                FlareDropdownMenu(
+                                    expanded = showMenu,
+                                    onDismissRequest = { showMenu = false },
+                                ) {
+                                    items.forEach { (value, label) ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(text = label)
+                                            },
+                                            onClick = {
+                                                state.updateSettings {
+                                                    copy(bottomBarStyle = value)
+                                                }
+                                                showMenu = false
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                    )
+                }
+
+                BoxWithConstraints {
+                    var showMenu by remember { mutableStateOf(false) }
+                    ListItem(
+                        modifier =
+                            Modifier
+                                .listCardItem()
+                                .clickable {
+                                    if (maxWidth < 400.dp) {
+                                        showMenu = true
+                                    }
+                                },
+                        headlineContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_behavior))
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_behavior_description))
+                        },
+                        trailingContent = {
+                            val items =
+                                persistentMapOf(
+                                    BottomBarBehavior.AlwaysShow to
+                                        stringResource(id = R.string.settings_appearance_bottombar_behavior_fixed),
+                                    BottomBarBehavior.MinimizeOnScroll to
+                                        stringResource(id = R.string.settings_appearance_bottombar_behavior_minimize_on_scroll),
+                                    BottomBarBehavior.HideOnScroll to
+                                        stringResource(id = R.string.settings_appearance_bottombar_behavior_hide_on_scroll),
+                                )
+                            if (maxWidth >= 400.dp) {
+                                ButtonGroup(
+                                    overflowIndicator = {},
+                                ) {
+                                    items.forEach { (value, label) ->
+                                        toggleableItem(
+                                            checked = appearanceSettings.bottomBarBehavior == value,
+                                            onCheckedChange = {
+                                                state.updateSettings {
+                                                    copy(bottomBarBehavior = value)
+                                                }
+                                            },
+                                            label = label,
+                                        )
+                                    }
+                                }
+                            } else {
+                                TextButton(onClick = {
+                                    showMenu = true
+                                }) {
+                                    when (appearanceSettings.bottomBarBehavior) {
+                                        BottomBarBehavior.AlwaysShow ->
+                                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_behavior_fixed))
+
+                                        BottomBarBehavior.MinimizeOnScroll ->
+                                            Text(
+                                                text =
+                                                    stringResource(
+                                                        id = R.string.settings_appearance_bottombar_behavior_minimize_on_scroll,
+                                                    ),
+                                            )
+
+                                        BottomBarBehavior.HideOnScroll ->
+                                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_behavior_hide_on_scroll))
+                                    }
+                                }
+                                FlareDropdownMenu(
+                                    expanded = showMenu,
+                                    onDismissRequest = { showMenu = false },
+                                ) {
+                                    items.forEach { (value, label) ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(text = label)
+                                            },
+                                            onClick = {
+                                                state.updateSettings {
+                                                    copy(bottomBarBehavior = value)
+                                                }
+                                                showMenu = false
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                    )
+                }
+
                 var fontSizeDiff by remember { mutableFloatStateOf(appearanceSettings.fontSizeDiff) }
                 Column(
                     modifier =

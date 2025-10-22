@@ -2789,6 +2789,6 @@ if (typeof module === "object") {
 }
 
 (function() {
-    return new Readability(document).parse();
+    return JSON.stringify(new Readability(document).parse());
 })();
     """.trimMargin()

@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network.rss
 
 import android.content.Context
 import android.webkit.WebView
+import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.network.ktorClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -9,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.serializer
 
 internal actual class NativeWebScraper(
     private val context: Context,
@@ -43,7 +45,7 @@ internal actual class NativeWebScraper(
                         evaluateJavascript(scriptToInject) {
                             if (finished) return@evaluateJavascript
                             finished = true
-                            callback(it)
+                            callback(it.decodeJson(String.serializer()))
                             destroy()
                         }
                     }

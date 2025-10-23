@@ -38,28 +38,22 @@ public class HomeTimelineWithTabsPresenter(
         settingsRepository.tabSettings
             .distinctUntilChangedBy { it.mainTabs + it.enableMixedTimeline }
             .map { settings ->
-                if (accountType == AccountType.Guest) {
+                (
+                    listOfNotNull(
+                        if (settings.enableMixedTimeline && settings.mainTabs.size > 1) {
+                            MixedTimelineTabItem(
+                                subTimelineTabItem = settings.mainTabs,
+                            )
+                        } else {
+                            null
+                        },
+                    ) + settings.mainTabs
+                ).ifEmpty {
                     listOf(
-                        HomeTimelineTabItem(AccountType.Guest),
+                        HomeTimelineTabItem(
+                            accountType = accountType,
+                        ),
                     )
-                } else {
-                    (
-                        listOfNotNull(
-                            if (settings.enableMixedTimeline && settings.mainTabs.size > 1) {
-                                MixedTimelineTabItem(
-                                    subTimelineTabItem = settings.mainTabs,
-                                )
-                            } else {
-                                null
-                            },
-                        ) + settings.mainTabs
-                    ).ifEmpty {
-                        listOf(
-                            HomeTimelineTabItem(
-                                accountType = AccountType.Active,
-                            ),
-                        )
-                    }
                 }
             }.map {
                 it.toImmutableList()

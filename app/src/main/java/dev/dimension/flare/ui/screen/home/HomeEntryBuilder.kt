@@ -31,7 +31,7 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
                 navigate(Route.ServiceSelect.Selection)
             },
             toTabSettings = {
-                navigate(Route.TabSettings(args.accountType))
+                navigate(Route.TabSettings)
             },
         )
     }
@@ -77,7 +77,6 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
         )
     ) { args ->
         TabSettingScreen(
-            accountType = args.accountType,
             onBack = onBack,
             toAddRssSource = {
                 navigate(Route.Rss.Create)

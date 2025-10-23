@@ -40,6 +40,7 @@ import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.component.floatingToolbarVerticalNestedScroll
 import dev.dimension.flare.ui.component.status.AdaptiveCard
+import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
@@ -88,7 +89,7 @@ internal fun HomeTimelineScreen(
                             state.setTopBarExpanded(true)
                         },
                         header =
-                            if (LocalAppearanceSettings.current.showComposeInHomeTimeline) {
+                            if (LocalAppearanceSettings.current.showComposeInHomeTimeline && state.user.isSuccess) {
                                 {
                                     Box(
                                         contentAlignment = Alignment.Center,
@@ -167,18 +168,16 @@ internal fun HomeTimelineScreen(
                                         )
                                     }
                                 }
-                                if (accountType !is AccountType.Guest) {
-                                    PillButton(
-                                        selected = false,
-                                        onSelectedChanged = {
-                                            onAddTab.invoke()
-                                        },
-                                    ) {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.Plus,
-                                            contentDescription = null,
-                                        )
-                                    }
+                                PillButton(
+                                    selected = false,
+                                    onSelectedChanged = {
+                                        onAddTab.invoke()
+                                    },
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Plus,
+                                        contentDescription = null,
+                                    )
                                 }
                             }
 

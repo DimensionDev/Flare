@@ -28,7 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -110,7 +110,7 @@ internal fun TabAddBottomSheet(
             allTabs.accountTabs.onSuccess { tabs ->
                 val pagerState =
                     rememberPagerState {
-                        tabs.size + 2
+                        tabs.size + 1
                     }
                 val scope = rememberCoroutineScope()
                 SecondaryScrollableTabRow(
@@ -131,18 +131,6 @@ internal fun TabAddBottomSheet(
                             }
                         },
                         text = {
-                            Text(text = stringResource(id = R.string.tab_settings_default))
-                        },
-                        modifier = Modifier.clip(CircleShape),
-                    )
-                    Tab(
-                        selected = pagerState.currentPage == 1,
-                        onClick = {
-                            scope.launch {
-                                pagerState.animateScrollToPage(1)
-                            }
-                        },
-                        text = {
                             Text(text = stringResource(id = R.string.rss_title))
                         },
                         modifier = Modifier.clip(CircleShape),
@@ -150,10 +138,10 @@ internal fun TabAddBottomSheet(
                     tabs.forEachIndexed { index, tab ->
                         LeadingIconTab(
                             modifier = Modifier.clip(CircleShape),
-                            selected = pagerState.currentPage == index + 2,
+                            selected = pagerState.currentPage == index + 1,
                             onClick = {
                                 scope.launch {
-                                    pagerState.animateScrollToPage(index + 2)
+                                    pagerState.animateScrollToPage(index + 1)
                                 }
                             },
                             text = {
@@ -190,23 +178,6 @@ internal fun TabAddBottomSheet(
                     verticalAlignment = Alignment.Top,
                 ) {
                     if (it == 0) {
-                        LazyColumn(
-                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                        ) {
-                            itemsIndexed(allTabs.defaultTabs) { index, it ->
-                                TabItem(
-                                    it,
-                                    modifier =
-                                        Modifier
-                                            .listCard(
-                                                index = index,
-                                                totalCount = allTabs.defaultTabs.size,
-                                            ),
-                                )
-                            }
-                        }
-                    } else if (it == 1) {
                         LazyColumn(
                             contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                             verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -270,8 +241,8 @@ internal fun TabAddBottomSheet(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.fillMaxWidth(),
                         ) {
-                            val tab = tabs[it - 2]
-                            var selectedIndex by remember { mutableStateOf(0) }
+                            val tab = tabs[it - 1]
+                            var selectedIndex by remember { mutableIntStateOf(0) }
                             if (tab.extraTabs.any()) {
                                 val items =
                                     listOf(

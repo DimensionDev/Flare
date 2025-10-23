@@ -178,10 +178,7 @@ internal sealed interface Route : NavKey {
     }
 
     @Serializable
-    data class TabSettings(
-        override val accountType: AccountType,
-    ) : Route,
-        WithAccountType
+    data object TabSettings : Route
 
     @Serializable
     data class Discover(

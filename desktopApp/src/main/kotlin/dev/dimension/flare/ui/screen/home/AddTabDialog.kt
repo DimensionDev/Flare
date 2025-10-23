@@ -108,7 +108,7 @@ internal fun AddTabDialog(
                 allTabs.accountTabs.onSuccess { tabs ->
                     val pagerState =
                         rememberPagerState {
-                            tabs.size + 2
+                            tabs.size + 1
                         }
                     val scope = rememberCoroutineScope()
                     LiteFilter {
@@ -122,29 +122,16 @@ internal fun AddTabDialog(
                                 }
                             },
                             content = {
-                                Text(text = stringResource(Res.string.tab_settings_default))
-                            },
-                        )
-                        PillButton(
-                            selected = pagerState.currentPage == 1,
-                            onSelectedChanged = {
-                                if (it) {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(1)
-                                    }
-                                }
-                            },
-                            content = {
                                 Text(text = stringResource(Res.string.rss_title))
                             },
                         )
                         tabs.forEachIndexed { index, tab ->
                             PillButton(
                                 modifier = Modifier.clip(CircleShape),
-                                selected = pagerState.currentPage == index + 2,
+                                selected = pagerState.currentPage == index + 1,
                                 onSelectedChanged = {
                                     scope.launch {
-                                        pagerState.animateScrollToPage(index + 2)
+                                        pagerState.animateScrollToPage(index + 1)
                                     }
                                 },
                                 content = {
@@ -160,7 +147,12 @@ internal fun AddTabDialog(
                                     Text(
                                         text = tab.profile.handle,
                                         style = FluentTheme.typography.caption,
-                                        color = FluentTheme.colors.text.text.tertiary,
+                                        color =
+                                            if (pagerState.currentPage == index + 1) {
+                                                FluentTheme.colors.text.onAccent.secondary
+                                            } else {
+                                                FluentTheme.colors.text.text.tertiary
+                                            },
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                     )
@@ -174,22 +166,6 @@ internal fun AddTabDialog(
                         verticalAlignment = Alignment.Top,
                     ) {
                         if (it == 0) {
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(2.dp),
-                            ) {
-                                itemsIndexed(allTabs.defaultTabs) { index, it ->
-                                    TabItem(
-                                        it,
-                                        modifier =
-                                            Modifier
-                                                .listCard(
-                                                    index = index,
-                                                    totalCount = allTabs.defaultTabs.size,
-                                                ),
-                                    )
-                                }
-                            }
-                        } else if (it == 1) {
                             LazyColumn(
                                 verticalArrangement = Arrangement.spacedBy(2.dp),
                             ) {
@@ -252,7 +228,7 @@ internal fun AddTabDialog(
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
-                                val tab = tabs[it - 2]
+                                val tab = tabs[it - 1]
                                 var selectedIndex by remember { mutableStateOf(0) }
                                 if (tab.extraTabs.any()) {
                                     val items =

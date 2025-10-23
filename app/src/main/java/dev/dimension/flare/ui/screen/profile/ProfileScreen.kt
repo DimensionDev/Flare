@@ -36,7 +36,6 @@ import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.currentWindowSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
@@ -53,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
@@ -238,7 +238,9 @@ internal fun ProfileScreen(
     val nestedScrollState = rememberNestedScrollViewState()
     val windowSize =
         with(LocalDensity.current) {
-            currentWindowSize().toSize().toDpSize()
+            LocalWindowInfo.current.containerSize
+                .toSize()
+                .toDpSize()
         }
     val bigScreen = isBigScreen()
     val scrollBehavior =
@@ -546,9 +548,15 @@ private fun ProfileMediaTab(
                 videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
             ),
     ) {
+        val size =
+            if (isBigScreen()) {
+                240.dp
+            } else {
+                120.dp
+            }
         LazyVerticalStaggeredGrid(
             modifier = modifier,
-            columns = StaggeredGridCells.Adaptive(120.dp),
+            columns = StaggeredGridCells.Adaptive(size),
             verticalItemSpacing = 8.dp,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 8.dp, horizontal = screenHorizontalPadding),

@@ -37,7 +37,6 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
@@ -46,7 +45,6 @@ import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.AllTabsPresenter
 import dev.dimension.flare.ui.screen.settings.EditTabDialog
@@ -64,14 +62,13 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun TabSettingScreen(
-    accountType: AccountType,
     onBack: () -> Unit,
     toAddRssSource: () -> Unit,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val haptics = LocalHapticFeedback.current
     val state by producePresenter {
-        presenter(accountType = accountType)
+        presenter()
     }
     DisposableEffect(Unit) {
         onDispose {
@@ -214,18 +211,10 @@ internal fun TabSettingScreen(
 
 @Composable
 private fun presenter(
-    accountType: AccountType,
     settingsRepository: SettingsRepository = koinInject(),
     appScope: CoroutineScope = koinInject(),
 ) = run {
     val scope = rememberCoroutineScope()
-    val accountState =
-        remember(accountType) {
-            UserPresenter(
-                accountType = accountType,
-                userKey = null,
-            )
-        }.invoke()
     var selectedEditTab by remember { mutableStateOf<TabItem?>(null) }
     val allTabsState = remember { AllTabsPresenter(filterIsTimeline = true) }.invoke()
     val tabSettings by settingsRepository.tabSettings.collectAsUiState()
@@ -286,13 +275,11 @@ private fun presenter(
         }
 
         fun commit() {
-            accountState.user.onSuccess { user ->
-                appScope.launch {
-                    settingsRepository.updateTabSettings {
-                        copy(
-                            mainTabs = cacheTabs,
-                        )
-                    }
+            appScope.launch {
+                settingsRepository.updateTabSettings {
+                    copy(
+                        mainTabs = cacheTabs,
+                    )
                 }
             }
         }

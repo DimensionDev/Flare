@@ -302,4 +302,6 @@
     <string name="settings_storage_app_log">Open app log</string>
     <string name="settings_storage_app_log_description">View the app log</string>
 
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+
 </resources>

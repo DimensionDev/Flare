@@ -14,6 +14,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Media.Core;
 using Flare.Cache;
 using Microsoft.Windows.Storage.Pickers;
@@ -376,6 +377,23 @@ namespace Flare
                                     }
                                 }
 
+                                break;
+                            }
+                            case "share-text":
+                            {
+                                if (jsonObject.RootElement.TryGetProperty("Data", out var dataElement))
+                                {
+                                    var text = dataElement.GetString();
+                                    if (text != null)
+                                    {
+                                        DataPackage dataPackage = new()
+                                        {
+                                            RequestedOperation = DataPackageOperation.Copy
+                                        };
+                                        dataPackage.SetText(text);
+                                        Clipboard.SetContent(dataPackage);
+                                    }
+                                }
                                 break;
                             }
                         }

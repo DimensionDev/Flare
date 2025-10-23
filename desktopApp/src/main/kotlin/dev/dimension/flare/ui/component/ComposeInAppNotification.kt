@@ -89,6 +89,10 @@ internal class ComposeInAppNotification : InAppNotification {
                 ),
             )
     }
+
+    fun message(messageId: StringResource) {
+        _source.value = Event(Notification.StringNotification(messageId, success = true))
+    }
 }
 
 private val Message.title

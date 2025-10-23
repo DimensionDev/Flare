@@ -84,4 +84,12 @@ internal class WindowsBridge(
             serializer = IPCEvent.OpenWebViewData.serializer(),
         )
     }
+
+    fun shareText(text: String) {
+        platformIPC.sendData(
+            "share-text",
+            text,
+            serializer = String.serializer(),
+        )
+    }
 }

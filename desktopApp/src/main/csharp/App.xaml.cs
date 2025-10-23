@@ -15,6 +15,8 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Media.Core;
+using Flare.Cache;
+using Microsoft.Windows.Storage.Pickers;
 
 namespace Flare
 {
@@ -142,6 +144,22 @@ namespace Flare
                                             SystemBackdrop = new MicaBackdrop(),
                                             Title = "Image Viewer",
                                         };
+                                        image.SaveRequested += async (_, uri) =>
+                                        {
+                                            var file = await ImageCache.Instance.GetFileFromCacheAsync(uri);
+                                            var picker = new FileSavePicker(window.AppWindow.Id)
+                                            {
+                                                SuggestedStartLocation = PickerLocationId.Downloads,
+                                                SuggestedFileName = file.Name,
+                                                FileTypeChoices = { { "Image", new List<string> { ".png", ".jpg", ".jpeg" } } },
+                                                DefaultFileExtension = file.FileType
+                                            };
+                                            var result = await picker.PickSaveFileAsync();
+                                            if (result != null)
+                                            {
+                                                File.Copy(file.Path, result.Path, true);
+                                            }
+                                        };
                                         scrollViewer.KeyDown += (_, e) =>
                                         {
                                             if (e.Key == Windows.System.VirtualKey.Escape)
@@ -165,6 +183,7 @@ namespace Flare
                                     {
                                         RequestedTheme = ElementTheme.Dark,
                                     };
+                                    var images = new List<ImageEx2>();
                                     foreach (var media in data.Medias)
                                     {
                                         switch (media.Type)
@@ -196,6 +215,7 @@ namespace Flare
                                                         }
                                                     }
                                                 };
+                                                images.Add(image);
                                                 flipView.Items.Add(scrollViewer);
                                                 break;
                                             case "video":
@@ -252,6 +272,25 @@ namespace Flare
                                         SystemBackdrop = new MicaBackdrop(),
                                         Title = "Media Viewer",
                                     };
+                                    foreach (var image in images)
+                                    {
+                                        image.SaveRequested += async (_, uri) =>
+                                        {
+                                            var file = await ImageCache.Instance.GetFileFromCacheAsync(uri);
+                                            var picker = new FileSavePicker(window.AppWindow.Id)
+                                            {
+                                                SuggestedStartLocation = PickerLocationId.Downloads,
+                                                SuggestedFileName = file.Name,
+                                                FileTypeChoices = { { "Image", new List<string> { ".png", ".jpg", ".jpeg" } } },
+                                                DefaultFileExtension = file.FileType
+                                            };
+                                            var result = await picker.PickSaveFileAsync();
+                                            if (result != null)
+                                            {
+                                                File.Copy(file.Path, result.Path, true);
+                                            }
+                                        };
+                                    }
                                     window.Closed += (sender, args) =>
                                     {
                                         foreach (var item in flipView.Items)

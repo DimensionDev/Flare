@@ -6,6 +6,7 @@ import dev.dimension.flare.copied_to_clipboard
 import dev.dimension.flare.ui.common.DesktopShare
 import dev.dimension.flare.ui.component.ComposeInAppNotification
 import org.apache.commons.lang3.SystemUtils
+import java.awt.Toolkit
 
 internal class DesktopShareImpl(
     private val windowsBridge: WindowsBridge,
@@ -14,6 +15,12 @@ internal class DesktopShareImpl(
     override fun shareText(text: String) {
         if (SystemUtils.IS_OS_WINDOWS) {
             windowsBridge.shareText(text)
+            inAppNotification.message(Res.string.copied_to_clipboard)
+        } else {
+            Toolkit.getDefaultToolkit().systemClipboard.setContents(
+                java.awt.datatransfer.StringSelection(text),
+                null,
+            )
             inAppNotification.message(Res.string.copied_to_clipboard)
         }
     }

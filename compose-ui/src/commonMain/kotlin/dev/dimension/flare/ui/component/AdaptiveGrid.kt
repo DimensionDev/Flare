@@ -20,7 +20,11 @@ internal fun AdaptiveGrid(
             if (measurables.size == 1) {
                 val placeable =
                     if (expandedSize) {
-                        measurables[0].measure(constraints)
+                        measurables[0].measure(
+                            constraints.copy(
+                                maxHeight = constraints.maxWidth * 12 / 9,
+                            ),
+                        )
                     } else {
                         measurables[0].measure(
                             constraints.copy(maxHeight = constraints.maxWidth * 9 / 16),

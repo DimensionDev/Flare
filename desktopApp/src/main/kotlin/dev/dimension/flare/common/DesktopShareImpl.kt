@@ -1,6 +1,5 @@
 package dev.dimension.flare.common
 
-import androidx.compose.ui.platform.LocalClipboardManager
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.windows.WindowsBridge
 import dev.dimension.flare.copied_to_clipboard

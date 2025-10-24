@@ -3,6 +3,7 @@ import Foundation
 import Kingfisher
 import SwiftUI
 import AVKit
+import AppKit
 
 class ClosableWindow: NSWindow {
     override func cancelOperation(_ sender: Any?) {
@@ -122,6 +123,27 @@ struct StatusMediaView: View {
                                 })
                                 .resizable()
                                 .scaledToFit()
+                                .contextMenu {
+                                    Button("Save Image") {
+                                        let panel = NSSavePanel()
+                                        panel.nameFieldStringValue = URL(string: media.url)?.lastPathComponent ?? "image"
+                                        panel.allowedContentTypes = [.png, .jpeg, .gif, .webP]
+                                        panel.begin { response in
+                                            if response == .OK, let url = panel.url {
+                                                KingfisherManager.shared.retrieveImage(with: URL(string: media.url)!, options: nil) { result in
+                                                    switch result {
+                                                    case .success(let value):
+                                                        if let data = value.image.kf.pngRepresentation() {
+                                                            try? data.write(to: url)
+                                                        }
+                                                    case .failure(let error):
+                                                        NSLog("Failed to save image: \(error)")
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                         } else if media.type == "video" {
                             if page == i {
                                 let player = AVPlayer(url: .init(string: media.url)!)

@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">Changer la taille de police de l\'application</string>
     <string name="settings_appearance_font_size_diff_decrease">Diminuer</string>
     <string name="settings_appearance_font_size_diff_increase">Agrandir</string>
+    <string name="settings_appearance_bottombar_style">Style de la barre inférieure</string>
+    <string name="settings_appearance_bottombar_style_description">Changer le style de la barre du bas</string>
+    <string name="settings_appearance_bottombar_style_floating">Flottant</string>
+    <string name="settings_appearance_bottombar_style_classic">Classique</string>
+    <string name="settings_appearance_bottombar_behavior">Comportement de la barre du bas</string>
+    <string name="settings_appearance_bottombar_behavior_description">Modifier le comportement de la barre du bas</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Fixe</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Cacher au défilement</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Réduire au défilement</string>
     <string name="settings_storage_clear_image_cache">Vider le cache des images</string>
     <string name="settings_storage_clear_image_cache_description">%1$s Mo d\'images seront supprimés</string>
     <string name="settings_storage_clear_database">Vider la base de données du cache</string>

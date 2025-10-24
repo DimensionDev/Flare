@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">%1$s käyttäjää, %2$s tilat poistetaan</string>
     <string name="settings_storage_app_log">Avaa sovelluksen loki</string>
     <string name="settings_storage_app_log_description">Näytä sovellusloki</string>
+    <string name="copied_to_clipboard">Kopioitu leikepöydälle</string>
 </resources>

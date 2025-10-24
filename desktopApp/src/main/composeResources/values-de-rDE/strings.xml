@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">%1$s Benutzer, %2$s Status werden entfernt</string>
     <string name="settings_storage_app_log">App-Log öffnen</string>
     <string name="settings_storage_app_log_description">App-Log anzeigen</string>
+    <string name="copied_to_clipboard">In Zwischenablage kopiert</string>
 </resources>

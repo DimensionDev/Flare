@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">%1$s usuários, o status %2$s será removido</string>
     <string name="settings_storage_app_log">Abrir log do aplicativo</string>
     <string name="settings_storage_app_log_description">Ver registro do aplicativo</string>
+    <string name="copied_to_clipboard">Copiado para o clipboard</string>
 </resources>

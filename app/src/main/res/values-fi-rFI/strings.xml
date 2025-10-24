@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">Muuta sovelluksen kirjasimen kokoa</string>
     <string name="settings_appearance_font_size_diff_decrease">Vähennä</string>
     <string name="settings_appearance_font_size_diff_increase">Lisää</string>
+    <string name="settings_appearance_bottombar_style">Alapalkin tyyli</string>
+    <string name="settings_appearance_bottombar_style_description">Muuta alareunan tyyli</string>
+    <string name="settings_appearance_bottombar_style_floating">Kelluva</string>
+    <string name="settings_appearance_bottombar_style_classic">Klassinen</string>
+    <string name="settings_appearance_bottombar_behavior">Alapalkin käyttäytyminen</string>
+    <string name="settings_appearance_bottombar_behavior_description">Muuta pohjapalkin käyttäytymistä</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Kiinteä</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Piilota vierittäessä</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Pienennä vierittäessä</string>
     <string name="settings_storage_clear_image_cache">Tyhjennä kuvien välimuisti</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB kuvia poistetaan</string>
     <string name="settings_storage_clear_database">Tyhjennä välimuistin tietokanta</string>

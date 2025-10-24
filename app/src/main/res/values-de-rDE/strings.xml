@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">Schriftgröße der App ändern</string>
     <string name="settings_appearance_font_size_diff_decrease">Verkleinern</string>
     <string name="settings_appearance_font_size_diff_increase">Erhöhen</string>
+    <string name="settings_appearance_bottombar_style">Unterer Balkenstil</string>
+    <string name="settings_appearance_bottombar_style_description">Stil der unteren Leiste ändern</string>
+    <string name="settings_appearance_bottombar_style_floating">Schweben</string>
+    <string name="settings_appearance_bottombar_style_classic">Klassisch</string>
+    <string name="settings_appearance_bottombar_behavior">Verhalten der unteren Leiste</string>
+    <string name="settings_appearance_bottombar_behavior_description">Verhalten der unteren Leiste ändern</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Feste</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Beim Scrollen ausblenden</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Beim Scrollen minimieren</string>
     <string name="settings_storage_clear_image_cache">Bildercache leeren</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB Bilder werden entfernt</string>
     <string name="settings_storage_clear_database">Cache-Datenbank leeren</string>

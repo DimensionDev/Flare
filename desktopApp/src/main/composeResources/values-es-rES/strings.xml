@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">%1$s usuarios, %2$s estados serán eliminados</string>
     <string name="settings_storage_app_log">Abrir el registro de la aplicación</string>
     <string name="settings_storage_app_log_description">Ver el registro de aplicaciones</string>
+    <string name="copied_to_clipboard">Copiado al portapapeles</string>
 </resources>

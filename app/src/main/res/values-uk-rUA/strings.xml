@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">Змінити розмір шрифту програми</string>
     <string name="settings_appearance_font_size_diff_decrease">Зменшити</string>
     <string name="settings_appearance_font_size_diff_increase">Збільшити</string>
+    <string name="settings_appearance_bottombar_style">Стиль нижньої панелі</string>
+    <string name="settings_appearance_bottombar_style_description">Змінити стиль нижньої панелі</string>
+    <string name="settings_appearance_bottombar_style_floating">В окремому вікні</string>
+    <string name="settings_appearance_bottombar_style_classic">Класичний</string>
+    <string name="settings_appearance_bottombar_behavior">Поведінка панелі знизу</string>
+    <string name="settings_appearance_bottombar_behavior_description">Змінити поведінку нижньої панелі</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Виправлена</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Не показувати на прокручуванні</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Згорнути при прокручуванні</string>
     <string name="settings_storage_clear_image_cache">Очистити кеш зображень</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB із зображень буде видалено</string>
     <string name="settings_storage_clear_database">Очистити базу даних кешу</string>

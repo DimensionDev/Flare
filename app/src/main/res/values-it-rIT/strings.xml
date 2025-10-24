@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">Cambia la dimensione del carattere dell\'app</string>
     <string name="settings_appearance_font_size_diff_decrease">Diminuisci</string>
     <string name="settings_appearance_font_size_diff_increase">Aumenta</string>
+    <string name="settings_appearance_bottombar_style">Stile barra inferiore</string>
+    <string name="settings_appearance_bottombar_style_description">Cambia lo stile della barra inferiore</string>
+    <string name="settings_appearance_bottombar_style_floating">Fluttuante</string>
+    <string name="settings_appearance_bottombar_style_classic">Classico</string>
+    <string name="settings_appearance_bottombar_behavior">Comportamento barra inferiore</string>
+    <string name="settings_appearance_bottombar_behavior_description">Cambia il comportamento della barra inferiore</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Fisso</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Nascondi in scorrimento</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimizza allo scorrimento</string>
     <string name="settings_storage_clear_image_cache">Cancella cache immagine</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB di immagini saranno rimossi</string>
     <string name="settings_storage_clear_database">Cancella database cache</string>

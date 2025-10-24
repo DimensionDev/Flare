@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">Změnit velikost písma aplikace</string>
     <string name="settings_appearance_font_size_diff_decrease">Snížit</string>
     <string name="settings_appearance_font_size_diff_increase">Zvýšit</string>
+    <string name="settings_appearance_bottombar_style">Styl spodní lišty</string>
+    <string name="settings_appearance_bottombar_style_description">Změnit styl spodního panelu</string>
+    <string name="settings_appearance_bottombar_style_floating">Plovoucí</string>
+    <string name="settings_appearance_bottombar_style_classic">Klasický</string>
+    <string name="settings_appearance_bottombar_behavior">Chování v dolní liště</string>
+    <string name="settings_appearance_bottombar_behavior_description">Změnit chování spodního panelu</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Fixní</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Skrýt při posouvání</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimalizovat při posouvání</string>
     <string name="settings_storage_clear_image_cache">Vymazat cache obrázků</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB obrázků bude odstraněno</string>
     <string name="settings_storage_clear_database">Vymazat databázi mezipaměti</string>

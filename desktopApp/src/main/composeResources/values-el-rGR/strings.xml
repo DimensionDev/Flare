@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">%1$s χρήστες, %2$s καταστάσεις θα αφαιρεθούν</string>
     <string name="settings_storage_app_log">Άνοιγμα αρχείου καταγραφής εφαρμογής</string>
     <string name="settings_storage_app_log_description">Δείτε το αρχείο καταγραφής της εφαρμογής</string>
+    <string name="copied_to_clipboard">Αντιγράφηκε στο πρόχειρο</string>
 </resources>

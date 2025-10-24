@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">Ändra typsnittsstorleken på appen</string>
     <string name="settings_appearance_font_size_diff_decrease">Minska</string>
     <string name="settings_appearance_font_size_diff_increase">Öka</string>
+    <string name="settings_appearance_bottombar_style">Stil på nedre fältet</string>
+    <string name="settings_appearance_bottombar_style_description">Ändra stilen på nedre fältet</string>
+    <string name="settings_appearance_bottombar_style_floating">Flytande</string>
+    <string name="settings_appearance_bottombar_style_classic">Klassisk</string>
+    <string name="settings_appearance_bottombar_behavior">Nedre radens beteende</string>
+    <string name="settings_appearance_bottombar_behavior_description">Ändra beteendet på nedre fältet</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Fast</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Dölj vid rullning</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimera vid rullning</string>
     <string name="settings_storage_clear_image_cache">Rensa bildcache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder kommer att tas bort</string>
     <string name="settings_storage_clear_database">Rensa cache-databas</string>

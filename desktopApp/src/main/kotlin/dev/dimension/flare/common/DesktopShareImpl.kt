@@ -5,8 +5,8 @@ import dev.dimension.flare.common.windows.WindowsBridge
 import dev.dimension.flare.copied_to_clipboard
 import dev.dimension.flare.ui.common.DesktopShare
 import dev.dimension.flare.ui.component.ComposeInAppNotification
-import java.awt.Toolkit
 import org.apache.commons.lang3.SystemUtils
+import java.awt.Toolkit
 
 internal class DesktopShareImpl(
     private val windowsBridge: WindowsBridge,

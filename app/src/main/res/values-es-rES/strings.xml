@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">Cambiar el tamaño de fuente de la aplicación</string>
     <string name="settings_appearance_font_size_diff_decrease">Reducir</string>
     <string name="settings_appearance_font_size_diff_increase">Aumentar</string>
+    <string name="settings_appearance_bottombar_style">Estilo de barra inferior</string>
+    <string name="settings_appearance_bottombar_style_description">Cambiar el estilo de la barra inferior</string>
+    <string name="settings_appearance_bottombar_style_floating">Flotante</string>
+    <string name="settings_appearance_bottombar_style_classic">Clásico</string>
+    <string name="settings_appearance_bottombar_behavior">Comportamiento de barra inferior</string>
+    <string name="settings_appearance_bottombar_behavior_description">Cambiar el comportamiento de la barra inferior</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Fijado</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Ocultar al desplegar</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimizar al desplegar</string>
     <string name="settings_storage_clear_image_cache">Limpiar caché de imágenes</string>
     <string name="settings_storage_clear_image_cache_description">Se eliminarán %1$s MB de imágenes</string>
     <string name="settings_storage_clear_database">Borrar base de datos de caché</string>

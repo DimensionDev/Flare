@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">%1$s gebruikers, %2$s statussen worden verwijderd</string>
     <string name="settings_storage_app_log">Open app-logboek</string>
     <string name="settings_storage_app_log_description">Bekijk het app-logboek</string>
+    <string name="copied_to_clipboard">Gekopieerd naar klembord</string>
 </resources>

@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">Skift skrifttypestørrelse for appen</string>
     <string name="settings_appearance_font_size_diff_decrease">Formindsk</string>
     <string name="settings_appearance_font_size_diff_increase">Forøg</string>
+    <string name="settings_appearance_bottombar_style">Stil i bunden bjælke</string>
+    <string name="settings_appearance_bottombar_style_description">Ændr stilen på den nederste bjælke</string>
+    <string name="settings_appearance_bottombar_style_floating">Flydende</string>
+    <string name="settings_appearance_bottombar_style_classic">Klassisk</string>
+    <string name="settings_appearance_bottombar_behavior">Nederste bjælke opførsel</string>
+    <string name="settings_appearance_bottombar_behavior_description">Ændr den nederste bjælkes opførsel</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Fast</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Skjul på rulle</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimér på rulle</string>
     <string name="settings_storage_clear_image_cache">Ryd billed-cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB billeder vil blive fjernet</string>
     <string name="settings_storage_clear_database">Ryd cache database</string>

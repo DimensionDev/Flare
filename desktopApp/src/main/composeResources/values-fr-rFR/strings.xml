@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">Les utilisateurs %1$s , les statuts %2$s seront supprimés</string>
     <string name="settings_storage_app_log">Ouvrir le journal de l\'application</string>
     <string name="settings_storage_app_log_description">Voir le journal des applications</string>
+    <string name="copied_to_clipboard">Copié dans le presse-papiers</string>
 </resources>

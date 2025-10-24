@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">%1$s utilizatori, stările %2$s vor fi șterse</string>
     <string name="settings_storage_app_log">Deschide jurnalul aplicației</string>
     <string name="settings_storage_app_log_description">Vezi jurnalul aplicațiilor</string>
+    <string name="copied_to_clipboard">Copiat în clipboard</string>
 </resources>

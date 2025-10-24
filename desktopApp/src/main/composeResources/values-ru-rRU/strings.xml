@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">%1$s пользователи, статусы %2$s будут удалены</string>
     <string name="settings_storage_app_log">Открыть журнал приложений</string>
     <string name="settings_storage_app_log_description">Просмотр журнала приложений</string>
+    <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
 </resources>

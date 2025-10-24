@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">%1$s مستخدمين، %2$s حالات سيتم إزالتها</string>
     <string name="settings_storage_app_log">فتح سجل التطبيق</string>
     <string name="settings_storage_app_log_description">عرض سجل التطبيقات</string>
+    <string name="copied_to_clipboard">نسخ إلى الحافظة</string>
 </resources>

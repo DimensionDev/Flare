@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">%1$sユーザー、%2$sステータスが削除されます</string>
     <string name="settings_storage_app_log">アプリログを開く</string>
     <string name="settings_storage_app_log_description">アプリのログを表示</string>
+    <string name="copied_to_clipboard">クリップボードにコピーしました</string>
 </resources>

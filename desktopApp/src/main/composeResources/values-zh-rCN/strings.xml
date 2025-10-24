@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">%1$s个用户，%2$s个状态将被删除</string>
     <string name="settings_storage_app_log">打开应用日志</string>
     <string name="settings_storage_app_log_description">查看应用日志</string>
+    <string name="copied_to_clipboard">复制到剪贴板</string>
 </resources>

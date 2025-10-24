@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">Изменить размер шрифта приложения</string>
     <string name="settings_appearance_font_size_diff_decrease">Уменьшить</string>
     <string name="settings_appearance_font_size_diff_increase">Увеличить</string>
+    <string name="settings_appearance_bottombar_style">Стиль нижней панели</string>
+    <string name="settings_appearance_bottombar_style_description">Изменить стиль нижней панели</string>
+    <string name="settings_appearance_bottombar_style_floating">Плавающий</string>
+    <string name="settings_appearance_bottombar_style_classic">Классика</string>
+    <string name="settings_appearance_bottombar_behavior">Поведение нижней панели</string>
+    <string name="settings_appearance_bottombar_behavior_description">Изменить поведение нижней панели</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Исправлено</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Скрыть при прокрутке</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Свернуть при прокрутке</string>
     <string name="settings_storage_clear_image_cache">Очистить кэш изображений</string>
     <string name="settings_storage_clear_image_cache_description">%1$s МБ изображений будет удалено</string>
     <string name="settings_storage_clear_database">Очистить базу данных кэша</string>

@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">Schimbați dimensiunea fontului aplicației</string>
     <string name="settings_appearance_font_size_diff_decrease">Scade</string>
     <string name="settings_appearance_font_size_diff_increase">Creștere</string>
+    <string name="settings_appearance_bottombar_style">Stil bară de jos</string>
+    <string name="settings_appearance_bottombar_style_description">Schimbă stilul barei de jos</string>
+    <string name="settings_appearance_bottombar_style_floating">Plutind</string>
+    <string name="settings_appearance_bottombar_style_classic">Clasic</string>
+    <string name="settings_appearance_bottombar_behavior">Comportamentul barei de jos</string>
+    <string name="settings_appearance_bottombar_behavior_description">Schimbă comportamentul barei de jos</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Fixat</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Ascunde la derulare</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimizează pe derulare</string>
     <string name="settings_storage_clear_image_cache">Golire cache imagine</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB de imagini vor fi eliminate</string>
     <string name="settings_storage_clear_database">Goliţi baza de date cache</string>

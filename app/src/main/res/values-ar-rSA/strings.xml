@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">تغيير حجم الخط للتطبيق</string>
     <string name="settings_appearance_font_size_diff_decrease">تقلص</string>
     <string name="settings_appearance_font_size_diff_increase">زيادة</string>
+    <string name="settings_appearance_bottombar_style">نمط الشريط السفلي</string>
+    <string name="settings_appearance_bottombar_style_description">تغيير نمط الشريط السفلي</string>
+    <string name="settings_appearance_bottombar_style_floating">عائم</string>
+    <string name="settings_appearance_bottombar_style_classic">كلاسيكي</string>
+    <string name="settings_appearance_bottombar_behavior">سلوك الشريط السفلي</string>
+    <string name="settings_appearance_bottombar_behavior_description">تغيير سلوك الشريط السفلي</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">ثابت</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">إخفاء عند التمرير</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">تصغير عند التمرير</string>
     <string name="settings_storage_clear_image_cache">مسح ذاكرة التخزين المؤقت للصورة</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB من الصور سيتم إزالتها</string>
     <string name="settings_storage_clear_database">مسح قاعدة بيانات ذاكرة التخزين المؤقت</string>

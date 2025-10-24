@@ -262,4 +262,5 @@
     <string name="settings_storage_clear_database_description">%1$s користувачів, статуси %2$s буде видалено</string>
     <string name="settings_storage_app_log">Відкрити журнал додатка</string>
     <string name="settings_storage_app_log_description">Переглянути журнал програми</string>
+    <string name="copied_to_clipboard">Скопійовано до буферу обміну</string>
 </resources>

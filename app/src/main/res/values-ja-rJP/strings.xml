@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">アプリのフォントサイズを変更する</string>
     <string name="settings_appearance_font_size_diff_decrease">減らす</string>
     <string name="settings_appearance_font_size_diff_increase">増加</string>
+    <string name="settings_appearance_bottombar_style">下部のバーのスタイル</string>
+    <string name="settings_appearance_bottombar_style_description">下部バーのスタイルを変更する</string>
+    <string name="settings_appearance_bottombar_style_floating">フローティング</string>
+    <string name="settings_appearance_bottombar_style_classic">クラシック</string>
+    <string name="settings_appearance_bottombar_behavior">下部のバーの動作</string>
+    <string name="settings_appearance_bottombar_behavior_description">下部バーの動作を変更する</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">固定</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">スクロール時に隠す</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">スクロール時に最小化</string>
     <string name="settings_storage_clear_image_cache">画像キャッシュをクリア</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MBの画像が削除されます</string>
     <string name="settings_storage_clear_database">キャッシュデータベースをクリア</string>

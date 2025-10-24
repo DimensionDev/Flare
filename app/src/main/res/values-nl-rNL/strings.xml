@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">De lettergrootte van de app wijzigen</string>
     <string name="settings_appearance_font_size_diff_decrease">Verlaag</string>
     <string name="settings_appearance_font_size_diff_increase">Verhogen</string>
+    <string name="settings_appearance_bottombar_style">Stijl onderaan balk</string>
+    <string name="settings_appearance_bottombar_style_description">De stijl van de onderste balk wijzigen</string>
+    <string name="settings_appearance_bottombar_style_floating">Zwevend</string>
+    <string name="settings_appearance_bottombar_style_classic">Klassiek</string>
+    <string name="settings_appearance_bottombar_behavior">Onderste balk gedrag</string>
+    <string name="settings_appearance_bottombar_behavior_description">Het gedrag van de onderste balk wijzigen</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Opgelost</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Verberg tijdens scrollen</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimaliseren bij scrollen</string>
     <string name="settings_storage_clear_image_cache">Afbeeldingencache legen</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB van afbeeldingen zal worden verwijderd</string>
     <string name="settings_storage_clear_database">Cache database wissen</string>

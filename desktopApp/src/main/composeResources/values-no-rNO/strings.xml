@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">%1$s brukere, %2$s statuser vil bli fjernet</string>
     <string name="settings_storage_app_log">Åpne app-logg</string>
     <string name="settings_storage_app_log_description">Se app-loggen</string>
+    <string name="copied_to_clipboard">Kopiert til utklippstavle</string>
 </resources>

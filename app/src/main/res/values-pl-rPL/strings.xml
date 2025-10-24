@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">Zmień rozmiar czcionki aplikacji</string>
     <string name="settings_appearance_font_size_diff_decrease">Zmniejsz</string>
     <string name="settings_appearance_font_size_diff_increase">Zwiększ</string>
+    <string name="settings_appearance_bottombar_style">Styl dolnego paska</string>
+    <string name="settings_appearance_bottombar_style_description">Zmień styl dolnego paska</string>
+    <string name="settings_appearance_bottombar_style_floating">Pływające</string>
+    <string name="settings_appearance_bottombar_style_classic">Klasyczny</string>
+    <string name="settings_appearance_bottombar_behavior">Zachowanie dolnego paska</string>
+    <string name="settings_appearance_bottombar_behavior_description">Zmień zachowanie dolnego paska</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Naprawione</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Ukryj przy przewijaniu</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimalizuj przy przewijaniu</string>
     <string name="settings_storage_clear_image_cache">Usuń pamięć podręczną obrazów</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB obrazów zostanie usunięte</string>
     <string name="settings_storage_clear_database">Wyczyść bazę pamięci podręcznej</string>

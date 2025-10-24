@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">更改应用程序的字体大小</string>
     <string name="settings_appearance_font_size_diff_decrease">减少</string>
     <string name="settings_appearance_font_size_diff_increase">增加</string>
+    <string name="settings_appearance_bottombar_style">底部栏样式</string>
+    <string name="settings_appearance_bottombar_style_description">更改底部栏样式</string>
+    <string name="settings_appearance_bottombar_style_floating">浮动中</string>
+    <string name="settings_appearance_bottombar_style_classic">经典</string>
+    <string name="settings_appearance_bottombar_behavior">底部条行为</string>
+    <string name="settings_appearance_bottombar_behavior_description">更改底部栏的行为</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">固定的</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">滚动时隐藏</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">滚动时最小化</string>
     <string name="settings_storage_clear_image_cache">清除图片缓存</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB的图片将被删除</string>
     <string name="settings_storage_clear_database">清除缓存数据库</string>

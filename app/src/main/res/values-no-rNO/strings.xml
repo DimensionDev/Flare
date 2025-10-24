@@ -147,6 +147,15 @@
     <string name="settings_appearance_font_size_diff_description">Endre skriftstørrelsen på appen</string>
     <string name="settings_appearance_font_size_diff_decrease">Reduser</string>
     <string name="settings_appearance_font_size_diff_increase">Øk</string>
+    <string name="settings_appearance_bottombar_style">Stil på nedre linje</string>
+    <string name="settings_appearance_bottombar_style_description">Endre stilen på den nederste linjen</string>
+    <string name="settings_appearance_bottombar_style_floating">Flytende</string>
+    <string name="settings_appearance_bottombar_style_classic">Klassisk</string>
+    <string name="settings_appearance_bottombar_behavior">Oppførsel ved nedre stolpe</string>
+    <string name="settings_appearance_bottombar_behavior_description">Endre oppførselen til bunnlinjen</string>
+    <string name="settings_appearance_bottombar_behavior_fixed">Fast</string>
+    <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Skjul i rull</string>
+    <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimer ved rulle</string>
     <string name="settings_storage_clear_image_cache">Tøm bildebuffer</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder vil bli fjernet</string>
     <string name="settings_storage_clear_database">Slett mellomlagerdatabase</string>

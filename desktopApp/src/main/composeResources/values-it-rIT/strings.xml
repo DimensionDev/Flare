@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">Utenti %1$s , gli stati %2$s verranno rimossi</string>
     <string name="settings_storage_app_log">Apri registro app</string>
     <string name="settings_storage_app_log_description">Visualizza il registro app</string>
+    <string name="copied_to_clipboard">Copiato negli appunti</string>
 </resources>

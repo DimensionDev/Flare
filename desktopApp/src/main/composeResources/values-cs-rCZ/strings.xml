@@ -263,4 +263,5 @@
     <string name="settings_storage_clear_database_description">%1$s uživatelé, %2$s stavy budou odstraněny</string>
     <string name="settings_storage_app_log">Otevřít protokol aplikace</string>
     <string name="settings_storage_app_log_description">Zobrazit protokol aplikace</string>
+    <string name="copied_to_clipboard">Zkopírováno do schránky</string>
 </resources>

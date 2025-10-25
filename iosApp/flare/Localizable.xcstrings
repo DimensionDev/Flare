@@ -208,6 +208,12 @@
             "value" : "%lld"
           }
         },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",

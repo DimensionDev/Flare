@@ -25,7 +25,7 @@
     <string name="service_select_instance_input_placeholder">Instância URL</string>
     <string name="service_select_next_button">Próximo</string>
     <string name="service_select_empty_message">Nenhuma instância encontrada</string>
-    <string name="service_select_welcome_title">Bem-vindo ao Sinalizador</string>
+    <string name="service_select_welcome_title">Bem-vindo ao Flare</string>
     <string name="service_select_welcome_message">Sinalizador é um cliente de rede social para %1$s.\nPara começar, selecione um serviço para se conectar.</string>
     <string name="mastodon_login_verify_message">Por favor, aguarde enquanto verificamos suas credenciais.</string>
     <string name="profile_tab_timeline">Postagens</string>
@@ -119,11 +119,11 @@
     <string name="settings_appearance_title">Aparência</string>
     <string name="settings_status_appearance_title">Aparência de Status</string>
     <string name="settings_status_appearance_subtitle">Personalizar a aparência do status</string>
-    <string name="settings_appearance_subtitle">Personalizar a aparência do Sinalizador</string>
+    <string name="settings_appearance_subtitle">Personalizar a aparência do Flare</string>
     <string name="settings_storage_title">Armazenamento</string>
-    <string name="settings_storage_subtitle">Gerenciar armazenamento do Sinalizador</string>
+    <string name="settings_storage_subtitle">Gerenciar armazenamento do Flare</string>
     <string name="settings_about_title">SOBRE</string>
-    <string name="settings_about_subtitle">Saiba mais sobre sinalizador</string>
+    <string name="settings_about_subtitle">Saiba mais sobre o Flare</string>
     <string name="settings_side_panel">Personalização do painel lateral</string>
     <string name="settings_side_panel_description">Personalizar o painel lateral</string>
     <string name="settings_local_filter_title">Filtro local</string>

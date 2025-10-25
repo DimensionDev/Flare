@@ -323,7 +323,7 @@
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">RSS</string>
     <string name="empty_rss_sources">Sem fontes de RSS</string>
-    <string name="service_select_welcome_title">Bem-vindo ao Sinalizador</string>
+    <string name="service_select_welcome_title">Bem-vindo ao Flare</string>
     <string name="service_select_welcome_message">Por favor, insira o servidor para começar.</string>
     <string name="service_select_welcome_hint">Sinalizador suporta Mastodon, Misskey, Bluesky e X.</string>
     <string name="service_select_welcome_list_hint">Ou escolha destes servidores</string>

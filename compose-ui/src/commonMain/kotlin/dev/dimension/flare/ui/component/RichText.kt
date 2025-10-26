@@ -41,6 +41,7 @@ import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.model.direction
 import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.isLightTheme
 import kotlinx.collections.immutable.ImmutableMap
@@ -80,6 +81,7 @@ public fun RichText(
     val h4 = PlatformTheme.typography.h4
     val h5 = PlatformTheme.typography.h5
     val h6 = PlatformTheme.typography.h6
+    val contentColor = PlatformContentColor.current
     val uriHandler = LocalUriHandler.current
     val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
     CompositionLocalProvider(
@@ -89,7 +91,7 @@ public fun RichText(
             PlatformTextStyle provides PlatformTextStyle.current.merge(textStyle),
         ) {
             val state =
-                remember(text, textStyle, linkStyle) {
+                remember(text, textStyle, linkStyle, contentColor) {
                     RichTextState(
                         richText = text,
                         styleData =
@@ -102,6 +104,7 @@ public fun RichText(
                                 h4 = h4,
                                 h5 = h5,
                                 h6 = h6,
+                                contentColor = contentColor,
                             ),
                     )
                 }

@@ -46,18 +46,6 @@ internal fun FeedComponent(
                     }
                 }.then(modifier),
     ) {
-        data.image?.let {
-            NetworkImage(
-                model = it,
-                contentDescription = data.title,
-                modifier =
-                    Modifier
-                        .aspectRatio(16f / 9f)
-                        .clip(
-                            PlatformTheme.shapes.medium,
-                        ),
-            )
-        }
         Column(
             modifier =
                 Modifier
@@ -68,6 +56,7 @@ internal fun FeedComponent(
                             it
                         }
                     },
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -84,6 +73,7 @@ internal fun FeedComponent(
                     text = data.source,
                     style = PlatformTheme.typography.caption,
                     modifier = Modifier.weight(1f),
+                    maxLines = 1,
                 )
                 data.createdAt?.let {
                     DateTimeText(
@@ -97,13 +87,43 @@ internal fun FeedComponent(
                 text = data.title,
                 style = PlatformTheme.typography.title,
             )
-            data.description?.let {
-                PlatformText(
-                    text = it,
-                    style = PlatformTheme.typography.caption,
-                    maxLines = 2,
-                    color = PlatformTheme.colorScheme.caption,
-                )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                data.description?.let {
+                    PlatformText(
+                        text = it,
+                        style = PlatformTheme.typography.caption,
+                        maxLines = 5,
+                        color = PlatformTheme.colorScheme.caption,
+                        modifier =
+                            Modifier.let {
+                                if (data.image != null) {
+                                    it.weight(1f)
+                                } else {
+                                    it
+                                }
+                            },
+                    )
+                }
+                data.image?.let {
+                    NetworkImage(
+                        model = it,
+                        contentDescription = data.title,
+                        modifier =
+                            Modifier
+                                .let {
+                                    if (data.description != null) {
+                                        it.size(80.dp)
+                                    } else {
+                                        it.aspectRatio(16f / 9f)
+                                    }
+                                }.clip(
+                                    PlatformTheme.shapes.medium,
+                                ),
+                        customHeaders = data.imageHeaders,
+                    )
+                }
             }
         }
     }

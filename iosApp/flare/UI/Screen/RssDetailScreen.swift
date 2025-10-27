@@ -142,13 +142,13 @@ struct HtmlWebView: UIViewRepresentable {
         webview.navigationDelegate = context.coordinator
         webview.scrollView.isScrollEnabled = false
         if let htmlString {
-            webview.loadHTMLString(getHtmlData(html: htmlString), baseURL: nil)
+            webview.loadHTMLString(getHtmlData(html: htmlString), baseURL: baseURL)
         }
         return webview
     }
     func updateUIView(_ uiView: WKWebView, context: Context) {
         if let htmlString {
-            uiView.loadHTMLString(getHtmlData(html: htmlString), baseURL: nil)
+            uiView.loadHTMLString(getHtmlData(html: htmlString), baseURL: baseURL)
         }
     }
     

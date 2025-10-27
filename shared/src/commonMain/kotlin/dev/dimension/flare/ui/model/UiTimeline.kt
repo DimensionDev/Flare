@@ -10,6 +10,7 @@ import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 
 @Immutable
@@ -72,6 +73,7 @@ public data class UiTimeline internal constructor(
             val createdAt: UiDateTime?,
             val source: String,
             val sourceIcon: String?,
+            val imageHeaders: ImmutableMap<String, String>?,
             private val openInBrowser: Boolean,
         ) : ItemContent() {
             override val itemKey: String

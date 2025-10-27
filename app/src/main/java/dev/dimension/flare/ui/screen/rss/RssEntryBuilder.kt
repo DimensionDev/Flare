@@ -25,7 +25,6 @@ import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 
@@ -55,6 +54,7 @@ internal fun EntryProviderScope<NavKey>.rssEntryBuilder(
                         id = it.id,
                         title = it.title,
                         url = it.url,
+                        favIcon = it.favIcon,
                     )
                 )
             },
@@ -75,9 +75,9 @@ internal fun EntryProviderScope<NavKey>.rssEntryBuilder(
                     feedUrl = args.url,
                     metaData = TabMetaData(
                         title = TitleType.Text(args.title ?: args.url),
-                        icon = IconType.Url(
-                            url = UiRssSource.favIconUrl(args.url),
-                        )
+                        icon = args.favIcon?.let {
+                            IconType.Url(args.favIcon)
+                        } ?: IconType.Material(IconType.Material.MaterialIcon.Rss)
                     )
                 )
             },

@@ -50,7 +50,21 @@ internal object RssService {
             ?: throw IllegalArgumentException("No RSS or Atom feeds found at the provided URL: $url")
 
     suspend fun fetchIcon(url: String): String? {
-        val feedLink = fetch(url).link ?: return null
+        val feed =
+            tryRun {
+                fetch(url)
+            }.getOrNull()
+        val feedIcon =
+            when (feed) {
+                is Feed.Atom -> feed.icon
+                is Feed.RDF -> null
+                is Feed.Rss20 -> null
+                else -> null
+            }
+        if (feedIcon != null) {
+            return feedIcon
+        }
+        val feedLink = feed?.link ?: url
         val parsedUrl = Url(feedLink)
         val favIcon = "https://${parsedUrl.host}/favicon.ico"
         val hasFavIcon =

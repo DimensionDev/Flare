@@ -20,6 +20,7 @@
     <string name="home_tab_list_title">清單</string>
     <string name="home_tab_feeds_title">動態</string>
     <string name="dm_list_title">直接消息</string>
+    <string name="home_timeline_new_toots">新貼文</string>
     <string name="navigate_back">返回</string>
     <string name="service_select_instance_input_placeholder">實例網址</string>
     <string name="service_select_next_button">下一步</string>
@@ -103,12 +104,16 @@
     <string name="mixed_timeline_title">綜合</string>
     <string name="bluesky_login_username">用戶名</string>
     <string name="bluesky_login_password">密碼</string>
+    <string name="bluesky_login_2fa">雙重驗證碼</string>
+    <string name="bluesky_login_oauth_button">透過 OAuth 登入</string>
+    <string name="bluesky_login_use_password_button">使用密碼</string>
     <string name="login_expired">登入會話已過期</string>
     <string name="login_expired_message">點擊重新登入</string>
     <string name="login_expired_relogin">再次登入</string>
     <string name="account_item_error_title">錯誤</string>
     <string name="account_item_error_message">載入帳號失敗</string>
     <string name="add_account">添加帳號</string>
+    <string name="remove_account">移除帳號</string>
     <string name="settings_accounts_title">帳號管理</string>
     <string name="settings_appearance_title">外觀</string>
     <string name="settings_appearance_subtitle">自訂Flare的外觀和感受</string>
@@ -170,6 +175,8 @@
     <string name="settings_appearance_compat_link_previews_description">以簡化模式在狀態中顯示鏈接預覽</string>
     <string name="settings_appearance_theme_color">主題顏色</string>
     <string name="settings_appearance_theme_color_description">更改應用的主題顏色</string>
+    <string name="settings_appearance_theme_pure_color">高對比模式</string>
+    <string name="settings_appearance_theme_pure_color_description">背景和文字之間增加對比</string>
     <string name="settings_about_source_code">源碼</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">加入我們的 Telegram 群組</string>
@@ -178,6 +185,8 @@
     <string name="settings_about_localization_description">幫助我們翻譯 Flare</string>
     <string name="settings_privacy_policy">隱私政策</string>
     <string name="users">用戶</string>
+    <string name="hashtags">主題標籤</string>
+    <string name="statues">狀態</string>
     <string name="compose_title">撰寫</string>
     <string name="compose_hint">發生了什麼事？</string>
     <string name="compose_poll_option_hint">選項 %1$s</string>
@@ -194,6 +203,7 @@
     <string name="compose_poll_expiration_7_days">7天</string>
     <string name="compose_content_warning_hint">內容警告</string>
     <string name="compose_media_sensitive">將媒體標記為敏感</string>
+    <string name="compose_notification_title">發放成功</string>
     <string name="misskey_visibility_public">公開</string>
     <string name="misskey_visibility_home">首頁</string>
     <string name="misskey_visibility_followers">追隨者</string>
@@ -247,4 +257,5 @@
     <string name="settings_storage_clear_database_description">將移除%1$s用戶，%2$s狀態</string>
     <string name="settings_storage_app_log">打開應用日誌</string>
     <string name="settings_storage_app_log_description">查看應用日誌</string>
+    <string name="copied_to_clipboard">已複製到剪貼簿</string>
 </resources>

@@ -56,10 +56,12 @@
     <string name="mastodon_visibility_direct_description">只有被提及的用戶可以看到此消息</string>
     <string name="settings_notifications_title">通知</string>
     <string name="settings_notifications_subtitle">自定義 Flare 通知你</string>
+    <string name="status_loadmore_end">沒有更多貼文</string>
     <string name="status_loadmore_error_retry">重試</string>
     <string name="status_empty">這裡什麼都沒有</string>
     <string name="status_sensitive_media">敏感媒體</string>
     <string name="show_media">顯示媒體</string>
+    <string name="hide_media">隱藏媒體</string>
     <string name="login_expired">登入會話已過期</string>
     <string name="login_expired_message">點擊重新登入</string>
     <string name="login_expired_relogin">再次登入</string>
@@ -100,6 +102,8 @@
     <string name="user_unmute">解除靜音 %1$s</string>
     <string name="mastodon_item_content_warning">內容警告</string>
     <string name="reply_to">回覆 %1$s</string>
+    <string name="status_detail_translate">翻譯貼文</string>
+    <string name="status_detail_tldr">摘要貼文</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
@@ -317,8 +321,12 @@
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">沒有Rss來源</string>
     <string name="service_select_welcome_title">歡迎來到Flare</string>
+    <string name="service_select_welcome_hint">Flare 支援 Mastodon、Misskey、Bluesky 和 X。</string>
+    <string name="service_select_welcome_list_hint">或從這些伺服器挑選</string>
     <string name="bluesky_login_username_hint">用戶名</string>
     <string name="bluesky_login_password_hint">密碼</string>
+    <string name="bluesky_login_oauth_button">透過 OAuth 登入</string>
+    <string name="bluesky_login_use_password_button">使用密碼</string>
     <string name="login_button">登入</string>
     <string name="mastodon_login_verify_message">請稍候，正在驗證您的憑證。</string>
     <string name="service_select_instance_input_placeholder">實例網址</string>
@@ -344,6 +352,7 @@
     <string name="settings_about_source_code">源碼</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">加入我們的 Telegram 群組</string>
+    <string name="settings_about_discord_description">加入我們的 Discord 伺服器</string>
     <string name="settings_about_line_description">加入我們的 Line 群組</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">幫助我們翻譯 Flare</string>

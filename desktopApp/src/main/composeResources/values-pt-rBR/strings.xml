@@ -7,10 +7,10 @@
     <string name="home_compose">Compor</string>
     <string name="home_login">Conectar-se</string>
     <string name="home_settings">Confirgurações</string>
-    <string name="home_tab_home_title">Residencial</string>
-    <string name="home_tab_notifications_title">notificações</string>
+    <string name="home_tab_home_title">Início</string>
+    <string name="home_tab_notifications_title">Notificações</string>
     <string name="home_tab_me_title">Eu</string>
-    <string name="home_tab_discover_title">Pendentes</string>
+    <string name="home_tab_discover_title">Pesquisar</string>
     <string name="settings_title">Confirgurações</string>
     <string name="mastodon_tab_local_title">Localização</string>
     <string name="mastodon_tab_public_title">Público</string>
@@ -25,8 +25,8 @@
     <string name="service_select_instance_input_placeholder">Instância URL</string>
     <string name="service_select_next_button">Próximo</string>
     <string name="service_select_empty_message">Nenhuma instância encontrada</string>
-    <string name="service_select_welcome_title">Bem-vindo ao Sinalizador</string>
-    <string name="service_select_welcome_message">Sinalizador é um cliente de rede social para %1$s.\nPara começar, selecione um serviço para se conectar.</string>
+    <string name="service_select_welcome_title">Bem-vindo ao Flare</string>
+    <string name="service_select_welcome_message">Flare é um cliente de rede social para %1$s.\nPara começar, selecione um serviço para se conectar.</string>
     <string name="mastodon_login_verify_message">Por favor, aguarde enquanto verificamos suas credenciais.</string>
     <string name="profile_tab_timeline">Postagens</string>
     <string name="profile_tab_timeline_with_reply">Mensagens e respostas</string>
@@ -119,11 +119,11 @@
     <string name="settings_appearance_title">Aparência</string>
     <string name="settings_status_appearance_title">Aparência de Status</string>
     <string name="settings_status_appearance_subtitle">Personalizar a aparência do status</string>
-    <string name="settings_appearance_subtitle">Personalizar a aparência do Sinalizador</string>
+    <string name="settings_appearance_subtitle">Personalizar a aparência do Flare</string>
     <string name="settings_storage_title">Armazenamento</string>
-    <string name="settings_storage_subtitle">Gerenciar armazenamento do Sinalizador</string>
-    <string name="settings_about_title">SOBRE</string>
-    <string name="settings_about_subtitle">Saiba mais sobre sinalizador</string>
+    <string name="settings_storage_subtitle">Gerenciar armazenamento do Flare</string>
+    <string name="settings_about_title">Sobre</string>
+    <string name="settings_about_subtitle">Saiba mais sobre o Flare</string>
     <string name="settings_side_panel">Personalização do painel lateral</string>
     <string name="settings_side_panel_description">Personalizar o painel lateral</string>
     <string name="settings_local_filter_title">Filtro local</string>
@@ -165,7 +165,7 @@
     <string name="settings_appearance_video_autoplay_never">nunca</string>
     <string name="settings_appearance_avatar_shape">Formato do avatar</string>
     <string name="settings_appearance_avatar_shape_description">Mudar a forma do avatar</string>
-    <string name="settings_appearance_avatar_shape_round">RODADA</string>
+    <string name="settings_appearance_avatar_shape_round">Redondo</string>
     <string name="settings_appearance_avatar_shape_square">Quadrado</string>
     <string name="settings_appearance_theme">Tema</string>
     <string name="settings_appearance_theme_description">Alterar o tema do aplicativo</string>
@@ -187,7 +187,7 @@
     <string name="settings_about_telegram_description">Junte-se ao nosso grupo do Telegram</string>
     <string name="settings_about_line_description">Junte-se ao nosso grupo de linhas</string>
     <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Ajude-nos a traduzir o Sinalizador</string>
+    <string name="settings_about_localization_description">Ajude-nos a traduzir o Flare</string>
     <string name="settings_privacy_policy">Política de Privacidade</string>
     <string name="users">Utilizadores</string>
     <string name="hashtags">Palavras-chave</string>
@@ -210,7 +210,7 @@
     <string name="compose_media_sensitive">Marcar mídia como sensível</string>
     <string name="compose_notification_title">Enviado com sucesso</string>
     <string name="misskey_visibility_public">Público</string>
-    <string name="misskey_visibility_home">Residencial</string>
+    <string name="misskey_visibility_home">Início</string>
     <string name="misskey_visibility_followers">Seguidores</string>
     <string name="misskey_visibility_specified">Especificado</string>
     <string name="misskey_visibility_public_description">Qualquer um pode ver e otimizar este toot</string>

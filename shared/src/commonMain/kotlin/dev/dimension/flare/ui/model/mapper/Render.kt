@@ -78,6 +78,7 @@ internal fun StatusContent.render(
             event = event as StatusEvent.Misskey,
             accountKey = event.accountKey,
             references = references,
+            pinned = pinned,
         )
 
     is StatusContent.MisskeyNotification ->

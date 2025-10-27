@@ -28,6 +28,7 @@ internal sealed interface StatusContent {
     @SerialName("misskey")
     data class Misskey internal constructor(
         internal val data: dev.dimension.flare.data.network.misskey.api.model.Note,
+        val pinned: Boolean = false,
     ) : StatusContent
 
     @Serializable

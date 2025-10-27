@@ -83,13 +83,14 @@ internal suspend fun List<Note>.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: suspend (Note) -> Long = { Instant.parse(it.createdAt).toEpochMilliseconds() },
+    pinnedProvider: suspend (Note) -> Boolean = { false },
 ): List<DbPagingTimelineWithStatus> =
     this.map {
         createDbPagingTimelineWithStatus(
             accountKey = accountKey,
             pagingKey = pagingKey,
             sortId = sortIdProvider(it),
-            status = it.toDbStatusWithUser(accountKey),
+            status = it.toDbStatusWithUser(accountKey, pinnedProvider(it)),
             references =
                 listOfNotNull(
                     if (it.renote != null) {
@@ -110,7 +111,10 @@ internal suspend fun List<Note>.toDbPagingTimeline(
         )
     }
 
-private fun Note.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser {
+private fun Note.toDbStatusWithUser(
+    accountKey: MicroBlogKey,
+    pinned: Boolean = false,
+): DbStatusWithUser {
     val user = user.toDbUser(accountKey.host)
     val status =
         DbStatus(
@@ -119,7 +123,7 @@ private fun Note.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser 
                     id = id,
                     host = user.userKey.host,
                 ),
-            content = StatusContent.Misskey(this),
+            content = StatusContent.Misskey(this, pinned),
             userKey = user.userKey,
             accountType = AccountType.Specific(accountKey),
             text = text,

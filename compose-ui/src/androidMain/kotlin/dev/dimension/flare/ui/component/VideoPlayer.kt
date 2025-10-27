@@ -160,8 +160,7 @@ public fun VideoPlayer(
                         } else {
                             it
                         }
-                    }.matchParentSize()
-                    .let {
+                    }.let {
                         if (keepScreenOn) {
                             it.keepScreenOn()
                         } else {

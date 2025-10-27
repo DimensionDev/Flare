@@ -7,7 +7,9 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.render.toUi
+import io.ktor.http.Url
 import io.ktor.util.encodeBase64
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
 import kotlinx.datetime.UtcOffset
@@ -59,6 +61,10 @@ internal fun StatusContent.Rss.RssContent.Atom.render(): UiTimeline =
                         published
                             ?.let { input -> parseRssDateToInstant(input) }
                             ?.toUi(),
+                    imageHeaders =
+                        persistentMapOf(
+                            "Referer" to "https://${Url(links.first().href).host}/",
+                        ),
                 ),
         )
     }
@@ -85,6 +91,10 @@ internal fun StatusContent.Rss.RssContent.Rss20.render(): UiTimeline =
                         pubDate
                             ?.let { input -> parseRssDateToInstant(input) }
                             ?.toUi(),
+                    imageHeaders =
+                        persistentMapOf(
+                            "Referer" to "https://${Url(link).host}/",
+                        ),
                 ),
         )
     }
@@ -111,6 +121,10 @@ internal fun StatusContent.Rss.RssContent.RDF.render(): UiTimeline =
                         date
                             ?.let { input -> parseRssDateToInstant(input) }
                             ?.toUi(),
+                    imageHeaders =
+                        persistentMapOf(
+                            "Referer" to "https://${Url(link).host}/",
+                        ),
                 ),
         )
     }

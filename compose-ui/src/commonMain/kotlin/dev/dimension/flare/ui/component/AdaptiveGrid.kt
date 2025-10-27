@@ -22,7 +22,7 @@ internal fun AdaptiveGrid(
                     if (expandedSize) {
                         measurables[0].measure(
                             constraints.copy(
-                                maxHeight = constraints.maxWidth * 12 / 9,
+                                maxHeight = constraints.maxWidth * 16 / 9,
                             ),
                         )
                     } else {

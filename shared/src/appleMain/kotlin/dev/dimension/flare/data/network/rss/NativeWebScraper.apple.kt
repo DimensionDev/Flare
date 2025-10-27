@@ -1,8 +1,10 @@
 package dev.dimension.flare.data.network.rss
 
 import dev.dimension.flare.data.network.ktorClient
+import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.readValue
 import kotlinx.coroutines.CoroutineScope
@@ -38,7 +40,10 @@ internal actual class NativeWebScraper(
         scope.launch {
             val html =
                 try {
-                    ktorClient().get(url).bodyAsText()
+                    ktorClient()
+                        .get(url) {
+                            this.accept(ContentType.Text.Html)
+                        }.bodyAsText()
                 } catch (t: Throwable) {
                     task.finish("error: network: ${t.message}")
                     tasks -= task

@@ -4,8 +4,10 @@ import android.content.Context
 import android.webkit.WebView
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.network.ktorClient
+import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,13 +26,20 @@ internal actual class NativeWebScraper(
         WebView(context).apply {
             with(settings) {
                 javaScriptEnabled = true
-                userAgentString =
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
             }
             scope.launch {
-                val html = ktorClient().get(url).bodyAsText()
-                withContext(Dispatchers.Main) {
-                    loadDataWithBaseURL("", html, "text/html", "UTF-8", null)
+                runCatching {
+                    val html =
+                        ktorClient()
+                            .get(url) {
+                                this.accept(ContentType.Text.Html)
+                            }.bodyAsText()
+                    withContext(Dispatchers.Main) {
+                        loadDataWithBaseURL("", html, "text/html", "UTF-8", null)
+                    }
+                }.onFailure {
+                    callback("error: network: ${it.message}")
+                    destroy()
                 }
             }
             webViewClient =
@@ -45,7 +54,11 @@ internal actual class NativeWebScraper(
                         evaluateJavascript(scriptToInject) {
                             if (finished) return@evaluateJavascript
                             finished = true
-                            callback(it.decodeJson(String.serializer()))
+                            if (it == "\"null\"" || it.startsWith("error:")) {
+                                callback("error: javascript evaluation failed")
+                            } else {
+                                callback(it.decodeJson(String.serializer()))
+                            }
                             destroy()
                         }
                     }

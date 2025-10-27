@@ -33,6 +33,7 @@ import dev.dimension.flare.ui.model.merge
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -49,6 +50,10 @@ public class ComposePresenter(
 
     @Composable
     override fun body(): ComposeState {
+        val userState =
+            remember(accountType) {
+                UserPresenter(accountType = accountType, userKey = null)
+            }.body().user
         val accountState by accountProvider(accountType = accountType, repository = accountRepository)
         val accounts by allAccountsPresenter(repository = accountRepository)
         val selectedAccounts =
@@ -65,48 +70,6 @@ public class ComposePresenter(
                 remember(status.statusKey) {
                     StatusPresenter(accountType = accountType, statusKey = status.statusKey)
                 }.body().status
-            }
-        val replyState =
-            statusState?.map {
-                if (it.content is UiTimeline.ItemContent.Status && it.content.platformType == PlatformType.VVo) {
-                    it.copy(
-                        content = it.content.quote.firstOrNull() ?: it.content,
-                    )
-                } else {
-                    it
-                }
-            }
-        val initialTextState =
-            statusState?.mapNotNull {
-                val content = it.content
-                if (content is UiTimeline.ItemContent.Status) {
-                    when (content.platformType) {
-                        PlatformType.VVo -> {
-                            if (content.quote.any() && status is ComposeStatus.Quote) {
-                                InitialText(
-                                    text = "//@${content.user?.name?.raw}:${content.content.raw}",
-                                    cursorPosition = 0,
-                                )
-                            } else {
-                                null
-                            }
-                        }
-                        PlatformType.Mastodon -> {
-                            if (status is ComposeStatus.Reply) {
-                                val text = "${content.user?.handle} "
-                                InitialText(
-                                    text = text,
-                                    cursorPosition = text.length,
-                                )
-                            } else {
-                                null
-                            }
-                        }
-                        else -> null
-                    }
-                } else {
-                    null
-                }
             }
         val allUsers =
             accounts.flatMap { data ->
@@ -151,6 +114,16 @@ public class ComposePresenter(
                     }.toImmutableList()
                     .toImmutableListWrapper()
             }
+        val replyState =
+            statusState?.map {
+                if (it.content is UiTimeline.ItemContent.Status && it.content.platformType == PlatformType.VVo) {
+                    it.copy(
+                        content = it.content.quote.firstOrNull() ?: it.content,
+                    )
+                } else {
+                    it
+                }
+            }
         val remainingAccounts =
             allUsers.map {
                 it
@@ -163,6 +136,76 @@ public class ComposePresenter(
         val enableCrossPost =
             allUsers.map {
                 it.size > 1 // && status == null
+            }
+        val initialTextState =
+            if (statusState != null) {
+                userState.flatMap { user ->
+                    remember(statusState) {
+                        statusState.mapNotNull { timeline ->
+                            val content = timeline.content
+                            if (content is UiTimeline.ItemContent.Status) {
+                                when (content.platformType) {
+                                    PlatformType.VVo -> {
+                                        if (content.quote.any() && status is ComposeStatus.Quote) {
+                                            InitialText(
+                                                text = "//@${content.user?.name?.raw}:${content.content.raw}",
+                                                cursorPosition = 0,
+                                            )
+                                        } else {
+                                            null
+                                        }
+                                    }
+                                    PlatformType.Mastodon, PlatformType.Misskey -> {
+                                        if (status is ComposeStatus.Reply) {
+                                            val handleToAdd = mutableSetOf<String>()
+                                            if (content.user?.key != selectedAccounts.firstOrNull()?.accountKey) {
+                                                content.user?.handle?.let {
+                                                    handleToAdd.add(it)
+                                                }
+                                            }
+                                            content.content.data
+                                                .getElementsByAttributeValueStarting(
+                                                    "href",
+                                                    "flare://ProfileWithNameAndHost",
+                                                ).filter {
+                                                    val href = it.attr("href")
+                                                    val params =
+                                                        href
+                                                            .substringAfter("flare://ProfileWithNameAndHost/")
+                                                            .substringBefore("?accountKey=")
+                                                            .split('/')
+                                                    val userName = params.getOrNull(0)
+                                                    val host = params.getOrNull(1)
+                                                    user.handle != "@$userName@$host"
+                                                }.filter {
+                                                    it.text() != content.user?.handle
+                                                }.forEach {
+                                                    handleToAdd.add(it.text())
+                                                }
+                                            val text =
+                                                buildString {
+                                                    handleToAdd.distinct().forEach {
+                                                        append("$it ")
+                                                    }
+                                                }
+                                            InitialText(
+                                                text = text,
+                                                cursorPosition = text.length,
+                                            )
+                                        } else {
+                                            null
+                                        }
+                                    }
+                                    else -> null
+                                }
+                            } else {
+                                null
+                            }
+                        }
+                    }
+                }
+            } else {
+                null
             }
 
         val services =

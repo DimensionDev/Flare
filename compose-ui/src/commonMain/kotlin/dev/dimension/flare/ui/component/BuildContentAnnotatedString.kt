@@ -1,6 +1,8 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -93,7 +95,12 @@ internal data class StyleData(
     val h4: TextStyle,
     val h5: TextStyle,
     val h6: TextStyle,
-)
+    private val contentColor: Color,
+) {
+    val color by lazy {
+        textStyle.color.takeOrElse { contentColor }
+    }
+}
 
 private fun AnnotatedString.Builder.renderNode(
     node: Node,
@@ -129,7 +136,9 @@ private fun AnnotatedString.Builder.renderElement(
         }
 
         "br" -> {
-            appendLine()
+            if (element.parent()?.hasText() == true) {
+                appendLine()
+            }
         }
 
         "center" -> {
@@ -148,7 +157,7 @@ private fun AnnotatedString.Builder.renderElement(
             pushStyle(
                 styleData.textStyle.copy(
                     fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                    background = styleData.textStyle.color.copy(alpha = 0.1f),
+                    background = styleData.color.copy(alpha = 0.1f),
                 ).toSpanStyle(),
             )
             element.childNodes().fastForEach {
@@ -160,19 +169,24 @@ private fun AnnotatedString.Builder.renderElement(
         "blockquote" -> {
             val style =
                 styleData.textStyle.copy(
-                    fontStyle = FontStyle.Italic,
-                    color = styleData.textStyle.color.copy(alpha = 0.7f),
+                    color = styleData.color.copy(alpha = 0.7f),
+                    background = styleData.color.copy(alpha = 0.05f),
                 )
             withStyle(
                 style.toParagraphStyle(),
             ) {
                 withStyle(style.toSpanStyle()) {
                     element.childNodes().fastForEach {
-                        renderNode(node = it, styleData = styleData, context = context)
+                        renderNode(
+                            node = it,
+                            styleData = styleData.copy(
+                                textStyle = style
+                            ),
+                            context = context,
+                        )
                     }
                 }
             }
-            appendLine()
         }
 
         "p", "div" -> {

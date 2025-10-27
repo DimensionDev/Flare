@@ -115,9 +115,7 @@ internal class UserTimelineRemoteMediator(
                             it.id !in pinnedIds
                         }
                 }
-            } ?: return Result(
-                endOfPaginationReached = true,
-            )
+            }
 
         return Result(
             endOfPaginationReached = response.isEmpty(),
@@ -131,6 +129,9 @@ internal class UserTimelineRemoteMediator(
                         } else {
                             Instant.parse(it.createdAt).toEpochMilliseconds()
                         }
+                    },
+                    pinnedProvider = {
+                        it.id in pinnedIds
                     },
                 ),
             nextKey = response.lastOrNull()?.id,

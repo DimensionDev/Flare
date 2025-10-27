@@ -281,14 +281,14 @@ internal fun Note.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Misskey,
     references: Map<ReferenceType, List<StatusContent>>,
+    pinned: Boolean,
 ): UiTimeline {
     val user = user.render(accountKey)
     val renote = (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.Misskey)?.data
     val currentStatus = this.renderStatus(accountKey, event)
     val actualStatus = renote ?: this
     val topMessage =
-        // TODO: find a way to detect pinned status
-        if (false) {
+        if (pinned) {
             UiTimeline.TopMessage(
                 user = user,
                 icon = UiTimeline.TopMessage.Icon.Pin,

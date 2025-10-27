@@ -1032,7 +1032,12 @@ private fun StatusContentComponent(
                     RichText(
                         text = content,
                         modifier = Modifier.fillMaxWidth(),
-                        maxLines = maxLines,
+                        maxLines =
+                            if (!contentWarning?.raw.isNullOrEmpty() && expanded || maxLines == Int.MAX_VALUE) {
+                                Int.MAX_VALUE
+                            } else {
+                                maxLines
+                            },
                     )
                 }
                 poll?.let {

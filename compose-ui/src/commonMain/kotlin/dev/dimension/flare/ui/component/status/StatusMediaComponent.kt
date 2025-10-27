@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -49,9 +50,9 @@ import dev.dimension.flare.ui.component.platform.rememberPlatformWifiState
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.theme.PlatformTheme
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 internal fun StatusMediaComponent(
@@ -258,7 +259,7 @@ public fun MediaItem(
                 customHeaders = media.customHeaders,
                 modifier =
                     modifier
-//                        .fillMaxSize()
+                        .fillMaxWidth()
                         .let {
                             if (keepAspectRatio) {
                                 it.aspectRatio(
@@ -288,7 +289,7 @@ public fun MediaItem(
                     contentDescription = media.description,
                     modifier =
                         modifier
-//                            .fillMaxSize()
+                            .fillMaxWidth()
                             .let {
                                 if (keepAspectRatio) {
                                     it.aspectRatio(
@@ -301,18 +302,18 @@ public fun MediaItem(
                             },
                     loadingPlaceholder = {
                         Box(
-//                            modifier =
-//                                Modifier
-//                                    .fillMaxSize(),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(),
                             contentAlignment = Alignment.Center,
                         ) {
                             NetworkImage(
                                 contentScale = contentScale,
                                 model = media.thumbnailUrl,
                                 contentDescription = media.description,
-//                                modifier =
-//                                    Modifier
-//                                        .fillMaxSize(),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth(),
                             )
                         }
                         Box(
@@ -337,18 +338,18 @@ public fun MediaItem(
                     },
                     errorContent = {
                         Box(
-//                            modifier =
-//                                Modifier
-//                                    .fillMaxSize(),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(),
                             contentAlignment = Alignment.Center,
                         ) {
                             NetworkImage(
                                 contentScale = contentScale,
                                 model = media.thumbnailUrl,
                                 contentDescription = media.description,
-//                                modifier =
-//                                    Modifier
-//                                        .fillMaxSize(),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth(),
                             )
                         }
                         Box(
@@ -411,7 +412,7 @@ public fun MediaItem(
                         contentDescription = media.description,
                         modifier =
                             Modifier
-//                                .fillMaxSize()
+                                .fillMaxWidth()
                                 .let {
                                     if (keepAspectRatio) {
                                         it.aspectRatio(
@@ -465,7 +466,7 @@ public fun MediaItem(
                 contentDescription = media.description,
                 modifier =
                     modifier
-//                        .fillMaxSize()
+                        .fillMaxWidth()
                         .let {
                             if (keepAspectRatio) {
                                 it.aspectRatio(
@@ -478,9 +479,9 @@ public fun MediaItem(
                         },
             ) {
                 Box(
-//                    modifier =
-//                        Modifier
-//                            .fillMaxSize(),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(),
                     contentAlignment = Alignment.Center,
                 ) {
                     NetworkImage(
@@ -488,9 +489,9 @@ public fun MediaItem(
                         customHeaders = media.customHeaders,
                         model = media.previewUrl,
                         contentDescription = media.description,
-//                        modifier =
-//                            Modifier
-//                                .fillMaxSize(),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth(),
                     )
                 }
                 PlatformCircularProgressIndicator(

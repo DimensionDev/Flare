@@ -58,15 +58,13 @@ struct HomeTimelineScreen: View {
                                     .backport
                                     .glassEffect(selectedTabIndex == index ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedTabIndex == index ? Color.accentColor : Color(.systemBackground))
                                 }
-                                if case .success = onEnum(of: presenter.state.user) {
-                                    Button {
-                                        toTabSetting()
-                                    } label: {
-                                        Image("fa-plus")
-                                    }
-                                    .backport
-                                    .glassButtonStyle()
+                                Button {
+                                    toTabSetting()
+                                } label: {
+                                    Image("fa-plus")
                                 }
+                                .backport
+                                .glassButtonStyle()
                             }
 //                            .padding(.horizontal)
                             .padding(.vertical, 8)

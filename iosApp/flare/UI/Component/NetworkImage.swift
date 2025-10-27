@@ -4,9 +4,17 @@ import Kingfisher
 struct NetworkImage: View {
     let data: URL?
     let placeholder: URL?
+    let customHeader: [String: String]?
     var body: some View {
         KFAnimatedImage
             .url(data)
+            .requestModifier({ request in
+                if let customHeader {
+                    for (key, value) in customHeader {
+                        request.setValue(value, forHTTPHeaderField: key)
+                    }
+                }
+            })
             .placeholder {
                 if let placeholder {
                     NetworkImage(data: placeholder)
@@ -27,13 +35,13 @@ struct NetworkImage: View {
 }
 
 extension NetworkImage {
-    init(data: String) {
-        self.init(data: .init(string: data))
+    init(data: String, customHeader: [String: String]? = nil) {
+        self.init(data: .init(string: data), placeholder: nil, customHeader: customHeader)
     }
     init(data: String, placeholder: String) {
-        self.init(data: .init(string: data), placeholder: .init(string: placeholder))
+        self.init(data: .init(string: data), placeholder: .init(string: placeholder), customHeader: nil)
     }
     init(data: URL?) {
-        self.init(data: data, placeholder: nil)
+        self.init(data: data, placeholder: nil, customHeader: nil)
     }
 }

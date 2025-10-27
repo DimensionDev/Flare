@@ -6,4 +6,7 @@
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_screen</item>
         <item name="postSplashScreenTheme">@style/Theme.Flare</item>
     </style>
+    <style name="DialogWindowTheme" parent="android:Theme.Dialog">
+        <item name="android:windowClipToOutline">false</item>
+    </style>
 </resources>

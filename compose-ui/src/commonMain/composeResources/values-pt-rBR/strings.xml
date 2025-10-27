@@ -56,8 +56,8 @@
     <string name="mastodon_visibility_unlisted_description">Qualquer pessoa pode ver este toot, mas ele não aparecerá na linha do tempo pública</string>
     <string name="mastodon_visibility_private_description">Somente seguidores podem ver este toot</string>
     <string name="mastodon_visibility_direct_description">Somente usuários mencionados podem ver este toot</string>
-    <string name="settings_notifications_title">notificações</string>
-    <string name="settings_notifications_subtitle">Personalize como o Sinalizador notifica você</string>
+    <string name="settings_notifications_title">Notificações</string>
+    <string name="settings_notifications_subtitle">Personalize como o Flare notifica você</string>
     <string name="status_loadmore_end">Não há mais postagens</string>
     <string name="status_loadmore_error">Erro ao carregar mais postagens</string>
     <string name="status_loadmore_error_retry">Repetir</string>
@@ -323,9 +323,9 @@
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">RSS</string>
     <string name="empty_rss_sources">Sem fontes de RSS</string>
-    <string name="service_select_welcome_title">Bem-vindo ao Sinalizador</string>
+    <string name="service_select_welcome_title">Bem-vindo ao Flare</string>
     <string name="service_select_welcome_message">Por favor, insira o servidor para começar.</string>
-    <string name="service_select_welcome_hint">Sinalizador suporta Mastodon, Misskey, Bluesky e X.</string>
+    <string name="service_select_welcome_hint">O Flare suporta Mastodon, Misskey, Bluesky e X.</string>
     <string name="service_select_welcome_list_hint">Ou escolha destes servidores</string>
     <string name="bluesky_login_username_hint">Usuário:</string>
     <string name="bluesky_login_password_hint">Palavra-passe</string>
@@ -338,11 +338,11 @@
     <string name="service_select_instance_input_placeholder">Instância URL</string>
     <string name="service_select_next_button">Próximo</string>
     <string name="service_select_empty_message">Nenhuma instância encontrada</string>
-    <string name="service_select_compatibility_warning">Este servidor usa %1$s, Sinalizador será executado em modo de compatibilidade. Alguns recursos podem não funcionar corretamente.</string>
-    <string name="home_tab_home_title">Residencial</string>
-    <string name="home_tab_notifications_title">notificações</string>
+    <string name="service_select_compatibility_warning">Este servidor usa %1$s, o Flare será executado em modo de compatibilidade. Alguns recursos podem não funcionar corretamente.</string>
+    <string name="home_tab_home_title">Início</string>
+    <string name="home_tab_notifications_title">Notificações</string>
     <string name="home_tab_me_title">Eu</string>
-    <string name="home_tab_discover_title">Pendentes</string>
+    <string name="home_tab_discover_title">Pesquisar</string>
     <string name="settings_title">Confirgurações</string>
     <string name="mastodon_tab_local_title">Localização</string>
     <string name="mastodon_tab_public_title">Público</string>
@@ -362,6 +362,6 @@
     <string name="settings_about_discord_description">Entre no nosso Discord</string>
     <string name="settings_about_line_description">Junte-se ao nosso grupo de linhas</string>
     <string name="settings_about_localization">Crowdin</string>
-    <string name="settings_about_localization_description">Ajude-nos a traduzir o Sinalizador</string>
+    <string name="settings_about_localization_description">Ajude-nos a traduzir o Flare</string>
     <string name="settings_privacy_policy">Política de Privacidade</string>
 </resources>

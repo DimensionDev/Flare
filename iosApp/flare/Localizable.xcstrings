@@ -208,6 +208,12 @@
             "value" : "%lld"
           }
         },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
@@ -607,7 +613,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SOBRE"
+            "value" : "Sobre"
           }
         },
         "ro" : {
@@ -793,6 +799,12 @@
             "state" : "translated",
             "value" : "接受关注请求"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接受追蹤請求"
+          }
         }
       }
     },
@@ -922,6 +934,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "账户管理"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "帳號管理"
           }
         }
       }
@@ -1420,6 +1438,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "添加 Rss"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "增加 RSS"
           }
         }
       }
@@ -3957,7 +3981,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "RODADA"
+            "value" : "Redondo"
           }
         },
         "ro" : {
@@ -13657,6 +13681,12 @@
             "state" : "translated",
             "value" : "选项"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選項"
+          }
         }
       }
     },
@@ -15649,6 +15679,12 @@
             "state" : "translated",
             "value" : "热门"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "熱門"
+          }
         }
       }
     },
@@ -15961,7 +15997,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pendentes"
+            "value" : "Pesquisar"
           }
         },
         "ro" : {
@@ -16959,6 +16995,12 @@
             "state" : "translated",
             "value" : "最近使用的"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最近使用"
+          }
         }
       }
     },
@@ -17089,6 +17131,12 @@
             "state" : "translated",
             "value" : "搜索表情"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜尋表情符號"
+          }
         }
       }
     },
@@ -17218,6 +17266,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "没有更多了"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您到底了"
           }
         }
       }
@@ -17841,6 +17895,12 @@
             "state" : "translated",
             "value" : "重新登陆"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新登入"
+          }
         }
       }
     },
@@ -18153,7 +18213,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pendentes"
+            "value" : "Pesquisar"
           }
         },
         "ro" : {
@@ -18338,6 +18398,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "收藏夹"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最愛"
           }
         }
       }
@@ -19389,6 +19455,12 @@
             "state" : "translated",
             "value" : "通知"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知"
+          }
         }
       }
     },
@@ -19519,6 +19591,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "无效的 URL"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無效網址"
           }
         }
       }
@@ -19957,6 +20035,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "加载中..."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "載入中……"
           }
         }
       }
@@ -20769,6 +20853,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "请输入关键字"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請輸入關鍵字"
           }
         }
       }
@@ -21586,6 +21676,12 @@
             "state" : "translated",
             "value" : "在缓存中搜索…"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜尋快取…"
+          }
         }
       }
     },
@@ -21715,6 +21811,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "帖子"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "狀態"
           }
         }
       }
@@ -22581,6 +22683,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "注销"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登出"
           }
         }
       }
@@ -25103,6 +25211,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "本地时间线"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本地時間軸"
           }
         }
       }
@@ -60711,6 +60825,12 @@
             "state" : "translated",
             "value" : "发送帖子失败"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "貼文發送失敗"
+          }
         }
       }
     },
@@ -60840,6 +60960,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "帖子已发送"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "貼文已發送"
           }
         }
       }
@@ -61154,6 +61280,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "保存图像失败"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "儲存圖片失敗"
           }
         }
       }
@@ -62093,6 +62225,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "通知"
@@ -68220,6 +68358,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "帖子"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "狀態"
           }
         }
       }

@@ -2,10 +2,10 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="login_button">Conectar-se</string>
     <string name="navigate_back">Navegar para trás</string>
-    <string name="home_tab_home_title">Residencial</string>
-    <string name="home_tab_notifications_title">notificações</string>
+    <string name="home_tab_home_title">Início</string>
+    <string name="home_tab_notifications_title">Notificações</string>
     <string name="home_tab_me_title">Eu</string>
-    <string name="home_tab_discover_title">Pendentes</string>
+    <string name="home_tab_discover_title">Pesquisar</string>
     <string name="home_timeline_new_toots">Novas postagens</string>
     <string name="notification_tab_all_title">TODOS</string>
     <string name="notification_tab_mentions_title">Menciona</string>
@@ -34,11 +34,11 @@
     <string name="settings_title">Confirgurações</string>
     <string name="settings_accounts_title">Gerenciamento da conta</string>
     <string name="settings_appearance_title">Aparência</string>
-    <string name="settings_appearance_subtitle">Personalizar a aparência do Sinalizador</string>
+    <string name="settings_appearance_subtitle">Personalizar a aparência do Flare</string>
     <string name="settings_storage_title">Armazenamento</string>
-    <string name="settings_storage_subtitle">Gerenciar armazenamento do Sinalizador</string>
-    <string name="settings_about_title">SOBRE</string>
-    <string name="settings_about_subtitle">Saiba mais sobre sinalizador</string>
+    <string name="settings_storage_subtitle">Gerenciar armazenamento do Flare</string>
+    <string name="settings_about_title">Sobre</string>
+    <string name="settings_about_subtitle">Saiba mais sobre o Flare</string>
     <string name="settings_side_panel">Personalização do painel lateral</string>
     <string name="settings_side_panel_description">Personalizar o painel lateral</string>
     <string name="settings_local_filter_title">Filtro local</string>
@@ -64,12 +64,12 @@
     <string name="login_expired">Sessão de login expirada</string>
     <string name="login_expired_message">Clique para entrar novamente</string>
     <string name="login_expired_relogin">Entrar novamente</string>
-    <string name="service_select_welcome_title">Bem-vindo ao Sinalizador</string>
-    <string name="service_select_welcome_message">Sinalizador é um cliente de rede social para Android.\nPara começar, por favor, selecione um serviço para se conectar.</string>
+    <string name="service_select_welcome_title">Bem-vindo ao Flare</string>
+    <string name="service_select_welcome_message">Flare é um cliente de rede social para Android.\nPara começar, por favor, selecione um serviço para se conectar.</string>
     <string name="mastodon_login_verify_message">Por favor, aguarde enquanto verificamos suas credenciais.</string>
     <string name="status_title">Detalhe</string>
     <string name="misskey_visibility_public">Público</string>
-    <string name="misskey_visibility_home">Residencial</string>
+    <string name="misskey_visibility_home">Início</string>
     <string name="misskey_visibility_followers">Seguidores</string>
     <string name="misskey_visibility_specified">Especificado</string>
     <string name="misskey_visibility_public_description">Qualquer um pode ver e otimizar este toot</string>
@@ -126,7 +126,7 @@
     <string name="settings_appearance_video_autoplay_never">nunca</string>
     <string name="settings_appearance_avatar_shape">Formato do avatar</string>
     <string name="settings_appearance_avatar_shape_description">Mudar a forma do avatar</string>
-    <string name="settings_appearance_avatar_shape_round">RODADA</string>
+    <string name="settings_appearance_avatar_shape_round">Redondo</string>
     <string name="settings_appearance_avatar_shape_square">Quadrado</string>
     <string name="settings_appearance_theme">Tema</string>
     <string name="settings_appearance_theme_description">Alterar o tema do aplicativo</string>
@@ -143,7 +143,7 @@
     <string name="settings_appearance_theme_color_description">Alterar a cor do tema do aplicativo</string>
     <string name="settings_appearance_theme_pure_color">Modo de Alto Contraste</string>
     <string name="settings_appearance_theme_pure_color_description">Aumentar o contraste entre plano de fundo e texto</string>
-    <string name="settings_appearance_font_size_diff">Font size</string>
+    <string name="settings_appearance_font_size_diff">Tamanho da fonte</string>
     <string name="settings_appearance_font_size_diff_description">Alterar o tamanho da fonte do aplicativo</string>
     <string name="settings_appearance_font_size_diff_decrease">Diminuir</string>
     <string name="settings_appearance_font_size_diff_increase">Aumentar</string>
@@ -294,4 +294,12 @@
     <string name="tab_settings_mixed_timeline">Adicionar guia de timeline mista</string>
     <string name="tab_settings_mixed_timeline_desc">Linha do tempo mista irá misturar todas as abas que resultam em uma aba</string>
     <string name="home_tab_social_timeline_title">Sócio</string>
+    <string name="changelog_current"><![CDATA[            <span>Versão %1$s:</span>
+            <ul>
+                <li>Configurações de fonte adicionadas.</li>
+                <li>O recurso RSS foi significativamente reformulado. O conteúdo do artigo agora é renderizado nativamente em vez de usar um WebView.</li>
+                <li>Lógica de renderização de richtext otimizada para melhor desempenho.</li>
+                <li>Correções de bugs e melhorias de desempenho.</li>
+            </ul>
+        ]]></string>
 </resources>

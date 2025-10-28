@@ -174,7 +174,7 @@ material3-navigation = { group = "io.github.stefanoq21", name = "material3-navig
 
 compose-lint-checks = { group = "com.slack.lint.compose", name = "compose-lint-checks", version.ref = "compose-lint-checks" }
 
-mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.2.0"
+mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.2.1"
 
 compose-webview = { group = "io.github.kevinnzou", name = "compose-webview", version = "0.33.6" }
 compose-webview-multiplatform = { group = "io.github.kevinnzou", name = "compose-webview-multiplatform", version = "2.0.3" }

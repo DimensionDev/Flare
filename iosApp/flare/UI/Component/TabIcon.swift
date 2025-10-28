@@ -31,6 +31,7 @@ extension TitleType {
             case .social: String(localized: "social_title")
             case .antenna: String(localized: "antenna_title")
             case .mixedTimeline: String(localized: "mixed_timeline_title")
+            case .liked: String(localized: "liked_title")
             }
             return text
         case .text(let text):
@@ -131,7 +132,7 @@ struct MaterialTabIcon: View {
         case .bookmark:     Image("fa-book-bookmark")
                 .resizable()
                 .scaledToFit()
-        case .heart:        Image("fa-star")
+        case .heart:        Image("fa-heart")
                 .resizable()
                 .scaledToFit()
         case .twitter:      Image("fa-twitter")

@@ -464,6 +464,7 @@
     <string name="social_title">Social</string>
     <string name="antenna_title">Antenna</string>
     <string name="mixed_timeline_title">Mixed</string>
+    <string name="liked_title">Liked</string>
 
 
     <string name="settings_about_description">The ultimate next generation open-sourced AI powered decentralized social network client.</string>

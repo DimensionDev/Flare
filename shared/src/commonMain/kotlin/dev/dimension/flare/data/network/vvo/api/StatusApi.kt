@@ -114,4 +114,20 @@ internal interface StatusApi {
         @Field("type") type: String = "comment",
         @Header("X-Xsrf-Token") xsrfToken: String = st,
     ): VVOResponse<JsonElement>
+
+    @POST("api/statuses/createfav")
+    @FormUrlEncoded
+    suspend fun favoriteStatus(
+        @Field("id") id: String,
+        @Field("st") st: String,
+        @Header("X-Xsrf-Token") xsrfToken: String = st,
+    ): VVOResponse<String>
+
+    @POST("api/statuses/destroyfav")
+    @FormUrlEncoded
+    suspend fun unfavoriteStatus(
+        @Field("id") id: String,
+        @Field("st") st: String,
+        @Header("X-Xsrf-Token") xsrfToken: String = st,
+    ): VVOResponse<String>
 }

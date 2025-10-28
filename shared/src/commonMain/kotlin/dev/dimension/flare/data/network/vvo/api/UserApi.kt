@@ -48,5 +48,6 @@ internal interface UserApi {
         @Query("since_id") sinceId: String? = null,
         @Query("page") page: Int? = null,
         @Query("page_type") pageType: String? = null,
+        @Query("openApp") openApp: Int? = null,
     ): VVOResponse<ContainerInfo>
 }

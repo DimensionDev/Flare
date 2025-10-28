@@ -133,5 +133,10 @@ internal sealed interface StatusEvent {
             statusKey: MicroBlogKey,
             liked: Boolean,
         )
+
+        fun favorite(
+            statusKey: MicroBlogKey,
+            favorited: Boolean,
+        )
     }
 }

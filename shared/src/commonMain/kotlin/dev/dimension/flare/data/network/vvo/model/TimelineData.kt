@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.network.vvo.model
 
 import dev.dimension.flare.common.JSON
+import dev.dimension.flare.data.repository.tryRun
 import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.format.DateTimeComponents.Companion.Format
 import kotlinx.datetime.format.DayOfWeekNames
@@ -64,7 +65,7 @@ private class VVOResponseSerializer<T>(
         val dataElt = obj["data"]
         val data =
             dataElt?.let {
-                runCatching { jsonDecoder.json.decodeFromJsonElement(dataSer, it) }
+                tryRun { jsonDecoder.json.decodeFromJsonElement(dataSer, it) }
                     .getOrNull()
             }
 
@@ -218,6 +219,8 @@ internal data class Status(
     val pageInfo: StatusPageInfo? = null,
     @SerialName("title")
     val title: Title? = null,
+    @SerialName("liked")
+    val liked: Boolean? = null,
 ) {
     val picsList: List<StatusPic>?
         get() =
@@ -417,9 +420,9 @@ internal data class StatusPicGeo(
 
 @Serializable
 internal data class User(
-    val id: Long,
+    val id: Long? = null,
     @SerialName("screen_name")
-    val screenName: String,
+    val screenName: String? = null,
     @SerialName("profile_image_url")
     val profileImageURL: String? = null,
     @SerialName("profile_url")

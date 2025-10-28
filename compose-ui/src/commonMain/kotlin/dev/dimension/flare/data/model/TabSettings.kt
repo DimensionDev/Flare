@@ -617,7 +617,17 @@ public sealed class TimelineTabItem : TabItem() {
                 ),
             )
 
-        private fun defaultVVOSecondaryItems(accountKey: MicroBlogKey) = persistentListOf<TimelineTabItem>()
+        private fun defaultVVOSecondaryItems(accountKey: MicroBlogKey) =
+            persistentListOf<TimelineTabItem>(
+                VVo.FeaturedTimelineTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Featured),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Featured, accountKey),
+                        ),
+                ),
+            )
     }
 }
 
@@ -961,6 +971,22 @@ public object Bluesky {
                         icon = IconType.Material(IconType.Material.MaterialIcon.Bookmark),
                     ),
             )
+    }
+}
+
+public object VVo {
+    @Serializable
+    public data class FeaturedTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem() {
+        override val key: String = "featured_$account"
+
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home
+                .DiscoverStatusTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 }
 

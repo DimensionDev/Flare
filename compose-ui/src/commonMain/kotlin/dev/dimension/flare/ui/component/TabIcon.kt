@@ -28,13 +28,13 @@ import compose.icons.fontawesomeicons.solid.BookBookmark
 import compose.icons.fontawesomeicons.solid.CircleUser
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Globe
+import compose.icons.fontawesomeicons.solid.Heart
 import compose.icons.fontawesomeicons.solid.House
 import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Message
 import compose.icons.fontawesomeicons.solid.RectangleList
 import compose.icons.fontawesomeicons.solid.SquareRss
-import compose.icons.fontawesomeicons.solid.Star
 import compose.icons.fontawesomeicons.solid.Users
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.antenna_title
@@ -48,6 +48,7 @@ import dev.dimension.flare.compose.ui.home_tab_home_title
 import dev.dimension.flare.compose.ui.home_tab_list_title
 import dev.dimension.flare.compose.ui.home_tab_me_title
 import dev.dimension.flare.compose.ui.home_tab_notifications_title
+import dev.dimension.flare.compose.ui.liked_title
 import dev.dimension.flare.compose.ui.mastodon_tab_local_title
 import dev.dimension.flare.compose.ui.mastodon_tab_public_title
 import dev.dimension.flare.compose.ui.mixed_timeline_title
@@ -244,6 +245,7 @@ internal val TitleType.Localized.res: StringResource
             TitleType.Localized.LocalizedKey.Social -> Res.string.social_title
             TitleType.Localized.LocalizedKey.Antenna -> Res.string.antenna_title
             TitleType.Localized.LocalizedKey.MixedTimeline -> Res.string.mixed_timeline_title
+            TitleType.Localized.LocalizedKey.Liked -> Res.string.liked_title
         }
 
 internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =
@@ -257,7 +259,7 @@ internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =
         IconType.Material.MaterialIcon.World -> FontAwesomeIcons.Solid.Globe
         IconType.Material.MaterialIcon.Featured -> FontAwesomeIcons.Solid.RectangleList
         IconType.Material.MaterialIcon.Bookmark -> FontAwesomeIcons.Solid.BookBookmark
-        IconType.Material.MaterialIcon.Heart -> FontAwesomeIcons.Solid.Star
+        IconType.Material.MaterialIcon.Heart -> FontAwesomeIcons.Solid.Heart
         IconType.Material.MaterialIcon.Twitter -> FontAwesomeIcons.Brands.Twitter
         IconType.Material.MaterialIcon.Mastodon -> FontAwesomeIcons.Brands.Mastodon
         IconType.Material.MaterialIcon.Misskey -> FontAwesomeIcons.Brands.Misskey

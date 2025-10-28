@@ -123,14 +123,16 @@ private fun Comment.toDbStatus(accountKey: MicroBlogKey): DbStatus =
         createdAt = createdAt ?: Clock.System.now(),
     )
 
-internal fun User.toDbUser(): DbUser =
-    DbUser(
-        handle = screenName,
-        host = vvoHost,
-        name = screenName,
-        userKey = MicroBlogKey(id = id.toString(), host = vvoHost),
-        platformType = PlatformType.VVo,
-        content =
-            UserContent
-                .VVO(data = this),
-    )
+internal fun User.toDbUser(): DbUser? =
+    screenName?.let {
+        DbUser(
+            handle = it,
+            host = vvoHost,
+            name = screenName,
+            userKey = MicroBlogKey(id = id.toString(), host = vvoHost),
+            platformType = PlatformType.VVo,
+            content =
+                UserContent
+                    .VVO(data = this),
+        )
+    }

@@ -670,7 +670,7 @@ internal class VVODataSource(
                     it.copy(
                         data =
                             it.data.copy(
-                                favorited = !liked,
+                                liked = !liked,
                                 attitudesCount =
                                     if (liked) {
                                         it.data.attitudesCount?.minus(1)
@@ -706,7 +706,7 @@ internal class VVODataSource(
                         it.copy(
                             data =
                                 it.data.copy(
-                                    favorited = liked,
+                                    liked = liked,
                                     attitudesCount =
                                         if (liked) {
                                             it.data.attitudesCount?.plus(1)
@@ -783,6 +783,74 @@ internal class VVODataSource(
                     },
                 )
             }.onSuccess {
+            }
+        }
+    }
+
+    override fun favorite(
+        statusKey: MicroBlogKey,
+        favorited: Boolean,
+    ) {
+        coroutineScope.launch {
+            updateStatusUseCase<StatusContent.VVO>(
+                statusKey = statusKey,
+                accountKey = accountKey,
+                cacheDatabase = database,
+                update = {
+                    it.copy(
+                        data =
+                            it.data.copy(
+                                favorited = !favorited,
+                            ),
+                    )
+                },
+            )
+
+            tryRun {
+                val config = service.config()
+                if (config.data?.login != true) {
+                    throw LoginExpiredException(
+                        accountKey = accountKey,
+                        platformType = PlatformType.VVo,
+                    )
+                }
+                val st = config.data.st
+                requireNotNull(st) { "st is null" }
+                if (favorited) {
+                    service.unfavoriteStatus(id = statusKey.id, st = st)
+                } else {
+                    service.favoriteStatus(id = statusKey.id, st = st)
+                }
+            }.onFailure {
+                updateStatusUseCase<StatusContent.VVO>(
+                    statusKey = statusKey,
+                    accountKey = accountKey,
+                    cacheDatabase = database,
+                    update = {
+                        it.copy(
+                            data =
+                                it.data.copy(
+                                    favorited = favorited,
+                                ),
+                        )
+                    },
+                )
+            }.onSuccess {
+                if (it.ok != 1L) {
+                    updateStatusUseCase<StatusContent.VVO>(
+                        statusKey = statusKey,
+                        accountKey = accountKey,
+                        cacheDatabase = database,
+                        update = {
+                            it.copy(
+                                data =
+                                    it.data.copy(
+                                        favorited = favorited,
+                                    ),
+                            )
+                        },
+                    )
+                }
             }
         }
     }
@@ -867,5 +935,19 @@ internal class VVODataSource(
                 type = ProfileTab.Timeline.Type.Status,
                 loader = userTimeline(userKey, false),
             ),
+        )
+
+    fun favouriteTimeline() =
+        FavouriteRemoteMediator(
+            service = service,
+            database = database,
+            accountKey = accountKey,
+        )
+
+    fun likeRemoteMediator() =
+        LikeRemoteMediator(
+            service = service,
+            database = database,
+            accountKey = accountKey,
         )
 }

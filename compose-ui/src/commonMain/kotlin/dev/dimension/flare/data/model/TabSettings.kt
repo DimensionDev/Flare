@@ -83,6 +83,7 @@ public sealed class TitleType {
             Antenna,
             MixedTimeline,
             Social,
+            Liked,
         }
     }
 }
@@ -627,6 +628,22 @@ public sealed class TimelineTabItem : TabItem() {
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Featured, accountKey),
                         ),
                 ),
+                VVo.FavoriteTimelineTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Bookmark),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Bookmark, accountKey),
+                        ),
+                ),
+                VVo.LikedTimelineTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Liked),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Heart, accountKey),
+                        ),
+                ),
             )
     }
 }
@@ -985,6 +1002,34 @@ public object VVo {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home
                 .DiscoverStatusTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Serializable
+    public data class FavoriteTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem() {
+        override val key: String = "favorite_$account"
+
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.vvo
+                .VVOFavouriteTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Serializable
+    public data class LikedTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem() {
+        override val key: String = "liked_$account"
+
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.vvo
+                .VVOLikeTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }

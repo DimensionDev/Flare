@@ -56,6 +56,8 @@ internal data class CardlistInfo(
     val autoLoadMoreIndex: Long? = null,
     @SerialName("since_id")
     val sinceID: Long? = null,
+    @SerialName("page")
+    val page: Long? = null,
 )
 
 @Serializable
@@ -88,7 +90,7 @@ internal data class TabsInfo(
 
 @Serializable
 internal data class Tab(
-    val id: Long? = null,
+//    val id: Long? = null,
     val tabKey: String? = null,
     @SerialName("must_show")
     val mustShow: Long? = null,

@@ -193,15 +193,22 @@ internal fun Status.renderStatus(
                 ),
                 StatusAction.Item.Like(
                     count = attitudesCount ?: 0,
-                    liked = favorited ?: false,
+                    liked = liked ?: false,
                     onClicked = {
-                        event.like(statusKey, favorited ?: false)
+                        event.like(statusKey, liked ?: false)
                     },
                 ),
                 StatusAction.Group(
                     displayItem = StatusAction.Item.More,
                     actions =
                         listOfNotNull(
+                            StatusAction.Item.Bookmark(
+                                count = 0,
+                                bookmarked = favorited ?: false,
+                                onClicked = {
+                                    event.favorite(statusKey, favorited ?: false)
+                                },
+                            ),
                             if (isFromMe) {
                                 StatusAction.Item.Delete(
                                     onClicked = {
@@ -274,7 +281,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         nameInternal =
             Element("span")
                 .apply {
-                    appendChild(TextNode(screenName))
+                    appendChild(TextNode(screenName.toString()))
                 }.toUi(),
         description =
             description?.let {

@@ -60028,6 +60028,16 @@
         }
       }
     },
+    "liked_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liked"
+          }
+        },
+      }
+    },
     "more" : {
       "localizations" : {
         "af" : {

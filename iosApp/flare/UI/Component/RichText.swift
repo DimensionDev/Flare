@@ -11,25 +11,27 @@ struct RichText: View {
     var body: some View {
         renderer
             .displayText
-            .backport
-            .textRenderer(CodeEffect())
-            .task(id: renderer.imageURLs) {
-                if !renderer.imageURLs.isEmpty, renderer.imageURLs.count != renderer.images.count, renderer.imageURLs.allSatisfy({ renderer.images[$0] == nil }) {
-                    var images: [String: Image?] = [:]
-                    for urlString in renderer.imageURLs {
-                        if let url = URL(string: urlString) {
-                            do {
-                                let image = try await KingfisherManager.shared.retrieveImage(with: url)
-                                images[urlString] = Image(uiImage: image.image.resize(height: imageSize) ?? image.image)
-                            } catch {
+//            .backport
+//            .textRenderer(.codeEffect)
+            .if(!renderer.imageURLs.isEmpty) { view in
+                view.task(id: renderer.imageURLs) {
+                    if renderer.imageURLs.count != renderer.images.count {
+                        var images: [String: Image?] = [:]
+                        for urlString in renderer.imageURLs {
+                            if let url = URL(string: urlString) {
+                                do {
+                                    let image = try await KingfisherManager.shared.retrieveImage(with: url)
+                                    images[urlString] = Image(uiImage: image.image.resize(height: imageSize) ?? image.image)
+                                } catch {
+                                    images[urlString] = nil
+                                }
+                            } else {
                                 images[urlString] = nil
                             }
-                        } else {
-                            images[urlString] = nil
                         }
+                        renderer.images = images
+                        renderer.render()
                     }
-                    renderer.images = images
-                    renderer.render()
                 }
             }
     }
@@ -164,7 +166,7 @@ struct RichTextRenderer {
             let codeText = element.text()
             self.result = self.result + Text(codeText)
                 .font(.system(.body, design: .monospaced))
-                .customAttribute(CodeAttribute())
+//                .customAttribute(.code)
             break;
 //            let currentAttributes = self.attributeContainer
 //            self.attributeContainer = .init()
@@ -180,7 +182,7 @@ struct RichTextRenderer {
             self.result = self.result + Text(blockquoteText)
                 .foregroundColor(.secondary)
                 .italic()
-                .customAttribute(CodeAttribute())
+//                .customAttribute(.code)
             break;
 //            let currentAttributes = self.attributeContainer
 //            self.attributeContainer = .init()
@@ -237,6 +239,14 @@ struct CodeEffect: TextRenderer {
             }
         }
     }
+}
+
+extension TextAttribute where Self == CodeAttribute {
+    static var code: CodeAttribute { CodeAttribute() }
+}
+
+extension TextRenderer where Self == CodeEffect {
+    static var codeEffect: CodeEffect { CodeEffect() }
 }
 
 extension UIImage {

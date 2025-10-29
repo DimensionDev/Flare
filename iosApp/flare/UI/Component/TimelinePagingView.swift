@@ -72,7 +72,7 @@ extension TimelinePagingView {
     }
 }
 
-struct TimelineData: Identifiable {
+struct TimelineData: Identifiable, Hashable {
     let id: String
     let data: UiTimeline?
     let index: Int

@@ -21,6 +21,25 @@ struct AppearanceScreen: View {
                     } label: {
                         Text("appearance_theme")
                     }
+                    VStack(
+                        alignment: .leading,
+                        
+                    ) {
+                        Text("appearance_font_size_diff")
+                        Slider(value: Binding(get: {
+                            appearance.fontSizeDiff
+                        }, set: { newValue in
+                            presenter.state.updateAppearanceSettings { settings in
+                                settings.copy(fontSizeDiff: newValue)
+                            }
+                        }), in: -2...4, step: 1) {
+                            Text("appearance_font_size_diff")
+                        } minimumValueLabel: {
+                            Image(systemName: "textformat.size.smaller")
+                        } maximumValueLabel: {
+                            Image(systemName: "textformat.size.larger")
+                        }
+                    }
                 }
             }
             Section {

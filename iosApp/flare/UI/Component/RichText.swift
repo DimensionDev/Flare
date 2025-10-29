@@ -109,7 +109,7 @@ struct RichTextRenderer {
             element.childNodes().forEach { node in
                 renderNode(node: node)
             }
-            self.attributedString = self.attributedString + AttributedString("\n\n", attributes: self.attributeContainer)
+//            self.attributedString = self.attributedString + AttributedString("\n", attributes: self.attributeContainer)
             break;
         case "span":
             element.childNodes().forEach { node in

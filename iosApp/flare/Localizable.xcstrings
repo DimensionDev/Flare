@@ -4592,6 +4592,16 @@
         }
       }
     },
+    "appearance_font_size_diff" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Font Size"
+          }
+        }
+      }
+    },
     "appearance_show_actions" : {
       "localizations" : {
         "af" : {

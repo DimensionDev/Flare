@@ -6,6 +6,8 @@ import Combine
 struct FlareTheme<Content: View>: View {
     @ViewBuilder let content: () -> Content
     @State private var themeSettings = ThemeSettings()
+    private let sizes: [DynamicTypeSize] =
+      [.xSmall, .small, .medium, .large, .xLarge, .xxLarge, .xxxLarge]
     var body: some View {
         content()
             .networkStatus()
@@ -13,6 +15,7 @@ struct FlareTheme<Content: View>: View {
             .preferredColorScheme(
                 themeSettings.appearanceSettings.theme == .system ? nil : (themeSettings.appearanceSettings.theme == .dark ? .dark : .light)
             )
+            .dynamicTypeSize(sizes[min(max(Int(themeSettings.appearanceSettings.fontSizeDiff) + 2, 0), sizes.count - 1)])
     }
 }
 

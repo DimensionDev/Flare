@@ -31,7 +31,7 @@ extension TitleType {
             case .social: String(localized: "social_title")
             case .antenna: String(localized: "antenna_title")
             case .mixedTimeline: String(localized: "mixed_timeline_title")
-            case .liked: String(localized: "liked_title")
+            case .liked: String(localized: "liked_tab_title")
             }
             return text
         case .text(let text):

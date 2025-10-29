@@ -11,7 +11,6 @@
 		0646B2622E7151A700535A3E /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0646B2612E7151A700535A3E /* Kingfisher */; };
 		0672EE122E8689C70092AD1F /* Drops in Frameworks */ = {isa = PBXBuildFile; productRef = 0672EE112E8689C70092AD1F /* Drops */; };
 		068923482E82A80700981D8E /* Flow in Frameworks */ = {isa = PBXBuildFile; productRef = 068923472E82A80700981D8E /* Flow */; };
-		068F7CD12E75405A00B5FB40 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 068F7CD02E75405A00B5FB40 /* MarkdownUI */; };
 		06C6B5482E853AAF00CCD388 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */; };
 		06C7FC172E7D474900A0D01A /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = 06C7FC162E7D474900A0D01A /* LazyPager */; };
 		06F36AAD2E8F7BEC00F5905F /* SwiftUIBackports in Frameworks */ = {isa = PBXBuildFile; productRef = 06F36AAC2E8F7BEC00F5905F /* SwiftUIBackports */; };
@@ -49,7 +48,6 @@
 			files = (
 				068923482E82A80700981D8E /* Flow in Frameworks */,
 				06C7FC172E7D474900A0D01A /* LazyPager in Frameworks */,
-				068F7CD12E75405A00B5FB40 /* MarkdownUI in Frameworks */,
 				0672EE122E8689C70092AD1F /* Drops in Frameworks */,
 				06C6B5482E853AAF00CCD388 /* SwiftUIIntrospect in Frameworks */,
 				0646B2622E7151A700535A3E /* Kingfisher in Frameworks */,
@@ -99,7 +97,6 @@
 			name = Flare;
 			packageProductDependencies = (
 				0646B2612E7151A700535A3E /* Kingfisher */,
-				068F7CD02E75405A00B5FB40 /* MarkdownUI */,
 				06C7FC162E7D474900A0D01A /* LazyPager */,
 				068923472E82A80700981D8E /* Flow */,
 				06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */,
@@ -137,7 +134,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				0646B2602E7151A700535A3E /* XCRemoteSwiftPackageReference "Kingfisher" */,
-				068F7CCF2E75405A00B5FB40 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 				06791BD42E7AA40000FF2050 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
 				06C7FC152E7D474900A0D01A /* XCRemoteSwiftPackageReference "LazyPager" */,
 				068923462E82A80700981D8E /* XCRemoteSwiftPackageReference "SwiftUI-Flow" */,
@@ -467,14 +463,6 @@
 				version = 3.1.1;
 			};
 		};
-		068F7CCF2E75405A00B5FB40 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
-			requirement = {
-				kind = exactVersion;
-				version = 2.4.1;
-			};
-		};
 		06C6B5462E853AAF00CCD388 /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/siteline/swiftui-introspect";
@@ -521,11 +509,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 068923462E82A80700981D8E /* XCRemoteSwiftPackageReference "SwiftUI-Flow" */;
 			productName = Flow;
-		};
-		068F7CD02E75405A00B5FB40 /* MarkdownUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 068F7CCF2E75405A00B5FB40 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
-			productName = MarkdownUI;
 		};
 		06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */ = {
 			isa = XCSwiftPackageProductDependency;

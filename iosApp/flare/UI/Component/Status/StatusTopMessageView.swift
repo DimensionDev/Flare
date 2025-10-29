@@ -1,6 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import MarkdownUI
 
 struct StatusTopMessageView: View {
     let topMessage: UiTimeline.TopMessage
@@ -10,10 +9,6 @@ struct StatusTopMessageView: View {
             if let user = topMessage.user {
                 RichText(text: user.name)
                     .lineLimit(1)
-                    .markdownTextStyle(\.text) {
-                        FontSize(12)
-                        ForegroundColor(.secondary)
-                    }
             }
             if let text = topMessage.type.localizedText {
                 Text(text)

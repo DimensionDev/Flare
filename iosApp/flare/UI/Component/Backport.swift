@@ -22,3 +22,13 @@ struct BackportLabelStyle: LabelStyle {
     }
 }
 
+extension Backport where Content: View {
+    @ViewBuilder
+    func textRenderer<T>(_ renderer: T) -> some View where T : TextRenderer {
+        if #available(iOS 18.0, *) {
+            content.textRenderer(renderer)
+        } else {
+            content
+        }
+    }
+}

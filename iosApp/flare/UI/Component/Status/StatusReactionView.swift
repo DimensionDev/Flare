@@ -18,7 +18,6 @@ struct StatusReactionView: View {
                                 Text(item.name)
                             } else {
                                 NetworkImage(data: item.url)
-                                    .frame(height: 20)
                             }
                         }
                     }
@@ -29,6 +28,7 @@ struct StatusReactionView: View {
                     })
                 }
             }
+            .frame(height: 36)
         }
         .scrollIndicators(.hidden)
     }

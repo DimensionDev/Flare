@@ -355,6 +355,7 @@
     <string name="social_title">Sosial</string>
     <string name="antenna_title">Antenne</string>
     <string name="mixed_timeline_title">Blandet</string>
+    <string name="liked_title">Likte</string>
     <string name="settings_about_description">Den ultimate neste generasjonen med åpen AI drevet desentralisert sosial nettverksklient.</string>
     <string name="settings_about_source_code">Kildekode</string>
     <string name="settings_about_telegram">Telegram</string>

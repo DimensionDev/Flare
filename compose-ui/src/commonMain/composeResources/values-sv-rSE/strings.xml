@@ -355,6 +355,7 @@
     <string name="social_title">Socialt</string>
     <string name="antenna_title">Antenn</string>
     <string name="mixed_timeline_title">Blandad</string>
+    <string name="liked_title">Gillade</string>
     <string name="settings_about_description">Den ultimata nästa generation öppen källkod AI drivs decentraliserade sociala nätverk klient.</string>
     <string name="settings_about_source_code">Källkod</string>
     <string name="settings_about_telegram">Telegram</string>

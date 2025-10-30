@@ -355,6 +355,7 @@
     <string name="social_title">Соціальні мережі</string>
     <string name="antenna_title">Антена</string>
     <string name="mixed_timeline_title">Змішаний</string>
+    <string name="liked_title">Вподобано</string>
     <string name="settings_about_description">На основі децентралізованого клієнта соціальної мережі під час наступного покоління.</string>
     <string name="settings_about_source_code">Початковий код</string>
     <string name="settings_about_telegram">Телеграма</string>

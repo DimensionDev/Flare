@@ -355,6 +355,7 @@
     <string name="social_title">Соцсети</string>
     <string name="antenna_title">Антенна</string>
     <string name="mixed_timeline_title">Смешанный</string>
+    <string name="liked_title">Понравилось</string>
     <string name="settings_about_description">Конечное поколение с открытым исходным кодом обеспечило децентрализованный клиент социальных сетей.</string>
     <string name="settings_about_source_code">Исходный код</string>
     <string name="settings_about_telegram">Телеграмма</string>

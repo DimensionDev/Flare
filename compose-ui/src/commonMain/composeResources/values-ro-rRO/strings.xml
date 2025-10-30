@@ -355,6 +355,7 @@
     <string name="social_title">Sociale</string>
     <string name="antenna_title">Antenă</string>
     <string name="mixed_timeline_title">Amestecat</string>
+    <string name="liked_title">Apreciat</string>
     <string name="settings_about_description">Cea mai importantă generaţie de AI open-sourced a oferit un client descentralizat al reţelei sociale.</string>
     <string name="settings_about_source_code">Cod sursă</string>
     <string name="settings_about_telegram">Telegramă</string>

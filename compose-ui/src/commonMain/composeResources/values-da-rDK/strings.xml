@@ -355,6 +355,7 @@
     <string name="social_title">Social</string>
     <string name="antenna_title">Antenne</string>
     <string name="mixed_timeline_title">Blandet</string>
+    <string name="liked_title">Syntes om</string>
     <string name="settings_about_description">Den ultimative næste generation open sourced AI drevet decentraliserede sociale netværk klient.</string>
     <string name="settings_about_source_code">Kilde kode</string>
     <string name="settings_about_telegram">Telegram</string>

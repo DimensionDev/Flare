@@ -355,6 +355,7 @@
     <string name="social_title">社交</string>
     <string name="antenna_title">天线</string>
     <string name="mixed_timeline_title">混合</string>
+    <string name="liked_title">赞的</string>
     <string name="settings_about_description">下一代开放源码的 AI 为分散的社交网络客户端提供动力。</string>
     <string name="settings_about_source_code">源代码</string>
     <string name="settings_about_telegram">Telegram</string>

@@ -353,6 +353,7 @@
     <string name="social_title">Κοινωνικά</string>
     <string name="antenna_title">Κεραία</string>
     <string name="mixed_timeline_title">Μεικτό</string>
+    <string name="liked_title">Άρεσε</string>
     <string name="settings_about_description">Το απόλυτο αποκεντρωμένο κοινωνικό δίκτυο που τροφοδοτείται από την επόμενη γενιά ανοικτού κώδικα.</string>
     <string name="settings_about_source_code">Πηγαίος κώδικας</string>
     <string name="settings_about_telegram">Telegram</string>

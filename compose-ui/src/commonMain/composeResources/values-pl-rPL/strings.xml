@@ -355,6 +355,7 @@
     <string name="social_title">Społeczność</string>
     <string name="antenna_title">Antena</string>
     <string name="mixed_timeline_title">Mieszane</string>
+    <string name="liked_title">Polubione</string>
     <string name="settings_about_description">Najnowszy klient nowej generacji oparty na zdecentralizowanej sieci społecznościowej.</string>
     <string name="settings_about_source_code">Kod źródłowy</string>
     <string name="settings_about_telegram">Telegram</string>

@@ -34,7 +34,7 @@
     <string name="profile_tab_media">メディア</string>
     <string name="report_title">レポート</string>
     <string name="report_description">この投稿の問題点は何ですか?</string>
-    <string name="report_reason_spam_title">迷惑メール</string>
+    <string name="report_reason_spam_title">スパム</string>
     <string name="report_reason_violation_title">規約違反かつ緊急</string>
     <string name="report_reason_misleading_title">誤解を招く内容</string>
     <string name="report_reason_sexual_title">望ましくない性的コンテンツ</string>
@@ -67,7 +67,7 @@
     <string name="status_detail_repost">リポスト</string>
     <string name="emoji_picker_recent">最近のもの</string>
     <string name="emoji_picker_search">検索</string>
-    <string name="media_show_thumbnail_list">Show thumbnail list</string>
+    <string name="media_show_thumbnail_list">サムネイル一覧を表示</string>
     <string name="media_hide_thumbnail_list">サムネイル一覧を非表示</string>
     <string name="media_save">保存</string>
     <string name="media_fullscreen">全画面</string>
@@ -247,7 +247,7 @@
     <string name="dm_leave">会話から出る</string>
     <string name="dm_to_profile">プロファイルを表示</string>
     <string name="tab_settings_mixed_timeline">混合タイムラインタブを追加</string>
-    <string name="tab_settings_mixed_timeline_desc">混合されたタイムラインは、すべてのタブタイムラインの結果を1つのタブにミックスします</string>
+    <string name="tab_settings_mixed_timeline_desc">混合タイムラインは、すべてのタブタイムラインの結果を1つのタブにミックスします</string>
     <string name="edit_tab_title">タブを編集</string>
     <string name="edit_tab_name">名前</string>
     <string name="edit_tab_name_placeholder">タブ名</string>

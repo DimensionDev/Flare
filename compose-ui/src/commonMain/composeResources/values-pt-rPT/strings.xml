@@ -355,6 +355,7 @@
     <string name="social_title">Sócio</string>
     <string name="antenna_title">Antena</string>
     <string name="mixed_timeline_title">Misto</string>
+    <string name="liked_title">Curtiu</string>
     <string name="settings_about_description">O melhor cliente descentralizado de rede social de código-fonte aberto da próxima geração.</string>
     <string name="settings_about_source_code">Código fonte</string>
     <string name="settings_about_telegram">Telegram</string>

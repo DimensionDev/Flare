@@ -150,7 +150,6 @@ struct MatrixView: View {
             .onTapGesture {
                 onFollowingClick()
             }
-            Divider()
             HStack {
                 Text(fansCount)
                 Text("matrix_followers")

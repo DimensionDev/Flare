@@ -296,9 +296,7 @@
     <string name="home_tab_social_timeline_title">社交</string>
     <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
             <ul>
-                <li>添加的字体设置。</li>
-                <li>对RSS功能进行了重大修改。 文章内容是原生化的，而不是使用 Web View。</li>
-                <li>优化富文本渲染逻辑以提高性能。</li>
+                <li>添加底部条设置</li>
                 <li>Bug 修复和性能改进。</li>
             </ul>
         ]]></string>

@@ -296,10 +296,8 @@
     <string name="home_tab_social_timeline_title">Sociální</string>
     <string name="changelog_current"><![CDATA[            <span>Verze %1$s:</span>
             <ul>
-                <li>Přidáno nastavení písma.</li>
-                <li>Výrazně vylepšil funkci RSS. Obsah článku je nyní vykreslen nativně místo používání WebView.</li>
-                <li>Optimalizovalo vykreslování bohatých textů pro lepší výkon.</li>
-                <li>Opravy chyb a zlepšení výkonu.</li>
+                <li>Přidáno spodní nastavení panelu</li>
+                <li>Opravy chyb a vylepšení výkonu.</li>
             </ul>
         ]]></string>
 </resources>

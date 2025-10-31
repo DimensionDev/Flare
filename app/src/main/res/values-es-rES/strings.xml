@@ -294,4 +294,10 @@
     <string name="tab_settings_mixed_timeline">Añadir pestaña de cronología mixta</string>
     <string name="tab_settings_mixed_timeline_desc">La línea de tiempo mezclada mezclará todas las pestañas que resulten en una pestaña</string>
     <string name="home_tab_social_timeline_title">Social</string>
+    <string name="changelog_current"><![CDATA[            <span>Versión %1$s:</span>
+            <ul>
+                <li>Añadida la configuración de la barra de inicio</li>
+                <li>correcciones de errores y mejoras de rendimiento.</li>
+            </ul>
+        ]]></string>
 </resources>

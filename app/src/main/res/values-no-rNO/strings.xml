@@ -296,10 +296,8 @@
     <string name="home_tab_social_timeline_title">Sosial</string>
     <string name="changelog_current"><![CDATA[            <span>Versjon %1$s:</span>
             <ul>
-                <li>Lagt til skriftinnstillinger.</li>
-                <li>Betydelig fornyet RSS-funksjonen. Artikkelinnhold blir nå gjengitt lokalt i stedet for å bruke en WebView.</li>
-                <li>Optimalisert rich-tekst logikk for bedre ytelse.</li>
-                <li>Feilrettinger og ytelsesforbedringer.</li>
+                <li>Lagt til nederste bar innstilling</li>
+                <li>feilfikser og ytelsesforbedringer.</li>
             </ul>
         ]]></string>
 </resources>

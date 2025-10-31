@@ -296,9 +296,7 @@
     <string name="home_tab_social_timeline_title">Social</string>
     <string name="changelog_current"><![CDATA[            <span>Versione %1$s:</span>
             <ul>
-                <li>Aggiunte impostazioni del carattere.</li>
-                <li>La funzione RSS è stata notevolmente rinnovata. Il contenuto dell\'articolo è ora renderizzato nativamente invece di utilizzare una WebView.</li>
-                <li>Logica di rendering ricco-testo ottimizzata per prestazioni migliori.</li>
+                <li>Aggiunte impostazioni barra inferiore</li>
                 <li>Correzioni di bug e miglioramenti delle prestazioni.</li>
             </ul>
         ]]></string>

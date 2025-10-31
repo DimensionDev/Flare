@@ -296,10 +296,9 @@
     <string name="home_tab_social_timeline_title">Soziale</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Schriftarteinstellungen hinzugefügt.</li>
-                <li>Das RSS-Feature wurde deutlich überarbeitet. Artikelinhalte werden nun nativ statt mit einem WebView dargestellt.</li>
-                <li>Optimierte Rich-Text-Rendering-Logik für eine bessere Performance.</li>
-                <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
+                <li>Grundeinstellungen</li>
+                
+                <li>Fehlerkorrekturen und Leistungsverbesserungen hinzugefügt.</li>
             </ul>
         ]]></string>
 </resources>

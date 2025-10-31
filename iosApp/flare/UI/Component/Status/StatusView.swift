@@ -200,6 +200,7 @@ struct StatusView: View {
                         StatusActionsView(data: data.actions, useText: false)
                             .font(isDetail ? .body : .footnote)
                             .foregroundStyle(isDetail ? .primary : .secondary)
+                            .padding(.top, 4)
                     }
                 }
                 .if(withLeadingPadding) { stack in

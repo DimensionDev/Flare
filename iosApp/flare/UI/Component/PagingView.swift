@@ -44,9 +44,9 @@ struct PagingView<T: AnyObject, EmptyContent: View, ErrorContent: View, LoadingC
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
             case .loading:
-                ForEach(0..<loadingCount, id: \.self) { index in
-                    loadingContent()
-               }
+                ProgressView()
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .center)
             case .notLoading(let notLoading):
                 EmptyView()
             }

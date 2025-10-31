@@ -44,12 +44,9 @@ struct TimelinePagingView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
             case .loading:
-                ForEach(0..<5) { index in
-                   ListCardView(index: index, totalCount: 5) {
-                       TimelinePlaceholderView()
-                           .padding()
-                   }
-               }
+                ProgressView()
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .center)
             case .notLoading(let notLoading):
                 if notLoading.endOfPaginationReached {
                     Text("end_of_list")

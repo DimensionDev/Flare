@@ -1,7 +1,9 @@
 import SwiftUI
+import SwiftUIBackports
 @preconcurrency import KotlinSharedUI
 
 struct ProfileScreen: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let accountType: AccountType
     let userKey: MicroBlogKey?
     let onFollowingClick: (MicroBlogKey) -> Void
@@ -10,6 +12,155 @@ struct ProfileScreen: View {
     @State private var selectedTab: Int = 0
     
     var body: some View {
+        ZStack {
+            if horizontalSizeClass == .regular {
+                regularBody
+            }
+            else {
+                compatBody
+            }
+        }
+        .background(Color(.systemGroupedBackground))
+        .toolbar {
+            if horizontalSizeClass == .regular, case .success(let tabState) = onEnum(of: presenter.state.tabs) {
+                let tabs = tabState.data.cast(ProfileState.Tab.self)
+                if tabs.count > 1 {
+                    ToolbarItemGroup {
+                        ForEach(0..<tabs.count, id: \.self) { index in
+                            let tab = tabs[index]
+                            let text = switch onEnum(of: tab) {
+                            case .media: LocalizedStringResource(stringLiteral: "profile_tab_media")
+                            case .timeline(let timeline):
+                                switch timeline.type {
+                                case .likes: LocalizedStringResource(stringLiteral: "profile_tab_likes")
+                                case .status: LocalizedStringResource(stringLiteral: "profile_tab_status")
+                                case .statusWithReplies: LocalizedStringResource(stringLiteral: "profile_tab_replies")
+                                }
+                            }
+                            Button {
+                                withAnimation(.spring) {
+                                    selectedTab = index
+                                }
+                            } label: {
+                                Text(text)
+                                    .foregroundStyle(selectedTab == index ? Color.accentColor : .primary)
+                                    .fontWeight(selectedTab == index ? .bold : .regular)
+                            }
+//                            .onTapGesture {
+//                            }
+//                            .padding(.horizontal)
+//                            .padding(.vertical, 8)
+//                            .foregroundStyle(selectedTab == index ? Color.white : .primary)
+//                            .backport
+//                            .glassEffect(selectedTab == index ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedTab == index ? Color.accentColor : Color(.systemBackground))
+                        }
+                    }
+                }
+                if #available(iOS 26.0, *) {
+                    ToolbarSpacer()
+                }
+            }
+            if case .success(let user) = onEnum(of: presenter.state.userState) {
+//                if horizontalSizeClass == .regular {
+//                    ToolbarItem(placement: .title) {
+//                        RichText(text: user.data.name)
+//                            .lineLimit(1)
+//                    }
+//                }
+                if case .success(let isMe) = onEnum(of: presenter.state.isMe), !isMe.data.boolValue {
+                    ToolbarItem(
+                        placement: .primaryAction
+                    ) {
+                        Menu {
+                            if case .success(let relation) = onEnum(of: presenter.state.relationState),
+                               case .success(let actionsArray) = onEnum(of: presenter.state.actions),
+                               actionsArray.data.count > 0 {
+                                let actions = actionsArray.data.cast(ProfileAction.self)
+                                ForEach(0..<actions.count, id: \.self) { index in
+                                    let item = actions[index]
+                                    Button(action: {
+                                        Task {
+                                            try? await item.invoke(userKey: user.data.key, relation: relation.data)
+                                        }
+                                    }, label: {
+                                        let text = switch onEnum(of: item) {
+                                        case .block(let block): if block.relationState(relation: relation.data) {
+                                            String(localized: "unblock")
+                                        } else {
+                                            String(localized: "block")
+                                        }
+                                        case .mute(let mute): if mute.relationState(relation: relation.data) {
+                                            String(localized: "unmute")
+                                        } else {
+                                            String(localized: "mute")
+                                        }
+                                        }
+                                        let icon = switch onEnum(of: item) {
+                                        case .block(let block): if block.relationState(relation: relation.data) {
+                                            "xmark.circle"
+                                        } else {
+                                            "checkmark.circle"
+                                        }
+                                        case .mute(let mute): if mute.relationState(relation: relation.data) {
+                                            "speaker"
+                                        } else {
+                                            "speaker.slash"
+                                        }
+                                        }
+                                        Label(text, systemImage: icon)
+                                    })
+                                }
+                            }
+                            Button(action: { presenter.state.report(userKey: user.data.key) }, label: {
+                                Label("report", systemImage: "exclamationmark.bubble")
+                            })
+                        } label: {
+                            Image(systemName: "ellipsis")
+                        }
+                    }
+                }
+            }
+        }
+        .background(Color(.systemGroupedBackground))
+    }
+    
+    var regularBody: some View {
+        HStack(
+            spacing: nil,
+        ) {
+            ScrollView {
+                ListCardView {
+                    ProfileHeader(
+                        user: presenter.state.userState,
+                        relation: presenter.state.relationState,
+                        isMe: presenter.state.isMe,
+                        onFollowClick: { user, relation in
+                            presenter.state.follow(userKey: user.key, data: relation)
+                        },
+                        onFollowingClick: onFollowingClick,
+                        onFansClick: onFansClick
+                    )
+                    .padding(.bottom)
+                }
+            }
+            .padding(.leading)
+            .frame(width: 400)
+            StateView(state: presenter.state.tabs) { tabsArray in
+                let tabs = tabsArray.cast(ProfileState.Tab.self)
+                let selectedTabItem = tabs[selectedTab]
+                switch onEnum(of: selectedTabItem) {
+                case .timeline(let timeline):
+                    ProfileTimelineWaterFallView(presenter: timeline.presenter)
+                        .id(timeline.type.name)
+                case .media(let media):
+                    ProfileTimelineWaterFallView(presenter: media.presenter.getMediaTimelinePresenter())
+                        .id("media")
+                }
+            }
+        }
+    }
+    
+    var compatBody: some View {
         List {
             ProfileHeader(
                 user: presenter.state.userState,
@@ -64,61 +215,7 @@ struct ProfileScreen: View {
         .scrollContentBackground(.hidden)
         .listRowSpacing(2)
         .listStyle(.plain)
-        .background(Color(.systemGroupedBackground))
-        .toolbar {
-            if case .success(let user) = onEnum(of: presenter.state.userState) {
-                if case .success(let isMe) = onEnum(of: presenter.state.isMe), !isMe.data.boolValue {
-                    Menu {
-                        if case .success(let relation) = onEnum(of: presenter.state.relationState),
-                           case .success(let actionsArray) = onEnum(of: presenter.state.actions),
-                           actionsArray.data.count > 0 {
-                            let actions = actionsArray.data.cast(ProfileAction.self)
-                            ForEach(0..<actions.count, id: \.self) { index in
-                                let item = actions[index]
-                                Button(action: {
-                                    Task {
-                                        try? await item.invoke(userKey: user.data.key, relation: relation.data)
-                                    }
-                                }, label: {
-                                    let text = switch onEnum(of: item) {
-                                    case .block(let block): if block.relationState(relation: relation.data) {
-                                        String(localized: "unblock")
-                                    } else {
-                                        String(localized: "block")
-                                    }
-                                    case .mute(let mute): if mute.relationState(relation: relation.data) {
-                                        String(localized: "unmute")
-                                    } else {
-                                        String(localized: "mute")
-                                    }
-                                    }
-                                    let icon = switch onEnum(of: item) {
-                                    case .block(let block): if block.relationState(relation: relation.data) {
-                                        "xmark.circle"
-                                    } else {
-                                        "checkmark.circle"
-                                    }
-                                    case .mute(let mute): if mute.relationState(relation: relation.data) {
-                                        "speaker"
-                                    } else {
-                                        "speaker.slash"
-                                    }
-                                    }
-                                    Label(text, systemImage: icon)
-                                })
-                            }
-                        }
-                        Button(action: { presenter.state.report(userKey: user.data.key) }, label: {
-                            Label("report", systemImage: "exclamationmark.bubble")
-                        })
-                    } label: {
-                        Image(systemName: "ellipsis")
-                    }
-                }
-            }
-        }
         .edgesIgnoringSafeArea(.top)
-        .background(Color(.systemGroupedBackground))
     }
 }
 
@@ -233,5 +330,20 @@ struct ProfileTimelineView: View {
 //            .refreshable {
 //                try? await presenter.state.refresh()
 //            }
+    }
+}
+
+struct ProfileTimelineWaterFallView: View {
+    @StateObject private var presenter: KotlinPresenter<TimelineState>
+    
+    init(presenter: TimelinePresenter) {
+        self._presenter = .init(wrappedValue: .init(presenter: presenter))
+    }
+    
+    var body: some View {
+        TimelinePagingContent(data: presenter.state.listState, detailStatusKey: nil)
+            .refreshable {
+                try? await presenter.state.refresh()
+            }
     }
 }

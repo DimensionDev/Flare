@@ -14,6 +14,8 @@ struct AccountManagementScreen: View {
                                 UserCompatView(data: user) {
                                     Image(systemName: currentAcount.accountKey == user.key ? "checkmark.circle.fill" : "circle")
                                         .foregroundColor(.blue)
+                                } onClicked: {
+                                    presenter.state.setActiveAccount(accountKey: user.key)
                                 }
                                 .onTapGesture {
                                     presenter.state.setActiveAccount(accountKey: user.key)

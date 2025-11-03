@@ -28,7 +28,7 @@ struct TimelineView: View {
                 }
             }
         }
-        .id(data.itemKey)
+//        .id(data.itemKey)
     }
 }
 

@@ -2,56 +2,80 @@ import SwiftUI
 import KotlinSharedUI
 
 struct VVOStatusScreen: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let statusKey: MicroBlogKey
     let accountType: AccountType
     @StateObject private var presenter: KotlinPresenter<VVOStatusDetailState>
     @State private var selectedType: VVOStatusDetailType = .comment
     var body: some View {
-        List {
-            ListCardView {
-                StateView(state: presenter.state.status) { item in
-                    TimelineView(data: item, detailStatusKey: statusKey)
-                } errorContent: { error in
-                    ListErrorView(error: error, onRetry: {})
-                } loadingContent: {
-                    TimelinePlaceholderView()
+        HStack(
+            alignment: .top,
+            spacing: 0
+        ) {
+            if horizontalSizeClass == .regular {
+                ScrollView {
+                    ListCardView {
+                        StateView(state: presenter.state.status) { item in
+                            TimelineView(data: item, detailStatusKey: statusKey)
+                        } errorContent: { error in
+                            ListErrorView(error: error, onRetry: {})
+                        } loadingContent: {
+                            TimelinePlaceholderView()
+                        }
+                        .padding()
+                    }
                 }
-                .padding()
+                .padding(.leading)
+                .frame(width: 400)
             }
-            .listRowSeparator(.hidden)
-            .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-            .padding(.horizontal)
-            .listRowBackground(Color.clear)
-            
-            Picker(selection: $selectedType) {
-                Text("vvo_status_reposts").tag(VVOStatusDetailType.repost)
-                Text("vvo_status_comments").tag(VVOStatusDetailType.comment)
-            } label: {
+            List {
+                if horizontalSizeClass == .compact {
+                    ListCardView {
+                        StateView(state: presenter.state.status) { item in
+                            TimelineView(data: item, detailStatusKey: statusKey)
+                        } errorContent: { error in
+                            ListErrorView(error: error, onRetry: {})
+                        } loadingContent: {
+                            TimelinePlaceholderView()
+                        }
+                        .padding()
+                    }
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .padding(.horizontal)
+                    .listRowBackground(Color.clear)
+                }
                 
+                Picker(selection: $selectedType) {
+                    Text("vvo_status_reposts").tag(VVOStatusDetailType.repost)
+                    Text("vvo_status_comments").tag(VVOStatusDetailType.comment)
+                } label: {
+                    
+                }
+                .pickerStyle(.segmented)
+                .listRowSeparator(.hidden)
+                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                .padding(.horizontal)
+                .listRowBackground(Color.clear)
+                
+                switch selectedType {
+                case .comment: TimelinePagingView(data: presenter.state.comment)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        .padding(.horizontal)
+                        .listRowBackground(Color.clear)
+                case .repost: TimelinePagingView(data: presenter.state.repost)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        .padding(.horizontal)
+                        .listRowBackground(Color.clear)
+                }
             }
-            .pickerStyle(.segmented)
-            .listRowSeparator(.hidden)
-            .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-            .padding(.horizontal)
-            .listRowBackground(Color.clear)
-            
-            switch selectedType {
-            case .comment: TimelinePagingView(data: presenter.state.comment)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    .padding(.horizontal)
-                    .listRowBackground(Color.clear)
-            case .repost: TimelinePagingView(data: presenter.state.repost)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                    .padding(.horizontal)
-                    .listRowBackground(Color.clear)
-            }
+            .detectScrolling()
+            .scrollContentBackground(.hidden)
+            .listRowSpacing(2)
+            .listStyle(.plain)
         }
-        .detectScrolling()
-        .scrollContentBackground(.hidden)
-        .listRowSpacing(2)
-        .listStyle(.plain)
         .background(Color(.systemGroupedBackground))
         .navigationTitle("vvo_status_title")
     }

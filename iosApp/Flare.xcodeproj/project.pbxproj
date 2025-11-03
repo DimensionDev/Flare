@@ -11,6 +11,7 @@
 		0646B2622E7151A700535A3E /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0646B2612E7151A700535A3E /* Kingfisher */; };
 		0672EE122E8689C70092AD1F /* Drops in Frameworks */ = {isa = PBXBuildFile; productRef = 0672EE112E8689C70092AD1F /* Drops */; };
 		068923482E82A80700981D8E /* Flow in Frameworks */ = {isa = PBXBuildFile; productRef = 068923472E82A80700981D8E /* Flow */; };
+		068B19382EB7490E0093DFC5 /* WaterfallGrids in Frameworks */ = {isa = PBXBuildFile; productRef = 068B19372EB7490E0093DFC5 /* WaterfallGrids */; };
 		06C6B5482E853AAF00CCD388 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */; };
 		06C7FC172E7D474900A0D01A /* LazyPager in Frameworks */ = {isa = PBXBuildFile; productRef = 06C7FC162E7D474900A0D01A /* LazyPager */; };
 		06F36AAD2E8F7BEC00F5905F /* SwiftUIBackports in Frameworks */ = {isa = PBXBuildFile; productRef = 06F36AAC2E8F7BEC00F5905F /* SwiftUIBackports */; };
@@ -51,6 +52,7 @@
 				0672EE122E8689C70092AD1F /* Drops in Frameworks */,
 				06C6B5482E853AAF00CCD388 /* SwiftUIIntrospect in Frameworks */,
 				0646B2622E7151A700535A3E /* Kingfisher in Frameworks */,
+				068B19382EB7490E0093DFC5 /* WaterfallGrids in Frameworks */,
 				06F36AAD2E8F7BEC00F5905F /* SwiftUIBackports in Frameworks */,
 				06310D712E96120700B6E081 /* VideoPlayer in Frameworks */,
 			);
@@ -103,6 +105,7 @@
 				0672EE112E8689C70092AD1F /* Drops */,
 				06F36AAC2E8F7BEC00F5905F /* SwiftUIBackports */,
 				06310D702E96120700B6E081 /* VideoPlayer */,
+				068B19372EB7490E0093DFC5 /* WaterfallGrids */,
 			);
 			productName = flare;
 			productReference = 06E433FE2E6A9A2600CD0826 /* Flare.app */;
@@ -141,6 +144,7 @@
 				0672EE102E8689C70092AD1F /* XCRemoteSwiftPackageReference "Drops" */,
 				06F36AAB2E8F7BEC00F5905F /* XCRemoteSwiftPackageReference "iOS-Backports" */,
 				06310D6F2E96120700B6E081 /* XCRemoteSwiftPackageReference "VideoPlayer" */,
+				068B19362EB7490E0093DFC5 /* XCRemoteSwiftPackageReference "WaterfallGrids" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 06E433FF2E6A9A2600CD0826 /* Products */;
@@ -326,7 +330,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = 7LFDZ96332;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -346,7 +350,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.6.1;
+				MARKETING_VERSION = 0.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.dimension.flare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -366,7 +370,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = 7LFDZ96332;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -386,7 +390,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.6.1;
+				MARKETING_VERSION = 0.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.dimension.flare;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -463,6 +467,14 @@
 				version = 3.1.1;
 			};
 		};
+		068B19362EB7490E0093DFC5 /* XCRemoteSwiftPackageReference "WaterfallGrids" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ricocrescenzio95/WaterfallGrids";
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.1;
+			};
+		};
 		06C6B5462E853AAF00CCD388 /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/siteline/swiftui-introspect";
@@ -509,6 +521,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 068923462E82A80700981D8E /* XCRemoteSwiftPackageReference "SwiftUI-Flow" */;
 			productName = Flow;
+		};
+		068B19372EB7490E0093DFC5 /* WaterfallGrids */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 068B19362EB7490E0093DFC5 /* XCRemoteSwiftPackageReference "WaterfallGrids" */;
+			productName = WaterfallGrids;
 		};
 		06C6B5472E853AAF00CCD388 /* SwiftUIIntrospect */ = {
 			isa = XCSwiftPackageProductDependency;

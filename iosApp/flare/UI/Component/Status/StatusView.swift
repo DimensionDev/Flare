@@ -52,8 +52,7 @@ struct StatusView: View {
                                         .foregroundStyle(.secondary)
                                 }
                             }
-                        }
-                        .onTapGesture {
+                        } onClicked: {
                             user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                         }
                     } else {
@@ -73,8 +72,7 @@ struct StatusView: View {
                                         .foregroundStyle(.secondary)
                                 }
                             }
-                        }
-                        .onTapGesture {
+                        } onClicked: {
                             user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                         }
                     }

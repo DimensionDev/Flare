@@ -109,66 +109,116 @@ extension RssDetailScreen {
     }
 }
 
-
-
 struct HtmlWebView: UIViewRepresentable {
+    @Environment(\.colorScheme) private var colorScheme
     @Binding var dynamicHeight: CGFloat
     let htmlString: String?
     let baseURL: URL?
     
+    var forceColorScheme: ColorScheme? = nil
+    
     class Coordinator: NSObject, WKNavigationDelegate {
         var parent: HtmlWebView
-
-        init(_ parent: HtmlWebView) {
-            self.parent = parent
-        }
-
+        init(_ parent: HtmlWebView) { self.parent = parent }
+        
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            webView.evaluateJavaScript("document.documentElement.scrollHeight", completionHandler: { (height, error) in
+            webView.evaluateJavaScript("document.documentElement.scrollHeight") { height, _ in
                 DispatchQueue.main.async {
-                    self.parent.dynamicHeight = height as! CGFloat
+                    if let h = height as? CGFloat {
+                        self.parent.dynamicHeight = h
+                    } else if let d = height as? Double {
+                        self.parent.dynamicHeight = CGFloat(d)
+                    }
                 }
-            })
+            }
         }
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
     }
     
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+    
     func makeUIView(context: Context) -> WKWebView {
-        let webview = WKWebView()
-        webview.scrollView.bounces = false
+        let config = WKWebViewConfiguration()
+        let webview = WKWebView(frame: .zero, configuration: config)
         webview.navigationDelegate = context.coordinator
+        webview.scrollView.bounces = false
         webview.scrollView.isScrollEnabled = false
-        if let htmlString {
-            webview.loadHTMLString(getHtmlData(html: htmlString), baseURL: baseURL)
+        
+        webview.isOpaque = false
+        webview.backgroundColor = .clear
+        webview.scrollView.backgroundColor = .clear
+        
+        applyStyleOverride(to: webview)
+        
+        if let html = htmlString {
+            webview.loadHTMLString(getHtmlData(html: html, scheme: (forceColorScheme ?? colorScheme)),
+                                   baseURL: baseURL)
         }
         return webview
     }
+    
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        if let htmlString {
-            uiView.loadHTMLString(getHtmlData(html: htmlString), baseURL: baseURL)
+        applyStyleOverride(to: uiView)
+        if let html = htmlString {
+            uiView.loadHTMLString(getHtmlData(html: html, scheme: (forceColorScheme ?? colorScheme)),
+                                  baseURL: baseURL)
         }
     }
     
-    func getHtmlData(html: String) -> String {
-        return """
+    private func applyStyleOverride(to webview: WKWebView) {
+        if let forced = forceColorScheme {
+            webview.overrideUserInterfaceStyle = (forced == .dark) ? .dark : .light
+        } else {
+            webview.overrideUserInterfaceStyle = .unspecified
+        }
+    }
+    
+    func getHtmlData(html: String, scheme: ColorScheme) -> String {
+        """
+        <!doctype html>
         <html>
         <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-        body { font-family: -apple-system; }
-        img { max-width: 100%; height: auto; }
-        </style>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="color-scheme" content="light dark">
+          <style>
+            :root {
+              color-scheme: light dark;
+              --bg: #ffffff;
+              --fg: #111111;
+              --muted: #666666;
+              --link: #0a84ff;
+              --code-bg: #f5f5f7;
+            }
+            @media (prefers-color-scheme: dark) {
+              :root {
+                --bg: #000000;
+                --fg: #eeeeee;
+                --muted: #aaaaaa;
+                --link: #7ab8ff;
+                --code-bg: #141416;
+              }
+            }
+            html, body {
+              margin: 0; padding: 0;
+              color: var(--fg);
+              font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+              -webkit-font-smoothing: antialiased;
+            }
+            a {
+              color: var(--link); 
+              text-decoration: none;
+            }
+            img, video { max-width: 100%; height: auto; }
+          </style>
         </head>
         <body>
-        \(html)
+          \(html)
         </body>
         </html>
         """
     }
 }
+
 
 
 struct SafariView: UIViewControllerRepresentable {

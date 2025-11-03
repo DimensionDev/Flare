@@ -196,7 +196,7 @@ material-motion-compose = { module = "io.github.fornewid:material-motion-compose
 
 precompose-molecule = { module = "moe.tlaster:precompose-molecule", version = "1.7.0-alpha03" }
 
-xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91.2" }
+xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91.3" }
 
 fluent-ui = { module = "io.github.compose-fluent:fluent", version = "0.2.0-SNAPSHOT" }
 

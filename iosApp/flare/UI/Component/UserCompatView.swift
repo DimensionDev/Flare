@@ -5,10 +5,17 @@ struct UserCompatView<TrailingContent: View>: View {
     @Environment(\.openURL) private var openURL
     let data: UiUserV2
     let trailing: () -> TrailingContent
+    let onClicked: (() -> Void)?
     var body: some View {
         HStack {
             AvatarView(data: data.avatar)
                 .frame(width: 44, height: 44)
+                .if(onClicked != nil) { view in
+                    view
+                        .onTapGesture {
+                            onClicked?()
+                        }
+                }
             VStack(
                 alignment: .leading
             ) {
@@ -16,6 +23,12 @@ struct UserCompatView<TrailingContent: View>: View {
                 Text(data.handle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            }
+            .if(onClicked != nil) { view in
+                view
+                    .onTapGesture {
+                        onClicked?()
+                    }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             trailing()
@@ -30,6 +43,7 @@ extension UserCompatView {
         self.trailing = {
             EmptyView()
         }
+        self.onClicked = nil
     }
 }
 

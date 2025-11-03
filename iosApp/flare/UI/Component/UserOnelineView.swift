@@ -5,15 +5,28 @@ struct UserOnelineView<TrailingContent: View>: View {
     @Environment(\.openURL) private var openURL
     let data: UiUserV2
     let trailing: () -> TrailingContent
+    let onClicked: (() -> Void)?
     var body: some View {
         HStack {
             AvatarView(data: data.avatar)
                 .frame(width: 20, height: 20)
+                .if(onClicked != nil) { view in
+                    view
+                        .onTapGesture {
+                            onClicked?()
+                        }
+                }
             HStack {
                 RichText(text: data.name)
                 Text(data.handle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            }
+            .if(onClicked != nil) { view in
+                view
+                    .onTapGesture {
+                        onClicked?()
+                    }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             trailing()
@@ -28,5 +41,6 @@ extension UserOnelineView {
         self.trailing = {
             EmptyView()
         }
+        self.onClicked = nil
     }
 }

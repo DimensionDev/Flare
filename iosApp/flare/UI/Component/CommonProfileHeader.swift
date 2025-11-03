@@ -8,6 +8,7 @@ enum CommonProfileHeaderConstants {
 }
 
 struct CommonProfileHeader: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
     let user: UiProfile
     let relation: UiState<UiRelation>
@@ -86,52 +87,60 @@ struct CommonProfileHeader: View {
                     }
                 }
 
-                ListCardView {
-                    VStack(
-                        alignment: .leading,
-                        spacing: 8
-                    ) {
-                        RichText(text: user.name)
-                            .font(.headline)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        HStack {
-                            Text(user.handle)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                            ForEach(0..<user.mark.count, id: \.self) { index in
-                                let mark = user.mark[index]
-                                switch mark {
-                                case .cat:      Image("fa-cat")
-                                case .verified: Image("fa-circle-check")
-                                case .locked:   Image("fa-lock")
-                                case .bot:      Image("fa-robot")
-                                }
-                            }
-                        }
-                        if let desc = user.description_ {
-                            RichText(text: desc)
-                        }
-
-                        if let bottomContent = user.bottomContent {
-                            switch onEnum(of: bottomContent) {
-                            case .fields(let data):
-                                FieldsView(fields: data.fields)
-                            case .iconify(let data):
-                                IconFieldView(data: data)
-                            }
-                        }
-
-                        MatrixView(
-                            followCount: user.matrices.followsCountHumanized,
-                            fansCount: user.matrices.fansCountHumanized,
-                            onFollowingClick: onFollowingClick,
-                            onFansClick: onFansClick
-                        )
+                if horizontalSizeClass == .compact {
+                    ListCardView {
+                        content
+                            .padding()
                     }
-                    .padding()
+                } else {
+                    content
                 }
             }
             .padding([.horizontal])
+        }
+    }
+    
+    var content: some View {
+        VStack(
+            alignment: .leading,
+            spacing: 8
+        ) {
+            RichText(text: user.name)
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack {
+                Text(user.handle)
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                ForEach(0..<user.mark.count, id: \.self) { index in
+                    let mark = user.mark[index]
+                    switch mark {
+                    case .cat:      Image("fa-cat")
+                    case .verified: Image("fa-circle-check")
+                    case .locked:   Image("fa-lock")
+                    case .bot:      Image("fa-robot")
+                    }
+                }
+            }
+            if let desc = user.description_ {
+                RichText(text: desc)
+            }
+
+            if let bottomContent = user.bottomContent {
+                switch onEnum(of: bottomContent) {
+                case .fields(let data):
+                    FieldsView(fields: data.fields)
+                case .iconify(let data):
+                    IconFieldView(data: data)
+                }
+            }
+
+            MatrixView(
+                followCount: user.matrices.followsCountHumanized,
+                fansCount: user.matrices.fansCountHumanized,
+                onFollowingClick: onFollowingClick,
+                onFansClick: onFansClick
+            )
         }
     }
 }

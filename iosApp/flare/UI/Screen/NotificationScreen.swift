@@ -14,17 +14,7 @@ struct NotificationScreen: View {
     }
 
     var body: some View {
-        List {
-            TimelinePagingView(data: presenter.state.listState)
-                .listRowSeparator(.hidden)
-                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .padding(.horizontal)
-                .listRowBackground(Color.clear)
-        }
-        .scrollContentBackground(.hidden)
-        .listRowSpacing(2)
-        .listStyle(.plain)
-        .background(Color(.systemGroupedBackground))
+        TimelinePagingContent(data: presenter.state.listState, detailStatusKey: nil)
         .onAppear {
             selectedType = presenter.state.notificationType
         }

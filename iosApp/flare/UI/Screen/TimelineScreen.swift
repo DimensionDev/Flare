@@ -3,6 +3,7 @@ import SwiftUI
 
 struct TimelineScreen: View {
     let tabItem: TimelineTabItem
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
     @StateObject var presenter: KotlinPresenter<TimelineItemPresenterState>
     init(tabItem: TimelineTabItem) {
@@ -20,6 +21,12 @@ struct TimelineScreen: View {
 //            onCollapse: {}
 //        )
 //        .ignoresSafeArea()
+        TimelinePagingContent(data: presenter.state.listState, detailStatusKey: nil)
+            .refreshable {
+                try? await presenter.state.refreshSuspend()
+            }
+    }
+    var singleListView: some View {
         List {
             TimelinePagingView(data: presenter.state.listState)
                 .listRowSeparator(.hidden)
@@ -35,6 +42,5 @@ struct TimelineScreen: View {
             try? await presenter.state.refreshSuspend()
         }
         .background(Color(.systemGroupedBackground))
-//        .navigationTitle(tabItem.metaData.title.text)
     }
 }

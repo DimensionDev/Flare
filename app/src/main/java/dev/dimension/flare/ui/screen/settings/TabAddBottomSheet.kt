@@ -43,9 +43,6 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
-import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.isEmpty
-import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
@@ -184,53 +181,35 @@ internal fun TabAddBottomSheet(
                         ) {
                             itemsIndexed(
                                 allTabs.rssTabs,
-                                emptyContent = {
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier.fillMaxWidth(),
-                                    ) {
-                                        Button(
-                                            onClick = toAddRssSource,
-                                        ) {
-                                            FAIcon(
-                                                FontAwesomeIcons.Solid.Plus,
-                                                contentDescription = stringResource(R.string.add_rss_source),
-                                            )
-                                            Text(stringResource(R.string.add_rss_source))
-                                        }
-                                    }
-                                },
-                            ) { index, itemCount, it ->
+                            ) { index, it ->
                                 TabItem(
-                                    remember(it) {
-                                        RssTimelineTabItem(it)
-                                    },
+                                    it,
                                     modifier =
                                         Modifier
                                             .listCard(
                                                 index = index,
-                                                totalCount = itemCount,
+                                                totalCount = allTabs.rssTabs.size,
                                             ),
                                 )
                             }
-                            if (!allTabs.rssTabs.isEmpty) {
+                            if (allTabs.rssTabs.isNotEmpty()) {
                                 item {
                                     Spacer(modifier = Modifier.height(12.dp))
                                 }
-                                item {
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier.fillMaxWidth(),
+                            }
+                            item {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Button(
+                                        onClick = toAddRssSource,
                                     ) {
-                                        Button(
-                                            onClick = toAddRssSource,
-                                        ) {
-                                            FAIcon(
-                                                FontAwesomeIcons.Solid.Plus,
-                                                contentDescription = stringResource(R.string.add_rss_source),
-                                            )
-                                            Text(stringResource(R.string.add_rss_source))
-                                        }
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Plus,
+                                            contentDescription = stringResource(R.string.add_rss_source),
+                                        )
+                                        Text(stringResource(R.string.add_rss_source))
                                     }
                                 }
                             }
@@ -333,7 +312,7 @@ internal fun TabAddBottomSheet(
 @Immutable
 internal interface AllTabsState {
     val defaultTabs: ImmutableList<TabItem>
-    val rssTabs: PagingState<UiRssSource>
+    val rssTabs: ImmutableList<UiRssSource>
     val accountTabs: UiState<ImmutableList<UiState<AccountTabs>>>
 }
 

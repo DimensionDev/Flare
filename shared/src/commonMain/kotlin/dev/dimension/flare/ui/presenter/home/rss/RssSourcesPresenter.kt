@@ -1,16 +1,18 @@
 package dev.dimension.flare.ui.presenter.home.rss
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.collectPagingState
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -22,7 +24,7 @@ public class RssSourcesPresenter :
     private val appDatabase by inject<AppDatabase>()
 
     public interface State {
-        public val sources: PagingState<UiRssSource>
+        public val sources: ImmutableList<UiRssSource>
 
         public fun add(
             url: String,
@@ -38,13 +40,14 @@ public class RssSourcesPresenter :
         val scope = rememberCoroutineScope()
         val sources by remember {
             appDatabase.rssSourceDao().getAll().map {
-                it.map {
-                    it.render()
-                }
+                it
+                    .map {
+                        it.render()
+                    }.toImmutableList()
             }
-        }.collectPagingState()
+        }.collectAsState(persistentListOf())
         return object : State {
-            override val sources: PagingState<UiRssSource> = sources
+            override val sources = sources
 
             override fun add(
                 url: String,

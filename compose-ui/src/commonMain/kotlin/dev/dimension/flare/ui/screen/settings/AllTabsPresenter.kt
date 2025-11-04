@@ -3,13 +3,13 @@ package dev.dimension.flare.ui.screen.settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
-import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.data.model.AllRssTimelineTabItem
+import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.takeSuccess
@@ -57,10 +57,25 @@ public class AllTabsPresenter(
                     }.toImmutableList()
             }
 
-        val rssTabs =
+        val rssSources =
             remember {
                 RssSourcesPresenter()
             }.body()
+        val rssTabs =
+            remember(rssSources.sources) {
+                (
+                    listOfNotNull(
+                        if (rssSources.sources.isNotEmpty()) {
+                            AllRssTimelineTabItem()
+                        } else {
+                            null
+                        },
+                    ) +
+                        rssSources.sources.map {
+                            RssTimelineTabItem(it)
+                        }
+                ).toImmutableList()
+            }
 
         return object : State {
             override val defaultTabs =
@@ -73,7 +88,7 @@ public class AllTabsPresenter(
                         }
                     }.toImmutableList()
             override val accountTabs = accountTabs
-            override val rssTabs = rssTabs.sources
+            override val rssTabs = rssTabs
         }
     }
 
@@ -87,7 +102,7 @@ public class AllTabsPresenter(
 
     public interface State {
         public val defaultTabs: ImmutableList<TabItem>
-        public val rssTabs: PagingState<UiRssSource>
+        public val rssTabs: ImmutableList<TimelineTabItem>
         public val accountTabs: UiState<ImmutableList<AccountTabs>>
 
         @Immutable

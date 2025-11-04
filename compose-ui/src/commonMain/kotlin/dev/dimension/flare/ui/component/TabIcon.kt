@@ -37,6 +37,7 @@ import compose.icons.fontawesomeicons.solid.RectangleList
 import compose.icons.fontawesomeicons.solid.SquareRss
 import compose.icons.fontawesomeicons.solid.Users
 import dev.dimension.flare.compose.ui.Res
+import dev.dimension.flare.compose.ui.all_rss_feeds_title
 import dev.dimension.flare.compose.ui.antenna_title
 import dev.dimension.flare.compose.ui.dm_list_title
 import dev.dimension.flare.compose.ui.home_tab_bookmarks_title
@@ -246,6 +247,7 @@ internal val TitleType.Localized.res: StringResource
             TitleType.Localized.LocalizedKey.Antenna -> Res.string.antenna_title
             TitleType.Localized.LocalizedKey.MixedTimeline -> Res.string.mixed_timeline_title
             TitleType.Localized.LocalizedKey.Liked -> Res.string.liked_title
+            TitleType.Localized.LocalizedKey.AllRssFeeds -> Res.string.all_rss_feeds_title
         }
 
 internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =

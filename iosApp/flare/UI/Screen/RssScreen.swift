@@ -7,7 +7,7 @@ struct RssScreen: View {
     @State private var selectedEditItem: UiRssSource? = nil
     var body: some View {
         List {
-            PagingView(data: presenter.state.sources) { item in
+            ForEach(presenter.state.sources, id: \.id) { item in
                 NavigationLink(value: Route.timeline(RssTimelineTabItem(data: item))) {
                     HStack {
                         UiRssView(data: item)
@@ -31,8 +31,6 @@ struct RssScreen: View {
 
                     }
                 }
-            } loadingContent: {
-                UiListPlaceholder()
             }
         }
         .navigationTitle("rss_title")

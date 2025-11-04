@@ -23,11 +23,16 @@ struct HomeTimelineScreen: View {
         GeometryReader { proxy in
             StateView(state: presenter.state.tabState) { state in
                 let tabs: [TimelineTabItem] = state.cast(TimelineTabItem.self)
-                let tab = tabs[selectedTabIndex]
+                let tab = tabs[min(max(selectedTabIndex, 0), tabs.count - 1)]
                 ZStack {
                     TimelineScreen(tabItem: tab)
                         .id(tab.key)
                 }
+                .onChange(of: state.count, { oldValue, newValue in
+                    if !(tabs.indices.contains(selectedTabIndex)) {
+                        selectedTabIndex = 0
+                    }
+                })
                 .toolbar {
                     let placement = if #available(iOS 26.0, *) {
                         ToolbarItemPlacement.automatic

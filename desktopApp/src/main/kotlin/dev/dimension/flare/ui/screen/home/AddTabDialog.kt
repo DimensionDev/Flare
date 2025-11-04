@@ -33,8 +33,6 @@ import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.Res
 import dev.dimension.flare.add_rss_source
 import dev.dimension.flare.antenna_title
-import dev.dimension.flare.common.isEmpty
-import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.ok
 import dev.dimension.flare.rss_title
@@ -171,53 +169,35 @@ internal fun AddTabDialog(
                             ) {
                                 itemsIndexed(
                                     allTabs.rssTabs,
-                                    emptyContent = {
-                                        Box(
-                                            contentAlignment = Alignment.Center,
-                                            modifier = Modifier.fillMaxWidth(),
-                                        ) {
-                                            AccentButton(
-                                                onClick = toAddRssSource,
-                                            ) {
-                                                FAIcon(
-                                                    FontAwesomeIcons.Solid.Plus,
-                                                    contentDescription = stringResource(Res.string.add_rss_source),
-                                                )
-                                                Text(stringResource(Res.string.add_rss_source))
-                                            }
-                                        }
-                                    },
-                                ) { index, itemCount, it ->
+                                ) { index, it ->
                                     TabItem(
-                                        remember(it) {
-                                            RssTimelineTabItem(it)
-                                        },
+                                        it,
                                         modifier =
                                             Modifier
                                                 .listCard(
                                                     index = index,
-                                                    totalCount = itemCount,
+                                                    totalCount = allTabs.rssTabs.size,
                                                 ),
                                     )
                                 }
-                                if (!allTabs.rssTabs.isEmpty) {
+                                if (allTabs.rssTabs.isNotEmpty()) {
                                     item {
                                         Spacer(modifier = Modifier.height(12.dp))
                                     }
-                                    item {
-                                        Box(
-                                            contentAlignment = Alignment.Center,
-                                            modifier = Modifier.fillMaxWidth(),
+                                }
+                                item {
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier.fillMaxWidth(),
+                                    ) {
+                                        AccentButton(
+                                            onClick = toAddRssSource,
                                         ) {
-                                            AccentButton(
-                                                onClick = toAddRssSource,
-                                            ) {
-                                                FAIcon(
-                                                    FontAwesomeIcons.Solid.Plus,
-                                                    contentDescription = stringResource(Res.string.add_rss_source),
-                                                )
-                                                Text(stringResource(Res.string.add_rss_source))
-                                            }
+                                            FAIcon(
+                                                FontAwesomeIcons.Solid.Plus,
+                                                contentDescription = stringResource(Res.string.add_rss_source),
+                                            )
+                                            Text(stringResource(Res.string.add_rss_source))
                                         }
                                     }
                                 }

@@ -5,6 +5,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.data.database.app.AppDatabase
+import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.datasource.rss.RssDataSource
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
@@ -25,6 +27,28 @@ public class RssTimelinePresenter(
 ) : TimelinePresenter() {
     override val loader: Flow<BaseTimelineLoader> by lazy {
         flowOf(RssDataSource.fetchLoader(url))
+    }
+}
+
+public class AllRssTimelinePresenter :
+    TimelinePresenter(),
+    KoinComponent {
+    private val appDatabase by inject<AppDatabase>()
+    private val database: CacheDatabase by inject()
+
+    override val loader: Flow<BaseTimelineLoader> by lazy {
+        appDatabase
+            .rssSourceDao()
+            .getAll()
+            .map { items ->
+                MixedRemoteMediator(
+                    database = database,
+                    mediators =
+                        items.map {
+                            RssDataSource.fetchLoader(it.url)
+                        },
+                )
+            }
     }
 }
 

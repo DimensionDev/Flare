@@ -84,6 +84,7 @@ public sealed class TitleType {
             MixedTimeline,
             Social,
             Liked,
+            AllRssFeeds,
         }
     }
 }
@@ -1074,6 +1075,24 @@ public data class RssTimelineTabItem(
 //                icon = IconType.Url(UiRssSource.favIconUrl(feedUrl)),
 //            ),
 //    )
+}
+
+@Serializable
+public data class AllRssTimelineTabItem(
+    override val metaData: TabMetaData =
+        TabMetaData(
+            title = TitleType.Localized(TitleType.Localized.LocalizedKey.AllRssFeeds),
+            icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+        ),
+    override val account: AccountType = AccountType.Active,
+) : TimelineTabItem() {
+    override val key: String = "all_rss"
+
+    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+
+    override fun createPresenter(): TimelinePresenter =
+        dev.dimension.flare.ui.presenter.home.rss
+            .AllRssTimelinePresenter()
 }
 
 @Serializable

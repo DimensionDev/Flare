@@ -307,11 +307,14 @@ struct AddTabSheet: View {
                 if selectedIndex == 0 {
                     if !presenter.state.rssTabs.isEmpty {
                         // rss
-                        PagingView(data: presenter.state.rssTabs) { item in
+                        ForEach(presenter.state.rssTabs) { tabItem in
                             HStack {
-                                UiRssView(data: item)
+                                Label {
+                                    TabTitle(title: tabItem.metaData.title)
+                                } icon: {
+                                    TabIcon(icon: tabItem.metaData.icon, accountType: tabItem.account)
+                                }
                                 Spacer()
-                                let tabItem = RssTimelineTabItem(data: item)
                                 if selectedTabs.contains(where: { $0.key == tabItem.key }) {
                                     Button {
                                         onDelete(tabItem)
@@ -330,8 +333,6 @@ struct AddTabSheet: View {
                                     .buttonStyle(.plain)
                                 }
                             }
-                        } loadingContent: {
-                            UiListPlaceholder()
                         }
                     }
                     Button {

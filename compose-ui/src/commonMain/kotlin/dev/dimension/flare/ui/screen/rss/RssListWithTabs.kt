@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,7 +30,6 @@ import dev.dimension.flare.compose.ui.empty_rss_sources
 import dev.dimension.flare.compose.ui.more
 import dev.dimension.flare.compose.ui.tab_settings_add
 import dev.dimension.flare.compose.ui.tab_settings_remove
-import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.listCard
@@ -48,9 +48,8 @@ public fun LazyListScope.rssListWithTabs(
     onClicked: (item: UiRssSource) -> Unit,
     onEdit: (id: Int) -> Unit,
 ) {
-    itemsIndexed(
-        state.sources,
-        emptyContent = {
+    if (state.sources.isEmpty()) {
+        item {
             Column(
                 modifier =
                     Modifier
@@ -72,122 +71,126 @@ public fun LazyListScope.rssListWithTabs(
                     style = PlatformTheme.typography.headline,
                 )
             }
-        },
-    ) { index, itemCount, it ->
-        PlatformListItem(
-            modifier =
-                Modifier
-                    .listCard(
-                        index = index,
-                        totalCount = itemCount,
-                    ).clickable {
-                        onClicked.invoke(it)
-                    },
-            headlineContent = {
-                it.title?.let {
-                    PlatformText(text = it)
-                }
-            },
-            supportingContent = {
-                PlatformText(it.url)
-            },
-            leadingContent = {
-                NetworkImage(
-                    model = it.favIcon,
-                    contentDescription = it.title,
-                    modifier = Modifier.size(24.dp),
-                )
-            },
-            trailingContent = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    state.currentTabs.onSuccess { currentTabs ->
-                        val isPinned =
-                            remember(
-                                it,
-                                currentTabs,
+        }
+    } else {
+        itemsIndexed(
+            state.sources,
+        ) { index, it ->
+            PlatformListItem(
+                modifier =
+                    Modifier
+                        .listCard(
+                            index = index,
+                            totalCount = state.sources.size,
+                        ).clickable {
+                            onClicked.invoke(it)
+                        },
+                headlineContent = {
+                    it.title?.let {
+                        PlatformText(text = it)
+                    }
+                },
+                supportingContent = {
+                    PlatformText(it.url)
+                },
+                leadingContent = {
+                    NetworkImage(
+                        model = it.favIcon,
+                        contentDescription = it.title,
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+                trailingContent = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        state.currentTabs.onSuccess { currentTabs ->
+                            val isPinned =
+                                remember(
+                                    it,
+                                    currentTabs,
+                                ) {
+                                    currentTabs.contains(it.url)
+                                }
+                            PlatformIconButton(
+                                onClick = {
+                                    if (isPinned) {
+                                        state.unpinTab(it)
+                                    } else {
+                                        state.pinTab(it)
+                                    }
+                                },
                             ) {
-                                currentTabs.contains(it.url)
-                            }
-                        PlatformIconButton(
-                            onClick = {
-                                if (isPinned) {
-                                    state.unpinTab(it)
-                                } else {
-                                    state.pinTab(it)
-                                }
-                            },
-                        ) {
-                            AnimatedContent(isPinned) {
-                                if (it) {
-                                    FAIcon(
-                                        imageVector = FontAwesomeIcons.Solid.ThumbtackSlash,
-                                        contentDescription = stringResource(Res.string.tab_settings_add),
-                                    )
-                                } else {
-                                    FAIcon(
-                                        imageVector = FontAwesomeIcons.Solid.Thumbtack,
-                                        contentDescription = stringResource(Res.string.tab_settings_remove),
-                                    )
+                                AnimatedContent(isPinned) {
+                                    if (it) {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.ThumbtackSlash,
+                                            contentDescription = stringResource(Res.string.tab_settings_add),
+                                        )
+                                    } else {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Thumbtack,
+                                            contentDescription = stringResource(Res.string.tab_settings_remove),
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    var showDropdown by remember {
-                        mutableStateOf(false)
-                    }
-                    PlatformIconButton(onClick = { showDropdown = true }) {
-                        FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
-                            contentDescription = stringResource(Res.string.more),
-                        )
-                        PlatformDropdownMenu(
-                            expanded = showDropdown,
-                            onDismissRequest = { showDropdown = false },
-                        ) {
-                            PlatformDropdownMenuItem(
-                                text = {
-                                    PlatformText(
-                                        text = stringResource(Res.string.edit_rss_source),
-                                    )
-                                },
-                                onClick = {
-                                    onEdit.invoke(it.id)
-                                    showDropdown = false
-                                },
-                                leadingIcon = {
-                                    FAIcon(
-                                        imageVector = FontAwesomeIcons.Solid.Pen,
-                                        contentDescription = stringResource(Res.string.edit_rss_source),
-                                    )
-                                },
+                        var showDropdown by remember {
+                            mutableStateOf(false)
+                        }
+                        PlatformIconButton(onClick = { showDropdown = true }) {
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
+                                contentDescription = stringResource(Res.string.more),
                             )
-                            PlatformDropdownMenuItem(
-                                text = {
-                                    PlatformText(
-                                        text = stringResource(Res.string.delete_rss_source),
-                                        color = PlatformTheme.colorScheme.error,
-                                    )
-                                },
-                                onClick = {
-                                    state.delete(it.id)
-                                    showDropdown = false
-                                },
-                                leadingIcon = {
-                                    FAIcon(
-                                        imageVector = FontAwesomeIcons.Solid.Trash,
-                                        contentDescription = stringResource(Res.string.delete_rss_source),
-                                        tint = PlatformTheme.colorScheme.error,
-                                    )
-                                },
-                            )
+                            PlatformDropdownMenu(
+                                expanded = showDropdown,
+                                onDismissRequest = { showDropdown = false },
+                            ) {
+                                PlatformDropdownMenuItem(
+                                    text = {
+                                        PlatformText(
+                                            text = stringResource(Res.string.edit_rss_source),
+                                        )
+                                    },
+                                    onClick = {
+                                        onEdit.invoke(it.id)
+                                        showDropdown = false
+                                    },
+                                    leadingIcon = {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Pen,
+                                            contentDescription = stringResource(Res.string.edit_rss_source),
+                                        )
+                                    },
+                                )
+                                PlatformDropdownMenuItem(
+                                    text = {
+                                        PlatformText(
+                                            text = stringResource(Res.string.delete_rss_source),
+                                            color = PlatformTheme.colorScheme.error,
+                                        )
+                                    },
+                                    onClick = {
+                                        state.delete(it.id)
+                                        showDropdown = false
+                                    },
+                                    leadingIcon = {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Trash,
+                                            contentDescription = stringResource(Res.string.delete_rss_source),
+                                            tint = PlatformTheme.colorScheme.error,
+                                        )
+                                    },
+                                )
+                            }
                         }
                     }
-                }
-            },
-        )
+                },
+            )
+        }
     }
 }

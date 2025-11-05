@@ -356,6 +356,7 @@
     <string name="antenna_title">هوائي</string>
     <string name="mixed_timeline_title">مختلطة</string>
     <string name="liked_title">معجب</string>
+    <string name="all_rss_feeds_title">كل تغذية Rss</string>
     <string name="settings_about_description">الجيل القادم النهائي مفتوح المصدر من AI زبون الشبكة الاجتماعية اللامركزية.</string>
     <string name="settings_about_source_code">الكود المصدري</string>
     <string name="settings_about_telegram">تيليجرام</string>

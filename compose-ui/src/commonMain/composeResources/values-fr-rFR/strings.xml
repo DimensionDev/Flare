@@ -356,6 +356,7 @@
     <string name="antenna_title">Antenne</string>
     <string name="mixed_timeline_title">Mixte</string>
     <string name="liked_title">Aimé</string>
+    <string name="all_rss_feeds_title">Tous les flux RSS</string>
     <string name="settings_about_description">Le client décentralisé du réseau social décentralisé de la prochaine génération à source libre a été alimenté par AI .</string>
     <string name="settings_about_source_code">Code source</string>
     <string name="settings_about_telegram">Télégramme</string>

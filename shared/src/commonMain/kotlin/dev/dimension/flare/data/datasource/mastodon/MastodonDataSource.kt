@@ -33,6 +33,7 @@ import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
+import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.PostAccounts
 import dev.dimension.flare.data.network.mastodon.api.model.PostList
@@ -394,7 +395,18 @@ internal open class MastodonDataSource(
                             multiple = poll.multiple,
                         )
                     },
-                quoteID = quoteID,
+                quoteID =
+                    if (this is PleromaDataSource) {
+                        quoteID
+                    } else {
+                        null
+                    },
+                quotedStatusID =
+                    if (this !is PleromaDataSource) {
+                        quoteID
+                    } else {
+                        null
+                    },
             ),
         )
 //        progress(ComposeProgress(maxProgress, maxProgress))

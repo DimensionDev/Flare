@@ -371,6 +371,19 @@ private fun Note.renderStatus(
                 )
             }.sortedByDescending { it.count }
             .toPersistentList()
+    val url =
+        buildString {
+            if (!uri.isNullOrEmpty()) {
+                append(uri)
+            } else if (!url.isNullOrEmpty()) {
+                append(url)
+            } else {
+                append("https://")
+                append(accountKey.host)
+                append("/notes/")
+                append(id)
+            }
+        }
     return UiTimeline.ItemContent.Status(
         parents =
             listOfNotNull(
@@ -487,6 +500,9 @@ private fun Note.renderStatus(
                                             )
                                         },
                             ),
+                            StatusAction.Item.Share(
+                                content = url,
+                            ),
                             if (isFromMe) {
                                 StatusAction.Item.Delete(
                                     onClicked = {
@@ -580,19 +596,7 @@ private fun Note.renderStatus(
                 ),
             )
         },
-        url =
-            buildString {
-                if (!uri.isNullOrEmpty()) {
-                    append(uri)
-                } else if (!url.isNullOrEmpty()) {
-                    append(url)
-                } else {
-                    append("https://")
-                    append(accountKey.host)
-                    append("/notes/")
-                    append(id)
-                }
-            },
+        url = url,
     )
 }
 

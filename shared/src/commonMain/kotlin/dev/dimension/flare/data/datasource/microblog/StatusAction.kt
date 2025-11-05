@@ -22,6 +22,16 @@ public sealed interface StatusAction {
             public val onClicked: ClickContext.() -> Unit
         }
 
+        public sealed interface Shareable {
+            public val content: String
+        }
+
+        public sealed interface Numbered {
+            public val count: Long
+            public val humanizedCount: String
+            public val digits: ImmutableList<Digit>
+        }
+
         public sealed interface Colorized {
             public val color: Color
 
@@ -36,13 +46,14 @@ public sealed interface StatusAction {
         public data object More : Item
 
         public data class Like internal constructor(
-            val count: Long,
+            override val count: Long,
             val liked: Boolean,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable,
-            Colorized {
-            public val humanizedCount: String by lazy {
+            Colorized,
+            Numbered {
+            public override val humanizedCount: String by lazy {
                 count
                     .takeIf {
                         it > 0
@@ -50,7 +61,7 @@ public sealed interface StatusAction {
                     .orEmpty()
             }
 
-            val digits: ImmutableList<Digit>
+            override val digits: ImmutableList<Digit>
                 get() =
                     humanizedCount
                         .mapIndexed { index, char ->
@@ -62,13 +73,14 @@ public sealed interface StatusAction {
         }
 
         public data class Retweet internal constructor(
-            val count: Long,
+            override val count: Long,
             val retweeted: Boolean,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable,
-            Colorized {
-            public val humanizedCount: String by lazy {
+            Colorized,
+            Numbered {
+            public override val humanizedCount: String by lazy {
                 count
                     .takeIf {
                         it > 0
@@ -76,7 +88,7 @@ public sealed interface StatusAction {
                     .orEmpty()
             }
 
-            val digits: ImmutableList<Digit>
+            override val digits: ImmutableList<Digit>
                 get() =
                     humanizedCount
                         .mapIndexed { index, char ->
@@ -88,11 +100,12 @@ public sealed interface StatusAction {
         }
 
         public data class Reply internal constructor(
-            val count: Long,
+            override val count: Long,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
-            Clickable {
-            public val humanizedCount: String by lazy {
+            Clickable,
+            Numbered {
+            public override val humanizedCount: String by lazy {
                 count
                     .takeIf {
                         it > 0
@@ -100,7 +113,7 @@ public sealed interface StatusAction {
                     .orEmpty()
             }
 
-            val digits: ImmutableList<Digit>
+            override val digits: ImmutableList<Digit>
                 get() =
                     humanizedCount
                         .mapIndexed { index, char ->
@@ -109,11 +122,12 @@ public sealed interface StatusAction {
         }
 
         public data class Comment internal constructor(
-            val count: Long,
+            override val count: Long,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
-            Clickable {
-            public val humanizedCount: String by lazy {
+            Clickable,
+            Numbered {
+            public override val humanizedCount: String by lazy {
                 count
                     .takeIf {
                         it > 0
@@ -121,7 +135,7 @@ public sealed interface StatusAction {
                     .orEmpty()
             }
 
-            val digits: ImmutableList<Digit>
+            override val digits: ImmutableList<Digit>
                 get() =
                     humanizedCount
                         .mapIndexed { index, char ->
@@ -130,11 +144,12 @@ public sealed interface StatusAction {
         }
 
         public data class Quote internal constructor(
-            val count: Long,
+            override val count: Long,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
-            Clickable {
-            public val humanizedCount: String by lazy {
+            Clickable,
+            Numbered {
+            public override val humanizedCount: String by lazy {
                 count
                     .takeIf {
                         it > 0
@@ -142,7 +157,7 @@ public sealed interface StatusAction {
                     .orEmpty()
             }
 
-            val digits: ImmutableList<Digit>
+            override val digits: ImmutableList<Digit>
                 get() =
                     humanizedCount
                         .mapIndexed { index, char ->
@@ -151,12 +166,13 @@ public sealed interface StatusAction {
         }
 
         public data class Bookmark internal constructor(
-            val count: Long,
+            override val count: Long,
             val bookmarked: Boolean,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
-            Clickable {
-            public val humanizedCount: String by lazy {
+            Clickable,
+            Numbered {
+            public override val humanizedCount: String by lazy {
                 count
                     .takeIf {
                         it > 0
@@ -164,7 +180,7 @@ public sealed interface StatusAction {
                     .orEmpty()
             }
 
-            val digits: ImmutableList<Digit>
+            override val digits: ImmutableList<Digit>
                 get() =
                     humanizedCount
                         .mapIndexed { index, char ->
@@ -195,5 +211,15 @@ public sealed interface StatusAction {
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable
+
+        public data class Share internal constructor(
+            override val content: String,
+        ) : Item,
+            Shareable
+
+        public data class FxShare internal constructor(
+            override val content: String,
+        ) : Item,
+            Shareable
     }
 }

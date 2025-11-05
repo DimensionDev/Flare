@@ -75,6 +75,7 @@ import dev.dimension.flare.compose.ui.bookmark_add
 import dev.dimension.flare.compose.ui.bookmark_remove
 import dev.dimension.flare.compose.ui.comment
 import dev.dimension.flare.compose.ui.delete
+import dev.dimension.flare.compose.ui.fx_share
 import dev.dimension.flare.compose.ui.hide_media
 import dev.dimension.flare.compose.ui.like
 import dev.dimension.flare.compose.ui.mastodon_item_show_less
@@ -150,7 +151,6 @@ public fun CommonStatusComponent(
 ) {
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalComponentAppearance.current
-    val platformContext = LocalPlatformContext.current
     Column(
         modifier =
             Modifier
@@ -326,12 +326,6 @@ public fun CommonStatusComponent(
                     ) {
                         StatusActions(
                             item.actions,
-                            onShare = {
-                                PlatformShare.shareText(
-                                    context = platformContext,
-                                    text = item.url,
-                                )
-                            },
                         )
                     }
                 } else {
@@ -341,12 +335,6 @@ public fun CommonStatusComponent(
                     ) {
                         StatusActions(
                             item.actions,
-                            onShare = {
-                                PlatformShare.shareText(
-                                    context = platformContext,
-                                    text = item.url,
-                                )
-                            },
                         )
                     }
                 }
@@ -673,7 +661,6 @@ public fun StatusVisibilityComponent(
 @Composable
 internal fun StatusActions(
     items: ImmutableList<StatusAction>,
-    onShare: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val haptics = LocalHapticFeedback.current
@@ -697,14 +684,6 @@ internal fun StatusActions(
                         color = statusActionItemColor(item = action.displayItem),
                         withTextMinWidth = index != items.lastIndex,
                     ) { closeMenu, isMenuShown ->
-                        if (action.displayItem is StatusAction.Item.More) {
-                            ShareMenu(
-                                onClick = {
-                                    onShare.invoke()
-                                    closeMenu.invoke()
-                                },
-                            )
-                        }
                         action.actions.fastForEach { subActions ->
                             when (subActions) {
                                 is StatusAction.Item -> {
@@ -817,6 +796,7 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
     closeMenu: () -> Unit,
     launcher: UriHandler,
 ) {
+    val context = LocalPlatformContext.current
     val color = statusActionItemColor(subActions)
     PlatformDropdownMenuItem(
         leadingIcon = {
@@ -844,6 +824,11 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
                             launcher.openUri(it)
                         },
                     ),
+                )
+            } else if (subActions is StatusAction.Item.Shareable) {
+                PlatformShare.shareText(
+                    context = context,
+                    text = subActions.content,
                 )
             }
         },
@@ -884,21 +869,16 @@ private val StatusAction.Item.icon: ImageVector
             is StatusAction.Item.Report -> FontAwesomeIcons.Solid.CircleInfo
             is StatusAction.Item.Retweet -> FontAwesomeIcons.Solid.Retweet
             is StatusAction.Item.Comment -> FontAwesomeIcons.Regular.CommentDots
+            is StatusAction.Item.FxShare -> FontAwesomeIcons.Solid.ShareNodes
+            is StatusAction.Item.Share -> FontAwesomeIcons.Solid.ShareNodes
         }
 
 private val StatusAction.Item.iconDigit: ImmutableList<Digit>?
     get() =
-        when (this) {
-            is StatusAction.Item.Bookmark -> digits
-            is StatusAction.Item.Delete -> null
-            is StatusAction.Item.Like -> digits
-            StatusAction.Item.More -> null
-            is StatusAction.Item.Quote -> digits
-            is StatusAction.Item.Reaction -> null
-            is StatusAction.Item.Reply -> digits
-            is StatusAction.Item.Report -> null
-            is StatusAction.Item.Retweet -> digits
-            is StatusAction.Item.Comment -> digits
+        if (this is StatusAction.Item.Numbered) {
+            this.digits
+        } else {
+            null
         }
 
 @Composable
@@ -955,6 +935,8 @@ private fun statusActionItemText(item: StatusAction.Item) =
         }
 
         is StatusAction.Item.Comment -> stringResource(resource = Res.string.comment)
+        is StatusAction.Item.FxShare -> stringResource(resource = Res.string.fx_share)
+        is StatusAction.Item.Share -> stringResource(resource = Res.string.share)
     }
 
 @Composable

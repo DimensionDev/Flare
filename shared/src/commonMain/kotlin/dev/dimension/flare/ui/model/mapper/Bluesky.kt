@@ -422,6 +422,20 @@ internal fun PostView.renderStatus(
         this.labels.any {
             it.`val` in sensitiveLabels
         }
+    val url =
+        buildString {
+            append("https://bsky.app/profile/")
+            append(author.handle)
+            append("/post/")
+            append(uri.atUri.substringAfterLast("/"))
+        }
+    val fxUrl =
+        buildString {
+            append("https://fxbsky.app/profile/")
+            append(author.handle)
+            append("/post/")
+            append(uri.atUri.substringAfterLast("/"))
+        }
 
     return UiTimeline.ItemContent.Status(
         platformType = PlatformType.Bluesky,
@@ -519,6 +533,12 @@ internal fun PostView.renderStatus(
                                     }
                                 },
                             ),
+                            StatusAction.Item.Share(
+                                content = url,
+                            ),
+                            StatusAction.Item.FxShare(
+                                content = fxUrl,
+                            ),
                             if (isFromMe) {
                                 StatusAction.Item.Delete(
                                     onClicked = {
@@ -571,13 +591,7 @@ internal fun PostView.renderStatus(
                 ),
             )
         },
-        url =
-            buildString {
-                append("https://bsky.app/profile/")
-                append(author.handle)
-                append("/post/")
-                append(uri.atUri.substringAfterLast("/"))
-            },
+        url = url,
     )
 }
 
@@ -868,6 +882,26 @@ private fun render(
                     id = record.value.uri.atUri,
                     host = accountKey.host,
                 )
+            val url =
+                buildString {
+                    append("https://bsky.app/profile/")
+                    append(record.value.author.handle)
+                    append("/post/")
+                    append(
+                        record.value.uri.atUri
+                            .substringAfterLast("/"),
+                    )
+                }
+            val fxUrl =
+                buildString {
+                    append("https://fxbsky.app/profile/")
+                    append(record.value.author.handle)
+                    append("/post/")
+                    append(
+                        record.value.uri.atUri
+                            .substringAfterLast("/"),
+                    )
+                }
             UiTimeline.ItemContent.Status(
                 user = user,
                 images =
@@ -980,6 +1014,12 @@ private fun render(
                             displayItem = StatusAction.Item.More,
                             actions =
                                 listOfNotNull(
+                                    StatusAction.Item.Share(
+                                        content = url,
+                                    ),
+                                    StatusAction.Item.FxShare(
+                                        content = fxUrl,
+                                    ),
                                     if (isFromMe) {
                                         StatusAction.Item.Delete(
                                             onClicked = {
@@ -1042,16 +1082,7 @@ private fun render(
                         ),
                     )
                 },
-                url =
-                    buildString {
-                        append("https://bsky.app/profile/")
-                        append(record.value.author.handle)
-                        append("/post/")
-                        append(
-                            record.value.uri.atUri
-                                .substringAfterLast("/"),
-                        )
-                    },
+                url = url,
             )
         }
 

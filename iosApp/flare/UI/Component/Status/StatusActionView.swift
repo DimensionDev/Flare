@@ -116,66 +116,62 @@ struct StatusActionItemView: View {
     let useText: Bool
     let isFixedWidth: Bool
     var body: some View {
-        Button(
-            role: data.role,
-        ) {
-            if let clickable = data as? StatusActionItemClickable {
-                clickable.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-            }
-        } label: {
-            Label {
-                ZStack(
-                    alignment: .leading
-                ) {
-                    if isFixedWidth, !useText {
-                        Text("0000")
-                            .opacity(0.0)
+        if let shareable = data as? StatusActionItemShareable {
+            ShareLink(data.textKey, item: .init(string: shareable.content)!)
+        } else {
+            Button(
+                role: data.role,
+            ) {
+                if let clickable = data as? StatusActionItemClickable {
+                    clickable.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                }
+            } label: {
+                Label {
+                    ZStack(
+                        alignment: .leading
+                    ) {
+                        if isFixedWidth, !useText {
+                            Text("0000")
+                                .opacity(0.0)
+                        }
+                        if useText {
+                            if let color = data.color {
+                                Text(data.textKey)
+                                    .foregroundStyle(color)
+                            } else {
+                                Text(data.textKey)
+                            }
+                        } else if let text = data.countText, themeSettings.appearanceSettings.showNumbers {
+                            if let color = data.color {
+                                Text(text)
+                                    .foregroundStyle(color)
+                            } else {
+                                Text(text)
+                            }
+                        }
                     }
-                    if useText {
-                        if let color = data.color {
-                            Text(data.textKey)
-                                .foregroundStyle(color)
-                        } else {
-                            Text(data.textKey)
-                        }
-                    } else if let text = data.countText, themeSettings.appearanceSettings.showNumbers {
-                        if let color = data.color {
-                            Text(text)
-                                .foregroundStyle(color)
-                        } else {
-                            Text(text)
-                        }
+                } icon: {
+                    if let color = data.color {
+                        StatusActionIcon(item: data)
+                            .foregroundStyle(color)
+                    } else {
+                        StatusActionIcon(item: data)
                     }
                 }
-            } icon: {
-                if let color = data.color {
-                    StatusActionIcon(item: data)
-                        .foregroundStyle(color)
-                } else {
-                    StatusActionIcon(item: data)
-                }
             }
+            .sensoryFeedback(.success, trigger: data.color)
+            .buttonStyle(.plain)
         }
-        .sensoryFeedback(.success, trigger: data.color)
-        .buttonStyle(.plain)
     }
 }
 
 extension StatusActionItem {
     var countText: String? {
-        switch onEnum(of: self) {
-        case .bookmark(let bookmark): bookmark.humanizedCount
-        case .delete: nil
-        case .like(let like): like.humanizedCount
-        case .more: nil
-        case .quote(let quote): quote.humanizedCount
-        case .reaction: nil
-        case .reply(let reply): reply.humanizedCount
-        case .report: nil
-        case .retweet(let retweet): retweet.humanizedCount
-        case .comment(let comment): comment.humanizedCount
+        if let numberd = self as? StatusActionItemNumbered {
+            return numberd.humanizedCount
+        } else {
+            return nil
         }
-
     }
     var color: Color? {
         if let colorized = self as? StatusActionItemColorized {
@@ -248,6 +244,10 @@ extension StatusActionItem {
                 : LocalizedStringResource("retweet")
         case .comment:
             return LocalizedStringResource("comment")
+        case .share:
+            return LocalizedStringResource("share")
+        case .fxShare:
+            return LocalizedStringResource("fx_share")
         }
     }
 }
@@ -299,6 +299,10 @@ struct StatusActionIcon: View {
 
             case .comment:
                 Image("fa-comment-dots")
+            case .share:
+                Image(.faShareNodes)
+            case .fxShare:
+                Image(.faShareNodes)
             }
         }
     }

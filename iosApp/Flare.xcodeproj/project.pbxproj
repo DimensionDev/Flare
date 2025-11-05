@@ -440,7 +440,7 @@
 			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
 			requirement = {
 				kind = exactVersion;
-				version = 8.5.0;
+				version = 8.6.1;
 			};
 		};
 		0672EE102E8689C70092AD1F /* XCRemoteSwiftPackageReference "Drops" */ = {
@@ -456,7 +456,7 @@
 			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
 			requirement = {
 				kind = exactVersion;
-				version = 0.61.0;
+				version = 0.62.2;
 			};
 		};
 		068923462E82A80700981D8E /* XCRemoteSwiftPackageReference "SwiftUI-Flow" */ = {
@@ -488,7 +488,7 @@
 			repositoryURL = "https://github.com/gh123man/LazyPager";
 			requirement = {
 				kind = exactVersion;
-				version = 1.2.0;
+				version = 1.2.1;
 			};
 		};
 		06F36AAB2E8F7BEC00F5905F /* XCRemoteSwiftPackageReference "iOS-Backports" */ = {
@@ -496,7 +496,7 @@
 			repositoryURL = "https://github.com/superwall/iOS-Backports";
 			requirement = {
 				kind = exactVersion;
-				version = 0.1.6;
+				version = 1.0.5;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

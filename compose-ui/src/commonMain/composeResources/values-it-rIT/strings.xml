@@ -356,6 +356,7 @@
     <string name="antenna_title">Antenna</string>
     <string name="mixed_timeline_title">Misto</string>
     <string name="liked_title">Piace</string>
+    <string name="all_rss_feeds_title">Tutti I Feed Rss</string>
     <string name="settings_about_description">Il client di social network decentralizzato basato su AI di ultima generazione.</string>
     <string name="settings_about_source_code">Codice sorgente</string>
     <string name="settings_about_telegram">Telegram</string>

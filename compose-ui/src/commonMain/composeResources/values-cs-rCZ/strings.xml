@@ -356,6 +356,7 @@
     <string name="antenna_title">Antény</string>
     <string name="mixed_timeline_title">Smíšená</string>
     <string name="liked_title">Líbí se mi</string>
+    <string name="all_rss_feeds_title">Všechny Rss kanály</string>
     <string name="settings_about_description">Konečná generace AI s otevřeným zdrojem napájí decentralizovaný klient sociální sítě.</string>
     <string name="settings_about_source_code">Zdrojový kód</string>
     <string name="settings_about_telegram">Telegram</string>

@@ -356,6 +356,7 @@
     <string name="antenna_title">アンテナ</string>
     <string name="mixed_timeline_title">混在しました</string>
     <string name="liked_title">いいね！</string>
+    <string name="all_rss_feeds_title">すべてのRSSフィード</string>
     <string name="settings_about_description">究極で次世代のオープンソースなAIを搭載した分散型ソーシャルネットワーククライアント。</string>
     <string name="settings_about_source_code">ソースコード</string>
     <string name="settings_about_telegram">Telegram</string>

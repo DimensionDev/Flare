@@ -356,6 +356,7 @@
     <string name="antenna_title">Antena</string>
     <string name="mixed_timeline_title">Mixto</string>
     <string name="liked_title">Me gustó</string>
+    <string name="all_rss_feeds_title">Todos los alimentos bríos</string>
     <string name="settings_about_description">La última generación de AI de código abierto impulsó al cliente descentralizado de la red social.</string>
     <string name="settings_about_source_code">Código fuente</string>
     <string name="settings_about_telegram">Telegram</string>

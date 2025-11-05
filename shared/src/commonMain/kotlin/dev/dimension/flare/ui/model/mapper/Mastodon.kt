@@ -264,7 +264,7 @@ private fun Status.renderStatus(
         } else {
             null
         }
-    val url =
+    val postUrl =
         buildString {
             if (!uri.isNullOrEmpty()) {
                 append(uri)
@@ -384,7 +384,7 @@ private fun Status.renderStatus(
                                     },
                                 ),
                                 StatusAction.Item.Share(
-                                    content = url,
+                                    content = postUrl,
                                 ),
                                 if (isFromMe) {
                                     StatusAction.Item.Delete(
@@ -483,7 +483,7 @@ private fun Status.renderStatus(
             )
         },
         bottomContent = bottomContent,
-        url = url,
+        url = postUrl,
     )
 }
 

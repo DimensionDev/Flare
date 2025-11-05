@@ -371,7 +371,7 @@ private fun Note.renderStatus(
                 )
             }.sortedByDescending { it.count }
             .toPersistentList()
-    val url =
+    val postUrl =
         buildString {
             if (!uri.isNullOrEmpty()) {
                 append(uri)
@@ -501,7 +501,7 @@ private fun Note.renderStatus(
                                         },
                             ),
                             StatusAction.Item.Share(
-                                content = url,
+                                content = postUrl,
                             ),
                             if (isFromMe) {
                                 StatusAction.Item.Delete(
@@ -596,7 +596,7 @@ private fun Note.renderStatus(
                 ),
             )
         },
-        url = url,
+        url = postUrl,
     )
 }
 

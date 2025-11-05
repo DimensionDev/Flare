@@ -167,8 +167,8 @@ struct StatusActionItemView: View {
 
 extension StatusActionItem {
     var countText: String? {
-        if let numberd = self as? StatusActionItemNumbered {
-            return numberd.humanizedCount
+        if let numbered = self as? StatusActionItemNumbered {
+            return numbered.humanizedCount
         } else {
             return nil
         }

@@ -495,6 +495,20 @@ internal fun Tweet.renderStatus(
             id = legacy?.idStr ?: restId,
             host = accountKey.host,
         )
+    val url =
+        buildString {
+            append("https://${accountKey.host}/")
+            append(user?.handleWithoutAtAndHost)
+            append("/status/")
+            append(legacy?.idStr ?: restId)
+        }
+    val fxUrl =
+        buildString {
+            append("https://fixupx.com/")
+            append(user?.handleWithoutAtAndHost)
+            append("/status/")
+            append(legacy?.idStr ?: restId)
+        }
 
     return UiTimeline.ItemContent.Status(
         statusKey = statusKey,
@@ -569,6 +583,12 @@ internal fun Tweet.renderStatus(
                                     event.bookmark(statusKey, legacy?.bookmarked ?: false)
                                 },
                             ),
+                            StatusAction.Item.Share(
+                                content = url,
+                            ),
+                            StatusAction.Item.FxShare(
+                                content = fxUrl,
+                            ),
                             if (isFromMe) {
                                 StatusAction.Item.Delete(
                                     onClicked = {
@@ -616,13 +636,7 @@ internal fun Tweet.renderStatus(
                 ),
             )
         },
-        url =
-            buildString {
-                append("https://${accountKey.host}/")
-                append(user?.handleWithoutAtAndHost)
-                append("/status/")
-                append(legacy?.idStr ?: restId)
-            },
+        url = url,
     )
 }
 

@@ -149,6 +149,13 @@ internal fun Status.renderStatus(
             id = id,
             host = vvoHost,
         )
+    val url =
+        buildString {
+            append("https://$vvoHostLong/")
+            append(user?.id)
+            append('/')
+            append(bid)
+        }
     return UiTimeline.ItemContent.Status(
         statusKey = statusKey,
         content = element.toUi(),
@@ -209,6 +216,9 @@ internal fun Status.renderStatus(
                                     event.favorite(statusKey, favorited ?: false)
                                 },
                             ),
+                            StatusAction.Item.Share(
+                                content = url,
+                            ),
                             if (isFromMe) {
                                 StatusAction.Item.Delete(
                                     onClicked = {
@@ -258,13 +268,7 @@ internal fun Status.renderStatus(
                 ),
             )
         },
-        url =
-            buildString {
-                append("https://$vvoHostLong/")
-                append(user?.id)
-                append('/')
-                append(bid)
-            },
+        url = url,
     )
 }
 
@@ -368,6 +372,13 @@ internal fun Comment.renderStatus(
                 }?.toMap()
                 ?.get("mid")
         }
+    val url =
+        buildString {
+            append("https://$vvoHostLong/")
+            append(user?.id)
+            append('/')
+            append(bid)
+        }
 
     return UiTimeline.ItemContent.Status(
         statusKey = statusKey,
@@ -446,6 +457,9 @@ internal fun Comment.renderStatus(
                     displayItem = StatusAction.Item.More,
                     actions =
                         listOfNotNull(
+                            StatusAction.Item.Share(
+                                content = url,
+                            ),
                             if (isFromMe) {
                                 StatusAction.Item.Delete(
                                     onClicked = {
@@ -503,13 +517,7 @@ internal fun Comment.renderStatus(
                 ),
             )
         },
-        url =
-            buildString {
-                append("https://$vvoHostLong/")
-                append(user?.id)
-                append('/')
-                append(bid)
-            },
+        url = url,
     )
 }
 

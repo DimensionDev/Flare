@@ -264,6 +264,16 @@ private fun Status.renderStatus(
         } else {
             null
         }
+    val postUrl =
+        buildString {
+            if (!uri.isNullOrEmpty()) {
+                append(uri)
+            } else if (!url.isNullOrEmpty()) {
+                append(url)
+            } else {
+                append("https://$host/@${account.acct}/$id")
+            }
+        }
     val quoteStatus = quote?.renderStatus(host, accountKey, dataSource)
     return UiTimeline.ItemContent.Status(
         images =
@@ -373,6 +383,9 @@ private fun Status.renderStatus(
                                         dataSource.bookmark(statusKey, bookmarked ?: false)
                                     },
                                 ),
+                                StatusAction.Item.Share(
+                                    content = postUrl,
+                                ),
                                 if (isFromMe) {
                                     StatusAction.Item.Delete(
                                         onClicked = {
@@ -470,16 +483,7 @@ private fun Status.renderStatus(
             )
         },
         bottomContent = bottomContent,
-        url =
-            buildString {
-                if (!uri.isNullOrEmpty()) {
-                    append(uri)
-                } else if (!url.isNullOrEmpty()) {
-                    append(url)
-                } else {
-                    append("https://$host/@${account.acct}/$id")
-                }
-            },
+        url = postUrl,
     )
 }
 

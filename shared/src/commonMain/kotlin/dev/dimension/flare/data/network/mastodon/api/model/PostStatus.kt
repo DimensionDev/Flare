@@ -19,6 +19,12 @@ internal data class PostStatus(
     val scheduledAt: String? = null,
     @SerialName("language")
     val language: String? = null,
+    // Pleroma-specific parameter: used only by Pleroma servers
     @SerialName("quote_id")
     val quoteID: String? = null,
+    // Mastodon-specific parameter: used only by Mastodon servers
+    @SerialName("quoted_status_id")
+    val quotedStatusID: String? = null,
+    @SerialName("quote_approval_policy")
+    val quoteApprovalPolicy: String? = null,
 )

@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -14,7 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonGroup
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -25,6 +24,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,6 +58,7 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
@@ -68,6 +69,7 @@ import dev.dimension.flare.ui.presenter.settings.AppearanceState
 import dev.dimension.flare.ui.theme.listCardContainer
 import dev.dimension.flare.ui.theme.listCardItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
@@ -113,103 +115,23 @@ internal fun AppearanceScreen(
                         .listCardContainer(),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                BoxWithConstraints {
-                    var showMenu by remember { mutableStateOf(false) }
-                    ListItem(
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    if (maxWidth < 400.dp) {
-                                        showMenu = true
-                                    }
-                                },
-                        headlineContent = {
-                            Text(text = stringResource(id = R.string.settings_appearance_theme))
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_appearance_theme_description))
-                        },
-                        trailingContent = {
-                            if (maxWidth >= 400.dp) {
-                                val items =
-                                    persistentMapOf(
-                                        Theme.LIGHT to stringResource(id = R.string.settings_appearance_theme_light),
-                                        Theme.SYSTEM to stringResource(id = R.string.settings_appearance_theme_auto),
-                                        Theme.DARK to stringResource(id = R.string.settings_appearance_theme_dark),
-                                    )
-                                ButtonGroup(
-                                    overflowIndicator = {},
-                                ) {
-                                    items.forEach { (theme, label) ->
-                                        toggleableItem(
-                                            checked = appearanceSettings.theme == theme,
-                                            onCheckedChange = {
-                                                state.updateSettings {
-                                                    copy(theme = theme)
-                                                }
-                                            },
-                                            label = label,
-                                        )
-                                    }
-                                }
-                            } else {
-                                TextButton(onClick = {
-                                    showMenu = true
-                                }) {
-                                    when (appearanceSettings.theme) {
-                                        Theme.LIGHT ->
-                                            Text(text = stringResource(id = R.string.settings_appearance_theme_light))
-
-                                        Theme.SYSTEM ->
-                                            Text(text = stringResource(id = R.string.settings_appearance_theme_auto))
-
-                                        Theme.DARK ->
-                                            Text(text = stringResource(id = R.string.settings_appearance_theme_dark))
-                                    }
-                                }
-                                FlareDropdownMenu(
-                                    expanded = showMenu,
-                                    onDismissRequest = { showMenu = false },
-                                ) {
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(text = stringResource(id = R.string.settings_appearance_theme_light))
-                                        },
-                                        onClick = {
-                                            state.updateSettings {
-                                                copy(theme = Theme.LIGHT)
-                                            }
-                                            showMenu = false
-                                        },
-                                    )
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(text = stringResource(id = R.string.settings_appearance_theme_auto))
-                                        },
-                                        onClick = {
-                                            state.updateSettings {
-                                                copy(theme = Theme.SYSTEM)
-                                            }
-                                            showMenu = false
-                                        },
-                                    )
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(text = stringResource(id = R.string.settings_appearance_theme_dark))
-                                        },
-                                        onClick = {
-                                            state.updateSettings {
-                                                copy(theme = Theme.DARK)
-                                            }
-                                            showMenu = false
-                                        },
-                                    )
-                                }
-                            }
-                        },
-                    )
-                }
+                SingleChoiceSettingsItem(
+                    headline = { Text(text = stringResource(id = R.string.settings_appearance_theme)) },
+                    supporting = { Text(text = stringResource(id = R.string.settings_appearance_theme_description)) },
+                    items =
+                        persistentMapOf(
+                            Theme.LIGHT to stringResource(id = R.string.settings_appearance_theme_light),
+                            Theme.SYSTEM to stringResource(id = R.string.settings_appearance_theme_auto),
+                            Theme.DARK to stringResource(id = R.string.settings_appearance_theme_dark),
+                        ),
+                    selected = appearanceSettings.theme,
+                    onSelected = {
+                        state.updateSettings {
+                            copy(theme = it)
+                        }
+                    },
+                    modifier = Modifier.listCardItem(),
+                )
                 ListItem(
                     headlineContent = {
                         Text(text = stringResource(id = R.string.settings_appearance_theme_pure_color))
@@ -291,166 +213,43 @@ internal fun AppearanceScreen(
                     )
                 }
 
-                BoxWithConstraints {
-                    var showMenu by remember { mutableStateOf(false) }
-                    ListItem(
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    if (maxWidth < 400.dp) {
-                                        showMenu = true
-                                    }
-                                },
-                        headlineContent = {
-                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_style))
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_style_description))
-                        },
-                        trailingContent = {
-                            val items =
-                                persistentMapOf(
-                                    BottomBarStyle.Floating to stringResource(id = R.string.settings_appearance_bottombar_style_floating),
-                                    BottomBarStyle.Classic to stringResource(id = R.string.settings_appearance_bottombar_style_classic),
-                                )
+                SingleChoiceSettingsItem(
+                    headline = { Text(text = stringResource(id = R.string.settings_appearance_bottombar_style)) },
+                    supporting = { Text(text = stringResource(id = R.string.settings_appearance_bottombar_style_description)) },
+                    items =
+                        persistentMapOf(
+                            BottomBarStyle.Floating to stringResource(id = R.string.settings_appearance_bottombar_style_floating),
+                            BottomBarStyle.Classic to stringResource(id = R.string.settings_appearance_bottombar_style_classic),
+                        ),
+                    selected = appearanceSettings.bottomBarStyle,
+                    onSelected = {
+                        state.updateSettings {
+                            copy(bottomBarStyle = it)
+                        }
+                    },
+                    modifier = Modifier.listCardItem(),
+                )
 
-                            if (maxWidth >= 400.dp) {
-                                ButtonGroup(
-                                    overflowIndicator = {},
-                                ) {
-                                    items.forEach { (value, label) ->
-                                        toggleableItem(
-                                            checked = appearanceSettings.bottomBarStyle == value,
-                                            onCheckedChange = {
-                                                state.updateSettings {
-                                                    copy(bottomBarStyle = value)
-                                                }
-                                            },
-                                            label = label,
-                                        )
-                                    }
-                                }
-                            } else {
-                                TextButton(onClick = {
-                                    showMenu = true
-                                }) {
-                                    when (appearanceSettings.bottomBarStyle) {
-                                        BottomBarStyle.Floating ->
-                                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_style_floating))
-
-                                        BottomBarStyle.Classic ->
-                                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_style_classic))
-                                    }
-                                }
-                                FlareDropdownMenu(
-                                    expanded = showMenu,
-                                    onDismissRequest = { showMenu = false },
-                                ) {
-                                    items.forEach { (value, label) ->
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(text = label)
-                                            },
-                                            onClick = {
-                                                state.updateSettings {
-                                                    copy(bottomBarStyle = value)
-                                                }
-                                                showMenu = false
-                                            },
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                    )
-                }
-
-                BoxWithConstraints {
-                    var showMenu by remember { mutableStateOf(false) }
-                    ListItem(
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    if (maxWidth < 400.dp) {
-                                        showMenu = true
-                                    }
-                                },
-                        headlineContent = {
-                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_behavior))
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_behavior_description))
-                        },
-                        trailingContent = {
-                            val items =
-                                persistentMapOf(
-                                    BottomBarBehavior.AlwaysShow to
-                                        stringResource(id = R.string.settings_appearance_bottombar_behavior_fixed),
-                                    BottomBarBehavior.MinimizeOnScroll to
-                                        stringResource(id = R.string.settings_appearance_bottombar_behavior_minimize_on_scroll),
-                                    BottomBarBehavior.HideOnScroll to
-                                        stringResource(id = R.string.settings_appearance_bottombar_behavior_hide_on_scroll),
-                                )
-                            if (maxWidth >= 400.dp) {
-                                ButtonGroup(
-                                    overflowIndicator = {},
-                                ) {
-                                    items.forEach { (value, label) ->
-                                        toggleableItem(
-                                            checked = appearanceSettings.bottomBarBehavior == value,
-                                            onCheckedChange = {
-                                                state.updateSettings {
-                                                    copy(bottomBarBehavior = value)
-                                                }
-                                            },
-                                            label = label,
-                                        )
-                                    }
-                                }
-                            } else {
-                                TextButton(onClick = {
-                                    showMenu = true
-                                }) {
-                                    when (appearanceSettings.bottomBarBehavior) {
-                                        BottomBarBehavior.AlwaysShow ->
-                                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_behavior_fixed))
-
-                                        BottomBarBehavior.MinimizeOnScroll ->
-                                            Text(
-                                                text =
-                                                    stringResource(
-                                                        id = R.string.settings_appearance_bottombar_behavior_minimize_on_scroll,
-                                                    ),
-                                            )
-
-                                        BottomBarBehavior.HideOnScroll ->
-                                            Text(text = stringResource(id = R.string.settings_appearance_bottombar_behavior_hide_on_scroll))
-                                    }
-                                }
-                                FlareDropdownMenu(
-                                    expanded = showMenu,
-                                    onDismissRequest = { showMenu = false },
-                                ) {
-                                    items.forEach { (value, label) ->
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(text = label)
-                                            },
-                                            onClick = {
-                                                state.updateSettings {
-                                                    copy(bottomBarBehavior = value)
-                                                }
-                                                showMenu = false
-                                            },
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                    )
-                }
+                SingleChoiceSettingsItem(
+                    headline = { Text(text = stringResource(id = R.string.settings_appearance_bottombar_behavior)) },
+                    supporting = { Text(text = stringResource(id = R.string.settings_appearance_bottombar_behavior_description)) },
+                    items =
+                        persistentMapOf(
+                            BottomBarBehavior.AlwaysShow to
+                                stringResource(id = R.string.settings_appearance_bottombar_behavior_fixed),
+                            BottomBarBehavior.MinimizeOnScroll to
+                                stringResource(id = R.string.settings_appearance_bottombar_behavior_minimize_on_scroll),
+                            BottomBarBehavior.HideOnScroll to
+                                stringResource(id = R.string.settings_appearance_bottombar_behavior_hide_on_scroll),
+                        ),
+                    selected = appearanceSettings.bottomBarBehavior,
+                    onSelected = {
+                        state.updateSettings {
+                            copy(bottomBarBehavior = it)
+                        }
+                    },
+                    modifier = Modifier.listCardItem(),
+                )
 
                 var fontSizeDiff by remember { mutableFloatStateOf(appearanceSettings.fontSizeDiff) }
                 Column(
@@ -471,7 +270,11 @@ internal fun AppearanceScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                        horizontalArrangement =
+                            Arrangement.spacedBy(
+                                8.dp,
+                                Alignment.CenterHorizontally,
+                            ),
                     ) {
                         IconButton(
                             onClick = {
@@ -552,88 +355,22 @@ internal fun AppearanceScreen(
                                 .background(MaterialTheme.colorScheme.surface),
                     )
                 }
-                BoxWithConstraints {
-                    var showMenu by remember { mutableStateOf(false) }
-                    ListItem(
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    if (maxWidth < 400.dp) {
-                                        showMenu = true
-                                    }
-                                },
-                        headlineContent = {
-                            Text(text = stringResource(id = R.string.settings_appearance_avatar_shape))
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_appearance_avatar_shape_description))
-                        },
-                        trailingContent = {
-                            if (maxWidth >= 400.dp) {
-                                val items =
-                                    persistentMapOf(
-                                        AvatarShape.CIRCLE to stringResource(id = R.string.settings_appearance_avatar_shape_round),
-                                        AvatarShape.SQUARE to stringResource(id = R.string.settings_appearance_avatar_shape_square),
-                                    )
-                                ButtonGroup(
-                                    overflowIndicator = {},
-                                ) {
-                                    items.forEach { (shape, label) ->
-                                        toggleableItem(
-                                            checked = appearanceSettings.avatarShape == shape,
-                                            onCheckedChange = {
-                                                state.updateSettings {
-                                                    copy(avatarShape = shape)
-                                                }
-                                            },
-                                            label = label,
-                                        )
-                                    }
-                                }
-                            } else {
-                                TextButton(onClick = {
-                                    showMenu = true
-                                }) {
-                                    when (appearanceSettings.avatarShape) {
-                                        AvatarShape.CIRCLE ->
-                                            Text(text = stringResource(id = R.string.settings_appearance_avatar_shape_round))
-
-                                        AvatarShape.SQUARE ->
-                                            Text(text = stringResource(id = R.string.settings_appearance_avatar_shape_square))
-                                    }
-                                }
-                                FlareDropdownMenu(
-                                    expanded = showMenu,
-                                    onDismissRequest = { showMenu = false },
-                                ) {
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(text = stringResource(id = R.string.settings_appearance_avatar_shape_round))
-                                        },
-                                        onClick = {
-                                            state.updateSettings {
-                                                copy(avatarShape = AvatarShape.CIRCLE)
-                                            }
-                                            showMenu = false
-                                        },
-                                    )
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(text = stringResource(id = R.string.settings_appearance_avatar_shape_square))
-                                        },
-                                        onClick = {
-                                            state.updateSettings {
-                                                copy(avatarShape = AvatarShape.SQUARE)
-                                            }
-                                            showMenu = false
-                                        },
-                                    )
-                                }
-                            }
-                        },
-                    )
-                }
+                SingleChoiceSettingsItem(
+                    headline = { Text(text = stringResource(id = R.string.settings_appearance_avatar_shape)) },
+                    supporting = { Text(text = stringResource(id = R.string.settings_appearance_avatar_shape_description)) },
+                    items =
+                        persistentMapOf(
+                            AvatarShape.CIRCLE to stringResource(id = R.string.settings_appearance_avatar_shape_round),
+                            AvatarShape.SQUARE to stringResource(id = R.string.settings_appearance_avatar_shape_square),
+                        ),
+                    selected = appearanceSettings.avatarShape,
+                    onSelected = {
+                        state.updateSettings {
+                            copy(avatarShape = it)
+                        }
+                    },
+                    modifier = Modifier.listCardItem(),
+                )
                 ListItem(
                     headlineContent = {
                         Text(text = stringResource(id = R.string.settings_appearance_show_actions))
@@ -825,78 +562,94 @@ internal fun AppearanceScreen(
                     )
                 }
                 AnimatedVisibility(appearanceSettings.showMedia) {
-                    BoxWithConstraints {
-                        var showMenu by remember { mutableStateOf(false) }
-                        ListItem(
-                            modifier =
-                                Modifier
-                                    .listCardItem()
-                                    .clickable {
-                                        if (maxWidth < 400.dp) {
-                                            showMenu = true
-                                        }
-                                    },
-                            headlineContent = {
-                                Text(text = stringResource(id = R.string.settings_appearance_video_autoplay))
-                            },
-                            supportingContent = {
-                                Text(text = stringResource(id = R.string.settings_appearance_video_autoplay_description))
-                            },
-                            trailingContent = {
-                                if (maxWidth >= 400.dp) {
-                                    val items =
-                                        persistentMapOf(
-                                            VideoAutoplay.WIFI to stringResource(id = R.string.settings_appearance_video_autoplay_wifi),
-                                            VideoAutoplay.ALWAYS to stringResource(id = R.string.settings_appearance_video_autoplay_always),
-                                            VideoAutoplay.NEVER to stringResource(id = R.string.settings_appearance_video_autoplay_never),
-                                        )
-                                    ButtonGroup(
-                                        overflowIndicator = {},
-                                    ) {
-                                        items.forEach { (autoplay, label) ->
-                                            toggleableItem(
-                                                checked = appearanceSettings.videoAutoplay == autoplay,
-                                                onCheckedChange = {
-                                                    state.updateSettings {
-                                                        copy(videoAutoplay = autoplay)
-                                                    }
-                                                },
-                                                label = label,
-                                            )
-                                        }
-                                    }
-                                } else {
-                                    TextButton(onClick = {
-                                        showMenu = true
-                                    }) {
-                                        Text(text = stringResource(id = appearanceSettings.videoAutoplay.id))
-                                    }
-                                    FlareDropdownMenu(
-                                        expanded = showMenu,
-                                        onDismissRequest = { showMenu = false },
-                                    ) {
-                                        VideoAutoplay.entries.forEach {
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Text(text = stringResource(id = it.id))
-                                                },
-                                                onClick = {
-                                                    state.updateSettings {
-                                                        copy(videoAutoplay = it)
-                                                    }
-                                                    showMenu = false
-                                                },
-                                            )
-                                        }
-                                    }
-                                }
+                    SingleChoiceSettingsItem(
+                        headline = { Text(text = stringResource(id = R.string.settings_appearance_video_autoplay)) },
+                        supporting = { Text(text = stringResource(id = R.string.settings_appearance_video_autoplay_description)) },
+                        items =
+                            persistentMapOf(
+                                VideoAutoplay.WIFI to stringResource(id = R.string.settings_appearance_video_autoplay_wifi),
+                                VideoAutoplay.ALWAYS to stringResource(id = R.string.settings_appearance_video_autoplay_always),
+                                VideoAutoplay.NEVER to stringResource(id = R.string.settings_appearance_video_autoplay_never),
+                            ),
+                        selected = appearanceSettings.videoAutoplay,
+                        onSelected = {
+                            state.updateSettings {
+                                copy(videoAutoplay = it)
+                            }
+                        },
+                        modifier = Modifier.listCardItem(),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun <T> SingleChoiceSettingsItem(
+    headline: @Composable () -> Unit,
+    supporting: @Composable () -> Unit,
+    items: ImmutableMap<T, String>,
+    selected: T,
+    onSelected: (T) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val isBigScreen = isBigScreen()
+    var showMenu by remember { mutableStateOf(false) }
+
+    ListItem(
+        modifier =
+            modifier
+                .clickable {
+                    if (!isBigScreen) {
+                        showMenu = true
+                    }
+                },
+        headlineContent = headline,
+        supportingContent = supporting,
+        trailingContent = {
+            if (isBigScreen) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+                ) {
+                    val entries = items.entries.toList()
+                    entries.forEachIndexed { index, (value, label) ->
+                        ToggleButton(
+                            checked = selected == value,
+                            onCheckedChange = { onSelected(value) },
+                            shapes =
+                                when (index) {
+                                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                    entries.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                                },
+                        ) {
+                            Text(text = label)
+                        }
+                    }
+                }
+            } else {
+                TextButton(onClick = { showMenu = true }) {
+                    Text(text = items[selected] ?: "")
+                }
+                FlareDropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false },
+                ) {
+                    items.forEach { (value, label) ->
+                        DropdownMenuItem(
+                            text = { Text(text = label) },
+                            onClick = {
+                                onSelected(value)
+                                showMenu = false
                             },
                         )
                     }
                 }
             }
-        }
-    }
+        },
+    )
 }
 
 @Composable

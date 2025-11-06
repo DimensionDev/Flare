@@ -73,7 +73,7 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
                             Toast
                                 .makeText(
                                     context,
-                                    context.getString(R.string.media_save_success),
+                                    R.string.media_save_success,
                                     Toast.LENGTH_SHORT,
                                 ).show()
                         },

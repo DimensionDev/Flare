@@ -2,8 +2,10 @@ package dev.dimension.flare.ui.controllers
 
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
+import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.InAppNotification
+import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.KoinHelper
 import org.koin.core.context.startKoin
 import org.koin.dsl.binds
@@ -25,7 +27,16 @@ public object ComposeUIHelper {
         SingletonImageLoader.setSafe { context ->
             ImageLoader
                 .Builder(context)
-                .crossfade(true)
+                .components {
+                    add(
+                        KtorNetworkFetcherFactory(
+                            httpClient =
+                                ktorClient {
+                                    useDefaultTransformers = false
+                                },
+                        ),
+                    )
+                }.crossfade(true)
                 .build()
         }
     }

@@ -38,24 +38,25 @@ internal fun ktorfit(
     )
 }
 
-internal fun ktorClient(
+public fun ktorClient(
     config: HttpClientConfig<*>.() -> Unit = {
         install(ContentNegotiation) {
             json(JSON)
         }
     },
-) = HttpClient(httpClientEngine) {
-    config.invoke(this)
-    install(Logging) {
-        logger = NapierLogger
-        level =
-            if (BuildConfig.debug) {
-                LogLevel.ALL
-            } else {
-                LogLevel.BODY
-            }
+): HttpClient =
+    HttpClient(httpClientEngine) {
+        config.invoke(this)
+        install(Logging) {
+            logger = NapierLogger
+            level =
+                if (BuildConfig.debug) {
+                    LogLevel.ALL
+                } else {
+                    LogLevel.BODY
+                }
+        }
     }
-}
 
 internal expect val httpClientEngine: HttpClientEngine
 

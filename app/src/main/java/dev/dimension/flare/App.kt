@@ -13,10 +13,10 @@ import coil3.svg.SvgDecoder
 import coil3.video.VideoFrameDecoder
 import dev.dimension.flare.common.AnimatedPngDecoder
 import dev.dimension.flare.common.AnimatedWebPDecoder
+import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.di.androidModule
 import dev.dimension.flare.di.composeUiModule
-import io.ktor.client.HttpClient
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -46,7 +46,10 @@ class App :
                 add(VideoFrameDecoder.Factory())
                 add(
                     KtorNetworkFetcherFactory(
-                        httpClient = HttpClient(dev.dimension.flare.data.network.httpClientEngine),
+                        httpClient =
+                            ktorClient {
+                                useDefaultTransformers = false
+                            },
                     ),
                 )
             }.crossfade(true)

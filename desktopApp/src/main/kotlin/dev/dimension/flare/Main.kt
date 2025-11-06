@@ -14,12 +14,14 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
+import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.DeeplinkHandler
 import dev.dimension.flare.common.NativeWindowBridge
 import dev.dimension.flare.common.NoopIPC
 import dev.dimension.flare.common.SandboxHelper
 import dev.dimension.flare.common.windows.WindowsIPC
+import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.di.composeUiModule
 import dev.dimension.flare.di.desktopModule
@@ -28,6 +30,7 @@ import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.WindowRouter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.ProvideThemeSettings
+import io.github.kdroidfilter.platformtools.darkmodedetector.windows.setWindowsAdaptiveTitleBar
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -67,7 +70,16 @@ fun main(args: Array<String>) {
         setSingletonImageLoaderFactory { context ->
             ImageLoader
                 .Builder(context)
-                .crossfade(true)
+                .components {
+                    add(
+                        KtorNetworkFetcherFactory(
+                            httpClient =
+                                ktorClient {
+                                    useDefaultTransformers = false
+                                },
+                        ),
+                    )
+                }.crossfade(true)
                 .build()
         }
         val extraWindowRoutes = remember { mutableStateMapOf<String, FloatingWindowState>() }
@@ -104,6 +116,7 @@ fun main(args: Array<String>) {
                         size = DpSize(520.dp, 840.dp),
                     ),
             ) {
+                window.setWindowsAdaptiveTitleBar()
                 FlareTheme {
                     FlareApp(
                         onWindowRoute = {

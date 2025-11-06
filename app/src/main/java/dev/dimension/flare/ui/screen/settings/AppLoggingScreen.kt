@@ -42,8 +42,8 @@ import dev.dimension.flare.ui.presenter.settings.DevModePresenter
 import dev.dimension.flare.ui.screen.media.saveByteArrayToDownloads
 import dev.dimension.flare.ui.theme.listCardContainer
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.time.Clock
+import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +73,7 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
                             Toast
                                 .makeText(
                                     context,
-                                    context.getString(R.string.media_save_success),
+                                    R.string.media_save_success,
                                     Toast.LENGTH_SHORT,
                                 ).show()
                         },

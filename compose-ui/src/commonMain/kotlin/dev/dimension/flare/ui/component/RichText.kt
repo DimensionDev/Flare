@@ -67,6 +67,7 @@ public fun RichText(
     lineHeight: TextUnit = TextUnit.Unspecified,
     overflow: TextOverflow = TextOverflow.Ellipsis,
     softWrap: Boolean = true,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
     textStyle: TextStyle = PlatformTextStyle.current,
     linkStyle: TextStyle =
         textStyle.copy(
@@ -83,7 +84,7 @@ public fun RichText(
     val h6 = PlatformTheme.typography.h6
     val contentColor = PlatformContentColor.current
     val uriHandler = LocalUriHandler.current
-    val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
+    var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     CompositionLocalProvider(
         LocalLayoutDirection provides layoutDirection,
     ) {
@@ -130,7 +131,7 @@ public fun RichText(
                                 awaitEachGesture {
                                     val change = awaitFirstDown()
                                     val annotation =
-                                        layoutResult.value?.getOffsetForPosition(change.position)?.let {
+                                        layoutResult?.getOffsetForPosition(change.position)?.let {
                                             state.annotatedString
                                                 .getStringAnnotations(start = it, end = it)
                                                 .firstOrNull()
@@ -161,7 +162,8 @@ public fun RichText(
                         softWrap = softWrap,
                         text = state.annotatedString,
                         onTextLayout = {
-                            layoutResult.value = it
+                            layoutResult = it
+                            onTextLayout.invoke(it)
                         },
                         inlineContent = renderInlineContent,
                     )
@@ -178,7 +180,7 @@ public fun RichText(
                             awaitEachGesture {
                                 val change = awaitFirstDown()
                                 val annotation =
-                                    layoutResult.value?.getOffsetForPosition(change.position)?.let {
+                                    layoutResult?.getOffsetForPosition(change.position)?.let {
                                         state.annotatedString
                                             .getStringAnnotations(start = it, end = it)
                                             .firstOrNull()
@@ -209,7 +211,8 @@ public fun RichText(
                     softWrap = softWrap,
                     text = state.annotatedString,
                     onTextLayout = {
-                        layoutResult.value = it
+                        layoutResult = it
+                        onTextLayout.invoke(it)
                     },
                     inlineContent = renderInlineContent,
                 )

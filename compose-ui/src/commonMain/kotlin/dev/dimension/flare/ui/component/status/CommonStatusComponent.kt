@@ -87,6 +87,7 @@ import dev.dimension.flare.compose.ui.mastodon_visibility_unlisted
 import dev.dimension.flare.compose.ui.more
 import dev.dimension.flare.compose.ui.poll_expired
 import dev.dimension.flare.compose.ui.poll_expired_at
+import dev.dimension.flare.compose.ui.post_show_full_text
 import dev.dimension.flare.compose.ui.quote
 import dev.dimension.flare.compose.ui.reaction_add
 import dev.dimension.flare.compose.ui.reaction_remove
@@ -269,7 +270,7 @@ public fun CommonStatusComponent(
                     content = item.content,
                     contentWarning = item.contentWarning,
                     poll = item.poll,
-                    maxLines = appearanceSettings.lineLimit,
+                    maxLines = 13, // appearanceSettings.lineLimit,
                 )
             }
 
@@ -999,6 +1000,9 @@ private fun StatusContentComponent(
     var expanded by rememberSaveable {
         mutableStateOf(false)
     }
+    var showSoftExpand by rememberSaveable {
+        mutableStateOf(false)
+    }
     Column(
         modifier = modifier,
     ) {
@@ -1038,12 +1042,27 @@ private fun StatusContentComponent(
                         text = content,
                         modifier = Modifier.fillMaxWidth(),
                         maxLines =
-                            if (!contentWarning?.raw.isNullOrEmpty() && expanded || maxLines == Int.MAX_VALUE) {
+                            if (expanded || maxLines == Int.MAX_VALUE) {
                                 Int.MAX_VALUE
                             } else {
                                 maxLines
                             },
+                        onTextLayout = {
+                            showSoftExpand = it.hasVisualOverflow
+                        },
                     )
+                    if (showSoftExpand) {
+                        PlatformTextButton(
+                            onClick = {
+                                expanded = true
+                            },
+                        ) {
+                            PlatformText(
+                                stringResource(Res.string.post_show_full_text),
+                                color = PlatformTheme.colorScheme.primary,
+                            )
+                        }
+                    }
                 }
                 poll?.let {
                     Spacer(modifier = Modifier.height(8.dp))

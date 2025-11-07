@@ -15,6 +15,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.MediaType
 import dev.dimension.flare.data.network.mastodon.api.model.Mention
 import dev.dimension.flare.data.network.mastodon.api.model.Notification
 import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
+import dev.dimension.flare.data.network.mastodon.api.model.QuoteApproval
 import dev.dimension.flare.data.network.mastodon.api.model.RelationshipResponse
 import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
@@ -68,27 +69,35 @@ internal fun Notification.render(
             NotificationTypes.Follow ->
                 UiTimeline.TopMessage.MessageType.Mastodon
                     .Follow(id = id.orEmpty())
+
             NotificationTypes.Favourite ->
                 UiTimeline.TopMessage.MessageType.Mastodon
                     .Favourite(id = id.orEmpty())
+
             NotificationTypes.Reblog ->
                 UiTimeline.TopMessage.MessageType.Mastodon
                     .Reblogged(id = id.orEmpty())
+
             NotificationTypes.Mention ->
                 UiTimeline.TopMessage.MessageType.Mastodon
                     .Mention(id = id.orEmpty())
+
             NotificationTypes.Poll ->
                 UiTimeline.TopMessage.MessageType.Mastodon
                     .Poll(id = id.orEmpty())
+
             NotificationTypes.FollowRequest ->
                 UiTimeline.TopMessage.MessageType.Mastodon
                     .FollowRequest(id = id.orEmpty())
+
             NotificationTypes.Status ->
                 UiTimeline.TopMessage.MessageType.Mastodon
                     .Status(id = id.orEmpty())
+
             NotificationTypes.Update ->
                 UiTimeline.TopMessage.MessageType.Mastodon
                     .Update(id = id.orEmpty())
+
             null ->
                 UiTimeline.TopMessage.MessageType.Mastodon
                     .UnKnown(id = id.orEmpty())
@@ -135,7 +144,11 @@ internal fun Notification.render(
                                     onClicked = {
                                         event.acceptFollowRequest(
                                             userKey = user.key,
-                                            notificationStatusKey = MicroBlogKey(id ?: "", accountKey.host),
+                                            notificationStatusKey =
+                                                MicroBlogKey(
+                                                    id ?: "",
+                                                    accountKey.host,
+                                                ),
                                         )
                                     },
                                 ),
@@ -143,12 +156,17 @@ internal fun Notification.render(
                                     onClicked = {
                                         event.rejectFollowRequest(
                                             userKey = user.key,
-                                            notificationStatusKey = MicroBlogKey(id ?: "", accountKey.host),
+                                            notificationStatusKey =
+                                                MicroBlogKey(
+                                                    id ?: "",
+                                                    accountKey.host,
+                                                ),
                                         )
                                     },
                                 ),
                             ),
                     )
+
                 else -> status ?: UiTimeline.ItemContent.User(user)
             },
     )
@@ -176,7 +194,8 @@ internal fun Status.render(
     requireNotNull(account) { "account is null" }
     val user = account.render(accountKey, host)
     val currentStatus = this.renderStatus(host, accountKey, event)
-    val actualStatus = (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.Mastodon)?.data ?: this
+    val actualStatus =
+        (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.Mastodon)?.data ?: this
     val topMessage =
         if (pinned == true) {
             UiTimeline.TopMessage(
@@ -222,8 +241,40 @@ private fun Status.renderStatus(
     requireNotNull(account) { "actualStatus.account is null" }
     val actualUser = account.render(accountKey, host)
     val isFromMe = actualUser.key == accountKey
-    val canReblog = visibility in listOf(Visibility.Public, Visibility.Unlisted) || (isFromMe && visibility != Visibility.Direct)
-    val canQuote = canReblog && dataSource is StatusEvent.Pleroma
+    val canReblog =
+        visibility in
+            listOf(
+                Visibility.Public,
+                Visibility.Unlisted,
+            ) ||
+            (isFromMe && visibility != Visibility.Direct)
+    val canQuote =
+        if (dataSource is StatusEvent.Pleroma) {
+            canReblog
+        } else if (quoteApproval != null && quoteApproval.currentUser != null) {
+            when (quoteApproval.currentUser) {
+                QuoteApproval.CurrentUser.Automatic -> {
+                    if (!quoteApproval.automatic.isNullOrEmpty()) {
+                        quoteApproval.automatic.contains(QuoteApproval.Approval.Public)
+                    } else {
+                        isFromMe
+                    }
+                }
+
+                QuoteApproval.CurrentUser.Manual -> {
+                    if (!quoteApproval.manual.isNullOrEmpty()) {
+                        quoteApproval.manual.contains(QuoteApproval.Approval.Public)
+                    } else {
+                        isFromMe
+                    }
+                }
+
+                QuoteApproval.CurrentUser.Denied -> false
+                QuoteApproval.CurrentUser.Unknown -> false
+            }
+        } else {
+            false
+        }
 //    val canReact = dataSource is StatusEvent.Pleroma
     // TODO: there are too many actions for Pleroma, disable for now
     val canReact = false
@@ -324,7 +375,45 @@ private fun Status.renderStatus(
                             )
                         },
                     ),
-                    if (canQuote) {
+                    if (canReblog && quoteApproval != null) {
+                        StatusAction.Group(
+                            displayItem =
+                                StatusAction.Item.Retweet(
+                                    count = reblogsCount ?: 0,
+                                    retweeted = reblogged ?: false,
+                                    onClicked = {
+                                    },
+                                ),
+                            actions =
+                                listOfNotNull(
+                                    if (canQuote) {
+                                        StatusAction.Item.Quote(
+                                            count = quotesCount ?: 0,
+                                            onClicked = {
+                                                launcher.launch(
+                                                    AppDeepLink.Compose.Quote(
+                                                        accountKey = accountKey,
+                                                        statusKey = statusKey,
+                                                    ),
+                                                )
+                                            },
+                                        )
+                                    } else {
+                                        null
+                                    },
+                                    StatusAction.Item.Retweet(
+                                        count = reblogsCount ?: 0,
+                                        retweeted = reblogged ?: false,
+                                        onClicked = {
+                                            dataSource.reblog(statusKey, reblogged ?: false)
+                                        },
+                                    ),
+                                ).toImmutableList(),
+                        )
+                    } else {
+                        null
+                    },
+                    if (quoteApproval == null && canQuote) {
                         StatusAction.Item.Quote(
                             count = quotesCount ?: 0,
                             onClicked = {
@@ -339,7 +428,7 @@ private fun Status.renderStatus(
                     } else {
                         null
                     },
-                    if (canReblog) {
+                    if (quoteApproval == null && canReblog) {
                         StatusAction.Item.Retweet(
                             count = reblogsCount ?: 0,
                             retweeted = reblogged ?: false,
@@ -676,7 +765,10 @@ internal fun DbEmoji.toUi(): List<UiEmoji> =
     when (content) {
         is EmojiContent.Mastodon -> {
             content.data.filter { it.visibleInPicker == true }.map {
-                val shortCode = it.shortcode.orEmpty().let { if (!it.startsWith(':') && !it.endsWith(':')) ":$it:" else it }
+                val shortCode =
+                    it.shortcode
+                        .orEmpty()
+                        .let { if (!it.startsWith(':') && !it.endsWith(':')) ":$it:" else it }
                 UiEmoji(
                     shortcode = shortCode,
                     url = it.url.orEmpty(),
@@ -762,35 +854,39 @@ private fun replaceMentionAndHashtag(
     host: String,
 ) {
     if (node is Element) {
-        val href = node.attribute("href")?.value
-        val c = node.attribute("class")?.value
-        val mention = mentions.firstOrNull { it.url == href }
-        if (mention != null) {
-            val id = mention.id
-            if (id != null) {
-                node.attributes().put(
-                    "href",
-                    AppDeepLink.Profile(
-                        accountKey = accountKey,
-                        userKey = MicroBlogKey(id, host),
-                    ),
-                )
-            }
-        } else if (node.text().startsWith("#")) {
-            node.attributes().put("href", AppDeepLink.Search(accountKey, node.text()))
-        } else if (!href.isNullOrEmpty() && c != null && c.contains("mention")) {
-            val url = Url(href)
-            val host = url.host
-            val name = url.segments.getOrNull(1)?.removePrefix("@")
-            if (!name.isNullOrEmpty() && host.isNotEmpty()) {
-                node.attributes().put(
-                    "href",
-                    AppDeepLink.ProfileWithNameAndHost(
-                        accountKey = accountKey,
-                        userName = name,
-                        host = host,
-                    ),
-                )
+        if (node.classNames().contains("quote-inline")) {
+            node.remove()
+        } else {
+            val href = node.attribute("href")?.value
+            val c = node.attribute("class")?.value
+            val mention = mentions.firstOrNull { it.url == href }
+            if (mention != null) {
+                val id = mention.id
+                if (id != null) {
+                    node.attributes().put(
+                        "href",
+                        AppDeepLink.Profile(
+                            accountKey = accountKey,
+                            userKey = MicroBlogKey(id, host),
+                        ),
+                    )
+                }
+            } else if (node.text().startsWith("#")) {
+                node.attributes().put("href", AppDeepLink.Search(accountKey, node.text()))
+            } else if (!href.isNullOrEmpty() && c != null && c.contains("mention")) {
+                val url = Url(href)
+                val host = url.host
+                val name = url.segments.getOrNull(1)?.removePrefix("@")
+                if (!name.isNullOrEmpty() && host.isNotEmpty()) {
+                    node.attributes().put(
+                        "href",
+                        AppDeepLink.ProfileWithNameAndHost(
+                            accountKey = accountKey,
+                            userName = name,
+                            host = host,
+                        ),
+                    )
+                }
             }
         }
         node.childNodes().forEach { replaceMentionAndHashtag(mentions, it, accountKey, host) }
@@ -812,7 +908,9 @@ internal fun InstanceData.render(): UiInstanceMetadata {
             mediaAttachment =
                 UiInstanceMetadata.Configuration.MediaAttachment(
                     imageSizeLimit = this.configuration?.mediaAttachments?.imageSizeLimit ?: -1,
-                    descriptionLimit = this.configuration?.mediaAttachments?.descriptionLimit ?: 1500,
+                    descriptionLimit =
+                        this.configuration?.mediaAttachments?.descriptionLimit
+                            ?: 1500,
                     supportedMimeTypes =
                         this.configuration
                             ?.mediaAttachments
@@ -823,7 +921,9 @@ internal fun InstanceData.render(): UiInstanceMetadata {
             poll =
                 UiInstanceMetadata.Configuration.Poll(
                     maxOptions = this.configuration?.polls?.maxOptions ?: 4,
-                    maxCharactersPerOption = this.configuration?.polls?.maxCharactersPerOption ?: 50,
+                    maxCharactersPerOption =
+                        this.configuration?.polls?.maxCharactersPerOption
+                            ?: 50,
                     minExpiration = this.configuration?.polls?.minExpiration ?: 300,
                     maxExpiration = this.configuration?.polls?.maxExpiration ?: 2592000,
                 ),

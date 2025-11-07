@@ -53,6 +53,8 @@ internal data class Status(
     val quotesCount: Long? = null,
     @SerialName("quote")
     val json_quote: JsonObject? = null,
+    @SerialName("quote_approval")
+    val quoteApproval: QuoteApproval? = null,
 ) {
     val quote: Status?
         get() =
@@ -77,3 +79,49 @@ internal data class MastodonQuote(
     @SerialName("quoted_status")
     val quoted_status: Status? = null,
 )
+
+@Serializable
+internal data class QuoteApproval(
+    @SerialName("automatic")
+    val automatic: List<Approval>? = null,
+    @SerialName("manual")
+    val manual: List<Approval>? = null,
+    @SerialName("current_user")
+    val currentUser: CurrentUser? = null,
+) {
+    @Serializable
+    enum class CurrentUser {
+        @SerialName("automatic")
+        Automatic,
+
+        @SerialName("manual")
+        Manual,
+
+        @SerialName("denied")
+        Denied,
+
+        @SerialName("unknown")
+        Unknown,
+    }
+
+    // Description: Describes who is expected to be able to quote that status and have the quote automatically authorized. An empty list means that nobody is expected to be able to quote this post. Other values may be added in the future, so unknown values should be treated as unsupported_policy.
+    // Type: Array of String (Enumerable, anyOf)
+    // public = Anybody is expected to be able to quote this status and have the quote be automatically accepted.
+    // followers = Followers are expected to be able to quote this status and have the quote be automatically accepted.
+    // following = People followed by the author are expected to be able to quote this status and have the quote be automatically accepted.
+    // unsupported_policy = The underlying quote policy is not supported by Mastodon. Some accounts that do not fit in the above categories may be able to quote and have the quote be automatically accepted.
+    @Serializable
+    enum class Approval {
+        @SerialName("public")
+        Public,
+
+        @SerialName("followers")
+        Followers,
+
+        @SerialName("following")
+        Following,
+
+        @SerialName("unsupported_policy")
+        UnsupportedPolicy,
+    }
+}

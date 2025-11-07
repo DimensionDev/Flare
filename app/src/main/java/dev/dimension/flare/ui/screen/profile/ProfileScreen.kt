@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -314,14 +313,11 @@ internal fun ProfileScreen(
                             containerColor = Color.Transparent,
                             scrolledContainerColor = Color.Transparent,
                         ),
-                    modifier =
-                        Modifier.let {
-                            if (!bigScreen) {
-                                it.windowInsetsPadding(WindowInsets.statusBars)
-                            } else {
-                                it
-                            }
-                        },
+//                    windowInsets = if (bigScreen) {
+//                        TopAppBarDefaults.windowInsets
+//                    } else {
+//                        WindowInsets()
+//                    },
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
                         if (showBackButton) {

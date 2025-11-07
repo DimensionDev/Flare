@@ -22,7 +22,7 @@ fun FlareTopAppBar(
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     expandedHeight: Dp = TopAppBarDefaults.TopAppBarExpandedHeight,
-    windowInsets: WindowInsets = WindowInsets(),
+    windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
     colors: TopAppBarColors =
         TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.background,
@@ -37,10 +37,10 @@ fun FlareTopAppBar(
         navigationIcon = navigationIcon,
         actions = actions,
         expandedHeight = expandedHeight,
-        windowInsets = windowInsets,
+        windowInsets = WindowInsets(),
         colors = colors,
         scrollBehavior = scrollBehavior,
-        contentPadding = TopAppBarDefaults.windowInsets.asPaddingValues(),
+        contentPadding = windowInsets.asPaddingValues(),
     )
 }
 

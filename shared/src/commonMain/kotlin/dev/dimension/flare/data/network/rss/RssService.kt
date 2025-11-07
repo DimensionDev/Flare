@@ -12,6 +12,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.xml.xml
+import kotlinx.serialization.decodeFromString
 import nl.adaptivity.xmlutil.serialization.XML
 
 internal object RssService {
@@ -50,55 +51,86 @@ internal object RssService {
             ?: throw IllegalArgumentException("No RSS or Atom feeds found at the provided URL: $url")
 
     suspend fun fetchIcon(url: String): String? {
+        val webContent =
+            tryRun {
+                ktorClient(
+                    config = {},
+                ).get(url).bodyAsText()
+            }.getOrNull() ?: return null
         val feed =
             tryRun {
-                fetch(url)
+                xml.decodeFromString<Feed>(webContent)
             }.getOrNull()
         val feedIcon =
             when (feed) {
                 is Feed.Atom -> feed.icon
                 is Feed.RDF -> null
                 is Feed.Rss20 -> null
-                else -> null
+                null -> null
             }
         if (feedIcon != null) {
             return feedIcon
         }
         val feedLink = feed?.link ?: url
         val parsedUrl = Url(feedLink)
-        val favIcon = "https://${parsedUrl.host}/favicon.ico"
-        val hasFavIcon =
-            tryRun {
-                val response = ktorClient().get(favIcon)
-                if (response.status.value !in 200..299) {
-                    throw Exception("Failed to fetch favicon: ${response.status}")
-                }
-            }
-        if (hasFavIcon.isSuccess) {
-            return favIcon
-        }
         val html =
-            tryRun {
-                ktorClient().get(feedLink).bodyAsText()
-            }.getOrNull() ?: return null
+            if (feed?.link != null && feed.link != url) {
+                tryRun {
+                    ktorClient(
+                        config = {},
+                    ).get(feedLink).bodyAsText()
+                }.getOrNull() ?: return null
+            } else {
+                webContent
+            }
         val document = Ksoup.parse(html)
-        val iconLink =
+        val icons =
             document
                 .select(
                     """
                     link[rel~=(?i)(?:^|\s)(?:icon|apple-touch-icon(?:-precomposed)?|mask-icon)(?:\s|$)],
                     link[rel~=(?i)^(?=.*\bshortcut\b)(?=.*\bicon\b).*$]
-                    
                     """.trimIndent(),
-                ).firstOrNull()
-                ?: return null
-        val iconHref = iconLink.attr("href").ifBlank { return null }
-        return if (iconHref.startsWith("http")) {
-            iconHref
-        } else if (iconHref.startsWith("/")) {
-            "https://${parsedUrl.host}$iconHref"
+                )
+        val iconLink =
+            icons.maxByOrNull {
+                it
+                    .attribute("sizes")
+                    ?.value
+                    ?.split('x')
+                    ?.firstOrNull()
+                    ?.toIntOrNull() ?: 0
+            }
+        if (iconLink == null) {
+            val favIcon = "https://${parsedUrl.host}/favicon.ico"
+            val hasFavIcon =
+                tryRun {
+                    val response =
+                        ktorClient(
+                            config = {},
+                        ).get(favIcon)
+                    if (response.status.value !in 200..299) {
+                        throw Exception("Failed to fetch favicon: ${response.status}")
+                    }
+                }
+            if (hasFavIcon.isSuccess) {
+                return favIcon
+            } else {
+                return null
+            }
         } else {
-            "https://${parsedUrl.host}/$iconHref"
+            val iconHref = iconLink.attr("href").ifBlank { return null }
+            return if (iconHref.startsWith("http")) {
+                iconHref
+            } else if (iconHref.startsWith("/")) {
+                if (iconHref.startsWith("//")) {
+                    "https:$iconHref"
+                } else {
+                    "https://${parsedUrl.host}$iconHref"
+                }
+            } else {
+                "https://${parsedUrl.host}/$iconHref"
+            }
         }
     }
 }

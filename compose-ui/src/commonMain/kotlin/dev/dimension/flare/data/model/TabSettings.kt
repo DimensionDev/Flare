@@ -102,6 +102,11 @@ public sealed class IconType {
     ) : IconType()
 
     @Serializable
+    public data class FavIcon(
+        val host: String,
+    ) : IconType()
+
+    @Serializable
     public data class Material(
         val icon: MaterialIcon,
     ) : IconType() {
@@ -669,13 +674,13 @@ public data class HomeTimelineTabItem(
                 ),
         )
 
-    public constructor(accountKey: MicroBlogKey, icon: String, title: String) :
+    public constructor(accountKey: MicroBlogKey, title: String) :
         this(
             account = AccountType.Specific(accountKey),
             metaData =
                 TabMetaData(
                     title = TitleType.Text(title),
-                    icon = IconType.Url(icon),
+                    icon = IconType.FavIcon(accountKey.host),
                 ),
         )
 }

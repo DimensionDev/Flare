@@ -3,7 +3,6 @@ package dev.dimension.flare.ui.model.mapper
 import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.network.rss.model.Feed
-import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.render.toUi
@@ -136,11 +135,11 @@ internal fun MicroBlogKey.Companion.fromRss(url: String) =
     )
 
 private fun parseRssDateToInstant(input: String): Instant? =
-    tryRun {
+    runCatching {
         Instant.parse(input)
-    }.getOrNull() ?: tryRun {
+    }.getOrNull() ?: runCatching {
         parseRfc2822LikeToInstant(input)
-    }.getOrNull() ?: tryRun {
+    }.getOrNull() ?: runCatching {
         parseRfc1123ToInstant(input)
     }.getOrNull()
 

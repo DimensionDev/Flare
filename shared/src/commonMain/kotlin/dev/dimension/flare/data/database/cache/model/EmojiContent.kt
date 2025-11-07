@@ -6,7 +6,6 @@ import dev.dimension.flare.data.network.vvo.model.EmojiData
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-// https://github.com/cashapp/sqldelight/issues/1333
 @Serializable
 internal sealed interface EmojiContent {
     @Serializable
@@ -25,5 +24,11 @@ internal sealed interface EmojiContent {
     @SerialName("VVO")
     data class VVO internal constructor(
         internal val data: EmojiData,
+    ) : EmojiContent
+
+    @Serializable
+    @SerialName("FavIcon")
+    data class FavIcon internal constructor(
+        internal val data: String,
     ) : EmojiContent
 }

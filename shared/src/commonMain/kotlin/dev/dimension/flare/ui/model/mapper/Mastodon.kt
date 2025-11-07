@@ -809,8 +809,6 @@ internal fun DbEmoji.toUi(): List<UiEmoji> =
                         )
                     }
                 }.orEmpty()
-
-        is EmojiContent.FavIcon -> emptyList()
     }
 
 private fun parseName(status: Account): Element {

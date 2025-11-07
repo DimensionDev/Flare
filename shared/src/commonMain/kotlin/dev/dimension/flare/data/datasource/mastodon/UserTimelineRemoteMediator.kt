@@ -84,6 +84,13 @@ internal class UserTimelineRemoteMediator(
                 response.toDbPagingTimeline(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
+                    sortIdProvider = {
+                        if (it.pinned == true) {
+                            Long.MAX_VALUE
+                        } else {
+                            it.createdAt?.toEpochMilliseconds() ?: 0
+                        }
+                    },
                 ),
             nextKey = response.next,
             previousKey = response.prev,

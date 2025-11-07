@@ -33,8 +33,8 @@ import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformIconButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.placeholder
+import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.MediaItem
-import dev.dimension.flare.ui.component.status.QuotedStatus
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiUserV2
@@ -136,10 +136,11 @@ public fun DMItem(
                         )
 
                     is UiDMItem.Message.Status ->
-                        QuotedStatus(
+                        CommonStatusComponent(
                             message.status,
                             modifier =
                                 Modifier
+                                    .padding(8.dp)
                                     .clip(PlatformTheme.shapes.large)
                                     .background(
                                         color =

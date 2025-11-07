@@ -96,7 +96,7 @@ import dev.dimension.flare.ui.component.Glassify
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.VideoPlayerPool
-import dev.dimension.flare.ui.component.status.QuotedStatus
+import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
@@ -494,23 +494,13 @@ internal fun StatusMediaScreen(
                                 contentColor = MaterialTheme.colorScheme.onBackground,
                             ) {
                                 Column(
-                                    modifier =
-                                        Modifier
-                                            .padding(
-                                                horizontal = screenHorizontalPadding,
-                                                vertical = 8.dp,
-                                            ).windowInsetsPadding(
-                                                WindowInsets.systemBars.only(
-                                                    WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-                                                ),
-                                            ),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                 ) {
                                     if (pagerState.pageCount > 1) {
                                         Row(
                                             modifier =
                                                 Modifier
-                                                    .padding(bottom = 8.dp),
+                                                    .padding(top = 8.dp),
                                             horizontalArrangement = Arrangement.Center,
                                         ) {
                                             repeat(pagerState.pageCount) { iteration ->
@@ -557,11 +547,22 @@ internal fun StatusMediaScreen(
                                         LocalComponentAppearance provides
                                             LocalComponentAppearance.current.copy(
                                                 showMedia = false,
+                                                showLinkPreview = false,
                                             ),
                                     ) {
-                                        QuotedStatus(
-                                            data = content,
-                                            showActions = true,
+                                        CommonStatusComponent(
+                                            item = content,
+                                            showMedia = false,
+                                            modifier =
+                                                Modifier
+                                                    .padding(
+                                                        horizontal = screenHorizontalPadding,
+                                                        vertical = 8.dp,
+                                                    ).windowInsetsPadding(
+                                                        WindowInsets.systemBars.only(
+                                                            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                                        ),
+                                                    ),
                                         )
                                     }
                                 }

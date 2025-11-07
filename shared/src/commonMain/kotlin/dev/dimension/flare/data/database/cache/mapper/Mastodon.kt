@@ -100,11 +100,7 @@ internal suspend fun List<Status>.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: suspend (Status) -> Long = {
-        if (it.pinned == true) {
-            Long.MAX_VALUE
-        } else {
-            it.createdAt?.toEpochMilliseconds() ?: 0
-        }
+        it.createdAt?.toEpochMilliseconds() ?: 0
     },
 ): List<DbPagingTimelineWithStatus> =
     this.map {

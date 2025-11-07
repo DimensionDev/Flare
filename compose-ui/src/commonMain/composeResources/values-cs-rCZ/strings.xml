@@ -97,6 +97,7 @@
     <string name="retweet">Opakovat</string>
     <string name="retweet_remove">Odstranit retweet</string>
     <string name="share">Sdílet</string>
+    <string name="fx_share">Sdílet přes FxEmbed</string>
     <string name="comment">Komentář</string>
     <string name="user_report">Nahlásit %1$s</string>
     <string name="user_block">Blokovat %1$s</string>

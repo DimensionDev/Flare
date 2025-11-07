@@ -97,6 +97,7 @@
     <string name="retweet">Retweet</string>
     <string name="retweet_remove">Supprimer le retweet</string>
     <string name="share">Partager</string>
+    <string name="fx_share">Partager via FxEmbed</string>
     <string name="comment">Commenter</string>
     <string name="user_report">Signaler %1$s</string>
     <string name="user_block">Bloquer %1$s</string>

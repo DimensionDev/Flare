@@ -95,6 +95,7 @@
     <string name="retweet">Retweet</string>
     <string name="retweet_remove">Αφαίρεση retweet</string>
     <string name="share">Κοινοποίηση</string>
+    <string name="fx_share">Κοινοποίηση μέσω FxEmbed</string>
     <string name="comment">Σχόλιο</string>
     <string name="user_report">Αναφορά %1$s</string>
     <string name="user_block">Αποκλεισμός %1$s</string>

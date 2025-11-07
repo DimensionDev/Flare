@@ -463,10 +463,11 @@ private fun UserListContent(
         }
         val status = data.status
         if (status != null) {
-            QuotedStatus(
-                data = status,
+            CommonStatusComponent(
+                item = status,
                 modifier =
                     Modifier
+                        .padding(8.dp)
                         .border(
                             FlareDividerDefaults.thickness,
                             color = FlareDividerDefaults.color,
@@ -474,17 +475,7 @@ private fun UserListContent(
                         ).clip(
                             shape = PlatformTheme.shapes.medium,
                         ),
-                onMediaClick = { media ->
-                    status.onMediaClicked.invoke(
-                        ClickContext(
-                            launcher = {
-                                uriHandler.openUri(it)
-                            },
-                        ),
-                        media,
-                        status.images.indexOf(media),
-                    )
-                },
+                isQuote = true,
             )
         }
     }

@@ -95,7 +95,7 @@ import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.NetworkImage
-import dev.dimension.flare.ui.component.status.QuotedStatus
+import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
@@ -566,15 +566,18 @@ fun ComposeDialog(
                                     LocalComponentAppearance.current.copy(
                                         showMedia = false,
                                         expandMediaSize = false,
+                                        showActions = false,
+                                        showLinkPreview = false,
                                     ),
                             ) {
-                                QuotedStatus(
-                                    data = content,
+                                CommonStatusComponent(
+                                    item = content,
                                     modifier =
                                         Modifier
                                             .padding(horizontal = screenHorizontalPadding)
                                             .padding(vertical = 8.dp)
                                             .fillMaxWidth(),
+                                    isQuote = true,
                                 )
                             }
                         }

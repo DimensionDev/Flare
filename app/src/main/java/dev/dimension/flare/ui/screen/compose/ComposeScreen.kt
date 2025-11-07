@@ -90,7 +90,7 @@ import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.NetworkImage
-import dev.dimension.flare.ui.component.status.QuotedStatus
+import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
@@ -538,14 +538,19 @@ internal fun ComposeScreen(
                                     LocalComponentAppearance.current.copy(
                                         showMedia = false,
                                         expandMediaSize = false,
+                                        showActions = false,
+                                        showLinkPreview = false,
                                     ),
                             ) {
-                                QuotedStatus(
-                                    data = content,
+                                CommonStatusComponent(
+                                    item = content,
                                     modifier =
                                         Modifier
-                                            .padding(horizontal = screenHorizontalPadding)
-                                            .fillMaxWidth(),
+                                            .padding(
+                                                horizontal = screenHorizontalPadding,
+                                                vertical = 8.dp,
+                                            ).fillMaxWidth(),
+                                    isQuote = true,
                                 )
                             }
                         }

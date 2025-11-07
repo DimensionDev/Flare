@@ -145,9 +145,11 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 public fun CommonStatusComponent(
     item: UiTimeline.ItemContent.Status,
-    isDetail: Boolean,
     modifier: Modifier = Modifier,
     enableStartPadding: Boolean = false,
+    isDetail: Boolean = false,
+    isQuote: Boolean = false,
+    showMedia: Boolean = true,
 ) {
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalComponentAppearance.current
@@ -171,18 +173,7 @@ public fun CommonStatusComponent(
                 }.then(modifier),
     ) {
         item.user?.let { user ->
-            CommonStatusHeaderComponent(
-                data = user,
-                onUserClick = {
-                    user.onClicked.invoke(
-                        ClickContext(
-                            launcher = {
-                                uriHandler.openUri(it)
-                            },
-                        ),
-                    )
-                },
-            ) {
+            val dateContent = @Composable {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -207,6 +198,37 @@ public fun CommonStatusComponent(
                             color = PlatformTheme.colorScheme.caption,
                         )
                     }
+                }
+            }
+            if (isQuote) {
+                UserCompat(
+                    user,
+                    onUserClick = {
+                        user.onClicked.invoke(
+                            ClickContext(
+                                launcher = {
+                                    uriHandler.openUri(it)
+                                },
+                            ),
+                        )
+                    },
+                ) {
+                    dateContent.invoke()
+                }
+            } else {
+                CommonStatusHeaderComponent(
+                    data = user,
+                    onUserClick = {
+                        user.onClicked.invoke(
+                            ClickContext(
+                                launcher = {
+                                    uriHandler.openUri(it)
+                                },
+                            ),
+                        )
+                    },
+                ) {
+                    dateContent.invoke()
                 }
             }
         }
@@ -260,7 +282,7 @@ public fun CommonStatusComponent(
                 )
             }
 
-            if (item.images.isNotEmpty()) {
+            if (item.images.isNotEmpty() && showMedia) {
                 Spacer(modifier = Modifier.height(8.dp))
                 StatusMediasComponent(
                     item,
@@ -300,10 +322,12 @@ public fun CommonStatusComponent(
 
             when (val content = item.bottomContent) {
                 is UiTimeline.ItemContent.Status.BottomContent.Reaction -> {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    StatusReactionComponent(
-                        data = content,
-                    )
+                    if (content.emojiReactions.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        StatusReactionComponent(
+                            data = content,
+                        )
+                    }
                 }
 
                 null -> Unit
@@ -415,7 +439,6 @@ private fun StatusQuoteComponent(
     quotes: ImmutableList<UiTimeline.ItemContent.Status>,
     modifier: Modifier = Modifier,
 ) {
-    val uriLauncher = LocalUriHandler.current
     Box(
         modifier =
             modifier
@@ -429,20 +452,20 @@ private fun StatusQuoteComponent(
     ) {
         Column {
             quotes.forEachIndexed { index, quote ->
-                QuotedStatus(
-                    data = quote,
-                    onMediaClick = { media ->
-                        quote.onMediaClicked.invoke(
-                            ClickContext(
-                                launcher = {
-                                    uriLauncher.openUri(it)
-                                },
-                            ),
-                            media,
-                            quote.images.indexOf(media),
-                        )
-                    },
-                )
+                CompositionLocalProvider(
+                    LocalComponentAppearance provides
+                        LocalComponentAppearance.current.copy(
+                            showActions = false,
+                        ),
+                ) {
+                    CommonStatusComponent(
+                        quote,
+                        isQuote = true,
+                        modifier =
+                            Modifier
+                                .padding(8.dp),
+                    )
+                }
                 if (index != quotes.lastIndex && quotes.size > 1) {
                     HorizontalDivider()
                 }

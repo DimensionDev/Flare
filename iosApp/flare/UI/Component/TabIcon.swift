@@ -75,6 +75,9 @@ struct TabIcon: View {
                 }
                 .frame(width: size, height: size)
             }
+        case .favIcon(let favIcon):
+            FavTabIcon(host: favIcon.host)
+                .frame(width: size, height: size)
         }
     }
 }
@@ -175,6 +178,30 @@ struct AvatarTabIcon: View {
     var body: some View {
         StateView(state: presenter.state.user) { user in
             AvatarView(data: user.avatar)
+        } loadingContent: {
+            Image("fa-globe")
+                .resizable()
+                .scaledToFit()
+                .redacted(reason: .placeholder)
+        }
+    }
+}
+
+struct FavTabIcon: View {
+    @StateObject private var presenter: KotlinPresenter<UiState<NSString>>
+    
+    init(host: String) {
+        self._presenter = .init(wrappedValue: .init(presenter: FavIconPresenter(host: host)))
+    }
+    
+    var body: some View {
+        StateView(state: presenter.state) { url in
+            NetworkImage(data: .init(url))
+        } loadingContent: {
+            Image("fa-globe")
+                .resizable()
+                .scaledToFit()
+                .redacted(reason: .placeholder)
         }
     }
 }

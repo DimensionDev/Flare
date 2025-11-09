@@ -6,12 +6,15 @@ import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlin.experimental.ExperimentalObjCRefinement
 
 public actual abstract class PresenterBase<Model : Any> : AutoCloseable {
     private val scope = CoroutineScope(Dispatchers.Main + DisplayLinkClock)
+    private var job: Job? = null
 
     public actual val models: StateFlow<Model> by lazy {
         scope.launchMolecule(RecompositionMode.ContextClock) {
@@ -20,6 +23,7 @@ public actual abstract class PresenterBase<Model : Any> : AutoCloseable {
     }
 
     override fun close() {
+        job?.cancel()
         scope.cancel()
     }
 
@@ -27,6 +31,16 @@ public actual abstract class PresenterBase<Model : Any> : AutoCloseable {
     @HiddenFromObjC
     @Composable
     public actual abstract fun body(): Model
+
+    public fun collect(collector: (Model) -> Unit) {
+        job?.cancel()
+        job =
+            scope.launch {
+                models.collect {
+                    collector(it)
+                }
+            }
+    }
 }
 
 @OptIn(ExperimentalObjCRefinement::class)

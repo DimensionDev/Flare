@@ -34,7 +34,7 @@ struct Router<Root: View>: View {
         .alert("delete_alert_title", isPresented: $showDeleteStatusAlert, presenting: deleteStatusData) { data in
             Button("Cancel", role: .cancel) {}
             Button("delete", role: .destructive) {
-                DeleteStatusPresenter(accountType: data.0, statusKey: data.1).models.value.delete()
+//                DeleteStatusPresenter(accountType: data.0, statusKey: data.1).models.value.delete()
             }
         } message: { data in
             Text("delete_status_alert_message")
@@ -42,7 +42,7 @@ struct Router<Root: View>: View {
         .alert("mastodon_report_status_alert_title", isPresented: $showMastodonReportStatusAlert, presenting: mastodonReportStatusData) { data in
             Button("Cancel", role: .cancel) {}
             Button("report", role: .destructive) {
-                MastodonReportPresenter(accountType: data.0, userKey: data.1, statusKey: data.2).models.value.report()
+//                MastodonReportPresenter(accountType: data.0, userKey: data.1, statusKey: data.2).models.value.report()
             }
         } message: { data in
             Text("mastodon_report_status_alert_message")

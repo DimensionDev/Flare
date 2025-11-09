@@ -1,3 +1,4 @@
+import co.touchlab.skie.configuration.FlowInterop
 import org.jetbrains.compose.compose
 
 plugins {
@@ -30,6 +31,7 @@ kotlin {
             baseName = "KotlinSharedUI"
             isStatic = true
             export(projects.shared)
+            linkerOpts.add("-lsqlite3")
         }
     }
 
@@ -102,8 +104,10 @@ skie {
         enabled.set(false)
     }
     features {
-        enableSwiftUIObservingPreview = true
-        enableFlowCombineConvertorPreview = true
+//        enableFlowCombineConvertorPreview = true
+        group {
+            FlowInterop.Enabled(false)
+        }
     }
 }
 

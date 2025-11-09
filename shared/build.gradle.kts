@@ -1,4 +1,3 @@
-
 import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
 import java.util.Locale
 
@@ -8,7 +7,6 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
-    alias(libs.plugins.skie)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.composeMultiplatform)
@@ -36,8 +34,16 @@ kotlin {
         minSdk = libs.versions.minSdk.get().toInt()
     }
     jvm()
-    iosArm64()
-    iosSimulatorArm64()
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64(),
+    ).forEach { appleTarget ->
+        appleTarget.binaries.framework {
+            baseName = "KotlinShared"
+            isStatic = true
+            linkerOpts.add("-lsqlite3")
+        }
+    }
 
     targets.forEach { target ->
         target.name.takeIf {
@@ -75,7 +81,6 @@ kotlin {
                 api(libs.bluesky.oauth)
                 implementation(libs.room.runtime)
                 implementation(libs.room.paging)
-                implementation(libs.sqlite.bundled)
                 implementation(libs.datastore)
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(libs.xmlUtil)
@@ -99,16 +104,19 @@ kotlin {
             dependencies {
                 implementation(libs.core.ktx)
                 implementation(libs.koin.android)
+                implementation(libs.sqlite.framework)
             }
         }
         val jvmMain by getting {
             dependencies {
                 implementation(libs.commons.lang3)
+                implementation(libs.sqlite.bundled)
             }
         }
         val appleMain by getting {
             dependencies {
                 implementation(libs.ktor.client.darwin)
+                implementation(libs.sqlite.framework)
             }
         }
         val nativeMain by getting {
@@ -128,19 +136,18 @@ ktlint {
     version.set(libs.versions.ktlint)
     filter {
         exclude { element -> element.file.path.contains("build", ignoreCase = true) }
-        exclude { element -> element.file.absolutePath.contains("data/network/misskey/api/", ignoreCase = true) }
-        exclude { element -> element.file.absolutePath.contains("data/network/xqt/", ignoreCase = true) }
-    }
-}
-
-skie {
-    analytics {
-        disableUpload.set(true)
-        enabled.set(false)
-    }
-    features {
-        enableSwiftUIObservingPreview = true
-        enableFlowCombineConvertorPreview = true
+        exclude { element ->
+            element.file.absolutePath.contains(
+                "data/network/misskey/api/",
+                ignoreCase = true
+            )
+        }
+        exclude { element ->
+            element.file.absolutePath.contains(
+                "data/network/xqt/",
+                ignoreCase = true
+            )
+        }
     }
 }
 

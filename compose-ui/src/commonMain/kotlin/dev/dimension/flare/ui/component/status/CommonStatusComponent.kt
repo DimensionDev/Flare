@@ -997,10 +997,10 @@ private fun StatusContentComponent(
     maxLines: Int,
     modifier: Modifier = Modifier,
 ) {
-    var expanded by rememberSaveable {
+    var expanded by remember {
         mutableStateOf(false)
     }
-    var showSoftExpand by rememberSaveable {
+    var showSoftExpand by remember {
         mutableStateOf(false)
     }
     Column(

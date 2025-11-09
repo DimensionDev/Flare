@@ -30,7 +30,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
-internal expect val pagingConfig: PagingConfig
+internal val pagingConfig: PagingConfig =
+    PagingConfig(
+        pageSize = 20,
+        enablePlaceholders = false,
+    )
 
 @OptIn(ExperimentalPagingApi::class)
 internal fun timelinePager(
@@ -110,7 +114,13 @@ internal class MemoryPagingSource<T : Any>(
             value: ImmutableList<T>,
         ) {
             @Suppress("UNCHECKED_CAST")
-            caches[key]?.value = ((caches[key]?.value as? ImmutableList<T> ?: persistentListOf()) + value).toImmutableList()
+            caches[key]?.value =
+                (
+                    (
+                        caches[key]?.value as? ImmutableList<T>
+                            ?: persistentListOf()
+                    ) + value
+                ).toImmutableList()
         }
 
         fun <T : Any> updateWith(
@@ -171,7 +181,8 @@ internal class MemoryPagingSource<T : Any>(
         val page = params.key ?: 0
 
         @Suppress("UNCHECKED_CAST")
-        val list = caches[key]?.value as? ImmutableList<T> ?: return LoadResult.Error(Exception("No data"))
+        val list =
+            caches[key]?.value as? ImmutableList<T> ?: return LoadResult.Error(Exception("No data"))
         val data = list.subList(page, (page + params.loadSize).coerceIn(0, list.size))
         val prevKey = (page - params.loadSize).takeIf { it in list.indices }
         val nextKey = (page + params.loadSize).takeIf { it in list.indices }

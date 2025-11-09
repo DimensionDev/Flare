@@ -12,7 +12,6 @@ import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.res
-import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
@@ -56,32 +55,27 @@ public class EditTabPresenter(
             override val initialText: UiState<String> = initialText
             override val withAvatar: Boolean = withAvatar
             override val availableIcons: ImmutableList<IconType> =
-                kotlin
-                    .run {
-                        when (val account = tabItem.account) {
-                            is AccountType.Specific ->
-                                listOf(
-                                    IconType.Avatar(account.accountKey),
-                                    IconType.Url(
-                                        UiRssSource.favIconUrl(account.accountKey.host),
-                                    ),
-                                )
+                run {
+                    when (val account = tabItem.account) {
+                        is AccountType.Specific ->
+                            listOf(
+                                IconType.Avatar(account.accountKey),
+                                IconType.FavIcon(account.accountKey.host),
+                            )
 
-                            else -> emptyList()
+                        else -> emptyList()
+                    } +
+                        IconType.Material.MaterialIcon.entries.map {
+                            IconType.Material(it)
                         } +
-                            IconType.Material.MaterialIcon.entries.map {
-                                IconType.Material(it)
-                            } +
-                            if (tabItem is RssTimelineTabItem) {
-                                listOfNotNull(
-                                    tabItem.favIcon?.let { IconType.Url(it) },
-                                )
-                            } else {
-                                emptyList()
-                            }
-                    }.let {
-                        it.toPersistentList()
-                    }
+                        if (tabItem is RssTimelineTabItem) {
+                            listOfNotNull(
+                                tabItem.favIcon?.let { IconType.Url(it) },
+                            )
+                        } else {
+                            emptyList()
+                        }
+                }.toPersistentList()
             override val icon = icon
 
             override fun setWithAvatar(value: Boolean) {
@@ -102,6 +96,7 @@ public class EditTabPresenter(
                                 IconType.Mixed(value.icon, account.accountKey)
 
                             is IconType.Url -> value
+                            is IconType.FavIcon -> value
                         }
                     } else {
                         when (value) {
@@ -109,6 +104,7 @@ public class EditTabPresenter(
                             is IconType.Material -> value
                             is IconType.Mixed -> IconType.Material(value.icon)
                             is IconType.Url -> value
+                            is IconType.FavIcon -> value
                         }
                     }
             }

@@ -11,7 +11,6 @@ import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvo
-import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.home.UserPresenter
@@ -80,7 +79,6 @@ public class HomeTimelineWithTabsPresenter(
                 val tab =
                     HomeTimelineTabItem(
                         accountKey = account.accountKey,
-                        icon = UiRssSource.favIconUrl(account.accountKey.host),
                         title =
                             when (account.platformType) {
                                 PlatformType.Mastodon -> "Mastodon"

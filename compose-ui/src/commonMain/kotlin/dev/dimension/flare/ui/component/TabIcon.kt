@@ -66,6 +66,7 @@ import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.icons.Misskey
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.home.FavIconPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
@@ -222,6 +223,37 @@ public fun TabIcon(
                         .size(size),
                 contentScale = ContentScale.Fit,
             )
+        }
+
+        is IconType.FavIcon -> {
+            val iconState by producePresenter(key = "fav-$accountType:${icon.host}") {
+                remember(accountType, icon) {
+                    FavIconPresenter(
+                        icon.host,
+                    )
+                }.body()
+            }
+            iconState
+                .onSuccess {
+                    NetworkImage(
+                        it,
+                        contentDescription =
+                            when (title) {
+                                is TitleType.Localized -> stringResource(title.res)
+                                is TitleType.Text -> title.content
+                            },
+                        modifier =
+                            modifier
+                                .size(size),
+                        contentScale = ContentScale.Fit,
+                    )
+                }.onLoading {
+                    AvatarComponent(
+                        null,
+                        size = size,
+                        modifier = Modifier.placeholder(true),
+                    )
+                }
         }
     }
 }

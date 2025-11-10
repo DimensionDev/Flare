@@ -20,12 +20,7 @@ struct NotificationScreen: View {
         }
         .detectScrolling()
         .toolbar {
-            let placement = if #available(iOS 26.0, *) {
-                ToolbarItemPlacement.automatic
-            } else {
-                ToolbarItemPlacement.title
-            }
-            ToolbarItem(placement: placement) {
+            ToolbarItem(placement: .title) {
                 StateView(state: presenter.state.allTypes) { allTypes in
                     let allTypes = allTypes.cast(NotificationFilter.self)
                     if allTypes.count > 1 {

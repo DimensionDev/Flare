@@ -117,6 +117,10 @@ public data class UiTimeline internal constructor(
                         append(statusKey)
                     }
 
+            val shouldExpandTextByDefault: Boolean by lazy {
+                contentWarning == null && !content.isLongText
+            }
+
             public sealed class BottomContent {
                 public data class Reaction internal constructor(
                     val emojiReactions: ImmutableList<EmojiReaction>,

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.repository.tryRun
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,7 +34,7 @@ internal class ComposeUseCase(
         progress: suspend (ComposeProgressState) -> Unit,
     ) {
         scope.launch {
-            runCatching {
+            tryRun {
                 progress.invoke(ComposeProgressState.Progress(0, 1))
                 data.account.dataSource.compose(
                     data = data,

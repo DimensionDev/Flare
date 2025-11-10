@@ -30,7 +30,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
-internal expect val pagingConfig: PagingConfig
+internal val pagingConfig: PagingConfig =
+    PagingConfig(
+        pageSize = 20,
+    )
 
 @OptIn(ExperimentalPagingApi::class)
 internal fun timelinePager(

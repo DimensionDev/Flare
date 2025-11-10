@@ -123,9 +123,22 @@ struct StatusView: View {
                                         .textSelection(.enabled)
                                 } else: { richText in
                                     richText
-                                        .lineLimit(5)
+                                        .if(data.shouldExpandTextByDefault || expand, if: { view in
+                                            view.lineLimit(nil)
+                                        }, else: { view in
+                                            view.lineLimit(5)
+                                        })
                                 }
-
+                            if !data.shouldExpandTextByDefault && !isDetail && !expand {
+                                Button {
+                                    withAnimation {
+                                        expand = true
+                                    }
+                                } label: {
+                                    Text("mastodon_item_show_more")
+                                }
+                                .buttonStyle(.borderless)
+                            }
                         }
                     }
                     
@@ -174,7 +187,7 @@ struct StatusView: View {
                                 }
                             }
                         }
-                        .padding()
+                        .padding(8)
                         .clipShape(.rect(cornerRadius: 16))
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)

@@ -270,7 +270,12 @@ public fun CommonStatusComponent(
                     content = item.content,
                     contentWarning = item.contentWarning,
                     poll = item.poll,
-                    maxLines = 13, // appearanceSettings.lineLimit,
+                    maxLines =
+                        if (item.shouldExpandTextByDefault) {
+                            Int.MAX_VALUE
+                        } else {
+                            appearanceSettings.lineLimit
+                        },
                 )
             }
 

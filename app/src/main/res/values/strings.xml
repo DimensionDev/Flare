@@ -319,7 +319,7 @@
     <string name="rss_title">RSS</string>
     <string name="empty_rss_sources">No RSS sources</string>
     <string name="rss_sources_rss_hub_host_label">RSSHub Host</string>
-    <string name="rss_sources_rss_hub_host_hint">You need to set the RSSHub host if you want to use RssHub, or select the public RssHub server</string>
+    <string name="rss_sources_rss_hub_host_hint">You need to set the RSSHub host if you want to use RSSHub, or select the public RSSHub server</string>
     <string name="rss_sources_discovered_rss_sources">Discovered RSS Sources</string>
     <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
     <string name="rss_sources_open_in_browser">Open in browser</string>

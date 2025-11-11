@@ -180,25 +180,20 @@ private fun AnnotatedString.Builder.renderElement(
                     color = styleData.color.copy(alpha = 0.7f),
                     background = styleData.color.copy(alpha = 0.05f),
                 )
-//            withStyle(
-//                style.toParagraphStyle(),
-//            ) {
-//            }
-            withStyle(style.toSpanStyle()) {
-                element.childNodes().fastForEach {
-                    renderNode(
-                        node = it,
-                        styleData = styleData.copy(
-                            style = style
-                        ),
-                        context = context,
-                    )
+            withStyle(
+                style.toParagraphStyle(),
+            ) {
+                withStyle(style.toSpanStyle()) {
+                    element.childNodes().fastForEach {
+                        renderNode(
+                            node = it,
+                            styleData = styleData.copy(
+                                style = style
+                            ),
+                            context = context,
+                        )
+                    }
                 }
-            }
-            if (element.parent()?.childNodes()?.last() != element) {
-                appendLine()
-                appendLine()
-                appendLine()
             }
         }
 

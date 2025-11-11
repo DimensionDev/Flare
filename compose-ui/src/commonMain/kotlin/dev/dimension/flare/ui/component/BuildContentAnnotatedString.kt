@@ -8,6 +8,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withAnnotation
 import androidx.compose.ui.text.withStyle
@@ -46,7 +47,7 @@ internal fun buildContentAnnotatedString(
 ): AnnotatedString {
     return buildAnnotatedString {
         renderElement(
-            element, 
+            element,
             styleData = styleData,
             context = context,
         )
@@ -87,7 +88,7 @@ internal class BuildContentAnnotatedStringContext {
 }
 
 internal data class StyleData(
-    val textStyle: TextStyle,
+    val style: TextStyle,
     val linkStyle: TextStyle,
     val h1: TextStyle,
     val h2: TextStyle,
@@ -97,6 +98,13 @@ internal data class StyleData(
     val h6: TextStyle,
     private val contentColor: Color,
 ) {
+    val textStyle by lazy {
+        style.copy(
+            lineHeightStyle = null,
+            platformStyle = null,
+            lineBreak = LineBreak.Paragraph,
+        )
+    }
     val color by lazy {
         textStyle.color.takeOrElse { contentColor }
     }
@@ -172,34 +180,47 @@ private fun AnnotatedString.Builder.renderElement(
                     color = styleData.color.copy(alpha = 0.7f),
                     background = styleData.color.copy(alpha = 0.05f),
                 )
-            withStyle(
-                style.toParagraphStyle(),
-            ) {
-                withStyle(style.toSpanStyle()) {
-                    element.childNodes().fastForEach {
-                        renderNode(
-                            node = it,
-                            styleData = styleData.copy(
-                                textStyle = style
-                            ),
-                            context = context,
-                        )
-                    }
+//            withStyle(
+//                style.toParagraphStyle(),
+//            ) {
+//            }
+            withStyle(style.toSpanStyle()) {
+                element.childNodes().fastForEach {
+                    renderNode(
+                        node = it,
+                        styleData = styleData.copy(
+                            style = style
+                        ),
+                        context = context,
+                    )
                 }
+            }
+            if (element.parent()?.childNodes()?.last() != element) {
+                appendLine()
+                appendLine()
+                appendLine()
             }
         }
 
         "p", "div" -> {
+//            withStyle(
+//                styleData.textStyle
+//                    .toParagraphStyle(),
+//            ) {
+//            }
             withStyle(
-                styleData.textStyle.toParagraphStyle(),
+                styleData.textStyle.toSpanStyle(),
             ) {
-                withStyle(
-                    styleData.textStyle.toSpanStyle(),
-                ) {
-                    element.childNodes().fastForEach {
-                        renderNode(node = it, styleData = styleData, context = context)
-                    }
+                element.childNodes().fastForEach {
+                    renderNode(node = it, styleData = styleData, context = context)
                 }
+            }
+            // https://issuetracker.google.com/issues/342419072
+            // https://issuetracker.google.com/issues/407557822
+            // https://issuetracker.google.com/issues/391393408
+            if (element.parent()?.childNodes()?.last() != element) {
+                appendLine()
+                appendLine()
             }
         }
 
@@ -298,7 +319,6 @@ private fun AnnotatedString.Builder.renderElement(
         }
 
         "h6" -> {
-            appendLine()
             withStyle(
                 styleData.h6.toParagraphStyle(),
             ) {
@@ -308,10 +328,12 @@ private fun AnnotatedString.Builder.renderElement(
                     }
                 }
             }
+            if (element.parent()?.childNodes()?.last() != element) {
+                appendLine()
+            }
         }
 
         "h5" -> {
-            appendLine()
             withStyle(
                 styleData.h5.toParagraphStyle(),
             ) {
@@ -321,10 +343,12 @@ private fun AnnotatedString.Builder.renderElement(
                     }
                 }
             }
+            if (element.parent()?.childNodes()?.last() != element) {
+                appendLine()
+            }
         }
 
         "h4" -> {
-            appendLine()
             withStyle(
                 styleData.h4.toParagraphStyle(),
             ) {
@@ -334,10 +358,12 @@ private fun AnnotatedString.Builder.renderElement(
                     }
                 }
             }
+            if (element.parent()?.childNodes()?.last() != element) {
+                appendLine()
+            }
         }
 
         "h3" -> {
-            appendLine()
             withStyle(
                 styleData.h3.toParagraphStyle(),
             ) {
@@ -347,10 +373,12 @@ private fun AnnotatedString.Builder.renderElement(
                     }
                 }
             }
+            if (element.parent()?.childNodes()?.last() != element) {
+                appendLine()
+            }
         }
 
         "h2" -> {
-            appendLine()
             withStyle(
                 styleData.h2.toParagraphStyle(),
             ) {
@@ -360,10 +388,12 @@ private fun AnnotatedString.Builder.renderElement(
                     }
                 }
             }
+            if (element.parent()?.childNodes()?.last() != element) {
+                appendLine()
+            }
         }
 
         "h1" -> {
-            appendLine()
             withStyle(
                 styleData.h1.toParagraphStyle(),
             ) {
@@ -372,6 +402,9 @@ private fun AnnotatedString.Builder.renderElement(
                         renderNode(node = it, styleData = styleData, context = context)
                     }
                 }
+            }
+            if (element.parent()?.childNodes()?.last() != element) {
+                appendLine()
             }
         }
 
@@ -397,6 +430,7 @@ private fun AnnotatedString.Builder.renderElement(
                     }
                 }
             }
+            appendLine()
         }
 
         else -> {
@@ -422,7 +456,7 @@ private fun AnnotatedString.Builder.renderLink(
                 element.childNodes().fastForEach {
                     renderNode(
                         node = it,
-                        styleData = styleData.copy(textStyle = styleData.linkStyle),
+                        styleData = styleData.copy(style = styleData.linkStyle),
                         context = context,
                     )
                 }

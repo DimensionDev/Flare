@@ -1053,7 +1053,7 @@ private fun StatusContentComponent(
                                 maxLines
                             },
                         onTextLayout = {
-                            showSoftExpand = it.hasVisualOverflow
+                            showSoftExpand = it.hasVisualOverflow && !expanded && maxLines != Int.MAX_VALUE
                         },
                     )
                     if (showSoftExpand) {

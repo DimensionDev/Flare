@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -225,14 +227,22 @@ private fun ProfileHeaderSuccess(
         },
         content = {
             user.description?.let {
-                RichText(
-                    text = it,
-                )
+                SelectionContainer {
+                    RichText(
+                        text = it,
+                    )
+                }
             }
             when (val content = user.bottomContent) {
                 is UiProfile.BottomContent.Fields ->
                     UserFields(
                         fields = content.fields,
+                        modifier =
+                            Modifier
+                                .background(PlatformTheme.colorScheme.cardAlt)
+                                .ignoreHorizontalParentPadding(screenHorizontalPadding)
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth(),
                     )
 
                 is UiProfile.BottomContent.Iconify -> {

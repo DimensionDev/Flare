@@ -99,7 +99,7 @@ internal object Bluesky {
             timeline.mapNotNull { it.status.status.user } +
                 timeline
                     .flatMap { it.status.references }
-                    .mapNotNull { it.status.user }
+                    .mapNotNull { it.status?.user }
         ).let { allUsers ->
             val exsitingUsers =
                 database
@@ -140,7 +140,7 @@ internal object Bluesky {
             timeline.map { it.status.status.data } +
                 timeline
                     .flatMap { it.status.references }
-                    .map { it.status.data }
+                    .mapNotNull { it.status?.data }
         ).let {
             database.statusDao().insertAll(it)
         }

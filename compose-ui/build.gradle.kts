@@ -102,7 +102,6 @@ skie {
         enabled.set(false)
     }
     features {
-        enableSwiftUIObservingPreview = true
         enableFlowCombineConvertorPreview = true
     }
 }

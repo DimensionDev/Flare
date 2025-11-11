@@ -34,7 +34,7 @@ internal fun DbPagingTimelineWithStatus.render(
                     .groupBy {
                         it.reference.referenceType
                     }.mapValues { (_, references) ->
-                        references.map { it.status.data.content }
+                        references.mapNotNull { it.status?.data?.content }
                     },
         ).let {
             if (useDbKey) {
@@ -51,7 +51,7 @@ internal fun DbStatusWithReference.render(event: StatusEvent?): UiTimeline =
             references
                 .groupBy { it.reference.referenceType }
                 .mapValues { (_, references) ->
-                    references.map { it.status.data.content }
+                    references.mapNotNull { it.status?.data?.content }
                 },
     )
 

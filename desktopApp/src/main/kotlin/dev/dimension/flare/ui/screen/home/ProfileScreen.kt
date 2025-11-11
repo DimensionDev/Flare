@@ -32,8 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
@@ -55,6 +53,7 @@ import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.ProfileHeader
 import dev.dimension.flare.ui.component.ProfileHeaderLoading
 import dev.dimension.flare.ui.component.ProfileMenu
+import dev.dimension.flare.ui.component.ignoreHorizontalParentPadding
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -510,12 +509,3 @@ private sealed interface ProfileTabItem {
         val data: PagingState<ProfileMedia>,
     ) : ProfileTabItem
 }
-
-fun Modifier.ignoreHorizontalParentPadding(horizontal: Dp): Modifier =
-    this.layout { measurable, constraints ->
-        val overridenWidth = constraints.maxWidth + 2 * horizontal.roundToPx()
-        val placeable = measurable.measure(constraints.copy(maxWidth = overridenWidth))
-        layout(placeable.width, placeable.height) {
-            placeable.place(0, 0)
-        }
-    }

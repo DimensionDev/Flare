@@ -65,7 +65,7 @@ internal data class DbStatusReferenceWithStatus(
         entityColumn = "statusKey",
         entity = DbStatus::class,
     )
-    val status: DbStatusWithUser,
+    val status: DbStatusWithUser?,
 )
 
 internal data class DbStatusWithReference(

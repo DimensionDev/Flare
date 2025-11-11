@@ -97,7 +97,7 @@ public fun RichText(
                         richText = text,
                         styleData =
                             StyleData(
-                                textStyle = textStyle,
+                                style = textStyle,
                                 linkStyle = linkStyle,
                                 h1 = h1,
                                 h2 = h2,

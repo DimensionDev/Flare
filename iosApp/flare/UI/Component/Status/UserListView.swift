@@ -10,8 +10,7 @@ struct UserListView: View {
                 HStack {
                     ForEach(data.users, id: \.key) { user in
                         UserCompatView(data: user)
-                            .padding(.horizontal)
-                            .padding(.vertical, 8)
+                            .padding(8)
                             .frame(width: 280)
                             .clipShape(.rect(cornerRadius: 16))
                             .overlay(
@@ -25,11 +24,10 @@ struct UserListView: View {
                 }
             }
             .scrollIndicators(.hidden)
-
             if let status = data.status {
                 VStack {
                     StatusView(data: status, isQuote: true)
-                        .padding()
+                        .padding(8)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .clipShape(.rect(cornerRadius: 16))

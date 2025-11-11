@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
-    alias(libs.plugins.skie)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.composeMultiplatform)
@@ -130,17 +129,6 @@ ktlint {
         exclude { element -> element.file.path.contains("build", ignoreCase = true) }
         exclude { element -> element.file.absolutePath.contains("data/network/misskey/api/", ignoreCase = true) }
         exclude { element -> element.file.absolutePath.contains("data/network/xqt/", ignoreCase = true) }
-    }
-}
-
-skie {
-    analytics {
-        disableUpload.set(true)
-        enabled.set(false)
-    }
-    features {
-        enableSwiftUIObservingPreview = true
-        enableFlowCombineConvertorPreview = true
     }
 }
 

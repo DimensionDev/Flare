@@ -19,15 +19,19 @@ struct StatusView: View {
         ) {
             if !data.parents.isEmpty {
                 ForEach(data.parents, id: \.itemKey) { parent in
-                    StatusView(data: parent, withLeadingPadding: true)
-                    .id(parent.itemKey)
+                    VStack(
+                        spacing: nil
+                    ) {
+                        StatusView(data: parent, withLeadingPadding: true)
+                        Spacer()
+                            .frame(height: 8)
+                    }
                     .overlay(alignment: .leading) {
                         Rectangle()
                             .fill(.separator)
                             .frame(minWidth: 1, maxWidth: 1, alignment: .leading)
                             .padding(.leading, 22)
                             .padding(.top, 44)
-
                     }
                 }
             }
@@ -123,9 +127,22 @@ struct StatusView: View {
                                         .textSelection(.enabled)
                                 } else: { richText in
                                     richText
-                                        .lineLimit(5)
+                                        .if(data.shouldExpandTextByDefault || expand, if: { view in
+                                            view.lineLimit(nil)
+                                        }, else: { view in
+                                            view.lineLimit(5)
+                                        })
                                 }
-
+                            if !data.shouldExpandTextByDefault && !isDetail && !expand {
+                                Button {
+                                    withAnimation {
+                                        expand = true
+                                    }
+                                } label: {
+                                    Text("mastodon_item_show_more")
+                                }
+                                .buttonStyle(.borderless)
+                            }
                         }
                     }
                     
@@ -174,7 +191,7 @@ struct StatusView: View {
                                 }
                             }
                         }
-                        .padding()
+                        .padding(8)
                         .clipShape(.rect(cornerRadius: 16))
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)

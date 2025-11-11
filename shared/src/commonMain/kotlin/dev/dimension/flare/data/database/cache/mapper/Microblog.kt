@@ -23,7 +23,7 @@ internal suspend fun saveToDatabase(
         items.mapNotNull { it.status.status.user } +
             items
                 .flatMap { it.status.references }
-                .mapNotNull { it.status.user }
+                .mapNotNull { it.status?.user }
     ).let { allUsers ->
         val exsitingUsers =
             database
@@ -86,16 +86,12 @@ internal suspend fun saveToDatabase(
         items.map { it.status.status.data } +
             items
                 .flatMap { it.status.references }
-                .map { it.status.data }
+                .mapNotNull { it.status?.data }
     ).let {
         database.statusDao().insertAll(it)
     }
-    items.map { it.status.status.data.statusKey }.let {
-        // in case of timeline change, remove old references
-        database.statusReferenceDao().delete(it)
-    }
     items.flatMap { it.status.references }.map { it.reference }.let {
-        database.statusReferenceDao().delete(it.map { it.statusKey })
+        // TODO: delete old references
         database.statusReferenceDao().insertAll(it)
     }
     database.pagingTimelineDao().insertAll(items.map { it.timeline })

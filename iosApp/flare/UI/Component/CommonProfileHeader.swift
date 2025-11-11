@@ -124,6 +124,7 @@ struct CommonProfileHeader: View {
             }
             if let desc = user.description_ {
                 RichText(text: desc)
+                    .textSelection(.enabled)
             }
 
             if let bottomContent = user.bottomContent {
@@ -209,10 +210,12 @@ struct FieldsView: View {
                 ForEach(0..<keys.count, id: \.self) { index in
                     let key = keys[index]
                     Text(key)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     if let richText = fields[key] {
                         RichText(text: richText)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             .font(.body)
                     }
                     if index != keys.count - 1 {

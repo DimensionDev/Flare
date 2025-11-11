@@ -19,15 +19,19 @@ struct StatusView: View {
         ) {
             if !data.parents.isEmpty {
                 ForEach(data.parents, id: \.itemKey) { parent in
-                    StatusView(data: parent, withLeadingPadding: true)
-                    .id(parent.itemKey)
+                    VStack(
+                        spacing: nil
+                    ) {
+                        StatusView(data: parent, withLeadingPadding: true)
+                        Spacer()
+                            .frame(height: 8)
+                    }
                     .overlay(alignment: .leading) {
                         Rectangle()
                             .fill(.separator)
                             .frame(minWidth: 1, maxWidth: 1, alignment: .leading)
                             .padding(.leading, 22)
                             .padding(.top, 44)
-
                     }
                 }
             }

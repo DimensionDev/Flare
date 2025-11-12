@@ -31,6 +31,7 @@ public sealed class UiAccount {
         override val accountKey: MicroBlogKey,
         internal val forkType: Credential.ForkType = Credential.ForkType.Mastodon,
         internal val instance: String,
+        val nodeType: String? = null,
     ) : UiAccount() {
         override val platformType: PlatformType
             get() = PlatformType.Mastodon
@@ -42,6 +43,8 @@ public sealed class UiAccount {
             val instance: String,
             val accessToken: String,
             val forkType: ForkType = ForkType.Mastodon,
+            // to support more forks in the future
+            val nodeType: String? = null,
         ) : UiAccount.Credential {
             enum class ForkType {
                 Mastodon,
@@ -70,6 +73,8 @@ public sealed class UiAccount {
     internal data class Misskey(
         override val accountKey: MicroBlogKey,
         private val host: String,
+        // to support more forks in the future
+        val nodeType: String? = null,
     ) : UiAccount() {
         override val platformType: PlatformType
             get() = PlatformType.Misskey
@@ -80,6 +85,7 @@ public sealed class UiAccount {
         data class Credential(
             val host: String,
             val accessToken: String,
+            val nodeType: String? = null,
         ) : UiAccount.Credential
 
         override val dataSource by lazy {
@@ -195,6 +201,7 @@ public sealed class UiAccount {
                         accountKey = account_key,
                         forkType = credential.forkType,
                         instance = credential.instance,
+                        nodeType = credential.nodeType,
                     )
                 }
 
@@ -203,6 +210,7 @@ public sealed class UiAccount {
                     Misskey(
                         accountKey = account_key,
                         host = credential.host,
+                        nodeType = credential.nodeType,
                     )
                 }
 

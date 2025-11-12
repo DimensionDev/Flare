@@ -98,6 +98,7 @@ public class MastodonCallbackPresenter(
                     instance = host,
                     accessToken = accessTokenResponse.accessToken,
                     forkType = forkType,
+                    nodeType = nodeInfo,
                 ),
         )
     }

@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.misskey.MisskeyOauthService
+import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.model.MicroBlogKey
@@ -76,6 +77,7 @@ public class MisskeyCallbackPresenter(
         requireNotNull(response.token) { "No token" }
         val id = response.user?.id
         requireNotNull(id) { "No user id" }
+        val nodeInfo = NodeInfoService.fetchNodeInfo(host)
         accountRepository.addAccount(
             UiAccount.Misskey(
                 accountKey =
@@ -89,6 +91,7 @@ public class MisskeyCallbackPresenter(
                 UiAccount.Misskey.Credential(
                     host = host,
                     accessToken = response.token,
+                    nodeType = nodeInfo,
                 ),
         )
     }

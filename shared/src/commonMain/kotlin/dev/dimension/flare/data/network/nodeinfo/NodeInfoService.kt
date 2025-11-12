@@ -41,21 +41,6 @@ internal data object NodeInfoService {
             "akkoma",
         )
 
-    private val mastodonNodeInfoName =
-        listOf(
-            "mastodon",
-            "kmyblue",
-            "fedibird",
-            "snac",
-        ) + pleromaNodeInfoName
-
-    private val misskeyNodeInfoName =
-        listOf(
-            "misskey",
-            "sharkey",
-            "cherrypick",
-        )
-
     suspend fun fetchNodeInfo(host: String): String? {
         val response =
             ktorClient()
@@ -137,27 +122,25 @@ internal data object NodeInfoService {
                 async {
                     tryRun {
                         val nodeInfo =
-                            fetchNodeInfo(hostCleaned)
-                                ?: throw IllegalArgumentException("NodeInfo not found: $hostCleaned")
-                        if (mastodonNodeInfoName.any { it.equals(nodeInfo, ignoreCase = true) }) {
+                            tryRun {
+                                fetchNodeInfo(hostCleaned)
+                            }.getOrNull()
+
+                        if (nodeInfo != null && nodeInfo.equals("mastodon", ignoreCase = true)) {
                             NodeData(
                                 host = hostCleaned,
                                 platformType = PlatformType.Mastodon,
                                 software = nodeInfo,
-                                compatibleMode =
-                                    !nodeInfo.equals(
-                                        "mastodon",
-                                        ignoreCase = true,
-                                    ),
+                                compatibleMode = false,
                             )
-                        } else if (misskeyNodeInfoName.any { it.equals(nodeInfo, ignoreCase = true) }) {
+                        } else if (nodeInfo != null && nodeInfo.equals("misskey", ignoreCase = true)) {
                             NodeData(
                                 host = hostCleaned,
                                 platformType = PlatformType.Misskey,
                                 software = nodeInfo,
                                 compatibleMode = !nodeInfo.equals("misskey", ignoreCase = true),
                             )
-                        } else {
+                        } else if (nodeInfo != null) {
                             tryRun {
                                 MisskeyService(
                                     "https://$hostCleaned/api/",
@@ -184,8 +167,23 @@ internal data object NodeInfoService {
                                             compatibleMode = true,
                                         )
                                     }
-                                }.getOrNull()
+                                }.getOrElse {
+                                    tryRun {
+                                        MastodonInstanceService("https://$hostCleaned/").instanceV1().let {
+                                            requireNotNull(it.title)
+                                            // should be able to use as mastodon
+                                            NodeData(
+                                                host = hostCleaned,
+                                                platformType = PlatformType.Mastodon,
+                                                software = nodeInfo,
+                                                compatibleMode = true,
+                                            )
+                                        }
+                                    }.getOrNull()
+                                }
                             }
+                        } else {
+                            null
                         }
                     }.getOrNull()
                 }

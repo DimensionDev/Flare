@@ -22,6 +22,7 @@
     <string name="mastodon_item_show_more">Toon meer</string>
     <string name="mastodon_item_show_less">Minder weergeven</string>
     <string name="mastodon_item_pinned">Vastgepinde toot</string>
+    <string name="post_show_full_text">Toon volledige tekst</string>
     <string name="bluesky_notification_item_followed_you">volgt jou nu</string>
     <string name="bluesky_notification_item_favourited_your_status">favoriet</string>
     <string name="bluesky_notification_item_reblogged_your_status">gedeeld</string>

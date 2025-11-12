@@ -22,6 +22,7 @@
     <string name="mastodon_item_show_more">显示更多</string>
     <string name="mastodon_item_show_less">显示更少</string>
     <string name="mastodon_item_pinned">置顶toot</string>
+    <string name="post_show_full_text">显示完整文本</string>
     <string name="bluesky_notification_item_followed_you">关注了你</string>
     <string name="bluesky_notification_item_favourited_your_status">收藏了</string>
     <string name="bluesky_notification_item_reblogged_your_status">转发了</string>

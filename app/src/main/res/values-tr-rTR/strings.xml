@@ -232,17 +232,8 @@
     <string name="local_history_search_placeholder">Yerel önbellekte ara</string>
     <string name="local_history_search_status_title">Durum</string>
     <string name="local_history_search_user_title">Kullanıcı</string>
-    <string name="rss_sources_title">Rss Kaynakları</string>
-    <string name="add_rss_source">Rss Kaynağı Ekle</string>
-    <string name="edit_rss_source">Rss Kaynağını Düzenle</string>
-    <string name="delete_rss_source">Rss Kaynağını Sil</string>
     <string name="rss_sources_title_label">Başlık</string>
     <string name="rss_sources_url_label">Url</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">Hiç rss kaynağı yok</string>
-    <string name="rss_sources_rss_hub_host_label">RssHub Ana Bilgisayar</string>
-    <string name="rss_sources_rss_hub_host_hint">RssHub kullanmak istiyorsanız RssHub ana bilgisayarını ayarlamanız veya genel RssHub sunucusunu seçmeniz gerekir</string>
-    <string name="rss_sources_discovered_rss_sources">Keşfedilen Rss Kaynakları</string>
     <string name="rss_sources_pinned_in_tabs">Ana sekmelere sabitleyin</string>
     <string name="rss_sources_open_in_browser">Tarayıcıda aç</string>
     <string name="rss_detail_open_in_browser">Tarayıcıda aç</string>

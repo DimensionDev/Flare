@@ -22,6 +22,7 @@
     <string name="mastodon_item_show_more">Mostra di più</string>
     <string name="mastodon_item_show_less">Mostra meno</string>
     <string name="mastodon_item_pinned">Radice bloccata</string>
+    <string name="post_show_full_text">Mostra testo completo</string>
     <string name="bluesky_notification_item_followed_you">ti ha seguito</string>
     <string name="bluesky_notification_item_favourited_your_status">favorito</string>
     <string name="bluesky_notification_item_reblogged_your_status">reblogged</string>

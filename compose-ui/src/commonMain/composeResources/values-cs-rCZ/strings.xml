@@ -22,6 +22,7 @@
     <string name="mastodon_item_show_more">Zobrazit více</string>
     <string name="mastodon_item_show_less">Zobrazit méně</string>
     <string name="mastodon_item_pinned">Připnutý toot</string>
+    <string name="post_show_full_text">Zobrazit celý text</string>
     <string name="bluesky_notification_item_followed_you">vás sleduje</string>
     <string name="bluesky_notification_item_favourited_your_status">oblíbený</string>
     <string name="bluesky_notification_item_reblogged_your_status">sdíleno</string>

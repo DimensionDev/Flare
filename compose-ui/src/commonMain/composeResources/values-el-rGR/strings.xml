@@ -20,6 +20,7 @@
     <string name="mastodon_item_show_more">Εμφάνιση περισσότερων</string>
     <string name="mastodon_item_show_less">Εμφάνιση λιγότερων</string>
     <string name="mastodon_item_pinned">Καρφιτσωμένη φωνή</string>
+    <string name="post_show_full_text">Εμφάνιση πλήρους κειμένου</string>
     <string name="bluesky_notification_item_followed_you">σας ακολούθησε</string>
     <string name="bluesky_notification_item_favourited_your_status">αγαπημένο</string>
     <string name="bluesky_notification_item_reblogged_your_status">επανασυνδεδεμένο</string>

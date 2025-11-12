@@ -22,6 +22,7 @@
     <string name="mastodon_item_show_more">Показать еще</string>
     <string name="mastodon_item_show_less">Меньше</string>
     <string name="mastodon_item_pinned">Закреплённый зуб</string>
+    <string name="post_show_full_text">Показать весь текст</string>
     <string name="bluesky_notification_item_followed_you">подписался на вас</string>
     <string name="bluesky_notification_item_favourited_your_status">избранный</string>
     <string name="bluesky_notification_item_reblogged_your_status">репостнуто</string>

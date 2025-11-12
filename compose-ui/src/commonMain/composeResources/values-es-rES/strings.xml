@@ -22,6 +22,7 @@
     <string name="mastodon_item_show_more">Mostrar más</string>
     <string name="mastodon_item_show_less">Mostrar menos</string>
     <string name="mastodon_item_pinned">Toot apilado</string>
+    <string name="post_show_full_text">Mostrar texto completo</string>
     <string name="bluesky_notification_item_followed_you">te siguió</string>
     <string name="bluesky_notification_item_favourited_your_status">favorito</string>
     <string name="bluesky_notification_item_reblogged_your_status">reblogueado</string>

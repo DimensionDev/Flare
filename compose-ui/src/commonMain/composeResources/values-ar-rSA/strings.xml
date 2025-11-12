@@ -22,6 +22,7 @@
     <string name="mastodon_item_show_more">إظهار المزيد</string>
     <string name="mastodon_item_show_less">إظهار أقل</string>
     <string name="mastodon_item_pinned">تبويق مثبت</string>
+    <string name="post_show_full_text">إظهار النص الكامل</string>
     <string name="bluesky_notification_item_followed_you">تابعك</string>
     <string name="bluesky_notification_item_favourited_your_status">المفضلة</string>
     <string name="bluesky_notification_item_reblogged_your_status">إعادة التدوين</string>

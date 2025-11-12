@@ -232,14 +232,8 @@
     <string name="local_history_search_placeholder">Tìm kiếm bộ nhớ đệm địa phương</string>
     <string name="local_history_search_status_title">Trạng thái</string>
     <string name="local_history_search_user_title">Người dùng</string>
-    <string name="rss_sources_title">Nguồn Rss</string>
-    <string name="add_rss_source">Thêm Nguồn Rss</string>
-    <string name="edit_rss_source">Chỉnh sửa Nguồn Rss</string>
-    <string name="delete_rss_source">Xóa Nguồn Rss</string>
     <string name="rss_sources_title_label">Tiêu đề</string>
     <string name="rss_sources_url_label">Url</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">Không có nguồn rss nào</string>
     <string name="rss_sources_open_in_browser">Mở trong trình duyệt</string>
     <string name="rss_detail_open_in_browser">Mở trong trình duyệt</string>
     <string name="rss_detail_share">Chia sẻ</string>

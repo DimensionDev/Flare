@@ -22,6 +22,7 @@
     <string name="mastodon_item_show_more">Показати більше</string>
     <string name="mastodon_item_show_less">Показати менше</string>
     <string name="mastodon_item_pinned">Закріплений дмух</string>
+    <string name="post_show_full_text">Показати повний текст</string>
     <string name="bluesky_notification_item_followed_you">підписався на вас</string>
     <string name="bluesky_notification_item_favourited_your_status">улюблене</string>
     <string name="bluesky_notification_item_reblogged_your_status">репост</string>

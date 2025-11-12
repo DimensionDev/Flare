@@ -37,6 +37,7 @@ public data class AppearanceSettings(
     val showComposeInHomeTimeline: Boolean = true,
     val bottomBarStyle: BottomBarStyle = BottomBarStyle.Floating,
     val bottomBarBehavior: BottomBarBehavior = BottomBarBehavior.MinimizeOnScroll,
+    val inAppBrowser: Boolean = true,
 ) {
     public companion object {
         // for iOS

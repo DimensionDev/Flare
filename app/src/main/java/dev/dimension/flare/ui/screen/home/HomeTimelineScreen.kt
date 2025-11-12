@@ -9,11 +9,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -38,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -238,6 +244,14 @@ internal fun TimelineItemContent(
     changeLogState: ChangeLogState? = null,
     isCurrentlyVisible: Boolean = true,
 ) {
+    val layoutDirection = LocalLayoutDirection.current
+    val paddingWithStatusBar =
+        PaddingValues(
+            top = maxOf(WindowInsets.statusBars.asPaddingValues().calculateTopPadding(), contentPadding.calculateTopPadding()),
+            bottom = contentPadding.calculateBottomPadding(),
+            start = contentPadding.calculateStartPadding(layoutDirection),
+            end = contentPadding.calculateEndPadding(layoutDirection),
+        )
     val state by producePresenter(
         "timeline_${item.key}",
     ) {
@@ -262,7 +276,7 @@ internal fun TimelineItemContent(
             changeLogState?.dismissChangeLog()
         },
         isRefreshing = state.isRefreshing,
-        indicatorPadding = contentPadding,
+        indicatorPadding = paddingWithStatusBar,
         content = {
             LazyStatusVerticalStaggeredGrid(
                 state = state.lazyListState,
@@ -325,7 +339,7 @@ internal fun TimelineItemContent(
                     exit = slideOutVertically { -it },
                     modifier =
                         Modifier
-                            .padding(contentPadding)
+                            .padding(paddingWithStatusBar)
                             .align(Alignment.TopCenter),
                 ) {
                     Glassify(

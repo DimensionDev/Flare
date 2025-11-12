@@ -338,6 +338,33 @@ internal fun AppearanceScreen(
                         }
                     }
                 }
+
+                ListItem(
+                    headlineContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_in_app_browser))
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_in_app_browser_description))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = appearanceSettings.inAppBrowser,
+                            onCheckedChange = {
+                                state.updateSettings {
+                                    copy(inAppBrowser = it)
+                                }
+                            },
+                        )
+                    },
+                    modifier =
+                        Modifier
+                            .listCardItem()
+                            .clickable {
+                                state.updateSettings {
+                                    copy(inAppBrowser = !inAppBrowser)
+                                }
+                            },
+                )
             }
 
             Column(

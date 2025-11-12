@@ -174,6 +174,7 @@ extension AppearanceSettings {
         showComposeInHomeTimeline: Bool? = nil,
         bottomBarStyle: BottomBarStyle? = nil,
         bottomBarBehavior: BottomBarBehavior? = nil,
+        inAppBrowser: Bool? = nil
     ) -> AppearanceSettings {
         AppearanceSettings(
             theme: theme ?? self.theme,
@@ -194,6 +195,7 @@ extension AppearanceSettings {
             showComposeInHomeTimeline: showComposeInHomeTimeline ?? self.showComposeInHomeTimeline,
             bottomBarStyle: bottomBarStyle ?? self.bottomBarStyle,
             bottomBarBehavior: bottomBarBehavior ?? self.bottomBarBehavior,
+            inAppBrowser: inAppBrowser ?? self.inAppBrowser
         )
     }
 }

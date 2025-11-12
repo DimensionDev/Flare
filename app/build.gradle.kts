@@ -153,6 +153,7 @@ dependencies {
     implementation(libs.haze)
     implementation(libs.haze.materials)
     implementation(libs.richtext.ui.material3)
+    implementation(libs.androidx.browser)
 
     // START Non-FOSS component
     if (project.file("google-services.json").exists()) {

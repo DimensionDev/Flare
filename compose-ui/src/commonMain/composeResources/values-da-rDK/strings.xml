@@ -22,6 +22,7 @@
     <string name="mastodon_item_show_more">Vis mere</string>
     <string name="mastodon_item_show_less">Vis mindre</string>
     <string name="mastodon_item_pinned">Fastgjort toot</string>
+    <string name="post_show_full_text">Vis fuld tekst</string>
     <string name="bluesky_notification_item_followed_you">fulgte dig</string>
     <string name="bluesky_notification_item_favourited_your_status">favorit</string>
     <string name="bluesky_notification_item_reblogged_your_status">reblogged</string>

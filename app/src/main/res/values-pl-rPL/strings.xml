@@ -263,10 +263,10 @@
     <string name="delete_rss_source">Usuń źródło RSS</string>
     <string name="rss_sources_title_label">Rozporządzenie Rady (EWG) nr 2658/87 z dnia 23 lipca 1987 r. w sprawie nomenklatury taryfowej i statystycznej oraz w sprawie Wspólnej Taryfy Celnej (Dz.U. L 256 z 7.9.1987, s. 1).</string>
     <string name="rss_sources_url_label">Adres URL</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">Brak źródeł rss</string>
-    <string name="rss_sources_rss_hub_host_label">Host RssHub</string>
-    <string name="rss_sources_rss_hub_host_hint">Musisz ustawić host RssHub jeśli chcesz używać RssHub, lub wybrać publiczny serwer RssHub</string>
+    <string name="rss_title">RSS</string>
+    <string name="empty_rss_sources">Brak źródeł RSS</string>
+    <string name="rss_sources_rss_hub_host_label">Host RSSHub</string>
+    <string name="rss_sources_rss_hub_host_hint">Musisz ustawić host RSSHub jeśli chcesz używać RSSHub lub wybrać publiczny serwer RSSHub</string>
     <string name="rss_sources_discovered_rss_sources">Odkryte źródła RSS</string>
     <string name="rss_sources_pinned_in_tabs">Przypnij do zakładek domowych</string>
     <string name="rss_sources_open_in_browser">Otwórz w przeglądarce</string>

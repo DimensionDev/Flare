@@ -22,6 +22,7 @@
     <string name="mastodon_item_show_more">Näytä lisää</string>
     <string name="mastodon_item_show_less">Näytä vähemmän</string>
     <string name="mastodon_item_pinned">Kiinnitetty tootti</string>
+    <string name="post_show_full_text">Näytä koko teksti</string>
     <string name="bluesky_notification_item_followed_you">seurasi sinua</string>
     <string name="bluesky_notification_item_favourited_your_status">suosikki</string>
     <string name="bluesky_notification_item_reblogged_your_status">reblogged</string>

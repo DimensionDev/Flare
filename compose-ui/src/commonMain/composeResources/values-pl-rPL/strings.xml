@@ -22,6 +22,7 @@
     <string name="mastodon_item_show_more">Pokaż więcej</string>
     <string name="mastodon_item_show_less">Pokaż mniej</string>
     <string name="mastodon_item_pinned">Przypięty wpis</string>
+    <string name="post_show_full_text">Pokaż pełny tekst</string>
     <string name="bluesky_notification_item_followed_you">obserwuje Ciebie</string>
     <string name="bluesky_notification_item_favourited_your_status">ulubione</string>
     <string name="bluesky_notification_item_reblogged_your_status">reblogowany</string>

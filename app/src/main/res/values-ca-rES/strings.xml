@@ -232,14 +232,8 @@
     <string name="local_history_search_placeholder">Cerca a la memòria cau local</string>
     <string name="local_history_search_status_title">Estat</string>
     <string name="local_history_search_user_title">Usuari</string>
-    <string name="rss_sources_title">Fonts Rss</string>
-    <string name="add_rss_source">Afegir font Rss</string>
-    <string name="edit_rss_source">Editar font Rss</string>
-    <string name="delete_rss_source">Esborrar font Rss</string>
     <string name="rss_sources_title_label">Títol</string>
     <string name="rss_sources_url_label">Url</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">No hi ha fonts rss</string>
     <string name="rss_sources_open_in_browser">Obre al navegador</string>
     <string name="rss_detail_open_in_browser">Obre al navegador</string>
     <string name="rss_detail_share">Compartir</string>

@@ -22,6 +22,7 @@
     <string name="mastodon_item_show_more">詳細を表示</string>
     <string name="mastodon_item_show_less">表示を減らす</string>
     <string name="mastodon_item_pinned">ピン留めされた投稿</string>
+    <string name="post_show_full_text">全文を表示</string>
     <string name="bluesky_notification_item_followed_you">があなたをフォローしました</string>
     <string name="bluesky_notification_item_favourited_your_status">がお気に入りしました</string>
     <string name="bluesky_notification_item_reblogged_your_status">がリブログしました</string>

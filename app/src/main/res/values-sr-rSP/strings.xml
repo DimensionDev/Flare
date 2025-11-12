@@ -232,14 +232,8 @@
     <string name="local_history_search_placeholder">Претражите локални кеш</string>
     <string name="local_history_search_status_title">Статус</string>
     <string name="local_history_search_user_title">Корисник</string>
-    <string name="rss_sources_title">Rss Извори</string>
-    <string name="add_rss_source">Додај Rss Извор</string>
-    <string name="edit_rss_source">Уреди Rss Извор</string>
-    <string name="delete_rss_source">Обриши Rss Извор</string>
     <string name="rss_sources_title_label">Наслов</string>
     <string name="rss_sources_url_label">Урл</string>
-    <string name="rss_title">Rss</string>
-    <string name="empty_rss_sources">Нема rss извора</string>
     <string name="rss_sources_open_in_browser">Отворите у прегледаћу</string>
     <string name="rss_detail_open_in_browser">Отворите у прегледаћу</string>
     <string name="rss_detail_share">Делите</string>

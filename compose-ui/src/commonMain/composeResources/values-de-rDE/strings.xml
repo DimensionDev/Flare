@@ -22,6 +22,7 @@
     <string name="mastodon_item_show_more">Mehr anzeigen</string>
     <string name="mastodon_item_show_less">Weniger anzeigen</string>
     <string name="mastodon_item_pinned">Angehängter toot</string>
+    <string name="post_show_full_text">Volltext anzeigen</string>
     <string name="bluesky_notification_item_followed_you">folgte dir</string>
     <string name="bluesky_notification_item_favourited_your_status">favorisiert</string>
     <string name="bluesky_notification_item_reblogged_your_status">reblogged</string>

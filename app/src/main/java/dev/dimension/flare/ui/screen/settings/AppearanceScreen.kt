@@ -400,6 +400,32 @@ internal fun AppearanceScreen(
                 )
                 ListItem(
                     headlineContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_full_width_post))
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_full_width_post_description))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = appearanceSettings.fullWidthPost,
+                            onCheckedChange = {
+                                state.updateSettings {
+                                    copy(fullWidthPost = it)
+                                }
+                            },
+                        )
+                    },
+                    modifier =
+                        Modifier
+                            .listCardItem()
+                            .clickable {
+                                state.updateSettings {
+                                    copy(fullWidthPost = !fullWidthPost)
+                                }
+                            },
+                )
+                ListItem(
+                    headlineContent = {
                         Text(text = stringResource(id = R.string.settings_appearance_show_actions))
                     },
                     supportingContent = {

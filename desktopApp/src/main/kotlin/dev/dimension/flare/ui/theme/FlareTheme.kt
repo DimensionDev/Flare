@@ -223,6 +223,7 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
                             translation = appSettings.aiConfig.translation,
                             tldr = appSettings.aiConfig.tldr,
                         ),
+                    fullWidthPost = appearanceSettings.fullWidthPost,
                 )
             },
         content = content,

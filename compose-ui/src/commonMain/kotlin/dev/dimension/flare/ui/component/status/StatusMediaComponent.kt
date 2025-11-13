@@ -458,12 +458,11 @@ public fun MediaItem(
         }
 
         is UiMedia.Gif ->
-            PlatformVideoPlayer(
-                contentScale = contentScale,
-                uri = media.url,
-                muted = true,
-                previewUri = media.previewUrl,
+            NetworkImage(
+                model = media.url,
                 contentDescription = media.description,
+                contentScale = contentScale,
+                customHeaders = media.customHeaders,
                 modifier =
                     modifier
                         .fillMaxWidth()
@@ -477,31 +476,6 @@ public fun MediaItem(
                                 it
                             }
                         },
-            ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    NetworkImage(
-                        contentScale = contentScale,
-                        customHeaders = media.customHeaders,
-                        model = media.previewUrl,
-                        contentDescription = media.description,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth(),
-                    )
-                }
-                PlatformCircularProgressIndicator(
-                    modifier =
-                        Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(24.dp)
-                            .size(24.dp),
-                    color = Color.White,
-                )
-            }
+            )
     }
 }

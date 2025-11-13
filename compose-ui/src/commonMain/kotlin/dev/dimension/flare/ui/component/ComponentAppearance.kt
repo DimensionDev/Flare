@@ -21,6 +21,7 @@ public data class ComponentAppearance(
     val compatLinkPreview: Boolean = false,
     val aiConfig: AiConfig = AiConfig(),
     val lineLimit: Int = 5,
+    val fullWidthPost: Boolean = false,
 ) {
     public data class AiConfig(
         val translation: Boolean = false,

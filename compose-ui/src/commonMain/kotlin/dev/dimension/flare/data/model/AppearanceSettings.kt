@@ -38,6 +38,7 @@ public data class AppearanceSettings(
     val bottomBarStyle: BottomBarStyle = BottomBarStyle.Floating,
     val bottomBarBehavior: BottomBarBehavior = BottomBarBehavior.MinimizeOnScroll,
     val inAppBrowser: Boolean = true,
+    val fullWidthPost: Boolean = true,
 ) {
     public companion object {
         // for iOS

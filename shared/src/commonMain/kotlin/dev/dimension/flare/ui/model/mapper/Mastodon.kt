@@ -589,9 +589,9 @@ private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
             )
 
         MediaType.GifV ->
-            UiMedia.Gif(
+            UiMedia.Video(
                 url = url.orEmpty(),
-                previewUrl = previewURL.orEmpty(),
+                thumbnailUrl = previewURL.orEmpty(),
                 description = description,
                 width = meta?.width?.toFloat() ?: meta?.original?.width?.toFloat() ?: 0f,
                 height = meta?.height?.toFloat() ?: meta?.original?.height?.toFloat() ?: 0f,
@@ -613,7 +613,15 @@ private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
                 previewUrl = previewURL,
             )
 
-        else -> null
+        else ->
+            UiMedia.Image(
+                url = url.orEmpty(),
+                previewUrl = previewURL.orEmpty(),
+                description = description,
+                width = meta?.width?.toFloat() ?: meta?.original?.width?.toFloat() ?: 0f,
+                height = meta?.height?.toFloat() ?: meta?.original?.height?.toFloat() ?: 0f,
+                sensitive = sensitive,
+            )
     }
 
 internal fun Account.render(

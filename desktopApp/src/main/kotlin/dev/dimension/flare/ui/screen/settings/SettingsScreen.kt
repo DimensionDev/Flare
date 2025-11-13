@@ -82,6 +82,8 @@ import dev.dimension.flare.settings_appearance_compat_link_previews
 import dev.dimension.flare.settings_appearance_compat_link_previews_description
 import dev.dimension.flare.settings_appearance_expand_media
 import dev.dimension.flare.settings_appearance_expand_media_description
+import dev.dimension.flare.settings_appearance_full_width_post
+import dev.dimension.flare.settings_appearance_full_width_post_description
 import dev.dimension.flare.settings_appearance_show_actions
 import dev.dimension.flare.settings_appearance_show_actions_description
 import dev.dimension.flare.settings_appearance_show_compose_in_home_timeline
@@ -379,6 +381,26 @@ internal fun SettingsScreen(
                             {
                                 state.appearanceState.updateSettings {
                                     copy(showComposeInHomeTimeline = it)
+                                }
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+                ExpanderItemSeparator()
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_appearance_full_width_post))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_full_width_post_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = LocalAppearanceSettings.current.fullWidthPost,
+                            {
+                                state.appearanceState.updateSettings {
+                                    copy(fullWidthPost = it)
                                 }
                             },
                             textBefore = true,

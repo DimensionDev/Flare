@@ -361,7 +361,9 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Added Bottom bar settings</li>
+                <li>Added Mastodon quote support</li>
+                <li>Added All RSS tab</li>
+                <li>Added in-app browser setting</li>
                 <li>Bug fixes and performance improvements.</li>
             </ul>
         ]]>

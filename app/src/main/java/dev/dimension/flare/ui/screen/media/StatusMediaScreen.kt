@@ -277,23 +277,25 @@ internal fun StatusMediaScreen(
                                             )
 
                                         is UiMedia.Gif ->
-                                            VideoPlayer(
-                                                uri = media.url,
-                                                previewUri = media.previewUrl,
-                                                contentDescription = media.description,
-                                                autoPlay = false,
+                                            ImageItem(
                                                 modifier =
                                                     Modifier
-                                                        //                                                .sharedElement(
-                                                        //                                                    rememberSharedContentState(media.previewUrl),
-                                                        //                                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                                        //                                                )
+                                                        //                                            .sharedElement(
+                                                        //                                                rememberSharedContentState(media.previewUrl),
+                                                        //                                                animatedVisibilityScope = this@AnimatedVisibilityScope,
+                                                        //                                            )
                                                         .fillMaxSize(),
+                                                url = media.url,
+                                                previewUrl = media.previewUrl,
+                                                description = media.description,
                                                 onClick = {
                                                     state.setShowUi(!state.showUi)
                                                 },
-                                                aspectRatio = media.aspectRatio,
-                                                contentScale = ContentScale.Fit,
+                                                setLockPager = {
+                                                    if (pagerState.currentPage == index) {
+                                                        state.setLockPager(it)
+                                                    }
+                                                },
                                                 onLongClick = {
                                                     hapticFeedback.performHapticFeedback(
                                                         HapticFeedbackType.LongPress,

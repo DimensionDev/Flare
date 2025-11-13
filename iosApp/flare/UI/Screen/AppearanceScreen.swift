@@ -20,6 +20,7 @@ struct AppearanceScreen: View {
                         Text("appearance_theme_dark").tag(Theme.dark)
                     } label: {
                         Text("appearance_theme")
+                        Text("appearance_theme_description")
                     }
                     VStack(
                         alignment: .leading,
@@ -58,8 +59,18 @@ struct AppearanceScreen: View {
                         Text("appearance_avatar_shape_square").tag(AvatarShape.square)
                     } label: {
                         Text("appearance_avatar_shape")
+                        Text("appearance_avatar_shape_description")
                     }
-                    
+                    Toggle(isOn: Binding(get: {
+                        appearance.fullWidthPost
+                    }, set: { newValue in
+                        presenter.state.updateAppearanceSettings { settings in
+                            settings.copy(fullWidthPost: newValue)
+                        }
+                    })) {
+                        Text("appearance_fullWidthPost")
+                        Text("appearance_fullWidthPost_description")
+                    }
                     Toggle(isOn: Binding(get: {
                         appearance.showActions
                     }, set: { newValue in
@@ -68,6 +79,7 @@ struct AppearanceScreen: View {
                         }
                     })) {
                         Text("appearance_show_actions")
+                        Text("appearance_show_actions_description")
                     }
                     if appearance.showActions {
                         Toggle(isOn: Binding(get: {
@@ -78,6 +90,7 @@ struct AppearanceScreen: View {
                             }
                         })) {
                             Text("appearance_show_numbers")
+                            Text("appearance_show_numbers_description")
                         }
                     }
                     Toggle(isOn: Binding(get: {
@@ -88,6 +101,7 @@ struct AppearanceScreen: View {
                         }
                     })) {
                         Text("appearance_show_link_preview")
+                        Text("appearance_show_link_preview_description")
                     }
                     
                     if appearance.showLinkPreview {
@@ -99,6 +113,7 @@ struct AppearanceScreen: View {
                             }
                         })) {
                             Text("appearance_compat_link_preview")
+                            Text("appearance_compat_link_preview_description")
                         }
                     }
                     
@@ -110,6 +125,7 @@ struct AppearanceScreen: View {
                         }
                     })) {
                         Text("appearance_show_media")
+                        Text("appearance_show_media_description")
                     }
                     
                     if appearance.showMedia {
@@ -121,6 +137,7 @@ struct AppearanceScreen: View {
                             }
                         })) {
                             Text("appearance_expand_media_size")
+                            Text("appearance_expand_media_size_description")
                         }
                         
                         Toggle(isOn: Binding(get: {
@@ -131,6 +148,7 @@ struct AppearanceScreen: View {
                             }
                         })) {
                             Text("appearance_show_sensitive_content")
+                            Text("appearance_show_sensitive_content_description")
                         }
                         
                         Picker(selection: Binding(get: {
@@ -145,6 +163,7 @@ struct AppearanceScreen: View {
                             Text("appearance_video_autoplay_always").tag(VideoAutoplay.always)
                         } label: {
                             Text("appearance_video_autoplay")
+                            Text("appearance_video_autoplay_description")
                         }
                     }
                 }
@@ -174,7 +193,8 @@ extension AppearanceSettings {
         showComposeInHomeTimeline: Bool? = nil,
         bottomBarStyle: BottomBarStyle? = nil,
         bottomBarBehavior: BottomBarBehavior? = nil,
-        inAppBrowser: Bool? = nil
+        inAppBrowser: Bool? = nil,
+        fullWidthPost: Bool? = nil,
     ) -> AppearanceSettings {
         AppearanceSettings(
             theme: theme ?? self.theme,
@@ -195,7 +215,8 @@ extension AppearanceSettings {
             showComposeInHomeTimeline: showComposeInHomeTimeline ?? self.showComposeInHomeTimeline,
             bottomBarStyle: bottomBarStyle ?? self.bottomBarStyle,
             bottomBarBehavior: bottomBarBehavior ?? self.bottomBarBehavior,
-            inAppBrowser: inAppBrowser ?? self.inAppBrowser
+            inAppBrowser: inAppBrowser ?? self.inAppBrowser,
+            fullWidthPost: fullWidthPost ?? self.fullWidthPost,
         )
     }
 }

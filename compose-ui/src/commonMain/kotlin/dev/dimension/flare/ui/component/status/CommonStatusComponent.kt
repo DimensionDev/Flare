@@ -106,7 +106,7 @@ import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.PlatformShare
 import dev.dimension.flare.ui.component.AdaptiveGrid
-import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.FAIcon
@@ -147,14 +147,13 @@ import org.jetbrains.compose.resources.stringResource
 public fun CommonStatusComponent(
     item: UiTimeline.ItemContent.Status,
     modifier: Modifier = Modifier,
-    enableStartPadding: Boolean = false,
     isDetail: Boolean = false,
     isQuote: Boolean = false,
     showMedia: Boolean = true,
 ) {
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalComponentAppearance.current
-    Column(
+    Row(
         modifier =
             Modifier
                 .let {
@@ -173,79 +172,101 @@ public fun CommonStatusComponent(
                     }
                 }.then(modifier),
     ) {
-        item.user?.let { user ->
-            val dateContent = @Composable {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    when (val content = item.topEndContent) {
-                        is UiTimeline.ItemContent.Status.TopEndContent.Visibility -> {
-                            StatusVisibilityComponent(
-                                visibility = content.visibility,
-                                modifier =
-                                    Modifier
-                                        .size(14.dp),
-                                tint = PlatformTheme.colorScheme.caption,
+        if (!appearanceSettings.fullWidthPost && !isQuote) {
+            item.user?.let {
+                AvatarComponent(
+                    it.avatar,
+                    modifier =
+                        Modifier.clickable {
+                            it.onClicked.invoke(
+                                ClickContext(
+                                    launcher = {
+                                        uriHandler.openUri(it)
+                                    },
+                                ),
                             )
-                        }
-
-                        null -> Unit
-                    }
-                    if (!isDetail) {
-                        DateTimeText(
-                            item.createdAt,
-                            style = PlatformTheme.typography.caption,
-                            color = PlatformTheme.colorScheme.caption,
-                        )
-                    }
-                }
-            }
-            if (isQuote) {
-                UserCompat(
-                    user,
-                    onUserClick = {
-                        user.onClicked.invoke(
-                            ClickContext(
-                                launcher = {
-                                    uriHandler.openUri(it)
-                                },
-                            ),
-                        )
-                    },
-                ) {
-                    dateContent.invoke()
-                }
-            } else {
-                CommonStatusHeaderComponent(
-                    data = user,
-                    onUserClick = {
-                        user.onClicked.invoke(
-                            ClickContext(
-                                launcher = {
-                                    uriHandler.openUri(it)
-                                },
-                            ),
-                        )
-                    },
-                ) {
-                    dateContent.invoke()
-                }
+                        },
+                )
+                Spacer(modifier = Modifier.width(8.dp))
             }
         }
-        Column(
-            modifier =
-                Modifier
-                    .let {
-                        if (enableStartPadding) {
-                            it.padding(
-                                start = AvatarComponentDefaults.size + 8.dp,
-                            )
-                        } else {
-                            it
+        Column {
+            item.user?.let { user ->
+                val dateContent = @Composable {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        when (val content = item.topEndContent) {
+                            is UiTimeline.ItemContent.Status.TopEndContent.Visibility -> {
+                                StatusVisibilityComponent(
+                                    visibility = content.visibility,
+                                    modifier =
+                                        Modifier
+                                            .size(14.dp),
+                                    tint = PlatformTheme.colorScheme.caption,
+                                )
+                            }
+
+                            null -> Unit
                         }
-                    },
-        ) {
+                        if (!isDetail) {
+                            DateTimeText(
+                                item.createdAt,
+                                style = PlatformTheme.typography.caption,
+                                color = PlatformTheme.colorScheme.caption,
+                            )
+                        }
+                    }
+                }
+                if (!appearanceSettings.fullWidthPost && !isQuote) {
+                    CommonStatusHeaderComponent(
+                        data = user,
+                        onUserClick = {
+                            user.onClicked.invoke(
+                                ClickContext(
+                                    launcher = {
+                                        uriHandler.openUri(it)
+                                    },
+                                ),
+                            )
+                        },
+                        leadingContent = null,
+                    ) {
+                        dateContent.invoke()
+                    }
+                } else if (isQuote) {
+                    UserCompat(
+                        user,
+                        onUserClick = {
+                            user.onClicked.invoke(
+                                ClickContext(
+                                    launcher = {
+                                        uriHandler.openUri(it)
+                                    },
+                                ),
+                            )
+                        },
+                    ) {
+                        dateContent.invoke()
+                    }
+                } else {
+                    CommonStatusHeaderComponent(
+                        data = user,
+                        onUserClick = {
+                            user.onClicked.invoke(
+                                ClickContext(
+                                    launcher = {
+                                        uriHandler.openUri(it)
+                                    },
+                                ),
+                            )
+                        },
+                    ) {
+                        dateContent.invoke()
+                    }
+                }
+            }
             when (val content = item.aboveTextContent) {
                 is UiTimeline.ItemContent.Status.AboveTextContent.ReplyTo -> {
                     Spacer(modifier = Modifier.height(4.dp))
@@ -1053,7 +1074,10 @@ private fun StatusContentComponent(
                                 maxLines
                             },
                         onTextLayout = {
-                            showSoftExpand = it.hasVisualOverflow && !expanded && maxLines != Int.MAX_VALUE
+                            showSoftExpand =
+                                it.hasVisualOverflow &&
+                                !expanded &&
+                                maxLines != Int.MAX_VALUE
                         },
                     )
                     if (showSoftExpand) {

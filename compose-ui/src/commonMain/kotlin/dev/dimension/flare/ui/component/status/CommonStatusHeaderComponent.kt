@@ -28,20 +28,21 @@ public fun CommonStatusHeaderComponent(
     data: UiUserV2,
     onUserClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
+    leadingContent: @Composable (RowScope.() -> Unit)? = {
+        AvatarComponent(
+            data = data.avatar,
+            modifier =
+                Modifier
+                    .pointerHoverIcon(PointerIcon.Hand)
+                    .clickable {
+                        onUserClick(data.key)
+                    },
+        )
+    },
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
     ListComponent(
-        leadingContent = {
-            AvatarComponent(
-                data = data.avatar,
-                modifier =
-                    Modifier
-                        .pointerHoverIcon(PointerIcon.Hand)
-                        .clickable {
-                            onUserClick(data.key)
-                        },
-            )
-        },
+        leadingContent = leadingContent,
         headlineContent = {
             RichText(
                 text = data.name,
@@ -85,7 +86,7 @@ public fun CommonStatusHeaderComponent(
 public fun ListComponent(
     headlineContent: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier,
-    leadingContent: @Composable RowScope.() -> Unit = {},
+    leadingContent: @Composable (RowScope.() -> Unit)? = null,
     supportingContent: @Composable ColumnScope.() -> Unit = {},
     trailingContent: @Composable RowScope.() -> Unit = {},
 ) {
@@ -93,8 +94,10 @@ public fun ListComponent(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        leadingContent.invoke(this)
-        Spacer(modifier = Modifier.width(8.dp))
+        if (leadingContent != null) {
+            leadingContent.invoke(this)
+            Spacer(modifier = Modifier.width(8.dp))
+        }
         Column(
             modifier =
                 Modifier

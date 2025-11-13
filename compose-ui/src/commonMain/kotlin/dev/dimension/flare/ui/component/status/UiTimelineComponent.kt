@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.Layout
@@ -234,6 +235,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDividerDefaults
+import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.VerticalDivider
 import dev.dimension.flare.ui.component.platform.PlatformButton
 import dev.dimension.flare.ui.component.platform.PlatformCard
@@ -258,6 +260,7 @@ internal fun UiTimelineComponent(
     horizontalPadding: Dp = screenHorizontalPadding,
 ) {
     val bigScreen = isBigScreen()
+    val appearance = LocalComponentAppearance.current
     Column(
         modifier = modifier,
     ) {
@@ -272,7 +275,11 @@ internal fun UiTimelineComponent(
                             if (item.content == null) {
                                 it.padding(vertical = 8.dp)
                             } else {
-                                it.padding(top = 8.dp)
+                                if (!appearance.fullWidthPost) {
+                                    it.padding(top = 8.dp, start = AvatarComponentDefaults.size + 8.dp)
+                                } else {
+                                    it.padding(top = 8.dp)
+                                }
                             }
                         }.fillMaxWidth(),
             )
@@ -495,16 +502,19 @@ private fun StatusContent(
         if (data.parents.any()) {
             Layout(
                 content = {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    CompositionLocalProvider(
+                        LocalComponentAppearance provides LocalComponentAppearance.current.copy(fullWidthPost = false),
                     ) {
-                        data.parents.fastForEach {
-                            CommonStatusComponent(
-                                item = it,
-                                isDetail = false,
-                                enableStartPadding = true,
-                                modifier = Modifier.padding(paddingValues),
-                            )
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                        ) {
+                            data.parents.fastForEach {
+                                CommonStatusComponent(
+                                    item = it,
+                                    isDetail = false,
+                                    modifier = Modifier.padding(paddingValues),
+                                )
+                            }
                         }
                     }
                     VerticalDivider(

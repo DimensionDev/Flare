@@ -41,10 +41,10 @@ struct StatusCardView: View {
                 }
             }
             .if(data.media == nil, if: { stack in
-                stack.padding()
+                stack.padding(8)
             }, else: { stack in
-                stack.padding(.horizontal)
-                    .padding(.bottom)
+                stack.padding(.horizontal, 8)
+                    .padding(.bottom, 8)
             })
         }
         .clipShape(.rect(cornerRadius: 16))

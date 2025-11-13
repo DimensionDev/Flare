@@ -35,203 +35,219 @@ struct StatusView: View {
                     }
                 }
             }
-            VStack(
-                alignment: .leading,
+            HStack(
+                alignment: .top,
+                spacing: 8,
             ) {
-                if let user = data.user {
-                    if isQuote {
-                        UserOnelineView(data: user) {
-                            HStack {
-                                switch onEnum(of: data.topEndContent) {
-                                case .visibility(let visibility):
-                                    StatusVisibilityView(data: visibility.visibility)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                case .none:
-                                    EmptyView()
-                                }
-                                if !isDetail {
-                                    DateTimeText(data: data.createdAt)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        } onClicked: {
+                if (!themeSettings.appearanceSettings.fullWidthPost || withLeadingPadding) && !isQuote, let user = data.user {
+                    AvatarView(data: user.avatar)
+                        .frame(width: 44, height: 44)
+                        .onTapGesture {
                             user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                         }
-                    } else {
-                        UserCompatView(data: user) {
-                            HStack {
-                                switch onEnum(of: data.topEndContent) {
-                                case .visibility(let visibility):
-                                    StatusVisibilityView(data: visibility.visibility)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                case .none:
-                                    EmptyView()
-                                }
-                                if !isDetail {
-                                    DateTimeText(data: data.createdAt)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        } onClicked: {
-                            user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-                        }
-                    }
                 }
                 VStack(
                     alignment: .leading,
-                    spacing: 8,
+                    spacing: nil,
                 ) {
-                    if let aboveTextContent = data.aboveTextContent {
-                        switch onEnum(of: aboveTextContent) {
-                        case .replyTo(let replyTo):
+                    if let user = data.user {
+                        if (!themeSettings.appearanceSettings.fullWidthPost || withLeadingPadding) && !isQuote {
                             HStack {
-                                Image("fa-reply")
-                                Text("Reply to \(replyTo.handle)")
-                            }
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        }
-                    }
-                    if let contentWarning = data.contentWarning, !contentWarning.isEmpty {
-                        RichText(text: contentWarning)
-                            .if(isDetail) { richText in
-                                richText
-                                    .textSelection(.enabled)
-                            }
-                        
-                        Button {
-                            withAnimation {
-                                expand = !expand
-                            }
-                        } label: {
-                            if expand {
-                                Text("mastodon_item_show_less")
-                            } else {
-                                Text("mastodon_item_show_more")
-                            }
-                        }
-                        .backport
-                        .glassProminentButtonStyle()
-                    }
-
-                    if expand || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
-                        if !data.content.isEmpty {
-                            RichText(text: data.content)
+                                VStack(
+                                    alignment: .leading,
+                                    spacing: nil,
+                                ) {
+                                    RichText(text: user.name)
+                                        .lineLimit(1)
+                                    Text(user.handle)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                                }
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                                topEndContent
+                            }
+                        } else if isQuote {
+                            UserOnelineView(data: user) {
+                                topEndContent
+                            } onClicked: {
+                                user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                            }
+                        } else {
+                            UserCompatView(data: user) {
+                                topEndContent
+                            } onClicked: {
+                                user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                            }
+                        }
+                    }
+                    VStack(
+                        alignment: .leading,
+                        spacing: 8,
+                    ) {
+                        if let aboveTextContent = data.aboveTextContent {
+                            switch onEnum(of: aboveTextContent) {
+                            case .replyTo(let replyTo):
+                                HStack {
+                                    Image("fa-reply")
+                                    Text("Reply to \(replyTo.handle)")
+                                }
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            }
+                        }
+                        if let contentWarning = data.contentWarning, !contentWarning.isEmpty {
+                            RichText(text: contentWarning)
                                 .if(isDetail) { richText in
                                     richText
                                         .textSelection(.enabled)
-                                } else: { richText in
-                                    richText
-                                        .if(data.shouldExpandTextByDefault || expand, if: { view in
-                                            view.lineLimit(nil)
-                                        }, else: { view in
-                                            view.lineLimit(5)
-                                        })
                                 }
-                            if !data.shouldExpandTextByDefault && !isDetail && !expand {
-                                Button {
-                                    withAnimation {
-                                        expand = true
-                                    }
-                                } label: {
-                                    Text("mastodon_item_show_more")
-                                }
-                                .buttonStyle(.borderless)
-                            }
-                        }
-                    }
-                    
-                    if isDetail {
-                        StatusTranslateView(content: data.content, contentWarning: data.contentWarning)
-                    }
-                    
-                    if let poll = data.poll, showMedia {
-                        StatusPollView(data: poll)
-                    }
-                    
-                    if !data.images.isEmpty, showMedia {
-                        if themeSettings.appearanceSettings.showMedia || expandMedia {
-                            StatusMediaView(data: data.images, sensitive: !(themeSettings.appearanceSettings.showSensitiveContent) && data.sensitive)
-                        } else {
+                            
                             Button {
                                 withAnimation {
-                                    expandMedia = true
+                                    expand = !expand
                                 }
                             } label: {
-                                Label {
-                                    Text("show_media_button", comment: "Button to show media attachments" )
-                                } icon: {
-                                    Image("fa-image")
+                                if expand {
+                                    Text("mastodon_item_show_less")
+                                } else {
+                                    Text("mastodon_item_show_more")
                                 }
                             }
                             .backport
-                            .glassButtonStyle(fallbackStyle: .bordered)
+                            .glassProminentButtonStyle()
                         }
-                    }
 
-                    if let card = data.card, showMedia, data.images.isEmpty, data.quote.isEmpty, themeSettings.appearanceSettings.showLinkPreview {
-                        if themeSettings.appearanceSettings.compatLinkPreview {
-                            StatusCompatCardView(data: card)
-                        } else {
-                            StatusCardView(data: card)
-                        }
-                    }
-
-                    if !data.quote.isEmpty, !isQuote {
-                        VStack {
-                            ForEach(data.quote, id: \.itemKey) { quote in
-                                StatusView(data: quote, isQuote: true)
-                                if data.quote.last != quote {
-                                    Divider()
+                        if expand || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
+                            if !data.content.isEmpty {
+                                RichText(text: data.content)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .if(isDetail) { richText in
+                                        richText
+                                            .textSelection(.enabled)
+                                    } else: { richText in
+                                        richText
+                                            .if(data.shouldExpandTextByDefault || expand, if: { view in
+                                                view.lineLimit(nil)
+                                            }, else: { view in
+                                                view.lineLimit(5)
+                                            })
+                                    }
+                                if !data.shouldExpandTextByDefault && !isDetail && !expand {
+                                    Button {
+                                        withAnimation {
+                                            expand = true
+                                        }
+                                    } label: {
+                                        Text("mastodon_item_show_more")
+                                    }
+                                    .buttonStyle(.borderless)
                                 }
                             }
                         }
-                        .padding(8)
-                        .clipShape(.rect(cornerRadius: 16))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color(.separator), lineWidth: 1)
-                        )
-                    }
+                        
+                        if isDetail {
+                            StatusTranslateView(content: data.content, contentWarning: data.contentWarning)
+                        }
+                        
+                        if let poll = data.poll, showMedia {
+                            StatusPollView(data: poll)
+                        }
+                        
+                        if !data.images.isEmpty, showMedia {
+                            if themeSettings.appearanceSettings.showMedia || expandMedia {
+                                StatusMediaView(data: data.images, sensitive: !(themeSettings.appearanceSettings.showSensitiveContent) && data.sensitive)
+                            } else {
+                                Button {
+                                    withAnimation {
+                                        expandMedia = true
+                                    }
+                                } label: {
+                                    Label {
+                                        Text("show_media_button", comment: "Button to show media attachments" )
+                                    } icon: {
+                                        Image("fa-image")
+                                    }
+                                }
+                                .backport
+                                .glassButtonStyle(fallbackStyle: .bordered)
+                            }
+                        }
 
-                    if case .reaction(let reaction) = onEnum(of: data.bottomContent), showMedia {
-                        if !reaction.emojiReactions.isEmpty {
-                            StatusReactionView(data: reaction)
+                        if let card = data.card, showMedia, data.images.isEmpty, data.quote.isEmpty, themeSettings.appearanceSettings.showLinkPreview {
+                            if themeSettings.appearanceSettings.compatLinkPreview {
+                                StatusCompatCardView(data: card)
+                            } else {
+                                StatusCardView(data: card)
+                            }
+                        }
+
+                        if !data.quote.isEmpty, !isQuote {
+                            VStack {
+                                ForEach(data.quote, id: \.itemKey) { quote in
+                                    StatusView(data: quote, isQuote: true)
+                                    if data.quote.last != quote {
+                                        Divider()
+                                    }
+                                }
+                            }
+                            .padding(8)
+                            .clipShape(.rect(cornerRadius: 16))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(Color(.separator), lineWidth: 1)
+                            )
+                        }
+
+                        if case .reaction(let reaction) = onEnum(of: data.bottomContent), showMedia {
+                            if !reaction.emojiReactions.isEmpty {
+                                StatusReactionView(data: reaction)
+                            }
+                        }
+
+                        if isDetail {
+                            DateTimeText(data: data.createdAt, fullTime: true)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        if !isQuote, (themeSettings.appearanceSettings.showActions || isDetail) {
+                            StatusActionsView(data: data.actions, useText: false)
+                                .font(isDetail ? .body : .footnote)
+                                .foregroundStyle(isDetail ? .primary : .secondary)
+                                .padding(.top, 4)
                         }
                     }
-
-                    if isDetail {
-                        DateTimeText(data: data.createdAt, fullTime: true)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    if !isQuote, (themeSettings.appearanceSettings.showActions || isDetail) {
-                        StatusActionsView(data: data.actions, useText: false)
-                            .font(isDetail ? .body : .footnote)
-                            .foregroundStyle(isDetail ? .primary : .secondary)
-                            .padding(.top, 4)
-                    }
                 }
-                .if(withLeadingPadding) { stack in
-                    stack.padding(.leading, 50)
+                .if(!isDetail) { view in
+                    view
+                        .contextMenu {
+                            StatusActionsView(data: data.actions, useText: true)
+                        }
                 }
-            }
-            .if(!isDetail) { view in
-                view
-                    .contextMenu {
-                        StatusActionsView(data: data.actions, useText: true)
-                    }
             }
         }
         .contentShape(.rect)
         .onTapGesture {
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+        }
+    }
+    
+    var topEndContent: some View {
+        HStack {
+            switch onEnum(of: data.topEndContent) {
+            case .visibility(let visibility):
+                StatusVisibilityView(data: visibility.visibility)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            case .none:
+                EmptyView()
+            }
+            if !isDetail {
+                DateTimeText(data: data.createdAt)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 }

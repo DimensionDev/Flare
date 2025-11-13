@@ -5,10 +5,14 @@ struct TimelineView: View {
     let data: UiTimeline
     let detailStatusKey: MicroBlogKey?
     @Environment(\.openURL) private var openURL
+    @Environment(\.themeSettings) private var themeSettings
     var body: some View {
         VStack {
             if let topMessage = data.topMessage {
                 StatusTopMessageView(topMessage: topMessage)
+                    .if(!themeSettings.appearanceSettings.fullWidthPost, transform: { view in
+                        view.padding(.leading, 44 + 8)
+                    })
                     .onTapGesture {
                         if let user = topMessage.user {
                             user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))

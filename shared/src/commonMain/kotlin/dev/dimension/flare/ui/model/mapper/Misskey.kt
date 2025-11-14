@@ -398,8 +398,10 @@ private fun Note.renderStatus(
                     file.toUi()
                 }?.toPersistentList() ?: persistentListOf(),
         contentWarning =
-            cw?.let {
-                misskeyParser.parse(it).toHtml(accountKey, emojis, remoteHost).toUi()
+            if (!cw.isNullOrEmpty() && !text.isNullOrEmpty()) {
+                misskeyParser.parse(cw).toHtml(accountKey, emojis, remoteHost).toUi()
+            } else {
+                null
             },
         user = user,
         quote =
@@ -410,7 +412,14 @@ private fun Note.renderStatus(
                     null
                 },
             ).toImmutableList(),
-        content = misskeyParser.parse(text.orEmpty()).toHtml(accountKey, emojis, remoteHost).toUi(),
+        content =
+            if (!text.isNullOrEmpty()) {
+                misskeyParser.parse(text).toHtml(accountKey, emojis, remoteHost).toUi()
+            } else if (!cw.isNullOrEmpty()) {
+                misskeyParser.parse(cw).toHtml(accountKey, emojis, remoteHost).toUi()
+            } else {
+                Element("span").toUi()
+            },
         actions =
             listOfNotNull(
                 StatusAction.Item.Reply(

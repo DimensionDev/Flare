@@ -101,9 +101,6 @@ skie {
         disableUpload.set(true)
         enabled.set(false)
     }
-    features {
-        enableFlowCombineConvertorPreview = true
-    }
 }
 
 dependencies {

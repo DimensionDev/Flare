@@ -301,7 +301,7 @@
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
                 <li>Ajout du support du devis Mastodon</li>
-                <li>Ajout de l'onglet</li>
+                <li>Ajout de l\'onglet</li>
                 <li>Ajout du paramétrage du navigateur intégré</li>
                 <li><li> Corrections de bugs et amélioration des performances.</li>
             </ul>

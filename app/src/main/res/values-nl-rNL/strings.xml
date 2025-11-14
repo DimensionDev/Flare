@@ -156,6 +156,10 @@
     <string name="settings_appearance_bottombar_behavior_fixed">Opgelost</string>
     <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Verberg tijdens scrollen</string>
     <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimaliseren bij scrollen</string>
+    <string name="settings_appearance_in_app_browser">In-app browser</string>
+    <string name="settings_appearance_in_app_browser_description">Open links in de in-app browser</string>
+    <string name="settings_appearance_full_width_post">Volledige breedte bericht</string>
+    <string name="settings_appearance_full_width_post_description">Toon bericht in volledige breedte</string>
     <string name="settings_storage_clear_image_cache">Afbeeldingencache legen</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB van afbeeldingen zal worden verwijderd</string>
     <string name="settings_storage_clear_database">Cache database wissen</string>
@@ -296,8 +300,10 @@
     <string name="home_tab_social_timeline_title">Sociaal</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
-                <li>Onderste balk-instellingen toegevoegd</li>
-                <li>bugfixes en prestatieverbeteringen.</li>
+                <li>Mastodon quote support</li>
+                <li>added All RSS tab</li>
+                <li>Toegevoegde in-app browserinstelling</li>
+                <li>Bug fixes en prestaties verbeteringen.</li>
             </ul>
         ]]></string>
 </resources>

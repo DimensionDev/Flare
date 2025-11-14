@@ -156,6 +156,10 @@
     <string name="settings_appearance_bottombar_behavior_fixed">Виправлена</string>
     <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Не показувати на прокручуванні</string>
     <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Згорнути при прокручуванні</string>
+    <string name="settings_appearance_in_app_browser">Вбудований браузер</string>
+    <string name="settings_appearance_in_app_browser_description">Відкрити посилання у вбудованому браузері</string>
+    <string name="settings_appearance_full_width_post">На всю ширину повідомлення</string>
+    <string name="settings_appearance_full_width_post_description">Показувати допис по всій ширині</string>
     <string name="settings_storage_clear_image_cache">Очистити кеш зображень</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB із зображень буде видалено</string>
     <string name="settings_storage_clear_database">Очистити базу даних кешу</string>

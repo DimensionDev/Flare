@@ -182,6 +182,8 @@
     <string name="settings_appearance_theme_color_description">Изменить цвет темы приложения</string>
     <string name="settings_appearance_theme_pure_color">Режим высокой контрастности</string>
     <string name="settings_appearance_theme_pure_color_description">Увеличить контраст между фоном и текстом</string>
+    <string name="settings_appearance_full_width_post">Полная ширина поста</string>
+    <string name="settings_appearance_full_width_post_description">Показать пост в полной ширине</string>
     <string name="settings_about_source_code">Исходный код</string>
     <string name="settings_about_telegram">Телеграмма</string>
     <string name="settings_about_telegram_description">Присоединяйтесь к нашей группе Telegram</string>

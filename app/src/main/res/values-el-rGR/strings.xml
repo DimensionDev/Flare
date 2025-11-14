@@ -156,6 +156,10 @@
     <string name="settings_appearance_bottombar_behavior_fixed">Σταθερό</string>
     <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Απόκρυψη κατά την κύλιση</string>
     <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Ελαχιστοποίηση κατά την κύλιση</string>
+    <string name="settings_appearance_in_app_browser">Περιηγητής εντός εφαρμογής</string>
+    <string name="settings_appearance_in_app_browser_description">Άνοιγμα συνδέσμων στο πρόγραμμα περιήγησης εντός εφαρμογής</string>
+    <string name="settings_appearance_full_width_post">Πλήρες πλάτος δημοσίευσης</string>
+    <string name="settings_appearance_full_width_post_description">Εμφάνιση της δημοσίευσης σε πλήρες πλάτος</string>
     <string name="settings_storage_clear_image_cache">Εκκαθάριση προσωρινής μνήμης εικόνας</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB εικόνων θα αφαιρεθούν</string>
     <string name="settings_storage_clear_database">Εκκαθάριση βάσης δεδομένων προσωρινής μνήμης</string>
@@ -296,8 +300,10 @@
     <string name="home_tab_social_timeline_title">Κοινωνικά</string>
     <string name="changelog_current"><![CDATA[            <span>Έκδοση %1$s:</span>
             <ul>
-                <li>Προστέθηκαν οι ρυθμίσεις κάτω μπάρας</li>
-                <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης.</li>
+                <li>Προστέθηκε υποστήριξη προσφοράς Mastodon</li>
+                <li>Προστέθηκε όλη η καρτέλα RSS</li>
+                <li>Προστέθηκε ρύθμιση προγράμματος περιήγησης στην εφαρμογή</li>
+                <li>Διορθώσεις σφαλμάτων και βελτιώσεις επιδόσεων.</li>
             </ul>
         ]]></string>
 </resources>

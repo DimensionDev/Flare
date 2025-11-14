@@ -156,6 +156,10 @@
     <string name="settings_appearance_bottombar_behavior_fixed">Naprawione</string>
     <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Ukryj przy przewijaniu</string>
     <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimalizuj przy przewijaniu</string>
+    <string name="settings_appearance_in_app_browser">Przeglądarka aplikacji</string>
+    <string name="settings_appearance_in_app_browser_description">Otwórz linki w przeglądarce aplikacji</string>
+    <string name="settings_appearance_full_width_post">Wiadomość o pełnej szerokości</string>
+    <string name="settings_appearance_full_width_post_description">Pokaż post o pełnej szerokości</string>
     <string name="settings_storage_clear_image_cache">Usuń pamięć podręczną obrazów</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB obrazów zostanie usunięte</string>
     <string name="settings_storage_clear_database">Wyczyść bazę pamięci podręcznej</string>
@@ -296,7 +300,9 @@
     <string name="home_tab_social_timeline_title">Społeczność</string>
     <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
-                <li>Dodano ustawienia paska dolnego</li>
+                <li>Dodano wsparcie oferty dla Mastodon</li>
+                <li>Dodano wszystkie karty RSS</li>
+                <li>Dodano ustawienia przeglądarki aplikacji</li>
                 <li>Poprawki błędów i ulepszenia wydajności.</li>
             </ul>
         ]]></string>

@@ -156,6 +156,10 @@
     <string name="settings_appearance_bottombar_behavior_fixed">Feste</string>
     <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Beim Scrollen ausblenden</string>
     <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Beim Scrollen minimieren</string>
+    <string name="settings_appearance_in_app_browser">In-App-Browser</string>
+    <string name="settings_appearance_in_app_browser_description">Links im In-App-Browser öffnen</string>
+    <string name="settings_appearance_full_width_post">Beitrag in voller Breite</string>
+    <string name="settings_appearance_full_width_post_description">Beitrag in voller Breite anzeigen</string>
     <string name="settings_storage_clear_image_cache">Bildercache leeren</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB Bilder werden entfernt</string>
     <string name="settings_storage_clear_database">Cache-Datenbank leeren</string>
@@ -296,9 +300,12 @@
     <string name="home_tab_social_timeline_title">Soziale</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Grundeinstellungen</li>
+                <li>Mastodon-Angebotsunterstützung</li>
                 
-                <li>Fehlerkorrekturen und Leistungsverbesserungen hinzugefügt.</li>
+                <li>Alle RSS Tab</li>
+                
+                <li>In-App-Browser-Einstellung</li>
+                <li>Fehlerbehebungen und Leistungsverbesserungen hinzugefügt.</li>
             </ul>
         ]]></string>
 </resources>

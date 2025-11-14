@@ -5351,7 +5351,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Font Size"
+            "value" : "字体大小"
           }
         }
       }
@@ -20071,7 +20071,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "fx_共享"
+            "value" : "通过FxEmbed分享"
           }
         }
       }

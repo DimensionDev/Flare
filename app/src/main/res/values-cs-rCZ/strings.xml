@@ -156,6 +156,10 @@
     <string name="settings_appearance_bottombar_behavior_fixed">Fixní</string>
     <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Skrýt při posouvání</string>
     <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimalizovat při posouvání</string>
+    <string name="settings_appearance_in_app_browser">Prohlížeč v aplikaci</string>
+    <string name="settings_appearance_in_app_browser_description">Otevřít odkazy v prohlížeči v aplikaci</string>
+    <string name="settings_appearance_full_width_post">Celá šířka příspěvku</string>
+    <string name="settings_appearance_full_width_post_description">Zobrazit příspěvek v plné šířce</string>
     <string name="settings_storage_clear_image_cache">Vymazat cache obrázků</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB obrázků bude odstraněno</string>
     <string name="settings_storage_clear_database">Vymazat databázi mezipaměti</string>
@@ -296,7 +300,9 @@
     <string name="home_tab_social_timeline_title">Sociální</string>
     <string name="changelog_current"><![CDATA[            <span>Verze %1$s:</span>
             <ul>
-                <li>Přidáno spodní nastavení panelu</li>
+                <li>Přidána podpora Mastodon citace</li>
+                <li>Přidána všechna RSS karta</li>
+                <li>Přidána nastavení</li>
                 <li>Opravy chyb a vylepšení výkonu.</li>
             </ul>
         ]]></string>

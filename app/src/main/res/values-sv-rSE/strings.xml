@@ -156,6 +156,10 @@
     <string name="settings_appearance_bottombar_behavior_fixed">Fast</string>
     <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Dölj vid rullning</string>
     <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimera vid rullning</string>
+    <string name="settings_appearance_in_app_browser">Webbläsare i app</string>
+    <string name="settings_appearance_in_app_browser_description">Öppna länkar i webbläsaren i appen</string>
+    <string name="settings_appearance_full_width_post">Full bredd inlägg</string>
+    <string name="settings_appearance_full_width_post_description">Visa inlägget i full bredd</string>
     <string name="settings_storage_clear_image_cache">Rensa bildcache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder kommer att tas bort</string>
     <string name="settings_storage_clear_database">Rensa cache-databas</string>
@@ -296,8 +300,10 @@
     <string name="home_tab_social_timeline_title">Socialt</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Lade till inställningar för nedre fältet</li>
-                <li>Felrättelser och prestandaförbättringar.</li>
+                <li>Added Mastodon quote support</li>
+                <li>Lade till alla RSS-fliken</li>
+                <li>Lade till i appen webbläsarinställning</li>
+                <li>Felrättningar och prestandaförbättringar.</li>
             </ul>
         ]]></string>
 </resources>

@@ -156,6 +156,10 @@
     <string name="settings_appearance_bottombar_behavior_fixed">Fisso</string>
     <string name="settings_appearance_bottombar_behavior_hide_on_scroll">Nascondi in scorrimento</string>
     <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Minimizza allo scorrimento</string>
+    <string name="settings_appearance_in_app_browser">Browser in-app</string>
+    <string name="settings_appearance_in_app_browser_description">Apri link nel browser in-app</string>
+    <string name="settings_appearance_full_width_post">Posta a larghezza intera</string>
+    <string name="settings_appearance_full_width_post_description">Mostra il post a tutta larghezza</string>
     <string name="settings_storage_clear_image_cache">Cancella cache immagine</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB di immagini saranno rimossi</string>
     <string name="settings_storage_clear_database">Cancella database cache</string>
@@ -296,7 +300,9 @@
     <string name="home_tab_social_timeline_title">Social</string>
     <string name="changelog_current"><![CDATA[            <span>Versione %1$s:</span>
             <ul>
-                <li>Aggiunte impostazioni barra inferiore</li>
+                <li>Aggiunto il supporto del preventivo di Mastodon</li>
+                <li>Aggiunto tutti i tab RSS</li>
+                <li>Aggiunta l'impostazione del browser in-app</li>
                 <li>Correzioni di bug e miglioramenti delle prestazioni.</li>
             </ul>
         ]]></string>

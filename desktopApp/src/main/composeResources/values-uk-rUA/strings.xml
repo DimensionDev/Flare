@@ -182,6 +182,8 @@
     <string name="settings_appearance_theme_color_description">Змінити колір теми програми</string>
     <string name="settings_appearance_theme_pure_color">Висококонтрастний режим</string>
     <string name="settings_appearance_theme_pure_color_description">Збільшити контраст між тлом і текстом</string>
+    <string name="settings_appearance_full_width_post">На всю ширину повідомлення</string>
+    <string name="settings_appearance_full_width_post_description">Показувати допис по всій ширині</string>
     <string name="settings_about_source_code">Початковий код</string>
     <string name="settings_about_telegram">Телеграма</string>
     <string name="settings_about_telegram_description">Приєднатися до нашої групи в Telegram</string>

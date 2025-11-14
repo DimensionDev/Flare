@@ -182,6 +182,8 @@
     <string name="settings_appearance_theme_color_description">Endre temafargen på appen</string>
     <string name="settings_appearance_theme_pure_color">Høy kontrastmodus</string>
     <string name="settings_appearance_theme_pure_color_description">Øk kontrast mellom bakgrunn og tekst</string>
+    <string name="settings_appearance_full_width_post">Full bredde innlegg</string>
+    <string name="settings_appearance_full_width_post_description">Vis innholdet i full bredde</string>
     <string name="settings_about_source_code">Kildekode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Bli med i vår Telegram gruppe</string>

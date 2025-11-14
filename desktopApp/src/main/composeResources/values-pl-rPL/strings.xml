@@ -182,6 +182,8 @@
     <string name="settings_appearance_theme_color_description">Zmień kolor motywu aplikacji</string>
     <string name="settings_appearance_theme_pure_color">Tryb wysokiego kontrastu</string>
     <string name="settings_appearance_theme_pure_color_description">Zwiększ kontrast między tłem i tekstem</string>
+    <string name="settings_appearance_full_width_post">Wiadomość o pełnej szerokości</string>
+    <string name="settings_appearance_full_width_post_description">Pokaż post o pełnej szerokości</string>
     <string name="settings_about_source_code">Kod źródłowy</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Dołącz do naszej grupy Telegram</string>

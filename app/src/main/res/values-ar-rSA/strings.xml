@@ -156,6 +156,10 @@
     <string name="settings_appearance_bottombar_behavior_fixed">ثابت</string>
     <string name="settings_appearance_bottombar_behavior_hide_on_scroll">إخفاء عند التمرير</string>
     <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">تصغير عند التمرير</string>
+    <string name="settings_appearance_in_app_browser">متصفح داخل التطبيق</string>
+    <string name="settings_appearance_in_app_browser_description">فتح الروابط في المتصفح داخل التطبيق</string>
+    <string name="settings_appearance_full_width_post">عرض كامل المنشور</string>
+    <string name="settings_appearance_full_width_post_description">إظهار المنشور في العرض الكامل</string>
     <string name="settings_storage_clear_image_cache">مسح ذاكرة التخزين المؤقت للصورة</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB من الصور سيتم إزالتها</string>
     <string name="settings_storage_clear_database">مسح قاعدة بيانات ذاكرة التخزين المؤقت</string>
@@ -294,4 +298,12 @@
     <string name="tab_settings_mixed_timeline">إضافة علامة تبويب الخيط الزمني المختلط</string>
     <string name="tab_settings_mixed_timeline_desc">سيتم خلط الخط الزمني المختلط بين جميع علامات التبويب في علامة تبويب واحدة</string>
     <string name="home_tab_social_timeline_title">إجتماعي</string>
+    <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
+            <ul>
+                <li>إضافة ماستدون لدعم الاقتباس</li>
+                <li>إضافة جميع علامات التبويب RSS</li>
+                <li>إضافة إعداد المتصفح</li>
+                <li>إصلاحات الشوائب وتحسين الأداء.</li>
+            </ul>
+        ]]></string>
 </resources>

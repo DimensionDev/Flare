@@ -340,7 +340,7 @@ public fun CommonStatusComponent(
                     )
                 }
             }
-            if (item.quote.isNotEmpty()) {
+            if (item.quote.isNotEmpty() && !isQuote) {
                 Spacer(modifier = Modifier.height(4.dp))
                 StatusQuoteComponent(
                     quotes = item.quote,

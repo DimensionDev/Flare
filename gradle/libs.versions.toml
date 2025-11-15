@@ -59,6 +59,7 @@ navigation3 = "1.0.0-rc01"
 zoomable = "0.18.0"
 bouncycastle = "1.82"
 cupertino = "2.3.1"
+nostr-sdk-jvm = "0.43.0"
 
 
 [libraries]

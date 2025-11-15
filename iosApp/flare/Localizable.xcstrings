@@ -508,6 +508,12 @@
             "value" : "حول"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Относно"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -962,6 +968,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إعادة المحاولة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повторен опит"
           }
         },
         "ca" : {
@@ -1598,6 +1610,12 @@
             "value" : "أدخل رابط الخادم"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Въведете URL адреса на сървъра"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1780,6 +1798,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "رابط الخادم"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Адрес на сървъра"
           }
         },
         "ca" : {
@@ -2148,6 +2172,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إعدادات الذكاء الاصطناعي"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфигурация на ИИ"
           }
         },
         "ca" : {
@@ -2702,6 +2732,12 @@
             "value" : "تغذيتي"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Моите емисии"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3014,6 +3050,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "قائمة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Списък"
           }
         },
         "ca" : {
@@ -3454,6 +3496,12 @@
             "value" : "هوائي"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Антена"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3636,6 +3684,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "هوائي"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Антена"
           }
         },
         "ca" : {
@@ -3822,6 +3876,12 @@
             "value" : "شكل الصورة الرمزية"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Форма на аватара"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4004,6 +4064,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تقريب"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кръг"
           }
         },
         "ca" : {
@@ -4190,6 +4256,12 @@
             "value" : "تغيير شكل الصورة الرمزية"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Смяна на формата на аватара"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4372,6 +4444,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "مربع"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Квадрат"
           }
         },
         "ca" : {
@@ -4870,6 +4948,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "توسيع الوسائط إلى الحجم الكامل"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разгъване на медията до пълен размер"
           }
         },
         "ca" : {
@@ -5630,6 +5714,12 @@
             "value" : "إظهار الإجراءات"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показване на действия"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6258,6 +6348,12 @@
             "value" : "إظهار الوسائط"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показване на медия"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6570,6 +6666,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إظهار الأرقام"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показване на числа"
           }
         },
         "ca" : {
@@ -7254,6 +7356,12 @@
             "value" : "السمة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тема"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7436,6 +7544,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "داكن"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тъмна"
           }
         },
         "ca" : {
@@ -7622,6 +7736,12 @@
             "value" : "تغيير موضوع التطبيق"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Смяна на темата на приложението"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7804,6 +7924,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "فاتح"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Светла"
           }
         },
         "ca" : {
@@ -8174,6 +8300,12 @@
             "value" : "المظهر"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Облик"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8358,6 +8490,12 @@
             "value" : "تشغيل تلقائي للفيديو"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Автоматично възпроизвеждане на видео"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -8540,6 +8678,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "دائما"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Винаги"
           }
         },
         "ca" : {
@@ -8856,6 +9000,12 @@
             "value" : "لا"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Никога"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9038,6 +9188,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wi-Fi فقط"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Само Wi-Fi"
           }
         },
         "ca" : {
@@ -9224,6 +9380,12 @@
             "value" : "كتلة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Блокиране"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9408,6 +9570,12 @@
             "value" : "التحديثات"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Емисии"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -9590,6 +9758,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تابعك"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ви последва"
           }
         },
         "ca" : {
@@ -10142,6 +10316,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ذكرك"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ви спомена"
           }
         },
         "ca" : {
@@ -11246,6 +11426,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تقرير"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Докладване"
           }
         },
         "ca" : {
@@ -13088,6 +13274,12 @@
             "value" : "مزعج"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спам"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13824,6 +14016,12 @@
             "value" : "إضافة إشارة مرجعية"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавяне на отметка"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14006,6 +14204,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إزالة الإشارة المرجعية"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Премахване на отметката"
           }
         },
         "ca" : {
@@ -14738,6 +14942,12 @@
             "value" : "Cnacel"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отказ"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14872,6 +15082,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إرسال"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изпращане"
           }
         },
         "ca" : {
@@ -15056,6 +15272,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تحذير المحتوى"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Предупреждение за съдържание"
           }
         },
         "ca" : {
@@ -15424,6 +15646,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ماذا يحدث؟"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Какво се случва?"
           }
         },
         "ca" : {
@@ -16006,6 +16234,12 @@
             "value" : "خيارات متعددة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Множествен избор"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16188,6 +16422,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "خيار واحد"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Единичен избор"
           }
         },
         "ca" : {
@@ -16374,6 +16614,12 @@
             "value" : "تأليف"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Съставяне"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16556,6 +16802,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "اقتباس"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цитиране"
           }
         },
         "ca" : {
@@ -16742,6 +16994,12 @@
             "value" : "الرد"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отговор"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16926,6 +17184,12 @@
             "value" : "حذف"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изтриване"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -17108,6 +17372,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "حذف"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изтриване"
           }
         },
         "ca" : {
@@ -17470,6 +17740,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "رسالة مباشرة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лично съобщение"
           }
         },
         "cs" : {
@@ -17928,6 +18204,12 @@
             "value" : "اكتشف"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Откриване"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18290,6 +18572,12 @@
             "value" : "كتابة رسالة مباشرة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Напишете лично съобщение"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -18418,6 +18706,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "رسالة مباشرة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лично съобщение"
           }
         },
         "cs" : {
@@ -19954,6 +20248,12 @@
             "value" : "فاكس_المشاركة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Споделяне чрез FxEmbed"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20088,6 +20388,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "المفضلة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отметки"
           }
         },
         "ca" : {
@@ -20272,6 +20578,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "اكتشف"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Откриване"
           }
         },
         "ca" : {
@@ -20594,6 +20906,12 @@
             "value" : "مميز"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Избрани"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20776,6 +21094,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "التحديثات"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Емисии"
           }
         },
         "ca" : {
@@ -20962,6 +21286,12 @@
             "value" : "المنزل"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начало"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21146,6 +21476,12 @@
             "value" : "قائمة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Списък"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21328,6 +21664,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "أنا"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Аз"
           }
         },
         "ca" : {
@@ -21785,6 +22127,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إعجاب"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Харесване"
           }
         },
         "ca" : {
@@ -22490,6 +22838,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "حذف"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изтриване"
           }
         },
         "ca" : {
@@ -23830,6 +24184,12 @@
             "value" : "الفلتر المحلي"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тукашен филтър"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24268,6 +24628,12 @@
             "value" : "التاريخ المحلي"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тукашна история"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24450,6 +24816,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "المستخدمون"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Потребители"
           }
         },
         "ca" : {
@@ -24636,6 +25008,12 @@
             "value" : "تسجيل الدخول"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вписване"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -24818,6 +25196,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تسجيل الدخول"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вписване"
           }
         },
         "ca" : {
@@ -25324,6 +25708,12 @@
             "value" : "إظهار أقل"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показване на по-малко"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -25506,6 +25896,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إظهار المزيد"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показване на още"
           }
         },
         "ca" : {
@@ -25876,6 +26272,12 @@
             "value" : "تابعك"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ви последва"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26242,6 +26644,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ذكرك"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ви спомена"
           }
         },
         "ca" : {
@@ -27348,6 +27756,12 @@
             "value" : "تقرير"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Докладване"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27798,6 +28212,12 @@
             "value" : "المتابِعون"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Последователи"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27980,6 +28400,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تابع"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Следван"
           }
         },
         "ca" : {
@@ -32052,6 +32478,12 @@
             "value" : "اكتسب 1 متابِع"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спечелете 1 последовател"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -32235,6 +32667,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "أول متابع"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Първи последовател"
           }
         },
         "ca" : {
@@ -32422,6 +32860,12 @@
             "value" : "اكسب 10 متابعين"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спечелете 10 последователи"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -32607,6 +33051,12 @@
             "value" : "تابعني !"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Следвайте ме!"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -32790,6 +33240,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "اكسب 50 متابعاً"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спечелете 50 последователи"
           }
         },
         "ca" : {
@@ -33162,6 +33618,12 @@
             "value" : "اكسب 100 متابِع"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спечелете 100 последователи"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -33347,6 +33809,12 @@
             "value" : "شعبية"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Популярен"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -33530,6 +33998,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "اكسب 300 تابع"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спечелете 300 последователи"
           }
         },
         "ca" : {
@@ -33902,6 +34376,12 @@
             "value" : "اكسب 500 متابع"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спечелете 500 последователи"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -34085,6 +34565,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "برج الراديو"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Радио кула"
           }
         },
         "ca" : {
@@ -34272,6 +34758,12 @@
             "value" : "احصل على 1000 تابع"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Спечелете 1000 последователи"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -34457,6 +34949,12 @@
             "value" : "تأثير"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Инфлуенсър"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -34640,6 +35138,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "اتبع المستخدم"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Последвайте потребител"
           }
         },
         "ca" : {
@@ -35012,6 +35516,12 @@
             "value" : "تابع 10 مستخدمين"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Последвайте 10 потребители"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -35382,6 +35892,12 @@
             "value" : "تتبع 50 حساباً"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Последвайте 50 акаунта"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -35565,6 +36081,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "الكثير من الأصدقاء"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Много приятели"
           }
         },
         "ca" : {
@@ -35752,6 +36274,12 @@
             "value" : "تابع 100 حساب"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Последвайте 100 акаунта"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -35937,6 +36465,12 @@
             "value" : "100 صديق"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "100 приятели"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -36120,6 +36654,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "اتبع 300 حساب"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Последвайте 300 акаунта"
           }
         },
         "ca" : {
@@ -60061,6 +60601,12 @@
             "value" : "تابعك"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ви последва"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -60427,6 +60973,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ذكرك"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ви спомена"
           }
         },
         "ca" : {
@@ -62107,6 +62659,12 @@
             "value" : "تقرير"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Докладване"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -62289,6 +62847,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "مختلطة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Смесено"
           }
         },
         "ca" : {
@@ -62475,6 +63039,12 @@
             "value" : "المزيد"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Още"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -62659,6 +63229,12 @@
             "value" : "المزيد"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Още"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -62841,6 +63417,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "كتم"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заглушаване"
           }
         },
         "ca" : {
@@ -63867,6 +64449,12 @@
             "value" : "الكل"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Всички"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -64233,6 +64821,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إعجاب"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Харесване"
           }
         },
         "ca" : {
@@ -65497,6 +66091,12 @@
             "value" : "إعجاب"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Харесвания"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -65679,6 +66279,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "الوسائط"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Медия"
           }
         },
         "ca" : {
@@ -65865,6 +66471,12 @@
             "value" : "الوظائف والردود"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикации и отговори"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -66049,6 +66661,12 @@
             "value" : "المشاركات"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -66231,6 +66849,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "اقتباس"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цитиране"
           }
         },
         "ca" : {
@@ -66969,6 +67593,12 @@
             "value" : "محظور"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Блокиран"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -67151,6 +67781,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "اتبع"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Последване"
           }
         },
         "ca" : {
@@ -67337,6 +67973,12 @@
             "value" : "تابع"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Следван"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -67519,6 +68161,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "يتابعك"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваш последовател"
           }
         },
         "ca" : {
@@ -67705,6 +68353,12 @@
             "value" : "مطلوب"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заявено"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -67887,6 +68541,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "الرد"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отговор"
           }
         },
         "ca" : {
@@ -68255,6 +68915,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تقرير"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Докладване"
           }
         },
         "ca" : {
@@ -70129,6 +70795,12 @@
             "value" : "مصادر Rss المكتشفة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открити източници на Rss"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -70815,6 +71487,12 @@
             "value" : "البحث"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Търсене"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -70997,6 +71675,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "المستخدمون"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Потребители"
           }
         },
         "ca" : {
@@ -71314,6 +71998,12 @@
             "value" : "الإعدادات"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -71496,6 +72186,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "مشاركة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Споделяне"
           }
         },
         "ca" : {
@@ -71683,6 +72379,12 @@
             "value" : "إظهار الوسائط"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показване на медия"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -71859,6 +72561,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إجتماعي"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Социални"
           }
         },
         "cs" : {
@@ -72985,6 +73693,12 @@
             "value" : "التخزين"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Съхранение"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -73297,6 +74011,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "حذف"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изтриване"
           }
         },
         "ca" : {
@@ -74999,6 +75719,12 @@
             "value" : "خلافا"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нехаресване"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -75367,6 +76093,12 @@
             "value" : "متابع"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Последовател"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -75549,6 +76281,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تابع"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Следван"
           }
         },
         "ca" : {
@@ -75735,6 +76473,12 @@
             "value" : "أعجبك حالتك"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хареса статуса ви"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -75917,6 +76661,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تعليقات"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коментари"
           }
         },
         "ca" : {
@@ -76231,6 +76981,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "الحالة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Състояние"
           }
         },
         "ca" : {

@@ -150,6 +150,8 @@ public fun CommonStatusComponent(
     isDetail: Boolean = false,
     isQuote: Boolean = false,
     showMedia: Boolean = true,
+    maxLines: Int? = null,
+    showExpandButton: Boolean = true,
 ) {
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalComponentAppearance.current
@@ -284,6 +286,7 @@ public fun CommonStatusComponent(
                         contentWarning = item.contentWarning,
                         poll = item.poll,
                         maxLines = Int.MAX_VALUE,
+                        showExpandButton = showExpandButton,
                     )
                 }
             } else {
@@ -292,11 +295,13 @@ public fun CommonStatusComponent(
                     contentWarning = item.contentWarning,
                     poll = item.poll,
                     maxLines =
-                        if (item.shouldExpandTextByDefault) {
-                            Int.MAX_VALUE
-                        } else {
-                            appearanceSettings.lineLimit
-                        },
+                        maxLines
+                            ?: if (item.shouldExpandTextByDefault) {
+                                Int.MAX_VALUE
+                            } else {
+                                appearanceSettings.lineLimit
+                            },
+                    showExpandButton = showExpandButton,
                 )
             }
 
@@ -1021,6 +1026,7 @@ private fun StatusContentComponent(
     contentWarning: UiRichText?,
     poll: UiPoll?,
     maxLines: Int,
+    showExpandButton: Boolean,
     modifier: Modifier = Modifier,
 ) {
     var expanded by rememberSaveable {
@@ -1077,7 +1083,8 @@ private fun StatusContentComponent(
                             showSoftExpand =
                                 it.hasVisualOverflow &&
                                 !expanded &&
-                                maxLines != Int.MAX_VALUE
+                                maxLines != Int.MAX_VALUE &&
+                                showExpandButton
                         },
                     )
                     if (showSoftExpand) {

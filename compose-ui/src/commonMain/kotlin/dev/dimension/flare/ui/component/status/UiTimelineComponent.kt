@@ -470,20 +470,23 @@ private fun UserListContent(
         }
         val status = data.status
         if (status != null) {
-            CommonStatusComponent(
-                item = status,
-                modifier =
-                    Modifier
-                        .padding(8.dp)
-                        .border(
-                            FlareDividerDefaults.thickness,
-                            color = FlareDividerDefaults.color,
-                            shape = PlatformTheme.shapes.medium,
-                        ).clip(
-                            shape = PlatformTheme.shapes.medium,
-                        ),
-                isQuote = true,
-            )
+            CompositionLocalProvider(
+                LocalComponentAppearance provides LocalComponentAppearance.current.copy(showActions = false),
+            ) {
+                CommonStatusComponent(
+                    item = status,
+                    modifier =
+                        Modifier
+                            .border(
+                                FlareDividerDefaults.thickness,
+                                color = FlareDividerDefaults.color,
+                                shape = PlatformTheme.shapes.medium,
+                            ).clip(
+                                shape = PlatformTheme.shapes.medium,
+                            ).padding(8.dp),
+                    isQuote = true,
+                )
+            }
         }
     }
 }

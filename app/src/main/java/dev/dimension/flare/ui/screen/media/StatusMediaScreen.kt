@@ -565,6 +565,9 @@ internal fun StatusMediaScreen(
                                                             WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
                                                         ),
                                                     ),
+                                            maxLines = 3,
+                                            showExpandButton = false,
+                                            isQuote = true,
                                         )
                                     }
                                 }

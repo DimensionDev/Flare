@@ -62,6 +62,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
@@ -84,9 +86,6 @@ import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import compose.icons.fontawesomeicons.solid.Xmark
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
-import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.R
 import dev.dimension.flare.common.VideoDownloadHelper
 import dev.dimension.flare.model.AccountType
@@ -134,7 +133,6 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalPermissionsApi::class,
-    ExperimentalHazeMaterialsApi::class,
 )
 @Composable
 internal fun StatusMediaScreen(
@@ -144,10 +142,10 @@ internal fun StatusMediaScreen(
     preview: String?,
     onDismiss: () -> Unit,
     toAltText: (UiMedia) -> Unit,
+    uriHandler: UriHandler,
     playerPool: VideoPlayerPool = koinInject(),
 ) {
     val hapticFeedback = LocalHapticFeedback.current
-    val hazeState = rememberHazeState()
     val context = LocalContext.current
     val permissionState =
         rememberPermissionState(
@@ -225,9 +223,6 @@ internal fun StatusMediaScreen(
                 }
                 Swiper(
                     state = swiperState,
-                    modifier =
-                        Modifier
-                            .hazeSource(state = hazeState),
                 ) {
                     HorizontalPager(
                         state = pagerState,
@@ -407,7 +402,6 @@ internal fun StatusMediaScreen(
                             modifier = Modifier.size(40.dp),
                             shape = CircleShape,
                             color = MaterialTheme.colorScheme.secondaryContainer,
-                            hazeState = hazeState,
 //                            colors = IconButtonDefaults.filledTonalIconButtonColors(
 //                                containerColor = Color.Transparent,
 //                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -427,7 +421,6 @@ internal fun StatusMediaScreen(
                                         toAltText.invoke(current)
                                     },
                                     color = MaterialTheme.colorScheme.secondaryContainer,
-                                    hazeState = hazeState,
                                     modifier = Modifier.size(40.dp),
                                     shape = CircleShape,
                                 ) {
@@ -449,7 +442,6 @@ internal fun StatusMediaScreen(
                                         state.save(current)
                                     }
                                 },
-                                hazeState = hazeState,
                                 color = MaterialTheme.colorScheme.secondaryContainer,
                                 modifier = Modifier.size(40.dp),
                                 shape = CircleShape,
@@ -464,7 +456,6 @@ internal fun StatusMediaScreen(
                                     onClick = {
                                         state.shareMedia(current)
                                     },
-                                    hazeState = hazeState,
                                     color = MaterialTheme.colorScheme.secondaryContainer,
                                     modifier = Modifier.size(40.dp),
                                     shape = CircleShape,
@@ -491,7 +482,6 @@ internal fun StatusMediaScreen(
                             exit = slideOutVertically { it },
                         ) {
                             Glassify(
-                                hazeState = hazeState,
                                 color = MaterialTheme.colorScheme.surfaceContainer,
                                 contentColor = MaterialTheme.colorScheme.onBackground,
                             ) {
@@ -551,6 +541,7 @@ internal fun StatusMediaScreen(
                                                 showMedia = false,
                                                 showLinkPreview = false,
                                             ),
+                                        LocalUriHandler provides uriHandler,
                                     ) {
                                         CommonStatusComponent(
                                             item = content,

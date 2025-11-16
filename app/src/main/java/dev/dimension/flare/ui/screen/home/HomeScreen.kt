@@ -56,8 +56,6 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Pen
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.Bluesky
@@ -114,7 +112,6 @@ internal fun HomeScreen(afterInit: () -> Unit) {
     val wideNavigationRailState = rememberWideNavigationRailState()
     state.tabs
         .onSuccess { tabs ->
-            val rootHazeState = rememberHazeState()
             val topLevelBackStack by producePresenter(
                 key = "home_top_level_back_stack_${tabs.all.first().tabItem}",
                 useImmediateClock = true,
@@ -161,7 +158,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
             Box {
                 NavigationSuiteScaffold2(
                     wideNavigationRailState = wideNavigationRailState,
-                    modifier = Modifier.fillMaxSize().hazeSource(rootHazeState),
+                    modifier = Modifier.fillMaxSize(),
                     bottomBarAutoHideEnabled = state.navigationState.bottomBarAutoHideEnabled,
                     layoutType = layoutType,
                     showFab = userState.isSuccess && accountType !is AccountType.Guest,
@@ -309,7 +306,6 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 }
                 InAppNotificationComponent(
                     modifier = Modifier.align(Alignment.TopCenter),
-                    hazeState = rootHazeState,
                 )
             }
         }.onLoading {

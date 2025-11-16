@@ -36,8 +36,6 @@ dependencies {
     implementation(libs.datastore)
     implementation(libs.reorderable)
     implementation(libs.platformtools.darkmodedetector)
-    implementation(libs.haze)
-    implementation(libs.haze.materials)
     implementation(libs.jna)
 }
 

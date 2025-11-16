@@ -50,8 +50,6 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
 import compose.icons.fontawesomeicons.solid.Plus
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineTabItem
@@ -267,7 +265,6 @@ internal fun TimelineItemContent(
             },
         )
     }
-    val hazeState = rememberHazeState()
     val scope = rememberCoroutineScope()
     RefreshContainer(
         modifier = modifier,
@@ -283,8 +280,7 @@ internal fun TimelineItemContent(
                 contentPadding = contentPadding,
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .hazeSource(hazeState),
+                        .fillMaxSize(),
             ) {
                 changeLogState?.shouldShowChangeLog?.onSuccess {
                     changeLogState.changeLog?.let { changelog ->
@@ -349,7 +345,6 @@ internal fun TimelineItemContent(
                                 state.lazyListState.scrollToItem(0)
                             }
                         },
-                        hazeState = hazeState,
                         shape = RoundedCornerShape(50),
                         color = MaterialTheme.colorScheme.primaryContainer,
                     ) {

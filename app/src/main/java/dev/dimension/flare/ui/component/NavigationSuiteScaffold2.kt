@@ -79,11 +79,6 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Pen
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
-import dev.chrisbanes.haze.materials.HazeMaterials
-import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.BottomBarStyle
@@ -97,7 +92,6 @@ val LocalBottomBarShowing = androidx.compose.runtime.staticCompositionLocalOf<Bo
     ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalMaterial3Api::class,
     ExperimentalSharedTransitionApi::class,
-    ExperimentalHazeMaterialsApi::class,
 )
 @ExperimentalMaterial3AdaptiveNavigationSuiteApi
 @Composable
@@ -118,7 +112,6 @@ fun NavigationSuiteScaffold2(
     footerItems: NavigationSuiteScope2.() -> Unit = {},
     content: @Composable () -> Unit = {},
 ) {
-    val hazeState = rememberHazeState()
     var isPodcastShowing by remember { mutableStateOf(false) }
     var isBottomBarExpanded by remember { mutableStateOf(true) }
     val bottomBarStyle = LocalAppearanceSettings.current.bottomBarStyle
@@ -355,15 +348,8 @@ fun NavigationSuiteScaffold2(
                                 .toDp()
                         },
                     LocalBottomBarShowing provides (layoutType == NavigationSuiteType.NavigationBar),
-                    LocalHazeState provides hazeState,
                 ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .hazeSource(state = hazeState),
-                    ) {
-                        content.invoke()
-                    }
+                    content.invoke()
                 }
                 Column(
                     modifier =
@@ -429,7 +415,6 @@ fun NavigationSuiteScaffold2(
                                         state = bottomBarState,
                                         provider = scope,
                                         animatedVisibilityScope = this@AnimatedContent,
-                                        hazeState = hazeState,
                                     )
                                 }
                             }
@@ -451,7 +436,6 @@ fun NavigationSuiteScaffold2(
                                             state = bottomBarState,
                                             provider = scope,
                                             animatedVisibilityScope = this@AnimatedContent,
-                                            hazeState = hazeState,
                                             onFabClicked = onFabClicked,
                                         )
                                     }
@@ -479,7 +463,6 @@ private fun SharedTransitionScope.BottomFab(
     state: BottomBarState,
     provider: NavigationSuiteItemProvider,
     animatedVisibilityScope: AnimatedVisibilityScope,
-    hazeState: HazeState,
     onFabClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -509,7 +492,6 @@ private fun SharedTransitionScope.BottomFab(
         shadowElevation = 8.dp,
         tonalElevation = 8.dp,
         color = MaterialTheme.colorScheme.primaryContainer,
-        hazeState = hazeState,
         modifier =
             modifier
                 .sharedElement(
@@ -546,13 +528,12 @@ private fun SharedTransitionScope.BottomFab(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalHazeMaterialsApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun SharedTransitionScope.BottomBar(
     state: BottomBarState,
     provider: NavigationSuiteItemProvider,
     animatedVisibilityScope: AnimatedVisibilityScope,
-    hazeState: HazeState,
     modifier: Modifier = Modifier,
 ) {
     val containerShape =
@@ -590,8 +571,6 @@ private fun SharedTransitionScope.BottomBar(
         shape = containerShape,
         shadowElevation = 8.dp,
         tonalElevation = 8.dp,
-        hazeState = hazeState,
-        hazeStyle = HazeMaterials.thick(),
         modifier =
             modifier
                 .sharedElement(

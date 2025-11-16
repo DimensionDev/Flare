@@ -72,8 +72,6 @@ kotlin {
                 implementation(libs.bundles.media3)
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.bundles.koin)
-                implementation(libs.haze)
-                implementation(libs.haze.materials)
             }
         }
         val jvmMain by getting {

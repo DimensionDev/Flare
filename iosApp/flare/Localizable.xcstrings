@@ -1160,6 +1160,12 @@
             "value" : "إضافة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавяне"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1472,6 +1478,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "خصائص الذكاء الاصطناعي"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Функции с ИИ"
           }
         },
         "cs" : {
@@ -1990,6 +2002,12 @@
             "value" : "تمكين ملخص الذكاء الاصطناعي"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включване на обобщаването с ИИ"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2362,6 +2380,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إعدادات الذكاء الاصطناعي"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Включване на превеждането с ИИ"
           }
         },
         "ca" : {
@@ -6032,6 +6056,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إظهار معاينات الرابط"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показване на прегледи на връзките"
           }
         },
         "ca" : {
@@ -10134,6 +10164,12 @@
             "value" : "المفضلة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "хареса"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10508,6 +10544,12 @@
             "value" : "مقتبس"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "цитира"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -10690,6 +10732,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "رد عليك"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ви отговори"
           }
         },
         "ca" : {
@@ -14764,6 +14812,12 @@
             "value" : "تعليق"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коментар"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15462,6 +15516,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تحديد الوسائط كوسائط حساسة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отбелязване на медията като деликатна"
           }
         },
         "ca" : {
@@ -18394,6 +18454,12 @@
             "value" : "المستخدمين الموصى بهم"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Препоръчани потребители"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19626,6 +19692,12 @@
             "value" : "خطأ"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Грешка"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -19808,6 +19880,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "خطأ"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Грешка"
           }
         },
         "ca" : {
@@ -23030,6 +23108,12 @@
             "value" : "تحرير"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Редактиране"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -23342,6 +23426,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keyword"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ключова дума"
           }
         },
         "ca" : {
@@ -26088,6 +26178,12 @@
             "value" : "المفضلة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "хареса"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27018,6 +27114,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إعادة التدوين"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "препубликува"
           }
         },
         "ca" : {
@@ -30628,6 +30730,12 @@
             "value" : "استراحة قصيرة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кратка почивка"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -30813,6 +30921,12 @@
             "value" : "إبقاء ميسكي مفتوحة لمدة 60 دقيقة على الأقل"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дръжте Misskey отворен поне 60 минути"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -30996,6 +31110,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "لا \"Miss\" في ميسكي"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без „Miss“ в Misskey"
           }
         },
         "ca" : {
@@ -38458,6 +38578,12 @@
             "value" : "حظا عادي فقط"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Просто късметлия"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -38641,6 +38767,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تسجيل الدخول في عيد ميلادك"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Впишете се на рождения си ден"
           }
         },
         "ca" : {
@@ -38828,6 +38960,12 @@
             "value" : "عيد ميلاد سعيد"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Честит рожден ден"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -39011,6 +39149,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تم تسجيل الدخول في اليوم الأول من السنة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вписан на първия ден от годината"
           }
         },
         "ca" : {
@@ -39381,6 +39525,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "سنة جديدة سعيدة!"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Честита нова година!"
           }
         },
         "ca" : {
@@ -39938,6 +40088,12 @@
             "value" : "مبتدئ I"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начинаещ I"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -40493,6 +40649,12 @@
             "value" : "مبتدئ II"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начинаещ II"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -40861,6 +41023,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "مبتدئ III"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начинаещ III"
           }
         },
         "ca" : {
@@ -45673,6 +45841,12 @@
             "value" : "شكرا لك على استخدام Misske!"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Благодарим ви, че използвате Misskey!"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -46411,6 +46585,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "أنا قطرة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Аз съм котка"
           }
         },
         "ca" : {
@@ -48633,6 +48813,12 @@
             "value" : "نشر 10 ملاحظات"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 10 публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -49003,6 +49189,12 @@
             "value" : "نشر 100 ملاحظة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 100 публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -49188,6 +49380,12 @@
             "value" : "الكثير من الملاحظات"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Много публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -49371,6 +49569,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "نشر 500 ملاحظة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 500 публикации"
           }
         },
         "ca" : {
@@ -49743,6 +49947,12 @@
             "value" : "نشر 1000 ملاحظة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 1000 публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -49928,6 +50138,12 @@
             "value" : "جبل من الملاحظات"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Планина от бележки"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -50111,6 +50327,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "نشر 5000 ملاحظة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 5000 публикации"
           }
         },
         "ca" : {
@@ -50483,6 +50705,12 @@
             "value" : "نشر 10,000 ملاحظة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 10 000 публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -50853,6 +51081,12 @@
             "value" : "نشر 20,000 ملاحظة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 20 000 публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -51036,6 +51270,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "بحاجة إلى... المزيد... ملاحظة..."
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трябват... повече... публикации..."
           }
         },
         "ca" : {
@@ -51223,6 +51463,12 @@
             "value" : "نشر 30,000 ملاحظة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 30 000 публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -51406,6 +51652,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ملاحظات ملاحظات!"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикации публикации публикации!"
           }
         },
         "ca" : {
@@ -51593,6 +51845,12 @@
             "value" : "نشر 40,000 ملاحظة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 40 000 публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -51776,6 +52034,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "مصنع الملاحظات"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Фабрика за публикации"
           }
         },
         "ca" : {
@@ -51963,6 +52227,12 @@
             "value" : "نشر 50000 ملاحظة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 50 000 публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -52146,6 +52416,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "كوكب الملاحظات"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Планета от публикации"
           }
         },
         "ca" : {
@@ -52333,6 +52609,12 @@
             "value" : "نشر 60,000 ملاحظة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 60 000 публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -52516,6 +52798,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ملاحظة شبه مسبار"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Квазар от публикации"
           }
         },
         "ca" : {
@@ -52703,6 +52991,12 @@
             "value" : "نشر 70,000 ملاحظة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 70 000 публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -52886,6 +53180,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ملاحظة الثقب الأسود"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Черна дупка от публикации"
           }
         },
         "ca" : {
@@ -53073,6 +53373,12 @@
             "value" : "نشر 80,000 ملاحظة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 80 000 публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -53256,6 +53562,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "مجرة ملاحظة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Галактика от публикации"
           }
         },
         "ca" : {
@@ -53443,6 +53755,12 @@
             "value" : "نشر 90,000 ملاحظة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 90 000 публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -53628,6 +53946,12 @@
             "value" : "ملاحظة الكون"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вселена от публикации"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -53811,6 +54135,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "نشر 000 100 ملاحظة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикувайте 100 000 публикации"
           }
         },
         "ca" : {
@@ -54181,6 +54511,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "كل ما لديك من ملاحظة بالنسبة لنا"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ВСИЧКИ ВАШИ ПУБЛИКАЦИИ ПРИНАДЛЕЖАТ НА НАС"
           }
         },
         "ca" : {
@@ -54921,6 +55257,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "مرحبا، العالم!"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Здравей, свят!"
           }
         },
         "ca" : {
@@ -58438,6 +58780,12 @@
             "value" : "عيّن اسمك إلى \"سيويلو\""
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Задайте си името „syuilo“"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -58621,6 +58969,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "مجمع الله"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Божи комплекс"
           }
         },
         "ca" : {
@@ -60417,6 +60771,12 @@
             "value" : "التطبيق"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложение"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -61349,6 +61709,12 @@
             "value" : "مقتبس"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "цитира"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -61531,6 +61897,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "أعيد نشرها"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "препубликува"
           }
         },
         "ca" : {
@@ -64639,6 +65011,12 @@
             "value" : "تعليق"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Коментар"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -67039,6 +67417,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إضافة رد فعل"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавяне на реакция"
           }
         },
         "ca" : {
@@ -69475,6 +69859,12 @@
             "value" : "إضافة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавяне"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -70485,6 +70875,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "التطبيق"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложение"
           }
         },
         "ca" : {
@@ -73379,6 +73775,12 @@
             "value" : "مسح ذاكرة التخزين المؤقت للصورة"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изчистване на кеша на изображенията"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -74201,6 +74603,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تحرير"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Редактиране"
           }
         },
         "ca" : {
@@ -77171,6 +77579,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "يذكر لك"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ви спомена"
           }
         },
         "ca" : {

@@ -12,6 +12,9 @@ struct StatusView: View {
     let showMedia: Bool
     @State private var expand = false
     @State private var expandMedia = false
+    private var showAsFullWidth: Bool {
+        (!themeSettings.appearanceSettings.fullWidthPost || withLeadingPadding) && !isQuote && !isDetail
+    }
     var body: some View {
         VStack(
             alignment: .leading,
@@ -39,7 +42,7 @@ struct StatusView: View {
                 alignment: .top,
                 spacing: 8,
             ) {
-                if (!themeSettings.appearanceSettings.fullWidthPost || withLeadingPadding) && !isQuote, let user = data.user {
+                if showAsFullWidth, let user = data.user {
                     AvatarView(data: user.avatar)
                         .frame(width: 44, height: 44)
                         .onTapGesture {
@@ -51,24 +54,14 @@ struct StatusView: View {
                     spacing: nil,
                 ) {
                     if let user = data.user {
-                        if (!themeSettings.appearanceSettings.fullWidthPost || withLeadingPadding) && !isQuote {
-                            HStack {
-                                VStack(
-                                    alignment: .leading,
-                                    spacing: nil,
-                                ) {
-                                    RichText(text: user.name)
-                                        .lineLimit(1)
-                                    Text(user.handle)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(1)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                        if showAsFullWidth {
+                            UserOnelineView(data: user, showAvatar: false) {
                                 topEndContent
+                            } onClicked: {
+                                user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                             }
                         } else if isQuote {
-                            UserOnelineView(data: user) {
+                            UserOnelineView(data: user, showAvatar: true) {
                                 topEndContent
                             } onClicked: {
                                 user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))

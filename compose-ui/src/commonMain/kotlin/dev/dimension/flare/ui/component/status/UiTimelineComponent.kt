@@ -276,7 +276,10 @@ internal fun UiTimelineComponent(
                                 it.padding(vertical = 8.dp)
                             } else {
                                 if (!appearance.fullWidthPost) {
-                                    it.padding(top = 8.dp, start = AvatarComponentDefaults.size + 8.dp)
+                                    it.padding(
+                                        top = 8.dp,
+                                        start = AvatarComponentDefaults.size - PlatformTheme.typography.caption.fontSize.value.dp,
+                                    )
                                 } else {
                                     it.padding(top = 8.dp)
                                 }

@@ -14,7 +14,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.AnimatedNumber
 import dev.dimension.flare.ui.component.FAIcon
@@ -54,16 +52,15 @@ public fun StatusActionButton(
     contentDescription: String? = null,
     enabled: Boolean = true,
     withTextMinWidth: Boolean = false,
-    content: @Composable RowScope.() -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val appearanceSettings = LocalComponentAppearance.current
     Row(
         modifier =
             modifier
-                .padding(vertical = 4.dp, horizontal = 8.dp),
+                .padding(vertical = 4.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         if (!LocalIsScrollingInProgress.current) {
             val contentColor = PlatformContentColor.current
@@ -89,7 +86,7 @@ public fun StatusActionButton(
                     contentDescription = contentDescription,
                     modifier =
                         Modifier
-                            .height(with(LocalDensity.current) { PlatformTextStyle.current.fontSize.toDp() + 4.dp })
+                            .height(PlatformTextStyle.current.fontSize.value.dp + 2.dp)
                             .pointerHoverIcon(PointerIcon.Hand)
                             .clickable(
                                 onClick = onClicked,
@@ -111,7 +108,7 @@ public fun StatusActionButton(
                 contentDescription = contentDescription,
                 modifier =
                     Modifier
-                        .height(with(LocalDensity.current) { PlatformTextStyle.current.fontSize.toDp() + 4.dp })
+                        .height(PlatformTextStyle.current.fontSize.value.dp + 2.dp)
                         .pointerHoverIcon(PointerIcon.Hand)
                         .clickable(
                             onClick = onClicked,
@@ -127,34 +124,35 @@ public fun StatusActionButton(
                 tint = color,
             )
         }
-        Box {
-            if (withTextMinWidth) {
-                PlatformText(
-                    "00000",
-                    color = Color.Transparent,
-                )
-            }
-            if (digits != null && appearanceSettings.showNumbers) {
-                AnimatedNumber(
-                    digits = digits,
-                    color = color,
-                    modifier =
-                        Modifier
-                            .pointerHoverIcon(PointerIcon.Hand)
-                            .clickable(
-                                onClick = onClicked,
-                                enabled = enabled,
-                                interactionSource = interactionSource,
-                                indication = null,
-                            ),
-                )
-            } else {
+        if (withTextMinWidth || digits != null && appearanceSettings.showNumbers) {
+            Box {
                 if (withTextMinWidth) {
-                    Spacer(modifier = Modifier.width(4.dp))
+                    PlatformText(
+                        "0000",
+                        color = Color.Transparent,
+                    )
+                }
+                if (digits != null && appearanceSettings.showNumbers) {
+                    AnimatedNumber(
+                        digits = digits,
+                        color = color,
+                        modifier =
+                            Modifier
+                                .pointerHoverIcon(PointerIcon.Hand)
+                                .clickable(
+                                    onClick = onClicked,
+                                    enabled = enabled,
+                                    interactionSource = interactionSource,
+                                    indication = null,
+                                ),
+                    )
+                } else {
+                    if (withTextMinWidth) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
                 }
             }
         }
-        content.invoke(this)
     }
 }
 

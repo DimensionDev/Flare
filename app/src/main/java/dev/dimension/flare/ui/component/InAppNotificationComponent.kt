@@ -86,12 +86,11 @@ internal fun InAppNotificationComponent(
                         Row(
                             modifier =
                                 Modifier
-                                    .padding(12.dp)
-                                    .animateContentSize()
                                     .clickable {
                                         showText = false
                                         showNotification = false
-                                    },
+                                    }.padding(12.dp)
+                                    .animateContentSize(),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             if (it.success) {

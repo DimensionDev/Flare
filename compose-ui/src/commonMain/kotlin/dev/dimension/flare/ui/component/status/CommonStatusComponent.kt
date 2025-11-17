@@ -39,7 +39,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -155,6 +154,7 @@ public fun CommonStatusComponent(
 ) {
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalComponentAppearance.current
+    val showAsFullWidth = !appearanceSettings.fullWidthPost && !isQuote && !isDetail
     Row(
         modifier =
             Modifier
@@ -174,7 +174,7 @@ public fun CommonStatusComponent(
                     }
                 }.then(modifier),
     ) {
-        if (!appearanceSettings.fullWidthPost && !isQuote) {
+        if (showAsFullWidth) {
             item.user?.let {
                 AvatarComponent(
                     it.avatar,
@@ -205,7 +205,7 @@ public fun CommonStatusComponent(
                                     visibility = content.visibility,
                                     modifier =
                                         Modifier
-                                            .size(14.dp),
+                                            .size(PlatformTheme.typography.caption.fontSize.value.dp),
                                     tint = PlatformTheme.colorScheme.caption,
                                 )
                             }
@@ -221,9 +221,9 @@ public fun CommonStatusComponent(
                         }
                     }
                 }
-                if (!appearanceSettings.fullWidthPost && !isQuote) {
-                    CommonStatusHeaderComponent(
-                        data = user,
+                if (showAsFullWidth) {
+                    UserCompat(
+                        user = user,
                         onUserClick = {
                             user.onClicked.invoke(
                                 ClickContext(
@@ -233,7 +233,7 @@ public fun CommonStatusComponent(
                                 ),
                             )
                         },
-                        leadingContent = null,
+                        leading = null,
                     ) {
                         dateContent.invoke()
                     }
@@ -769,12 +769,8 @@ internal fun StatusActions(
                                                             contentDescription = "Loading",
                                                             modifier =
                                                                 Modifier
-                                                                    .size(
-                                                                        with(LocalDensity.current) {
-                                                                            PlatformTextStyle.current.fontSize.toDp() +
-                                                                                4.dp
-                                                                        },
-                                                                    ).placeholder(
+                                                                    .size(PlatformTextStyle.current.fontSize.value.dp + 2.dp)
+                                                                    .placeholder(
                                                                         true,
                                                                         color = PlatformTheme.colorScheme.cardAlt,
                                                                     ),
@@ -823,29 +819,6 @@ internal fun StatusActions(
 }
 
 @Composable
-private fun PlatformDropdownMenuScope.ShareMenu(onClick: () -> Unit) {
-    PlatformDropdownMenuItem(
-        leadingIcon = {
-            FAIcon(
-                imageVector = FontAwesomeIcons.Solid.ShareNodes,
-                contentDescription = stringResource(Res.string.share),
-                modifier =
-                    Modifier
-                        .size(with(LocalDensity.current) { PlatformTextStyle.current.fontSize.toDp() + 4.dp }),
-            )
-        },
-        text = {
-            PlatformText(
-                text = stringResource(Res.string.share),
-            )
-        },
-        onClick = {
-            onClick.invoke()
-        },
-    )
-}
-
-@Composable
 private fun PlatformDropdownMenuScope.StatusActionItemMenu(
     subActions: StatusAction.Item,
     closeMenu: () -> Unit,
@@ -861,7 +834,7 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
                 tint = color,
                 modifier =
                     Modifier
-                        .size(with(LocalDensity.current) { PlatformTextStyle.current.fontSize.toDp() + 4.dp }),
+                        .height(PlatformTextStyle.current.fontSize.value.dp + 2.dp),
             )
         },
         text = {

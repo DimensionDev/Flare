@@ -22,6 +22,16 @@ internal fun UserCompat(
     user: UiUserV2,
     modifier: Modifier = Modifier,
     onUserClick: (MicroBlogKey) -> Unit = {},
+    leading: @Composable (RowScope.() -> Unit)? = {
+        AvatarComponent(
+            data = user.avatar,
+            size = AvatarComponentDefaults.compatSize,
+            modifier =
+                Modifier.clickable {
+                    onUserClick.invoke(user.key)
+                },
+        )
+    },
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
     with(user) {
@@ -30,29 +40,21 @@ internal fun UserCompat(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AvatarComponent(
-                data = avatar,
-                size = AvatarComponentDefaults.compatSize,
-                modifier =
-                    Modifier.clickable {
-                        onUserClick.invoke(user.key)
-                    },
-            )
+            leading?.invoke(this)
             Row(
                 modifier =
                     Modifier
-                        .weight(1f),
+                        .weight(1f)
+                        .clickable {
+                            onUserClick.invoke(user.key)
+                        },
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
             ) {
                 RichText(
                     text = name,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier =
-                        Modifier.clickable {
-                            onUserClick.invoke(user.key)
-                        },
+                    modifier = Modifier.alignByBaseline(),
                 )
                 PlatformText(
                     text = handle,
@@ -60,10 +62,7 @@ internal fun UserCompat(
                     color = PlatformTheme.colorScheme.caption,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier =
-                        Modifier.clickable {
-                            onUserClick.invoke(user.key)
-                        },
+                    modifier = Modifier.alignByBaseline(),
                 )
             }
             trailing.invoke(this)

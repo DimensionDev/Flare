@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,17 +20,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.ArrowsRotate
 import compose.icons.fontawesomeicons.solid.Plus
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
-import dev.chrisbanes.haze.materials.FluentMaterials
-import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.data.model.LocalAppearanceSettings
@@ -56,13 +52,11 @@ import io.github.composefluent.component.SubtleButton
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 internal fun HomeTimelineScreen(
     accountType: AccountType,
     onAddTab: () -> Unit,
 ) {
-    val hazeState = rememberHazeState()
     val state by producePresenter(key = "home_timeline_$accountType") {
         presenter(accountType)
     }
@@ -74,7 +68,6 @@ internal fun HomeTimelineScreen(
                         state = currentTabTimelineState,
                         modifier =
                             Modifier
-                                .hazeSource(hazeState)
                                 .floatingToolbarVerticalNestedScroll(
                                     expanded = state.isTopBarExpanded,
                                     onExpand = {
@@ -123,71 +116,73 @@ internal fun HomeTimelineScreen(
                         enter = slideInVertically { -it },
                         exit = slideOutVertically { -it },
                     ) {
-                        Row(
-                            modifier =
-                                Modifier
-                                    .hazeEffect(
-                                        state = hazeState,
-                                        style =
-                                            FluentMaterials.mica(
-                                                FluentTheme.colors.background.mica.base
-                                                    .luminance() < 0.5f,
-                                            ),
-                                    ).fillMaxWidth(1f)
-                                    .padding(LocalWindowPadding.current)
-                                    .padding(horizontal = screenHorizontalPadding),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            LiteFilter(
+                        Box {
+                            Box(
                                 modifier =
                                     Modifier
-                                        .weight(1f),
+                                        .matchParentSize()
+                                        .background(FluentTheme.colors.background.mica.base)
+                                        .blur(32.dp),
+                            )
+                            Row(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth(1f)
+                                        .padding(LocalWindowPadding.current)
+                                        .padding(horizontal = screenHorizontalPadding),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                tabState.forEachIndexed { index, tab ->
-                                    PillButton(
-                                        selected = tab.key == currentTab.key,
-                                        onSelectedChanged = {
-                                            if (tab.key == currentTab.key) {
-                                                if (currentTabTimelineState.lazyListState.firstVisibleItemIndex == 0) {
-                                                    currentTabTimelineState.refreshSync()
+                                LiteFilter(
+                                    modifier =
+                                        Modifier
+                                            .weight(1f),
+                                ) {
+                                    tabState.forEachIndexed { index, tab ->
+                                        PillButton(
+                                            selected = tab.key == currentTab.key,
+                                            onSelectedChanged = {
+                                                if (tab.key == currentTab.key) {
+                                                    if (currentTabTimelineState.lazyListState.firstVisibleItemIndex == 0) {
+                                                        currentTabTimelineState.refreshSync()
+                                                    } else {
+                                                        currentTabTimelineState.lazyListState.requestScrollToItem(
+                                                            0,
+                                                        )
+                                                    }
                                                 } else {
-                                                    currentTabTimelineState.lazyListState.requestScrollToItem(
-                                                        0,
-                                                    )
+                                                    state.setSelectedIndex(index)
                                                 }
-                                            } else {
-                                                state.setSelectedIndex(index)
-                                            }
+                                            },
+                                        ) {
+                                            TabIcon(
+                                                tabItem = tab,
+                                            )
+                                            TabTitle(
+                                                title = tab.metaData.title,
+                                            )
+                                        }
+                                    }
+                                    PillButton(
+                                        selected = false,
+                                        onSelectedChanged = {
+                                            onAddTab.invoke()
                                         },
                                     ) {
-                                        TabIcon(
-                                            tabItem = tab,
-                                        )
-                                        TabTitle(
-                                            title = tab.metaData.title,
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Plus,
+                                            contentDescription = null,
                                         )
                                     }
                                 }
-                                PillButton(
-                                    selected = false,
-                                    onSelectedChanged = {
-                                        onAddTab.invoke()
-                                    },
-                                ) {
+
+                                SubtleButton(onClick = {
+                                    currentTabTimelineState.refreshSync()
+                                }) {
                                     FAIcon(
-                                        FontAwesomeIcons.Solid.Plus,
-                                        contentDescription = null,
+                                        imageVector = FontAwesomeIcons.Solid.ArrowsRotate,
+                                        contentDescription = stringResource(Res.string.refresh),
                                     )
                                 }
-                            }
-
-                            SubtleButton(onClick = {
-                                currentTabTimelineState.refreshSync()
-                            }) {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.ArrowsRotate,
-                                    contentDescription = stringResource(Res.string.refresh),
-                                )
                             }
                         }
                     }

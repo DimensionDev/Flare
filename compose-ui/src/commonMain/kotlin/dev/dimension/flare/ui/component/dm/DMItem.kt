@@ -140,7 +140,6 @@ public fun DMItem(
                             message.status,
                             modifier =
                                 Modifier
-                                    .padding(8.dp)
                                     .clip(PlatformTheme.shapes.large)
                                     .background(
                                         color =
@@ -150,7 +149,7 @@ public fun DMItem(
                                                 PlatformTheme.colorScheme.card
                                             },
                                         shape = PlatformTheme.shapes.large,
-                                    ),
+                                    ).padding(8.dp),
                         )
                 }
             }

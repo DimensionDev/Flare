@@ -65,15 +65,16 @@ internal fun Router(
     val isBigScreen = isBigScreen()
 
     val uriHandler = LocalUriHandler.current
-    CompositionLocalProvider(
-        LocalUriHandler provides
-            remember(topLevelBackStack, uriHandler) {
-                ProxyUriHandler(uriHandler) {
-                    Route.parse(it)?.let {
-                        navigate(it)
-                    }
+    val proxyUriHandler =
+        remember(topLevelBackStack, uriHandler) {
+            ProxyUriHandler(uriHandler) {
+                Route.parse(it)?.let {
+                    navigate(it)
                 }
-            },
+            }
+        }
+    CompositionLocalProvider(
+        LocalUriHandler provides proxyUriHandler,
     ) {
         NavDisplay<NavKey>(
             sceneStrategy =
@@ -120,7 +121,7 @@ internal fun Router(
                     composeEntryBuilder(::navigate, ::onBack)
                     dmEntryBuilder(::navigate, ::onBack, navigationState)
                     listEntryBuilder(::navigate, ::onBack)
-                    mediaEntryBuilder(::navigate, ::onBack)
+                    mediaEntryBuilder(::navigate, ::onBack, uriHandler = proxyUriHandler)
                     profileEntryBuilder(::navigate, ::onBack)
                     rssEntryBuilder(::navigate, ::onBack)
                     serviceSelectEntryBuilder(::navigate, ::onBack)

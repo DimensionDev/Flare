@@ -32,7 +32,6 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleCheck
 import compose.icons.fontawesomeicons.solid.CircleExclamation
-import dev.chrisbanes.haze.HazeState
 import dev.dimension.flare.common.ComposeInAppNotification
 import dev.dimension.flare.common.Notification
 import kotlinx.coroutines.delay
@@ -42,7 +41,6 @@ import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun InAppNotificationComponent(
-    hazeState: HazeState,
     modifier: Modifier = Modifier,
     notification: ComposeInAppNotification = koinInject(),
 ) {
@@ -59,6 +57,7 @@ internal fun InAppNotificationComponent(
                             .fillMaxWidth(),
                 )
             }
+
             is Notification.StringNotification -> {
                 var showNotification by remember { mutableStateOf(false) }
                 var showText by remember { mutableStateOf(false) }
@@ -83,18 +82,16 @@ internal fun InAppNotificationComponent(
                         shape = RoundedCornerShape(50),
                         shadowElevation = 8.dp,
                         tonalElevation = 8.dp,
-                        hazeState = hazeState,
-                        modifier =
-                            Modifier.clickable {
-                                showText = false
-                                showNotification = false
-                            },
                     ) {
                         Row(
                             modifier =
                                 Modifier
                                     .padding(12.dp)
-                                    .animateContentSize(),
+                                    .animateContentSize()
+                                    .clickable {
+                                        showText = false
+                                        showNotification = false
+                                    },
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             if (it.success) {

@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.media
 
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
@@ -12,6 +13,7 @@ import dev.dimension.flare.ui.route.Route
 internal fun EntryProviderScope<NavKey>.mediaEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
+    uriHandler: UriHandler,
 ) {
     entry<Route.Media.Image>(
         metadata = DialogSceneStrategy.dialog(
@@ -45,6 +47,7 @@ internal fun EntryProviderScope<NavKey>.mediaEntryBuilder(
             toAltText = { media ->
                 media.description?.let { navigate(Route.Status.AltText(it)) }
             },
+            uriHandler = uriHandler
         )
     }
 

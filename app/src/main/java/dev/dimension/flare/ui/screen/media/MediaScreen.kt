@@ -59,8 +59,6 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import compose.icons.fontawesomeicons.solid.Xmark
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Glassify
@@ -93,7 +91,6 @@ internal fun MediaScreen(
     onDismiss: () -> Unit,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
-    val hazeState = rememberHazeState()
     val context = LocalContext.current
     val permissionState =
         rememberPermissionState(
@@ -119,9 +116,6 @@ internal fun MediaScreen(
         ) {
             Swiper(
                 state = swiperState,
-                modifier =
-                    Modifier
-                        .hazeSource(state = hazeState),
             ) {
                 val zoomableState =
                     rememberZoomableImageState(rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f)))
@@ -174,7 +168,6 @@ internal fun MediaScreen(
                         modifier = Modifier.size(40.dp),
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.secondaryContainer,
-                        hazeState = hazeState,
                     ) {
                         FAIcon(
                             FontAwesomeIcons.Solid.Xmark,
@@ -194,7 +187,6 @@ internal fun MediaScreen(
                                 state.save()
                             }
                         },
-                        hazeState = hazeState,
                         color = MaterialTheme.colorScheme.secondaryContainer,
                         modifier = Modifier.size(40.dp),
                         shape = CircleShape,
@@ -208,7 +200,6 @@ internal fun MediaScreen(
                         onClick = {
                             state.share()
                         },
-                        hazeState = hazeState,
                         color = MaterialTheme.colorScheme.secondaryContainer,
                         modifier = Modifier.size(40.dp),
                         shape = CircleShape,

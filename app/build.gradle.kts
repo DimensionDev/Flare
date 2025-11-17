@@ -150,8 +150,6 @@ dependencies {
     implementation(libs.compose.placeholder.material3)
     implementation(libs.webkit)
     implementation(libs.bundles.navigation3)
-    implementation(libs.haze)
-    implementation(libs.haze.materials)
     implementation(libs.richtext.ui.material3)
     implementation(libs.androidx.browser)
 

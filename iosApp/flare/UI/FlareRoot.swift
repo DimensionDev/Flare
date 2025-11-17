@@ -7,6 +7,7 @@ struct FlareRoot: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
     @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
+    @StateObject private var notificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
     @State var selectedTab: String?
     
     var body: some View {
@@ -14,55 +15,49 @@ struct FlareRoot: View {
             StateView(state: homeTabsPresenter.state.tabs) { tabs in
                 TabView(selection: $selectedTab) {
                     if horizontalSizeClass == .regular {
-                        ForEach(tabs.primary, id: \.tabItem.key) { data in
-                            let badge = if case .success(let count) = onEnum(of: data.badgeCountState) {
-                                count.data.intValue
+                        ForEach(tabs.primary, id: \.key) { data in
+                            let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
+                                Int(notificationBadgePresenter.state.count)
                             } else {
                                 0
                             }
-                            Tab(value: data.tabItem.key) {
+                            Tab(value: data.key) {
                                 Router { onNavigate in
-                                    data.tabItem.view(onNavigate: onNavigate)
+                                    data.view(onNavigate: onNavigate)
                                 }
                             } label: {
                                 Label {
-                                    TabTitle(title: data.tabItem.metaData.title)
+                                    TabTitle(title: data.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: data.tabItem.metaData.icon, accountType: data.tabItem.account)
+                                    TabIcon(icon: data.metaData.icon, accountType: data.account)
                                 }
                             }
                             .badge(badge)
                         }
-                        ForEach(tabs.secondary, id: \.tabItem.key) { data in
-                            let badge = if case .success(let count) = onEnum(of: data.badgeCountState) {
-                                count.data.intValue
-                            } else {
-                                0
-                            }
-                            Tab(value: data.tabItem.key) {
+                        ForEach(tabs.secondary, id: \.key) { data in
+                            Tab(value: data.key) {
                                 Router { onNavigate in
-                                    data.tabItem.view(onNavigate: onNavigate)
+                                    data.view(onNavigate: onNavigate)
                                 }
                             } label: {
                                 Label {
-                                    TabTitle(title: data.tabItem.metaData.title)
+                                    TabTitle(title: data.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: data.tabItem.metaData.icon, accountType: data.tabItem.account)
+                                    TabIcon(icon: data.metaData.icon, accountType: data.account)
                                 }
                             }
-                            .badge(badge)
                             .tabPlacement(.sidebarOnly)
                         }
                         if let profileRoute = tabs.extraProfileRoute {
-                            Tab(value: profileRoute.tabItem.key) {
+                            Tab(value: profileRoute.key) {
                                 Router { onNavigate in
-                                    profileRoute.tabItem.view(onNavigate: onNavigate)
+                                    profileRoute.view(onNavigate: onNavigate)
                                 }
                             } label: {
                                 Label {
-                                    TabTitle(title: profileRoute.tabItem.metaData.title)
+                                    TabTitle(title: profileRoute.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: profileRoute.tabItem.metaData.icon, accountType: profileRoute.tabItem.account)
+                                    TabIcon(icon: profileRoute.metaData.icon, accountType: profileRoute.account)
                                 }
                             }
                             .tabPlacement(.sidebarOnly)
@@ -81,21 +76,21 @@ struct FlareRoot: View {
                         }
                         .tabPlacement(.sidebarOnly)
                     } else {
-                        ForEach(tabs.primary, id: \.tabItem.key) { data in
-                            let badge = if case .success(let count) = onEnum(of: data.badgeCountState) {
-                                count.data.intValue
+                        ForEach(tabs.primary, id: \.key) { data in
+                            let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
+                                Int(notificationBadgePresenter.state.count)
                             } else {
                                 0
                             }
-                            Tab(value: data.tabItem.key) {
+                            Tab(value: data.key) {
                                 Router { onNavigate in
-                                    data.tabItem.view(onNavigate: onNavigate)
+                                    data.view(onNavigate: onNavigate)
                                 }
                             } label: {
                                 Label {
-                                    TabTitle(title: data.tabItem.metaData.title)
+                                    TabTitle(title: data.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: data.tabItem.metaData.icon, accountType: data.tabItem.account)
+                                    TabIcon(icon: data.metaData.icon, accountType: data.account)
                                 }
                             }
                             .badge(badge)
@@ -121,7 +116,7 @@ struct FlareRoot: View {
                         StateView(state: activeAccountPresenter.state.user) { user in
                             UserCompatView(data: user)
                                 .onTapGesture {
-                                    selectedTab = profileRoute.tabItem.key
+                                    selectedTab = profileRoute.key
                                 }
                         }
                     }
@@ -138,6 +133,7 @@ struct BackportFlareRoot: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
     @StateObject private var homeTabsPresenter = KotlinPresenter(presenter: HomeTabsPresenter())
+    @StateObject private var notificationBadgePresenter = KotlinPresenter(presenter: AllNotificationBadgePresenter())
     @State var selectedTab: String?
     
     var body: some View {
@@ -145,54 +141,50 @@ struct BackportFlareRoot: View {
             StateView(state: homeTabsPresenter.state.tabs) { tabs in
                 TabView(selection: $selectedTab) {
                     if horizontalSizeClass == .regular {
-                        ForEach(tabs.primary, id: \.tabItem.key) { data in
-                            let badge = if case .success(let count) = onEnum(of: data.badgeCountState) {
-                                count.data.intValue
+                        ForEach(tabs.primary, id: \.key) { data in
+                            let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
+                                Int(notificationBadgePresenter.state.count)
                             } else {
                                 0
                             }
                             Router { onNavigate in
-                                data.tabItem.view(onNavigate: onNavigate)
+                                data.view(onNavigate: onNavigate)
                             }
                             .tabItem {
                                 Label {
-                                    TabTitle(title: data.tabItem.metaData.title)
+                                    TabTitle(title: data.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: data.tabItem.metaData.icon, accountType: data.tabItem.account)
+                                    TabIcon(icon: data.metaData.icon, accountType: data.account)
                                 }
                             }
-                            .tag(data.tabItem.key)
+                            .badge(badge)
+                            .tag(data.key)
                         }
-                        ForEach(tabs.secondary, id: \.tabItem.key) { data in
-                            let badge = if case .success(let count) = onEnum(of: data.badgeCountState) {
-                                count.data.intValue
-                            } else {
-                                0
-                            }
+                        ForEach(tabs.secondary, id: \.key) { data in
                             Router { onNavigate in
-                                data.tabItem.view(onNavigate: onNavigate)
+                                data.view(onNavigate: onNavigate)
                             }
                             .tabItem {
                                 Label {
-                                    TabTitle(title: data.tabItem.metaData.title)
+                                    TabTitle(title: data.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: data.tabItem.metaData.icon, accountType: data.tabItem.account)
+                                    TabIcon(icon: data.metaData.icon, accountType: data.account)
                                 }
                             }
-                            .tag(data.tabItem.key)
+                            .tag(data.key)
                         }
                         if let profileRoute = tabs.extraProfileRoute {
                             Router { onNavigate in
-                                profileRoute.tabItem.view(onNavigate: onNavigate)
+                                profileRoute.view(onNavigate: onNavigate)
                             }
                             .tabItem {
                                 Label {
-                                    TabTitle(title: profileRoute.tabItem.metaData.title)
+                                    TabTitle(title: profileRoute.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: profileRoute.tabItem.metaData.icon, accountType: profileRoute.tabItem.account)
+                                    TabIcon(icon: profileRoute.metaData.icon, accountType: profileRoute.account)
                                 }
                             }
-                            .tag(profileRoute.tabItem.key)
+                            .tag(profileRoute.key)
                         }
                         Router { _ in
                             SettingsScreen()
@@ -206,23 +198,24 @@ struct BackportFlareRoot: View {
                         }
                         .tag("settings")
                     } else {
-                        ForEach(tabs.primary, id: \.tabItem.key) { data in
-                            let badge = if case .success(let count) = onEnum(of: data.badgeCountState) {
-                                count.data.intValue
+                        ForEach(tabs.primary, id: \.key) { data in
+                            let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
+                                Int(notificationBadgePresenter.state.count)
                             } else {
                                 0
                             }
                             Router { onNavigate in
-                                data.tabItem.view(onNavigate: onNavigate)
+                                data.view(onNavigate: onNavigate)
                             }
                             .tabItem {
                                 Label {
-                                    TabTitle(title: data.tabItem.metaData.title)
+                                    TabTitle(title: data.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: data.tabItem.metaData.icon, accountType: data.tabItem.account)
+                                    TabIcon(icon: data.metaData.icon, accountType: data.account)
                                 }
                             }
-                            .tag(data.tabItem.key)
+                            .badge(badge)
+                            .tag(data.key)
                         }
                     }
                     if case .success = onEnum(of: activeAccountPresenter.state.user) {

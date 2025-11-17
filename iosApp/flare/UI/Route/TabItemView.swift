@@ -16,8 +16,10 @@ extension TabItem {
                 TimelineScreen(tabItem: timelineTabItem)
                     .navigationTitle(timelineTabItem.metaData.title.text)
             }
+        case .allNotificationTabItem:
+            NotificationScreen()
         case .notificationTabItem:
-            NotificationScreen(accountType: self.account)
+            NotificationScreen()
         case .settingsTabItem:
             SettingsScreen()
         case .discoverTabItem(let discoverTabItem):

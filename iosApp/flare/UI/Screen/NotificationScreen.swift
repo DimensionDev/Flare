@@ -1,30 +1,27 @@
 import SwiftUI
+import SwiftUIBackports
 @preconcurrency import KotlinSharedUI
 
 struct NotificationScreen: View {
-    @StateObject private var presenter: KotlinPresenter<NotificationPresenterState>
-    @State private var selectedType: NotificationFilter?
+    @StateObject private var presenter: KotlinPresenter<AllNotificationPresenterState> = .init(presenter: AllNotificationPresenter())
     @Environment(\.openURL) private var openURL
     @State private var showTopBar = true
 
-    init(accountType: AccountType) {
-        self._presenter = .init(wrappedValue: .init(presenter: NotificationPresenter(accountType: accountType)))
-//        self._selectedType = .init(initialValue: presenter.state.notificationType)
-        print("create NotificationScreen")
-    }
-
     var body: some View {
-        TimelinePagingContent(data: presenter.state.listState, detailStatusKey: nil)
-        .onAppear {
-            selectedType = presenter.state.notificationType
-        }
-        .detectScrolling()
-        .toolbar {
-            ToolbarItem(placement: .title) {
-                StateView(state: presenter.state.allTypes) { allTypes in
+        TimelinePagingContent(data: presenter.state.timeline, detailStatusKey: nil)
+            .refreshable {
+                try? await presenter.state.refreshSuspend()
+            }
+            .detectScrolling()
+            .safeAreaInset(edge: .top) {
+                StateView(state: presenter.state.supportedNotificationFilters) { allTypes in
                     let allTypes = allTypes.cast(NotificationFilter.self)
                     if allTypes.count > 1 {
-                        Picker("notification_type_title", selection: $selectedType) {
+                        Picker("notification_type_title", selection: Binding(get: {
+                            presenter.state.selectedFilter ?? allTypes.first ?? .all
+                        }, set: { value in
+                            presenter.state.setFilter(filter: value)
+                        })) {
                             ForEach(allTypes, id: \.self) { type in
                                 switch type {
                                 case .all:
@@ -39,24 +36,51 @@ struct NotificationScreen: View {
                             }
                         }
                         .pickerStyle(.segmented)
-                        .onChange(of: selectedType) { oldValue, newValue in
-                            if let value = newValue {
-                                if oldValue != newValue {
-                                    presenter.state.onNotificationTypeChanged(value: value)
+                        .padding(.horizontal)
+                    }
+                }
+            }
+            .toolbar {
+                ToolbarItem {
+                    StateView(state: presenter.state.notifications) { dic in
+                        if let items = dic as? [UiProfile : Int32] {
+                            ScrollView(.horizontal) {
+                                HStack(
+                                    spacing: 8,
+                                ) {
+                                    ForEach(Array(items.keys), id: \.handle) { key in
+                                        let value = items[key]
+                                        ZStack {
+                                            if presenter.state.selectedAccount?.key == key.key {
+                                                Label {
+                                                    Text(key.handle)
+                                                        .badge(value != nil && value! > 0 ? value! : 0)
+                                                } icon: {
+                                                    AvatarView(data: key.avatar)
+                                                        .frame(width: 20, height: 20)
+                                                }
+                                            } else {
+                                                AvatarView(data: key.avatar)
+                                                    .frame(width: 20, height: 20)
+                                                    .badge(value != nil && value! > 0 ? value! : 0)
+                                            }
+                                        }
+                                        .onTapGesture {
+                                            presenter.state.setAccount(profile: key)
+                                        }
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 8)
+                                        .foregroundStyle(presenter.state.selectedAccount?.key == key.key ? Color.white : .primary)
+                                        .backport
+                                        .glassEffect(presenter.state.selectedAccount?.key == key.key ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: presenter.state.selectedAccount?.key == key.key ? Color.accentColor : Color(.systemBackground))
+                                    }
                                 }
+                                .padding(.vertical, 8)
                             }
+                            .scrollIndicators(.hidden)
                         }
                     }
                 }
             }
-        }
-        .refreshable {
-            try? await presenter.state.refresh()
-        }
-        .onChange(of: presenter.state.notificationType) { _, newValue in
-            if selectedType == nil {
-                selectedType = newValue
-            }
-        }
     }
 }

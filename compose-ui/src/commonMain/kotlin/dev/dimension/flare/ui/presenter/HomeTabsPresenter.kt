@@ -13,7 +13,6 @@ import dev.dimension.flare.data.repository.activeAccountFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.presenter.HomeTabsPresenter.State.HomeTabState.HomeTabItem
 import dev.dimension.flare.ui.presenter.home.DirectMessageBadgePresenter
 import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import kotlinx.collections.immutable.ImmutableList
@@ -32,23 +31,17 @@ public class HomeTabsPresenter :
 
         @Immutable
         public data class HomeTabState(
-            val primary: ImmutableList<HomeTabItem>,
-            val secondary: ImmutableList<HomeTabItem>,
-            val extraProfileRoute: HomeTabItem?,
+            val primary: ImmutableList<TabItem>,
+            val secondary: ImmutableList<TabItem>,
+            val extraProfileRoute: TabItem?,
             val secondaryIconOnly: Boolean = false,
         ) {
-            val all: ImmutableList<HomeTabItem>
+            val all: ImmutableList<TabItem>
                 get() =
                     (primary + secondary + extraProfileRoute)
                         .filterNotNull()
-                        .distinctBy { it.tabItem.key }
+                        .distinctBy { it.key }
                         .toImmutableList()
-
-            @Immutable
-            public data class HomeTabItem(
-                val tabItem: TabItem,
-                val badgeCountState: UiState<Int> = UiState.Success(0),
-            )
         }
     }
 
@@ -62,10 +55,7 @@ public class HomeTabsPresenter :
                 if (account == null) {
                     State.HomeTabState(
                         primary =
-                            TimelineTabItem.guest
-                                .map {
-                                    HomeTabItem(it)
-                                }.toImmutableList(),
+                            TimelineTabItem.guest.toImmutableList(),
                         secondary = persistentListOf(),
                         extraProfileRoute = null,
                         secondaryIconOnly = true,
@@ -75,22 +65,13 @@ public class HomeTabsPresenter :
                         tabsState.secondaryItems ?: TimelineTabItem.defaultSecondary(account)
                     State.HomeTabState(
                         primary =
-                            TimelineTabItem.default
-                                .map {
-                                    HomeTabItem(it)
-                                }.toImmutableList(),
+                            TimelineTabItem.default.toImmutableList(),
                         secondary =
-                            secondary
-                                .map {
-                                    HomeTabItem(it)
-                                }.toImmutableList(),
+                            secondary.toImmutableList(),
                         extraProfileRoute =
-                            HomeTabItem(
-                                tabItem =
-                                    ProfileTabItem(
-                                        accountKey = account.accountKey,
-                                        userKey = account.accountKey,
-                                    ),
+                            ProfileTabItem(
+                                accountKey = account.accountKey,
+                                userKey = account.accountKey,
                             ),
                         secondaryIconOnly = tabsState.secondaryItems == null,
                     )

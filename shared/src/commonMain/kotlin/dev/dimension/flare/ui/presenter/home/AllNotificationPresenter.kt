@@ -12,6 +12,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.combineLatestFlowLists
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -30,6 +31,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -45,10 +47,14 @@ public class AllNotificationPresenter :
         public val notifications: UiState<ImmutableMap<UiProfile, Int>>
         public val supportedNotificationFilters: UiState<ImmutableList<NotificationFilter>>
         public val timeline: PagingState<UiTimeline>
+        public val selectedFilter: NotificationFilter?
+        public val selectedAccount: UiProfile?
 
-        public fun selectProfile(profile: UiProfile)
+        public fun setAccount(profile: UiProfile)
 
-        public fun selectFilter(filter: NotificationFilter)
+        public fun setFilter(filter: NotificationFilter)
+
+        public suspend fun refreshSuspend()
     }
 
     private val accountsNotificationFlow by lazy {
@@ -56,8 +62,13 @@ public class AllNotificationPresenter :
             .map {
                 it.map {
                     combine(it.dataSource.userById(it.accountKey.id).data, it.dataSource.notificationBadgeCount().data) { user, badge ->
-                        if (user is CacheState.Success && badge is CacheState.Success) {
-                            user.data to badge.data
+                        if (user is CacheState.Success) {
+                            user.data to
+                                if (badge is CacheState.Success) {
+                                    badge.data
+                                } else {
+                                    0
+                                }
                         } else {
                             null
                         }
@@ -98,7 +109,7 @@ public class AllNotificationPresenter :
             }
         }
         notifications.onSuccess {
-            LaunchedEffect(it) {
+            LaunchedEffect(it.keys) {
                 selectedAccount = it.keys.firstOrNull()
             }
         }
@@ -112,7 +123,9 @@ public class AllNotificationPresenter :
                     accountServiceFlow(AccountType.Specific(profile.key), accountRepository)
                         .flatMapLatest {
                             require(it is AuthenticatedMicroblogDataSource)
-                            it.notification(filter, scope = scope)
+                            runCatching {
+                                it.notification(filter, scope = scope)
+                            }.getOrDefault(emptyFlow())
                         }
                 }.flatMapLatest { it }
             }.collectAsLazyPagingItems().toPagingState()
@@ -121,13 +134,19 @@ public class AllNotificationPresenter :
             override val notifications = notifications
             override val supportedNotificationFilters = notificationFilters
             override val timeline = listState
+            override val selectedFilter = selectedNotificationFilter
+            override val selectedAccount = selectedAccount
 
-            override fun selectProfile(profile: UiProfile) {
+            override fun setAccount(profile: UiProfile) {
                 selectedAccount = profile
             }
 
-            override fun selectFilter(filter: NotificationFilter) {
+            override fun setFilter(filter: NotificationFilter) {
                 selectedNotificationFilter = filter
+            }
+
+            override suspend fun refreshSuspend() {
+                listState.refreshSuspend()
             }
         }
     }

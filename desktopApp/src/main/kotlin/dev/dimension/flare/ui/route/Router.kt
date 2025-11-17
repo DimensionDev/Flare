@@ -315,9 +315,7 @@ internal fun WindowScope.RouteContent(
         }
 
         is Route.Notification -> {
-            NotificationScreen(
-                accountType = route.accountType,
-            )
+            NotificationScreen()
         }
 
         is Profile -> {

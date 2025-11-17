@@ -41,6 +41,7 @@ import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.UserPlus
 import dev.dimension.flare.data.model.AllListTabItem
+import dev.dimension.flare.data.model.AllNotificationTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.DirectMessageTabItem
 import dev.dimension.flare.data.model.DiscoverTabItem
@@ -57,20 +58,14 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabTitle
-import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.HomeTabsPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
+import dev.dimension.flare.ui.presenter.home.AllNotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
-import dev.dimension.flare.ui.route.Route.AllLists
-import dev.dimension.flare.ui.route.Route.BlueskyFeeds
-import dev.dimension.flare.ui.route.Route.Discover
-import dev.dimension.flare.ui.route.Route.MeRoute
-import dev.dimension.flare.ui.route.Route.Notification
-import dev.dimension.flare.ui.route.Route.Timeline
 import dev.dimension.flare.ui.route.Router
 import dev.dimension.flare.ui.route.StackManager
 import dev.dimension.flare.ui.route.rememberStackManager
@@ -96,9 +91,9 @@ internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
     state.tabs.onSuccess { tabs ->
         val stackManager =
             rememberStackManager(
-                startRoute = getRoute(tabs.primary.first().tabItem),
-                key = tabs.all.joinToString { it.tabItem.key },
-                topLevelRoutes = tabs.all.map { getRoute(it.tabItem) },
+                startRoute = getRoute(tabs.primary.first()),
+                key = tabs.all.joinToString { it.key },
+                topLevelRoutes = tabs.all.map { getRoute(it) },
             )
 
         val currentRoute = stackManager.currentRoute
@@ -137,7 +132,7 @@ internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
                     .onSuccess { user ->
                         SubtleButton(
                             onClick = {
-                                navigate(MeRoute(AccountType.Specific(user.key)))
+                                navigate(Route.MeRoute(AccountType.Specific(user.key)))
                             },
                         ) {
                             Column(
@@ -203,8 +198,8 @@ internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
                     }
 
                 @Composable
-                fun buildMenuItem(tab: HomeTabsPresenter.State.HomeTabState.HomeTabItem) {
-                    val selected = currentRoute == getRoute(tab.tabItem)
+                fun buildMenuItem(tab: TabItem) {
+                    val selected = currentRoute == getRoute(tab)
                     val color by animateColorAsState(
                         targetValue =
                             if (selected) {
@@ -218,12 +213,12 @@ internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
                             if (selected) {
                                 state.scrollToTopRegistry.scrollToTop()
                             } else {
-                                navigate(getRoute(tab.tabItem))
+                                navigate(getRoute(tab))
                             }
                         },
                         icon = {
                             TabIcon(
-                                tab.tabItem,
+                                tab,
                                 iconOnly = tabs.secondaryIconOnly,
                                 color = color,
                                 modifier =
@@ -233,21 +228,19 @@ internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
                         },
                         text = {
                             TabTitle(
-                                tab.tabItem.metaData.title,
+                                tab.metaData.title,
                                 color = color,
                                 style = FluentTheme.typography.caption,
                             )
                         },
                         badge =
-                            if (tab.badgeCountState.isSuccess) {
+                            if (tab is NotificationTabItem || tab is AllNotificationTabItem) {
                                 {
-                                    tab.badgeCountState.onSuccess { count ->
-                                        if (count > 0) {
-                                            Badge(
-                                                status = BadgeStatus.Attention,
-                                                content = { Text(count.toString()) },
-                                            )
-                                        }
+                                    if (state.notificationState.count > 0) {
+                                        Badge(
+                                            status = BadgeStatus.Attention,
+                                            content = { Text(state.notificationState.count.toString()) },
+                                        )
                                     }
                                 }
                             } else {
@@ -390,14 +383,14 @@ private fun NavigationItemIcon(
 
 private fun getRoute(tab: TabItem): Route =
     when (tab) {
-        is DiscoverTabItem -> Discover(tab.account)
-        is ProfileTabItem -> MeRoute(tab.account)
+        is DiscoverTabItem -> Route.Discover(tab.account)
+        is ProfileTabItem -> Route.MeRoute(tab.account)
         is HomeTimelineTabItem -> Route.Home(tab.account)
-        is TimelineTabItem -> Timeline(tab)
-        is NotificationTabItem -> Notification(tab.account)
+        is TimelineTabItem -> Route.Timeline(tab)
+        AllNotificationTabItem, is NotificationTabItem -> Route.Notification
         SettingsTabItem -> Route.Settings
-        is AllListTabItem -> AllLists(tab.account)
-        is Bluesky.FeedsTabItem -> BlueskyFeeds(tab.account)
+        is AllListTabItem -> Route.AllLists(tab.account)
+        is Bluesky.FeedsTabItem -> Route.BlueskyFeeds(tab.account)
         is DirectMessageTabItem -> Route.DmList(tab.account)
         is RssTabItem -> Route.RssList
         is Misskey.AntennasListTabItem -> Route.MisskeyAntennas(tab.account)
@@ -408,11 +401,13 @@ private fun presenter() =
     run {
         val accountState = remember { ActiveAccountPresenter() }.invoke()
         val tabState = remember { HomeTabsPresenter() }.invoke()
+        val allNotificationState = remember { AllNotificationBadgePresenter() }.invoke()
         val scrollToTopRegistry =
             remember {
                 ScrollToTopRegistry()
             }
         object : UserState by accountState, HomeTabsPresenter.State by tabState {
+            val notificationState = allNotificationState
             val scrollToTopRegistry = scrollToTopRegistry
         }
     }

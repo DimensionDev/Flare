@@ -14,7 +14,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.home.DirectMessageBadgePresenter
-import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -89,15 +88,6 @@ public class HomeTabsPresenter :
         return object : State {
             override val tabs = tabs
         }
-    }
-
-    @Composable
-    private fun notificationBadgePresenter(accountType: AccountType): UiState<Int> {
-        val presenter =
-            remember(accountType) {
-                NotificationBadgePresenter(accountType)
-            }.body()
-        return presenter.count
     }
 
     @Composable

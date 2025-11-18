@@ -3,6 +3,7 @@ import SwiftUIBackports
 @preconcurrency import KotlinSharedUI
 
 struct NotificationScreen: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @StateObject private var presenter: KotlinPresenter<AllNotificationPresenterState> = .init(presenter: AllNotificationPresenter())
     @State private var showTopBar = true
 
@@ -12,24 +13,58 @@ struct NotificationScreen: View {
                 try? await presenter.state.refreshSuspend()
             }
             .detectScrolling()
-            .safeAreaInset(edge: .top) {
-                StateView(state: presenter.state.supportedNotificationFilters) { allTypesAny in
-                    let allTypes = allTypesAny.cast(NotificationFilter.self)
-                    NotificationFilterSegments(
-                        allTypes: allTypes,
-                        selected: presenter.state.selectedFilter,
-                        onSelect: { presenter.state.setFilter(filter: $0) }
-                    )
-                    .padding(.horizontal)
-                }
+            .if(presenter.state.notifications.count >= 1 && horizontalSizeClass == .compact) { view in
+                view
+                    .safeAreaInset(edge: .top) {
+                        StateView(state: presenter.state.supportedNotificationFilters) { allTypesAny in
+                            let allTypes = allTypesAny.cast(NotificationFilter.self)
+                            NotificationFilterSegments(
+                                allTypes: allTypes,
+                                selected: presenter.state.selectedFilter,
+                                onSelect: { presenter.state.setFilter(filter: $0) }
+                            )
+                            .padding(.horizontal)
+                        }
+                    }
             }
             .toolbar {
-                ToolbarItem {
-                    NotificationAccountsBar(
-                        items: presenter.state.notifications,
-                        selectedAccount: presenter.state.selectedAccount,
-                        onSelect: { presenter.state.setAccount(profile: $0) }
-                    )
+                if presenter.state.notifications.count > 1 {
+                    ToolbarItem {
+                        NotificationAccountsBar(
+                            items: presenter.state.notifications,
+                            selectedAccount: presenter.state.selectedAccount,
+                            onSelect: { presenter.state.setAccount(profile: $0) }
+                        )
+                    }
+                    if horizontalSizeClass == .regular {
+                        if #available(iOS 26.0, *) {
+                            ToolbarSpacer()
+                        }
+                        ToolbarItem {
+                            StateView(state: presenter.state.supportedNotificationFilters) { allTypesAny in
+                                let allTypes = allTypesAny.cast(NotificationFilter.self)
+                                NotificationFilterSegments(
+                                    allTypes: allTypes,
+                                    selected: presenter.state.selectedFilter,
+                                    onSelect: { presenter.state.setFilter(filter: $0) }
+                                )
+                                .padding(.horizontal)
+                            }
+                        }
+                    }
+                    
+                } else {
+                    ToolbarItem(placement: .title) {
+                        StateView(state: presenter.state.supportedNotificationFilters) { allTypesAny in
+                            let allTypes = allTypesAny.cast(NotificationFilter.self)
+                            NotificationFilterSegments(
+                                allTypes: allTypes,
+                                selected: presenter.state.selectedFilter,
+                                onSelect: { presenter.state.setFilter(filter: $0) }
+                            )
+                            .padding(.horizontal)
+                        }
+                    }
                 }
             }
     }

@@ -52,44 +52,42 @@ internal fun NotificationScreen() {
             contentPadding = LocalWindowPadding.current,
             state = listState,
         ) {
-            state.notifications.onSuccess { items ->
-                if (items.size > 1) {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        LiteFilter {
-                            items.forEach { (profile, badge) ->
-                                PillButton(
-                                    selected = state.selectedAccount?.key == profile.key,
-                                    onSelectedChanged = {
-                                        if (it) {
-                                            state.setAccount(profile)
-                                        }
-                                    },
+            if (state.notifications.size > 1) {
+                item(
+                    span = StaggeredGridItemSpan.FullLine,
+                ) {
+                    LiteFilter {
+                        state.notifications.forEach { (profile, badge) ->
+                            PillButton(
+                                selected = state.selectedAccount?.key == profile.key,
+                                onSelectedChanged = {
+                                    if (it) {
+                                        state.setAccount(profile)
+                                    }
+                                },
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        AvatarComponent(
-                                            data = profile.avatar,
-                                            size = AvatarComponentDefaults.compatSize,
+                                    AvatarComponent(
+                                        data = profile.avatar,
+                                        size = AvatarComponentDefaults.compatSize,
+                                    )
+                                    AnimatedVisibility(state.selectedAccount?.key == profile.key) {
+                                        Text(
+                                            profile.handle,
+                                            maxLines = 1,
+                                            modifier = Modifier.padding(start = 8.dp),
                                         )
-                                        AnimatedVisibility(state.selectedAccount?.key == profile.key) {
-                                            Text(
-                                                profile.handle,
-                                                maxLines = 1,
-                                                modifier = Modifier.padding(start = 8.dp),
-                                            )
-                                        }
-                                        AnimatedVisibility(badge > 0) {
-                                            Badge(
-                                                status = BadgeStatus.Informational,
-                                                content = {
-                                                    Text(badge.toString())
-                                                },
-                                                modifier = Modifier.padding(start = 8.dp),
-                                            )
-                                        }
+                                    }
+                                    AnimatedVisibility(badge > 0) {
+                                        Badge(
+                                            status = BadgeStatus.Informational,
+                                            content = {
+                                                Text(badge.toString())
+                                            },
+                                            modifier = Modifier.padding(start = 8.dp),
+                                        )
                                     }
                                 }
                             }

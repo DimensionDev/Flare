@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +28,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,7 +46,7 @@ public class AllNotificationPresenter :
     private val accountRepository: AccountRepository by inject()
 
     public interface State {
-        public val notifications: UiState<ImmutableMap<UiProfile, Int>>
+        public val notifications: ImmutableMap<UiProfile, Int>
         public val supportedNotificationFilters: UiState<ImmutableList<NotificationFilter>>
         public val timeline: PagingState<UiTimeline>
         public val selectedFilter: NotificationFilter?
@@ -84,7 +86,7 @@ public class AllNotificationPresenter :
     @Composable
     override fun body(): State {
         val scope = rememberCoroutineScope()
-        val notifications by accountsNotificationFlow.collectAsUiState()
+        val notifications by accountsNotificationFlow.collectAsState(persistentMapOf())
         var selectedAccount by remember {
             mutableStateOf<UiProfile?>(null)
         }
@@ -108,10 +110,9 @@ public class AllNotificationPresenter :
                 selectedNotificationFilter = it.firstOrNull()
             }
         }
-        notifications.onSuccess {
-            LaunchedEffect(it.keys) {
-                selectedAccount = it.keys.firstOrNull()
-            }
+
+        LaunchedEffect(notifications.size) {
+            selectedAccount = notifications.keys.firstOrNull()
         }
 
         val listState =

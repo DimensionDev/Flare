@@ -419,8 +419,8 @@ struct ComposeScreen: View {
         }
     }
     private func getReferenceStatus() -> ComposeData.ReferenceStatus? {
-        return if let data = composeStatus, let replyState = presenter.state.replyState, case .success(let timeline) = onEnum(of: replyState) {
-            ComposeData.ReferenceStatus(data: timeline.data, composeStatus: data)
+        return if let data = composeStatus {
+            ComposeData.ReferenceStatus(data: presenter.state.replyState?.takeSuccess() as? UiTimeline, composeStatus: data)
         } else {
             nil
         }

@@ -919,6 +919,37 @@ private fun render(
                                             sensitive = false,
                                         )
                                     }
+                                is RecordViewRecordEmbedUnion.RecordWithMediaView ->
+                                    when (val media = it.value.media) {
+                                        is RecordWithMediaViewMediaUnion.ImagesView ->
+                                            media.value.images.map {
+                                                UiMedia.Image(
+                                                    url = it.fullsize.uri,
+                                                    previewUrl = it.thumb.uri,
+                                                    description = it.alt,
+                                                    width = it.aspectRatio?.width?.toFloat() ?: 0f,
+                                                    height = it.aspectRatio?.height?.toFloat() ?: 0f,
+                                                    sensitive = false,
+                                                )
+                                            }
+                                        is RecordWithMediaViewMediaUnion.VideoView ->
+                                            persistentListOf(
+                                                UiMedia.Video(
+                                                    url = media.value.playlist.uri,
+                                                    thumbnailUrl = media.value.thumbnail?.uri ?: "",
+                                                    description = media.value.alt,
+                                                    width =
+                                                        media.value.aspectRatio
+                                                            ?.width
+                                                            ?.toFloat() ?: 0f,
+                                                    height =
+                                                        media.value.aspectRatio
+                                                            ?.height
+                                                            ?.toFloat() ?: 0f,
+                                                ),
+                                            )
+                                        else -> null
+                                    }
 
                                 else -> null
                             }

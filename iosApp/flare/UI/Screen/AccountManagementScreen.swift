@@ -20,6 +20,17 @@ struct AccountManagementScreen: View {
                                 .onTapGesture {
                                     presenter.state.setActiveAccount(accountKey: user.key)
                                 }
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        presenter.state.logout(accountKey: user.key)
+                                    } label: {
+                                        Label {
+                                            Text("logout_title")
+                                        } icon: {
+                                            Image("fa-trash")
+                                        }
+                                    }
+                                }
                                 .swipeActions {
                                     Button(role: .destructive) {
                                         presenter.state.logout(accountKey: user.key)
@@ -29,7 +40,6 @@ struct AccountManagementScreen: View {
                                         } icon: {
                                             Image("fa-trash")
                                         }
-
                                     }
                                 }
                             } errorContent: { error in

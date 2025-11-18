@@ -53,13 +53,8 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
             },
         )
     }
-    entry<Route.Notification> { args ->
-        NotificationScreen(
-            accountType = args.accountType,
-            toQuickMenu = {
-                openDrawer.invoke()
-            },
-        )
+    entry<Route.Notification> {
+        NotificationScreen()
     }
     entry<Route.Search> { args ->
         SearchScreen(

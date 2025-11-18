@@ -28,9 +28,7 @@ internal sealed interface Route {
         val accountType: AccountType,
     ) : ScreenRoute
 
-    data class Notification(
-        val accountType: AccountType,
-    ) : ScreenRoute
+    data object Notification : ScreenRoute
 
     data object Settings : ScreenRoute
 

@@ -2,7 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 
 struct SecondaryTabsScreen: View {
-    let tabs: [HomeTabsPresenterStateHomeTabState.HomeTabItem]
+    let tabs: [TabItem]
     @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
     var body: some View {
         Router { _ in
@@ -14,12 +14,12 @@ struct SecondaryTabsScreen: View {
                 }
 
                 Section {
-                    ForEach(tabs, id: \.tabItem.key) { tab in
-                        NavigationLink(value: Route.tabItem(tab.tabItem)) {
+                    ForEach(tabs, id: \.key) { tab in
+                        NavigationLink(value: Route.tabItem(tab)) {
                             Label {
-                                TabTitle(title: tab.tabItem.metaData.title)
+                                TabTitle(title: tab.metaData.title)
                             } icon: {
-                                TabIcon(icon: tab.tabItem.metaData.icon, accountType: tab.tabItem.account, iconOnly: true)
+                                TabIcon(icon: tab.metaData.icon, accountType: tab.account, iconOnly: true)
                             }
                         }
                     }

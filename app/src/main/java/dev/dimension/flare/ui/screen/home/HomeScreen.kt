@@ -58,6 +58,7 @@ import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Pen
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AllListTabItem
+import dev.dimension.flare.data.model.AllNotificationTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.DirectMessageTabItem
 import dev.dimension.flare.data.model.DiscoverTabItem
@@ -89,6 +90,7 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTabsPresenter
+import dev.dimension.flare.ui.presenter.home.AllNotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
@@ -113,11 +115,11 @@ internal fun HomeScreen(afterInit: () -> Unit) {
     state.tabs
         .onSuccess { tabs ->
             val topLevelBackStack by producePresenter(
-                key = "home_top_level_back_stack_${tabs.all.first().tabItem}",
+                key = "home_top_level_back_stack_${tabs.all.first().key}",
                 useImmediateClock = true,
             ) {
                 TopLevelBackStack<Route>(
-                    getDirection(tabs.all.first().tabItem),
+                    getDirection(tabs.all.first()),
                 )
             }
 
@@ -179,7 +181,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         )
                     },
                     navigationSuiteItems = {
-                        tabs.primary.forEach { (tab, badgeState) ->
+                        tabs.primary.forEach { tab ->
                             item(
                                 selected = currentRoute == getDirection(tab),
                                 onClick = {
@@ -202,13 +204,11 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                     )
                                 },
                                 badge =
-                                    if (badgeState.isSuccess) {
+                                    if (tab is AllNotificationTabItem || tab is NotificationTabItem) {
                                         {
-                                            badgeState.onSuccess {
-                                                if (it > 0) {
-                                                    Badge {
-                                                        Text(text = it.toString())
-                                                    }
+                                            if (state.notificationState.count > 0) {
+                                                Badge {
+                                                    Text(text = state.notificationState.count.toString())
                                                 }
                                             }
                                         }
@@ -230,7 +230,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         }
                     },
                     secondaryItems = {
-                        tabs.secondary.forEach { (tab, badgeState) ->
+                        tabs.secondary.forEach { tab ->
                             item(
                                 selected = currentRoute == getDirection(tab),
                                 onClick = {
@@ -254,13 +254,11 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                     )
                                 },
                                 badge =
-                                    if (badgeState.isSuccess) {
+                                    if (tab is AllNotificationTabItem || tab is NotificationTabItem) {
                                         {
-                                            badgeState.onSuccess {
-                                                if (it > 0) {
-                                                    Badge {
-                                                        Text(text = it.toString())
-                                                    }
+                                            if (state.notificationState.count > 0) {
+                                                Badge {
+                                                    Text(text = state.notificationState.count.toString())
                                                 }
                                             }
                                         }
@@ -534,7 +532,7 @@ private fun getDirection(
         is ProfileTabItem -> Route.Profile.Me(accountType)
         is HomeTimelineTabItem -> Route.Home(accountType)
         is TimelineTabItem -> Route.Timeline(accountType, tab)
-        is NotificationTabItem -> Route.Notification(accountType)
+        is NotificationTabItem, AllNotificationTabItem -> Route.Notification
         SettingsTabItem -> Route.Settings.Main
         is AllListTabItem -> Route.Lists.List(accountType)
         is Bluesky.FeedsTabItem -> Route.Bluesky.Feed(accountType)
@@ -558,7 +556,12 @@ private fun presenter() =
             remember {
                 ScrollToTopRegistry()
             }
+        val notificationState =
+            remember {
+                AllNotificationBadgePresenter()
+            }.invoke()
         object {
+            val notificationState = notificationState
             val tabs = tabs.tabs
             val navigationState = navigationState
             val scrollToTopRegistry = scrollToTopRegistry

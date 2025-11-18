@@ -141,6 +141,20 @@ public sealed class IconType {
 }
 
 @Serializable
+public data object AllNotificationTabItem : TabItem() {
+    override val metaData: TabMetaData =
+        TabMetaData(
+            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
+            icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
+        )
+    override val account: AccountType = AccountType.Active
+    override val key: String = "all_notification"
+
+    override fun update(metaData: TabMetaData): TabItem = this
+}
+
+// keep this here for compatibility
+@Serializable
 public data class NotificationTabItem(
     override val account: AccountType,
     override val metaData: TabMetaData,
@@ -165,14 +179,7 @@ public sealed class TimelineTabItem : TabItem() {
                             icon = IconType.Material(IconType.Material.MaterialIcon.Home),
                         ),
                 ),
-                NotificationTabItem(
-                    account = AccountType.Active,
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
-                        ),
-                ),
+                AllNotificationTabItem,
                 DiscoverTabItem(
                     account = AccountType.Active,
                     metaData =
@@ -192,14 +199,7 @@ public sealed class TimelineTabItem : TabItem() {
                             icon = IconType.Material(IconType.Material.MaterialIcon.Home),
                         ),
                 ),
-                NotificationTabItem(
-                    account = AccountType.Active,
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
-                        ),
-                ),
+                AllNotificationTabItem,
                 RssTabItem(
                     metaData =
                         TabMetaData(
@@ -295,18 +295,6 @@ public sealed class TimelineTabItem : TabItem() {
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
                         ),
                 ),
-                NotificationTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
-                            icon =
-                                IconType.Mixed(
-                                    IconType.Material.MaterialIcon.Notification,
-                                    accountKey,
-                                ),
-                        ),
-                ),
                 DiscoverTabItem(
                     account = AccountType.Specific(accountKey),
                     metaData =
@@ -373,18 +361,6 @@ public sealed class TimelineTabItem : TabItem() {
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
-                        ),
-                ),
-                NotificationTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
-                            icon =
-                                IconType.Mixed(
-                                    IconType.Material.MaterialIcon.Notification,
-                                    accountKey,
-                                ),
                         ),
                 ),
                 DiscoverTabItem(
@@ -463,18 +439,6 @@ public sealed class TimelineTabItem : TabItem() {
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
                         ),
                 ),
-                NotificationTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
-                            icon =
-                                IconType.Mixed(
-                                    IconType.Material.MaterialIcon.Notification,
-                                    accountKey,
-                                ),
-                        ),
-                ),
                 DiscoverTabItem(
                     account = AccountType.Specific(accountKey),
                     metaData =
@@ -524,18 +488,6 @@ public sealed class TimelineTabItem : TabItem() {
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
-                        ),
-                ),
-                NotificationTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
-                            icon =
-                                IconType.Mixed(
-                                    IconType.Material.MaterialIcon.Notification,
-                                    accountKey,
-                                ),
                         ),
                 ),
                 DiscoverTabItem(
@@ -596,18 +548,6 @@ public sealed class TimelineTabItem : TabItem() {
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
-                        ),
-                ),
-                NotificationTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
-                            icon =
-                                IconType.Mixed(
-                                    IconType.Material.MaterialIcon.Notification,
-                                    accountKey,
-                                ),
                         ),
                 ),
                 DiscoverTabItem(

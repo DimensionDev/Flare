@@ -226,10 +226,7 @@ internal sealed interface Route : NavKey {
     }
 
     @Serializable
-    data class Notification(
-        override val accountType: AccountType,
-    ) : Route,
-        WithAccountType
+    data object Notification : Route
 
     @Serializable
     data class Search(

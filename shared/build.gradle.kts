@@ -1,4 +1,3 @@
-
 import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
 import java.util.Locale
 
@@ -86,6 +85,7 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
         val androidJvmMain by getting {

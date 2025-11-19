@@ -144,9 +144,7 @@ private fun AnnotatedString.Builder.renderElement(
         }
 
         "br" -> {
-            if (element.parent()?.hasText() == true) {
-                appendLine()
-            }
+            appendLine()
         }
 
         "center" -> {

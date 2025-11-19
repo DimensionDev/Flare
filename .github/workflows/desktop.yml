@@ -54,6 +54,9 @@ jobs:
           base64 -d -i desktopApp/runtime.provisionprofile.b64 > desktopApp/runtime.provisionprofile    
         env:
           MACOS_RUNTIME_PROVISION: ${{ secrets.MACOS_RUNTIME_PROVISION }}
+      # Run tests
+      - name: Run Tests
+        run: ./gradlew allTests
       - name: Build with Gradle
         env:
           BUILD_NUMBER: ${{github.run_number}}
@@ -90,6 +93,9 @@ jobs:
         with:
           distribution: "jetbrains"
           java-version: 21
+      # Run tests
+      - name: Run Tests
+        run: ./gradlew allTests
       - name: Build with Gradle
         env:
           BUILD_NUMBER: ${{github.run_number}}

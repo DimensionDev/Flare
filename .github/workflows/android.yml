@@ -46,6 +46,10 @@ jobs:
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
         run: ./.github/apply_signing.sh
 
+      # Run tests
+      - name: Run Tests
+        run: ./gradlew allTests
+
       # Build with Gradle
       - name: Build with Gradle
         env:

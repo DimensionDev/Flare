@@ -1359,7 +1359,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rss hinzufügen"
+            "value" : "RSS hinzufügen"
           }
         },
         "el" : {
@@ -2029,7 +2029,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "KI-Zusammenfassung aktivieren"
+            "value" : "KI Zusammenfassung aktivieren"
           }
         },
         "el" : {
@@ -2219,7 +2219,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI-Konfiguration"
+            "value" : "KI Konfiguration"
           }
         },
         "el" : {
@@ -2409,7 +2409,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI-Konfiguration"
+            "value" : "KI Konfiguration"
           }
         },
         "el" : {
@@ -4925,7 +4925,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mostrar pré-visualizações de links no modo de simplificação na publicação"
+            "value" : "Mostrar pré-visualizações de links no modo simplificado na publicação"
           }
         },
         "ro" : {
@@ -7413,7 +7413,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Thema"
+            "value" : "Theme"
           }
         },
         "el" : {
@@ -7793,7 +7793,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ändern Sie das Theme der App"
+            "value" : "Ändere das Theme der App"
           }
         },
         "el" : {
@@ -8073,7 +8073,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fino"
+            "value" : "Claro"
           }
         },
         "ro" : {
@@ -8827,7 +8827,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "sempre"
+            "value" : "Sempre"
           }
         },
         "ro" : {
@@ -9147,7 +9147,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "nunca"
+            "value" : "Nunca"
           }
         },
         "ro" : {
@@ -12607,7 +12607,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anti-Soziales Verhalten"
+            "value" : "Asoziales Verhalten"
           }
         },
         "el" : {
@@ -14555,7 +14555,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "cancelar"
+            "value" : "Cancelar"
           }
         },
         "ro" : {
@@ -15089,7 +15089,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cnacel"
+            "value" : "Cancelar"
           }
         },
         "ro" : {
@@ -15255,7 +15255,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mandar"
+            "value" : "Enviar"
           }
         },
         "ro" : {
@@ -15735,7 +15735,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Was passiert?"
+            "value" : "Was ist los?"
           }
         },
         "el" : {
@@ -15979,7 +15979,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alternativa"
+            "value" : "Opção"
           }
         },
         "ro" : {
@@ -16981,7 +16981,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cotação"
+            "value" : "Citação"
           }
         },
         "ro" : {
@@ -17551,7 +17551,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "excluir"
+            "value" : "Excluir"
           }
         },
         "ro" : {
@@ -18025,7 +18025,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tendências"
+            "value" : "Em Alta"
           }
         },
         "ro" : {
@@ -18191,7 +18191,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trending Hashtags"
+            "value" : "Hashtags em Alta"
           }
         },
         "ro" : {
@@ -19121,7 +19121,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rss Quelle bearbeiten"
+            "value" : "RSS Quelle bearbeiten"
           }
         },
         "el" : {
@@ -20277,7 +20277,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Login Re"
+            "value" : "Logar novamente"
           }
         },
         "ro" : {
@@ -21391,7 +21391,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zuhause"
+            "value" : "Start"
           }
         },
         "el" : {
@@ -22015,7 +22015,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "notificação"
+            "value" : "Notificação"
           }
         },
         "ro" : {
@@ -22863,7 +22863,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Carregandochar@@0"
+            "value" : "Carregando..."
           }
         },
         "ro" : {
@@ -23035,7 +23035,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "excluir"
+            "value" : "Excluir"
           }
         },
         "ro" : {
@@ -23225,7 +23225,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alterar"
+            "value" : "Editar"
           }
         },
         "ro" : {
@@ -23545,7 +23545,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keyword"
+            "value" : "Palavra-chave"
           }
         },
         "ro" : {
@@ -23699,7 +23699,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Por favor insira uma palavra-chave"
+            "value" : "Por favor, insira uma palavra-chave"
           }
         },
         "ro" : {
@@ -24663,7 +24663,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Statuses"
+            "value" : "Status"
           }
         },
         "ro" : {
@@ -25025,7 +25025,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Utilizadores"
+            "value" : "Usuários"
           }
         },
         "ro" : {
@@ -25215,7 +25215,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conectar-se"
+            "value" : "Entrar"
           }
         },
         "ro" : {
@@ -25405,7 +25405,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conectar-se"
+            "value" : "Entrar"
           }
         },
         "ro" : {
@@ -65228,7 +65228,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Möge"
+            "value" : "Gefällt mir"
           }
         },
         "el" : {
@@ -66496,7 +66496,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gefällt"
+            "value" : "Likes"
           }
         },
         "el" : {
@@ -69886,7 +69886,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Neu"
+            "value" : "Hinzufügen"
           }
         },
         "el" : {
@@ -70188,7 +70188,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sie müssen den RssHub Host setzen, wenn Sie RssHub verwenden möchten, oder den öffentlichen RssHub Server auswählen"
+            "value" : "Du musst den RSSHub-Host festlegen, wenn du RSSHub verwenden möchtest oder den öffentlichen RSSHub-Server auswählen"
           }
         },
         "el" : {
@@ -70342,7 +70342,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bitte RssHub Host hier eingeben"
+            "value" : "Bitte RSSHub Host hier eingeben"
           }
         },
         "el" : {
@@ -70472,7 +70472,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "RssHub Host"
+            "value" : "RSSHub Host"
           }
         },
         "el" : {
@@ -71212,7 +71212,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Entdeckte Rss Quellen"
+            "value" : "Entdeckte RSS Quellen"
           }
         },
         "el" : {
@@ -71626,7 +71626,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bitte geben Sie die URL hier ein"
+            "value" : "Bitte gebe die URL hier ein"
           }
         },
         "el" : {
@@ -72980,7 +72980,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Soziale"
+            "value" : "Sozial"
           }
         },
         "el" : {
@@ -73264,7 +73264,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zusammenfassung Beitrag"
+            "value" : "Zusammenfassender Beitrag"
           }
         },
         "el" : {
@@ -73974,7 +73974,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bestätigen"
+            "value" : "Bildercache löschen?"
           }
         },
         "el" : {
@@ -74532,7 +74532,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "excluir"
+            "value" : "Excluir"
           }
         },
         "ro" : {
@@ -74722,7 +74722,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alterar"
+            "value" : "Editar"
           }
         },
         "ro" : {
@@ -74804,7 +74804,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tab icon"
+            "value" : "Tab Icon"
           }
         },
         "el" : {
@@ -75064,7 +75064,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bitte den Tab-Titel hier eingeben"
+            "value" : "Bitte gebe den Tab-Titel hier ein"
           }
         },
         "el" : {
@@ -75336,7 +75336,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gemischte Zeitleiste vermischt alle Tabs in einem Tab"
+            "value" : "Die gemischte Zeitleiste mischt alle Tabs der Zeitleiste in einen Tab"
           }
         },
         "el" : {
@@ -76428,7 +76428,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Desbloquear"
+            "value" : "Desmutar"
           }
         },
         "ro" : {
@@ -76808,7 +76808,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seguinte"
+            "value" : "Seguindo"
           }
         },
         "ro" : {
@@ -77188,7 +77188,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "comentários"
+            "value" : "Comentários"
           }
         },
         "ro" : {
@@ -77508,7 +77508,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SItuação"
+            "value" : "Status"
           }
         },
         "ro" : {

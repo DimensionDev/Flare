@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="delete">excluir</string>
+    <string name="delete">Excluir</string>
     <string name="profile_header_following_count">%1$s Seguindo</string>
     <string name="profile_header_fans_count">%1$s Seguidores</string>
     <string name="profile_header_toots_count">Postagens %1$s</string>
     <string name="profile_misskey_header_status_count">Postagens %1$s</string>
     <string name="profile_header_button_follow">Seguir</string>
-    <string name="profile_header_button_following">Seguinte</string>
+    <string name="profile_header_button_following">Seguindo</string>
     <string name="profile_header_button_requested">Solicitado</string>
     <string name="profile_header_button_blocked">Bloqueado</string>
     <string name="profile_header_button_is_fans">Você está seguindo</string>
@@ -15,7 +15,7 @@
     <string name="mastodon_notification_item_reblogged_your_status">repostou</string>
     <string name="mastodon_notification_item_poll_ended">Uma enquete em que você participou acabou</string>
     <string name="mastodon_notification_item_mentioned_you">mencionou você</string>
-    <string name="mastodon_notification_item_requested_follow">peça para seguir você</string>
+    <string name="mastodon_notification_item_requested_follow">pediu para seguir você</string>
     <string name="mastodon_notification_item_posted_status">acabou de postar um status</string>
     <string name="mastodon_notification_item_updated_status">atualizou um toot</string>
     <string name="mastodon_item_reblogged_status">compartilhou um toot</string>
@@ -53,7 +53,7 @@
     <string name="mastodon_visibility_unlisted">Não-listado</string>
     <string name="mastodon_visibility_private">Privado</string>
     <string name="mastodon_visibility_direct">Direto</string>
-    <string name="mastodon_visibility_public_description">Qualquer um pode ver e otimizar este toot</string>
+    <string name="mastodon_visibility_public_description">Qualquer um pode ver e impulsionar este toot</string>
     <string name="mastodon_visibility_unlisted_description">Qualquer pessoa pode ver este toot, mas ele não aparecerá na linha do tempo pública</string>
     <string name="mastodon_visibility_private_description">Somente seguidores podem ver este toot</string>
     <string name="mastodon_visibility_direct_description">Somente usuários mencionados podem ver este toot</string>
@@ -78,18 +78,18 @@
     <string name="blusky_item_action_repost">Republicar</string>
     <string name="blusky_item_action_quote">Cotação</string>
     <string name="blusky_item_action_report">Denunciar</string>
-    <string name="blusky_item_action_delete">excluir</string>
+    <string name="blusky_item_action_delete">Excluir</string>
     <string name="mastodon_item_unbookmark">Desfavoritar</string>
     <string name="mastodon_item_bookmark">Favorito</string>
-    <string name="mastodon_item_delete">excluir</string>
+    <string name="mastodon_item_delete">Excluir</string>
     <string name="mastodon_item_report">Denunciar</string>
-    <string name="misskey_item_action_delete">excluir</string>
+    <string name="misskey_item_action_delete">Excluir</string>
     <string name="misskey_item_action_report">Denunciar</string>
     <string name="bookmark_remove">Remover marcador favorito</string>
     <string name="bookmark_add">Adicionar marcador</string>
     <string name="like">Gostei</string>
     <string name="unlike">Descurtir</string>
-    <string name="more">MAIS</string>
+    <string name="more">Mais</string>
     <string name="quote">Cotação</string>
     <string name="reaction_add">Adicionar reação</string>
     <string name="reaction_remove">Remover reação</string>
@@ -309,7 +309,7 @@
     <string name="settings_side_panel_empty">O padrão mostrará o painel lateral depende da plataforma da conta.</string>
     <string name="tab_settings_add">Adicionar</string>
     <string name="tab_settings_drag">Arrastar</string>
-    <string name="tab_settings_edit">Alterar</string>
+    <string name="tab_settings_edit">Editar</string>
     <string name="tab_settings_remove">Excluir</string>
     <string name="tab_settings_default">Padrão</string>
     <string name="tab_settings_list">Lista</string>
@@ -329,15 +329,15 @@
     <string name="service_select_welcome_message">Por favor, insira o servidor para começar.</string>
     <string name="service_select_welcome_hint">O Flare suporta Mastodon, Misskey, Bluesky e X.</string>
     <string name="service_select_welcome_list_hint">Ou escolha destes servidores</string>
-    <string name="bluesky_login_username_hint">Usuário:</string>
-    <string name="bluesky_login_password_hint">Palavra-passe</string>
+    <string name="bluesky_login_username_hint">Usuário</string>
+    <string name="bluesky_login_password_hint">Senha</string>
     <string name="bluesky_login_auth_factor_token_hint">Token de autenticação</string>
-    <string name="bluesky_login_oauth_button">Login com OAuth</string>
+    <string name="bluesky_login_oauth_button">Login via OAuth</string>
     <string name="bluesky_login_use_password_button">Usar Senha</string>
-    <string name="bluesky_login_oauth_hint">O Bluesky OAuth pode não ser estável o suficiente, use o login de senha se você encontrar quaisquer problemas.</string>
-    <string name="login_button">Conectar-se</string>
+    <string name="bluesky_login_oauth_hint">O OAuth do Bluesky pode estar instável, use o login de senha se você encontrar quaisquer problemas.</string>
+    <string name="login_button">Entrar</string>
     <string name="mastodon_login_verify_message">Por favor, aguarde enquanto verificamos suas credenciais.</string>
-    <string name="service_select_instance_input_placeholder">Instância URL</string>
+    <string name="service_select_instance_input_placeholder">URL da instância</string>
     <string name="service_select_next_button">Próximo</string>
     <string name="service_select_empty_message">Nenhuma instância encontrada</string>
     <string name="service_select_compatibility_warning">Este servidor usa %1$s, o Flare será executado em modo de compatibilidade. Alguns recursos podem não funcionar corretamente.</string>
@@ -345,8 +345,8 @@
     <string name="home_tab_notifications_title">Notificações</string>
     <string name="home_tab_me_title">Eu</string>
     <string name="home_tab_discover_title">Pesquisar</string>
-    <string name="settings_title">Confirgurações</string>
-    <string name="mastodon_tab_local_title">Localização</string>
+    <string name="settings_title">Configurações</string>
+    <string name="mastodon_tab_local_title">Local</string>
     <string name="mastodon_tab_public_title">Público</string>
     <string name="home_tab_featured_title">Destaques</string>
     <string name="home_tab_bookmarks_title">Favoritos</string>

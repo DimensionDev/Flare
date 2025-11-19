@@ -105,9 +105,7 @@ struct RichTextRenderer {
             self.attributeContainer = currentAttributes
             break;
         case "br":
-            if element.parent()?.hasText() == true {
-                self.attributedString = self.attributedString + AttributedString("\n", attributes: self.attributeContainer)
-            }
+            self.attributedString = self.attributedString + AttributedString("\n", attributes: self.attributeContainer)
             break;
         case "p", "div":
             element.childNodes().forEach { node in

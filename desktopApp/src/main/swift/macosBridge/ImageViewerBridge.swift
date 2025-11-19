@@ -71,6 +71,7 @@ struct StatusMediaItem: Decodable {
     let url: String
     let type: String
     let placeholder: String?
+    let fileName: String
 }
 
 @_cdecl("open_status_image_viewer")
@@ -126,7 +127,7 @@ struct StatusMediaView: View {
                                 .contextMenu {
                                     Button("Save Image") {
                                         let panel = NSSavePanel()
-                                        panel.nameFieldStringValue = URL(string: media.url)?.lastPathComponent ?? "image"
+                                        panel.nameFieldStringValue = media.fileName
                                         panel.allowedContentTypes = [.png, .jpeg, .gif, .webP]
                                         panel.begin { response in
                                             if response == .OK, let url = panel.url {

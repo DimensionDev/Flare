@@ -194,6 +194,7 @@ namespace Flare
                                                 {
                                                     Source = media.Url,
                                                     Stretch = Stretch.Uniform,
+                                                    Tag = media.FileName,
                                                 };
                                                 var scrollViewer = new ScrollViewer
                                                 {
@@ -281,7 +282,7 @@ namespace Flare
                                             var picker = new FileSavePicker(window.AppWindow.Id)
                                             {
                                                 SuggestedStartLocation = PickerLocationId.Downloads,
-                                                SuggestedFileName = file.Name,
+                                                SuggestedFileName = image.Tag as string,
                                                 FileTypeChoices = { { "Image", new List<string> { ".png", ".jpg", ".jpeg" } } },
                                                 DefaultFileExtension = file.FileType
                                             };
@@ -437,13 +438,15 @@ namespace Flare
         [JsonPropertyName("medias")] public List<StatusMediaItem> Medias { get; init; } = Medias;
     }
 
-    internal class StatusMediaItem(string Url, string Type, string? Placeholder)
+    internal class StatusMediaItem(string Url, string Type, string? Placeholder, string FileName)
     {
         [JsonPropertyName("url")] public string Url { get; init; } = Url;
 
         [JsonPropertyName("type")] public string Type { get; init; } = Type;
 
         [JsonPropertyName("placeholder")] public string? Placeholder { get; init; } = Placeholder;
+
+        [JsonPropertyName("fileName")] public string FileName { get; init; } = FileName;
     }
 
     internal class OpenWebViewData(string Url, string Id)

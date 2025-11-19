@@ -4,6 +4,7 @@ import dev.dimension.flare.common.IPCEvent
 import dev.dimension.flare.common.PlatformIPC
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.getFileName
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.serialization.builtins.serializer
 import kotlin.uuid.ExperimentalUuidApi
@@ -23,6 +24,8 @@ internal class WindowsBridge(
     fun openStatusImageViewer(
         data: ImmutableList<UiMedia>,
         selectedIndex: Int,
+        statusKey: String,
+        userHandle: String,
     ) {
         val medias =
             data.map {
@@ -42,6 +45,7 @@ internal class WindowsBridge(
                             is UiMedia.Gif -> it.previewUrl
                             is UiMedia.Audio -> null
                         },
+                    fileName = it.getFileName(statusKey, userHandle),
                 )
             }
         val model =

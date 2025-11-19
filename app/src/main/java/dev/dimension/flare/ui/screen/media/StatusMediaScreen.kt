@@ -100,9 +100,11 @@ import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.getFileName
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
@@ -856,11 +858,18 @@ private fun statusMediaPresenter(
         }
 
         fun save(data: UiMedia) {
-            when (data) {
-                is UiMedia.Audio -> download(data.url)
-                is UiMedia.Gif -> download(data.url)
-                is UiMedia.Image -> save(data.url)
-                is UiMedia.Video -> download(data.url)
+            val status = (state.status.takeSuccess()?.content as? UiTimeline.ItemContent.Status)
+            if (status != null) {
+                val statusKey = status.statusKey.toString()
+                val userHandle = status.user?.handle ?: "unknown"
+                val fileName = data.getFileName(statusKey, userHandle)
+
+                when (data) {
+                    is UiMedia.Audio -> download(data.url, fileName)
+                    is UiMedia.Gif -> download(data.url, fileName)
+                    is UiMedia.Image -> save(data.url, fileName)
+                    is UiMedia.Video -> download(data.url, fileName)
+                }
             }
         }
 
@@ -917,11 +926,14 @@ private fun statusMediaPresenter(
             }
         }
 
-        fun download(uri: String) {
+        fun download(
+            uri: String,
+            fileName: String,
+        ) {
             scope.launch {
                 videoDownloadHelper.downloadVideo(
                     uri = uri,
-                    fileName = uri.substringAfterLast("/"),
+                    fileName = fileName,
                     callback =
                         object : VideoDownloadHelper.DownloadCallback {
                             override fun onDownloadSuccess(downloadId: Long) {
@@ -954,11 +966,13 @@ private fun statusMediaPresenter(
             }
         }
 
-        fun save(uri: String) {
+        fun save(
+            uri: String,
+            fileName: String,
+        ) {
             scope.launch {
                 context.imageLoader.diskCache?.openSnapshot(uri)?.use {
                     val byteArray = it.data.toFile().readBytes()
-                    val fileName = uri.substringAfterLast("/")
                     saveByteArrayToDownloads(context, byteArray, fileName)
                     withContext(Dispatchers.Main) {
                         Toast

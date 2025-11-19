@@ -61,6 +61,7 @@ data class IPCEvent<T>(
             val url: String,
             val type: String,
             val placeholder: String?,
+            val fileName: String,
         )
     }
 

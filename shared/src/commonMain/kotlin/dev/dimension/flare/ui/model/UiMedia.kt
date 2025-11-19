@@ -57,3 +57,24 @@ public sealed interface UiMedia {
         override val customHeaders: ImmutableMap<String, String>? = null,
     ) : UiMedia
 }
+
+public fun UiMedia.getFileName(
+    statusKey: String,
+    userHandle: String,
+): String {
+    val key = statusKey.replace("/", "_")
+    val handle = userHandle.replace("/", "_")
+    val originalName = url.substringAfterLast("/")
+    val extension =
+        if (originalName.contains(".")) {
+            originalName.substringAfterLast(".")
+        } else {
+            when (this) {
+                is UiMedia.Audio -> "mp3"
+                is UiMedia.Gif -> "gif"
+                is UiMedia.Image -> "jpg"
+                is UiMedia.Video -> "mp4"
+            }
+        }
+    return "${key}_$handle.$extension"
+}

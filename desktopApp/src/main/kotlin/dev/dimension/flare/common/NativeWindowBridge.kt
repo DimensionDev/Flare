@@ -7,7 +7,6 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.route.Route
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
@@ -32,24 +31,35 @@ internal class NativeWindowBridge(
 
     fun openStatusImageViewer(route: Route.StatusMedia) {
         scope.launch {
-            val medias =
+            val status =
                 StatusPresenter(
                     accountType = route.accountType,
                     statusKey = route.statusKey,
                 ).moleculeFlow
                     .map {
-                        it.status.map {
-                            (it.content as? UiTimeline.ItemContent.Status)?.images.orEmpty().toImmutableList()
-                        }
+                        it.status.takeSuccess()?.content as? UiTimeline.ItemContent.Status
                     }.mapNotNull {
-                        it.takeSuccess()
+                        it
                     }.distinctUntilChanged()
                     .firstOrNull()
-            if (medias != null) {
+            if (status != null) {
+                val medias = status.images
+                val statusKey = status.statusKey.toString()
+                val userHandle = status.user?.handle ?: "unknown"
                 if (SystemUtils.IS_OS_MAC_OSX) {
-                    MacosBridge.openStatusImageViewer(medias, selectedIndex = route.index)
+                    MacosBridge.openStatusImageViewer(
+                        data = medias,
+                        selectedIndex = route.index,
+                        statusKey = statusKey,
+                        userHandle = userHandle,
+                    )
                 } else if (SystemUtils.IS_OS_WINDOWS) {
-                    windowsBridge.openStatusImageViewer(medias, selectedIndex = route.index)
+                    windowsBridge.openStatusImageViewer(
+                        data = medias,
+                        selectedIndex = route.index,
+                        statusKey = statusKey,
+                        userHandle = userHandle,
+                    )
                 } else {
                     // TODO: Implement for other platforms
                 }

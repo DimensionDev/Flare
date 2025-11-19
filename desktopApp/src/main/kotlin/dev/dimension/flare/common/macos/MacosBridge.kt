@@ -5,6 +5,7 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import dev.dimension.flare.common.IPCEvent
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.getFileName
 
 internal object MacosBridge {
     private interface Bridge : Library {
@@ -99,6 +100,8 @@ internal object MacosBridge {
     fun openStatusImageViewer(
         data: List<UiMedia>,
         selectedIndex: Int,
+        statusKey: String,
+        userHandle: String,
     ) {
         val medias =
             data.map {
@@ -118,6 +121,7 @@ internal object MacosBridge {
                             is UiMedia.Gif -> it.previewUrl
                             is UiMedia.Audio -> null
                         },
+                    fileName = it.getFileName(statusKey, userHandle),
                 )
             }
         val model =

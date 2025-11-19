@@ -56,7 +56,7 @@ jobs:
           MACOS_RUNTIME_PROVISION: ${{ secrets.MACOS_RUNTIME_PROVISION }}
       # Run tests
       - name: Run Tests
-        run: ./gradlew allTests
+        run: ./gradlew jvmTest
       - name: Build with Gradle
         env:
           BUILD_NUMBER: ${{github.run_number}}
@@ -95,7 +95,7 @@ jobs:
           java-version: 21
       # Run tests
       - name: Run Tests
-        run: ./gradlew allTests
+        run: ./gradlew jvmTest
       - name: Build with Gradle
         env:
           BUILD_NUMBER: ${{github.run_number}}

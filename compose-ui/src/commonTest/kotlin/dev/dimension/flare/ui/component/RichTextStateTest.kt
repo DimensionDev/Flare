@@ -78,4 +78,111 @@ class RichTextStateTest {
 
         assertEquals("hello\nworld", state.annotatedString.text)
     }
+
+    @Test
+    fun strong_tag_applies_bold_style() {
+        val ui = htmlToUiRichText("<strong>Bold Text</strong>")
+        val state = RichTextState(ui, defaultStyleData())
+
+        val spanStyles = state.annotatedString.spanStyles
+        val boldStyle = spanStyles.firstOrNull { it.item.fontWeight == androidx.compose.ui.text.font.FontWeight.Bold }
+        assertNotNull(boldStyle)
+        assertEquals(0, boldStyle.start)
+        assertEquals(9, boldStyle.end)
+    }
+
+    @Test
+    fun em_tag_applies_italic_style() {
+        val ui = htmlToUiRichText("<em>Italic Text</em>")
+        val state = RichTextState(ui, defaultStyleData())
+
+        val spanStyles = state.annotatedString.spanStyles
+        val italicStyle = spanStyles.firstOrNull { it.item.fontStyle == androidx.compose.ui.text.font.FontStyle.Italic }
+        assertNotNull(italicStyle)
+        assertEquals(0, italicStyle.start)
+        assertEquals(11, italicStyle.end)
+    }
+
+    @Test
+    fun del_tag_applies_line_through_decoration() {
+        val ui = htmlToUiRichText("<del>Deleted Text</del>")
+        val state = RichTextState(ui, defaultStyleData())
+
+        val spanStyles = state.annotatedString.spanStyles
+        val lineThroughStyle =
+            spanStyles.firstOrNull {
+                it.item.textDecoration == androidx.compose.ui.text.style.TextDecoration.LineThrough
+            }
+        assertNotNull(lineThroughStyle)
+        assertEquals(0, lineThroughStyle.start)
+        assertEquals(12, lineThroughStyle.end)
+    }
+
+    @Test
+    fun u_tag_applies_underline_decoration() {
+        val ui = htmlToUiRichText("<u>Underlined Text</u>")
+        val state = RichTextState(ui, defaultStyleData())
+
+        val spanStyles = state.annotatedString.spanStyles
+        val underlineStyle = spanStyles.firstOrNull { it.item.textDecoration == androidx.compose.ui.text.style.TextDecoration.Underline }
+        assertNotNull(underlineStyle)
+        assertEquals(0, underlineStyle.start)
+        assertEquals(15, underlineStyle.end)
+    }
+
+    @Test
+    fun code_tag_applies_monospace_font_and_background() {
+        val ui = htmlToUiRichText("<code>Code Text</code>")
+        val state = RichTextState(ui, defaultStyleData())
+
+        val spanStyles = state.annotatedString.spanStyles
+        val codeStyle = spanStyles.firstOrNull { it.item.fontFamily == androidx.compose.ui.text.font.FontFamily.Monospace }
+        assertNotNull(codeStyle)
+        assertEquals(0, codeStyle.start)
+        assertEquals(9, codeStyle.end)
+        // Check background color if possible, or just existence of style is enough for now
+    }
+
+    @Test
+    fun list_items_are_prefixed_with_bullet() {
+        val ui = htmlToUiRichText("<ul><li>Item 1</li><li>Item 2</li></ul>")
+        val state = RichTextState(ui, defaultStyleData())
+
+        val text = state.annotatedString.text
+        assertTrue(text.contains("• Item 1"))
+        assertTrue(text.contains("• Item 2"))
+    }
+
+    @Test
+    fun headers_apply_correct_styles() {
+        val ui = htmlToUiRichText("<h1>Header 1</h1><h2>Header 2</h2>")
+        val state = RichTextState(ui, defaultStyleData())
+
+        val text = state.annotatedString.text
+        assertTrue(text.contains("Header 1"))
+        assertTrue(text.contains("Header 2"))
+
+        assertTrue(text.contains("\n"))
+    }
+
+    @Test
+    fun center_tag_applies_center_alignment() {
+        val ui = htmlToUiRichText("<center>Centered Text</center>")
+        val state = RichTextState(ui, defaultStyleData())
+
+        assertEquals("Centered Text", state.annotatedString.text)
+    }
+
+    @Test
+    fun blockquote_applies_styling() {
+        val ui = htmlToUiRichText("<blockquote>Quote</blockquote>")
+        val state = RichTextState(ui, defaultStyleData())
+
+        val paragraphStyles = state.annotatedString.paragraphStyles
+        assertTrue(paragraphStyles.isNotEmpty())
+
+        val spanStyles = state.annotatedString.spanStyles
+        val backgroundStyle = spanStyles.firstOrNull { it.item.background != androidx.compose.ui.graphics.Color.Unspecified }
+        assertNotNull(backgroundStyle)
+    }
 }

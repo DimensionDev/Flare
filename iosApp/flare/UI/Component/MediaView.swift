@@ -16,13 +16,19 @@ struct MediaView: View {
     var body: some View {
         switch onEnum(of: data) {
         case .image(let image):
-            AdaptiveSizeMediaContainerView(expandToFullSize: expandToFullSize) {
+            AdaptiveSizeMediaContainerView(
+                aspectRatio: CGFloat(image.aspectRatio),
+                expandToFullSize: expandToFullSize
+            ) {
                 NetworkImage(data: image.previewUrl)
             }
         case .video(let video):
             MediaVideoView(data: video, expandToFullSize: expandToFullSize)
         case .gif(let gif):
-            AdaptiveSizeMediaContainerView(expandToFullSize: expandToFullSize) {
+            AdaptiveSizeMediaContainerView(
+                aspectRatio: CGFloat(gif.aspectRatio),
+                expandToFullSize: expandToFullSize
+            ) {
                 NetworkImage(data: gif.url)
             }
         case .audio(let audio):
@@ -32,11 +38,24 @@ struct MediaView: View {
 }
 
 struct AdaptiveSizeMediaContainerView<Content: View>: View {
+    let aspectRatio: CGFloat?
     let expandToFullSize: Bool
     @ViewBuilder let content: () -> Content
+    
+    init(aspectRatio: CGFloat? = nil, expandToFullSize: Bool, @ViewBuilder content: @escaping () -> Content) {
+        self.aspectRatio = aspectRatio
+        self.expandToFullSize = expandToFullSize
+        self.content = content
+    }
+    
     var body: some View {
         if expandToFullSize {
-            content()
+            if let aspectRatio {
+                content()
+                    .aspectRatio(aspectRatio, contentMode: .fit)
+            } else {
+                content()
+            }
         } else {
             Color.gray
                 .opacity(0.2)
@@ -72,7 +91,10 @@ struct MediaVideoView: View {
     }
     
     var body: some View {
-        AdaptiveSizeMediaContainerView(expandToFullSize: expandToFullSize) {
+        AdaptiveSizeMediaContainerView(
+            aspectRatio: CGFloat(data.aspectRatio),
+            expandToFullSize: expandToFullSize
+        ) {
             NetworkImage(data: data.thumbnailUrl)
         }
         .overlay {
@@ -131,10 +153,10 @@ struct MediaVideoView: View {
                 .padding()
             case .error:
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(Color(.white))
-                    .padding(8)
-                    .background(.black, in: .rect(cornerRadius: 16))
-                    .padding()
+                .foregroundStyle(Color(.white))
+                .padding(8)
+                .background(.black, in: .rect(cornerRadius: 16))
+                .padding()
             }
         }
     }

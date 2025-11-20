@@ -189,7 +189,7 @@ firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analy
 firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics" }
 
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
-colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.1.2" }
+colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.1.3" }
 material-motion-compose = { module = "io.github.fornewid:material-motion-compose-core", version = "2.0.1" }
 
 precompose-molecule = { module = "moe.tlaster:precompose-molecule", version = "1.7.0-alpha03" }

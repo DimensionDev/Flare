@@ -100,7 +100,7 @@ material3-adaptive-navigation = { group = "androidx.compose.material3.adaptive",
 paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 composeIcons-fontAwesome = { module = "moe.tlaster.compose.icons:font-awesome", version.ref = "composeIcons" }
-datastore = { group = "androidx.datastore", name = "datastore", version = "1.1.7" }
+datastore = { group = "androidx.datastore", name = "datastore", version = "1.2.0" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 androidx-window = { group = "androidx.window", name = "window-core", version = "1.5.1" }
 androidx-splash = { group = "androidx.core", name = "core-splashscreen", version = "1.2.0" }

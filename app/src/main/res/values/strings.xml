@@ -364,9 +364,8 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Added Mastodon quote support</li>
-                <li>Added All RSS tab</li>
-                <li>Added in-app browser setting</li>
+                <li>Notifications now support multiple accounts.</li>
+                <li>Add support for OPML import and export.</li>
                 <li>Bug fixes and performance improvements.</li>
             </ul>
         ]]>

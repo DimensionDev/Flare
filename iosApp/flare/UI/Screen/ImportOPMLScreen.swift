@@ -11,7 +11,7 @@ struct ImportOPMLScreen: View {
         do {
             url.startAccessingSecurityScopedResource()
             let content = try String(contentsOf: url, encoding: .utf8)
-            self._presenter = .init(wrappedValue: .init(presenter: ImportOPMLPresenter(opmlContent: content ?? "")))
+            self._presenter = .init(wrappedValue: .init(presenter: ImportOPMLPresenter(opmlContent: content)))
             url.stopAccessingSecurityScopedResource()
         } catch {
             self._presenter = .init(wrappedValue: .init(presenter: ImportOPMLPresenter(opmlContent: "")))

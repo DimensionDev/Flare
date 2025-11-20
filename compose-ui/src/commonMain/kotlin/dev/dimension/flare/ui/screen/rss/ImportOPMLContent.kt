@@ -80,15 +80,6 @@ public fun ImportOPMLContent(
                     )
                 }
             }
-//            PlatformButton(
-//                onClick = onGoBack,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
-//                enabled = !state.importing,
-//            ) {
-//                PlatformText(stringResource(Res.string.done))
-//            }
         }
     }
 }

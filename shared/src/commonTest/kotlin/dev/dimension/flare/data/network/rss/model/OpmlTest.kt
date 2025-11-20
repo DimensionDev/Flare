@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.network.rss.model
 
+import dev.dimension.flare.common.Xml
 import kotlinx.serialization.decodeFromString
-import nl.adaptivity.xmlutil.serialization.XML
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -23,7 +23,7 @@ class OpmlTest {
             </opml>
             """.trimIndent()
 
-        val opml = XML.decodeFromString<Opml>(xml)
+        val opml = Xml.decodeFromString<Opml>(xml)
 
         assertEquals("2.0", opml.version)
         assertEquals("My Feeds", opml.head.title)
@@ -66,7 +66,7 @@ class OpmlTest {
             </opml>
             """.trimIndent()
 
-        val opml = XML.decodeFromString<Opml>(xml)
+        val opml = Xml.decodeFromString<Opml>(xml)
 
         assertEquals("1.0", opml.version)
         assertEquals("walterlv", opml.head.title)
@@ -87,5 +87,77 @@ class OpmlTest {
         assertEquals(2, microsoft.outlines.size)
         assertEquals("Microsoft .NET Blog", microsoft.outlines[0].text)
         assertEquals("Microsoft The Visual Studio Blog", microsoft.outlines[1].text)
+    }
+
+    @Test
+    fun testOpml() {
+        val xml =
+            """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <opml version="2.0">
+                <head>
+                    <title>RSS Feeds Export</title>
+                    <dateCreated>2025-11-20 14:46:05</dateCreated>
+                </head>
+                <body>
+                    <outline text="Rolling Stone" title="Rolling Stone" type="rss" description="Music, Film, TV and Political News Coverage" htmlUrl="https://www.rollingstone.com" xmlUrl="https://www.rollingstone.com/music/feed/"/>
+                    <outline text="New York Times" title="New York Times" type="rss" description="Comprehensive news coverage spanning global events, politics, culture, and opinion, with in-depth reporting and analysis." htmlUrl="https://www.nytimes.com" xmlUrl="https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"/>
+                    <outline text="Fast Company" title="Fast Company" type="rss" description="Fast Company inspires a new breed of innovative and creative thought leaders who are actively inventing the future of business." htmlUrl="https://www.fastcompany.com/" xmlUrl="https://www.fastcompany.com/latest/rss"/>
+                    <outline text="NPR News (Latest)" title="NPR News (Latest)" type="rss" description="U.S. and world news from NPR, America’s public radio network (hourly updated headlines)." htmlUrl="https://www.npr.org/sections/news/" xmlUrl="https://feeds.npr.org/1001/rss.xml"/>
+                    <outline text="BBC News – World" title="BBC News – World" type="rss" description="Global news from the BBC (British public broadcaster) covering major international stories." htmlUrl="https://www.bbc.co.uk/news/world" xmlUrl="https://feeds.bbci.co.uk/news/world/rss.xml"/>
+                </body>
+            </opml>
+            """.trimIndent()
+
+        val opml = Xml.decodeFromString<Opml>(xml)
+
+        assertEquals("2.0", opml.version)
+        assertEquals("RSS Feeds Export", opml.head.title)
+        assertEquals("2025-11-20 14:46:05", opml.head.dateCreated)
+        assertEquals(5, opml.body.outlines.size)
+
+        val outlines = opml.body.outlines
+
+        val rollingStone = outlines[0]
+        assertEquals("Rolling Stone", rollingStone.text)
+        assertEquals("https://www.rollingstone.com/music/feed/", rollingStone.xmlUrl)
+        assertEquals("https://www.rollingstone.com", rollingStone.htmlUrl)
+        assertEquals("Music, Film, TV and Political News Coverage", rollingStone.description)
+
+        val nyTimes = outlines[1]
+        assertEquals("New York Times", nyTimes.text)
+        assertEquals("https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", nyTimes.xmlUrl)
+        assertEquals("https://www.nytimes.com", nyTimes.htmlUrl)
+        assertEquals(
+            "Comprehensive news coverage spanning global events, politics, culture, and opinion, with in-depth reporting and analysis.",
+            nyTimes.description,
+        )
+
+        val fastCompany = outlines[2]
+        assertEquals("Fast Company", fastCompany.text)
+        assertEquals("https://www.fastcompany.com/latest/rss", fastCompany.xmlUrl)
+        assertEquals("https://www.fastcompany.com/", fastCompany.htmlUrl)
+        assertEquals(
+            "Fast Company inspires a new breed of innovative and creative thought leaders who are actively inventing the future of business.",
+            fastCompany.description,
+        )
+
+        val npr = outlines[3]
+        assertEquals("NPR News (Latest)", npr.text)
+        assertEquals("https://feeds.npr.org/1001/rss.xml", npr.xmlUrl)
+        assertEquals("https://www.npr.org/sections/news/", npr.htmlUrl)
+        assertEquals(
+            "U.S. and world news from NPR, America’s public radio network (hourly updated headlines).",
+            npr.description,
+        )
+
+        val bbc = outlines[4]
+        assertEquals("BBC News – World", bbc.text)
+        assertEquals("https://feeds.bbci.co.uk/news/world/rss.xml", bbc.xmlUrl)
+        assertEquals("https://www.bbc.co.uk/news/world", bbc.htmlUrl)
+        assertEquals(
+            "Global news from the BBC (British public broadcaster) covering major international stories.",
+            bbc.description,
+        )
     }
 }

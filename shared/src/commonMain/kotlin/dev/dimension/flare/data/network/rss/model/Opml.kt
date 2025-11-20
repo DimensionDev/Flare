@@ -62,6 +62,9 @@ public data class OpmlOutline(
     @XmlSerialName("htmlUrl")
     @XmlElement(false)
     val htmlUrl: String? = null,
+    @XmlSerialName("description")
+    @XmlElement(false)
+    val description: String? = null,
     @XmlSerialName("outline")
     @XmlElement(true)
     val outlines: List<OpmlOutline> = emptyList(),

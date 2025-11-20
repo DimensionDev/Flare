@@ -17,5 +17,24 @@
 			</array>
 		</dict>
 	</array>
+    <key>UTExportedTypeDeclarations</key>
+    <array>
+        <dict>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.txt</string>
+            </array>
+            <key>UTTypeIdentifier</key>
+            <string>opml</string>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>opml</string>
+                </array>
+            </dict>
+        </dict>
+    </array>
+
 </dict>
 </plist>

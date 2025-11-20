@@ -13,12 +13,10 @@ import dev.dimension.flare.data.network.rss.model.Feed
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.mapper.fromRss
+import dev.dimension.flare.ui.model.mapper.parseRssDateToInstant
 import dev.dimension.flare.ui.model.mapper.title
 import dev.dimension.flare.ui.render.parseHtml
-import kotlinx.datetime.format.DateTimeComponents
-import kotlinx.datetime.parse
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 @OptIn(ExperimentalPagingApi::class)
 internal class RssTimelineRemoteMediator(
@@ -78,7 +76,7 @@ internal class RssTimelineRemoteMediator(
                                                 ?.let { html -> parseHtml(html) }
                                                 ?.wholeText(),
                                         createdAt =
-                                            it.data.published?.let { Instant.parse(it) }
+                                            it.data.published?.let { parseRssDateToInstant(it) }
                                                 ?: Clock.System.now(),
                                     ),
                             )
@@ -110,7 +108,7 @@ internal class RssTimelineRemoteMediator(
                                                 .let { html -> parseHtml(html) }
                                                 .wholeText(),
                                         createdAt =
-                                            it.data.date?.let { Instant.parse(it) }
+                                            it.data.date?.let { parseRssDateToInstant(it) }
                                                 ?: Clock.System.now(),
                                     ),
                             )
@@ -144,9 +142,8 @@ internal class RssTimelineRemoteMediator(
                                         createdAt =
                                             it.data.pubDate
                                                 ?.let {
-                                                    Instant.parse(
+                                                    parseRssDateToInstant(
                                                         it,
-                                                        DateTimeComponents.Formats.RFC_1123,
                                                     )
                                                 }
                                                 ?: Clock.System.now(),

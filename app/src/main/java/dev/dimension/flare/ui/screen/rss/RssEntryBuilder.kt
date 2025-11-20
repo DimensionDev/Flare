@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import compose.icons.FontAwesomeIcons
@@ -100,6 +101,9 @@ internal fun EntryProviderScope<NavKey>.rssEntryBuilder(
         RssSourceEditSheet(
             onDismissRequest = onBack,
             id = null,
+            onImportOPML = {
+                navigate(Route.Rss.OPMLImport(it))
+            }
         )
     }
     entry<Route.Rss.Edit>(
@@ -108,6 +112,17 @@ internal fun EntryProviderScope<NavKey>.rssEntryBuilder(
         RssSourceEditSheet(
             onDismissRequest = onBack,
             id = args.id,
+            onImportOPML = {
+                navigate(Route.Rss.OPMLImport(it))
+            },
+        )
+    }
+    entry<Route.Rss.OPMLImport>(
+        metadata = BottomSheetSceneStrategy.bottomSheet()
+    ) { args ->
+        OPMLImportSheet(
+            uri = args.url.toUri(),
+            onBack = onBack,
         )
     }
 }

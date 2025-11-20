@@ -24,6 +24,8 @@ import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.add_rss_source
 import dev.dimension.flare.opml_export
+import dev.dimension.flare.save_completed
+import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.presenter.home.rss.ExportOPMLPresenter
@@ -32,10 +34,12 @@ import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.ProgressBar
+import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import java.awt.FileDialog
 import java.io.File
 
@@ -78,7 +82,7 @@ internal fun RssListScreen(
                 modifier = Modifier.fillParentMaxWidth(),
             ) {
                 if (state.sources.any()) {
-                    AccentButton(
+                    SubtleButton(
                         onClick = {
                             state.export()
                         },
@@ -126,6 +130,7 @@ internal fun RssListScreen(
 @Composable
 private fun presenter(onFilePicker: () -> File?) =
     run {
+        val notification = koinInject<ComposeInAppNotification>()
         val exportPresenter = remember { ExportOPMLPresenter() }
         val scope = rememberCoroutineScope()
         var exporting by remember { mutableStateOf(false) }
@@ -147,6 +152,7 @@ private fun presenter(onFilePicker: () -> File?) =
                         }
                     }
                     exporting = false
+                    notification.message(Res.string.save_completed)
                 }
             }
         }

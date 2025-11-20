@@ -148,6 +148,11 @@ internal sealed interface Route : NavKey {
         data object Create : Rss
 
         @Serializable
+        data class OPMLImport(
+            val url: String,
+        ) : Rss
+
+        @Serializable
         data class Edit(
             val id: Int,
         ) : Rss

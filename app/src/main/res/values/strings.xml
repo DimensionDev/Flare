@@ -317,6 +317,9 @@
     <string name="add_rss_source">Add RSS Source</string>
     <string name="edit_rss_source">Edit RSS Source</string>
     <string name="delete_rss_source">Delete RSS Source</string>
+    <string name="opml_import">Import from OPML</string>
+    <string name="opml_export">Export to OPML</string>
+    <string name="export_completed">Export completed</string>
 
     <string name="rss_sources_title_label">Title</string>
     <string name="rss_sources_url_label">Url</string>

@@ -22,7 +22,7 @@
         <dict>
             <key>UTTypeConformsTo</key>
             <array>
-                <string>public.txt</string>
+                <string>public.text</string>
             </array>
             <key>UTTypeIdentifier</key>
             <string>opml</string>

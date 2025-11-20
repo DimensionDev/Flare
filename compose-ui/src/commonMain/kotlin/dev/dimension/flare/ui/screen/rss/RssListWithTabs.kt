@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.rss
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
@@ -142,50 +143,52 @@ public fun LazyListScope.rssListWithTabs(
                             mutableStateOf(false)
                         }
                         PlatformIconButton(onClick = { showDropdown = true }) {
-                            FAIcon(
-                                imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
-                                contentDescription = stringResource(Res.string.more),
-                            )
-                            PlatformDropdownMenu(
-                                expanded = showDropdown,
-                                onDismissRequest = { showDropdown = false },
-                            ) {
-                                PlatformDropdownMenuItem(
-                                    text = {
-                                        PlatformText(
-                                            text = stringResource(Res.string.edit_rss_source),
-                                        )
-                                    },
-                                    onClick = {
-                                        onEdit.invoke(it.id)
-                                        showDropdown = false
-                                    },
-                                    leadingIcon = {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.Pen,
-                                            contentDescription = stringResource(Res.string.edit_rss_source),
-                                        )
-                                    },
+                            Box {
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
+                                    contentDescription = stringResource(Res.string.more),
                                 )
-                                PlatformDropdownMenuItem(
-                                    text = {
-                                        PlatformText(
-                                            text = stringResource(Res.string.delete_rss_source),
-                                            color = PlatformTheme.colorScheme.error,
-                                        )
-                                    },
-                                    onClick = {
-                                        state.delete(it.id)
-                                        showDropdown = false
-                                    },
-                                    leadingIcon = {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.Trash,
-                                            contentDescription = stringResource(Res.string.delete_rss_source),
-                                            tint = PlatformTheme.colorScheme.error,
-                                        )
-                                    },
-                                )
+                                PlatformDropdownMenu(
+                                    expanded = showDropdown,
+                                    onDismissRequest = { showDropdown = false },
+                                ) {
+                                    PlatformDropdownMenuItem(
+                                        text = {
+                                            PlatformText(
+                                                text = stringResource(Res.string.edit_rss_source),
+                                            )
+                                        },
+                                        onClick = {
+                                            onEdit.invoke(it.id)
+                                            showDropdown = false
+                                        },
+                                        leadingIcon = {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Pen,
+                                                contentDescription = stringResource(Res.string.edit_rss_source),
+                                            )
+                                        },
+                                    )
+                                    PlatformDropdownMenuItem(
+                                        text = {
+                                            PlatformText(
+                                                text = stringResource(Res.string.delete_rss_source),
+                                                color = PlatformTheme.colorScheme.error,
+                                            )
+                                        },
+                                        onClick = {
+                                            state.delete(it.id)
+                                            showDropdown = false
+                                        },
+                                        leadingIcon = {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Trash,
+                                                contentDescription = stringResource(Res.string.delete_rss_source),
+                                                tint = PlatformTheme.colorScheme.error,
+                                            )
+                                        },
+                                    )
+                                }
                             }
                         }
                     }

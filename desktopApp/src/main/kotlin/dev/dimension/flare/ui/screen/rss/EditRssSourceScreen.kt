@@ -37,6 +37,7 @@ import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.edit_rss_source
 import dev.dimension.flare.ok
+import dev.dimension.flare.opml_import
 import dev.dimension.flare.rss_sources_discovered_rss_sources
 import dev.dimension.flare.rss_sources_pinned_in_tabs
 import dev.dimension.flare.rss_sources_rss_hub_host_hint
@@ -58,6 +59,7 @@ import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.home.rss.CheckRssSourcePresenter
 import dev.dimension.flare.ui.presenter.home.rss.EditRssSourcePresenter
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.theme.LocalComposeWindow
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.CardExpanderItem
 import io.github.composefluent.component.CheckBox
@@ -74,13 +76,16 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import java.io.File
 
 @Composable
 fun EditRssSourceScreen(
     onDismissRequest: () -> Unit,
     id: Int?,
     initialUrl: String? = null,
+    onImport: (String) -> Unit,
 ) {
+    val composeWindow = LocalComposeWindow.current
     val state by producePresenter("rss_source_edit_${id}_$initialUrl") { presenter(id, initialUrl) }
 
     ContentDialog(
@@ -93,6 +98,12 @@ fun EditRssSourceScreen(
         visible = true,
         primaryButtonText = stringResource(Res.string.ok),
         closeButtonText = stringResource(Res.string.cancel),
+        secondaryButtonText =
+            if (id == null) {
+                stringResource(Res.string.opml_import)
+            } else {
+                null
+            },
         onButtonClick = {
             when (it) {
                 ContentDialogButton.Primary -> {
@@ -142,7 +153,25 @@ fun EditRssSourceScreen(
                     }
                 }
 
-                ContentDialogButton.Secondary -> Unit
+                ContentDialogButton.Secondary -> {
+                    java.awt
+                        .FileDialog(composeWindow)
+                        .apply {
+                            filenameFilter =
+                                java.io.FilenameFilter { _, name ->
+                                    name.endsWith(".opml", ignoreCase = true)
+                                }
+                            isVisible = true
+                        }.takeIf { dialog ->
+                            dialog.file.isNotEmpty() && dialog.directory.isNotEmpty()
+                        }?.let {
+                            onDismissRequest()
+                            onImport.invoke(
+                                File(it.directory, it.file).absolutePath,
+                            )
+                        }
+                }
+
                 ContentDialogButton.Close -> {
                     onDismissRequest.invoke()
                 }

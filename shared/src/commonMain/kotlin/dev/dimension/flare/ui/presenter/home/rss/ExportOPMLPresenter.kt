@@ -30,43 +30,45 @@ public class ExportOPMLPresenter :
 
         LaunchedEffect(Unit) {
             try {
-                val sources = appDatabase.rssSourceDao().getAll().first()
-
-                val outlines =
-                    sources.map { source ->
-                        OpmlOutline(
-                            text = source.title ?: source.url,
-                            title = source.title,
-                            type = "rss",
-                            xmlUrl = source.url,
-                            htmlUrl = null,
-                        )
-                    }
-
-                val opml =
-                    Opml(
-                        version = "2.0",
-                        head =
-                            OpmlHead(
-                                title = "Flare Export",
-                                dateCreated = Clock.System.now().toString(),
-                            ),
-                        body =
-                            OpmlBody(
-                                outlines = outlines,
-                            ),
-                    )
-
-                val content =
-                    XML {
-                        indentString = "  "
-                    }.encodeToString(Opml.serializer(), opml)
-                state = UiState.Success(content)
+                state = UiState.Success(export())
             } catch (e: Exception) {
                 state = UiState.Error(e)
             }
         }
 
         return state
+    }
+
+    public suspend fun export(): String {
+        val sources = appDatabase.rssSourceDao().getAll().first()
+
+        val outlines =
+            sources.map { source ->
+                OpmlOutline(
+                    text = source.title ?: source.url,
+                    title = source.title,
+                    type = "rss",
+                    xmlUrl = source.url,
+                    htmlUrl = null,
+                )
+            }
+
+        val opml =
+            Opml(
+                version = "2.0",
+                head =
+                    OpmlHead(
+                        title = "Flare Export",
+                        dateCreated = Clock.System.now().toString(),
+                    ),
+                body =
+                    OpmlBody(
+                        outlines = outlines,
+                    ),
+            )
+
+        return XML {
+            indentString = "  "
+        }.encodeToString(Opml.serializer(), opml)
     }
 }

@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name" translatable="false">Flare</string>
     <string name="delete">Delete</string>
-    
+    <string name="done">Done</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+
     <string name="profile_header_following_count">%1$s Following</string>
     <string name="profile_header_fans_count">%1$s Followers</string>
     <string name="profile_header_toots_count">%1$s Posts</string>

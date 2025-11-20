@@ -44,6 +44,7 @@ import dev.dimension.flare.ui.screen.media.RawMediaScreen
 import dev.dimension.flare.ui.screen.media.StatusMediaScreen
 import dev.dimension.flare.ui.screen.misskey.AntennasListScreen
 import dev.dimension.flare.ui.screen.rss.EditRssSourceScreen
+import dev.dimension.flare.ui.screen.rss.ImportOPMLScreen
 import dev.dimension.flare.ui.screen.rss.RssListScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import dev.dimension.flare.ui.screen.settings.LocalCacheScreen
@@ -176,6 +177,11 @@ internal fun WindowScope.RouteContent(
             EditRssSourceScreen(
                 onDismissRequest = onBack,
                 id = null,
+                onImport = {
+                    navigate(
+                        Route.ImportOPML(it),
+                    )
+                },
             )
         }
 
@@ -183,8 +189,21 @@ internal fun WindowScope.RouteContent(
             EditRssSourceScreen(
                 onDismissRequest = onBack,
                 id = route.id,
+                onImport = {
+                    navigate(
+                        Route.ImportOPML(it),
+                    )
+                },
             )
         }
+
+        is Route.ImportOPML -> {
+            ImportOPMLScreen(
+                onDismissRequest = onBack,
+                filePath = route.filePath,
+            )
+        }
+
         is Route.Compose.New ->
             FluentDialog(
                 visible = true,

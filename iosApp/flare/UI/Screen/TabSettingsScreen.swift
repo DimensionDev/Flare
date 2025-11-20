@@ -253,6 +253,7 @@ struct AddTabSheet: View {
     let onAdd: (TabItem) -> Void
     @State private var showAddRssSource = false
     @State private var selectedIndex = 0
+    @State private var importOpmlUrl: URL? = nil
     var body: some View {
         VStack {
             ScrollView(.horizontal) {
@@ -378,7 +379,14 @@ struct AddTabSheet: View {
         }
         .sheet(isPresented: $showAddRssSource) {
             NavigationStack {
-                EditRssSheet(id: nil)
+                EditRssSheet(id: nil, onImportOPML: { url in
+                    importOpmlUrl = url
+                })
+            }
+        }
+        .sheet(item: $importOpmlUrl) { url in
+            NavigationStack {
+                ImportOPMLScreen(url: url)
             }
         }
     }

@@ -134,9 +134,11 @@ internal fun MicroBlogKey.Companion.fromRss(url: String) =
         host = "RSS",
     )
 
-private fun parseRssDateToInstant(input: String): Instant? =
+internal fun parseRssDateToInstant(input: String): Instant? =
     runCatching {
         Instant.parse(input)
+    }.getOrNull() ?: runCatching {
+        parseIso8601LocalToInstant(input)
     }.getOrNull() ?: runCatching {
         parseRfc2822LikeToInstant(input)
     }.getOrNull() ?: runCatching {
@@ -287,4 +289,11 @@ private fun parseZoneOffsetFlexible(z: String): UtcOffset {
         }
     require(hh in 0..18 && mm in 0..59) { "Out-of-range zone: $z" }
     return UtcOffset(hours = sign * hh, minutes = sign * mm)
+}
+
+private fun parseIso8601LocalToInstant(input: String): Instant {
+    val trimmed = input.trim()
+    require('T' in trimmed) { "Invalid ISO8601 local datetime: $input" }
+    val local = LocalDateTime.parse(trimmed)
+    return local.toInstant(UtcOffset.ZERO)
 }

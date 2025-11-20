@@ -34,6 +34,7 @@ class AddRssSourceActivity : ComponentActivity() {
                         },
                         id = null,
                         initialUrl = initialText,
+                        onImportOPML = {},
                     )
                 }
             }

@@ -615,8 +615,9 @@ fun ComposeDialog(
                                         isVisible = true
                                     }.files
                                     .takeIf { files -> files.isNotEmpty() }
-                                    ?.map { file -> File(file.toURI()) }
-                                    ?.let { uris -> mediaState.addMedia(uris) }
+                                    .orEmpty()
+                                    .toList()
+                                    .let { uris -> mediaState.addMedia(uris) }
                             },
                             disabled = !state.canMedia,
                             iconOnly = true,

@@ -1,5 +1,8 @@
 package dev.dimension.flare.ui.screen.rss
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -75,6 +78,7 @@ import org.koin.compose.koinInject
 @Composable
 internal fun RssSourceEditSheet(
     onDismissRequest: () -> Unit,
+    onImportOPML: (String) -> Unit,
     id: Int?,
     initialUrl: String? = null,
 ) {
@@ -83,6 +87,13 @@ internal fun RssSourceEditSheet(
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
+            it?.let {
+                onDismissRequest.invoke()
+                onImportOPML.invoke(it.toString())
+            }
+        }
     Column(
         modifier =
             Modifier
@@ -150,6 +161,19 @@ internal fun RssSourceEditSheet(
                     }
             },
         )
+
+        AnimatedVisibility(state.url.text.isEmpty() && initialUrl == null) {
+            TextButton(
+                onClick = {
+                    launcher.launch(arrayOf("*/*"))
+                },
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.opml_import))
+            }
+        }
 
         state.checkState.onSuccess { rssState ->
             when (rssState) {

@@ -155,6 +155,10 @@ internal sealed interface Route {
 
     data object CreateRssSource : FloatingRoute
 
+    data class ImportOPML(
+        val filePath: String,
+    ) : FloatingRoute
+
     data class RssDetail(
         override val url: String,
     ) : UrlRoute

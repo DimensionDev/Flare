@@ -1,10 +1,13 @@
 import SwiftUI
 import KotlinSharedUI
+import UniformTypeIdentifiers
 
 struct RssScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: RssListWithTabsPresenter())
     @State private var showAddSheet = false
     @State private var selectedEditItem: UiRssSource? = nil
+    @State private var importOpmlUrl: URL? = nil
+    @State private var exportedOPMLContent: String? = nil
     var body: some View {
         List {
             ForEach(presenter.state.sources, id: \.id) { item in
@@ -35,6 +38,33 @@ struct RssScreen: View {
         }
         .navigationTitle("rss_title")
         .toolbar {
+            if !presenter.state.sources.isEmpty {
+                ToolbarItem {
+                    Button {
+                        Task {
+                            exportedOPMLContent = try? await ExportOPMLPresenter().export()
+                        }
+                    } label: {
+                        Image("fa-file-export")
+                    }
+                    .fileExporter(
+                        isPresented: Binding(
+                            get: { exportedOPMLContent != nil },
+                            set: { newValue in
+                                if !newValue {
+                                    exportedOPMLContent = nil
+                                }
+                            }
+                        ),
+                        document: OPMLFile(initialText: exportedOPMLContent ?? ""),
+                        defaultFilename: "flare_export.opml"
+                    ) { result in
+                        exportedOPMLContent = nil
+                    }
+                    
+                }
+            }
+            
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showAddSheet = true
@@ -45,12 +75,22 @@ struct RssScreen: View {
         }
         .sheet(isPresented: $showAddSheet) {
             NavigationStack {
-                EditRssSheet(id: nil)
+                EditRssSheet(id: nil, onImportOPML: { url in
+                    showAddSheet = false
+                    importOpmlUrl = url
+                })
             }
         }
         .sheet(item: $selectedEditItem) { item in
             NavigationStack {
-                EditRssSheet(id: Int(item.id), initialUrl: item.url)
+                EditRssSheet(id: Int(item.id), initialUrl: item.url, onImportOPML: { url in
+                    importOpmlUrl = url
+                })
+            }
+        }
+        .sheet(item: $importOpmlUrl) { url in
+            NavigationStack {
+                ImportOPMLScreen(url: url)
             }
         }
     }
@@ -59,6 +99,7 @@ struct RssScreen: View {
 struct EditRssSheet: View {
     @Environment(\.dismiss) private var dismiss
     let id: Int?
+    let onImportOPML: (URL) -> Void
     private let publicRssHubServer = [
         "https://rsshub.rssforever.com",
         "https://hub.slarker.me",
@@ -70,6 +111,7 @@ struct EditRssSheet: View {
     @State private var rssHubHost: String = ""
     @State private var openInApp: Bool = true
     @State private var selectedRssSources: [UiRssSource] = []
+    @State private var showFileImporter = false
     var body: some View {
         Form {
             Section {
@@ -97,6 +139,29 @@ struct EditRssSheet: View {
                     }
             } header: {
                 Text("rss_url_header")
+            } footer: {
+                if url.isEmpty && id == nil {
+                    Button("opml_import") {
+                        showFileImporter = true
+                    }
+                    .fileImporter(
+                        isPresented: $showFileImporter,
+                        allowedContentTypes: [
+                            UTType(exportedAs: "opml", conformingTo: .plainText),
+                            .plainText,
+                            .xml,
+                            .text,
+                        ]
+                    ) { result in
+                        switch result {
+                        case .success(let url):
+                            onImportOPML(url)
+                            dismiss()
+                        case .failure(let error):
+                            print(error)
+                        }
+                    }
+                }
             }
             StateView(state: presenter.state.checkState) { state in
                 switch onEnum(of: state) {
@@ -269,8 +334,9 @@ struct EditRssSheet: View {
 }
 
 extension EditRssSheet {
-    init(id: Int?, initialUrl: String? = nil) {
+    init(id: Int?, initialUrl: String? = nil, onImportOPML: @escaping (URL) -> Void) {
         self.id = id
+        self.onImportOPML = onImportOPML
         self.url = initialUrl ?? ""
         self._presenter = .init(wrappedValue: .init(presenter: EditRssSourcePresenter(id: id == nil ? nil : KotlinInt(value: Int32(id!)))))
     }
@@ -278,4 +344,8 @@ extension EditRssSheet {
 
 extension UiRssSource: Identifiable {
     
+}
+
+extension URL: Identifiable {
+    public var id: String { absoluteString }
 }

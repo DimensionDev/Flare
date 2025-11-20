@@ -41,6 +41,12 @@ internal class ComposeInAppNotification : InAppNotification {
         _source.value = Event(Notification.StringNotification(message.title, success = true))
     }
 
+    fun message(
+        @StringRes messageId: Int,
+    ) {
+        _source.value = Event(Notification.StringNotification(messageId, success = true))
+    }
+
     override fun onError(
         message: Message,
         throwable: Throwable,

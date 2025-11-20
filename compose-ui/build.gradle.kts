@@ -1,3 +1,4 @@
+import co.touchlab.skie.configuration.DefaultArgumentInterop
 import org.jetbrains.compose.compose
 
 plugins {
@@ -98,6 +99,11 @@ skie {
     analytics {
         disableUpload.set(true)
         enabled.set(false)
+    }
+    features {
+        group {
+            DefaultArgumentInterop.Enabled(true)
+        }
     }
 }
 

@@ -265,6 +265,9 @@
     <string name="add_rss_source">RSS bron toevoegen</string>
     <string name="edit_rss_source">RSS bron bewerken</string>
     <string name="delete_rss_source">Verwijder RSS Source</string>
+    <string name="opml_import">Importeren uit OPML</string>
+    <string name="opml_export">Exporteren naar OPML</string>
+    <string name="export_completed">Exporteren voltooid</string>
     <string name="rss_sources_title_label">Aanspreektitel</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">RSS</string>
@@ -300,10 +303,9 @@
     <string name="home_tab_social_timeline_title">Sociaal</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
-                <li>Mastodon quote support</li>
-                <li>added All RSS tab</li>
-                <li>Toegevoegde in-app browserinstelling</li>
-                <li>Bug fixes en prestaties verbeteringen.</li>
+                <li>Notificaties ondersteunen nu meerdere accounts.</li>
+                <li>Voeg ondersteuning toe voor OPML import en export.</li>
+                <li>bugfixes en prestatieverbeteringen.</li>
             </ul>
         ]]></string>
 </resources>

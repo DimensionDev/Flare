@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">حذف</string>
+    <string name="done">تم</string>
+    <string name="cancel">إلغاء</string>
+    <string name="ok">حسناً</string>
     <string name="profile_header_following_count">%1$s متابعة</string>
     <string name="profile_header_fans_count">%1$s متابعين</string>
     <string name="profile_header_toots_count">منشورات %1$s</string>

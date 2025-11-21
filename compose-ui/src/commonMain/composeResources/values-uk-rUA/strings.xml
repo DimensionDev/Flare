@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Видалити</string>
+    <string name="done">Виконано</string>
+    <string name="cancel">Скасувати</string>
+    <string name="ok">Гаразд</string>
     <string name="profile_header_following_count">%1$s Підписки</string>
     <string name="profile_header_fans_count">%1$s Підписників</string>
     <string name="profile_header_toots_count">%1$s Posts</string>

@@ -265,6 +265,9 @@
     <string name="add_rss_source">添加 RSS 源</string>
     <string name="edit_rss_source">编辑 RSS 源</string>
     <string name="delete_rss_source">删除 RSS 源</string>
+    <string name="opml_import">从 OPML 导入</string>
+    <string name="opml_export">导出到 OPML</string>
+    <string name="export_completed">导出完成</string>
     <string name="rss_sources_title_label">标题</string>
     <string name="rss_sources_url_label">网址</string>
     <string name="rss_title">RSS</string>
@@ -298,4 +301,11 @@
     <string name="tab_settings_mixed_timeline">添加混合时间线标签</string>
     <string name="tab_settings_mixed_timeline_desc">混合时间线将混合所有标签页的时间线结果</string>
     <string name="home_tab_social_timeline_title">社交</string>
+    <string name="changelog_current"><![CDATA[            <span> %1$s版本:</span>
+            <ul>
+                <li>通知现在支持多个帐户。</li>
+                <li>添加对 OPML 进出口的支持。</li>
+                <li>Bug 修复和性能改进。</li>
+            </ul>
+        ]]></string>
 </resources>

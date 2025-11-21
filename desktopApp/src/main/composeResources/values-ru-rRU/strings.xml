@@ -266,4 +266,7 @@
     <string name="settings_storage_app_log">Открыть журнал приложений</string>
     <string name="settings_storage_app_log_description">Просмотр журнала приложений</string>
     <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
+    <string name="opml_import">Импорт из OPML</string>
+    <string name="opml_export">Экспорт в OPML</string>
+    <string name="save_completed">Сохранение завершено</string>
 </resources>

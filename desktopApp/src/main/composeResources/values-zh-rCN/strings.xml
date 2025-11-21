@@ -266,4 +266,7 @@
     <string name="settings_storage_app_log">打开应用日志</string>
     <string name="settings_storage_app_log_description">查看应用日志</string>
     <string name="copied_to_clipboard">复制到剪贴板</string>
+    <string name="opml_import">从 OPML 导入</string>
+    <string name="opml_export">导出到 OPML</string>
+    <string name="save_completed">保存完成</string>
 </resources>

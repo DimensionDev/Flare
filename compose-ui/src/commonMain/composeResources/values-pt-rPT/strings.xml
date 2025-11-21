@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">excluir</string>
+    <string name="done">Concluído</string>
+    <string name="cancel">cancelar</string>
+    <string name="ok">Certo</string>
     <string name="profile_header_following_count">%1$s Seguindo</string>
     <string name="profile_header_fans_count">%1$s Seguidores</string>
     <string name="profile_header_toots_count">Postagens %1$s</string>

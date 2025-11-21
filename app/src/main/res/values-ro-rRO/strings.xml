@@ -265,6 +265,9 @@
     <string name="add_rss_source">Adaugă sursă RSS</string>
     <string name="edit_rss_source">Editare sursă RSS</string>
     <string name="delete_rss_source">Șterge sursa RSS</string>
+    <string name="opml_import">Importă din OPML</string>
+    <string name="opml_export">Exportă în OPML</string>
+    <string name="export_completed">Exportare finalizată</string>
     <string name="rss_sources_title_label">Titlu</string>
     <string name="rss_sources_url_label">Url-ul</string>
     <string name="rss_title">RSS</string>
@@ -300,10 +303,9 @@
     <string name="home_tab_social_timeline_title">Sociale</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
-                <li>Oferta Mastodon a adăugat suport</li>
-                <li>Adăugat toate fila RSS</li>
-                <li>Adăugat setarea în browser</li>
-                <li>Remedieri erori şi îmbunătăţiri ale performanţei.</li>
+                <li>Notificări suportă acum conturi multiple.</li>
+                <li>Adaugă suport pentru importul și exportul OPML.</li>
+                <li>Remedierea erorilor şi îmbunătăţirea performanţei.</li>
             </ul>
         ]]></string>
 </resources>

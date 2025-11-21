@@ -265,6 +265,9 @@
     <string name="add_rss_source">Добавить источник RSS</string>
     <string name="edit_rss_source">Изменить RSS-источник</string>
     <string name="delete_rss_source">Удалить RSS-источник</string>
+    <string name="opml_import">Импорт из OPML</string>
+    <string name="opml_export">Экспорт в OPML</string>
+    <string name="export_completed">Экспорт завершен</string>
     <string name="rss_sources_title_label">Заголовок</string>
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">RSS-лента</string>
@@ -300,9 +303,8 @@
     <string name="home_tab_social_timeline_title">Соцсети</string>
     <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
             <ul>
-                <li>Добавлена поддержка цитаты Mastodon</li>
-                <li>Добавлена вся вкладка RSS</li>
-                <li>Добавлена настройка браузера в приложении</li>
+                <li>Уведомления теперь поддерживают несколько учетных записей.</li>
+                <li>Добавить поддержку импорта и экспорта OPML.</li>
                 <li>Исправления ошибок и улучшения производительности.</li>
             </ul>
         ]]></string>

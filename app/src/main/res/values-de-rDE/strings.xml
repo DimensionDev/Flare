@@ -265,6 +265,9 @@
     <string name="add_rss_source">RSS-Quelle hinzufügen</string>
     <string name="edit_rss_source">RSS-Quelle bearbeiten</string>
     <string name="delete_rss_source">RSS-Quelle löschen</string>
+    <string name="opml_import">Von OPML importieren</string>
+    <string name="opml_export">Nach OPML exportieren</string>
+    <string name="export_completed">Export abgeschlossen</string>
     <string name="rss_sources_title_label">Titel</string>
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">RSS</string>
@@ -300,12 +303,9 @@
     <string name="home_tab_social_timeline_title">Sozial</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Mastodon-Angebotsunterstützung</li>
-                
-                <li>Alle RSS Tab</li>
-                
-                <li>In-App-Browser-Einstellung</li>
-                <li>Fehlerbehebungen und Leistungsverbesserungen hinzugefügt.</li>
+                <li>Benachrichtigungen unterstützen jetzt mehrere Konten.</li>
+                <li>Unterstützung für OPML-Import und Export hinzufügen.</li>
+                <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
             </ul>
         ]]></string>
 </resources>

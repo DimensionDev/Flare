@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">מחק</string>
+    <string name="done">בוצע</string>
+    <string name="cancel">ביטול</string>
+    <string name="ok">אוקי</string>
     <string name="profile_header_following_count">%1$s עוקבים אחרי</string>
     <string name="profile_header_fans_count">%1$s עוקבים</string>
     <string name="profile_header_button_follow">לעקוב</string>

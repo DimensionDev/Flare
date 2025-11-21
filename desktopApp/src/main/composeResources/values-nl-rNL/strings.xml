@@ -266,4 +266,7 @@
     <string name="settings_storage_app_log">Open app-logboek</string>
     <string name="settings_storage_app_log_description">Bekijk het app-logboek</string>
     <string name="copied_to_clipboard">Gekopieerd naar klembord</string>
+    <string name="opml_import">Importeren uit OPML</string>
+    <string name="opml_export">Exporteren naar OPML</string>
+    <string name="save_completed">Opslaan voltooid</string>
 </resources>

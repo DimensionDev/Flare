@@ -266,4 +266,7 @@
     <string name="settings_storage_app_log">Άνοιγμα αρχείου καταγραφής εφαρμογής</string>
     <string name="settings_storage_app_log_description">Δείτε το αρχείο καταγραφής της εφαρμογής</string>
     <string name="copied_to_clipboard">Αντιγράφηκε στο πρόχειρο</string>
+    <string name="opml_import">Εισαγωγή από OPML</string>
+    <string name="opml_export">Εξαγωγή σε OPML</string>
+    <string name="save_completed">Ολοκλήρωση αποθήκευσης</string>
 </resources>

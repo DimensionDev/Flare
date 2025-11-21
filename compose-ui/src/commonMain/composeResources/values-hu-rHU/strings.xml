@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Törlés</string>
+    <string name="done">Kész</string>
+    <string name="cancel">Mégse</string>
+    <string name="ok">Rendben</string>
     <string name="profile_header_following_count">%1$s Követés</string>
     <string name="profile_header_fans_count">%1$s Követő</string>
     <string name="profile_header_button_follow">Követés</string>

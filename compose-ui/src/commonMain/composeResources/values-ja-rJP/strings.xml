@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">削除</string>
+    <string name="done">完了</string>
+    <string name="cancel">キャンセル</string>
+    <string name="ok">OK</string>
     <string name="profile_header_following_count">%1$sフォロー中</string>
     <string name="profile_header_fans_count">%1$sフォロワー</string>
     <string name="profile_header_toots_count">%1$s 投稿</string>

@@ -265,6 +265,9 @@
     <string name="add_rss_source">Προσθήκη Πηγής RSS</string>
     <string name="edit_rss_source">Επεξεργασία Πηγαίου Κώδικα RSS</string>
     <string name="delete_rss_source">Διαγραφή Πηγής Rss</string>
+    <string name="opml_import">Εισαγωγή από OPML</string>
+    <string name="opml_export">Εξαγωγή σε OPML</string>
+    <string name="export_completed">Η εξαγωγή ολοκληρώθηκε</string>
     <string name="rss_sources_title_label">Τίτλος</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">RSS</string>
@@ -300,10 +303,9 @@
     <string name="home_tab_social_timeline_title">Κοινωνικά</string>
     <string name="changelog_current"><![CDATA[            <span>Έκδοση %1$s:</span>
             <ul>
-                <li>Προστέθηκε υποστήριξη προσφοράς Mastodon</li>
-                <li>Προστέθηκε όλη η καρτέλα RSS</li>
-                <li>Προστέθηκε ρύθμιση προγράμματος περιήγησης στην εφαρμογή</li>
-                <li>Διορθώσεις σφαλμάτων και βελτιώσεις επιδόσεων.</li>
+                <li>Οι ειδοποιήσεις τώρα υποστηρίζουν πολλούς λογαριασμούς.</li>
+                <li>Προσθήκη υποστήριξης για εισαγωγή και εξαγωγή OPML.</li>
+                <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης.</li>
             </ul>
         ]]></string>
 </resources>

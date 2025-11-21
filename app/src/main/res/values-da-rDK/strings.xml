@@ -265,6 +265,9 @@
     <string name="add_rss_source">Tilføj RSS-kilde</string>
     <string name="edit_rss_source">Rediger RSS-kilde</string>
     <string name="delete_rss_source">Slet RSS-kilde</string>
+    <string name="opml_import">Importer fra OPML</string>
+    <string name="opml_export">Eksporter til OPML</string>
+    <string name="export_completed">Eksport fuldført</string>
     <string name="rss_sources_title_label">Titel</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">RSS</string>
@@ -300,10 +303,9 @@
     <string name="home_tab_social_timeline_title">Social</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Tilføjet Mastodon tilbud support</li>
-                <li>Tilføjet Alle RSS-fane</li>
-                <li>Tilføjet in-app browser indstilling</li>
-                <li>Fejlrettelser og ydeevne forbedringer.</li>
+                <li>Notifikationer understøtter nu flere konti.</li>
+                <li>Tilføj understøttelse for OPML-import og eksport.</li>
+                <li>Fejlrettelser og forbedringer af ydeevnen.</li>
             </ul>
         ]]></string>
 </resources>

@@ -265,4 +265,7 @@
     <string name="settings_storage_app_log">Відкрити журнал додатка</string>
     <string name="settings_storage_app_log_description">Переглянути журнал програми</string>
     <string name="copied_to_clipboard">Скопійовано до буферу обміну</string>
+    <string name="opml_import">Імпорт з OPML</string>
+    <string name="opml_export">Експорт в OPML</string>
+    <string name="save_completed">Зберегти завершене</string>
 </resources>

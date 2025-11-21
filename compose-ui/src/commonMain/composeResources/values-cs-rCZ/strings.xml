@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Vymazat</string>
+    <string name="done">Hotovo</string>
+    <string name="cancel">Zrušit</string>
+    <string name="ok">OK</string>
     <string name="profile_header_following_count">%1$s následuje</string>
     <string name="profile_header_fans_count">%1$s následovníci</string>
     <string name="profile_header_toots_count">%1$s příspěvky</string>

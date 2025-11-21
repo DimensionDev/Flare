@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Sil</string>
+    <string name="done">Tamam</string>
+    <string name="cancel">İptal</string>
+    <string name="ok">Tamam</string>
     <string name="profile_header_following_count">%1$s Takip Edilenler</string>
     <string name="profile_header_fans_count">%1$s Takipçi</string>
     <string name="profile_header_button_follow">Takip Et</string>

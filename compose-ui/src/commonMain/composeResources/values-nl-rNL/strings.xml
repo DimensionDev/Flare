@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Verwijderen</string>
+    <string name="done">Voltooid</string>
+    <string name="cancel">annuleren</string>
+    <string name="ok">Ok</string>
     <string name="profile_header_following_count">%1$s volgers</string>
     <string name="profile_header_fans_count">%1$s volgers</string>
     <string name="profile_header_toots_count">%1$s berichten</string>

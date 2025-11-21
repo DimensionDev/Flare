@@ -304,7 +304,7 @@
     <string name="changelog_current"><![CDATA[            <span>Versione %1$s:</span>
             <ul>
                 <li>Le notifiche ora supportano più account.</li>
-                <li>Aggiungere il supporto per l'importazione ed esportazione di OPML.</li>
+                <li>Aggiungere il supporto per l\'importazione ed esportazione di OPML.</li>
                 <li>Correzioni di bug e miglioramenti delle prestazioni.</li>
             </ul>
         ]]></string>

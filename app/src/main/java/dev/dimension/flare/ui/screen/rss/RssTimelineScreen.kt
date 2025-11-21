@@ -11,6 +11,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import dev.dimension.flare.common.isRefreshing
+import dev.dimension.flare.data.model.BottomBarBehavior
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
@@ -33,7 +35,12 @@ internal fun RssTimelineScreen(
 ) {
     val scope = rememberCoroutineScope()
     val state by producePresenter("rss_timeline_$id") { presenter(id) }
-    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val topAppBarScrollBehavior =
+        if (LocalAppearanceSettings.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
+            TopAppBarDefaults.pinnedScrollBehavior()
+        } else {
+            TopAppBarDefaults.enterAlwaysScrollBehavior()
+        }
     FlareScaffold(
         topBar = {
             FlareTopAppBar(

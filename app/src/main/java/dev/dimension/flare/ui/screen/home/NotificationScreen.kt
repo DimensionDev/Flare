@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.model.BottomBarBehavior
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.ui.common.isCompat
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -65,7 +67,12 @@ internal fun NotificationScreen() {
         },
     )
     val windowInfo = currentWindowAdaptiveInfo()
-    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val topAppBarScrollBehavior =
+        if (LocalAppearanceSettings.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
+            TopAppBarDefaults.pinnedScrollBehavior()
+        } else {
+            TopAppBarDefaults.enterAlwaysScrollBehavior()
+        }
     FlareScaffold(
         topBar = {
             FlareTopAppBar(

@@ -38,6 +38,8 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FileCircleExclamation
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.data.model.BottomBarBehavior
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.isExpanded
@@ -81,7 +83,12 @@ internal fun VVOStatusScreen(
                 .toSize()
                 .toDpSize()
         }
-    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val topAppBarScrollBehavior =
+        if (LocalAppearanceSettings.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
+            TopAppBarDefaults.pinnedScrollBehavior()
+        } else {
+            TopAppBarDefaults.enterAlwaysScrollBehavior()
+        }
     val bigScreen = windowInfo.windowSizeClass.isExpanded()
     FlareScaffold(
         topBar = {

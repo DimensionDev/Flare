@@ -266,4 +266,7 @@
     <string name="settings_storage_app_log">Abrir log do aplicativo</string>
     <string name="settings_storage_app_log_description">Ver registro do aplicativo</string>
     <string name="copied_to_clipboard">Copiado para o clipboard</string>
+    <string name="opml_import">Importar do OPML</string>
+    <string name="opml_export">Exportar para OPML</string>
+    <string name="save_completed">Salvo com sucesso</string>
 </resources>

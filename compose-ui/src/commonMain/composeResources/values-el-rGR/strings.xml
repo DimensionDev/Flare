@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Διαγραφή</string>
+    <string name="done">Ολοκληρώθηκε</string>
+    <string name="cancel">Ακύρωση</string>
+    <string name="ok">Εντάξει</string>
     <string name="profile_header_following_count">%1$s Ακολουθήσεις</string>
     <string name="profile_header_fans_count">%1$s Ακολούθοι</string>
     <string name="profile_header_button_follow">Ακολουθήστε</string>

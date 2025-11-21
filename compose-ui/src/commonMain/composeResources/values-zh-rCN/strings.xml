@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">删除</string>
+    <string name="done">完成</string>
+    <string name="cancel">取消</string>
+    <string name="ok">好的</string>
     <string name="profile_header_following_count">%1$s 关注</string>
     <string name="profile_header_fans_count">%1$s 粉丝</string>
     <string name="profile_header_toots_count">%1$s 帖子</string>

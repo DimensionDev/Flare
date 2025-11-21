@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Изабери</string>
+    <string name="done">Завршено</string>
+    <string name="cancel">Отказати</string>
+    <string name="ok">ОК</string>
     <string name="profile_header_following_count">%1$s Следећи</string>
     <string name="profile_header_fans_count">%1$s Фанови</string>
     <string name="profile_header_button_follow">Следите</string>

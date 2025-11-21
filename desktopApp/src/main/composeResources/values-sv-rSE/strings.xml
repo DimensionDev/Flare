@@ -266,4 +266,7 @@
     <string name="settings_storage_app_log">Öppna applogg</string>
     <string name="settings_storage_app_log_description">Visa apploggen</string>
     <string name="copied_to_clipboard">Kopierad till urklipp</string>
+    <string name="opml_import">Importera från OPML</string>
+    <string name="opml_export">Exportera till OPML</string>
+    <string name="save_completed">Spara slutförd</string>
 </resources>

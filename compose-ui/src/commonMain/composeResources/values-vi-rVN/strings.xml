@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Xóa</string>
+    <string name="done">Hoàn tất</string>
+    <string name="cancel">Hủy</string>
+    <string name="ok">OK</string>
     <string name="profile_header_following_count">%1$s Đang theo dõi</string>
     <string name="profile_header_fans_count">%1$s Người theo dõi</string>
     <string name="profile_header_button_follow">Theo dõi</string>

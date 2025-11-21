@@ -265,6 +265,9 @@
     <string name="add_rss_source">إضافة مصدر RSS</string>
     <string name="edit_rss_source">تحرير مصدر RSS</string>
     <string name="delete_rss_source">حذف مصدر RSS</string>
+    <string name="opml_import">استيراد من OPML</string>
+    <string name="opml_export">تصدير إلى OPML</string>
+    <string name="export_completed">اكتمل التصدير</string>
     <string name="rss_sources_title_label">العنوان</string>
     <string name="rss_sources_url_label">الرابط</string>
     <string name="rss_title">RSS</string>
@@ -300,10 +303,9 @@
     <string name="home_tab_social_timeline_title">إجتماعي</string>
     <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
             <ul>
-                <li>إضافة ماستدون لدعم الاقتباس</li>
-                <li>إضافة جميع علامات التبويب RSS</li>
-                <li>إضافة إعداد المتصفح</li>
-                <li>إصلاحات الشوائب وتحسين الأداء.</li>
+                <li>الإشعارات تدعم الآن حسابات متعددة.</li>
+                <li>يضاف دعم لاستيراد وتصدير OPML.</li>
+                <li>إصلاحات الشوائب وتحسينات الأداء.</li>
             </ul>
         ]]></string>
 </resources>

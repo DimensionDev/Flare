@@ -266,4 +266,7 @@
     <string name="settings_storage_app_log">Otevřít protokol aplikace</string>
     <string name="settings_storage_app_log_description">Zobrazit protokol aplikace</string>
     <string name="copied_to_clipboard">Zkopírováno do schránky</string>
+    <string name="opml_import">Importovat z OPML</string>
+    <string name="opml_export">Exportovat do OPML</string>
+    <string name="save_completed">Uložení dokončeno</string>
 </resources>

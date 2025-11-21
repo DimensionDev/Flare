@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Slet</string>
+    <string name="done">Udført</string>
+    <string name="cancel">Annuller</string>
+    <string name="ok">Ok</string>
     <string name="profile_header_following_count">%1$s Følger</string>
     <string name="profile_header_fans_count">%1$s Følgere</string>
     <string name="profile_header_toots_count">%1$s Indlæg</string>

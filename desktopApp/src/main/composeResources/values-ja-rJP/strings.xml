@@ -266,4 +266,7 @@
     <string name="settings_storage_app_log">アプリログを開く</string>
     <string name="settings_storage_app_log_description">アプリのログを表示</string>
     <string name="copied_to_clipboard">クリップボードにコピーしました</string>
+    <string name="opml_import">OPMLからインポート</string>
+    <string name="opml_export">OPMLにエクスポート</string>
+    <string name="save_completed">保存が完了しました</string>
 </resources>

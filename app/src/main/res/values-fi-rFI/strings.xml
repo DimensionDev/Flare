@@ -265,6 +265,9 @@
     <string name="add_rss_source">Lisää RSS-lähde</string>
     <string name="edit_rss_source">Muokkaa Rss Lähdettä</string>
     <string name="delete_rss_source">Poista RSS-lähde</string>
+    <string name="opml_import">Tuo OPML:sta</string>
+    <string name="opml_export">Vie OPML:ään</string>
+    <string name="export_completed">Vienti valmis</string>
     <string name="rss_sources_title_label">Otsikko</string>
     <string name="rss_sources_url_label">URL-osoite</string>
     <string name="rss_title">RSS</string>
@@ -300,10 +303,9 @@
     <string name="home_tab_social_timeline_title">Sosiaalinen</string>
     <string name="changelog_current"><![CDATA[            <span>Versio %1$s:</span>
             <ul>
-                <li>Lisätty Mastodonin lainauspalvelu</li>
-                <li>Lisätty Kaikki RSS-välilehdet</li>
-                <li>Lisätty sovelluksen sisäinen selain asetus</li>
-                <li>Korjauksia ja suorituskyvyn parannuksia.</li>
+                <li>Ilmoitukset tukevat nyt useita tilejä.</li>
+                <li>Lisää tuki OPML-tuonnille ja vientille.</li>
+                <li>Virheenkorjauksia ja suorituskyvyn parannuksia.</li>
             </ul>
         ]]></string>
 </resources>

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Ștergere</string>
+    <string name="done">Terminat</string>
+    <string name="cancel">Anulează</string>
+    <string name="ok">Ok</string>
     <string name="profile_header_following_count">%1$s urmărită</string>
     <string name="profile_header_fans_count">%1$s Urmăritori</string>
     <string name="profile_header_toots_count">%1$s Postări</string>

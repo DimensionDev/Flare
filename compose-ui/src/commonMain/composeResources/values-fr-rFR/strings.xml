@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Supprimez</string>
+    <string name="done">Fait</string>
+    <string name="cancel">Abandonner</string>
+    <string name="ok">Ok</string>
     <string name="profile_header_following_count">%1$s abonné</string>
     <string name="profile_header_fans_count">%1$s Abonné(e)s</string>
     <string name="profile_header_toots_count">Publications %1$s</string>

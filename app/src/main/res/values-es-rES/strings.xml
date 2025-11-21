@@ -265,6 +265,9 @@
     <string name="add_rss_source">Añadir fuente RSS</string>
     <string name="edit_rss_source">Editar fuente RSS</string>
     <string name="delete_rss_source">Eliminar fuente RSS</string>
+    <string name="opml_import">Importar desde OPML</string>
+    <string name="opml_export">Exportar a OPML</string>
+    <string name="export_completed">Exportación completada</string>
     <string name="rss_sources_title_label">Título</string>
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">RSS</string>
@@ -298,4 +301,11 @@
     <string name="tab_settings_mixed_timeline">Añadir pestaña de cronología mixta</string>
     <string name="tab_settings_mixed_timeline_desc">La línea de tiempo mezclada mezclará todas las pestañas que resulten en una pestaña</string>
     <string name="home_tab_social_timeline_title">Social</string>
+    <string name="changelog_current"><![CDATA[            <span>Versión %1$s:</span>
+            <ul>
+                <li>Notificaciones ahora soportan varias cuentas.</li>
+                <li>Add support for OPML import and export.</li>
+                <li>correcciones de errores y mejoras de rendimiento.</li>
+            </ul>
+        ]]></string>
 </resources>

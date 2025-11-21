@@ -265,6 +265,9 @@
     <string name="add_rss_source">Lägg till RSS-källa</string>
     <string name="edit_rss_source">Redigera RSS-källa</string>
     <string name="delete_rss_source">Ta bort RSS-källa</string>
+    <string name="opml_import">Importera från OPML</string>
+    <string name="opml_export">Exportera till OPML</string>
+    <string name="export_completed">Export slutförd</string>
     <string name="rss_sources_title_label">Titel</string>
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">RSS</string>
@@ -300,10 +303,9 @@
     <string name="home_tab_social_timeline_title">Socialt</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Added Mastodon quote support</li>
-                <li>Lade till alla RSS-fliken</li>
-                <li>Lade till i appen webbläsarinställning</li>
-                <li>Felrättningar och prestandaförbättringar.</li>
+                <li>Meddelanden stöder nu flera konton.</li>
+                <li>Lägg till stöd för OPML import och export.</li>
+                <li>Felrättelser och prestandaförbättringar.</li>
             </ul>
         ]]></string>
 </resources>

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Radera</string>
+    <string name="done">Klar</string>
+    <string name="cancel">Avbryt</string>
+    <string name="ok">Ok</string>
     <string name="profile_header_following_count">%1$s Följer</string>
     <string name="profile_header_fans_count">%1$s Följare</string>
     <string name="profile_header_toots_count">%1$s inlägg</string>

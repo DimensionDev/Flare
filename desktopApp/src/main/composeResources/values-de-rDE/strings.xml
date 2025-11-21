@@ -266,4 +266,7 @@
     <string name="settings_storage_app_log">App-Log öffnen</string>
     <string name="settings_storage_app_log_description">App-Log anzeigen</string>
     <string name="copied_to_clipboard">In Zwischenablage kopiert</string>
+    <string name="opml_import">Von OPML importieren</string>
+    <string name="opml_export">Nach OPML exportieren</string>
+    <string name="save_completed">Speichern abgeschlossen</string>
 </resources>

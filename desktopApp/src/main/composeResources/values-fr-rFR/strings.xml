@@ -266,4 +266,7 @@
     <string name="settings_storage_app_log">Ouvrir le journal de l\'application</string>
     <string name="settings_storage_app_log_description">Voir le journal des applications</string>
     <string name="copied_to_clipboard">Copié dans le presse-papiers</string>
+    <string name="opml_import">Importer depuis OPML</string>
+    <string name="opml_export">Exporter vers OPML</string>
+    <string name="save_completed">Sauvegarde terminée</string>
 </resources>

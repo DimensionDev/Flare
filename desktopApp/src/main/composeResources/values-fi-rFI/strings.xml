@@ -266,4 +266,7 @@
     <string name="settings_storage_app_log">Avaa sovelluksen loki</string>
     <string name="settings_storage_app_log_description">Näytä sovellusloki</string>
     <string name="copied_to_clipboard">Kopioitu leikepöydälle</string>
+    <string name="opml_import">Tuo OPML:sta</string>
+    <string name="opml_export">Vie OPML:ään</string>
+    <string name="save_completed">Tallennus valmis</string>
 </resources>

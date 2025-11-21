@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Verwyder</string>
+    <string name="done">Gereed</string>
+    <string name="cancel">Kanselleer</string>
+    <string name="ok">OK</string>
     <string name="profile_header_following_count">%1$s Volg</string>
     <string name="profile_header_fans_count">%1$s Volgers</string>
     <string name="profile_header_button_follow">Volg</string>

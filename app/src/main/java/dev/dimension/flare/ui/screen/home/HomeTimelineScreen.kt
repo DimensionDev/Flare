@@ -52,6 +52,8 @@ import compose.icons.fontawesomeicons.solid.AnglesUp
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.data.model.BottomBarBehavior
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -92,7 +94,12 @@ internal fun HomeTimelineScreen(
     }
     val scope = rememberCoroutineScope()
 
-    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val topAppBarScrollBehavior =
+        if (LocalAppearanceSettings.current.bottomBarBehavior == BottomBarBehavior.AlwaysShow) {
+            TopAppBarDefaults.pinnedScrollBehavior()
+        } else {
+            TopAppBarDefaults.enterAlwaysScrollBehavior()
+        }
     FlareScaffold(
         topBar = {
             FlareTopAppBar(

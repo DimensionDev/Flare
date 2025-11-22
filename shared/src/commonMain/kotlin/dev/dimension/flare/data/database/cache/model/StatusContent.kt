@@ -123,6 +123,12 @@ internal sealed interface StatusContent {
             ) : RssContent
         }
     }
+
+    @Serializable
+    @SerialName("Test")
+    data class Test internal constructor(
+        internal val data: String,
+    ) : StatusContent
 }
 
 internal suspend inline fun <reified T : StatusContent> updateStatusUseCase(

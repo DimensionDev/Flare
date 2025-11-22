@@ -50,4 +50,10 @@ internal sealed interface UserContent {
     data class VVO internal constructor(
         internal val data: dev.dimension.flare.data.network.vvo.model.User,
     ) : UserContent
+
+    @Serializable
+    @SerialName("Test")
+    data class Test internal constructor(
+        internal val data: String,
+    ) : UserContent
 }

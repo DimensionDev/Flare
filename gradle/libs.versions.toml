@@ -50,7 +50,7 @@ firebase-bom = "34.6.0"
 google-services = "4.4.4"
 firebase-crashlytics = "3.0.6"
 materialKolor = "4.0.4"
-room = "2.8.4"
+room = "2.8.3"
 sqlite = "2.6.2"
 compose-multiplatform = "1.9.3"
 logback = "1.5.21"
@@ -99,6 +99,7 @@ material3-adaptive-layout = { group = "androidx.compose.material3.adaptive", nam
 material3-adaptive-navigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation" }
 paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
+paging-testing = { group = "androidx.paging", name = "paging-testing", version.ref = "paging" }
 composeIcons-fontAwesome = { module = "moe.tlaster.compose.icons:font-awesome", version.ref = "composeIcons" }
 datastore = { group = "androidx.datastore", name = "datastore", version = "1.2.0" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }

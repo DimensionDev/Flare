@@ -17,4 +17,7 @@ internal interface StatusReferenceDao {
 
     @Query("DELETE FROM status_reference WHERE statusKey in (:keys)")
     suspend fun delete(keys: List<MicroBlogKey>)
+
+    @Query("SELECT * FROM status_reference WHERE statusKey = :key")
+    suspend fun getByStatusKey(key: MicroBlogKey): List<DbStatusReference>
 }

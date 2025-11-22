@@ -30,7 +30,7 @@ public data class AppearanceSettings(
     val showMedia: Boolean = true,
     val showSensitiveContent: Boolean = false,
     val videoAutoplay: VideoAutoplay = VideoAutoplay.WIFI,
-    val expandMediaSize: Boolean = false,
+    val expandMediaSize: Boolean = true,
     val compatLinkPreview: Boolean = false,
     val fontSizeDiff: Float = 0f,
     val lineHeightDiff: Float = 0f,
@@ -38,7 +38,7 @@ public data class AppearanceSettings(
     val bottomBarStyle: BottomBarStyle = BottomBarStyle.Floating,
     val bottomBarBehavior: BottomBarBehavior = BottomBarBehavior.MinimizeOnScroll,
     val inAppBrowser: Boolean = true,
-    val fullWidthPost: Boolean = true,
+    val fullWidthPost: Boolean = false,
 ) {
     public companion object {
         // for iOS

@@ -27,10 +27,8 @@ public fun <T : Any> LazyListScope.items(
                 count = itemCount,
                 key =
                     key?.let {
-                        {
-                            this.itemKey {
-                                key(it)
-                            }
+                        this.itemKey {
+                            key(it)
                         }
                     },
                 contentType = {
@@ -77,10 +75,8 @@ public fun <T : Any> LazyListScope.itemsIndexed(
                 count = itemCount,
                 key =
                     key?.let {
-                        {
-                            this.itemKey {
-                                key(it)
-                            }
+                        this.itemKey {
+                            key(it)
                         }
                     },
                 contentType = {
@@ -128,7 +124,7 @@ public fun <T : Any> LazyStaggeredGridScope.items(
                 key =
                     key?.let {
                         {
-                            it(this, it)
+                            key(this, it)
                         }
                     },
                 contentType = {
@@ -171,10 +167,8 @@ public fun <T : Any> LazyStaggeredGridScope.itemsIndexed(
                 count = itemCount,
                 key =
                     key?.let {
-                        {
-                            this.itemKey {
-                                key(it)
-                            }
+                        this.itemKey {
+                            key(it)
                         }
                     },
                 contentType = {

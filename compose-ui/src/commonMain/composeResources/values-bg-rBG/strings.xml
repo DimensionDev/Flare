@@ -17,7 +17,7 @@
     <string name="mastodon_notification_item_requested_follow">поиска да ви следва</string>
     <string name="mastodon_item_show_more">Показване на още</string>
     <string name="mastodon_item_show_less">Показване на по-малко</string>
-    <string name="post_show_full_text">Показване на пълния текст</string>
+    <string name="post_show_full_text">Показване на целия текст</string>
     <string name="bluesky_notification_item_followed_you">ви последва</string>
     <string name="bluesky_notification_item_favourited_your_status">хареса</string>
     <string name="bluesky_notification_item_reblogged_your_status">препубликува</string>
@@ -28,6 +28,7 @@
     <string name="misskey_notification_item_replied_to_you">ви отговори</string>
     <string name="misskey_notification_item_reposted_your_status">препубликува</string>
     <string name="misskey_notification_item_quoted_your_status">цитира</string>
+    <string name="misskey_notification_item_reacted_to_your_status">реагира на вашия статус</string>
     <string name="misskey_notification_item_follow_request_accepted">прие искането ви за следване</string>
     <string name="misskey_notification_item_app">Приложение</string>
     <string name="misskey_notification_item_followed_you">ви последва</string>

@@ -54,7 +54,7 @@
     <string name="service_select_welcome_title">Добре дошли във Flare</string>
     <string name="service_select_welcome_message">Flare е клиент за социални мрежи за Android.\nЗа да започнете, моля изберете услуга, към която да се свържете.</string>
     <string name="mastodon_login_verify_message">Моля, изчакайте, докато проверяваме вашите идентификационни данни.</string>
-    <string name="status_title">Подробност</string>
+    <string name="status_title">Подробно</string>
     <string name="misskey_visibility_public">Общодостъпно</string>
     <string name="misskey_visibility_home">Начало</string>
     <string name="misskey_visibility_followers">Последователи</string>
@@ -210,6 +210,7 @@
     <string name="rss_detail_tldr_error">Неуспешно обобщаване</string>
     <string name="rss_detail_tldr_loading">Обобщава се…</string>
     <string name="emoji_picker_search">Търсене</string>
+    <string name="changelog_title">Добре дошли отново!</string>
     <string name="podcast_host">Хост</string>
     <string name="podcast_title">Подкаст</string>
     <string name="podcast_speaker">Говорител</string>

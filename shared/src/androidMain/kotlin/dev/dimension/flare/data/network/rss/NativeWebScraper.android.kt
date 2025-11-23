@@ -60,7 +60,7 @@ internal actual class NativeWebScraper(
                                 runCatching {
                                     callback(it.decodeJson(String.serializer()))
                                 }.getOrElse {
-                                    callback("error: deserialization failed")
+                                    callback("error: deserialization failed: ${it.message}")
                                 }
                             }
                             destroy()

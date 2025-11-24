@@ -54,10 +54,14 @@ internal actual class NativeWebScraper(
                         evaluateJavascript(scriptToInject) {
                             if (finished) return@evaluateJavascript
                             finished = true
-                            if (it == "\"null\"" || it.startsWith("error:")) {
+                            if (it == "'null'" || it == "\"null\"" || it.startsWith("error:")) {
                                 callback("error: javascript evaluation failed")
                             } else {
-                                callback(it.decodeJson(String.serializer()))
+                                runCatching {
+                                    callback(it.decodeJson(String.serializer()))
+                                }.getOrElse {
+                                    callback("error: deserialization failed: ${it.message}")
+                                }
                             }
                             destroy()
                         }

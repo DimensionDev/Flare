@@ -8,10 +8,10 @@ struct PagingView<T: AnyObject, EmptyContent: View, ErrorContent: View, LoadingC
     @ViewBuilder
     let errorContent: (KotlinThrowable, @escaping () -> Void) -> ErrorContent
     @ViewBuilder
-    let loadingContent: () -> LoadingContent
+    let loadingContent: (Int, Int) -> LoadingContent
     let loadingCount = 5
     @ViewBuilder
-    let successContent: (T) -> SuccessContent
+    let successContent: (T, Int, Int) -> SuccessContent
     var body: some View {
         switch onEnum(of: data) {
         case .empty: emptyContent()
@@ -20,20 +20,19 @@ struct PagingView<T: AnyObject, EmptyContent: View, ErrorContent: View, LoadingC
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         case .loading: ForEach(0..<loadingCount, id: \.self) { index in
-            loadingContent()
+            loadingContent(index, loadingCount)
         }
         case .success(let success):
             ForEach(0..<success.itemCount, id: \.self) { index in
-                if let item = success.peek(index: index) {
-                    successContent(item)
-                        .onAppear {
-                            _ = success.get(index: index)
-                        }
-                } else {
-                    loadingContent()
-                        .onAppear {
-                            _ = success.get(index: index)
-                        }
+                ZStack {
+                    if let item = success.peek(index: index) {
+                        successContent(item, Int(index), Int(success.itemCount))
+                    } else {
+                        loadingContent(Int(index), Int(success.itemCount))
+                    }
+                }
+                .onAppear {
+                    _ = success.get(index: index)
                 }
             }
             
@@ -70,7 +69,13 @@ extension PagingView {
                     retry()
                 }
             },
-            loadingContent: loadingContent, successContent: successContent)
+            loadingContent: { index, loadingCount in
+                loadingContent()
+            },
+            successContent: { item, index, itemCount in
+                successContent(item)
+            }
+        )
     }
 }
 

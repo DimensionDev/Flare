@@ -28,6 +28,10 @@ public data class UiRichText(
     val html: String = data.html()
     public val isEmpty: Boolean = raw.isEmpty() && data.getAllElements().size <= 1
     public val isLongText: Boolean = innerText.codePointCount() > 480
+
+    public val imageUrls: List<String> =
+        data.getElementsByTag("img").mapNotNull { it.attr("src").ifEmpty { null } } +
+            data.getElementsByTag("emoji").mapNotNull { it.attr("target").ifEmpty { null } }
 }
 
 internal fun Element.toUi(): UiRichText =

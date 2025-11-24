@@ -3,7 +3,6 @@ package dev.dimension.flare.data.datasource.mastodon
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
@@ -31,6 +30,7 @@ import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.memoryPager
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
@@ -758,7 +758,7 @@ internal open class MastodonDataSource(
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             TrendsUserPagingSource(
                 service = service,
@@ -776,7 +776,7 @@ internal open class MastodonDataSource(
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             TrendHashtagPagingSource(
                 service,
@@ -797,7 +797,7 @@ internal open class MastodonDataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             SearchUserPagingSource(
                 service = service,
@@ -813,7 +813,7 @@ internal open class MastodonDataSource(
         pageSize: Int = 20,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             SearchUserPagingSource(
                 service = service,
@@ -1240,7 +1240,7 @@ internal open class MastodonDataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             MastodonFollowingPagingSource(
                 service = service,
@@ -1256,7 +1256,7 @@ internal open class MastodonDataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             MastodonFansPagingSource(
                 service = service,

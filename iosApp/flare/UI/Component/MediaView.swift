@@ -17,7 +17,6 @@ struct MediaView: View {
         switch onEnum(of: data) {
         case .image(let image):
             AdaptiveSizeMediaContainerView(
-                aspectRatio: CGFloat(image.aspectRatio),
                 expandToFullSize: expandToFullSize
             ) {
                 NetworkImage(data: image.previewUrl)
@@ -26,7 +25,6 @@ struct MediaView: View {
             MediaVideoView(data: video, expandToFullSize: expandToFullSize)
         case .gif(let gif):
             AdaptiveSizeMediaContainerView(
-                aspectRatio: CGFloat(gif.aspectRatio),
                 expandToFullSize: expandToFullSize
             ) {
                 NetworkImage(data: gif.url)
@@ -38,24 +36,17 @@ struct MediaView: View {
 }
 
 struct AdaptiveSizeMediaContainerView<Content: View>: View {
-    let aspectRatio: CGFloat?
     let expandToFullSize: Bool
     @ViewBuilder let content: () -> Content
     
-    init(aspectRatio: CGFloat? = nil, expandToFullSize: Bool, @ViewBuilder content: @escaping () -> Content) {
-        self.aspectRatio = aspectRatio
+    init(expandToFullSize: Bool, @ViewBuilder content: @escaping () -> Content) {
         self.expandToFullSize = expandToFullSize
         self.content = content
     }
     
     var body: some View {
         if expandToFullSize {
-            if let aspectRatio {
-                content()
-                    .aspectRatio(aspectRatio, contentMode: .fit)
-            } else {
-                content()
-            }
+            content()
         } else {
             Color.gray
                 .opacity(0.2)
@@ -92,7 +83,6 @@ struct MediaVideoView: View {
     
     var body: some View {
         AdaptiveSizeMediaContainerView(
-            aspectRatio: CGFloat(data.aspectRatio),
             expandToFullSize: expandToFullSize
         ) {
             NetworkImage(data: data.thumbnailUrl)

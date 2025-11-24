@@ -104,6 +104,7 @@ skie {
         group {
             DefaultArgumentInterop.Enabled(true)
         }
+        enableFlowCombineConvertorPreview = true
     }
 }
 

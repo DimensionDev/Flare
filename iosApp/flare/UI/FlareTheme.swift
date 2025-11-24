@@ -21,27 +21,31 @@ struct FlareTheme<Content: View>: View {
 
 @Observable
 class ThemeSettings {
+    var subscribers = Set<AnyCancellable>()
     var presenter: SettingsPresenter
 
     init() {
         self.presenter = SettingsPresenter()
         self.appearanceSettings = AppearanceSettings.companion.Default
         self.aiConfig = .init(translation: false, tldr: true)
-        self.presenter.subscribe { [weak self] newState in
+        self.presenter.models.toPublisher().receive(on: DispatchQueue.main).sink { [weak self] newState in
             if case .success(let appearanceSettings) = onEnum(of: newState.appearance) {
                 self?.appearanceSettings = appearanceSettings.data
             }
             if case .success(let appSettings) = onEnum(of: newState.appSettings) {
                 self?.aiConfig = appSettings.data.aiConfig
             }
-        }
+        }.store(in: &subscribers)
     }
     var appearanceSettings: AppearanceSettings
     var aiConfig: AppSettings.AiConfig
 
     @MainActor
     deinit {
-        self.presenter.close()
+        subscribers.forEach { cancleable in
+            cancleable.cancel()
+        }
+        presenter.close()
     }
 }
 
@@ -56,4 +60,3 @@ extension EnvironmentValues {
         set { self[ThemeSettingsKey.self] = newValue }
     }
 }
-

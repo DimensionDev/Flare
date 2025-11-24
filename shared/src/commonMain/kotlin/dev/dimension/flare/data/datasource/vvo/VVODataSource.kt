@@ -2,7 +2,6 @@ package dev.dimension.flare.data.datasource.vvo
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import dev.dimension.flare.common.BaseTimelineLoader
@@ -28,6 +27,7 @@ import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.vvo.VVOService
@@ -122,7 +122,7 @@ internal class VVODataSource(
 
             NotificationFilter.Comment ->
                 Pager(
-                    config = PagingConfig(pageSize = pageSize),
+                    config = pagingConfig,
                 ) {
                     CommentPagingSource(
                         service = service,
@@ -136,7 +136,7 @@ internal class VVODataSource(
 
             NotificationFilter.Like ->
                 Pager(
-                    config = PagingConfig(pageSize = pageSize),
+                    config = pagingConfig,
                 ) {
                     LikePagingSource(
                         service = service,
@@ -430,7 +430,7 @@ internal class VVODataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             SearchUserPagingSource(
                 service = service,
@@ -452,7 +452,7 @@ internal class VVODataSource(
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             TrendHashtagPagingSource(
                 accountKey = accountKey,
@@ -905,7 +905,7 @@ internal class VVODataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             FollowingPagingSource(
                 service = service,
@@ -920,7 +920,7 @@ internal class VVODataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             FansPagingSource(
                 service = service,

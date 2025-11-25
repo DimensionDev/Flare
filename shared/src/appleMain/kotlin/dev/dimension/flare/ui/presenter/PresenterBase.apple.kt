@@ -1,20 +1,20 @@
 package dev.dimension.flare.ui.presenter
 
 import androidx.compose.runtime.Composable
-import app.cash.molecule.DisplayLinkClock
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.launchMolecule
-import kotlin.experimental.ExperimentalObjCRefinement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.experimental.ExperimentalObjCRefinement
 
 public actual abstract class PresenterBase<Model : Any> : AutoCloseable {
-    private val scope = CoroutineScope(Dispatchers.Main + DisplayLinkClock)
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     public actual val models: StateFlow<Model> by lazy {
-        scope.launchMolecule(RecompositionMode.ContextClock) {
+        scope.launchMolecule(RecompositionMode.Immediate) {
             body()
         }
     }

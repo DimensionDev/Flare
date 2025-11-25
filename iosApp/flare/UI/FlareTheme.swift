@@ -42,8 +42,8 @@ class ThemeSettings {
 
     @MainActor
     deinit {
-        subscribers.forEach { cancleable in
-            cancleable.cancel()
+        subscribers.forEach { cancellable in
+            cancellable.cancel()
         }
         presenter.close()
     }

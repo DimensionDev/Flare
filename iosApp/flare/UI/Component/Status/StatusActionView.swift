@@ -100,7 +100,7 @@ struct StatusActionView: View {
 struct AsyncStatusActionView: View {
     let data: StatusActionAsyncActionItem
     var body: some View {
-        // TODO: Not supprted yet
+        // TODO: Not supported yet
 //        Button {
 //
 //        } label: {

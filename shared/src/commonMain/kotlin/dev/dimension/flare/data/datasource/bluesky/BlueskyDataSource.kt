@@ -3,7 +3,6 @@ package dev.dimension.flare.data.datasource.bluesky
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
@@ -91,6 +90,7 @@ import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
 import dev.dimension.flare.data.datasource.microblog.memoryPager
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.bluesky.BlueskyService
@@ -936,7 +936,7 @@ internal class BlueskyDataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             SearchUserPagingSource(
                 service,
@@ -947,7 +947,7 @@ internal class BlueskyDataSource(
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             TrendsUserPagingSource(
                 service,
@@ -1064,7 +1064,7 @@ internal class BlueskyDataSource(
         scope: CoroutineScope,
     ): Flow<PagingData<Pair<UiList, Boolean>>> =
         Pager(
-            config = PagingConfig(pageSize = 20),
+            config = pagingConfig,
         ) {
             object : BasePagingSource<String, UiList>() {
                 override fun getRefreshKey(state: PagingState<String, UiList>): String? = null
@@ -1767,7 +1767,7 @@ internal class BlueskyDataSource(
 
     override fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
         Pager(
-            config = PagingConfig(pageSize = 20),
+            config = pagingConfig,
             remoteMediator =
                 DMListRemoteMediator(
                     getService = this::pdsService,
@@ -1792,7 +1792,7 @@ internal class BlueskyDataSource(
         scope: CoroutineScope,
     ): Flow<PagingData<UiDMItem>> =
         Pager(
-            config = PagingConfig(pageSize = 20),
+            config = pagingConfig,
             remoteMediator =
                 DMConversationRemoteMediator(
                     getService = this::pdsService,
@@ -2129,7 +2129,7 @@ internal class BlueskyDataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             FollowingPagingSource(
                 service = service,
@@ -2144,7 +2144,7 @@ internal class BlueskyDataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             FansPagingSource(
                 service = service,

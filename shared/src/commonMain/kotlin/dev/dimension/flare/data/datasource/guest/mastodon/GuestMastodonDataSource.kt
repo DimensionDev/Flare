@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.datasource.guest.mastodon
 
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import dev.dimension.flare.common.BaseTimelinePagingSourceFactory
@@ -17,6 +16,7 @@ import dev.dimension.flare.data.datasource.mastodon.SearchUserPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendHashtagPagingSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -147,7 +147,7 @@ internal class GuestMastodonDataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             SearchUserPagingSource(
                 service = service,
@@ -163,13 +163,13 @@ internal class GuestMastodonDataSource(
     }
 
     override fun discoverStatuses() = TODO()
-//        Pager(PagingConfig(pageSize = pageSize)) {
+//        Pager(pagingConfig) {
 //            GuestDiscoverStatusPagingSource(host = host, service = service)
 //        }.flow.cachedIn(scope)
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             TrendHashtagPagingSource(
                 service,
@@ -182,7 +182,7 @@ internal class GuestMastodonDataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             MastodonFollowingPagingSource(
                 service = service,
@@ -198,7 +198,7 @@ internal class GuestMastodonDataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             MastodonFansPagingSource(
                 service = service,

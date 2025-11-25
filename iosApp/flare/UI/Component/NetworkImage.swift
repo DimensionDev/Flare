@@ -6,8 +6,7 @@ struct NetworkImage: View {
     let placeholder: URL?
     let customHeader: [String: String]?
     var body: some View {
-        KFAnimatedImage
-            .url(data)
+        KFAnimatedImage(data)
             .requestModifier({ request in
                 if let customHeader {
                     for (key, value) in customHeader {
@@ -24,11 +23,12 @@ struct NetworkImage: View {
                         .redacted(reason: .placeholder)
                 }
             }
-            .if(placeholder == nil, if: { image in
-                image.loadTransition(.blurReplace)
-            }, else: { image in
-                image
-            })
+            .cancelOnDisappear(true)
+//            .if(placeholder == nil, if: { image in
+//                image.loadTransition(.opacity)
+//            }, else: { image in
+//                image
+//            })
 //            .resizable()
             .scaledToFill()
     }

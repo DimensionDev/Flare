@@ -2,18 +2,21 @@ import SwiftUI
 
 struct AdaptiveGrid: Layout {
 
-    public var singleFollowsImageAspect: Bool
-    public var spacing: CGFloat
-    public var maxColumns: Int
+    public let singleFollowsImageAspect: Bool
+    public let singleViewAspectRatio: CGFloat?
+    public let spacing: CGFloat
+    public let maxColumns: Int
 
     public init(
         singleFollowsImageAspect: Bool = true,
+        singleViewAspectRatio: CGFloat? = nil,
         spacing: CGFloat = 4,
         maxColumns: Int = 3
     ) {
         self.singleFollowsImageAspect = singleFollowsImageAspect
         self.spacing = spacing
         self.maxColumns = max(1, maxColumns)
+        self.singleViewAspectRatio = singleViewAspectRatio
     }
 
     public struct Cache {}
@@ -140,9 +143,13 @@ struct AdaptiveGrid: Layout {
 
     private func aspectForSingle(subviews: Subviews) -> CGFloat {
         if singleFollowsImageAspect {
-            let ideal = subviews[0].sizeThatFits(.unspecified)
-            if ideal.width > 0, ideal.height > 0 { return max(0.01, ideal.width / ideal.height) }
-            return 1
+            if let ratio = singleViewAspectRatio {
+                return max(9.0/21.0, ratio)
+            } else {
+                let ideal = subviews[0].sizeThatFits(.unspecified)
+                if ideal.width > 0, ideal.height > 0 { return max(0.01, ideal.width / ideal.height) }
+                return 1
+            }
         } else {
             return 16.0 / 9.0
         }

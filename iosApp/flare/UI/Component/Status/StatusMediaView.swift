@@ -12,7 +12,12 @@ struct StatusMediaView: View {
     @State private var selectedIndex: Int? = nil
 
     var body: some View {
-        AdaptiveGrid(singleFollowsImageAspect: themeSettings.appearanceSettings.expandMediaSize, spacing: 4, maxColumns: 3) {
+        AdaptiveGrid(
+            singleFollowsImageAspect: themeSettings.appearanceSettings.expandMediaSize,
+            singleViewAspectRatio: data.first?.aspectRatio,
+            spacing: 4,
+            maxColumns: 3,
+        ) {
             ForEach(0..<data.count, id: \.self) { index in
                 let item = data[index]
                 MediaView(data: item, expandToFullSize: themeSettings.appearanceSettings.expandMediaSize && data.count == 1)
@@ -101,6 +106,17 @@ struct AltTextOverlay: View {
                 .padding()
                 .frame(width: 280)
                 .presentationCompactAdaptation(.popover)
+        }
+    }
+}
+
+extension UiMedia {
+    var aspectRatio: CGFloat? {
+        switch onEnum(of: self) {
+        case .image(let image): return CGFloat(image.aspectRatio)
+        case .video(let video): return CGFloat(video.aspectRatio)
+        case .gif(let gifv): return CGFloat(gifv.aspectRatio)
+        case .audio: return nil
         }
     }
 }

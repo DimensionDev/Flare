@@ -597,7 +597,7 @@ internal class XQTDataSource(
                 accountKey = accountKey,
                 query = query,
             )
-        }.flow
+        }.flow.cachedIn(scope)
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
         Pager(

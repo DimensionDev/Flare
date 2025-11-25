@@ -19,6 +19,9 @@ public data class UiTimeline internal constructor(
     val content: ItemContent?,
     private val dbKey: String? = null,
 ) {
+    val id: String by lazy {
+        itemKey
+    }
     val itemKey: String
         get() =
             buildString {
@@ -76,6 +79,9 @@ public data class UiTimeline internal constructor(
             val imageHeaders: ImmutableMap<String, String>?,
             private val openInBrowser: Boolean,
         ) : ItemContent() {
+            val id: String by lazy {
+                itemKey
+            }
             override val itemKey: String
                 get() = "Feed_$url"
 
@@ -109,6 +115,9 @@ public data class UiTimeline internal constructor(
             val onClicked: ClickContext.() -> Unit,
             val onMediaClicked: ClickContext.(media: UiMedia, index: Int) -> Unit,
         ) : ItemContent() {
+            val id: String by lazy {
+                itemKey
+            }
             override val itemKey: String
                 get() =
                     buildString {
@@ -168,6 +177,9 @@ public data class UiTimeline internal constructor(
             val value: UiUserV2,
             val button: ImmutableList<Button> = persistentListOf(),
         ) : ItemContent() {
+            val id: String by lazy {
+                itemKey
+            }
             override val itemKey: String
                 get() =
                     buildString {
@@ -190,6 +202,9 @@ public data class UiTimeline internal constructor(
             val users: ImmutableList<UiUserV2>,
             val status: Status? = null,
         ) : ItemContent() {
+            val id: String by lazy {
+                itemKey
+            }
             override val itemKey: String
                 get() =
                     buildString {
@@ -209,6 +224,9 @@ public data class UiTimeline internal constructor(
         val onClicked: ClickContext.() -> Unit,
         val statusKey: MicroBlogKey,
     ) {
+        val id: String by lazy {
+            itemKey
+        }
         val itemKey: String
             get() =
                 buildString {

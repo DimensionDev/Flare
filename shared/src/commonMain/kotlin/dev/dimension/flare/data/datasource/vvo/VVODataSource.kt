@@ -437,7 +437,7 @@ internal class VVODataSource(
                 accountKey = accountKey,
                 query = query,
             )
-        }.flow
+        }.flow.cachedIn(scope)
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> {
         TODO("Not yet implemented")

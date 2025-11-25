@@ -79,6 +79,7 @@ struct StatusActionView: View {
                                     }
                                 }
                             }
+                            .lineLimit(1)
                         } icon: {
                             if let color = group.displayItem.color {
                                 StatusActionIcon(item: group.displayItem)
@@ -99,13 +100,14 @@ struct StatusActionView: View {
 struct AsyncStatusActionView: View {
     let data: StatusActionAsyncActionItem
     var body: some View {
-        Button {
-
-        } label: {
-
-        }
-        .onAppear {
-        }
+        // TODO: Not supprted yet
+//        Button {
+//
+//        } label: {
+//
+//        }
+//        .onAppear {
+//        }
     }
 }
 
@@ -150,6 +152,7 @@ struct StatusActionItemView: View {
                             }
                         }
                     }
+                    .lineLimit(1)
                 } icon: {
                     if let color = data.color {
                         StatusActionIcon(item: data)

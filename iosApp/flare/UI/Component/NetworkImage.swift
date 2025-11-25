@@ -7,7 +7,6 @@ struct NetworkImage: View {
     let customHeader: [String: String]?
     var body: some View {
         KFAnimatedImage(data)
-            .fade(duration: 0.25)
             .requestModifier({ request in
                 if let customHeader {
                     for (key, value) in customHeader {

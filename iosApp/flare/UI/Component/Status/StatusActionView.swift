@@ -10,13 +10,10 @@ struct StatusActionsView: View {
         HStack {
             ForEach(0..<data.count, id: \.self) { index in
                 let item = data[index]
+                if index == data.count - 1 {
+                    Spacer()
+                }
                 StatusActionView(data: item, useText: useText, isFixedWidth: index != data.count - 1)
-                    .if(index == data.count - 1) { view in
-                        view.frame(maxWidth: .infinity, alignment: .trailing)
-                    } else: { view in
-                        view
-                    }
-
             }
         }
         .backport
@@ -92,7 +89,8 @@ struct StatusActionView: View {
                 }
             }
         case .asyncActionItem(let asyncItem):
-            AsyncStatusActionView(data: asyncItem)
+            EmptyView()
+//            AsyncStatusActionView(data: asyncItem)
         }
     }
 }
@@ -259,54 +257,37 @@ struct StatusActionIcon: View {
     let item: StatusActionItem
 
     var body: some View {
-        Group {
-            switch onEnum(of: item) {
-            case .bookmark(let bookmarked):
-                if bookmarked.bookmarked {
-                    Image("fa-bookmark.fill")
-                } else {
-                    Image("fa-bookmark")
-                }
+        Image(item.imageName)
+    }
+}
 
-            case .delete:
-                Image("fa-trash")
-
-            case .like(let liked):
-                if liked.liked {
-                    Image("fa-heart.fill")
-                } else {
-                    Image("fa-heart")
-                }
-
-            case .more:
-                Image("fa-ellipsis")
-
-            case .quote:
-                Image("fa-quote-left")
-
-            case .reaction(let reacted):
-                if reacted.reacted {
-                    Image("fa-minus")
-                } else {
-                    Image("fa-plus")
-                }
-
-            case .reply:
-                Image("fa-reply")
-
-            case .report:
-                Image("fa-circle-info")
-
-            case .retweet:
-                Image("fa-retweet")
-
-            case .comment:
-                Image("fa-comment-dots")
-            case .share:
-                Image(.faShareNodes)
-            case .fxShare:
-                Image(.faShareNodes)
-            }
+extension StatusActionItem {
+    var imageName: String {
+        switch onEnum(of: self) {
+        case .bookmark(let bookmarked):
+            return bookmarked.bookmarked ? "fa-bookmark.fill" : "fa-bookmark"
+        case .delete:
+            return "fa-trash"
+        case .like(let liked):
+            return liked.liked ? "fa-heart.fill" : "fa-heart"
+        case .more:
+            return "fa-ellipsis"
+        case .quote:
+            return "fa-quote-left"
+        case .reaction(let reacted):
+            return reacted.reacted ? "fa-minus" : "fa-plus"
+        case .reply:
+            return "fa-reply"
+        case .report:
+            return "fa-circle-info"
+        case .retweet:
+            return "fa-retweet"
+        case .comment:
+            return "fa-comment-dots"
+        case .share:
+            return "fa-share-nodes"
+        case .fxShare:
+            return "fa-share-nodes"
         }
     }
 }

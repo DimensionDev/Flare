@@ -9,7 +9,9 @@ import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -31,19 +33,25 @@ public class SettingsPresenter :
 
             override fun updateAppearanceSettings(block: AppearanceSettings.() -> AppearanceSettings) {
                 scope.launch {
-                    repository.updateAppearanceSettings(block)
+                    withContext(Dispatchers.Main) {
+                        repository.updateAppearanceSettings(block)
+                    }
                 }
             }
 
             override fun updateAppSettings(block: AppSettings.() -> AppSettings) {
                 scope.launch {
-                    repository.updateAppSettings(block)
+                    withContext(Dispatchers.Main) {
+                        repository.updateAppSettings(block)
+                    }
                 }
             }
 
             override fun updateTabSettings(block: TabSettings.() -> TabSettings) {
                 scope.launch {
-                    repository.updateTabSettings(block)
+                    withContext(Dispatchers.Main) {
+                        repository.updateTabSettings(block)
+                    }
                 }
             }
         }

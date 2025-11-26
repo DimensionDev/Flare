@@ -20,7 +20,7 @@ struct StatusMediaView: View {
         ) {
             ForEach(0..<data.count, id: \.self) { index in
                 let item = data[index]
-                MediaView(data: item, expandToFullSize: themeSettings.appearanceSettings.expandMediaSize && data.count == 1)
+                MediaView(data: item)
                     .onTapGesture {
                         if !sensitive || !isBlur {
                             selectedIndex = index

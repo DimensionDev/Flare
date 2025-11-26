@@ -6,55 +6,35 @@ import AVFoundation
 
 struct MediaView: View {
     let data: UiMedia
-    let expandToFullSize: Bool
     
-    init(data: UiMedia, expandToFullSize: Bool = false) {
+    init(data: UiMedia) {
         self.data = data
-        self.expandToFullSize = expandToFullSize
     }
     
     var body: some View {
-        switch onEnum(of: data) {
-        case .image(let image):
-            AdaptiveSizeMediaContainerView(
-                expandToFullSize: expandToFullSize
-            ) {
-                NetworkImage(data: image.previewUrl)
+        ZStack {
+            switch onEnum(of: data) {
+            case .image(let image):
+                Color.gray
+                    .opacity(0.2)
+                    .overlay {
+                        NetworkImage(data: image.previewUrl)
+                            .allowsHitTesting(false)
+                    }
+                    .clipped()
+            case .video(let video):
+                MediaVideoView(data: video)
+            case .gif(let gif):
+                Color.gray
+                    .opacity(0.2)
+                    .overlay {
+                        NetworkImage(data: gif.url)
+                            .allowsHitTesting(false)
+                    }
+                    .clipped()
+            case .audio(let audio):
+                EmptyView()
             }
-        case .video(let video):
-            MediaVideoView(data: video, expandToFullSize: expandToFullSize)
-        case .gif(let gif):
-            AdaptiveSizeMediaContainerView(
-                expandToFullSize: expandToFullSize
-            ) {
-                NetworkImage(data: gif.url)
-            }
-        case .audio(let audio):
-            EmptyView()
-        }
-    }
-}
-
-struct AdaptiveSizeMediaContainerView<Content: View>: View {
-    let expandToFullSize: Bool
-    @ViewBuilder let content: () -> Content
-    
-    init(expandToFullSize: Bool, @ViewBuilder content: @escaping () -> Content) {
-        self.expandToFullSize = expandToFullSize
-        self.content = content
-    }
-    
-    var body: some View {
-        if expandToFullSize {
-            content()
-        } else {
-            Color.gray
-                .opacity(0.2)
-                .overlay {
-                    content()
-                        .allowsHitTesting(false)
-                }
-                .clipped()
         }
     }
 }
@@ -68,7 +48,6 @@ struct MediaVideoView: View {
     @State private var time: CMTime = .zero
     @State private var isAppeared: Bool = false
     let data: UiMediaVideo
-    let expandToFullSize: Bool
     
     func canPlay() -> Bool {
         switch themeSettings.appearanceSettings.videoAutoplay {
@@ -82,11 +61,13 @@ struct MediaVideoView: View {
     }
     
     var body: some View {
-        AdaptiveSizeMediaContainerView(
-            expandToFullSize: expandToFullSize
-        ) {
-            NetworkImage(data: data.thumbnailUrl)
-        }
+        Color.gray
+            .opacity(0.2)
+            .overlay {
+                NetworkImage(data: data.thumbnailUrl)
+                    .allowsHitTesting(false)
+            }
+            .clipped()
         .overlay {
             VideoPlayer(url: .init(string: data.url)!, play: $play, time: $time)
                 .mute(true)

@@ -12,17 +12,28 @@ struct RichText: View {
         render(text: text, images: images)
             .task(id: text.raw) {
                 let urls = text.imageUrls
-                for urlString in urls {
-                    if let url = URL(string: urlString) {
-                        do {
-                            let image = try await KingfisherManager.shared.retrieveImage(with: url)
-                            if let resized = image.image.resize(height: imageSize) {
-                                images[urlString] = Image(uiImage: resized)
-                            } else {
-                                images[urlString] = Image(uiImage: image.image)
+                let targetHeight = imageSize
+                await withTaskGroup(of: (String, Image?).self) { group in
+                    for urlString in urls {
+                        group.addTask {
+                            guard let url = URL(string: urlString) else { return (urlString, nil) }
+                            do {
+                                let result = try await KingfisherManager.shared.retrieveImage(with: url)
+                                let uiImage = result.image
+                                if let resized = await uiImage.resize(height: targetHeight) {
+                                    return (urlString, Image(uiImage: resized))
+                                } else {
+                                    return (urlString, Image(uiImage: uiImage))
+                                }
+                            } catch {
+                                return (urlString, nil)
                             }
-                        } catch {
-                            // Ignore error
+                        }
+                    }
+                    
+                    for await (urlString, image) in group {
+                        if let image = image {
+                            images[urlString] = image
                         }
                     }
                 }

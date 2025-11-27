@@ -7,13 +7,13 @@ import SwiftUIBackports
 struct StatusMediaView: View {
     let data: [any UiMedia]
     let sensitive: Bool
-    @Environment(\.themeSettings) private var themeSettings
+    @Environment(\.appearanceSettings.expandMediaSize) private var expandMediaSize
     @State private var isBlur: Bool
     @State private var selectedIndex: Int? = nil
 
     var body: some View {
         AdaptiveGrid(
-            singleFollowsImageAspect: themeSettings.appearanceSettings.expandMediaSize,
+            singleFollowsImageAspect: expandMediaSize,
             singleViewAspectRatio: data.first?.aspectRatio,
             spacing: 4,
             maxColumns: 3,

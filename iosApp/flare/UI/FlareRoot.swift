@@ -29,7 +29,7 @@ struct FlareRoot: View {
                                 Label {
                                     TabTitle(title: data.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: data.metaData.icon, accountType: data.account)
+                                    TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
                                 }
                             }
                             .badge(badge)
@@ -43,7 +43,7 @@ struct FlareRoot: View {
                                 Label {
                                     TabTitle(title: data.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: data.metaData.icon, accountType: data.account)
+                                    TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
                                 }
                             }
                             .tabPlacement(.sidebarOnly)
@@ -57,7 +57,7 @@ struct FlareRoot: View {
                                 Label {
                                     TabTitle(title: profileRoute.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: profileRoute.metaData.icon, accountType: profileRoute.account)
+                                    TabIcon(icon: profileRoute.metaData.icon, accountType: profileRoute.account, iconOnly: true)
                                 }
                             }
                             .tabPlacement(.sidebarOnly)
@@ -90,7 +90,7 @@ struct FlareRoot: View {
                                 Label {
                                     TabTitle(title: data.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: data.metaData.icon, accountType: data.account)
+                                    TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
                                 }
                             }
                             .badge(badge)
@@ -154,7 +154,7 @@ struct BackportFlareRoot: View {
                                 Label {
                                     TabTitle(title: data.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: data.metaData.icon, accountType: data.account)
+                                    TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
                                 }
                             }
                             .badge(badge)
@@ -168,7 +168,7 @@ struct BackportFlareRoot: View {
                                 Label {
                                     TabTitle(title: data.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: data.metaData.icon, accountType: data.account)
+                                    TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
                                 }
                             }
                             .tag(data.key)
@@ -181,7 +181,7 @@ struct BackportFlareRoot: View {
                                 Label {
                                     TabTitle(title: profileRoute.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: profileRoute.metaData.icon, accountType: profileRoute.account)
+                                    TabIcon(icon: profileRoute.metaData.icon, accountType: profileRoute.account, iconOnly: true)
                                 }
                             }
                             .tag(profileRoute.key)
@@ -211,7 +211,7 @@ struct BackportFlareRoot: View {
                                 Label {
                                     TabTitle(title: data.metaData.title)
                                 } icon: {
-                                    TabIcon(icon: data.metaData.icon, accountType: data.account)
+                                    TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
                                 }
                             }
                             .badge(badge)

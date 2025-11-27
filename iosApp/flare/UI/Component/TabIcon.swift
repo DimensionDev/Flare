@@ -66,6 +66,7 @@ struct TabIcon: View {
                     alignment: .bottomTrailing
                 ) {
                     AvatarTabIcon(userKey: mixed.userKey, accountType: accountType)
+                        .frame(width: size, height: size)
                     MaterialTabIcon(icon: mixed.icon)
                         .padding(2)
                         .background(Color.white)
@@ -108,61 +109,33 @@ extension TabIcon {
 struct MaterialTabIcon: View {
     let icon: IconType.MaterialMaterialIcon
     var body: some View {
-        switch icon {
-        case .home:        Image("fa-house")
-                .resizable()
-                .scaledToFit()
-        case .notification: Image("fa-bell")
-                .resizable()
-                .scaledToFit()
-        case .search:       Image("fa-magnifying-glass")
-                .resizable()
-                .scaledToFit()
-        case .profile:      Image("fa-circle-user")
-                .resizable()
-                .scaledToFit()
-        case .settings:     Image("fa-gear")
-                .resizable()
-                .scaledToFit()
-        case .local:        Image("fa-users")
-                .resizable()
-                .scaledToFit()
-        case .world:        Image("fa-globe")
-                .resizable()
-                .scaledToFit()
-        case .featured:     Image("fa-rectangle-list")
-                .resizable()
-                .scaledToFit()
-        case .bookmark:     Image("fa-book-bookmark")
-                .resizable()
-                .scaledToFit()
-        case .heart:        Image("fa-heart")
-                .resizable()
-                .scaledToFit()
-        case .twitter:      Image("fa-twitter")
-                .resizable()
-                .scaledToFit()
-        case .mastodon:     Image("fa-mastodon")
-                .resizable()
-                .scaledToFit()
-        case .misskey:      Image("fa-globe")
-                .resizable()
-                .scaledToFit()
-        case .bluesky:      Image("fa-bluesky")
-                .resizable()
-                .scaledToFit()
-        case .list:         Image("fa-list")
-                .resizable()
-                .scaledToFit()
-        case .feeds:        Image("fa-square-rss")
-                .resizable()
-                .scaledToFit()
-        case .messages:     Image("fa-message")
-                .resizable()
-                .scaledToFit()
-        case .rss:          Image("fa-square-rss")
-                .resizable()
-                .scaledToFit()
+        Image(icon.imageName)
+            .resizable()
+            .scaledToFit()
+    }
+}
+
+extension IconType.MaterialMaterialIcon {
+    var imageName: String {
+        switch self {
+        case .home:        "fa-house"
+        case .notification: "fa-bell"
+        case .search:       "fa-magnifying-glass"
+        case .profile:      "fa-circle-user"
+        case .settings:     "fa-gear"
+        case .local:        "fa-users"
+        case .world:        "fa-globe"
+        case .featured:     "fa-rectangle-list"
+        case .bookmark:     "fa-book-bookmark"
+        case .heart:        "fa-heart"
+        case .twitter:      "fa-twitter"
+        case .mastodon:     "fa-mastodon"
+        case .misskey:      "fa-globe"
+        case .bluesky:      "fa-bluesky"
+        case .list:         "fa-list"
+        case .feeds:        "fa-square-rss"
+        case .messages:     "fa-message"
+        case .rss:          "fa-square-rss"
         }
     }
 }

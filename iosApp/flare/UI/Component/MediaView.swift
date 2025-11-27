@@ -16,7 +16,7 @@ struct MediaView: View {
             switch onEnum(of: data) {
             case .image(let image):
                 Color.gray
-                    .opacity(0.2)
+//                    .opacity(0.2)
                     .overlay {
                         NetworkImage(data: image.previewUrl)
                             .allowsHitTesting(false)
@@ -26,7 +26,7 @@ struct MediaView: View {
                 MediaVideoView(data: video)
             case .gif(let gif):
                 Color.gray
-                    .opacity(0.2)
+//                    .opacity(0.2)
                     .overlay {
                         NetworkImage(data: gif.url)
                             .allowsHitTesting(false)
@@ -40,7 +40,7 @@ struct MediaView: View {
 }
 
 struct MediaVideoView: View {
-    @Environment(\.themeSettings) private var themeSettings
+    @Environment(\.appearanceSettings.videoAutoplay) private var videoAutoplay
     @Environment(\.networkKind) private var networkKind
     @Environment(\.isScrolling) private var isScrolling
     @State private var play: Bool = false
@@ -50,7 +50,7 @@ struct MediaVideoView: View {
     let data: UiMediaVideo
     
     func canPlay() -> Bool {
-        switch themeSettings.appearanceSettings.videoAutoplay {
+        switch videoAutoplay {
         case .always:
             return true
         case .wifi:
@@ -62,7 +62,7 @@ struct MediaVideoView: View {
     
     var body: some View {
         Color.gray
-            .opacity(0.2)
+//            .opacity(0.2)
             .overlay {
                 NetworkImage(data: data.thumbnailUrl)
                     .allowsHitTesting(false)

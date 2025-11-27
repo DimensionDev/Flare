@@ -1,7 +1,5 @@
 package dev.dimension.flare.data.network.rss.model
 
-import dev.dimension.flare.common.Xml
-import kotlinx.serialization.decodeFromString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -23,7 +21,7 @@ class OpmlTest {
             </opml>
             """.trimIndent()
 
-        val opml = Xml.decodeFromString<Opml>(xml)
+        val opml = decodeOpml(xml)
 
         assertEquals("2.0", opml.version)
         assertEquals("My Feeds", opml.head?.title)
@@ -66,7 +64,7 @@ class OpmlTest {
             </opml>
             """.trimIndent()
 
-        val opml = Xml.decodeFromString<Opml>(xml)
+        val opml = decodeOpml(xml)
 
         assertEquals("1.0", opml.version)
         assertEquals("walterlv", opml.head?.title)
@@ -109,7 +107,7 @@ class OpmlTest {
             </opml>
             """.trimIndent()
 
-        val opml = Xml.decodeFromString<Opml>(xml)
+        val opml = decodeOpml(xml)
 
         assertEquals("2.0", opml.version)
         assertEquals("RSS Feeds Export", opml.head?.title)
@@ -168,11 +166,12 @@ class OpmlTest {
             <?xml version="1.0" encoding="UTF-8"?>
               <opml version="2.0">
                 <body>
-                  <outline text="example" type="rss" xmlUrl="https://example.com" htmlUrl="http://example.com" category="example" />                </body>
+                  <outline text="example" type="rss" xmlUrl="https://example.com" htmlUrl="http://example.com" category="example" />                
+                </body>
               </opml>
             """.trimIndent()
 
-        val opml = Xml.decodeFromString<Opml>(xml)
+        val opml = decodeOpml(xml)
 
         assertEquals("2.0", opml.version)
         assertEquals(1, opml.body.outlines.size)
@@ -181,6 +180,54 @@ class OpmlTest {
         assertEquals("example", first.text)
         assertEquals("https://example.com", first.xmlUrl)
         assertEquals("http://example.com", first.htmlUrl)
+        assertEquals("example", first.category)
+    }
+
+    @Test
+    fun testFeedsOpml2() {
+        val xml =
+            """
+            <?xml version="1.0" encoding="UTF-8"?>
+              <opml version="2.0">
+                <body>
+                  <outline text="example" type="rss" xmlUrl="https://example.com?a=a&b=b" htmlUrl="https://example.com?a=a&b=b" category="example" />                
+                </body>
+              </opml>
+            """.trimIndent()
+
+        val opml = decodeOpml(xml)
+
+        assertEquals("2.0", opml.version)
+        assertEquals(1, opml.body.outlines.size)
+
+        val first = opml.body.outlines[0]
+        assertEquals("example", first.text)
+        assertEquals("https://example.com?a=a&b=b", first.xmlUrl)
+        assertEquals("https://example.com?a=a&b=b", first.htmlUrl)
+        assertEquals("example", first.category)
+    }
+
+    @Test
+    fun testFeedsOpml3() {
+        val xml =
+            """
+            <?xml version="1.0" encoding="UTF-8"?>
+              <opml version="2.0">
+                <body>
+                  <outline text="example" type="rss" xmlUrl="https://example.com?a=a&amp;b=b" htmlUrl="https://example.com?a=a&amp;b=b" category="example" />                
+                </body>
+              </opml>
+            """.trimIndent()
+
+        val opml = decodeOpml(xml)
+
+        assertEquals("2.0", opml.version)
+        assertEquals(1, opml.body.outlines.size)
+
+        val first = opml.body.outlines[0]
+        assertEquals("example", first.text)
+        assertEquals("https://example.com?a=a&b=b", first.xmlUrl)
+        assertEquals("https://example.com?a=a&b=b", first.htmlUrl)
         assertEquals("example", first.category)
     }
 }

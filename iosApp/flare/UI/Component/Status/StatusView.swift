@@ -11,7 +11,6 @@ struct StatusView: View {
     let withLeadingPadding: Bool
     let showMedia: Bool
     @State private var expand = false
-    @State private var expandMedia = false
     private var showAsFullWidth: Bool {
         (!themeSettings.appearanceSettings.fullWidthPost || withLeadingPadding) && !isQuote && !isDetail
     }
@@ -148,23 +147,7 @@ struct StatusView: View {
                         }
                         
                         if !data.images.isEmpty, showMedia {
-                            if themeSettings.appearanceSettings.showMedia || expandMedia {
-                                StatusMediaView(data: data.images, sensitive: !(themeSettings.appearanceSettings.showSensitiveContent) && data.sensitive)
-                            } else {
-                                Button {
-                                    withAnimation {
-                                        expandMedia = true
-                                    }
-                                } label: {
-                                    Label {
-                                        Text("show_media_button", comment: "Button to show media attachments" )
-                                    } icon: {
-                                        Image("fa-image")
-                                    }
-                                }
-                                .backport
-                                .glassButtonStyle(fallbackStyle: .bordered)
-                            }
+                            StatusMediaContent(data: data.images, sensitive: data.sensitive)
                         }
 
                         if let card = data.card, showMedia, data.images.isEmpty, data.quote.isEmpty, themeSettings.appearanceSettings.showLinkPreview {
@@ -212,12 +195,12 @@ struct StatusView: View {
                         }
                     }
                 }
-                .if(!isDetail) { view in
-                    view
-                        .contextMenu {
-                            StatusActionsView(data: data.actions, useText: true)
-                        }
-                }
+//                .if(!isDetail) { view in
+//                    view
+//                        .contextMenu {
+//                            StatusActionsView(data: data.actions, useText: true)
+//                        }
+//                }
             }
         }
         .contentShape(.rect)
@@ -241,6 +224,32 @@ struct StatusView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+        }
+    }
+}
+
+struct StatusMediaContent: View {
+    @Environment(\.themeSettings) private var themeSettings
+    @State private var expandMedia = false
+    let data: [any UiMedia]
+    let sensitive: Bool
+    var body: some View {
+        if themeSettings.appearanceSettings.showMedia || expandMedia {
+            StatusMediaView(data: data, sensitive: !(themeSettings.appearanceSettings.showSensitiveContent) && sensitive)
+        } else {
+            Button {
+                withAnimation {
+                    expandMedia = true
+                }
+            } label: {
+                Label {
+                    Text("show_media_button", comment: "Button to show media attachments" )
+                } icon: {
+                    Image("fa-image")
+                }
+            }
+            .backport
+            .glassButtonStyle(fallbackStyle: .bordered)
         }
     }
 }

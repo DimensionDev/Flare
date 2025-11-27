@@ -6,7 +6,8 @@ struct NetworkImage: View {
     let placeholder: URL?
     let customHeader: [String: String]?
     var body: some View {
-        KFAnimatedImage(data)
+        KFImage(data)
+            .resizable()
             .requestModifier({ request in
                 if let customHeader {
                     for (key, value) in customHeader {

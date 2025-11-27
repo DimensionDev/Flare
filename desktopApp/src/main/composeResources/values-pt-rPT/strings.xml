@@ -5,10 +5,10 @@
     <string name="delete">excluir</string>
     <string name="refresh">atualizar</string>
     <string name="home_compose">Compor</string>
-    <string name="home_login">Conectar-se</string>
+    <string name="home_login">Entrar</string>
     <string name="home_settings">Confirgurações</string>
     <string name="home_tab_home_title">Residencial</string>
-    <string name="home_tab_notifications_title">notificações</string>
+    <string name="home_tab_notifications_title">Notificações</string>
     <string name="home_tab_me_title">Eu</string>
     <string name="home_tab_discover_title">Pendentes</string>
     <string name="settings_title">Confirgurações</string>

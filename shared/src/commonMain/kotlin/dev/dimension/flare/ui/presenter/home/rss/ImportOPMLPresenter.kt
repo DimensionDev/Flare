@@ -8,12 +8,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.common.Xml
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.network.rss.RssService
-import dev.dimension.flare.data.network.rss.model.Opml
 import dev.dimension.flare.data.network.rss.model.OpmlOutline
+import dev.dimension.flare.data.network.rss.model.decodeOpml
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -21,7 +20,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.serialization.decodeFromString
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Clock
@@ -52,7 +50,7 @@ public class ImportOPMLPresenter(
 
         LaunchedEffect(Unit) {
             try {
-                val opml = Xml.decodeFromString<Opml>(opmlContent)
+                val opml = decodeOpml(opmlContent)
                 val outlines =
                     opml.body.outlines
                         .flatMap { flattenOutlines(it) }

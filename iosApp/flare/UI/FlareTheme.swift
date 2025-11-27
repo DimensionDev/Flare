@@ -5,58 +5,38 @@ import Combine
 
 struct FlareTheme<Content: View>: View {
     @ViewBuilder let content: () -> Content
-    @State private var themeSettings = ThemeSettings()
+    @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     private let sizes: [DynamicTypeSize] =
       [.xSmall, .small, .medium, .large, .xLarge, .xxLarge, .xxxLarge]
     var body: some View {
-        content()
-            .networkStatus()
-            .environment(\.themeSettings, themeSettings)
-            .preferredColorScheme(
-                themeSettings.appearanceSettings.theme == .system ? nil : (themeSettings.appearanceSettings.theme == .dark ? .dark : .light)
-            )
-            .dynamicTypeSize(sizes[min(max(Int(themeSettings.appearanceSettings.fontSizeDiff) + 2, 0), sizes.count - 1)])
-    }
-}
-
-@Observable
-class ThemeSettings {
-    var subscribers = Set<AnyCancellable>()
-    var presenter: SettingsPresenter
-
-    init() {
-        self.presenter = SettingsPresenter()
-        self.appearanceSettings = AppearanceSettings.companion.Default
-        self.aiConfig = .init(translation: false, tldr: true)
-        self.presenter.models.toPublisher().receive(on: DispatchQueue.main).sink { [weak self] newState in
-            if case .success(let appearanceSettings) = onEnum(of: newState.appearance) {
-                self?.appearanceSettings = appearanceSettings.data
+        StateView(state: presenter.state.appSettings) { appSettings in
+            StateView(state: presenter.state.appearance) { appearance in
+                content()
+                    .networkStatus()
+                    .environment(\.aiConfig, appSettings.aiConfig)
+                    .environment(\.appearanceSettings, appearance)
+                    .preferredColorScheme(
+                        appearance.theme == .system ? nil : (appearance.theme == .dark ? .dark : .light)
+                    )
+                    .dynamicTypeSize(sizes[min(max(Int(appearance.fontSizeDiff) + 2, 0), sizes.count - 1)])
             }
-            if case .success(let appSettings) = onEnum(of: newState.appSettings) {
-                self?.aiConfig = appSettings.data.aiConfig
-            }
-        }.store(in: &subscribers)
-    }
-    var appearanceSettings: AppearanceSettings
-    var aiConfig: AppSettings.AiConfig
-
-    @MainActor
-    deinit {
-        subscribers.forEach { cancellable in
-            cancellable.cancel()
         }
-        presenter.close()
     }
 }
 
-
-
-private struct ThemeSettingsKey: EnvironmentKey {
-    static let defaultValue = ThemeSettings()
+private struct AppearanceSettingsKey: EnvironmentKey {
+    static let defaultValue = AppearanceSettings.companion.Default
+}
+private struct AiConfigKey: EnvironmentKey {
+    static let defaultValue = AppSettings.AiConfig(translation: false, tldr: true)
 }
 extension EnvironmentValues {
-    var themeSettings: ThemeSettings {
-        get { self[ThemeSettingsKey.self] }
-        set { self[ThemeSettingsKey.self] = newValue }
+    var appearanceSettings: AppearanceSettings {
+        get { self[AppearanceSettingsKey.self] }
+        set { self[AppearanceSettingsKey.self] = newValue }
+    }
+    var aiConfig: AppSettings.AiConfig {
+        get { self[AiConfigKey.self] }
+        set { self[AiConfigKey.self] = newValue }
     }
 }

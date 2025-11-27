@@ -22,7 +22,7 @@ struct StatusActionsView: View {
 }
 
 struct StatusActionView: View {
-    @Environment(\.themeSettings) private var themeSettings
+    @Environment(\.appearanceSettings.showNumbers) private var showNumbers
     let data: StatusAction
     let useText: Bool
     let isFixedWidth: Bool
@@ -65,9 +65,9 @@ struct StatusActionView: View {
                             ) {
                                 if isFixedWidth, !useText {
                                     Text("0000")
-                                        .opacity(0.0)
+                                        .foregroundStyle(.clear)
                                 }
-                                if let text = group.displayItem.countText, themeSettings.appearanceSettings.showNumbers {
+                                if let text = group.displayItem.countText, showNumbers {
                                     if let color = group.displayItem.color {
                                         Text(text)
                                             .foregroundStyle(color)
@@ -110,7 +110,7 @@ struct AsyncStatusActionView: View {
 }
 
 struct StatusActionItemView: View {
-    @Environment(\.themeSettings) private var themeSettings
+    @Environment(\.appearanceSettings.showNumbers) private var showNumbers
     @Environment(\.openURL) private var openURL
     let data: StatusActionItem
     let useText: Bool
@@ -132,7 +132,7 @@ struct StatusActionItemView: View {
                     ) {
                         if isFixedWidth, !useText {
                             Text("0000")
-                                .opacity(0.0)
+                                .foregroundStyle(Color.clear)
                         }
                         if useText {
                             if let color = data.color {
@@ -141,7 +141,7 @@ struct StatusActionItemView: View {
                             } else {
                                 Text(data.textKey)
                             }
-                        } else if let text = data.countText, themeSettings.appearanceSettings.showNumbers {
+                        } else if let text = data.countText, showNumbers {
                             if let color = data.color {
                                 Text(text)
                                     .foregroundStyle(color)

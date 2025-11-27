@@ -3,7 +3,10 @@ import KotlinSharedUI
 import SwiftUIBackports
 
 struct StatusView: View {
-    @Environment(\.themeSettings) private var themeSettings
+    @Environment(\.appearanceSettings.fullWidthPost) private var fullWidthPost
+    @Environment(\.appearanceSettings.showLinkPreview) private var showLinkPreview
+    @Environment(\.appearanceSettings.compatLinkPreview) private var compatLinkPreview
+    @Environment(\.appearanceSettings.showActions) private var showActions
     @Environment(\.openURL) private var openURL
     let data: UiTimeline.ItemContentStatus
     let isDetail: Bool
@@ -12,7 +15,7 @@ struct StatusView: View {
     let showMedia: Bool
     @State private var expand = false
     private var showAsFullWidth: Bool {
-        (!themeSettings.appearanceSettings.fullWidthPost || withLeadingPadding) && !isQuote && !isDetail
+        (!fullWidthPost || withLeadingPadding) && !isQuote && !isDetail
     }
     var body: some View {
         VStack(
@@ -150,8 +153,8 @@ struct StatusView: View {
                             StatusMediaContent(data: data.images, sensitive: data.sensitive)
                         }
 
-                        if let card = data.card, showMedia, data.images.isEmpty, data.quote.isEmpty, themeSettings.appearanceSettings.showLinkPreview {
-                            if themeSettings.appearanceSettings.compatLinkPreview {
+                        if let card = data.card, showMedia, data.images.isEmpty, data.quote.isEmpty, showLinkPreview {
+                            if compatLinkPreview {
                                 StatusCompatCardView(data: card)
                             } else {
                                 StatusCardView(data: card)
@@ -187,7 +190,7 @@ struct StatusView: View {
                                 .foregroundStyle(.secondary)
                         }
 
-                        if !isQuote, (themeSettings.appearanceSettings.showActions || isDetail) {
+                        if !isQuote, (showActions || isDetail) {
                             StatusActionsView(data: data.actions, useText: false)
                                 .font(isDetail ? .body : .footnote)
                                 .foregroundStyle(isDetail ? .primary : .secondary)
@@ -229,13 +232,14 @@ struct StatusView: View {
 }
 
 struct StatusMediaContent: View {
-    @Environment(\.themeSettings) private var themeSettings
+    @Environment(\.appearanceSettings.showMedia) private var showMedia
+    @Environment(\.appearanceSettings.showSensitiveContent) private var showSensitiveContent
     @State private var expandMedia = false
     let data: [any UiMedia]
     let sensitive: Bool
     var body: some View {
-        if themeSettings.appearanceSettings.showMedia || expandMedia {
-            StatusMediaView(data: data, sensitive: !(themeSettings.appearanceSettings.showSensitiveContent) && sensitive)
+        if showMedia || expandMedia {
+            StatusMediaView(data: data, sensitive: !(showSensitiveContent) && sensitive)
         } else {
             Button {
                 withAnimation {

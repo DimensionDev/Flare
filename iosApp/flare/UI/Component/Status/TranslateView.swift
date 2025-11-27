@@ -2,7 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 
 struct StatusTranslateView: View {
-    @Environment(\.themeSettings) private var themeSettings
+    @Environment(\.aiConfig) private var aiConfig
     let content: UiRichText
     let contentWarning: UiRichText?
     @State private var enableTranslate: Bool = false
@@ -21,7 +21,7 @@ struct StatusTranslateView: View {
                         Text("status_translate")
                     }
                     .buttonStyle(.borderless)
-                    if content.isLongText, themeSettings.aiConfig.tldr {
+                    if content.isLongText, aiConfig.tldr {
                         Button {
                             enableTLDR.toggle()
                         } label: {
@@ -33,11 +33,11 @@ struct StatusTranslateView: View {
                 
                 if enableTranslate {
                     if let cw = contentWarning {
-                        TranslateTextView(text: cw.innerText, useAI: themeSettings.aiConfig.translation)
+                        TranslateTextView(text: cw.innerText, useAI: aiConfig.translation)
                     }
-                    TranslateTextView(text: content.innerText, useAI: themeSettings.aiConfig.translation)
+                    TranslateTextView(text: content.innerText, useAI: aiConfig.translation)
                 }
-                if enableTLDR, content.isLongText, themeSettings.aiConfig.tldr {
+                if enableTLDR, content.isLongText, aiConfig.tldr {
                     
                 }
             }

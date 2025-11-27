@@ -15,6 +15,7 @@
 
 package dev.dimension.flare.data.network.misskey.api.model
 
+import dev.dimension.flare.data.network.misskey.api.serializer.MisskeyEmojiMapSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -36,7 +37,9 @@ internal data class UserLite(
     @SerialName(value = "isModerator") val isModerator: kotlin.Boolean? = false,
     @SerialName(value = "isBot") val isBot: kotlin.Boolean? = null,
     @SerialName(value = "isCat") val isCat: kotlin.Boolean? = null,
-    @SerialName(value = "emojis") val emojis: Map<kotlin.String, kotlin.String> = emptyMap(),
+    @SerialName(value = "emojis")
+    @Serializable(with = MisskeyEmojiMapSerializer::class)
+    val emojis: Map<kotlin.String, kotlin.String> = emptyMap(),
 ) {
     /**
      * *

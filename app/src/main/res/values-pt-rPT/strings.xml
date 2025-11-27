@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="login_button">Conectar-se</string>
+    <string name="login_button">Entrar</string>
     <string name="navigate_back">Navegar para trás</string>
     <string name="home_tab_home_title">Residencial</string>
-    <string name="home_tab_notifications_title">notificações</string>
+    <string name="home_tab_notifications_title">Notificações</string>
     <string name="home_tab_me_title">Eu</string>
     <string name="home_tab_discover_title">Pendentes</string>
     <string name="home_timeline_new_toots">Novas postagens</string>
-    <string name="notification_tab_all_title">TODOS</string>
+    <string name="notification_tab_all_title">Todos</string>
     <string name="notification_tab_mentions_title">Menciona</string>
     <string name="notification_tab_comments_title">comentários</string>
     <string name="notification_tab_likes_title">Gostos</string>

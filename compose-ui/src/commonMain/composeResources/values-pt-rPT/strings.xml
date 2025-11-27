@@ -60,7 +60,7 @@
     <string name="mastodon_visibility_unlisted_description">Qualquer pessoa pode ver este toot, mas ele não aparecerá na linha do tempo pública</string>
     <string name="mastodon_visibility_private_description">Somente seguidores podem ver este toot</string>
     <string name="mastodon_visibility_direct_description">Somente usuários mencionados podem ver este toot</string>
-    <string name="settings_notifications_title">notificações</string>
+    <string name="settings_notifications_title">Notificações</string>
     <string name="settings_notifications_subtitle">Personalize como o Sinalizador notifica você</string>
     <string name="status_loadmore_end">Não há mais postagens</string>
     <string name="status_loadmore_error">Erro ao carregar mais postagens</string>
@@ -338,14 +338,14 @@
     <string name="bluesky_login_oauth_button">Login com OAuth</string>
     <string name="bluesky_login_use_password_button">Usar Senha</string>
     <string name="bluesky_login_oauth_hint">O Bluesky OAuth pode não ser estável o suficiente, use o login de senha se você encontrar quaisquer problemas.</string>
-    <string name="login_button">Conectar-se</string>
+    <string name="login_button">Entrar</string>
     <string name="mastodon_login_verify_message">Por favor, aguarde enquanto verificamos suas credenciais.</string>
     <string name="service_select_instance_input_placeholder">Instância URL</string>
     <string name="service_select_next_button">Próximo</string>
     <string name="service_select_empty_message">Nenhuma instância encontrada</string>
     <string name="service_select_compatibility_warning">Este servidor usa %1$s, Sinalizador será executado em modo de compatibilidade. Alguns recursos podem não funcionar corretamente.</string>
     <string name="home_tab_home_title">Residencial</string>
-    <string name="home_tab_notifications_title">notificações</string>
+    <string name="home_tab_notifications_title">Notificações</string>
     <string name="home_tab_me_title">Eu</string>
     <string name="home_tab_discover_title">Pendentes</string>
     <string name="settings_title">Confirgurações</string>

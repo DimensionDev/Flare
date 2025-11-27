@@ -11,7 +11,7 @@ public data class Opml(
     @XmlElement(false)
     val version: String,
     @XmlSerialName("head")
-    val head: OpmlHead,
+    val head: OpmlHead? = null,
     @XmlSerialName("body")
     val body: OpmlBody,
 )
@@ -62,6 +62,9 @@ public data class OpmlOutline(
     @XmlSerialName("htmlUrl")
     @XmlElement(false)
     val htmlUrl: String? = null,
+    @XmlSerialName("category")
+    @XmlElement(false)
+    val category: String? = null,
     @XmlSerialName("description")
     @XmlElement(false)
     val description: String? = null,

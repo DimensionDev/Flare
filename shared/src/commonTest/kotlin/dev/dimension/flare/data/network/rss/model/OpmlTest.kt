@@ -26,7 +26,7 @@ class OpmlTest {
         val opml = Xml.decodeFromString<Opml>(xml)
 
         assertEquals("2.0", opml.version)
-        assertEquals("My Feeds", opml.head.title)
+        assertEquals("My Feeds", opml.head?.title)
         assertEquals(2, opml.body.outlines.size)
 
         val techOutline = opml.body.outlines[0]
@@ -69,7 +69,7 @@ class OpmlTest {
         val opml = Xml.decodeFromString<Opml>(xml)
 
         assertEquals("1.0", opml.version)
-        assertEquals("walterlv", opml.head.title)
+        assertEquals("walterlv", opml.head?.title)
         assertEquals(3, opml.body.outlines.size)
 
         val walterlv = opml.body.outlines[0]
@@ -112,8 +112,8 @@ class OpmlTest {
         val opml = Xml.decodeFromString<Opml>(xml)
 
         assertEquals("2.0", opml.version)
-        assertEquals("RSS Feeds Export", opml.head.title)
-        assertEquals("2025-11-20 14:46:05", opml.head.dateCreated)
+        assertEquals("RSS Feeds Export", opml.head?.title)
+        assertEquals("2025-11-20 14:46:05", opml.head?.dateCreated)
         assertEquals(5, opml.body.outlines.size)
 
         val outlines = opml.body.outlines
@@ -159,5 +159,28 @@ class OpmlTest {
             "Global news from the BBC (British public broadcaster) covering major international stories.",
             bbc.description,
         )
+    }
+
+    @Test
+    fun testFeedsOpml() {
+        val xml =
+            """
+            <?xml version="1.0" encoding="UTF-8"?>
+              <opml version="2.0">
+                <body>
+                  <outline text="example" type="rss" xmlUrl="https://example.com" htmlUrl="http://example.com" category="example" />                </body>
+              </opml>
+            """.trimIndent()
+
+        val opml = Xml.decodeFromString<Opml>(xml)
+
+        assertEquals("2.0", opml.version)
+        assertEquals(1, opml.body.outlines.size)
+
+        val first = opml.body.outlines[0]
+        assertEquals("example", first.text)
+        assertEquals("https://example.com", first.xmlUrl)
+        assertEquals("http://example.com", first.htmlUrl)
+        assertEquals("example", first.category)
     }
 }

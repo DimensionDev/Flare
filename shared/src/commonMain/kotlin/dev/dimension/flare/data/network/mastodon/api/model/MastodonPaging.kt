@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.network.mastodon.api.model
 
 import de.jensklingenberg.ktorfit.Ktorfit
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.converter.Converter
 import de.jensklingenberg.ktorfit.converter.KtorfitResult
 import de.jensklingenberg.ktorfit.converter.TypeData
@@ -17,19 +16,6 @@ internal class MastodonPaging<T>(
     val next: String? = null,
     val prev: String? = null,
 ) : List<T> by data {
-    companion object {
-        fun <T> from(response: Response<List<T>>): MastodonPaging<T> {
-            val link = response.headers["link"]
-            val next = link?.let { "max_id=(\\d+)".toRegex().find(it) }?.groupValues?.getOrNull(1)
-            val prev = link?.let { "min_id=(\\d+)".toRegex().find(it) }?.groupValues?.getOrNull(1)
-            return MastodonPaging(
-                data = response.body() ?: emptyList(),
-                next = next,
-                prev = prev,
-            )
-        }
-    }
-
     operator fun plus(other: List<T>): MastodonPaging<T> =
         MastodonPaging(
             data = this.data.plus(other),
@@ -53,9 +39,6 @@ internal class MastodonPagingConverterFactory : Converter.Factory {
                         }
 
                         is KtorfitResult.Success -> {
-                            val link = result.response.headers["link"]
-                            val next = link?.let { "max_id=(\\d+)".toRegex().find(it) }?.groupValues?.getOrNull(1)
-                            val prev = link?.let { "min_id=(\\d+)".toRegex().find(it) }?.groupValues?.getOrNull(1)
                             val body =
                                 result.response.bodyAsText().decodeJson(
                                     ListSerializer(
@@ -65,11 +48,39 @@ internal class MastodonPagingConverterFactory : Converter.Factory {
                                             .serializer(),
                                     ),
                                 )
-                            MastodonPaging(
-                                data = body,
-                                next = next,
-                                prev = prev,
-                            )
+                            val link = result.response.headers["link"]
+                            if (result.response.headers.contains("link") && link != null) {
+                                val next =
+                                    "max_id=(\\d+)"
+                                        .toRegex()
+                                        .find(link)
+                                        ?.groupValues
+                                        ?.getOrNull(1)
+                                val prev =
+                                    "min_id=(\\d+)"
+                                        .toRegex()
+                                        .find(link)
+                                        ?.groupValues
+                                        ?.getOrNull(1)
+                                MastodonPaging(
+                                    data = body,
+                                    next = next,
+                                    prev = prev,
+                                )
+                            } else {
+                                val next =
+                                    when (val last = body.lastOrNull()) {
+                                        is Status -> last.id
+                                        is Notification -> last.id
+                                        is Account -> last.id
+                                        is MastodonList -> last.id
+                                        else -> null
+                                    }
+                                MastodonPaging(
+                                    data = body,
+                                    next = next,
+                                )
+                            }
                         }
                     }
             }

@@ -56,7 +56,7 @@ compose-multiplatform = "1.9.3"
 logback = "1.5.21"
 navigation3 = "1.0.0"
 zoomable = "0.18.0"
-bouncycastle = "1.82"
+bouncycastle = "1.83"
 cupertino = "2.3.1"
 
 

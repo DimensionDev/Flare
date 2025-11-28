@@ -183,7 +183,7 @@
     <string name="home_tab_discover_title">Откриване</string>
     <string name="settings_title">Настройки</string>
     <string name="mastodon_tab_local_title">Тукашни</string>
-    <string name="mastodon_tab_public_title">Общодостъпни</string>
+    <string name="mastodon_tab_public_title">Обществени</string>
     <string name="home_tab_featured_title">Избрани</string>
     <string name="home_tab_bookmarks_title">Отметки</string>
     <string name="home_tab_favorite_title">Любими</string>

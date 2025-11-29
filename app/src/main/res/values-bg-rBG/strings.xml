@@ -42,7 +42,9 @@
     <string name="settings_side_panel">Персонализиране на панела</string>
     <string name="settings_side_panel_description">Персонализиране на страничния панел</string>
     <string name="settings_local_filter_title">Тукашен филтър</string>
+    <string name="settings_local_filter_description">Настройки на филтър за тукашната хронология</string>
     <string name="settings_local_history_title">Тукашна история</string>
+    <string name="settings_local_history_description">Преглед или търсене в историята на сърфиране</string>
     <string name="settings_ai_config_title">Конфигурация на ИИ</string>
     <string name="settings_ai_config_description">Конфигуриране на настройките за ИИ</string>
     <string name="settings_ai_config_server">Адрес на сървъра</string>
@@ -76,6 +78,7 @@
     <string name="settings_appearance_show_media">Показване на медия</string>
     <string name="settings_appearance_show_media_description">Показване на медия в статуса</string>
     <string name="settings_appearance_show_numbers">Показване на числа</string>
+    <string name="settings_appearance_show_cw_img">Показване на чувствително съдържание</string>
     <string name="settings_appearance_expand_media">Разгъване на медията до пълен размер</string>
     <string name="settings_appearance_video_autoplay">Автоматично възпроизвеждане на видео</string>
     <string name="settings_appearance_video_autoplay_wifi">Само Wi-Fi</string>
@@ -95,6 +98,7 @@
     <string name="settings_appearance_show_link_previews_description">Показване на прегледи на връзките в статуси</string>
     <string name="settings_appearance_compat_link_previews">Опростяване на прегледите на връзките</string>
     <string name="settings_appearance_theme_color">Цвят на темата</string>
+    <string name="settings_appearance_theme_pure_color">Режим с висок контраст</string>
     <string name="settings_appearance_font_size_diff">Размер на шрифта</string>
     <string name="settings_appearance_font_size_diff_description">Промяна на размера на шрифта на приложението</string>
     <string name="settings_appearance_font_size_diff_decrease">Намаляване</string>
@@ -110,6 +114,7 @@
     <string name="settings_appearance_bottombar_behavior_minimize_on_scroll">Минимизиране при превъртане</string>
     <string name="settings_appearance_in_app_browser">Браузър в приложението</string>
     <string name="settings_appearance_in_app_browser_description">Отваряне на връзките в браузъра на приложението</string>
+    <string name="settings_appearance_full_width_post">Публикации в пълен размер</string>
     <string name="settings_storage_clear_image_cache">Изчистване на кеша на изображенията</string>
     <string name="service_select_instance_input_placeholder">URL адрес на инстанция</string>
     <string name="service_select_next_button">Напред</string>
@@ -118,6 +123,7 @@
     <string name="media_menu_save">Запазване</string>
     <string name="media_menu_share_image">Споделяне на изображение</string>
     <string name="media_save_fail">Неуспешно запазване</string>
+    <string name="media_alt_text">Алтернативен текст</string>
     <string name="tab_settings_add">Добавяне</string>
     <string name="tab_settings_edit">Редактиране</string>
     <string name="tab_settings_remove">Премахване</string>
@@ -174,10 +180,12 @@
     <string name="list_create_description_hint">Описание на списъка</string>
     <string name="edit_account_list_title">Редактиране на списъка с акаунти</string>
     <string name="feeds_my_feeds_title">Моите емисии</string>
+    <string name="feeds_discover_feeds_created_by">Създадено от %1$s</string>
     <string name="profile_tab_timeline">Публикации</string>
     <string name="profile_tab_timeline_with_reply">Публикации и отговори</string>
     <string name="profile_tab_likes">Харесвания</string>
     <string name="profile_tab_media">Медия</string>
+    <string name="tab_settings_title">Настройки на раздела</string>
     <string name="dm_list_title">Лични съобщения</string>
     <string name="dm_list_empty">Няма лични съобщения</string>
     <string name="dm_list_error">Неуспешно зареждане на лични съобщения</string>
@@ -188,6 +196,7 @@
     <string name="dm_to_profile">Показване на профила</string>
     <string name="following_title">Следван</string>
     <string name="fans_title">Последовател</string>
+    <string name="local_history_search_placeholder">Търсене в локалния кеш</string>
     <string name="local_history_search_status_title">Състояние</string>
     <string name="local_history_search_user_title">Потребител</string>
     <string name="rss_sources_title">Източници на RSS</string>
@@ -220,6 +229,7 @@
     <string name="podcast_living">Подкаст на живо</string>
     <string name="home_tab_antennas_title">Антена</string>
     <string name="antennas_empty">Няма антени</string>
-    <string name="home_tab_mixed_timeline_title">Смесено</string>
+    <string name="home_tab_mixed_timeline_title">Обединено</string>
+    <string name="tab_settings_mixed_timeline">Добавяне на раздел с обединена хронология</string>
     <string name="home_tab_social_timeline_title">Социални</string>
 </resources>

@@ -1344,6 +1344,12 @@
             "value" : "إضافة Rss"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавяне на Rss"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3079,7 +3085,7 @@
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Списък"
+            "value" : "Списъци"
           }
         },
         "ca" : {
@@ -3713,7 +3719,7 @@
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Антена"
+            "value" : "Антени"
           }
         },
         "ca" : {
@@ -5472,6 +5478,12 @@
             "value" : "عرض كامل المنشور"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Публикации в пълен размер"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7016,6 +7028,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إظهار المحتوى الحساس"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показване на чувствително съдържание"
           }
         },
         "ca" : {
@@ -14444,6 +14462,12 @@
             "value" : "إلغاء"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отказ"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -14626,6 +14650,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "أغلق"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Затваряне"
           }
         },
         "ca" : {
@@ -18914,6 +18944,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تم"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово"
           }
         },
         "ca" : {
@@ -23290,6 +23326,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "تعديل عامل التصفية"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Редактиране на филтъра"
           }
         },
         "cs" : {
@@ -28042,6 +28084,12 @@
             "value" : "الخط الزمني المحلي"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тукашна хронология"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28176,6 +28224,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "الخط الزمني العام"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обществена хронология"
           }
         },
         "cs" : {
@@ -30358,6 +30412,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "انقر هنا"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Натиснете тук"
           }
         },
         "ca" : {
@@ -63224,7 +63284,7 @@
         "bg" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Смесено"
+            "value" : "Обединено"
           }
         },
         "ca" : {
@@ -65657,6 +65717,12 @@
             "value" : "حسناً"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добре"
+          }
+        },
         "ca" : {
           "stringUnit" : {
             "state" : "translated",
@@ -66543,6 +66609,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "التصويت"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Гласуване"
           }
         },
         "ca" : {
@@ -67867,6 +67939,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إزالة رد الفعل"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Премахване на реакцията"
           }
         },
         "ca" : {
@@ -71871,6 +71949,12 @@
             "value" : "الرجاء إدخال عنوان URL هنا"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Моля, поставете url адреса тук"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -71999,6 +72083,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Statuses"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Статуси"
           }
         },
         "cs" : {
@@ -72516,6 +72606,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إظهار"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показване"
           }
         },
         "cs" : {
@@ -73509,6 +73605,12 @@
             "value" : "ملخص المنشور"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обобщаване на публикацията"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -73637,6 +73739,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ترجمة المنشور"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Превеждане на публикацията"
           }
         },
         "cs" : {
@@ -75179,6 +75287,12 @@
             "value" : "عنوان التبويب"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заглавие на раздела"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -75307,6 +75421,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "الرجاء إدخال عنوان التبويب هنا"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Моля, поставете тук заглавието на раздела"
           }
         },
         "cs" : {
@@ -75573,6 +75693,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "سيتم خلط الخط الزمني المختلط بين جميع علامات التبويب في علامة تبويب واحدة"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Обединената хронология ще обедини хронологиите от всички раздели в един раздел"
           }
         },
         "ca" : {
@@ -75883,6 +76009,12 @@
             "value" : "علامات التبويب الرئيسية"
           }
         },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Основни раздели"
+          }
+        },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
@@ -76017,6 +76149,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إعدادات علامة التبويب"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки на раздела"
           }
         },
         "ca" : {
@@ -76201,6 +76339,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "إلغاء الحظر"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Отблокирване"
           }
         },
         "ca" : {

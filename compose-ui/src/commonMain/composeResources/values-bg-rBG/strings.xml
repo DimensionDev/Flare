@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Изтриване</string>
+    <string name="done">Готово</string>
+    <string name="cancel">Отказ</string>
+    <string name="ok">Добре</string>
     <string name="profile_header_following_count">%1$s следвани</string>
     <string name="profile_header_fans_count">%1$s последователи</string>
     <string name="profile_header_toots_count">%1$s публикации</string>
@@ -40,6 +43,8 @@
     <string name="settings_notifications_title">Известия</string>
     <string name="status_loadmore_end">Няма повече публикации</string>
     <string name="status_loadmore_error_retry">Повторен опит</string>
+    <string name="status_empty">Няма нищо за показване</string>
+    <string name="status_sensitive_media">Чувствителна медия</string>
     <string name="show_media">Показване на медия</string>
     <string name="hide_media">Скриване на медията</string>
     <string name="login_expired_relogin">Повторно вписване</string>
@@ -61,6 +66,7 @@
     <string name="more">Още</string>
     <string name="quote">Цитиране</string>
     <string name="reaction_add">Добавяне на реакция</string>
+    <string name="reaction_remove">Премахване на реакцията</string>
     <string name="reply">Отговор</string>
     <string name="report">Докладване</string>
     <string name="share">Споделяне</string>
@@ -144,6 +150,9 @@
     <string name="poll_voted">Гласувано</string>
     <string name="user_send_message">Изпращане на съобщение</string>
     <string name="profile_search_user_using_account_compat">Намиране в %1$s</string>
+    <string name="feeds_discover_feeds_created_by">Създадено от %1$s</string>
+    <string name="notification_item_accept_follow_request">Приемане</string>
+    <string name="notification_item_reject_follow_request">Отхвърляне</string>
     <string name="dm_list_empty">Няма лични съобщения</string>
     <string name="dm_list_error">Неуспешно зареждане на лични съобщения</string>
     <string name="send">Изпращане</string>
@@ -169,6 +178,9 @@
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">Няма източници на rss</string>
     <string name="service_select_welcome_title">Добре дошли във Flare</string>
+    <string name="service_select_welcome_message">Моля, въведете сървъра, за да започнете.</string>
+    <string name="service_select_welcome_hint">Flare поддържа Mastodon, Misskey, Bluesky и X.</string>
+    <string name="service_select_welcome_list_hint">Или изберете от тези сървъри</string>
     <string name="bluesky_login_username_hint">Потребителско име</string>
     <string name="bluesky_login_password_hint">Парола</string>
     <string name="bluesky_login_use_password_button">Използване на парола</string>
@@ -192,7 +204,7 @@
     <string name="dm_list_title">Лични съобщения</string>
     <string name="social_title">Социални</string>
     <string name="antenna_title">Антена</string>
-    <string name="mixed_timeline_title">Смесено</string>
+    <string name="mixed_timeline_title">Обединено</string>
     <string name="settings_about_description">Следващо поколение децентрализиран клиент за социални мрежи, захранван от ИИ и с отворен код.</string>
     <string name="settings_about_source_code">Програмен код</string>
     <string name="settings_about_telegram">Телеграм</string>

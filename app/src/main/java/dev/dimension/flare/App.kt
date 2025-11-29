@@ -19,7 +19,7 @@ import dev.dimension.flare.di.androidModule
 import dev.dimension.flare.di.composeUiModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
-
+import nostr.keys.androidContext
 class App :
     Application(),
     SingletonImageLoader.Factory {

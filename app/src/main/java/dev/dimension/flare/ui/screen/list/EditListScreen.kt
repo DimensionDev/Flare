@@ -68,7 +68,6 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.list.EditListState
 import dev.dimension.flare.ui.presenter.list.ListEditPresenter
 import dev.dimension.flare.ui.screen.settings.AccountItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -392,7 +391,7 @@ private fun presenter(
         mutableStateOf(false)
     }
 
-    object : EditListState by state {
+    object : ListEditPresenter.State by state {
         val text = text
         val description = description
         val isLoading = isLoading

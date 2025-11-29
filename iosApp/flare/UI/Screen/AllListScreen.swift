@@ -4,6 +4,8 @@ import SwiftUI
 struct AllListScreen: View {
     @StateObject private var presenter: KotlinPresenter<AllListWithTabsPresenterState>
     private let accountType: AccountType
+    @State private var editListId: String? = nil
+    @State private var deleteListId: String? = nil
     
     init(accountType: AccountType) {
         self.accountType = accountType
@@ -27,6 +29,50 @@ struct AllListScreen: View {
                         )
                 ) {
                     UiListView(data: item)
+                        .if(!item.readonly) { view in
+                            view.swipeActions(edge: .leading) {
+                                Button {
+                                    editListId = item.id
+                                } label: {
+                                    Label {
+                                        Text("list_edit_title")
+                                    } icon: {
+                                        Image(.faPen)
+                                    }
+                                }
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    deleteListId = item.id
+                                } label: {
+                                    Label {
+                                        Text("delete")
+                                    } icon: {
+                                        Image(.faTrash)
+                                    }
+                                }
+                            }
+                            .contextMenu {
+                                Button {
+                                    editListId = item.id
+                                } label: {
+                                    Label {
+                                        Text("edit")
+                                    } icon: {
+                                        Image(.faPen)
+                                    }
+                                }
+                                Button(role: .destructive) {
+                                    deleteListId = item.id
+                                } label: {
+                                    Label {
+                                        Text("delete")
+                                    } icon: {
+                                        Image(.faTrash)
+                                    }
+                                }
+                            }
+                        }
                 }
             } loadingContent: {
                 UiListPlaceholder()
@@ -36,5 +82,26 @@ struct AllListScreen: View {
         .refreshable {
             try? await presenter.state.refreshSuspend()
         }
+        .sheet(item: $editListId) { id in
+            NavigationStack {
+                EditListScreen(accountType: accountType, listId: id)
+            }
+        }
+        .alert("delete_list_title", isPresented: Binding(get: {
+            deleteListId != nil
+        }, set: { value in
+            if !value {
+                deleteListId = nil
+            }
+        }), presenting: deleteListId, actions: { id in
+            Button("Cancel", role: .cancel) {}
+            Button("report", role: .destructive) {
+                Task {
+                    try? await DeleteListPresenter(accountType: accountType, listId: id).models.value.deleteList()
+                }
+            }
+        }, message: { data in
+            Text("delete_list_description")
+        })
     }
 }

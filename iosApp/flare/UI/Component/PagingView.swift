@@ -77,6 +77,31 @@ extension PagingView {
             }
         )
     }
+    
+    
+    init(
+        data: PagingState<T>,
+        @ViewBuilder
+        successContent: @escaping (T) -> SuccessContent,
+        @ViewBuilder
+        loadingContent: @escaping () -> LoadingContent,
+        @ViewBuilder
+        errorContent: @escaping (KotlinThrowable, @escaping () -> Void) -> ErrorContent
+    ) where EmptyContent == ListEmptyView {
+        self.init(
+            data: data,
+            emptyContent: { ListEmptyView() },
+            errorContent: { error, retry in
+                errorContent(error, retry)
+            },
+            loadingContent: { index, loadingCount in
+                loadingContent()
+            },
+            successContent: { item, index, itemCount in
+                successContent(item)
+            }
+        )
+    }
 }
 
 

@@ -26,12 +26,24 @@ import org.koin.core.component.inject
 public class ListEditPresenter(
     private val accountType: AccountType,
     private val listId: String,
-) : PresenterBase<EditListState>(),
+) : PresenterBase<ListEditPresenter.State>(),
     KoinComponent {
+    @Immutable
+    public interface State :
+        EditListMemberState,
+        ListMembersState,
+        ListInfoState {
+        public val supportedMetaData: UiState<ImmutableList<ListMetaDataType>>
+
+        public fun refresh()
+
+        public suspend fun updateList(listMetaData: ListMetaData)
+    }
+
     private val accountRepository: AccountRepository by inject()
 
     @Composable
-    override fun body(): EditListState {
+    override fun body(): State {
         val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
         val listInfoState =
@@ -56,7 +68,7 @@ public class ListEditPresenter(
                 ListMembersPresenter(accountType, listId)
             }.body()
         return object :
-            EditListState,
+            State,
             EditListMemberState by state,
             ListMembersState by memberState,
             ListInfoState by listInfoState {
@@ -80,16 +92,4 @@ public class ListEditPresenter(
             }
         }
     }
-}
-
-@Immutable
-public interface EditListState :
-    EditListMemberState,
-    ListMembersState,
-    ListInfoState {
-    public val supportedMetaData: UiState<ImmutableList<ListMetaDataType>>
-
-    public fun refresh()
-
-    public suspend fun updateList(listMetaData: ListMetaData)
 }

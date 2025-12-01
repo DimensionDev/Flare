@@ -75,7 +75,7 @@ struct StatusMediaScreen: View {
                                 statusView
                                     .padding()
                                     .backport
-                                    .glassEffect(.regular, in: .rect(corners: .concentric, isUniform: true), fallbackBackground: .regularMaterial)
+                                    .glassEffect(.tinted(.init(.systemGroupedBackground).opacity(0.5)), in: .rect(corners: .concentric, isUniform: true), fallbackBackground: .regularMaterial)
                                     .padding()
                                     .transition(.move(edge: .bottom).combined(with: .opacity))
                             } else {
@@ -97,6 +97,7 @@ struct StatusMediaScreen: View {
                     }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onChange(of: selectedIndex) { oldValue, newValue in
             isPlaying = true
             videoState = .idle
@@ -104,7 +105,9 @@ struct StatusMediaScreen: View {
         }
         .onChange(of: presenter.state.status) { oldValue, newValue in
             if medias.isEmpty, case .success(let success) = onEnum(of: newValue), case .status(let content) = onEnum(of: success.data.content) {
-                medias = content.images
+                withAnimation {
+                    medias = content.images
+                }
             }
         }
         .background(.black.opacity(opacity))

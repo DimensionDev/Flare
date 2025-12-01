@@ -165,7 +165,7 @@ struct LazyPagerIndicator: View {
         HStack(spacing: 8) {
             ForEach(0..<count, id: \.self) { index in
                 Circle()
-                    .fill(index == page ? Color.primary : Color.secondary.opacity(0.5))
+                    .fill(index == page ? Color.accentColor : Color.secondary)
                     .frame(width: 8, height: 8)
             }
         }

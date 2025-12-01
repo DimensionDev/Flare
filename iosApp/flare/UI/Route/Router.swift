@@ -6,11 +6,11 @@ struct Router<Root: View>: View {
     @ViewBuilder let root: (@escaping (Route) -> Void) -> Root
     @State private var backStack: [Route] = []
     @State private var sheet: Route? = nil
+    @State private var cover: Route? = nil
     @State private var deleteStatusData: (AccountType, MicroBlogKey)? = nil
     @State private var showDeleteStatusAlert = false
     @State private var showMastodonReportStatusAlert = false
     @State private var mastodonReportStatusData: (AccountType, MicroBlogKey, MicroBlogKey?)? = nil
-    @State private var selectedMediaItem: String? = nil
     var body: some View {
         NavigationStack(path: $backStack) {
             root({ route in
@@ -30,6 +30,16 @@ struct Router<Root: View>: View {
                     clearToHome: { backStack.removeAll() }
                 )
             }
+        }
+        .fullScreenCover(item: $cover) { route in
+            NavigationStack {
+                route.view(
+                    onNavigate: { route in navigate(route: route) },
+                    clearToHome: { backStack.removeAll() }
+                )
+            }
+            .background(ClearFullScreenBackground())
+            .colorScheme(.dark)
         }
         .alert("delete_alert_title", isPresented: $showDeleteStatusAlert, presenting: deleteStatusData) { data in
             Button("Cancel", role: .cancel) {}
@@ -55,19 +65,10 @@ struct Router<Root: View>: View {
                 return .systemAction
             }
         })
-        .fullScreenCover(item: $selectedMediaItem) { item in
-            NavigationStack {
-                MediaScreen(url: item)
-            }
-            .background(ClearFullScreenBackground())
-            .colorScheme(.dark)
-        }
     }
 
     func navigate(route: Route) {
-        if case .mediaImage(let url, let preview) = route {
-            self.selectedMediaItem = url
-        } else if case .statusDeleteConfirm(let accountType, let statusKey) = route {
+        if case .statusDeleteConfirm(let accountType, let statusKey) = route {
             deleteStatusData = (accountType, statusKey)
             showDeleteStatusAlert = true
         } else if case .statusMastodonReport(let accountType, let userKey, let statusKey) = route {
@@ -75,15 +76,27 @@ struct Router<Root: View>: View {
             showMastodonReportStatusAlert = true
         } else if isSheetRoute(route: route) {
             sheet = route
+        } else if isFullScreenCover(route: route) {
+            cover = route
         } else if backStack.last != route {
             backStack.append(route)
             sheet = nil
+            cover = nil
         }
     }
     
     func isSheetRoute(route: Route) -> Bool {
         switch route {
         case .composeNew, .composeQuote, .composeReply, .composeVVOReplyComment, .tabSettings, .statusBlueskyReport, .statusMisskeyReport, .statusAddReaction:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    func isFullScreenCover(route: Route) -> Bool {
+        switch route {
+        case .mediaStatusMedia, .mediaImage:
             return true
         default:
             return false

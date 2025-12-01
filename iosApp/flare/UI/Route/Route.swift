@@ -77,6 +77,10 @@ enum Route: Hashable, Identifiable {
         case .dmConversation(let accountType, let roomKey, let title):
             DMConversationScreen(accountType: accountType, roomKey: roomKey)
                 .navigationTitle(title)
+        case .mediaImage(let url, let preview):
+            MediaScreen(url: url)
+        case .mediaStatusMedia(let accountType, let statusKey, let selectedIndex, let preview):
+            StatusMediaScreen(accountType: accountType, statusKey: statusKey, initialIndex: Int(selectedIndex), preview: preview)
         default:
             Text("Not done yet for \(self)")
         }

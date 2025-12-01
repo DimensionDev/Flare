@@ -9,10 +9,13 @@ struct StatusView: View {
     @Environment(\.appearanceSettings.showActions) private var showActions
     @Environment(\.openURL) private var openURL
     let data: UiTimeline.ItemContentStatus
-    let isDetail: Bool
-    let isQuote: Bool
-    let withLeadingPadding: Bool
-    let showMedia: Bool
+    var isDetail: Bool = false
+    var isQuote: Bool = false
+    var withLeadingPadding: Bool = false
+    var showMedia: Bool = true
+    var maxLine: Int = 5
+    var showExpandTextButton: Bool = true
+    var forceHideActions: Bool = false
     @State private var expand = false
     private var showAsFullWidth: Bool {
         (!fullWidthPost || withLeadingPadding) && !isQuote && !isDetail
@@ -122,13 +125,13 @@ struct StatusView: View {
                                             .textSelection(.enabled)
                                     } else: { richText in
                                         richText
-                                            .if(data.shouldExpandTextByDefault || expand, if: { view in
+                                            .if((data.shouldExpandTextByDefault || expand) && maxLine >= 5, if: { view in
                                                 view.lineLimit(nil)
                                             }, else: { view in
-                                                view.lineLimit(5)
+                                                view.lineLimit(maxLine)
                                             })
                                     }
-                                if !data.shouldExpandTextByDefault && !isDetail && !expand {
+                                if !data.shouldExpandTextByDefault && !isDetail && !expand && showExpandTextButton {
                                     Button {
                                         withAnimation {
                                             expand = true
@@ -150,7 +153,9 @@ struct StatusView: View {
                         }
                         
                         if !data.images.isEmpty, showMedia {
-                            StatusMediaContent(data: data.images, sensitive: data.sensitive)
+                            StatusMediaContent(data: data.images, sensitive: data.sensitive) { media, index in
+                                data.onMediaClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)), media, .init(int: .init(index)))
+                            }
                         }
 
                         if let card = data.card, showMedia, data.images.isEmpty, data.quote.isEmpty, showLinkPreview {
@@ -164,7 +169,7 @@ struct StatusView: View {
                         if !data.quote.isEmpty, !isQuote {
                             VStack {
                                 ForEach(data.quote, id: \.itemKey) { quote in
-                                    StatusView(data: quote, isQuote: true)
+                                    StatusView(data: quote, isQuote: true, forceHideActions: true)
                                     if data.quote.last != quote {
                                         Divider()
                                     }
@@ -190,7 +195,7 @@ struct StatusView: View {
                                 .foregroundStyle(.secondary)
                         }
 
-                        if !isQuote, (showActions || isDetail) {
+                        if (showActions || isDetail) && !forceHideActions {
                             StatusActionsView(data: data.actions, useText: false)
                                 .font(isDetail ? .body : .footnote)
                                 .foregroundStyle(isDetail ? .primary : .secondary)
@@ -237,9 +242,10 @@ struct StatusMediaContent: View {
     @State private var expandMedia = false
     let data: [any UiMedia]
     let sensitive: Bool
+    let onMediaClicked: (any UiMedia, Int) -> Void
     var body: some View {
         if showMedia || expandMedia {
-            StatusMediaView(data: data, sensitive: !(showSensitiveContent) && sensitive)
+            StatusMediaView(data: data, sensitive: !(showSensitiveContent) && sensitive, onMediaClicked: onMediaClicked)
         } else {
             Button {
                 withAnimation {
@@ -258,40 +264,24 @@ struct StatusMediaContent: View {
     }
 }
 
-extension StatusView {
-    init(data: UiTimeline.ItemContentStatus, isDetail: Bool) {
-        self.data = data
-        self.isDetail = isDetail
-        self.isQuote = false
-        self.withLeadingPadding = false
-        self.showMedia = true
-    }
-    init(data: UiTimeline.ItemContentStatus, detailStatusKey: MicroBlogKey?) {
-        self.data = data
-        self.isDetail = data.statusKey == detailStatusKey
-        self.isQuote = false
-        self.withLeadingPadding = false
-        self.showMedia = true
-    }
-    init(data: UiTimeline.ItemContentStatus, isQuote: Bool) {
-        self.data = data
-        self.isDetail = false
-        self.isQuote = isQuote
-        self.withLeadingPadding = false
-        self.showMedia = true
-    }
-    init(data: UiTimeline.ItemContentStatus, withLeadingPadding: Bool) {
-        self.data = data
-        self.isDetail = false
-        self.isQuote = false
-        self.withLeadingPadding = withLeadingPadding
-        self.showMedia = true
-    }
-    init(data: UiTimeline.ItemContentStatus, isQuote: Bool, showMedia: Bool) {
-        self.data = data
-        self.isDetail = false
-        self.isQuote = isQuote
-        self.withLeadingPadding = false
-        self.showMedia = showMedia
-    }
-}
+//extension StatusView {
+//    init(
+//        data: UiTimeline.ItemContentStatus, 
+//        isDetail: Bool = false, 
+//        isQuote: Bool = false,
+//        withLeadingPadding: Bool = false,
+//        showMedia: Bool = true,
+//        maxLine: Int = 5, 
+//        showExpandTextButton: Bool = true, 
+//        forceHideActions: Bool = false
+//    ) {
+//        self.data = data
+//        self.isDetail = isDetail
+//        self.isQuote = isQuote
+//        self.withLeadingPadding = withLeadingPadding
+//        self.showMedia = showMedia
+//        self.maxLine = maxLine
+//        self.showExpandTextButton = showExpandTextButton
+//        self.forceHideActions = forceHideActions
+//    }
+//}

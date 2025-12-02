@@ -18,8 +18,15 @@ enum Route: Hashable, Identifiable {
     ) -> some View {
         switch self {
         case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew(accountType)) }, toTabSetting: { onNavigate(.tabSettings) })
-        case .timeline(let item): TimelineScreen(tabItem: item)
-                .navigationTitle(item.metaData.title.text)
+        case .timeline(let item):
+            switch onEnum(of: item) {
+            case .ListTimelineTabItem(let listTabItem):
+                ListTimelineScreen(tabItem: listTabItem)
+                    .navigationTitle(item.metaData.title.text)
+            default:
+                TimelineScreen(tabItem: item)
+                    .navigationTitle(item.metaData.title.text)
+            }
         case .serviceSelect:
             ServiceSelectionScreen(toHome: { clearToHome() })
         case .statusDetail(let accountType, let statusKey):
@@ -123,6 +130,7 @@ enum Route: Hashable, Identifiable {
     case userFollowing(AccountType, MicroBlogKey)
     case userFans(AccountType, MicroBlogKey)
     case dmConversation(AccountType, MicroBlogKey, String)
+    
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {

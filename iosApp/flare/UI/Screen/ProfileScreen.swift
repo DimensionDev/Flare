@@ -10,6 +10,7 @@ struct ProfileScreen: View {
     let onFansClick: (MicroBlogKey) -> Void
     @StateObject private var presenter: KotlinPresenter<ProfileState>
     @State private var selectedTab: Int = 0
+    @State private var showEditListSheet = false
     
     var body: some View {
         ZStack {
@@ -21,6 +22,13 @@ struct ProfileScreen: View {
             }
         }
         .background(Color(.systemGroupedBackground))
+        .sheet(isPresented: $showEditListSheet) {
+            if let userKey {
+                NavigationStack {
+                    EditUserInListScreen(accountType: accountType, userKey: userKey)
+                }
+            }
+        }
         .toolbar {
             if horizontalSizeClass == .regular, case .success(let tabState) = onEnum(of: presenter.state.tabs) {
                 let tabs = tabState.data.cast(ProfileState.Tab.self)
@@ -72,6 +80,19 @@ struct ProfileScreen: View {
                         placement: .primaryAction
                     ) {
                         Menu {
+                            if case .success(let listDataSource) = onEnum(of: presenter.state.isListDataSource), listDataSource.data.boolValue {
+                                Button {
+                                    showEditListSheet = true
+                                } label: {
+                                    Label {
+                                        Text("edit_user_in_list")
+                                    } icon: {
+                                        Image(.faList)
+                                    }
+                                }
+                                Divider()
+                            }
+                            
                             if case .success(let relation) = onEnum(of: presenter.state.relationState),
                                case .success(let actionsArray) = onEnum(of: presenter.state.actions),
                                actionsArray.data.count > 0 {
@@ -110,8 +131,9 @@ struct ProfileScreen: View {
                                         Label(text, systemImage: icon)
                                     })
                                 }
+                                Divider()
                             }
-                            Button(action: { presenter.state.report(userKey: user.data.key) }, label: {
+                            Button(role: .destructive,action: { presenter.state.report(userKey: user.data.key) }, label: {
                                 Label("report", systemImage: "exclamationmark.bubble")
                             })
                         } label: {

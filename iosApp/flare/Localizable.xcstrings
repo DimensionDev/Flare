@@ -17460,6 +17460,9 @@
         }
       }
     },
+    "Delete" : {
+
+    },
     "delete_alert_title" : {
       "localizations" : {
         "af" : {
@@ -19168,6 +19171,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Edit"
+          }
+        }
+      }
+    },
+    "edit_list_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit list"
           }
         }
       }
@@ -22740,6 +22753,36 @@
         }
       }
     },
+    "list_edit_avatar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List icon"
+          }
+        }
+      }
+    },
+    "list_edit_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List description"
+          }
+        }
+      }
+    },
+    "list_edit_name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List name"
+          }
+        }
+      }
+    },
     "list_edit_title" : {
       "localizations" : {
         "en" : {
@@ -22896,6 +22939,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "List name"
+          }
+        }
+      }
+    },
+    "list.create.avatar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List icon"
+          }
+        }
+      }
+    },
+    "list.create.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List description"
+          }
+        }
+      }
+    },
+    "list.create.description.placeholder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List description"
+          }
+        }
+      }
+    },
+    "list.create.name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List name"
+          }
+        }
+      }
+    },
+    "list.create.name.placeholder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List name"
+          }
+        }
+      }
+    },
+    "list.create.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create list"
           }
         }
       }

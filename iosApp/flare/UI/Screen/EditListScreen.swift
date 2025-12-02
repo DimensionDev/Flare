@@ -23,8 +23,8 @@ struct EditListScreen: View {
     var body: some View {
         List {
             StateView(state: presenter.state.supportedMetaData) { supportedMetadata in
-                Section {
-                    if supportedMetadata.contains(ListMetaDataType.avatar) {
+                if supportedMetadata.contains(ListMetaDataType.avatar) {
+                    Section {
                         PhotosPicker(selection: $avatar, matching: .any(of: [.images, .videos, .livePhotos])) {
                             if let selectedImage {
                                 selectedImage
@@ -54,14 +54,24 @@ struct EditListScreen: View {
                                   }
                               }
                           }
+                    } header: {
+                        Text("list_edit_avatar")
                     }
+                }
+                Section {
                     TextField(text: $title) {
                         Text("list_name")
                     }
-                    if supportedMetadata.contains(ListMetaDataType.theDescription) {
+                } header: {
+                    Text("list_edit_name")
+                }
+                if supportedMetadata.contains(ListMetaDataType.theDescription) {
+                    Section {
                         TextField(text: $desc) {
                             Text("list_description")
                         }
+                    } header: {
+                        Text("list_edit_description")
                     }
                 }
             }
@@ -134,12 +144,24 @@ struct EditListScreen: View {
                 Button {
                     Task {
                         isLoading = true
-                        try? await presenter.state.updateList(
-                            listMetaData: .init(
-                                title: self.title,
-                                description: self.desc.isEmpty ? nil : self.desc,
+                        let imageData = try? await avatar?.loadTransferable(type: Data.self)
+                        let imageByteArray = imageData != nil ? KotlinByteArray.from(data: imageData!) : nil
+                        if let imageByteArray, let avatar {
+                            try? await presenter.state.updateList(
+                                listMetaData: .init(
+                                    title: self.title,
+                                    description: self.desc.isEmpty ? nil : self.desc,
+                                    avatar: .init(name: avatar.itemIdentifier, data: imageByteArray)
+                                )
                             )
-                        )
+                        } else {
+                            try? await presenter.state.updateList(
+                                listMetaData: .init(
+                                    title: self.title,
+                                    description: self.desc.isEmpty ? nil : self.desc,
+                                )
+                            )
+                        }
                         isLoading = false
                         dismiss()
                     }

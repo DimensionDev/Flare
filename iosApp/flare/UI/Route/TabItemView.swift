@@ -12,6 +12,9 @@ extension TabItem {
             switch onEnum(of: timelineTabItem) {
             case .HomeTimelineTabItem(let homeTimelineTabItem):
                 HomeTimelineScreen(accountType: homeTimelineTabItem.account, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew(homeTimelineTabItem.account) ) }, toTabSetting: { onNavigate(.tabSettings) } )
+            case .ListTimelineTabItem(let listTabItem):
+                ListTimelineScreen(tabItem: listTabItem)
+                    .navigationTitle(timelineTabItem.metaData.title.text)
             default:
                 TimelineScreen(tabItem: timelineTabItem)
                     .navigationTitle(timelineTabItem.metaData.title.text)

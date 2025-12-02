@@ -5,8 +5,13 @@ import coil3.SingletonImageLoader
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.InAppNotification
+import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.KoinHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.binds
 import org.koin.dsl.module
@@ -18,7 +23,7 @@ public object ComposeUIHelper {
             modules(
                 module {
                     single {
-                        inAppNotification
+                        ProxyInAppNotification(inAppNotification, get())
                     } binds arrayOf(InAppNotification::class)
                 },
             )
@@ -38,6 +43,42 @@ public object ComposeUIHelper {
                     )
                 }.crossfade(true)
                 .build()
+        }
+    }
+}
+
+private class ProxyInAppNotification(
+    private val delegate: InAppNotification,
+    private val scope: CoroutineScope,
+) : InAppNotification {
+    override fun onProgress(
+        message: Message,
+        progress: Int,
+        total: Int,
+    ) {
+        scope.launch {
+            withContext(Dispatchers.Main) {
+                delegate.onProgress(message, progress, total)
+            }
+        }
+    }
+
+    override fun onSuccess(message: Message) {
+        scope.launch {
+            withContext(Dispatchers.Main) {
+                delegate.onSuccess(message)
+            }
+        }
+    }
+
+    override fun onError(
+        message: Message,
+        throwable: Throwable,
+    ) {
+        scope.launch {
+            withContext(Dispatchers.Main) {
+                delegate.onError(message, throwable)
+            }
         }
     }
 }

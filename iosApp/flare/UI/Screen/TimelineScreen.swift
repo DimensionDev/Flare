@@ -26,21 +26,35 @@ struct TimelineScreen: View {
                 try? await presenter.state.refreshSuspend()
             }
     }
-    var singleListView: some View {
-        List {
-            TimelinePagingView(data: presenter.state.listState)
-                .listRowSeparator(.hidden)
-                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .padding(.horizontal)
-                .listRowBackground(Color.clear)
-        }
-        .detectScrolling()
-        .scrollContentBackground(.hidden)
-        .listRowSpacing(2)
-        .listStyle(.plain)
-        .refreshable {
-            try? await presenter.state.refreshSuspend()
-        }
-        .background(Color(.systemGroupedBackground))
+}
+
+struct ListTimelineScreen:  View {
+    let tabItem: ListTimelineTabItem
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.openURL) private var openURL
+    @StateObject private var presenter: KotlinPresenter<ListInfoState>
+    @State private var showEditListSheet = false
+    init(tabItem: ListTimelineTabItem) {
+        self.tabItem = tabItem
+        self._presenter = .init(wrappedValue: .init(presenter: ListInfoPresenter(accountType: tabItem.account, listId: tabItem.listId)))
+    }
+    var body: some View {
+        TimelineScreen(tabItem: tabItem)
+            .sheet(isPresented: $showEditListSheet) {
+                NavigationStack {
+                    EditListScreen(accountType: tabItem.account, listId: tabItem.listId)
+                }
+            }
+            .toolbar {
+                if case .success(let success) = onEnum(of: presenter.state.listInfo), !success.data.readonly {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            showEditListSheet = true
+                        } label: {
+                            Text("edit_list_title")
+                        }
+                    }
+                }
+            }
     }
 }

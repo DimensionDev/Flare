@@ -53,7 +53,7 @@ public class BlueskyLoginPresenter(
                             baseUrl = "https://$baseUrl",
                             username = username,
                             password = password,
-                            authFactorToken = authFactorToken?.takeIf { it.isNotEmpty() },
+                            authFactorToken = authFactorToken?.takeIf { it.isNotEmpty() && require2FA },
                             accountRepository = accountRepository,
                         )
                         toHome.invoke()
@@ -61,7 +61,6 @@ public class BlueskyLoginPresenter(
                         if (it is AtpException && it.error?.error == "AuthFactorTokenRequired") {
                             require2FA = true
                         } else {
-                            require2FA = false
                             error = it
                         }
                     }

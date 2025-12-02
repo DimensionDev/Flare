@@ -4,10 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -19,21 +22,25 @@ public class DeleteListPresenter(
     private val listId: String,
 ) : PresenterBase<DeleteListState>(),
     KoinComponent {
+    private val scope by inject<CoroutineScope>()
     private val accountRepository: AccountRepository by inject()
 
     @Composable
-    override fun body(): DeleteListState {
-        val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
-
-        return object : DeleteListState {
+    override fun body(): DeleteListState =
+        object : DeleteListState {
             override suspend fun deleteList() {
-                serviceState.onSuccess {
-                    require(it is ListDataSource)
-                    it.deleteList(listId)
+                scope.launch {
+                    accountServiceFlow(
+                        accountType = accountType,
+                        repository = accountRepository,
+                    ).map {
+                        require(it is ListDataSource)
+                        it
+                    }.first()
+                        .deleteList(listId)
                 }
             }
         }
-    }
 }
 
 @Immutable

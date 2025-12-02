@@ -6,6 +6,7 @@ struct AllListScreen: View {
     private let accountType: AccountType
     @State private var editListId: String? = nil
     @State private var deleteListId: String? = nil
+    @State private var showCreateListSheet: Bool = false
     
     init(accountType: AccountType) {
         self.accountType = accountType
@@ -95,7 +96,7 @@ struct AllListScreen: View {
             }
         }), presenting: deleteListId, actions: { id in
             Button("Cancel", role: .cancel) {}
-            Button("report", role: .destructive) {
+            Button("Delete", role: .destructive) {
                 Task {
                     try? await DeleteListPresenter(accountType: accountType, listId: id).models.value.deleteList()
                 }
@@ -103,5 +104,19 @@ struct AllListScreen: View {
         }, message: { data in
             Text("delete_list_description")
         })
+        .sheet(isPresented: $showCreateListSheet) {
+            NavigationStack {
+                CreateListScreen(accountType: accountType)
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showCreateListSheet = true
+                } label: {
+                    Image(.faPlus)
+                }
+            }
+        }
     }
 }

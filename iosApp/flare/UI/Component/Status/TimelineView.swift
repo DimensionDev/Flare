@@ -25,7 +25,7 @@ struct TimelineView: View {
                 case .feed(let feed):
                     FeedView(data: feed)
                 case .status(let status):
-                    StatusView(data: status, detailStatusKey: detailStatusKey)
+                    StatusView(data: status, isDetail: detailStatusKey == status.statusKey)
                 case .user(let user):
                     TimelineUserView(data: user)
                 case .userList(let userList):

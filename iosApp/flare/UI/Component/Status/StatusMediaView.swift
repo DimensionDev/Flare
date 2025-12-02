@@ -7,9 +7,10 @@ import SwiftUIBackports
 struct StatusMediaView: View {
     let data: [any UiMedia]
     let sensitive: Bool
+    let onMediaClicked: (any UiMedia, Int) -> Void
     @Environment(\.appearanceSettings.expandMediaSize) private var expandMediaSize
     @State private var isBlur: Bool
-    @State private var selectedIndex: Int? = nil
+//    @State private var selectedIndex: Int? = nil
 
     var body: some View {
         AdaptiveGrid(
@@ -23,7 +24,8 @@ struct StatusMediaView: View {
                 MediaView(data: item)
                     .onTapGesture {
                         if !sensitive || !isBlur {
-                            selectedIndex = index
+                            onMediaClicked(item, index)
+//                            selectedIndex = index
                         }
                     }
                     .overlay(alignment: .bottomTrailing) {
@@ -33,13 +35,13 @@ struct StatusMediaView: View {
                     }
             }
         }
-        .fullScreenCover(item: $selectedIndex) { index in
-            NavigationStack {
-                StatusMediaScreen(data: data, selectedIndex: index)
-            }
-            .background(ClearFullScreenBackground())
-            .colorScheme(.dark)
-        }
+//        .fullScreenCover(item: $selectedIndex) { index in
+//            NavigationStack {
+//                StatusMediaScreen(data: data, selectedIndex: index)
+//            }
+//            .background(ClearFullScreenBackground())
+//            .colorScheme(.dark)
+//        }
         .blur(radius: isBlur ? 20 : 0)
         .overlay(
             alignment: isBlur ? .center : .topLeading
@@ -82,9 +84,10 @@ struct StatusMediaView: View {
 }
 
 extension StatusMediaView {
-    init(data: [any UiMedia], sensitive: Bool) {
+    init(data: [any UiMedia], sensitive: Bool, onMediaClicked: @escaping (any UiMedia, Int) -> Void) {
         self.data = data
         self.sensitive = sensitive
+        self.onMediaClicked = onMediaClicked
         self._isBlur = State(initialValue: sensitive)
     }
 }

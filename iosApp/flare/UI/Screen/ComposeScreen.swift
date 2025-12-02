@@ -186,7 +186,7 @@ struct ComposeScreen: View {
                     if let replyState = presenter.state.replyState,
                        case .success(let reply) = onEnum(of: replyState),
                        case .status(let content) = onEnum(of: reply.data.content) {
-                        StatusView(data: content, isQuote: true, showMedia: false)
+                        StatusView(data: content, isQuote: true, showMedia: false, forceHideActions: true)
                             .padding()
                             .clipShape(.rect(cornerRadius: 16))
                             .overlay(
@@ -206,7 +206,7 @@ struct ComposeScreen: View {
                         ) {
                             if !viewModel.pollViewModel.enabled {
                                 StateView(state: presenter.state.composeConfig) { config in
-                                    if config.media != nil {
+                                    if let media = config.media {
                                         PhotosPicker(selection: Binding(get: {
                                             viewModel.mediaViewModel.selectedItems
                                         }, set: { value in

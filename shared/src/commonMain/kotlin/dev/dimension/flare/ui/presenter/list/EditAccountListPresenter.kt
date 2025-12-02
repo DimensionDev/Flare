@@ -5,6 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.filter
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.toPagingState
@@ -21,6 +22,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -45,7 +47,11 @@ public class EditAccountListPresenter(
                 .map { service ->
                     require(service is ListDataSource)
                     remember(service) {
-                        service.myList(scope = scope)
+                        service.myList(scope = scope).map {
+                            it.filter {
+                                !it.readonly
+                            }
+                        }
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
         val userLists =

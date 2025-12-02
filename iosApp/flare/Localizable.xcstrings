@@ -19369,6 +19369,16 @@
         }
       }
     },
+    "edit_user_in_list" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add/Remove from list"
+          }
+        }
+      }
+    },
     "emoji_recently_used" : {
       "localizations" : {
         "ar" : {

@@ -26,7 +26,7 @@ struct UserListView: View {
             .scrollIndicators(.hidden)
             if let status = data.status {
                 VStack {
-                    StatusView(data: status, isQuote: true)
+                    StatusView(data: status, isQuote: true, forceHideActions: true)
                         .padding(8)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

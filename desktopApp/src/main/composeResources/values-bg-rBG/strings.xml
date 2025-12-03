@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="ok">Добре</string>
     <string name="delete">Изтриване</string>
     <string name="home_compose">Съставяне</string>
     <string name="home_login">Вписване</string>
@@ -69,7 +70,10 @@
     <string name="list_create_description">Описание на списъка</string>
     <string name="list_create_description_hint">Описание на списъка</string>
     <string name="feeds_my_feeds_title">Моите емисии</string>
+    <string name="feeds_discover_feeds_title">Открийте емисии</string>
     <string name="feeds_discover_feeds_created_by">Създадено от %1$s</string>
+    <string name="feeds_unsubscribe">Отписване</string>
+    <string name="feeds_subscribe">Записване</string>
     <string name="social_title">Социални</string>
     <string name="antenna_title">Антена</string>
     <string name="mixed_timeline_title">Обединено</string>
@@ -154,6 +158,10 @@
     <string name="misskey_visibility_home">Начало</string>
     <string name="misskey_visibility_followers">Последователи</string>
     <string name="misskey_visibility_specified">Определени</string>
+    <string name="misskey_visibility_public_description">Всеки може да види и подсили тази публикация</string>
+    <string name="misskey_visibility_home_description">Само потребители на тази инстанция могат да видят тази публикация</string>
+    <string name="misskey_visibility_followers_description">Само последователи могат да видят тази публикация</string>
+    <string name="misskey_visibility_specified_description">Само споменатите потребители могат да видят тази публикация</string>
     <string name="rss_sources_title">Източници на Rss</string>
     <string name="rss_sources_title_label">Заглавие</string>
     <string name="rss_sources_url_label">Url</string>

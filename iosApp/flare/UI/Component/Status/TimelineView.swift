@@ -11,8 +11,13 @@ struct TimelineView: View {
         VStack {
             if let topMessage = data.topMessage {
                 StatusTopMessageView(topMessage: topMessage)
-                    .if(!fullWidthPost, transform: { view in
+                    .if(!fullWidthPost && data.content != nil, transform: { view in
                         view.padding(.leading, 44 - iconSize)
+                    })
+                    .if(data.content != nil, transform: { view in
+                        view.lineLimit(1)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     })
                     .onTapGesture {
                         if let user = topMessage.user {

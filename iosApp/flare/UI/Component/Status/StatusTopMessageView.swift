@@ -8,16 +8,12 @@ struct StatusTopMessageView: View {
             topMessage.icon.awesomeImage
             if let user = topMessage.user {
                 RichText(text: user.name)
-                    .lineLimit(1)
             }
             if let text = topMessage.type.localizedText {
                 Text(text)
-                    .lineLimit(1)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .font(.caption)
-        .foregroundStyle(.secondary)
     }
 }
 

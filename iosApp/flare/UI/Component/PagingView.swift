@@ -25,7 +25,7 @@ struct PagingView<T: AnyObject, EmptyContent: View, ErrorContent: View, LoadingC
         case .success(let success):
             ForEach(0..<success.itemCount, id: \.self) { index in
                 ZStack {
-                    if let item = success.peek(index: index) {
+                    if index < success.itemCount, let item = success.peek(index: index) {
                         successContent(item, Int(index), Int(success.itemCount))
                     } else {
                         loadingContent(Int(index), Int(success.itemCount))

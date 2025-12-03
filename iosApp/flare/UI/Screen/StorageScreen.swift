@@ -47,6 +47,14 @@ struct StorageScreen: View {
                     presenter.state.clearCache()
                 }
             }
+            
+            NavigationLink(value: Route.appLog) {
+                Label {
+                    Text("storage_view_app_log")
+                } icon: {
+                    Image(.faEnvelope)
+                }
+            }
         }
         .navigationTitle("storage_title")
     }

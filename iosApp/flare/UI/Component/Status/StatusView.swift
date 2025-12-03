@@ -100,6 +100,7 @@ struct StatusView: View {
                                     richText
                                         .textSelection(.enabled)
                                 }
+                                .fixedSize(horizontal: false, vertical: true)
                             
                             Button {
                                 withAnimation {
@@ -131,6 +132,7 @@ struct StatusView: View {
                                                 view.lineLimit(maxLine)
                                             })
                                     }
+                                    .fixedSize(horizontal: false, vertical: true)
                                 if !data.shouldExpandTextByDefault && !isDetail && !expand && showExpandTextButton {
                                     Button {
                                         withAnimation {

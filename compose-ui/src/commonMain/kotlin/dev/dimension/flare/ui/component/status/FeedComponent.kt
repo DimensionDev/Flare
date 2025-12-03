@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.platform.PlatformText
-import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.theme.PlatformTheme
@@ -26,7 +25,6 @@ internal fun FeedComponent(
     data: UiTimeline.ItemContent.Feed,
     modifier: Modifier = Modifier,
 ) {
-    val bigScreen = isBigScreen()
     val uriHandler = LocalUriHandler.current
     Column(
         modifier =
@@ -35,95 +33,77 @@ internal fun FeedComponent(
                     data.onClicked.invoke(
                         ClickContext(uriHandler::openUri),
                     )
-                }.let {
-                    if (bigScreen) {
-                        it
-                    } else {
-                        it.padding(
-                            horizontal = screenHorizontalPadding,
-                            vertical = 8.dp,
-                        )
-                    }
-                }.then(modifier),
+                }.padding(
+                    horizontal = screenHorizontalPadding,
+                    vertical = 8.dp,
+                ).then(modifier),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Column(
-            modifier =
-                Modifier
-                    .let {
-                        if (bigScreen) {
-                            it.padding(8.dp)
-                        } else {
-                            it
-                        }
-                    },
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-            ) {
-                data.sourceIcon?.let {
-                    NetworkImage(
-                        it,
-                        contentDescription = data.source,
-                        modifier = Modifier.size(16.dp),
-                    )
-                }
-                PlatformText(
-                    text = data.source,
-                    style = PlatformTheme.typography.caption,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1,
+            data.sourceIcon?.let {
+                NetworkImage(
+                    it,
+                    contentDescription = data.source,
+                    modifier = Modifier.size(16.dp),
                 )
-                data.createdAt?.let {
-                    DateTimeText(
-                        it,
-                        style = PlatformTheme.typography.caption,
-                        color = PlatformTheme.colorScheme.caption,
-                    )
-                }
             }
             PlatformText(
-                text = data.title,
-                style = PlatformTheme.typography.title,
+                text = data.source,
+                style = PlatformTheme.typography.caption,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
             )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                data.description?.let {
-                    PlatformText(
-                        text = it,
-                        style = PlatformTheme.typography.caption,
-                        maxLines = 5,
-                        color = PlatformTheme.colorScheme.caption,
-                        modifier =
-                            Modifier.let {
-                                if (data.image != null) {
-                                    it.weight(1f)
+            data.createdAt?.let {
+                DateTimeText(
+                    it,
+                    style = PlatformTheme.typography.caption,
+                    color = PlatformTheme.colorScheme.caption,
+                )
+            }
+        }
+        PlatformText(
+            text = data.title,
+            style = PlatformTheme.typography.title,
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            data.description?.let {
+                PlatformText(
+                    text = it,
+                    style = PlatformTheme.typography.caption,
+                    maxLines = 5,
+                    color = PlatformTheme.colorScheme.caption,
+                    modifier =
+                        Modifier.let {
+                            if (data.image != null) {
+                                it.weight(1f)
+                            } else {
+                                it
+                            }
+                        },
+                )
+            }
+            data.image?.let {
+                NetworkImage(
+                    model = it,
+                    contentDescription = data.title,
+                    modifier =
+                        Modifier
+                            .let {
+                                if (data.description != null) {
+                                    it.size(80.dp)
                                 } else {
-                                    it
+                                    it.aspectRatio(16f / 9f)
                                 }
-                            },
-                    )
-                }
-                data.image?.let {
-                    NetworkImage(
-                        model = it,
-                        contentDescription = data.title,
-                        modifier =
-                            Modifier
-                                .let {
-                                    if (data.description != null) {
-                                        it.size(80.dp)
-                                    } else {
-                                        it.aspectRatio(16f / 9f)
-                                    }
-                                }.clip(
-                                    PlatformTheme.shapes.medium,
-                                ),
-                        customHeaders = data.imageHeaders,
-                    )
-                }
+                            }.clip(
+                                PlatformTheme.shapes.medium,
+                            ),
+                    customHeaders = data.imageHeaders,
+                )
             }
         }
     }

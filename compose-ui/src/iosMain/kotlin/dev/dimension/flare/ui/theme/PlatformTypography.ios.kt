@@ -32,4 +32,8 @@ internal actual object PlatformTypography {
     actual val h6: TextStyle
         @Composable
         get() = CupertinoTheme.typography.title3
+
+    actual val body: TextStyle
+        @Composable
+        get() = CupertinoTheme.typography.body
 }

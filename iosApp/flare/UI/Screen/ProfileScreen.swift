@@ -363,7 +363,7 @@ struct ProfileTimelineWaterFallView: View {
     }
     
     var body: some View {
-        TimelinePagingContent(data: presenter.state.listState, detailStatusKey: nil)
+        TimelinePagingContent(data: presenter.state.listState, detailStatusKey: nil, key: presenter.key)
             .refreshable {
                 try? await presenter.state.refresh()
             }

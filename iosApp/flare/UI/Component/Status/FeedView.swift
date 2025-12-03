@@ -17,6 +17,7 @@ struct FeedView: View {
                 }
                 Text(data.source)
                     .font(.footnote)
+                    .fixedSize(horizontal: false, vertical: true)
                 Spacer()
                 if let date = data.createdAt {
                     DateTimeText(data: date)
@@ -32,6 +33,7 @@ struct FeedView: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(5)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 if let image = data.image {
                     NetworkImage(data: image, customHeader: data.imageHeaders)

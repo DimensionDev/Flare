@@ -30,4 +30,7 @@ internal expect object PlatformColorScheme {
 
     @get:Composable
     val onCard: Color
+
+    @get:Composable
+    val text: Color
 }

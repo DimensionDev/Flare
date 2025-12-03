@@ -4,24 +4,13 @@ import SwiftUI
 struct TimelineScreen: View {
     let tabItem: TimelineTabItem
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @Environment(\.openURL) private var openURL
     @StateObject var presenter: KotlinPresenter<TimelineItemPresenterState>
     init(tabItem: TimelineTabItem) {
         self.tabItem = tabItem
         self._presenter = .init(wrappedValue: .init(presenter: TimelineItemPresenter(timelineTabItem: tabItem)))
     }
     var body: some View {
-//        ComposeTimelineView(
-//            key: presenter.key,
-//            data: presenter.state.listState,
-//            detailStatusKey: nil,
-//            topPadding: 0,
-//            onOpenLink: { url in openURL.callAsFunction(.init(string: url)!) },
-//            onExpand: {},
-//            onCollapse: {}
-//        )
-//        .ignoresSafeArea()
-        TimelinePagingContent(data: presenter.state.listState, detailStatusKey: nil)
+        TimelinePagingContent(data: presenter.state.listState, detailStatusKey: nil, key: presenter.key)
             .refreshable {
                 try? await presenter.state.refreshSuspend()
             }

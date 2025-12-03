@@ -33,4 +33,8 @@ internal actual object PlatformTypography {
     actual val h6: TextStyle
         @Composable
         get() = MaterialTheme.typography.titleSmall
+
+    actual val body: TextStyle
+        @Composable
+        get() = MaterialTheme.typography.bodyMedium
 }

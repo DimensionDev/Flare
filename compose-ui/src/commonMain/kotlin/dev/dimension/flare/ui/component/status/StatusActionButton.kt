@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +41,7 @@ import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.platform.rippleIndication
 import dev.dimension.flare.ui.model.Digit
 import dev.dimension.flare.ui.theme.PlatformContentColor
+import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -182,15 +184,20 @@ internal fun StatusActionGroup(
             enabled = enabled,
             withTextMinWidth = withTextMinWidth,
         )
-        PlatformDropdownMenu(
-            expanded = showMenu,
-            onDismissRequest = { showMenu = false },
+        CompositionLocalProvider(
+            PlatformContentColor provides PlatformTheme.colorScheme.text,
+            PlatformTextStyle provides PlatformTheme.typography.body,
         ) {
-            subMenus.invoke(
-                this,
-                { showMenu = false },
-                showMenu,
-            )
+            PlatformDropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false },
+            ) {
+                subMenus.invoke(
+                    this,
+                    { showMenu = false },
+                    showMenu,
+                )
+            }
         }
     }
 }

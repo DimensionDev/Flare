@@ -8746,6 +8746,26 @@
         }
       }
     },
+    "appearance_use_compose_view" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experimental: Use cross-platform post UI"
+          }
+        }
+      }
+    },
+    "appearance_use_compose_view_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use the same post UI code from Android and Desktop, this is experimental and might be removed in the future."
+          }
+        }
+      }
+    },
     "appearance_video_autoplay" : {
       "localizations" : {
         "af" : {

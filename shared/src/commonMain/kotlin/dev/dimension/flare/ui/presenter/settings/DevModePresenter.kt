@@ -35,14 +35,13 @@ public class DevModePresenter : PresenterBase<DevModePresenter.State>() {
             }
         }.collectAsState(persistentListOf())
         return object : State {
-            override val enabled: Boolean
-                get() = enabled
+            override val enabled = enabled
 
             override fun setEnabled(value: Boolean) {
                 DebugRepository.setEnabled(value)
             }
 
-            override val messages: ImmutableList<String> get() = messages
+            override val messages = messages
 
             override fun printMessageToString(): String = DebugRepository.printToString()
 

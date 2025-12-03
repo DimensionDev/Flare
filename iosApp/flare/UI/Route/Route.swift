@@ -88,6 +88,8 @@ enum Route: Hashable, Identifiable {
             MediaScreen(url: url)
         case .mediaStatusMedia(let accountType, let statusKey, let selectedIndex, let preview):
             StatusMediaScreen(accountType: accountType, statusKey: statusKey, initialIndex: Int(selectedIndex), preview: preview)
+        case .appLog:
+            AppLogScreen()
         default:
             Text("Not done yet for \(self)")
         }
@@ -130,7 +132,7 @@ enum Route: Hashable, Identifiable {
     case userFollowing(AccountType, MicroBlogKey)
     case userFans(AccountType, MicroBlogKey)
     case dmConversation(AccountType, MicroBlogKey, String)
-    
+    case appLog
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {

@@ -8761,7 +8761,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Use the same post UI code from Android and Desktop, this is experimental and might remove in the future."
+            "value" : "Use the same post UI code from Android and Desktop, this is experimental and might be removed in the future."
           }
         }
       }

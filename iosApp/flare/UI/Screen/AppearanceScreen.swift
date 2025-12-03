@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 
 struct AppearanceScreen: View {
+    @AppStorage("pref_timeline_use_compose_view") private var useComposeView: Bool = false
     @StateObject private var statusPresenter = KotlinPresenter(presenter: AppearancePresenter())
     @StateObject private var presenter = KotlinPresenter(presenter: SettingsPresenter())
     var body: some View {
@@ -40,6 +41,10 @@ struct AppearanceScreen: View {
                         } maximumValueLabel: {
                             Image(systemName: "textformat.size.larger")
                         }
+                    }
+                    Toggle(isOn: $useComposeView) {
+                        Text("appearance_use_compose_view")
+                        Text("appearance_use_compose_view_description")
                     }
                 }
             }

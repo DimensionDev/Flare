@@ -16,7 +16,6 @@ import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
-import kotlin.coroutines.CoroutineContext
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -29,6 +28,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 internal val pagingConfig: PagingConfig =
     PagingConfig(

@@ -1,27 +1,20 @@
 package dev.dimension.flare.ui.component.platform
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
+import com.slapps.cupertino.CupertinoDropdownMenu
+import com.slapps.cupertino.CupertinoMenuScope
 import com.slapps.cupertino.ExperimentalCupertinoApi
-import com.slapps.cupertino.LocalContentColor
-import com.slapps.cupertino.ProvideTextStyle
-import com.slapps.cupertino.theme.CupertinoTheme
-import dev.dimension.flare.ui.theme.PlatformTheme
+import com.slapps.cupertino.MenuAction
 
-internal actual typealias PlatformDropdownMenuScope = ColumnScope
+// internal actual typealias PlatformDropdownMenuScope = ColumnScope
 
-// internal actual interface PlatformDropdownMenuScope
+internal actual interface PlatformDropdownMenuScope
 
-// private data class PlatformDropdownMenuScopeImpl(
-//    val delegate: CupertinoMenuScope
-// ) : PlatformDropdownMenuScope
+private data class PlatformDropdownMenuScopeImpl(
+    val delegate: CupertinoMenuScope,
+) : PlatformDropdownMenuScope
 
 @OptIn(ExperimentalCupertinoApi::class)
 @Composable
@@ -112,15 +105,15 @@ internal actual fun PlatformDropdownMenu(
 //            }
 //        },
 //    )
-//    CupertinoDropdownMenu(
-//        expanded = expanded,
-//        onDismissRequest = onDismissRequest,
-//        modifier = modifier,
-//        content = {
-//            val scope = remember(this) { PlatformDropdownMenuScopeImpl(this) }
-//            content.invoke(scope)
-//        }
-//    )
+    CupertinoDropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = modifier,
+        content = {
+            val scope = remember(this) { PlatformDropdownMenuScopeImpl(this) }
+            content.invoke(scope)
+        },
+    )
 }
 
 @Composable
@@ -131,40 +124,40 @@ internal actual fun PlatformDropdownMenuScope.PlatformDropdownMenuItem(
     leadingIcon: @Composable (() -> Unit)?,
     trailingIcon: @Composable (() -> Unit)?,
 ) {
-    ProvideTextStyle(
-        CupertinoTheme.typography.body,
-    ) {
-        CompositionLocalProvider(
-            LocalContentColor provides CupertinoTheme.colorScheme.label,
-        ) {
-            PlatformListItem(
-                modifier =
-                    modifier
-                        .clip(shape = PlatformTheme.shapes.listCardItemShape)
-                        .background(
-                            CupertinoTheme.colorScheme.tertiarySystemBackground,
-                        ).padding(vertical = 8.dp)
-                        .clickable {
-                            onClick.invoke()
-                        },
-                leadingContent = {
-                    leadingIcon?.invoke()
-                },
-                headlineContent = {
-                    text()
-                },
-                trailingContent = {
-                    trailingIcon?.invoke()
-                },
-            )
-        }
-    }
-//    (this as PlatformDropdownMenuScopeImpl).delegate.MenuAction(
-//        modifier = modifier,
-//        title = text,
-//        onClick = onClick,
-//        icon = {
-//            leadingIcon?.invoke()
-//        },
-//    )
+//    ProvideTextStyle(
+//        CupertinoTheme.typography.body,
+//    ) {
+//        CompositionLocalProvider(
+//            LocalContentColor provides CupertinoTheme.colorScheme.label,
+//        ) {
+//            PlatformListItem(
+//                modifier =
+//                    modifier
+//                        .clip(shape = PlatformTheme.shapes.listCardItemShape)
+//                        .background(
+//                            CupertinoTheme.colorScheme.tertiarySystemBackground,
+//                        ).padding(vertical = 8.dp)
+//                        .clickable {
+//                            onClick.invoke()
+//                        },
+//                leadingContent = {
+//                    leadingIcon?.invoke()
+//                },
+//                headlineContent = {
+//                    text()
+//                },
+//                trailingContent = {
+//                    trailingIcon?.invoke()
+//                },
+//            )
+//        }
+//    }
+    (this as PlatformDropdownMenuScopeImpl).delegate.MenuAction(
+        modifier = modifier,
+        title = text,
+        onClick = onClick,
+        icon = {
+            leadingIcon?.invoke()
+        },
+    )
 }

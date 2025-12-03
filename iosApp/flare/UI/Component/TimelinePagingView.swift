@@ -16,12 +16,14 @@ struct TimelinePagingView: View {
         } loadingContent: { index, totalCount in
             ListCardView(index: index, totalCount: totalCount) {
                 TimelinePlaceholderView()
-                    .padding()
+                    .padding(.horizontal)
+                    .padding(.vertical, 12)
             }
         } successContent: { item, index, totalCount in
             ListCardView(index: index, totalCount: totalCount) {
                 TimelineView(data: item, detailStatusKey: detailStatusKey)
-                    .padding()
+                    .padding(.horizontal)
+                    .padding(.vertical, 12)
             }
         }
     }
@@ -59,11 +61,26 @@ struct TimelineCollection: @MainActor RandomAccessCollection {
 }
 
 struct TimelinePagingContent: View {
+    @AppStorage("pref_timeline_use_compose_view") private var useComposeView: Bool = false
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.openURL) private var openURL
     let data: PagingState<UiTimeline>
     let detailStatusKey: MicroBlogKey?
+    let key: String
     var body: some View {
-        if horizontalSizeClass == .compact {
+        if useComposeView {
+            ComposeTimelineView(
+                key: key,
+                data: data,
+                detailStatusKey: detailStatusKey,
+                topPadding: 0,
+                onOpenLink: { url in openURL.callAsFunction(.init(string: url)!) },
+                onExpand: {},
+                onCollapse: {}
+            )
+            .ignoresSafeArea()
+            .background(Color(.systemGroupedBackground))
+        } else if horizontalSizeClass == .compact {
             singleListView
         } else {
             GeometryReader { proxy in
@@ -90,7 +107,7 @@ struct TimelinePagingContent: View {
     
     var singleListView: some View {
         List {
-            TimelinePagingView(data: data)
+            TimelinePagingView(data: data, detailStatusKey: detailStatusKey)
                 .listRowSeparator(.hidden)
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .padding(.horizontal)

@@ -8,7 +8,7 @@ struct NotificationScreen: View {
     @State private var showTopBar = true
 
     var body: some View {
-        TimelinePagingContent(data: presenter.state.timeline, detailStatusKey: nil)
+        TimelinePagingContent(data: presenter.state.timeline, detailStatusKey: nil, key: presenter.key)
             .refreshable {
                 try? await presenter.state.refreshSuspend()
             }

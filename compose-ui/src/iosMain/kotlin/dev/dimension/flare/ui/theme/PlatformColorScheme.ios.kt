@@ -34,4 +34,8 @@ internal actual object PlatformColorScheme {
     actual val onCard: Color
         @Composable
         get() = CupertinoTheme.colorScheme.label
+
+    actual val text: Color
+        @Composable
+        get() = CupertinoTheme.colorScheme.label
 }

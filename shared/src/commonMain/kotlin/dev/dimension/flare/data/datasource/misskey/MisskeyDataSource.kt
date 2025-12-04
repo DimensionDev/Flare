@@ -757,7 +757,7 @@ internal class MisskeyDataSource(
     override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(500),
-            media = ComposeConfig.Media(4, true),
+            media = ComposeConfig.Media(18, true),
             poll = ComposeConfig.Poll(4),
             emoji = ComposeConfig.Emoji(emoji(), "misskey@${accountKey.host}"),
             contentWarning = ComposeConfig.ContentWarning,

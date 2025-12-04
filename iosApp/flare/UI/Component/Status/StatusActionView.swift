@@ -45,44 +45,42 @@ struct StatusActionView: View {
                         StatusActionView(data: item, useText: true, isFixedWidth: false)
                     }
                 } label: {
-                    if !isFixedWidth && group.displayItem.countText == nil {
-                        if let color = group.displayItem.color {
-                            StatusActionIcon(item: group.displayItem)
-                                .foregroundStyle(color)
-                                .scaledToFit()
-                                .frame(width: 32, alignment: .center)
-                                .contentShape(.rect)
-                        } else {
-                            StatusActionIcon(item: group.displayItem)
-                                .scaledToFit()
-                                .frame(width: 32, alignment: .center)
-                                .contentShape(.rect)
-                        }
-                    } else {
-                        Label {
-                            ZStack(
-                                alignment: .leading
-                            ) {
-                                if isFixedWidth, !useText {
-                                    Text("0000")
-                                        .foregroundStyle(.clear)
-                                }
-                                if let text = group.displayItem.countText, showNumbers {
-                                    if let color = group.displayItem.color {
-                                        Text(text)
-                                            .foregroundStyle(color)
-                                    } else {
-                                        Text(text)
-                                    }
-                                }
-                            }
-                            .lineLimit(1)
-                        } icon: {
+                    ZStack {
+                        Text("0")
+                            .foregroundStyle(.clear)
+                        if !isFixedWidth && group.displayItem.countText == nil {
                             if let color = group.displayItem.color {
                                 StatusActionIcon(item: group.displayItem)
                                     .foregroundStyle(color)
                             } else {
                                 StatusActionIcon(item: group.displayItem)
+                            }
+                        } else {
+                            Label {
+                                ZStack(
+                                    alignment: .leading
+                                ) {
+                                    if isFixedWidth, !useText {
+                                        Text("0000")
+                                            .foregroundStyle(.clear)
+                                    }
+                                    if let text = group.displayItem.countText, showNumbers {
+                                        if let color = group.displayItem.color {
+                                            Text(text)
+                                                .foregroundStyle(color)
+                                        } else {
+                                            Text(text)
+                                        }
+                                    }
+                                }
+                                .lineLimit(1)
+                            } icon: {
+                                if let color = group.displayItem.color {
+                                    StatusActionIcon(item: group.displayItem)
+                                        .foregroundStyle(color)
+                                } else {
+                                    StatusActionIcon(item: group.displayItem)
+                                }
                             }
                         }
                     }

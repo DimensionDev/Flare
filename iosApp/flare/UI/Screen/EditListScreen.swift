@@ -231,6 +231,7 @@ struct EditListMemberScreen: View {
                 }
             }
         }
+        .navigationTitle("list_edit_member_title")
         .searchable(text: $searchText, prompt: "search")
         .onSubmit(of: .search) {
             presenter.state.setFilter(value: searchText)

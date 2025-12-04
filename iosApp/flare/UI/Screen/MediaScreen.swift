@@ -8,8 +8,7 @@ struct MediaScreen: View {
     @State var opacity: CGFloat = 1 // Dismiss gesture background opacity
     var body: some View {
         LazyPager(data: [url]) { item in
-            NetworkImage(data: item)
-                .scaledToFit()
+            AdaptiveKFImage(data: item, placeholder: nil)
         }
         .onDismiss(backgroundOpacity: $opacity) {
             dismiss()

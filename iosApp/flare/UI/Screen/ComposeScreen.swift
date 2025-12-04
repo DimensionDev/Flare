@@ -26,11 +26,19 @@ struct ComposeScreen: View {
                             let item = users.get(index: index)
                             if let userState = item.first, let account = item.second {
                                 StateView(state: userState) { user in
-                                    HStack {
-                                        AvatarView(data: user.avatar)
-                                            .frame(width: 20, height: 20)
+                                    Label {
                                         Text(user.handle)
+                                    } icon: {
+                                        AvatarView(data: user.avatar)
+                                            .scaledToFit()
+                                            .frame(width: 20, height: 20)
                                     }
+//                                    HStack {
+//                                        AvatarView(data: user.avatar)
+//                                            .scaledToFit()
+//                                            .frame(width: 20, height: 20)
+//                                        Text(user.handle)
+//                                    }
                                     .padding(.horizontal)
                                     .padding(.vertical, 8)
                                     .background(Color(.secondarySystemBackground))
@@ -56,7 +64,8 @@ struct ComposeScreen: View {
                                                     Text(user.handle)
                                                 } icon: {
                                                     AvatarView(data: user.avatar)
-                                                        .frame(width: 20, height: 20)
+                                                        .scaledToFit()
+                                                        .frame(maxWidth: 20, maxHeight: 20)
                                                 }
                                             }
                                         }
@@ -101,8 +110,7 @@ struct ComposeScreen: View {
                     if viewModel.mediaViewModel.items.count > 0 {
                         ScrollView(.horizontal) {
                             HStack {
-                                ForEach(viewModel.mediaViewModel.items.indices, id: \.self) { index in
-                                    let item = viewModel.mediaViewModel.items[index]
+                                ForEach(viewModel.mediaViewModel.items) { item in
                                     if let image = item.image {
                                         Image(uiImage: image)
                                             .resizable()
@@ -322,6 +330,11 @@ struct ComposeScreen: View {
                 applyCursorIfPossible()
             }
         }
+        .onSuccessOf(of: presenter.state.composeConfig) { config in
+            if let media = config.media {
+                viewModel.mediaViewModel.maxSize = Int(media.maxCount)
+            }
+        }
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -474,8 +487,9 @@ class MediaViewModel {
     var selectedItems: [PhotosPickerItem] = []
     var items: [MediaItem] = []
     var sensitive = false
+    var maxSize = 4
     func update() {
-        if selectedItems.count > 4 {
+        if selectedItems.count > maxSize {
             selectedItems = Array(selectedItems[(selectedItems.count - 4)...(selectedItems.count - 1)])
         } else {
             selectedItems = selectedItems
@@ -493,13 +507,16 @@ class MediaViewModel {
 }
 
 @Observable
-class MediaItem: Equatable {
+class MediaItem: Equatable, Identifiable {
     static func == (lhs: MediaItem, rhs: MediaItem) -> Bool {
         lhs.item == rhs.item
     }
     let item: PhotosPickerItem
     var image: UIImage?
     var data: Data?
+    var id: String {
+        item.itemIdentifier ?? UUID().uuidString
+    }
     init(item: PhotosPickerItem) {
         self.item = item
         item.loadTransferable(type: Data.self) { result in

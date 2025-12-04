@@ -364,8 +364,6 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Notifications now support multiple accounts.</li>
-                <li>Add support for OPML import and export.</li>
                 <li>Bug fixes and performance improvements.</li>
             </ul>
         ]]>

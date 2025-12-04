@@ -267,7 +267,7 @@ internal fun ComposeScreen(
                                         onDismissRequest = {
                                             state.setShowAccountSelectMenu(false)
                                         },
-                                        properties = PopupProperties(focusable = true),
+                                        properties = PopupProperties(focusable = false),
                                     ) {
                                         for (i in 0 until others.size) {
                                             val (user, account) = others[i]
@@ -680,6 +680,7 @@ internal fun ComposeScreen(
                                             ?.let(AccountType::Specific)
                                     }
                                 Popup(
+                                    alignment = Alignment.BottomStart,
                                     onDismissRequest = {
                                         state.setShowEmojiMenu(false)
                                     },
@@ -688,7 +689,7 @@ internal fun ComposeScreen(
                                             x = 0,
                                             y =
                                                 with(LocalDensity.current) {
-                                                    48.dp.roundToPx()
+                                                    -48.dp.roundToPx()
                                                 },
                                         ),
                                     properties =

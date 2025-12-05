@@ -303,9 +303,7 @@
     <string name="home_tab_social_timeline_title">Sosial</string>
     <string name="changelog_current"><![CDATA[            <span>Versjon %1$s:</span>
             <ul>
-                <li>Varsler støtter nå flere kontoer.</li>
-                <li>Legg til støtte for OPML import og eksport.</li>
-                <li>Feilrettinger og ytelsesforbedringer.</li>
+                <li>Bug fikser og ytelsesforbedringer.</li>
             </ul>
         ]]></string>
 </resources>

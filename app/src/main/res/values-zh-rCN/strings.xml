@@ -301,11 +301,4 @@
     <string name="tab_settings_mixed_timeline">添加混合时间线</string>
     <string name="tab_settings_mixed_timeline_desc">混合时间线将混合所有标签页的时间线</string>
     <string name="home_tab_social_timeline_title">社交</string>
-    <string name="changelog_current"><![CDATA[            <span> %1$s版本:</span>
-            <ul>
-                <li>通知现在支持多个帐户。</li>
-                <li>添加对 OPML 进出口的支持。</li>
-                <li>Bug 修复和性能改进。</li>
-            </ul>
-        ]]></string>
 </resources>

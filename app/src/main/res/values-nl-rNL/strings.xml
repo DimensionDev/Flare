@@ -303,9 +303,7 @@
     <string name="home_tab_social_timeline_title">Sociaal</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
-                <li>Notificaties ondersteunen nu meerdere accounts.</li>
-                <li>Voeg ondersteuning toe voor OPML import en export.</li>
-                <li>bugfixes en prestatieverbeteringen.</li>
+                <li>Bugs fixes en prestatieverbeteringen.</li>
             </ul>
         ]]></string>
 </resources>

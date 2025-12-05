@@ -300,11 +300,4 @@
     <string name="tab_settings_mixed_timeline">Додати змішану вкладку часової шкали</string>
     <string name="tab_settings_mixed_timeline_desc">Змішана часова шкала будуть змішувати всі вкладки в результаті однієї вкладки</string>
     <string name="home_tab_social_timeline_title">Соціальні мережі</string>
-    <string name="changelog_current"><![CDATA[            <span>Версія %1$s:</span>
-            <ul>
-                <li>Нотифікації тепер підтримують декілька акаунтів.</li>
-                <li>Додати підтримку для імпорту і експорту OPML .</li>
-                <li>Виправлення продуктивності та покращення продуктивності.</li>
-            </ul>
-        ]]></string>
 </resources>

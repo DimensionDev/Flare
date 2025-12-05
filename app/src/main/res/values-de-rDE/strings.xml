@@ -303,8 +303,6 @@
     <string name="home_tab_social_timeline_title">Sozial</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Benachrichtigungen unterstützen jetzt mehrere Konten.</li>
-                <li>Unterstützung für OPML-Import und Export hinzufügen.</li>
                 <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
             </ul>
         ]]></string>

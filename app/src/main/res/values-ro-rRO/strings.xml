@@ -303,9 +303,7 @@
     <string name="home_tab_social_timeline_title">Sociale</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
-                <li>Notificări suportă acum conturi multiple.</li>
-                <li>Adaugă suport pentru importul și exportul OPML.</li>
-                <li>Remedierea erorilor şi îmbunătăţirea performanţei.</li>
+                <li>Remedieri ale erorilor şi îmbunătăţiri de performanţă.</li>
             </ul>
         ]]></string>
 </resources>

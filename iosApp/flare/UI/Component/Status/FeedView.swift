@@ -25,7 +25,9 @@ struct FeedView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            Text(data.title)
+            if let title = data.title {
+                Text(title)
+            }
             HStack {
                 if let desc = data.description_ {
                     Text(desc)

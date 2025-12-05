@@ -64,10 +64,12 @@ internal fun FeedComponent(
                 )
             }
         }
-        PlatformText(
-            text = data.title,
-            style = PlatformTheme.typography.title,
-        )
+        data.title?.let { title ->
+            PlatformText(
+                text = title,
+                style = PlatformTheme.typography.title,
+            )
+        }
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {

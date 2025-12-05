@@ -69,7 +69,7 @@ public data class UiTimeline internal constructor(
         public abstract val itemKey: String
 
         public data class Feed internal constructor(
-            val title: String,
+            val title: String?,
             val description: String?,
             val url: String,
             val image: String?,

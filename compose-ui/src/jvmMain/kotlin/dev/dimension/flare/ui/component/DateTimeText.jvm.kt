@@ -3,11 +3,16 @@ package dev.dimension.flare.ui.component
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.rememberSaveable
 import dev.dimension.flare.ui.render.UiDateTime
-import org.ocpsoft.prettytime.PrettyTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
+import java.util.Locale
+import org.ocpsoft.prettytime.PrettyTime
 
 private val prettyTime = PrettyTime(Date(0))
+
+public fun updateTimeFormatterLocale(locale: Locale) {
+    prettyTime.setLocale(locale)
+}
 
 @Composable
 internal actual fun rememberFormattedDateTime(

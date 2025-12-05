@@ -49,7 +49,6 @@ import dev.dimension.flare.ui.screen.rss.RssListScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import dev.dimension.flare.ui.screen.settings.LocalCacheScreen
 import dev.dimension.flare.ui.screen.settings.SettingsScreen
-import dev.dimension.flare.ui.screen.settings.StorageScreen
 import dev.dimension.flare.ui.screen.status.StatusScreen
 import dev.dimension.flare.ui.screen.status.VVOCommentScreen
 import dev.dimension.flare.ui.screen.status.VVOStatusScreen
@@ -391,9 +390,6 @@ internal fun WindowScope.RouteContent(
                 toLocalCache = {
                     navigate(Route.LocalCache)
                 },
-                toStorage = {
-                    navigate(Route.StorageUsage)
-                },
             )
         }
 
@@ -589,9 +585,6 @@ internal fun WindowScope.RouteContent(
 
         Route.LocalCache ->
             LocalCacheScreen()
-
-        Route.StorageUsage ->
-            StorageScreen()
 
         is Route.Following ->
             FollowingScreen(

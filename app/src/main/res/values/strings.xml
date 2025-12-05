@@ -67,6 +67,8 @@
     <string name="settings_ai_config_translation_description">Replace Google Translate with AI translation, might take longer time</string>
     <string name="settings_ai_config_enable_tldr">Enable AI Summarization</string>
     <string name="settings_ai_config_tldr_description">Enable AI summarization for long posts, only available in post that longer than 500 characters</string>
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_description">Change the language of the app</string>
 
     <string name="status_loadmore_error_retry">Retry</string>
     <string name="login_expired">Login session expired</string>

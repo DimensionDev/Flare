@@ -339,7 +339,7 @@ internal sealed interface Feed {
         @Serializable
         data class Item(
             @XmlElement(true)
-            val title: String,
+            val title: String? = null,
             @XmlElement(true)
             val link: String,
             @XmlElement(true)

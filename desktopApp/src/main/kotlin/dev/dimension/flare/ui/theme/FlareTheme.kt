@@ -44,10 +44,10 @@ import io.github.composefluent.FluentTheme
 import io.github.composefluent.darkColors
 import io.github.composefluent.lightColors
 import io.github.kdroidfilter.platformtools.darkmodedetector.isSystemInDarkMode
-import java.util.Locale
 import kotlinx.coroutines.launch
 import org.apache.commons.lang3.SystemUtils
 import org.koin.compose.koinInject
+import java.util.Locale
 
 internal val LocalComposeWindow =
     staticCompositionLocalOf<ComposeWindow?> {

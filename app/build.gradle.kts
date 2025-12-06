@@ -108,6 +108,9 @@ android {
     lint {
         disable.add("MissingTranslation")
     }
+    androidResources {
+        generateLocaleConfig = true
+    }
 }
 
 dependencies {

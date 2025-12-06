@@ -143,3 +143,56 @@ extra["nativeDestDir"] = "resources/macos-arm64"
 apply(from = File(projectDir, "install-native-libs.gradle.kts"))
 apply(from = File(projectDir, "build-swift.gradle.kts"))
 
+
+
+abstract class GenerateSupportedLocales : DefaultTask() {
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun run() {
+        val resRoot = project.file("src/main/composeResources")
+
+        val locales = resRoot.listFiles()
+            ?.filter { it.isDirectory && it.name.startsWith("values-") }
+            ?.map { it.name.removePrefix("values-") } // e.g. "ja", "zh", "zh-rCN"
+            ?.distinct()
+            ?.sorted()
+            ?.map { it.replace("-r", "-") }
+            ?: emptyList()
+
+        val pkg = "dev.dimension.flare"
+        val outDir = outputDir.get().asFile
+        val outFile = File(outDir, "SupportedLocales.kt")
+
+        outDir.mkdirs()
+        outFile.writeText(
+            """
+            package $pkg
+
+            object SupportedLocales {
+                val tags: List<String> = listOf(
+                    "en-US",
+                    ${locales.joinToString(",\n                    ") { "\"$it\"" }}
+                )
+            }
+            """.trimIndent()
+        )
+    }
+}
+
+val generateSupportedLocales = tasks.register<GenerateSupportedLocales>("generateSupportedLocales") {
+    outputDir.set(layout.buildDirectory.dir("generated/supportedLocales"))
+}
+kotlin {
+    sourceSets {
+        val main by getting {
+            kotlin.srcDir(generateSupportedLocales.map { it.outputDir })
+        }
+    }
+}
+
+tasks.named("compileKotlin") {
+    dependsOn(generateSupportedLocales)
+}

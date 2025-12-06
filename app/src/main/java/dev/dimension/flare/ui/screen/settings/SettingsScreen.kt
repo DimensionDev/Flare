@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.screen.settings
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,8 +21,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleInfo
@@ -30,6 +34,7 @@ import compose.icons.fontawesomeicons.solid.Database
 import compose.icons.fontawesomeicons.solid.Filter
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Globe
+import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.TableList
@@ -92,6 +97,7 @@ internal fun SettingsScreen(
     toAiConfig: () -> Unit,
     onBack: () -> Unit,
 ) {
+    val context = LocalContext.current
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter { settingsPresenter() }
     FlareScaffold(
@@ -231,6 +237,37 @@ internal fun SettingsScreen(
                                 toAppearance.invoke()
                             },
                 )
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                    ListItem(
+                        headlineContent = {
+                            Text(text = stringResource(id = R.string.settings_language_title))
+                        },
+                        leadingContent = {
+                            ThemedIcon(
+                                imageVector = FontAwesomeIcons.Solid.Language,
+                                contentDescription = stringResource(id = R.string.settings_language_title),
+                                color = ThemeIconData.Color.SapphireBlue,
+                            )
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_language_description))
+                        },
+                        modifier =
+                            Modifier
+                                .listCardItem()
+                                .clickable {
+                                    try {
+                                        val intent =
+                                            Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
+                                                data = "package:${BuildConfig.APPLICATION_ID}".toUri()
+                                            }
+                                        context.startActivity(intent)
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                },
+                    )
+                }
                 state.user.onSuccess {
                     ListItem(
                         headlineContent = {

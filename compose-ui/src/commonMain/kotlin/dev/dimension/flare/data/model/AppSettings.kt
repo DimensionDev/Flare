@@ -16,6 +16,7 @@ import okio.BufferedSource
 public data class AppSettings(
     val version: String,
     val aiConfig: AiConfig = AiConfig(),
+    val language: String = "",
 ) {
     @Serializable
     public data class AiConfig(

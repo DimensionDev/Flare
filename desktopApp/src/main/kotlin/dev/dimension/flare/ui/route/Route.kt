@@ -185,8 +185,6 @@ internal sealed interface Route {
 
     data object LocalCache : ScreenRoute
 
-    data object StorageUsage : ScreenRoute
-
     data class Following(
         val accountType: AccountType,
         val userKey: MicroBlogKey,

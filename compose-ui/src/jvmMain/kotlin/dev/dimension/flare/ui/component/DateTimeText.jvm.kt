@@ -6,8 +6,13 @@ import dev.dimension.flare.ui.render.UiDateTime
 import org.ocpsoft.prettytime.PrettyTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
+import java.util.Locale
 
 private val prettyTime = PrettyTime(Date(0))
+
+public fun updateTimeFormatterLocale(locale: Locale) {
+    prettyTime.setLocale(locale)
+}
 
 @Composable
 internal actual fun rememberFormattedDateTime(

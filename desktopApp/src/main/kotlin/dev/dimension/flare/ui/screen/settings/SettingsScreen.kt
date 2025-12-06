@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -19,14 +20,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Solid
@@ -43,6 +46,7 @@ import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
+import dev.dimension.flare.SupportedLocales
 import dev.dimension.flare.add_account
 import dev.dimension.flare.app_name
 import dev.dimension.flare.cancel
@@ -52,6 +56,7 @@ import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.delete
 import dev.dimension.flare.edit
 import dev.dimension.flare.home_login
 import dev.dimension.flare.ok
@@ -102,11 +107,17 @@ import dev.dimension.flare.settings_appearance_theme_dark
 import dev.dimension.flare.settings_appearance_theme_description
 import dev.dimension.flare.settings_appearance_theme_light
 import dev.dimension.flare.settings_appearance_title
+import dev.dimension.flare.settings_language_description
+import dev.dimension.flare.settings_language_title
 import dev.dimension.flare.settings_local_history_description
 import dev.dimension.flare.settings_local_history_title
 import dev.dimension.flare.settings_privacy_policy
 import dev.dimension.flare.settings_status_appearance_subtitle
 import dev.dimension.flare.settings_status_appearance_title
+import dev.dimension.flare.settings_storage_clear_database
+import dev.dimension.flare.settings_storage_clear_database_description
+import dev.dimension.flare.settings_storage_clear_image_cache
+import dev.dimension.flare.settings_storage_clear_image_cache_description
 import dev.dimension.flare.settings_storage_subtitle
 import dev.dimension.flare.settings_storage_title
 import dev.dimension.flare.ui.component.AccountItem
@@ -122,6 +133,8 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.FlareServerProviderPresenter
+import dev.dimension.flare.ui.presenter.settings.StoragePresenter
+import dev.dimension.flare.ui.presenter.settings.StorageState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.Button
@@ -134,6 +147,7 @@ import io.github.composefluent.component.ExpanderItem
 import io.github.composefluent.component.ExpanderItemSeparator
 import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.HyperlinkButton
+import io.github.composefluent.component.MenuFlyout
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.ProgressRing
@@ -152,14 +166,13 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import java.util.Locale
 
 @Composable
 internal fun SettingsScreen(
     toLogin: () -> Unit,
     toLocalCache: () -> Unit,
-    toStorage: () -> Unit,
 ) {
-    val uriHandler = LocalUriHandler.current
     val state by producePresenter { presenter() }
 
     val scrollState = rememberScrollState()
@@ -354,6 +367,47 @@ internal fun SettingsScreen(
                         adaptivePlacement = true,
                         placement = FlyoutPlacement.BottomAlignedEnd,
                     )
+                },
+            )
+
+            CardExpanderItem(
+                icon = null,
+                heading = {
+                    Text(stringResource(Res.string.settings_language_title))
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_language_description))
+                },
+                trailing = {
+                    var isFlyoutVisible by remember { mutableStateOf(false) }
+                    DropDownButton(
+                        onClick = { isFlyoutVisible = !isFlyoutVisible },
+                        content = {
+                            Text(Locale.getDefault().displayName)
+                        },
+                    )
+                    MenuFlyout(
+                        visible = isFlyoutVisible,
+                        onDismissRequest = { isFlyoutVisible = false },
+                        modifier = Modifier.heightIn(max = 200.dp),
+                        placement = FlyoutPlacement.BottomAlignedEnd,
+                    ) {
+                        SupportedLocales.tags.forEach {
+                            MenuFlyoutItem(
+                                text = {
+                                    Text(
+                                        Locale.forLanguageTag(it).let {
+                                            it.getDisplayName(it)
+                                        },
+                                    )
+                                },
+                                onClick = {
+                                    state.setLanguage(it)
+                                    isFlyoutVisible = false
+                                },
+                            )
+                        }
+                    }
                 },
             )
 
@@ -643,23 +697,66 @@ internal fun SettingsScreen(
                     icon = null,
                 )
             }
-            CardExpanderItem(
-                onClick = toStorage,
-                icon = null,
+            Expander(
+                expanded = state.storageState.expanded,
+                onExpandedChanged = state.storageState::setExpanded,
                 heading = {
                     Text(stringResource(Res.string.settings_storage_title))
-                },
-                trailing = {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.AngleRight,
-                        contentDescription = null,
-                        modifier = Modifier.size(12.dp),
-                    )
                 },
                 caption = {
                     Text(stringResource(Res.string.settings_storage_subtitle))
                 },
-            )
+                icon = null,
+            ) {
+                ExpanderItem(
+                    heading = {
+                        Text(text = stringResource(Res.string.settings_storage_clear_image_cache))
+                    },
+                    caption = {
+                        Text(
+                            text =
+                                stringResource(
+                                    Res.string.settings_storage_clear_image_cache_description,
+                                    state.storageState.imageCacheSize,
+                                ),
+                        )
+                    },
+                    trailing = {
+                        Button(
+                            onClick = {
+                                state.storageState.clearImageCache()
+                            },
+                        ) {
+                            Text(stringResource(Res.string.delete))
+                        }
+                    },
+                )
+
+                ExpanderItem(
+                    heading = {
+                        Text(text = stringResource(Res.string.settings_storage_clear_database))
+                    },
+                    caption = {
+                        Text(
+                            text =
+                                stringResource(
+                                    Res.string.settings_storage_clear_database_description,
+                                    state.storageState.userCount,
+                                    state.storageState.statusCount,
+                                ),
+                        )
+                    },
+                    trailing = {
+                        Button(
+                            onClick = {
+                                state.storageState.clearCacheDatabase()
+                            },
+                        ) {
+                            Text(stringResource(Res.string.delete))
+                        }
+                    },
+                )
+            }
 
             Header(stringResource(Res.string.settings_ai_config_title))
             ContentDialog(
@@ -930,8 +1027,11 @@ internal fun SettingsScreen(
 @Composable
 private fun presenter() =
     run {
+        val scope = rememberCoroutineScope()
+        val settingsRepository = koinInject<SettingsRepository>()
         val accountState = accountsPresenter()
         val appearanceState = appearancePresenter()
+        val storageState = storagePresenter()
         val aiConfigState = aiConfigPresenter()
         var aboutExpanded by remember { mutableStateOf(false) }
 
@@ -939,11 +1039,56 @@ private fun presenter() =
             val accountState = accountState
             val appearanceState = appearanceState
             val aiConfigState = aiConfigState
-
+            val storageState = storageState
             val aboutExpanded = aboutExpanded
 
             fun setAboutExpanded(value: Boolean) {
                 aboutExpanded = value
+            }
+
+            fun setLanguage(tag: String) {
+                scope.launch {
+                    settingsRepository.updateAppSettings {
+                        copy(language = tag)
+                    }
+                }
+            }
+        }
+    }
+
+@Composable
+private fun storagePresenter() =
+    run {
+        var refreshKey by remember { mutableStateOf(0) }
+        val state = remember { StoragePresenter() }.invoke()
+        var imageCacheSize by remember(refreshKey) {
+            mutableLongStateOf(
+                SingletonImageLoader
+                    .get(PlatformContext.INSTANCE)
+                    .diskCache
+                    ?.size
+                    ?.div(1024L * 1024L) ?: 0L,
+            )
+        }
+        var expanded by remember { mutableStateOf(false) }
+        object : StorageState by state {
+            val expanded = expanded
+            val imageCacheSize = imageCacheSize
+
+            fun clearImageCache() {
+                SingletonImageLoader.get(PlatformContext.INSTANCE).diskCache?.clear()
+                refreshKey++
+            }
+
+            fun clearCacheDatabase() {
+                state.clearCache()
+            }
+
+            fun setExpanded(value: Boolean) {
+                expanded = value
+                if (value) {
+                    refreshKey++
+                }
             }
         }
     }

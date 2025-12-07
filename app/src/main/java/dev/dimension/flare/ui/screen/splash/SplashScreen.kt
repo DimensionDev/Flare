@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.splash
 
+import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,10 +22,12 @@ internal fun SplashScreen() {
                     .padding(it),
             contentAlignment = Alignment.Center,
         ) {
-            Image(
-                painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = null,
-            )
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                Image(
+                    painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = null,
+                )
+            }
         }
     }
 }

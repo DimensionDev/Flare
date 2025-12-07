@@ -37,6 +37,7 @@ dependencies {
     implementation(libs.reorderable)
     implementation(libs.platformtools.darkmodedetector)
     implementation(libs.jna)
+    api("io.github.kevinnzou:compose-webview-multiplatform:2.0.3")
 }
 
 compose.desktop {
@@ -44,7 +45,7 @@ compose.desktop {
         mainClass = "dev.dimension.flare.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Pkg, TargetFormat.Exe)
+            targetFormats(TargetFormat.Pkg, TargetFormat.Exe, TargetFormat.Deb)
             packageName = "Flare"
             val buildVersion = System.getenv("BUILD_VERSION")?.toString()?.takeIf {
                 // match semantic versioning
@@ -84,7 +85,7 @@ compose.desktop {
                 iconFile.set(project.file("resources/ic_launcher.ico"))
             }
             linux {
-                modules("jdk.security.auth")
+
             }
             appResourcesRootDir.set(file("resources"))
         }
@@ -195,4 +196,14 @@ kotlin {
 
 tasks.named("compileKotlin") {
     dependsOn(generateSupportedLocales)
+}
+
+// if is linux
+if (System.getProperty("os.name").contains("Linux")) {
+    afterEvaluate {
+        tasks.withType<JavaExec> {
+            jvmArgs("--add-opens", "java.desktop/sun.awt=ALL-UNNAMED")
+            jvmArgs("--add-opens", "java.desktop/java.awt.peer=ALL-UNNAMED")
+        }
+    }
 }

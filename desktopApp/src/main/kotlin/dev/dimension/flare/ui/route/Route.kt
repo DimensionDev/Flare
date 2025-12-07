@@ -195,6 +195,11 @@ internal sealed interface Route {
         val userKey: MicroBlogKey,
     ) : ScreenRoute
 
+    data class WebViewLogin(
+        val url: String,
+        val cookieCallback: ((cookies: String?) -> Unit)?,
+    ) : WindowRoute
+
     companion object {
         public fun parse(url: String): Route? {
             val deeplinkRoute = DeeplinkRoute.parse(url) ?: return null

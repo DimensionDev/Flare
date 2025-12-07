@@ -1,8 +1,6 @@
 package dev.dimension.flare
 
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
@@ -16,7 +14,9 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
+import dev.datlag.kcef.KCEF
 import dev.dimension.flare.common.DeeplinkHandler
+import dev.dimension.flare.common.FlareWindowManager
 import dev.dimension.flare.common.NativeWindowBridge
 import dev.dimension.flare.common.NoopIPC
 import dev.dimension.flare.common.SandboxHelper
@@ -36,10 +36,19 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import java.awt.Desktop
+import java.io.File
 
 fun main(args: Array<String>) {
+    if (SystemUtils.IS_OS_LINUX) {
+        KCEF.initBlocking(
+            builder = {
+                installDir(File("kcef-bundle"))
+            },
+        )
+    }
     SandboxHelper.configureSandboxArgs()
     val ports = WindowsIPC.parsePorts(args)
     val platformIPC =
@@ -58,6 +67,7 @@ fun main(args: Array<String>) {
             desktopModule + KoinHelper.modules() + composeUiModule +
                 module {
                     single { platformIPC }
+                    singleOf(::FlareWindowManager)
                 },
         )
     }
@@ -82,7 +92,7 @@ fun main(args: Array<String>) {
                 }.crossfade(true)
                 .build()
         }
-        val extraWindowRoutes = remember { mutableStateMapOf<String, FloatingWindowState>() }
+        val extraWindowRoutes = koinInject<FlareWindowManager>()
         val nativeWindowBridge = koinInject<NativeWindowBridge>()
 
         fun openWindow(
@@ -116,7 +126,9 @@ fun main(args: Array<String>) {
                         size = DpSize(520.dp, 840.dp),
                     ),
             ) {
-                window.setWindowsAdaptiveTitleBar()
+                if (SystemUtils.IS_OS_WINDOWS) {
+                    window.setWindowsAdaptiveTitleBar()
+                }
                 FlareTheme {
                     FlareApp(
                         onWindowRoute = {

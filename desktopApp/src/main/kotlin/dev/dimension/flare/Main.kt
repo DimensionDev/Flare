@@ -188,12 +188,12 @@ fun main(args: Array<String>) {
     }
 }
 
-private const val entryFileName = "flare.desktop"
-private const val lockId = "dev.dimensiondev.flare"
+private const val ENTRY_FILE_NAME = "flare.desktop"
+private const val LOCK_ID = "dev.dimensiondev.flare"
 
 private fun ensureDesktopEntry() {
     val entryFile =
-        File("${System.getProperty("user.home")}/.local/share/applications/$entryFileName")
+        File("${System.getProperty("user.home")}/.local/share/applications/$ENTRY_FILE_NAME")
     if (!entryFile.exists()) {
         entryFile.createNewFile()
     }
@@ -219,15 +219,15 @@ private fun ensureMimeInfo() {
     if (text.isEmpty() || text.isBlank()) {
         file.writeText("[MIME Cache]${System.lineSeparator()}")
     }
-    if (!file.readText().contains("x-scheme-handler/$APPSCHEMA=$entryFileName;")) {
-        file.appendText("${System.lineSeparator()}x-scheme-handler/$APPSCHEMA=$entryFileName;")
+    if (!file.readText().contains("x-scheme-handler/$APPSCHEMA=$ENTRY_FILE_NAME;")) {
+        file.appendText("${System.lineSeparator()}x-scheme-handler/$APPSCHEMA=$ENTRY_FILE_NAME;")
     }
 }
 
 private fun isRunning(args: Array<String>): Boolean {
     val running =
         try {
-            JUnique.acquireLock(lockId) {
+            JUnique.acquireLock(LOCK_ID) {
                 DeeplinkHandler.handleDeeplink(it)
                 null
             }
@@ -237,7 +237,7 @@ private fun isRunning(args: Array<String>): Boolean {
         }
     if (running) {
         args.forEach {
-            JUnique.sendMessage(lockId, it)
+            JUnique.sendMessage(LOCK_ID, it)
         }
     }
     return running

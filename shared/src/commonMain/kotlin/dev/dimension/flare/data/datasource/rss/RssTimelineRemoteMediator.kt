@@ -2,7 +2,7 @@ package dev.dimension.flare.data.datasource.rss
 
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
-import dev.dimension.flare.data.database.app.AppDatabase
+import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.createDbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
@@ -22,7 +22,9 @@ import kotlin.time.Clock
 internal class RssTimelineRemoteMediator(
     private val url: String,
     private val cacheDatabase: CacheDatabase,
-    private val appDatabase: AppDatabase,
+    private val fetchFeed: suspend (String) -> Feed = RssService::fetch,
+    private val fetchIcon: suspend (String) -> String? = RssService::fetchIcon,
+    private val fetchSource: suspend (String) -> DbRssSources?,
 ) : BaseTimelineRemoteMediator(
         database = cacheDatabase,
     ) {
@@ -37,14 +39,10 @@ internal class RssTimelineRemoteMediator(
         pageSize: Int,
         request: Request,
     ): Result {
-        val rssSource =
-            appDatabase
-                .rssSourceDao()
-                .getByUrl(url)
-                .firstOrNull()
-        val response = RssService.fetch(url)
+        val rssSource = fetchSource(url)
+        val response = fetchFeed(url)
         val title = rssSource?.title ?: response.title
-        val icon = rssSource?.icon ?: RssService.fetchIcon(url)
+        val icon = rssSource?.icon ?: fetchIcon(url)
         val content =
             when (response) {
                 is Feed.Atom ->
@@ -154,7 +152,7 @@ internal class RssTimelineRemoteMediator(
                 createDbPagingTimelineWithStatus(
                     accountType = AccountType.Guest,
                     pagingKey = pagingKey,
-                    sortId = -index.toLong(),
+                    sortId = status.data.createdAt.toEpochMilliseconds(),
                     status = status,
                     references = mapOf(),
                 )

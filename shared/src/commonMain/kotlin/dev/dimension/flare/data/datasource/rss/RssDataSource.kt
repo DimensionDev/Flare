@@ -14,6 +14,11 @@ internal object RssDataSource :
         RssTimelineRemoteMediator(
             url = url,
             cacheDatabase = database,
-            appDatabase = appDatabase,
+            fetchSource = {
+                appDatabase
+                    .rssSourceDao()
+                    .getByUrl(it)
+                    .firstOrNull()
+            },
         )
 }

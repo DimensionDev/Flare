@@ -74,7 +74,8 @@ internal class RssTimelineRemoteMediator(
                                                 ?.let { html -> parseHtml(html) }
                                                 ?.wholeText(),
                                         createdAt =
-                                            it.data.published?.let { parseRssDateToInstant(it) }
+                                            (it.data.published ?: it.data.updated)
+                                                ?.let { parseRssDateToInstant(it) }
                                                 ?: Clock.System.now(),
                                     ),
                             )

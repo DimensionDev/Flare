@@ -57,7 +57,7 @@ internal fun StatusContent.Rss.RssContent.Atom.render(): UiTimeline =
                     sourceIcon = this@render.icon,
                     openInBrowser = this@render.openInBrowser,
                     createdAt =
-                        published
+                        (published ?: updated)
                             ?.let { input -> parseRssDateToInstant(input) }
                             ?.toUi(),
                     imageHeaders =

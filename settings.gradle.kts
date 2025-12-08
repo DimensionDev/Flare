@@ -12,6 +12,7 @@ dependencyResolutionManagement {
         mavenCentral()
         maven("https://jitpack.io")
         maven("https://central.sonatype.com/repository/maven-snapshots/")
+        maven("https://github.com/poolborges/maven/raw/master/thirdparty/")
     }
 }
 

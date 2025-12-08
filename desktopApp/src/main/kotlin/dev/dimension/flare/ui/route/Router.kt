@@ -49,6 +49,7 @@ import dev.dimension.flare.ui.screen.rss.RssListScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import dev.dimension.flare.ui.screen.settings.LocalCacheScreen
 import dev.dimension.flare.ui.screen.settings.SettingsScreen
+import dev.dimension.flare.ui.screen.settings.WebViewLoginScreen
 import dev.dimension.flare.ui.screen.status.StatusScreen
 import dev.dimension.flare.ui.screen.status.VVOCommentScreen
 import dev.dimension.flare.ui.screen.status.VVOStatusScreen
@@ -613,5 +614,8 @@ internal fun WindowScope.RouteContent(
                     )
                 },
             )
+
+        is Route.WebViewLogin ->
+            WebViewLoginScreen(route = route)
     }
 }

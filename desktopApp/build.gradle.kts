@@ -37,6 +37,7 @@ dependencies {
     implementation(libs.reorderable)
     implementation(libs.platformtools.darkmodedetector)
     implementation(libs.jna)
+    implementation("it.sauronsoftware:junique:1.0.4")
 }
 
 compose.desktop {
@@ -44,7 +45,7 @@ compose.desktop {
         mainClass = "dev.dimension.flare.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Pkg, TargetFormat.Exe)
+            targetFormats(TargetFormat.Pkg, TargetFormat.Exe, TargetFormat.Deb)
             packageName = "Flare"
             val buildVersion = System.getenv("BUILD_VERSION")?.toString()?.takeIf {
                 // match semantic versioning
@@ -84,7 +85,7 @@ compose.desktop {
                 iconFile.set(project.file("resources/ic_launcher.ico"))
             }
             linux {
-                modules("jdk.security.auth")
+                iconFile.set(project.file("resources/ic_launcher.png"))
             }
             appResourcesRootDir.set(file("resources"))
         }

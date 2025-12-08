@@ -14,7 +14,7 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
-import dev.datlag.kcef.KCEF
+import dev.dimension.flare.common.APPSCHEMA
 import dev.dimension.flare.common.DeeplinkHandler
 import dev.dimension.flare.common.FlareWindowManager
 import dev.dimension.flare.common.NativeWindowBridge
@@ -31,6 +31,8 @@ import dev.dimension.flare.ui.route.WindowRouter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.ProvideThemeSettings
 import io.github.kdroidfilter.platformtools.darkmodedetector.windows.setWindowsAdaptiveTitleBar
+import it.sauronsoftware.junique.AlreadyLockedException
+import it.sauronsoftware.junique.JUnique
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -40,14 +42,17 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import java.awt.Desktop
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
+import kotlin.io.path.absolutePathString
 
 fun main(args: Array<String>) {
+    if (SystemUtils.IS_OS_LINUX && isRunning(args)) {
+        return
+    }
     if (SystemUtils.IS_OS_LINUX) {
-        KCEF.initBlocking(
-            builder = {
-                installDir(File("kcef-bundle"))
-            },
-        )
+        ensureMimeInfo()
+        ensureDesktopEntry()
     }
     SandboxHelper.configureSandboxArgs()
     val ports = WindowsIPC.parsePorts(args)
@@ -181,4 +186,59 @@ fun main(args: Array<String>) {
             }
         }
     }
+}
+
+private const val entryFileName = "flare.desktop"
+private const val lockId = "dev.dimensiondev.flare"
+
+private fun ensureDesktopEntry() {
+    val entryFile =
+        File("${System.getProperty("user.home")}/.local/share/applications/$entryFileName")
+    if (!entryFile.exists()) {
+        entryFile.createNewFile()
+    }
+    val path = Files.readSymbolicLink(Paths.get("/proc/self/exe"))
+    entryFile.writeText(
+        "[Desktop Entry]${System.lineSeparator()}" +
+            "Type=Application${System.lineSeparator()}" +
+            "Name=Flare${System.lineSeparator()}" +
+            "Icon=\"${path.parent.parent.absolutePathString() + "/lib/Flare.png" + "\""}${System.lineSeparator()}" +
+            "Exec=\"${path.absolutePathString() + "\" %u"}${System.lineSeparator()}" +
+            "Terminal=false${System.lineSeparator()}" +
+            "Categories=Network;Internet;${System.lineSeparator()}" +
+            "MimeType=application/x-$APPSCHEMA;x-scheme-handler/$APPSCHEMA;",
+    )
+}
+
+private fun ensureMimeInfo() {
+    val file = File("${System.getProperty("user.home")}/.local/share/applications/mimeinfo.cache")
+    if (!file.exists()) {
+        file.createNewFile()
+    }
+    val text = file.readText()
+    if (text.isEmpty() || text.isBlank()) {
+        file.writeText("[MIME Cache]${System.lineSeparator()}")
+    }
+    if (!file.readText().contains("x-scheme-handler/$APPSCHEMA=$entryFileName;")) {
+        file.appendText("${System.lineSeparator()}x-scheme-handler/$APPSCHEMA=$entryFileName;")
+    }
+}
+
+private fun isRunning(args: Array<String>): Boolean {
+    val running =
+        try {
+            JUnique.acquireLock(lockId) {
+                DeeplinkHandler.handleDeeplink(it)
+                null
+            }
+            false
+        } catch (e: AlreadyLockedException) {
+            true
+        }
+    if (running) {
+        args.forEach {
+            JUnique.sendMessage(lockId, it)
+        }
+    }
+    return running
 }

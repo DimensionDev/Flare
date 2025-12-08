@@ -5,23 +5,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalUriHandler
 import dev.dimension.flare.LocalWindowPadding
-import dev.dimension.flare.common.FlareWindowManager
 import dev.dimension.flare.common.OnDeepLink
 import dev.dimension.flare.common.WebViewBridge
 import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.presenter.login.VVOLoginPresenter
 import dev.dimension.flare.ui.presenter.login.XQTLoginPresenter
-import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.login.ServiceSelectionScreenContent
 import moe.tlaster.precompose.molecule.producePresenter
-import org.apache.commons.lang3.SystemUtils
 import org.koin.compose.koinInject
 
 @Composable
 internal fun ServiceSelectScreen(onBack: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     val webviewBridge = koinInject<WebViewBridge>()
-    val windowManager = koinInject<FlareWindowManager>()
     val xqtLoginState by producePresenter("xqt_login_state") {
         remember {
             XQTLoginPresenter(toHome = onBack)
@@ -66,18 +62,9 @@ internal fun ServiceSelectScreen(onBack: () -> Unit) {
                 },
             )
         },
-        openUri = {
-            if (SystemUtils.IS_OS_LINUX) {
-                windowManager.put("login", Route.WebViewLogin(it, null))
-            } else {
-                uriHandler.openUri(it)
-            }
-        },
+        openUri = uriHandler::openUri,
         registerDeeplinkCallback = { callback ->
             OnDeepLink {
-                if (SystemUtils.IS_OS_LINUX) {
-                    windowManager.remove("login")
-                }
                 callback(it)
                 true
             }

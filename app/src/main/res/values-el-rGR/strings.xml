@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Αντικαταστήστε το Google Translate με τη μετάφραση τεχνητής νοημοσύνης, μπορεί να πάρει περισσότερο χρόνο</string>
     <string name="settings_ai_config_enable_tldr">Ενεργοποίηση Περίληψης Τεχνητής Νοημοσύνης</string>
     <string name="settings_ai_config_tldr_description">Ενεργοποίηση περιλήψεων τεχνητής νοημοσύνης για μεγάλες δημοσιεύσεις, μόνο διαθέσιμη σε ανάρτηση που υπερβαίνει τους 500 χαρακτήρες</string>
+    <string name="settings_language_title">Γλώσσα</string>
+    <string name="settings_language_description">Αλλαγή γλώσσας της εφαρμογής</string>
     <string name="status_loadmore_error_retry">Επανάληψη</string>
     <string name="login_expired">Η συνεδρία σύνδεσης έχει λήξει</string>
     <string name="login_expired_message">Κάντε κλικ για να συνδεθείτε ξανά</string>

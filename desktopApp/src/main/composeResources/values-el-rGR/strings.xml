@@ -184,6 +184,8 @@
     <string name="settings_appearance_theme_pure_color_description">Αύξηση της αντίθεσης μεταξύ φόντου και κειμένου</string>
     <string name="settings_appearance_full_width_post">Πλήρες πλάτος δημοσίευσης</string>
     <string name="settings_appearance_full_width_post_description">Εμφάνιση της δημοσίευσης σε πλήρες πλάτος</string>
+    <string name="settings_language_title">Γλώσσα</string>
+    <string name="settings_language_description">Αλλαγή γλώσσας της εφαρμογής</string>
     <string name="settings_about_source_code">Πηγαίος κώδικας</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Γίνετε μέλος της ομάδας Telegram</string>

@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Google 翻訳を AI 翻訳に置き換えるには時間がかかる場合があります</string>
     <string name="settings_ai_config_enable_tldr">AIサマリー化を有効にする</string>
     <string name="settings_ai_config_tldr_description">長い投稿のAIサマリー化を有効にします。500文字以上の投稿でのみ利用できます</string>
+    <string name="settings_language_title">言語</string>
+    <string name="settings_language_description">アプリの言語を変更する</string>
     <string name="status_loadmore_error_retry">再試行する</string>
     <string name="login_expired">ログインセッションの有効期限が切れました</string>
     <string name="login_expired_message">クリックして再度ログインする</string>

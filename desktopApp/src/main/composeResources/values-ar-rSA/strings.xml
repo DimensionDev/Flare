@@ -184,6 +184,8 @@
     <string name="settings_appearance_theme_pure_color_description">زيادة التباين بين الخلفية والنص</string>
     <string name="settings_appearance_full_width_post">عرض كامل المنشور</string>
     <string name="settings_appearance_full_width_post_description">إظهار المنشور في العرض الكامل</string>
+    <string name="settings_language_title">اللغة</string>
+    <string name="settings_language_description">تغيير لغة التطبيق</string>
     <string name="settings_about_source_code">الكود المصدري</string>
     <string name="settings_about_telegram">تيليجرام</string>
     <string name="settings_about_telegram_description">انضم إلى مجموعة تيليجرام</string>

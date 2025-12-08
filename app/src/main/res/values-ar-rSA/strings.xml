@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">استبدال ترجمة جوجل بترجمة الذكاء الاصطناعي، قد يستغرق وقتاً أطول</string>
     <string name="settings_ai_config_enable_tldr">تمكين ملخص الذكاء الاصطناعي</string>
     <string name="settings_ai_config_tldr_description">تمكين تلخيص الذكاء الاصطناعي لمشاركات طويلة، فقط متاح في المشاركة التي تزيد عن 500 حرف</string>
+    <string name="settings_language_title">اللغة</string>
+    <string name="settings_language_description">تغيير لغة التطبيق</string>
     <string name="status_loadmore_error_retry">إعادة المحاولة</string>
     <string name="login_expired">انتهت صلاحية جلسة تسجيل الدخول</string>
     <string name="login_expired_message">انقر لتسجيل الدخول مرة أخرى</string>

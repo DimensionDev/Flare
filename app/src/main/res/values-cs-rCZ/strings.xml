@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Nahradit Google překlad AI překladem, může trvat déle</string>
     <string name="settings_ai_config_enable_tldr">Povolit souhrn AI</string>
     <string name="settings_ai_config_tldr_description">Povolit AI shrnutí pro dlouhé příspěvky, dostupné pouze v příspěvku, který je delší než 500 znaků</string>
+    <string name="settings_language_title">Jazyk</string>
+    <string name="settings_language_description">Změnit jazyk aplikace</string>
     <string name="status_loadmore_error_retry">Opakovat</string>
     <string name="login_expired">Relace přihlášení vypršela</string>
     <string name="login_expired_message">Klikněte pro přihlášení znovu</string>

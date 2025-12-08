@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Ersetzen Sie Google Translate durch KI Übersetzung, dies kann länger dauern</string>
     <string name="settings_ai_config_enable_tldr">KI Zusammenfassung aktivieren</string>
     <string name="settings_ai_config_tldr_description">KI Zusammenfassung für lange Beiträge aktivieren, nur verfügbar in Beiträgen die länger als 500 Zeichen sind</string>
+    <string name="settings_language_title">Sprache</string>
+    <string name="settings_language_description">Sprache der App ändern</string>
     <string name="status_loadmore_error_retry">Wiederholen</string>
     <string name="login_expired">Die Anmeldesitzung ist abgelaufen</string>
     <string name="login_expired_message">Zum erneuten Anmelden klicken</string>

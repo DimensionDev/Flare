@@ -184,6 +184,8 @@
     <string name="settings_appearance_theme_pure_color_description">背景とテキストのコントラストを上げる</string>
     <string name="settings_appearance_full_width_post">全幅の投稿</string>
     <string name="settings_appearance_full_width_post_description">投稿を全幅で表示</string>
+    <string name="settings_language_title">言語</string>
+    <string name="settings_language_description">アプリの言語を変更する</string>
     <string name="settings_about_source_code">ソースコード</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Telegramグループに参加する</string>

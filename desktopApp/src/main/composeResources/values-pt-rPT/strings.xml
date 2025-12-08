@@ -184,6 +184,8 @@
     <string name="settings_appearance_theme_pure_color_description">Aumentar o contraste entre plano de fundo e texto</string>
     <string name="settings_appearance_full_width_post">Largura total da postagem</string>
     <string name="settings_appearance_full_width_post_description">Mostrar a postagem em largura total</string>
+    <string name="settings_language_title">IDIOMA</string>
+    <string name="settings_language_description">Alterar o idioma do aplicativo</string>
     <string name="settings_about_source_code">Código fonte</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Junte-se ao nosso grupo do Telegram</string>

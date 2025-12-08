@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Substituir o Google Tradutor pela tradução IA pode demorar mais tempo</string>
     <string name="settings_ai_config_enable_tldr">Habilitar resumo de IA</string>
     <string name="settings_ai_config_tldr_description">Ativar o resumo de IA para publicações longas, somente disponíveis na publicação com mais de 500 caracteres</string>
+    <string name="settings_language_title">IDIOMA</string>
+    <string name="settings_language_description">Alterar o idioma do aplicativo</string>
     <string name="status_loadmore_error_retry">Repetir</string>
     <string name="login_expired">Sessão de login expirada</string>
     <string name="login_expired_message">Clique para entrar novamente</string>

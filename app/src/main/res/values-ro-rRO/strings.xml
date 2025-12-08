@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Înlocuiți traducerea Google cu AI traducere, ar putea dura mai mult timp</string>
     <string name="settings_ai_config_enable_tldr">Activează rezumarea AI</string>
     <string name="settings_ai_config_tldr_description">Activează sumarizarea AI pentru postările lungi, disponibile doar în postarea care depășește 500 de caractere</string>
+    <string name="settings_language_title">Limba</string>
+    <string name="settings_language_description">Schimbă limba aplicației</string>
     <string name="status_loadmore_error_retry">Reîncercați</string>
     <string name="login_expired">Sesiunea de autentificare a expirat</string>
     <string name="login_expired_message">Faceți clic pentru a vă reconecta</string>

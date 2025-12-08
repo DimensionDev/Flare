@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Korvaa Google Translate kanssa AI käännös, saattaa kestää pidempään aikaa</string>
     <string name="settings_ai_config_enable_tldr">Ota Käyttöön tekoälyn Yhteenveto</string>
     <string name="settings_ai_config_tldr_description">Ota käyttöön tekoälyn yhteenveto pitkiä viestejä, saatavilla vain post että yli 500 merkkiä</string>
+    <string name="settings_language_title">Kieli</string>
+    <string name="settings_language_description">Vaihda sovelluksen kieli</string>
     <string name="status_loadmore_error_retry">Yritä Uudelleen</string>
     <string name="login_expired">Kirjautumissessio on vanhentunut</string>
     <string name="login_expired_message">Klikkaa kirjautuaksesi uudelleen</string>

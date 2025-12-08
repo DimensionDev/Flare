@@ -184,6 +184,8 @@
     <string name="settings_appearance_theme_pure_color_description">Zvýšit kontrast mezi pozadím a textem</string>
     <string name="settings_appearance_full_width_post">Celá šířka příspěvku</string>
     <string name="settings_appearance_full_width_post_description">Zobrazit příspěvek v plné šířce</string>
+    <string name="settings_language_title">Jazyk</string>
+    <string name="settings_language_description">Změnit jazyk aplikace</string>
     <string name="settings_about_source_code">Zdrojový kód</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Připojte se k naší skupině Telegram</string>

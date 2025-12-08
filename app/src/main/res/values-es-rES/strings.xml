@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Reemplazar Google Translate con una traducción de IA, puede llevar más tiempo</string>
     <string name="settings_ai_config_enable_tldr">Activar resumen de IA</string>
     <string name="settings_ai_config_tldr_description">Habilitar resumen de IA para mensajes largos, sólo disponible en post de más de 500 caracteres</string>
+    <string name="settings_language_title">Idioma</string>
+    <string name="settings_language_description">Cambiar el idioma de la aplicación</string>
     <string name="status_loadmore_error_retry">Reintentar</string>
     <string name="login_expired">La sesión de inicio ha expirado</string>
     <string name="login_expired_message">Haga clic para volver a iniciar sesión</string>

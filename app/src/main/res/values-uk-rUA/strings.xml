@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Заміна перекладу від Google AI може зайняти більше часу</string>
     <string name="settings_ai_config_enable_tldr">Увімкнути підсумок ШІ</string>
     <string name="settings_ai_config_tldr_description">Увімкнути підсумок ШІ для довгих постів, доступних тільки в повідомленнях, більше ніж 500 символів</string>
+    <string name="settings_language_title">Мова:</string>
+    <string name="settings_language_description">Змінити мову програми</string>
     <string name="status_loadmore_error_retry">Повторити спробу</string>
     <string name="login_expired">Сесію входу закрито</string>
     <string name="login_expired_message">Нажміть кнопку для входу знову</string>

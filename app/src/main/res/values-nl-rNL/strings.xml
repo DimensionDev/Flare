@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Vervang Google Translate door AI vertaling, dit kan langer duren</string>
     <string name="settings_ai_config_enable_tldr">AI samenvatting inschakelen</string>
     <string name="settings_ai_config_tldr_description">AI samenvatting inschakelen voor lange berichten, alleen beschikbaar in post van meer dan 500 tekens</string>
+    <string name="settings_language_title">Taal</string>
+    <string name="settings_language_description">De taal van de app wijzigen</string>
     <string name="status_loadmore_error_retry">Opnieuw</string>
     <string name="login_expired">Inlogsessie verlopen</string>
     <string name="login_expired_message">Klik om opnieuw in te loggen</string>

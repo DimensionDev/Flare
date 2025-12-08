@@ -184,6 +184,8 @@
     <string name="settings_appearance_theme_pure_color_description">Lisää taustan ja tekstin välistä kontrastia</string>
     <string name="settings_appearance_full_width_post">Koko leveys viesti</string>
     <string name="settings_appearance_full_width_post_description">Näytä viesti täydellä leveydellä</string>
+    <string name="settings_language_title">Kieli</string>
+    <string name="settings_language_description">Vaihda sovelluksen kieli</string>
     <string name="settings_about_source_code">Lähdekoodi</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Liity meidän Telegram ryhmään</string>

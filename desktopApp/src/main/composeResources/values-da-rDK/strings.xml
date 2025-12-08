@@ -184,6 +184,8 @@
     <string name="settings_appearance_theme_pure_color_description">Forøg kontrasten mellem baggrund og tekst</string>
     <string name="settings_appearance_full_width_post">Fuld bredde indlæg</string>
     <string name="settings_appearance_full_width_post_description">Vis indlægget i fuld bredde</string>
+    <string name="settings_language_title">Sprog</string>
+    <string name="settings_language_description">Skift sproget i app\'en</string>
     <string name="settings_about_source_code">Kilde kode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Tilmeld dig vores Telegram gruppe</string>

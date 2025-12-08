@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Zastąp Google Translate tłumaczeniem AI może zająć więcej czasu</string>
     <string name="settings_ai_config_enable_tldr">Włącz podsumowanie AI</string>
     <string name="settings_ai_config_tldr_description">Włącz podsumowanie AI dla długich postów, dostępne tylko w postach dłuższych niż 500 znaków</string>
+    <string name="settings_language_title">Język</string>
+    <string name="settings_language_description">Zmień język aplikacji</string>
     <string name="status_loadmore_error_retry">Ponów próbę</string>
     <string name="login_expired">Sesja logowania wygasła</string>
     <string name="login_expired_message">Kliknij, aby zalogować się ponownie</string>

@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Замена перевода Google с помощью ИИ перевода, может занять больше времени</string>
     <string name="settings_ai_config_enable_tldr">Включить пересказ с помощью ИИ</string>
     <string name="settings_ai_config_tldr_description">Включить пересказ для длинных текстовых записей - доступно только для постов длиной более 500 символов</string>
+    <string name="settings_language_title">Язык</string>
+    <string name="settings_language_description">Изменить язык приложения</string>
     <string name="status_loadmore_error_retry">Повторить</string>
     <string name="login_expired">Сессия входа истекла</string>
     <string name="login_expired_message">Нажмите, чтобы войти снова</string>

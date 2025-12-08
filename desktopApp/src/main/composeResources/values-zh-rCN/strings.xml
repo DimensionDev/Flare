@@ -184,6 +184,8 @@
     <string name="settings_appearance_theme_pure_color_description">增加背景和文本之间的对比度</string>
     <string name="settings_appearance_full_width_post">全宽帖子</string>
     <string name="settings_appearance_full_width_post_description">全宽显示帖子</string>
+    <string name="settings_language_title">语言</string>
+    <string name="settings_language_description">更改应用程序的语言</string>
     <string name="settings_about_source_code">源代码</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">加入Telegram 群组</string>

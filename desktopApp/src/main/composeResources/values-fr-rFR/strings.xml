@@ -184,6 +184,8 @@
     <string name="settings_appearance_theme_pure_color_description">Augmenter le contraste entre l\'arrière-plan et le texte</string>
     <string name="settings_appearance_full_width_post">Poteau en pleine largeur</string>
     <string name="settings_appearance_full_width_post_description">Afficher le message en pleine largeur</string>
+    <string name="settings_language_title">Langue</string>
+    <string name="settings_language_description">Changer la langue de l\'application</string>
     <string name="settings_about_source_code">Code source</string>
     <string name="settings_about_telegram">Télégramme</string>
     <string name="settings_about_telegram_description">Rejoignez notre groupe Telegram</string>

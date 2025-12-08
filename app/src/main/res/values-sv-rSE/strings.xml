@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Ersätt Google Translate med AI-översättning, kan ta längre tid</string>
     <string name="settings_ai_config_enable_tldr">Aktivera AI-sammanfattning</string>
     <string name="settings_ai_config_tldr_description">Aktivera AI-sammanfattning för långa inlägg, endast tillgängligt i inlägg som är längre än 500 tecken</string>
+    <string name="settings_language_title">Språk</string>
+    <string name="settings_language_description">Ändra språket i appen</string>
     <string name="status_loadmore_error_retry">Försök igen</string>
     <string name="login_expired">Sessionen för inloggning har gått ut</string>
     <string name="login_expired_message">Klicka för att logga in igen</string>

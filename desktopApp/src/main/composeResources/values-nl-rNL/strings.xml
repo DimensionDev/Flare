@@ -184,6 +184,8 @@
     <string name="settings_appearance_theme_pure_color_description">Vergroot contrast tussen achtergrond en tekst</string>
     <string name="settings_appearance_full_width_post">Volledige breedte bericht</string>
     <string name="settings_appearance_full_width_post_description">Toon bericht in volledige breedte</string>
+    <string name="settings_language_title">Taal</string>
+    <string name="settings_language_description">De taal van de app wijzigen</string>
     <string name="settings_about_source_code">Bron code</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Deelnemen aan onze Telegram-groep</string>

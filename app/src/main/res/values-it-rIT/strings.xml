@@ -60,6 +60,8 @@
     <string name="settings_ai_config_translation_description">Sostituire Google Translate con la traduzione AI, potrebbe richiedere più tempo</string>
     <string name="settings_ai_config_enable_tldr">Abilita Riepilogo AI</string>
     <string name="settings_ai_config_tldr_description">Abilita il riepilogo IA per i post lunghi, disponibile solo in post con più di 500 caratteri</string>
+    <string name="settings_language_title">Lingua</string>
+    <string name="settings_language_description">Cambia la lingua dell\'app</string>
     <string name="status_loadmore_error_retry">Riprova</string>
     <string name="login_expired">Sessione di accesso scaduta</string>
     <string name="login_expired_message">Clicca di nuovo per effettuare il login</string>

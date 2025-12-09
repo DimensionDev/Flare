@@ -1,10 +1,10 @@
 package dev.dimension.flare.ui.model.mapper
 
 import app.bsky.richtext.FacetFeatureUnion
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlinx.coroutines.test.runTest
 
 class BlueskyFacetsTest {
     @Test

@@ -29,8 +29,8 @@ public data class ComposeConfig internal constructor(
     ) {
         private val popularCodes =
             listOf(
-                "zh",
                 "en",
+                "zh",
                 "ja",
                 "ko",
                 "pt",

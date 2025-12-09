@@ -126,6 +126,7 @@ import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import io.github.composefluent.component.TextFieldDefaults
 import io.github.composefluent.surface.Card
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
@@ -1036,6 +1037,7 @@ private fun composePresenter(
                                     composeStatus = status,
                                 )
                             },
+                        language = languageState.takeSuccess()?.selectedLanguage.orEmpty(),
                     )
                 state.send(data)
                 // cleanup
@@ -1210,7 +1212,7 @@ private fun languageState(config: ComposeConfig.Language) =
                         .firstOrNull {
                             it.first.isO3Language == Locale.getDefault().isO3Language
                         }?.second,
-                ),
+                ).toImmutableList(),
             )
         }
         var showLanguagePicker by remember {
@@ -1221,7 +1223,7 @@ private fun languageState(config: ComposeConfig.Language) =
             val allLanguage = allLanguage
             val selectedLanguage = selectedLanguage
             val selectedLanguageName =
-                selectedLanguage.joinToString(",") { tag ->
+                selectedLanguage.joinToString(" ") { tag ->
                     Locale.of(tag).displayName
                 }
             val showLanguagePicker = showLanguagePicker
@@ -1232,11 +1234,11 @@ private fun languageState(config: ComposeConfig.Language) =
 
             fun selectLanguage(tag: String) {
                 if (config.maxCount == 1) {
-                    selectedLanguage = listOf(tag)
+                    selectedLanguage = persistentListOf(tag)
                 } else if (selectedLanguage.contains(tag) && selectedLanguage.size > 1) {
-                    selectedLanguage = selectedLanguage - tag
-                } else if (selectedLanguage.size < config.maxCount) {
-                    selectedLanguage = selectedLanguage + tag
+                    selectedLanguage = (selectedLanguage - tag).toImmutableList()
+                } else if (!selectedLanguage.contains(tag) && selectedLanguage.size < config.maxCount) {
+                    selectedLanguage = (selectedLanguage + tag).toImmutableList()
                 }
             }
         }

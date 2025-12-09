@@ -14,6 +14,7 @@ import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountProvider
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -218,7 +219,14 @@ public class ComposePresenter(
                     it
                         .mapNotNull {
                             if (it is AuthenticatedMicroblogDataSource) {
-                                it.composeConfig(statusKey = status?.statusKey)
+                                it.composeConfig(
+                                    type =
+                                        when (status) {
+                                            is ComposeStatus.Quote -> ComposeType.Quote
+                                            is ComposeStatus.Reply -> ComposeType.Reply
+                                            null -> ComposeType.New
+                                        },
+                                )
                             } else {
                                 null
                             }

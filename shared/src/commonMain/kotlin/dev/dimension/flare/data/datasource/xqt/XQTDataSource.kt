@@ -30,6 +30,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.ListMetaData
@@ -420,20 +421,30 @@ internal class XQTDataSource(
                 ?.removeSuffix("@${accountKey.host}")
         val maxProgress = data.medias.size + 1
         val mediaIds =
-            data.medias.mapIndexed { index, item ->
+            data.medias.mapIndexed { index, (item, altText) ->
                 uploadMedia(
                     mediaType = getMeidaTypeFromName(item.name),
                     mediaData = item.readBytes(),
                 ).also {
-                    if (data.sensitive) {
+                    if (data.sensitive || !altText.isNullOrEmpty()) {
                         service.postMediaMetadataCreate(
                             body =
                                 PostMediaMetadataCreateRequest(
                                     mediaId = it,
                                     sensitiveMediaWarning =
-                                        listOf(
-                                            PostMediaMetadataCreateRequest.SensitiveMediaWarning.Other,
-                                        ),
+                                        if (data.sensitive) {
+                                            listOf(
+                                                PostMediaMetadataCreateRequest.SensitiveMediaWarning.Other,
+                                            )
+                                        } else {
+                                            null
+                                        },
+                                    altText =
+                                        if (!altText.isNullOrEmpty()) {
+                                            PostMediaMetadataCreateRequest.AltText(altText)
+                                        } else {
+                                            null
+                                        },
                                 ),
                         )
                     }
@@ -623,10 +634,16 @@ internal class XQTDataSource(
             )
         }.flow
 
-    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
+    override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(280),
-            media = ComposeConfig.Media(4, true),
+            media =
+                ComposeConfig.Media(
+                    maxCount = 4,
+                    canSensitive = true,
+                    altTextMaxLength = 1000,
+                    allowMediaOnly = true,
+                ),
         )
 
     override suspend fun follow(
@@ -914,7 +931,10 @@ internal class XQTDataSource(
                                             bookmarked = bookmarked,
                                             bookmarkCount =
                                                 if (bookmarked) {
-                                                    maxOf(0, (it.data.legacy.bookmarkCount ?: 1) - 1)
+                                                    maxOf(
+                                                        0,
+                                                        (it.data.legacy.bookmarkCount ?: 1) - 1,
+                                                    )
                                                 } else {
                                                     (it.data.legacy.bookmarkCount ?: 0) + 1
                                                 },
@@ -1720,7 +1740,9 @@ internal class XQTDataSource(
                     conversationId = roomKey.id,
                 )
             }.onSuccess {
-                database.messageDao().deleteRoomTimeline(roomKey, accountType = AccountType.Specific(accountKey))
+                database
+                    .messageDao()
+                    .deleteRoomTimeline(roomKey, accountType = AccountType.Specific(accountKey))
                 database.messageDao().deleteRoom(roomKey)
                 database.messageDao().deleteRoomReference(roomKey)
                 database.messageDao().deleteRoomMessages(roomKey)

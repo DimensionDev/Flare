@@ -31,7 +31,7 @@ internal interface AuthenticatedMicroblogDataSource :
 
     suspend fun deleteStatus(statusKey: MicroBlogKey)
 
-    fun composeConfig(statusKey: MicroBlogKey? = null): ComposeConfig
+    fun composeConfig(type: ComposeType): ComposeConfig
 
     fun profileActions(): List<ProfileAction>
 
@@ -41,6 +41,12 @@ internal interface AuthenticatedMicroblogDataSource :
     )
 
     fun notificationBadgeCount(): CacheData<Int> = Cacheable({ }, { flowOf(0) })
+}
+
+internal enum class ComposeType {
+    New,
+    Quote,
+    Reply,
 }
 
 internal data class ComposeProgress(

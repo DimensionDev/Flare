@@ -21,6 +21,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
@@ -357,12 +358,13 @@ internal class MisskeyDataSource(
         val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias
-                .mapIndexed { index, item ->
+                .mapIndexed { index, (item, altText) ->
                     service
                         .upload(
                             item.readBytes(),
                             name = item.name ?: "unknown",
                             sensitive = data.sensitive,
+                            comment = altText,
                         ).also {
                             progress(ComposeProgress(index + 1, maxProgress))
                         }
@@ -371,7 +373,7 @@ internal class MisskeyDataSource(
                 }
         service.notesCreate(
             NotesCreateRequest(
-                text = data.content,
+                text = data.content.takeIf { it.isNotEmpty() && it.isNotBlank() },
                 visibility =
                     when (data.visibility) {
                         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public -> "public"
@@ -754,11 +756,17 @@ internal class MisskeyDataSource(
             )
         }.flow
 
-    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
+    override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(3000),
-            media = ComposeConfig.Media(18, true),
-            poll = ComposeConfig.Poll(4),
+            media =
+                ComposeConfig.Media(
+                    maxCount = 18,
+                    canSensitive = true,
+                    altTextMaxLength = 512,
+                    allowMediaOnly = true,
+                ),
+            poll = ComposeConfig.Poll(9),
             emoji = ComposeConfig.Emoji(emoji(), "misskey@${accountKey.host}"),
             contentWarning = ComposeConfig.ContentWarning,
             visibility = ComposeConfig.Visibility,
@@ -826,7 +834,10 @@ internal class MisskeyDataSource(
                                     choices =
                                         it.data.poll.choices.mapIndexed { index, choice ->
                                             if (options.contains(index)) {
-                                                choice.copy(votes = choice.votes + 1, isVoted = true)
+                                                choice.copy(
+                                                    votes = choice.votes + 1,
+                                                    isVoted = true,
+                                                )
                                             } else {
                                                 choice
                                             }
@@ -859,7 +870,10 @@ internal class MisskeyDataSource(
                                         choices =
                                             it.data.poll.choices.mapIndexed { index, choice ->
                                                 if (options.contains(index)) {
-                                                    choice.copy(votes = choice.votes - 1, isVoted = false)
+                                                    choice.copy(
+                                                        votes = choice.votes - 1,
+                                                        isVoted = false,
+                                                    )
                                                 } else {
                                                     choice
                                                 }

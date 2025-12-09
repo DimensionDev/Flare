@@ -21,13 +21,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.insert
-import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -41,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.isCtrlPressed
@@ -90,6 +87,7 @@ import dev.dimension.flare.misskey_visibility_specified
 import dev.dimension.flare.misskey_visibility_specified_description
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.navigate_back
+import dev.dimension.flare.ok
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.FAIcon
@@ -117,6 +115,8 @@ import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.CheckBox
 import io.github.composefluent.component.FlyoutContainer
+import io.github.composefluent.component.FlyoutPlacement
+import io.github.composefluent.component.MenuFlyout
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.PillButton
@@ -131,6 +131,7 @@ import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
+import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -390,7 +391,9 @@ fun ComposeDialog(
             }
             state.mediaState.onSuccess { mediaState ->
                 AnimatedVisibility(mediaState.medias.isNotEmpty()) {
-                    Column {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         Row(
                             modifier =
                                 Modifier
@@ -399,32 +402,75 @@ fun ComposeDialog(
                                     .horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            mediaState.medias.forEach { uri ->
+                            mediaState.medias.forEach { (uri, altTextState) ->
                                 Box {
                                     NetworkImage(
                                         model = uri.absolutePath,
-                                        contentDescription = null,
+                                        contentDescription = altTextState.text.toString(),
                                         modifier =
                                             Modifier
                                                 .size(128.dp)
                                                 .clip(RoundedCornerShape(8.dp)),
                                     )
-                                    IconButton(
-                                        onClick = {
-                                            mediaState.removeMedia(uri)
-                                        },
+                                    Row(
                                         modifier =
                                             Modifier
-                                                .align(Alignment.TopEnd)
-                                                .background(
-                                                    color = Color.Black.copy(alpha = 0.3f),
-                                                    shape = CircleShape,
-                                                ),
+                                                .fillMaxWidth()
+                                                .align(Alignment.TopEnd),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
                                     ) {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.Xmark,
-                                            contentDescription = null,
-                                        )
+                                        if (mediaState.enableAltText) {
+                                            FlyoutContainer(
+                                                flyout = {
+                                                    Column(
+                                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                                        horizontalAlignment = Alignment.End,
+                                                    ) {
+                                                        TextField(
+                                                            altTextState,
+                                                            modifier = Modifier.width(300.dp),
+                                                            trailing = {
+                                                                val remainingLength = mediaState.altTextMaxLength - altTextState.text.length
+                                                                Text(
+                                                                    remainingLength.toString(),
+                                                                    color =
+                                                                        if (remainingLength > 10) {
+                                                                            FluentTheme.colors.text.text.secondary
+                                                                        } else {
+                                                                            FluentTheme.colors.system.critical
+                                                                        },
+                                                                )
+                                                            },
+                                                        )
+                                                        Button(
+                                                            onClick = {
+                                                                isFlyoutVisible = false
+                                                            },
+                                                        ) {
+                                                            Text(stringResource(Res.string.ok))
+                                                        }
+                                                    }
+                                                },
+                                            ) {
+                                                Button(
+                                                    onClick = {
+                                                        isFlyoutVisible = true
+                                                    },
+                                                ) {
+                                                    Text("ALT")
+                                                }
+                                            }
+                                        }
+                                        Button(
+                                            onClick = {
+                                                mediaState.removeMedia(uri)
+                                            },
+                                        ) {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Xmark,
+                                                contentDescription = null,
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -743,6 +789,43 @@ fun ComposeDialog(
                     }
                 }
 
+                state.languageState.onSuccess { languageState ->
+                    Box {
+                        SubtleButton(
+                            onClick = {
+                                languageState.setShowLanguagePicker(true)
+                            },
+                            iconOnly = true,
+                            modifier = Modifier.padding(4.dp),
+                        ) {
+                            Text(languageState.selectedLanguageName)
+                        }
+                        MenuFlyout(
+                            visible = languageState.showLanguagePicker,
+                            onDismissRequest = {
+                                languageState.setShowLanguagePicker(false)
+                            },
+                            modifier = Modifier.heightIn(max = 200.dp),
+                            placement = FlyoutPlacement.BottomAlignedEnd,
+                        ) {
+                            languageState.allLanguage.forEach { (locale, tag) ->
+                                MenuFlyoutItem(
+                                    selected = languageState.selectedLanguage.contains(tag),
+                                    onSelectedChanged = {
+                                        languageState.selectLanguage(tag)
+                                    },
+                                    text = {
+                                        Text(locale.displayName)
+                                    },
+//                                    onClick = {
+//                                        languageState.selectLanguage(tag)
+//                                    },
+                                )
+                            }
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.weight(1f))
 
                 state.remainingLength.onSuccess {
@@ -845,6 +928,14 @@ private fun composePresenter(
                 contentWarningPresenter()
             }
 
+    val languageState =
+        state.composeConfig
+            .mapNotNull {
+                it.language
+            }.map {
+                languageState(it)
+            }
+
     state.initialTextState?.onSuccess {
         LaunchedEffect(it) {
             if (it.text.isNotEmpty()) {
@@ -857,11 +948,19 @@ private fun composePresenter(
     }
 
     val canSend =
-        remember(textFieldState.text, state.account) {
+        remember(textFieldState.text, state.account, mediaState, state.composeConfig) {
             textFieldState.text.isNotBlank() &&
                 textFieldState.text.isNotEmpty() &&
                 state.account is UiState.Success &&
-                remainingLength.takeSuccessOr(0) >= 0
+                remainingLength.takeSuccessOr(0) >= 0 ||
+                (
+                    (textFieldState.text.isEmpty() || textFieldState.text.isBlank()) &&
+                        state.composeConfig
+                            .takeSuccess()
+                            ?.media
+                            ?.allowMediaOnly == true &&
+                        !mediaState.takeSuccess()?.medias.isNullOrEmpty()
+                )
         }
     val canPoll =
         remember(mediaState) {
@@ -884,6 +983,7 @@ private fun composePresenter(
         val pollState = pollState
         val mediaState = mediaState
         val contentWarningState = contentWarningState
+        val languageState = languageState
         val state = state
 
         fun selectEmoji(emoji: UiEmoji) {
@@ -899,7 +999,13 @@ private fun composePresenter(
                         content = textFieldState.text.toString(),
                         medias =
                             mediaState.takeSuccess()?.medias.orEmpty().map {
-                                FileItem(it)
+                                ComposeData.Media(
+                                    file = FileItem(it.file),
+                                    altText =
+                                        it.textState.text
+                                            .toString()
+                                            .takeIf { it.isNotEmpty() },
+                                )
                             },
                         poll =
                             pollState.takeSuccess()?.takeIf { it.enabled }?.let {
@@ -976,7 +1082,7 @@ private fun contentWarningPresenter() =
 private fun mediaPresenter(config: ComposeConfig.Media) =
     run {
         var medias by remember {
-            mutableStateOf(listOf<File>())
+            mutableStateOf(listOf<MediaData>())
         }
         var isMediaSensitive by remember {
             mutableStateOf(false)
@@ -988,13 +1094,23 @@ private fun mediaPresenter(config: ComposeConfig.Media) =
             val canAddMedia = medias.size < config.maxCount
             val canSensitive = config.canSensitive
             val enabled = config.maxCount > 0
+            val enableAltText = config.altTextMaxLength > 0
+            val altTextMaxLength = config.altTextMaxLength
 
             fun addMedia(uris: List<File>) {
-                medias = (medias + uris).distinct().takeLast(config.maxCount)
+                medias =
+                    (
+                        medias +
+                            uris.map {
+                                MediaData(it)
+                            }
+                    ).distinctBy {
+                        it.file
+                    }.takeLast(config.maxCount)
             }
 
             fun removeMedia(uri: File) {
-                medias = medias.filterNot { it == uri }
+                medias = medias.filterNot { it.file == uri }
                 if (medias.isEmpty()) {
                     isMediaSensitive = false
                 }
@@ -1010,6 +1126,11 @@ private fun mediaPresenter(config: ComposeConfig.Media) =
             }
         }
     }
+
+private data class MediaData(
+    val file: File,
+    val textState: TextFieldState = TextFieldState(),
+)
 
 @Composable
 private fun pollPresenter(config: ComposeConfig.Poll) =
@@ -1068,6 +1189,55 @@ private fun pollPresenter(config: ComposeConfig.Poll) =
                 options = listOf(TextFieldState(), TextFieldState())
                 pollSingleChoice = true
                 expiredAt = PollExpiration.Minutes5
+            }
+        }
+    }
+
+@Composable
+private fun languageState(config: ComposeConfig.Language) =
+    run {
+        val allLanguage =
+            remember {
+                config.sortedIsoCodes
+                    .map {
+                        Locale.of(it) to it
+                    }.toImmutableList()
+            }
+        var selectedLanguage by remember {
+            mutableStateOf(
+                listOfNotNull(
+                    allLanguage
+                        .firstOrNull {
+                            it.first.isO3Language == Locale.getDefault().isO3Language
+                        }?.second,
+                ),
+            )
+        }
+        var showLanguagePicker by remember {
+            mutableStateOf(false)
+        }
+
+        object {
+            val allLanguage = allLanguage
+            val selectedLanguage = selectedLanguage
+            val selectedLanguageName =
+                selectedLanguage.joinToString(",") { tag ->
+                    Locale.of(tag).displayName
+                }
+            val showLanguagePicker = showLanguagePicker
+
+            fun setShowLanguagePicker(value: Boolean) {
+                showLanguagePicker = value
+            }
+
+            fun selectLanguage(tag: String) {
+                if (config.maxCount == 1) {
+                    selectedLanguage = listOf(tag)
+                } else if (selectedLanguage.contains(tag) && selectedLanguage.size > 1) {
+                    selectedLanguage = selectedLanguage - tag
+                } else if (selectedLanguage.size < config.maxCount) {
+                    selectedLanguage = selectedLanguage + tag
+                }
             }
         }
     }

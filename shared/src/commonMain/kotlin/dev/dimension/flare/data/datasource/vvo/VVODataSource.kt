@@ -23,6 +23,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
@@ -350,7 +351,7 @@ internal class VVODataSource(
         val st = config.data.st
         requireNotNull(st) { "st is null" }
         val mediaIds =
-            data.medias.mapIndexed { index, it ->
+            data.medias.mapIndexed { index, (it, _) ->
                 uploadMedia(it, st).also {
                     progress(ComposeProgress(index + 1, maxProgress))
                 }
@@ -460,10 +461,16 @@ internal class VVODataSource(
             )
         }.flow
 
-    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
+    override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(2000),
-            media = ComposeConfig.Media(if (statusKey == null) 18 else 1, false),
+            media =
+                ComposeConfig.Media(
+                    if (type == ComposeType.New) 18 else 1,
+                    false,
+                    altTextMaxLength = -1,
+                    allowMediaOnly = false,
+                ),
             emoji = ComposeConfig.Emoji(emoji = emoji(), mergeTag = "vvo@${accountKey.host}"),
         )
 

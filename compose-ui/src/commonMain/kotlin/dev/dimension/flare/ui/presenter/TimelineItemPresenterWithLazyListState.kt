@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.presenter
 
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -18,6 +17,7 @@ import kotlinx.coroutines.flow.mapNotNull
 
 public class TimelineItemPresenterWithLazyListState(
     private val timelineTabItem: TimelineTabItem,
+    private val lazyStaggeredGridState: LazyStaggeredGridState,
 ) : PresenterBase<TimelineItemPresenterWithLazyListState.State>() {
     public interface State : TimelineItemPresenter.State {
         public val showNewToots: Boolean
@@ -50,7 +50,7 @@ public class TimelineItemPresenterWithLazyListState(
                     }
             }
         }
-        val lazyListState = rememberLazyStaggeredGridState()
+        val lazyListState = lazyStaggeredGridState
         val isAtTheTop by remember {
             derivedStateOf {
                 lazyListState.firstVisibleItemIndex == 0 &&

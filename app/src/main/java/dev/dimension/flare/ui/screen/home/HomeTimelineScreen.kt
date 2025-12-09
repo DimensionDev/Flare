@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -248,6 +250,7 @@ internal fun TimelineItemContent(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     changeLogState: ChangeLogState? = null,
     isCurrentlyVisible: Boolean = true,
+    lazyStaggeredGridState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ) {
     val layoutDirection = LocalLayoutDirection.current
     val paddingWithStatusBar =
@@ -260,7 +263,7 @@ internal fun TimelineItemContent(
     val state by producePresenter(
         "timeline_${item.key}",
     ) {
-        remember { TimelineItemPresenterWithLazyListState(item) }
+        remember { TimelineItemPresenterWithLazyListState(item, lazyStaggeredGridState) }
             .invoke()
     }
     if (isCurrentlyVisible) {

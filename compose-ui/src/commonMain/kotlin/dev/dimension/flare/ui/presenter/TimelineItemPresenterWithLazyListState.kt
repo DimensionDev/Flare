@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.mapNotNull
 
 public class TimelineItemPresenterWithLazyListState(
     private val timelineTabItem: TimelineTabItem,
+    private val lazyStaggeredGridState: LazyStaggeredGridState? = null,
 ) : PresenterBase<TimelineItemPresenterWithLazyListState.State>() {
     public interface State : TimelineItemPresenter.State {
         public val showNewToots: Boolean
@@ -50,7 +51,7 @@ public class TimelineItemPresenterWithLazyListState(
                     }
             }
         }
-        val lazyListState = rememberLazyStaggeredGridState()
+        val lazyListState = lazyStaggeredGridState ?: rememberLazyStaggeredGridState()
         val isAtTheTop by remember {
             derivedStateOf {
                 lazyListState.firstVisibleItemIndex == 0 &&

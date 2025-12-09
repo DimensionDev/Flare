@@ -112,6 +112,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.bskyJson
+import dev.dimension.flare.ui.model.mapper.parseBskyFacets
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
@@ -369,9 +370,20 @@ internal class BlueskyDataSource(
                 }.map {
                     it.blob
                 }
+        val facets =
+            parseBskyFacets(
+                data.content,
+                resolveMentionDid = { userName ->
+                    service
+                        .getProfile(GetProfileQueryParams(actor = Handle(handle = userName)))
+                        .requireResponse()
+                        .did.did
+                },
+            )
         val post =
             Post(
                 text = data.content,
+                facets = facets,
                 createdAt = Clock.System.now().toDeprecatedInstant(),
                 embed =
                     quoteId

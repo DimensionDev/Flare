@@ -15,7 +15,11 @@ import app.bsky.feed.PostViewEmbedUnion
 import app.bsky.graph.ListView
 import app.bsky.notification.ListNotificationsNotificationReason
 import app.bsky.richtext.Facet
+import app.bsky.richtext.FacetByteSlice
 import app.bsky.richtext.FacetFeatureUnion
+import app.bsky.richtext.FacetLink
+import app.bsky.richtext.FacetMention
+import app.bsky.richtext.FacetTag
 import chat.bsky.convo.MessageView
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
@@ -51,7 +55,12 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import moe.tlaster.twitter.parser.HashTagToken
 import moe.tlaster.twitter.parser.TwitterParser
+import moe.tlaster.twitter.parser.UrlToken
+import moe.tlaster.twitter.parser.UserNameToken
+import sh.christian.ozone.api.Did
+import sh.christian.ozone.api.Uri
 import sh.christian.ozone.api.model.JsonContent
 
 private val sensitiveLabels =
@@ -62,6 +71,15 @@ private val sensitiveLabels =
         "graphic-media",
         "nudity",
     )
+
+private val parser =
+    TwitterParser(
+        validMarkInUserName = listOf('.', '-'),
+        enableEscapeInUrl = true,
+        validMarkInHashTag = listOf('.', ':'),
+        enableDomainDetection = true,
+    )
+
 internal val bskyJson by lazy {
     Json {
         ignoreUnknownKeys = true
@@ -111,6 +129,71 @@ internal fun parseBlueskyJson(
                 }.toUi()
         }
     }
+}
+
+internal suspend fun parseBskyFacets(
+    content: String,
+    resolveMentionDid: suspend (handle: String) -> String,
+): List<Facet> {
+    val tokens = parser.parse(content)
+    if (tokens.isEmpty()) {
+        return emptyList()
+    }
+
+    val facets = mutableListOf<Facet>()
+    var byteIndex = 0
+
+    for (token in tokens) {
+        val tokenBytes = token.value.toByteArray(charset = Charsets.UTF_8)
+        val start = byteIndex
+        val end = byteIndex + tokenBytes.size
+
+        val feature =
+            when (token) {
+                is UrlToken ->
+                    FacetFeatureUnion.Link(
+                        FacetLink(
+                            uri = Uri(token.value),
+                        ),
+                    )
+
+                is HashTagToken ->
+                    FacetFeatureUnion.Tag(
+                        FacetTag(
+                            tag = token.value.trimStart('#'),
+                        ),
+                    )
+
+                is UserNameToken -> {
+                    val handle = token.value.removePrefix("@")
+                    val didString = resolveMentionDid(handle)
+                    FacetFeatureUnion.Mention(
+                        FacetMention(
+                            did = Did(didString),
+                        ),
+                    )
+                }
+
+                else -> null
+            }
+
+        if (feature != null) {
+            facets.add(
+                Facet(
+                    index =
+                        FacetByteSlice(
+                            byteStart = start.toLong(),
+                            byteEnd = end.toLong(),
+                        ),
+                    features = listOf(feature),
+                ),
+            )
+        }
+
+        byteIndex = end
+    }
+
+    return facets
 }
 
 private fun parseBluesky(
@@ -626,13 +709,6 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
         },
     )
 }
-
-private val parser =
-    TwitterParser(
-        validMarkInUserName = listOf('.', '-'),
-        enableEscapeInUrl = true,
-        validMarkInHashTag = listOf('.', ':'),
-    )
 
 internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
     val userKey =

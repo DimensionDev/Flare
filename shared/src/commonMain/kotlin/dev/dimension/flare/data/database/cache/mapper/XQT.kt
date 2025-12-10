@@ -45,7 +45,6 @@ import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.mapper.name
 import dev.dimension.flare.ui.model.mapper.parseXQTCustomDateTime
 import dev.dimension.flare.ui.model.mapper.screenName
-import kotlin.collections.toMap
 import kotlin.time.Clock
 
 internal object XQT {
@@ -267,21 +266,21 @@ private fun TweetUnion.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWit
 private fun toDbStatusWithUser(
     tweet: Tweet,
     accountKey: MicroBlogKey,
-): DbStatusWithUser {
+): DbStatusWithUser? {
     val user =
         tweet.core
             ?.userResults
             ?.result
             ?.let {
                 it as? User
-            }?.toDbUser(accountKey) ?: throw IllegalStateException("Tweet.user should not be null")
+            }?.toDbUser(accountKey) ?: return null
     return DbStatusWithUser(
         data =
             DbStatus(
                 statusKey =
                     MicroBlogKey(
                         id = tweet.restId,
-                        host = user.userKey.host,
+                        host = accountKey.host,
                     ),
                 content = StatusContent.XQT(tweet),
                 userKey = user.userKey,
@@ -293,24 +292,6 @@ private fun toDbStatusWithUser(
             ),
         user = user,
     )
-}
-
-private fun TimelineTweet.toDbUser(accountKey: MicroBlogKey): DbUser {
-    val tweet =
-        when (tweetResults.result) {
-            is Tweet -> tweetResults.result
-            null, is TweetTombstone -> throw IllegalStateException("Tweet tombstone should not be saved")
-            is TweetWithVisibilityResults -> tweetResults.result.tweet
-        }
-    val user =
-        tweet.core
-            ?.userResults
-            ?.result
-            ?.let {
-                it as? User
-            }
-            ?: throw IllegalStateException("Tweet.user should not be null")
-    return user.toDbUser(accountKey = accountKey)
 }
 
 internal fun User.toDbUser(accountKey: MicroBlogKey) =

@@ -628,6 +628,16 @@
         }
       }
     },
+    "about_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Learn more about Flare"
+          }
+        }
+      }
+    },
     "about_title" : {
       "localizations" : {
         "af" : {
@@ -950,6 +960,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "接受追蹤請求"
+          }
+        }
+      }
+    },
+    "account_management_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage your accounts"
           }
         }
       }
@@ -1798,6 +1818,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "增加 RSS"
+          }
+        }
+      }
+    },
+    "ai_config_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configure AI settings"
           }
         }
       }
@@ -5666,6 +5696,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在简化模式下显示链接预览"
+          }
+        }
+      }
+    },
+    "appearance_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Customize the look and feel of Flare"
           }
         }
       }
@@ -27942,6 +27982,16 @@
         }
       }
     },
+    "local_filter_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local filter settings for timeline"
+          }
+        }
+      }
+    },
     "local_filter_edit" : {
       "localizations" : {
         "af" : {
@@ -29300,6 +29350,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "本地過濾器"
+          }
+        }
+      }
+    },
+    "local_history_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View or search your browsing history"
           }
         }
       }
@@ -79469,6 +79529,16 @@
         }
       }
     },
+    "storage_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage Flare's storage"
+          }
+        }
+      }
+    },
     "storage_title" : {
       "localizations" : {
         "af" : {
@@ -79969,6 +80039,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "摘要这篇文章"
+          }
+        }
+      }
+    },
+    "system_settings_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update Flare’s permission or language"
+          }
+        }
+      }
+    },
+    "system_settings_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System settings"
           }
         }
       }

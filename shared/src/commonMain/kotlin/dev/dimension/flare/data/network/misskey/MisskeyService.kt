@@ -69,6 +69,7 @@ internal class MisskeyService(
         data: ByteArray,
         name: String,
         sensitive: Boolean = false,
+        comment: String? = null,
     ): DriveFile? {
         val token = accessTokenFlow?.firstOrNull()
         val multipart =
@@ -84,6 +85,9 @@ internal class MisskeyService(
                     append("isSensitive", sensitive)
                     if (token != null) {
                         append("i", token)
+                    }
+                    if (comment != null) {
+                        append("comment", comment)
                     }
                 },
             )

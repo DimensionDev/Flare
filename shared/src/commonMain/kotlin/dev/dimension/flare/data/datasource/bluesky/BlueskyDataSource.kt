@@ -79,6 +79,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.ListMetaData
@@ -136,6 +137,7 @@ import sh.christian.ozone.api.AtUri
 import sh.christian.ozone.api.Cid
 import sh.christian.ozone.api.Did
 import sh.christian.ozone.api.Handle
+import sh.christian.ozone.api.Language
 import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
 import sh.christian.ozone.api.model.JsonContent
@@ -361,14 +363,15 @@ internal class BlueskyDataSource(
         val maxProgress = data.medias.size + 1
         val mediaBlob =
             data.medias
-                .mapIndexedNotNull { index, item ->
+                .mapIndexedNotNull { index, (item, altText) ->
                     service
                         .uploadBlob(item.readBytes())
                         .also {
                             progress(ComposeProgress(index + 1, maxProgress))
                         }.maybeResponse()
-                }.map {
-                    it.blob
+                        ?.let {
+                            it.blob to altText
+                        }
                 }
         val facets =
             parseBskyFacets(
@@ -407,7 +410,7 @@ internal class BlueskyDataSource(
                             Images(
                                 blobs
                                     .map { blob ->
-                                        ImagesImage(image = blob, alt = "")
+                                        ImagesImage(image = blob.first, alt = blob.second.orEmpty())
                                     }.toImmutableList(),
                             ),
                         )
@@ -441,6 +444,10 @@ internal class BlueskyDataSource(
                                 root = root,
                             )
                         },
+                langs =
+                    data.language.map {
+                        Language(it)
+                    },
             )
         service
             .createRecord(
@@ -972,10 +979,17 @@ internal class BlueskyDataSource(
 
     override fun discoverStatuses() = throw UnsupportedOperationException("Bluesky does not support discover statuses")
 
-    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
+    override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(300),
-            media = ComposeConfig.Media(4, true),
+            media =
+                ComposeConfig.Media(
+                    maxCount = 4,
+                    canSensitive = true,
+                    altTextMaxLength = 2000,
+                    allowMediaOnly = true,
+                ),
+            language = ComposeConfig.Language(3),
         )
 
     override suspend fun follow(

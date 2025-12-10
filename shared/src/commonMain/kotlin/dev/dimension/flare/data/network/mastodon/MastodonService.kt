@@ -90,6 +90,7 @@ internal class MastodonService(
     suspend fun upload(
         data: ByteArray,
         name: String,
+        description: String?,
     ): UploadResponse {
         val multipart =
             MultiPartFormDataContent(
@@ -101,6 +102,9 @@ internal class MastodonService(
                             append(HttpHeaders.ContentDisposition, "filename=$name")
                         },
                     )
+                    if (description != null) {
+                        append("description", description)
+                    }
                 },
             )
         return upload(multipart)

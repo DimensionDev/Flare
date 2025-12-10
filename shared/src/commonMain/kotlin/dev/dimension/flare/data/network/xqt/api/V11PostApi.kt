@@ -121,6 +121,7 @@ internal interface V11PostApi {
 
     @POST("1.1/media/metadata/create.json")
     suspend fun postMediaMetadataCreate(
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
         @Body body: PostMediaMetadataCreateRequest,
     ): Response<Unit>
 

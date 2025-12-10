@@ -11,7 +11,7 @@ public data class ComposeData(
     val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type =
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public,
     val language: List<String> = listOf("en"),
-    val medias: List<FileItem> = emptyList(),
+    val medias: List<Media> = emptyList(),
     val sensitive: Boolean = false,
     val spoilerText: String? = null,
     val poll: Poll? = null,
@@ -22,6 +22,11 @@ public data class ComposeData(
         val options: List<String>,
         val expiredAfter: Long,
         val multiple: Boolean,
+    )
+
+    public data class Media(
+        val file: FileItem,
+        val altText: String?,
     )
 
     public data class ReferenceStatus(

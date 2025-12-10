@@ -14,6 +14,7 @@ import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountProvider
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -27,10 +28,13 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.merge
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.UserPresenter
@@ -218,7 +222,14 @@ public class ComposePresenter(
                     it
                         .mapNotNull {
                             if (it is AuthenticatedMicroblogDataSource) {
-                                it.composeConfig(statusKey = status?.statusKey)
+                                it.composeConfig(
+                                    type =
+                                        when (status) {
+                                            is ComposeStatus.Quote -> ComposeType.Quote
+                                            is ComposeStatus.Reply -> ComposeType.Reply
+                                            null -> ComposeType.New
+                                        },
+                                )
                             } else {
                                 null
                             }
@@ -246,8 +257,38 @@ public class ComposePresenter(
                     visibilityPresenter()
                 }
 
+        var text by remember {
+            mutableStateOf("")
+        }
+        var mediaSize by remember {
+            mutableStateOf(0)
+        }
+        val remainingLength =
+            composeConfig
+                .mapNotNull {
+                    it.text
+                }.map {
+                    it.maxLength - text.length
+                }
+
+        val canSend =
+            remember(text, mediaSize, composeConfig) {
+                text.isNotBlank() &&
+                    text.isNotEmpty() &&
+                    accountState.isSuccess &&
+                    remainingLength.takeSuccessOr(0) >= 0 ||
+                    (
+                        (text.isEmpty() || text.isBlank()) &&
+                            composeConfig
+                                .takeSuccess()
+                                ?.media
+                                ?.allowMediaOnly == true &&
+                            mediaSize > 0
+                    )
+            }
+
         return object : ComposeState(
-            account = accountState,
+            canSend = canSend,
             visibilityState = visibilityState,
             replyState = replyState,
             emojiState = emojiState,
@@ -271,6 +312,14 @@ public class ComposePresenter(
                 } else {
                     selectedAccounts.add(account)
                 }
+            }
+
+            override fun setText(value: String) {
+                text = value
+            }
+
+            override fun setMediaSize(value: Int) {
+                mediaSize = value
             }
         }
     }
@@ -350,7 +399,7 @@ public sealed class ComposeStatus {
 
 @Immutable
 public abstract class ComposeState(
-    public val account: UiState<UiAccount>,
+    public val canSend: Boolean,
     public val visibilityState: UiState<VisibilityState>,
     public val replyState: UiState<UiTimeline>?,
     public val initialTextState: UiState<InitialText>?,
@@ -364,6 +413,10 @@ public abstract class ComposeState(
     public abstract fun send(data: ComposeData)
 
     public abstract fun selectAccount(account: UiAccount)
+
+    public abstract fun setText(value: String)
+
+    public abstract fun setMediaSize(value: Int)
 }
 
 @Immutable

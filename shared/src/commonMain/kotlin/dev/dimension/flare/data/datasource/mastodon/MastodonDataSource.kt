@@ -21,6 +21,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
@@ -361,11 +362,12 @@ internal open class MastodonDataSource(
         val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias
-                .mapIndexed { index, item ->
+                .mapIndexed { index, (file, altText) ->
                     service
                         .upload(
-                            item.readBytes(),
-                            name = item.name ?: "unknown",
+                            file.readBytes(),
+                            name = file.name ?: "unknown",
+                            description = altText,
                         ).also {
                             progress(ComposeProgress(index + 1, maxProgress))
                         }
@@ -407,6 +409,7 @@ internal open class MastodonDataSource(
                     } else {
                         null
                     },
+                language = data.language.firstOrNull(),
             ),
         )
 //        progress(ComposeProgress(maxProgress, maxProgress))
@@ -825,14 +828,30 @@ internal open class MastodonDataSource(
             )
         }.flow.cachedIn(scope)
 
-    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
+    override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(500),
-            media = ComposeConfig.Media(4, true),
-            poll = ComposeConfig.Poll(4),
+            media =
+                if (type == ComposeType.Quote) {
+                    null
+                } else {
+                    ComposeConfig.Media(
+                        maxCount = 4,
+                        canSensitive = true,
+                        altTextMaxLength = 1500,
+                        allowMediaOnly = true,
+                    )
+                },
+            poll =
+                if (type == ComposeType.Quote) {
+                    null
+                } else {
+                    ComposeConfig.Poll(4)
+                },
             emoji = ComposeConfig.Emoji(emoji(), mergeTag = "mastodon@${accountKey.host}"),
             contentWarning = ComposeConfig.ContentWarning,
             visibility = ComposeConfig.Visibility,
+            language = ComposeConfig.Language(1),
         )
 
     override suspend fun follow(

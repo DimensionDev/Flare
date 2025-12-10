@@ -111,32 +111,17 @@ struct ComposeScreen: View {
                         ScrollView(.horizontal) {
                             HStack {
                                 ForEach(viewModel.mediaViewModel.items) { item in
-                                    if let image = item.image {
-                                        Image(uiImage: image)
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 128, height: 128)
-                                            .cornerRadius(8)
-                                            .contextMenu {
-                                                Button(action: {
-                                                    withAnimation {
-                                                        viewModel.mediaViewModel.remove(item: item)
-                                                    }
-                                                }, label: {
-                                                    Label {
-                                                        Text("delete")
-                                                    } icon: {
-                                                        Image("fa-trash")
-                                                    }
-                                                })
-                                            }
-                                    }
+                                    ComposeMediaItemView(item: item, mediaViewModel: viewModel.mediaViewModel)
                                 }
                             }
                         }
-                        Toggle(isOn: $viewModel.mediaViewModel.sensitive, label: {
-                            Text("compose_media_mark_sensitive")
-                        })
+                        StateView(state: presenter.state.composeConfig) { config in
+                            if let media = config.media, media.canSensitive {
+                                Toggle(isOn: $viewModel.mediaViewModel.sensitive, label: {
+                                    Text("compose_media_mark_sensitive")
+                                })
+                            }
+                        }
                     }
                     if viewModel.pollViewModel.enabled {
                         HStack(
@@ -214,13 +199,16 @@ struct ComposeScreen: View {
                         ) {
                             if !viewModel.pollViewModel.enabled {
                                 StateView(state: presenter.state.composeConfig) { config in
-                                    if let media = config.media {
-                                        PhotosPicker(selection: Binding(get: {
-                                            viewModel.mediaViewModel.selectedItems
-                                        }, set: { value in
-                                            viewModel.mediaViewModel.selectedItems = value
-                                            viewModel.mediaViewModel.update()
-                                        }), matching: .any(of: [.images, .videos, .livePhotos])) {
+                                    if config.media != nil {
+                                        PhotosPicker(
+                                            selection: Binding(get: {
+                                                viewModel.mediaViewModel.selectedItems
+                                            }, set: { value in
+                                                viewModel.mediaViewModel.selectedItems = value
+                                                viewModel.mediaViewModel.update()
+                                            }),
+                                            maxSelectionCount: viewModel.mediaViewModel.maxSize,
+                                            matching: .any(of: [.images, .videos, .livePhotos])) {
                                             Image("fa-image")
                                         }
                                     }
@@ -303,11 +291,54 @@ struct ComposeScreen: View {
                                     }
                                 }
                             }
+                            StateView(state: presenter.state.composeConfig) { config in
+                                if let languageConfig = config.language {
+                                    Menu {
+                                        ForEach(languageConfig.sortedIsoCodes, id: \.self) { code in
+                                            Button {
+                                                if languageConfig.maxCount > 1 {
+                                                    if viewModel.languages.contains(code) {
+                                                        if viewModel.languages.count > 1 {
+                                                            viewModel.languages.removeAll { $0 == code }
+                                                        }
+                                                    } else {
+                                                        if viewModel.languages.count < languageConfig.maxCount {
+                                                            viewModel.languages.append(code)
+                                                        }
+                                                    }
+                                                } else {
+                                                    viewModel.languages = [code]
+                                                }
+                                            } label: {
+                                                HStack {
+                                                    Text(Locale.current.localizedString(forLanguageCode: code) ?? code)
+                                                    if viewModel.languages.contains(code) {
+                                                        Image(systemName: "checkmark")
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } label: {
+                                        if let first = viewModel.languages.first, viewModel.languages.count == 1 {
+                                             Text(first.uppercased())
+                                                .font(.caption)
+                                                .bold()
+                                                .padding(4)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 4)
+                                                        .stroke(Color.primary, lineWidth: 1)
+                                                )
+                                        } else {
+                                            Image(systemName: "globe")
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        .scrollIndicators(.hidden)
                         .font(.title)
                         .buttonStyle(.plain)
                     }
+                    .scrollIndicators(.hidden)
                     Spacer()
                     StateView(state: presenter.state.composeConfig) { config in
                         if let maxLength = config.text?.maxLength {
@@ -333,7 +364,15 @@ struct ComposeScreen: View {
         .onSuccessOf(of: presenter.state.composeConfig) { config in
             if let media = config.media {
                 viewModel.mediaViewModel.maxSize = Int(media.maxCount)
+                viewModel.mediaViewModel.enableAltText = media.altTextMaxLength > 0
+                viewModel.mediaViewModel.altTextMaxLength = Int(media.altTextMaxLength)
             }
+        }
+        .onChange(of: viewModel.text) { oldValue, newValue in
+            presenter.state.setText(value: newValue)
+        }
+        .onChange(of: viewModel.mediaViewModel.items.count) { _, newValue in
+            presenter.state.setMediaSize(value: Int32(newValue))
         }
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
@@ -368,7 +407,7 @@ struct ComposeScreen: View {
                         Image(systemName: "paperplane.fill")
                     }
                 }
-                .disabled(viewModel.text.isEmpty)
+                .disabled(!presenter.state.canSend)
             }
         }
     }
@@ -407,7 +446,7 @@ struct ComposeScreen: View {
                 account: account,
                 content: viewModel.text,
                 visibility: getVisibility(),
-                language: ["en"],
+                language: viewModel.languages,
                 medias: getMedia(),
                 sensitive: viewModel.mediaViewModel.sensitive,
                 spoilerText: viewModel.contentWarning,
@@ -426,9 +465,9 @@ struct ComposeScreen: View {
         dismiss()
     }
     
-    private func getMedia() -> [FileItem] {
+    private func getMedia() -> [ComposeData.Media] {
         return viewModel.mediaViewModel.items.map { item in
-            FileItem(name: item.item.itemIdentifier, data: KotlinByteArray.from(data: item.data!))
+                .init(file: .init(name: item.item.itemIdentifier, data: KotlinByteArray.from(data: item.data!)), altText: item.altText.isEmpty ? nil : item.altText)
         }
     }
     private func getReferenceStatus() -> ComposeData.ReferenceStatus? {
@@ -460,6 +499,12 @@ class ComposeInputViewModel {
     var pollViewModel = PollViewModel()
     var mediaViewModel = MediaViewModel()
     var visibility: UiTimeline.ItemContentStatusTopEndContentVisibilityType = .public
+    var languages: [String] = {
+        if let code = Locale.current.language.languageCode?.identifier {
+            return [code]
+        }
+        return ["en"]
+    }()
     
     
     func showEmojiPanel() {
@@ -488,6 +533,8 @@ class MediaViewModel {
     var items: [MediaItem] = []
     var sensitive = false
     var maxSize = 4
+    var enableAltText = true
+    var altTextMaxLength = 500
     func update() {
         if selectedItems.count > maxSize {
             selectedItems = Array(selectedItems[(selectedItems.count - 4)...(selectedItems.count - 1)])
@@ -514,11 +561,12 @@ class MediaItem: Equatable, Identifiable {
     let item: PhotosPickerItem
     var image: UIImage?
     var data: Data?
-    var id: String {
-        item.itemIdentifier ?? UUID().uuidString
-    }
+    var altText: String = ""
+    let id: String
+    
     init(item: PhotosPickerItem) {
         self.item = item
+        self.id = item.itemIdentifier ?? UUID().uuidString
         item.loadTransferable(type: Data.self) { result in
             do {
                 if let data = try result.get() {
@@ -612,5 +660,63 @@ extension ComposeScreen {
         self.accountType = accountType
         self.composeStatus = composeStatus
         self._presenter = .init(wrappedValue: .init(presenter: ComposePresenter(accountType: accountType, status: composeStatus)))
+    }
+}
+
+struct ComposeMediaItemView: View {
+    let item: MediaItem
+    var mediaViewModel: MediaViewModel
+    @State private var showAltTextEditor = false
+    
+    var body: some View {
+        if let image = item.image {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 128, height: 128)
+                .cornerRadius(8)
+                .overlay(alignment: .bottomLeading) {
+                    if mediaViewModel.enableAltText && !item.altText.isEmpty {
+                        Text("ALT")
+                            .font(.caption2)
+                            .bold()
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(.white.opacity(0.8))
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                            .padding(4)
+                    }
+                }
+                .onTapGesture {
+                    if mediaViewModel.enableAltText {
+                        showAltTextEditor = true
+                    }
+                }
+                .contextMenu {
+                    Button(action: {
+                        withAnimation {
+                            mediaViewModel.remove(item: item)
+                        }
+                    }, label: {
+                        Label {
+                            Text("delete")
+                        } icon: {
+                            Image("fa-trash")
+                        }
+                    })
+                    
+                    if mediaViewModel.enableAltText {
+                        Button {
+                            showAltTextEditor = true
+                        } label: {
+                            Label("Edit Description", systemImage: "pencil")
+                        }
+                    }
+                }
+                .sheet(isPresented: $showAltTextEditor) {
+                    AltTextEditSheet(item: item, maxLength: mediaViewModel.altTextMaxLength)
+                }
+        }
     }
 }

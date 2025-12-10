@@ -109,7 +109,6 @@ import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
-import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.invoke
@@ -923,6 +922,10 @@ private fun composePresenter(
         mutableStateOf(TextFieldState(initialText))
     }
 
+    LaunchedEffect(textFieldState.text) {
+        state.setText(textFieldState.text.toString())
+    }
+
     val remainingLength =
         state.composeConfig
             .mapNotNull {
@@ -946,6 +949,12 @@ private fun composePresenter(
             }.map {
                 mediaPresenter(it, initialMedias)
             }
+
+    mediaState.onSuccess {
+        LaunchedEffect(it.medias.size) {
+            state.setMediaSize(it.medias.size)
+        }
+    }
 
     val contentWarningState =
         state.composeConfig
@@ -973,21 +982,6 @@ private fun composePresenter(
         }
     }
 
-    val canSend =
-        remember(textFieldState.text, state.account, mediaState, state.composeConfig) {
-            textFieldState.text.isNotBlank() &&
-                textFieldState.text.isNotEmpty() &&
-                state.account is UiState.Success &&
-                remainingLength.takeSuccessOr(0) >= 0 ||
-                (
-                    (textFieldState.text.isEmpty() || textFieldState.text.isBlank()) &&
-                        state.composeConfig
-                            .takeSuccess()
-                            ?.media
-                            ?.allowMediaOnly == true &&
-                        !mediaState.takeSuccess()?.medias.isNullOrEmpty()
-                )
-        }
     val canPoll =
         remember(mediaState) {
             mediaState !is UiState.Success || mediaState.data.medias.isEmpty()
@@ -1005,7 +999,7 @@ private fun composePresenter(
                 it.toString()
             }
         val textFieldState = textFieldState
-        val canSend = canSend
+        val canSend = state.canSend
         val canPoll = canPoll
         val canMedia = canMedia
         val pollState = pollState

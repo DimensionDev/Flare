@@ -103,7 +103,6 @@ import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
-import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.invoke
@@ -126,11 +125,6 @@ import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import io.github.composefluent.component.TextFieldDefaults
 import io.github.composefluent.surface.Card
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
-import moe.tlaster.precompose.molecule.producePresenter
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import java.util.Locale
 import kotlin.time.Duration
@@ -138,6 +132,11 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.uuid.ExperimentalUuidApi
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 private val imageExtensions = setOf("png", "jpg", "jpeg", "gif", "bmp")
 private val videoExtensions = setOf("mp4", "mov", "avi", "mkv", "webm")
@@ -897,6 +896,10 @@ private fun composePresenter(
         mutableStateOf(TextFieldState(initialText))
     }
 
+    LaunchedEffect(textFieldState.text) {
+        state.setText(textFieldState.text.toString())
+    }
+
     val remainingLength =
         state.composeConfig
             .mapNotNull {
@@ -920,6 +923,12 @@ private fun composePresenter(
             }.map {
                 mediaPresenter(it)
             }
+
+    mediaState.onSuccess {
+        LaunchedEffect(it.medias.size) {
+            state.setMediaSize(it.medias.size)
+        }
+    }
 
     val contentWarningState =
         state.composeConfig
@@ -948,21 +957,6 @@ private fun composePresenter(
         }
     }
 
-    val canSend =
-        remember(textFieldState.text, state.account, mediaState, state.composeConfig) {
-            textFieldState.text.isNotBlank() &&
-                textFieldState.text.isNotEmpty() &&
-                state.account is UiState.Success &&
-                remainingLength.takeSuccessOr(0) >= 0 ||
-                (
-                    (textFieldState.text.isEmpty() || textFieldState.text.isBlank()) &&
-                        state.composeConfig
-                            .takeSuccess()
-                            ?.media
-                            ?.allowMediaOnly == true &&
-                        !mediaState.takeSuccess()?.medias.isNullOrEmpty()
-                )
-        }
     val canPoll =
         remember(mediaState) {
             mediaState !is UiState.Success || mediaState.data.medias.isEmpty()
@@ -978,7 +972,7 @@ private fun composePresenter(
                 it.toString()
             }
         val textFieldState = textFieldState
-        val canSend = canSend
+        val canSend = state.canSend
         val canPoll = canPoll
         val canMedia = canMedia
         val pollState = pollState

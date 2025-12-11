@@ -12,6 +12,7 @@ import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.serialization.Serializable
 
 @Immutable
 public data class UiTimeline internal constructor(
@@ -157,6 +158,7 @@ public data class UiTimeline internal constructor(
                 public data class Visibility internal constructor(
                     val visibility: Type,
                 ) : TopEndContent() {
+                    @Serializable
                     public enum class Type {
                         Public,
                         Home,

@@ -3,6 +3,8 @@ package dev.dimension.flare.data.datastore
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
+import dev.dimension.flare.data.datastore.model.ComposeConfigData
+import dev.dimension.flare.data.datastore.model.ComposeConfigDataSerializer
 import dev.dimension.flare.data.datastore.model.FlareConfig
 import dev.dimension.flare.data.datastore.model.FlareConfigSerializer
 import dev.dimension.flare.data.datastore.model.GuestData
@@ -35,6 +37,19 @@ internal class AppDataStore(
                     serializer = FlareConfigSerializer,
                     producePath = {
                         platformPathProducer.dataStoreFile("flare_config.pb")
+                    },
+                ),
+        )
+    }
+
+    val composeConfigData: DataStore<ComposeConfigData> by lazy {
+        DataStoreFactory.create(
+            storage =
+                OkioStorage(
+                    fileSystem = FileSystem.SYSTEM,
+                    serializer = ComposeConfigDataSerializer,
+                    producePath = {
+                        platformPathProducer.dataStoreFile("compose_config.pb")
                     },
                 ),
         )

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.tryRun
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +14,7 @@ import kotlinx.coroutines.withContext
 internal class ComposeUseCase(
     private val scope: CoroutineScope,
     private val inAppNotification: InAppNotification,
+    private val appDataStore: AppDataStore,
 ) {
     operator fun invoke(data: ComposeData) {
         invoke(data) {
@@ -36,6 +38,11 @@ internal class ComposeUseCase(
         scope.launch {
             tryRun {
                 progress.invoke(ComposeProgressState.Progress(0, 1))
+                appDataStore.composeConfigData.updateData {
+                    it.copy(
+                        visibility = data.visibility,
+                    )
+                }
                 data.account.dataSource.compose(
                     data = data,
                     progress = {

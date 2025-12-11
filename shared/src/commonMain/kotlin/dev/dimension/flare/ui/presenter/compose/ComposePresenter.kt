@@ -15,6 +15,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountProvider
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -51,6 +52,7 @@ public class ComposePresenter(
     KoinComponent {
     private val composeUseCase: ComposeUseCase by inject()
     private val accountRepository: AccountRepository by inject()
+    private val appDataStore: AppDataStore by inject()
 
     @Composable
     override fun body(): ComposeState {
@@ -331,6 +333,11 @@ public class ComposePresenter(
         }
         var visibility by remember {
             mutableStateOf(UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public)
+        }
+        LaunchedEffect(appDataStore.composeConfigData.data) {
+            appDataStore.composeConfigData.data.collect {
+                visibility = it.visibility
+            }
         }
         return object : VisibilityState {
             override val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type

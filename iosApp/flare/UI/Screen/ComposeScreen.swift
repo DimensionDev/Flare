@@ -232,17 +232,17 @@ struct ComposeScreen: View {
                                     ForEach(visibilityState.allVisibilities, id: \.self) { visibility in
                                         Button {
                                             visibilityState.setVisibility(value: visibility)
-                                            viewModel.visibility = visibility
                                         } label: {
                                             Label {
-                                                Text(visibility.name)
+                                                Text(visibility.title)
                                             } icon: {
                                                 StatusVisibilityView(data: visibility)
                                             }
+                                            Text(visibility.desc)
                                         }
                                     }
                                 } label: {
-                                    StatusVisibilityView(data: viewModel.visibility)
+                                    StatusVisibilityView(data: visibilityState.visibility)
                                 }
                             }
                             StateView(state: presenter.state.composeConfig) { config in
@@ -485,7 +485,10 @@ struct ComposeScreen: View {
         }
     }
     private func getVisibility() -> UiTimeline.ItemContentStatusTopEndContentVisibilityType {
-        return viewModel.visibility
+        switch onEnum(of: presenter.state.visibilityState) {
+        case .success(let success): return success.data.visibility
+        default: return .public
+        }
     }
 
 }
@@ -498,7 +501,7 @@ class ComposeInputViewModel {
     var showEmoji = false
     var pollViewModel = PollViewModel()
     var mediaViewModel = MediaViewModel()
-    var visibility: UiTimeline.ItemContentStatusTopEndContentVisibilityType = .public
+//    var visibility: UiTimeline.ItemContentStatusTopEndContentVisibilityType = .public
     var languages: [String] = {
         if let code = Locale.current.language.languageCode?.identifier {
             return [code]
@@ -717,6 +720,33 @@ struct ComposeMediaItemView: View {
                 .sheet(isPresented: $showAltTextEditor) {
                     AltTextEditSheet(item: item, maxLength: mediaViewModel.altTextMaxLength)
                 }
+        }
+    }
+}
+
+extension UiTimeline.ItemContentStatusTopEndContentVisibilityType {
+    var title: LocalizedStringResource {
+        switch self {
+        case .public:
+            return LocalizedStringResource("status_visibility_public")
+        case .home:
+            return LocalizedStringResource("status_visibility_home")
+        case .followers:
+            return LocalizedStringResource("status_visibility_followers")
+        case .specified:
+            return LocalizedStringResource("status_visibility_specified")
+        }
+    }
+    var desc: LocalizedStringResource {
+        switch self {
+        case .public:
+            return LocalizedStringResource("status_visibility_public_description")
+        case .home:
+            return LocalizedStringResource("status_visibility_home_description")
+        case .followers:
+            return LocalizedStringResource("status_visibility_followers_description")
+        case .specified:
+            return LocalizedStringResource("status_visibility_specified_description")
         }
     }
 }

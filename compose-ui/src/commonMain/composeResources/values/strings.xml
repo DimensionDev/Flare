@@ -22,12 +22,12 @@
     <string name="mastodon_notification_item_poll_ended">A poll you were participating in has ended</string>
     <string name="mastodon_notification_item_mentioned_you">mentioned you</string>
     <string name="mastodon_notification_item_requested_follow">request to follow you</string>
-    <string name="mastodon_notification_item_posted_status">just posted a status</string>
-    <string name="mastodon_notification_item_updated_status">updated a toot</string>
-    <string name="mastodon_item_reblogged_status">boosted a toot</string>
+    <string name="mastodon_notification_item_posted_status">just posted a post</string>
+    <string name="mastodon_notification_item_updated_status">updated a post</string>
+    <string name="mastodon_item_reblogged_status">boosted a post</string>
     <string name="mastodon_item_show_more">Show more</string>
     <string name="mastodon_item_show_less">Show less</string>
-    <string name="mastodon_item_pinned">Pinned toot</string>
+    <string name="mastodon_item_pinned">Pinned post</string>
 
     <string name="post_show_full_text">Show full text</string>
 
@@ -36,7 +36,7 @@
     <string name="bluesky_notification_item_reblogged_your_status">reblogged</string>
     <string name="bluesky_notification_item_poll_ended">A poll you were participating in has ended</string>
     <string name="bluesky_notification_item_mentioned_you">mentioned you</string>
-    <string name="bluesky_item_reblogged_status">boosted a status</string>
+    <string name="bluesky_item_reblogged_status">reposted a post</string>
     <string name="bluesky_notification_item_replied_to_you">replied to you</string>
     <string name="bluesky_notification_item_quoted_your_status">quoted</string>
     <string name="bluesky_notification_item_starterpack_joined">Starterpack Joined</string>
@@ -47,7 +47,7 @@
     <string name="misskey_notification_item_replied_to_you">replied to you</string>
     <string name="misskey_notification_item_reposted_your_status">reposted</string>
     <string name="misskey_notification_item_quoted_your_status">quoted</string>
-    <string name="misskey_notification_item_reacted_to_your_status">reacted to your status</string>
+    <string name="misskey_notification_item_reacted_to_your_status">reacted to your post</string>
     <string name="misskey_notification_item_poll_ended">A poll you were participating in has ended</string>
     <string name="misskey_notification_item_follow_request_accepted">accepted your follow request</string>
     <string name="misskey_notification_item_achievement_earned">You\'ve earned an achievement: %1$s\n%2$s</string>
@@ -55,7 +55,7 @@
     <string name="misskey_notification_item_followed_you">followed you</string>
     <string name="misskey_notification_item_requested_follow">requested to follow you</string>
     <string name="misskey_notification_unknwon">Unknown notification %1$s</string>
-    <string name="misskey_item_reblogged_status">reposted a status</string>
+    <string name="misskey_item_reblogged_status">reposted a post</string>
 
     <string name="xqt_item_reblogged_status">retweeted</string>
     <string name="xqt_item_mention_status">mentions you</string>
@@ -64,10 +64,10 @@
     <string name="mastodon_visibility_unlisted">Unlisted</string>
     <string name="mastodon_visibility_private">Private</string>
     <string name="mastodon_visibility_direct">Direct</string>
-    <string name="mastodon_visibility_public_description">Anyone can see and boost this toot</string>
-    <string name="mastodon_visibility_unlisted_description">Anyone can see this toot, but it won\'t appear on the public timeline</string>
-    <string name="mastodon_visibility_private_description">Only followers can see this toot</string>
-    <string name="mastodon_visibility_direct_description">Only mentioned users can see this toot</string>
+    <string name="mastodon_visibility_public_description">Anyone can see and boost this post</string>
+    <string name="mastodon_visibility_unlisted_description">Anyone can see this post, but it won\'t appear on the public timeline</string>
+    <string name="mastodon_visibility_private_description">Only followers can see this post</string>
+    <string name="mastodon_visibility_direct_description">Only mentioned users can see this post</string>
 
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_notifications_subtitle">Customize how Flare notifies you</string>
@@ -84,7 +84,7 @@
     <string name="login_expired_relogin">Login again</string>
 
     <string name="misskey_compose_local_only">Local only</string>
-    <string name="misskey_compose_local_only_description">Only users on this instance can see this toot</string>
+    <string name="misskey_compose_local_only_description">Only users on this instance can see this post</string>
 
     <string name="misskey_item_action_renote">Renote</string>
     <string name="misskey_item_action_quote">Quote</string>
@@ -134,7 +134,7 @@
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
 
-    <string name="vvo_notification_like">Liked your status</string>
+    <string name="vvo_notification_like">Liked your post</string>
 
     <string name="user_follow_edit_list">Add/Remove from list</string>
     <string name="list_empty">No lists</string>

@@ -333,7 +333,7 @@ private fun Status.renderStatus(
                     attachment.toUi(sensitive = sensitive ?: false)
                 }?.toPersistentList() ?: persistentListOf(),
         contentWarning =
-            spoilerText?.let {
+            spoilerText?.takeIf { it.isNotEmpty() && it.isNotBlank() }?.let {
                 Element("span")
                     .apply {
                         appendText(it)

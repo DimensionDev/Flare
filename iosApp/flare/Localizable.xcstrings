@@ -7997,7 +7997,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Always show sensitive content in the status"
+            "value" : "Always show sensitive content in the post"
           }
         },
         "es" : {
@@ -11985,7 +11985,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "boosted a status"
+            "value" : "reposted a post"
           }
         },
         "es" : {
@@ -29517,7 +29517,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Statuses"
+            "value" : "Posts"
           }
         },
         "es" : {
@@ -30567,7 +30567,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pinned toot"
+            "value" : "Pinned post"
           }
         },
         "es" : {
@@ -32259,7 +32259,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "boosted a toot"
+            "value" : "reposted a post"
           }
         },
         "es" : {
@@ -32443,7 +32443,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "updated a toot"
+            "value" : "updated a post"
           }
         },
         "es" : {
@@ -77198,7 +77198,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Statuses"
+            "value" : "Posts"
           }
         },
         "es" : {
@@ -78582,7 +78582,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Status Detail"
+            "value" : "Post Detail"
           }
         },
         "es" : {
@@ -78949,6 +78949,86 @@
         }
       }
     },
+    "status_visibility_followers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Followers"
+          }
+        }
+      }
+    },
+    "status_visibility_followers_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only followers can see this post"
+          }
+        }
+      }
+    },
+    "status_visibility_home" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        }
+      }
+    },
+    "status_visibility_home_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only users on this instance can see this post"
+          }
+        }
+      }
+    },
+    "status_visibility_public" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Public"
+          }
+        }
+      }
+    },
+    "status_visibility_public_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anyone can see and repost this post"
+          }
+        }
+      }
+    },
+    "status_visibility_specified" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Specified"
+          }
+        }
+      }
+    },
+    "status_visibility_specified_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only mentioned users can see this post"
+          }
+        }
+      }
+    },
     "storage_clear_database_cache_confirm" : {
       "localizations" : {
         "ar" : {
@@ -79114,7 +79194,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Clear database cache, %1$lld users and %2$lld statuses will be deleted"
+            "value" : "Clear database cache, %1$lld users and %2$lld posts will be deleted"
           }
         },
         "es" : {
@@ -82618,7 +82698,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Liked your status"
+            "value" : "Liked your post"
           }
         },
         "es" : {
@@ -83128,7 +83208,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Status"
+            "value" : "Post"
           }
         },
         "es" : {

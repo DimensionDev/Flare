@@ -1,6 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import Kingfisher
 
 struct FeedView: View {
     @Environment(\.openURL) private var openURL

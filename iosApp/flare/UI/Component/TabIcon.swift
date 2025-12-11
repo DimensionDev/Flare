@@ -1,6 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import Kingfisher
 
 struct TabTitle: View {
     let title: TitleType

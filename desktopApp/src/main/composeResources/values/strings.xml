@@ -136,8 +136,8 @@
 
     <string name="settings_accounts_title">Account Management</string>
     <string name="settings_appearance_title">Appearance</string>
-    <string name="settings_status_appearance_title">Status Appearance</string>
-    <string name="settings_status_appearance_subtitle">Customize the appearance of status</string>
+    <string name="settings_status_appearance_title">Post Appearance</string>
+    <string name="settings_status_appearance_subtitle">Customize the appearance of post</string>
     <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
     <string name="settings_storage_title">Storage</string>
     <string name="settings_storage_subtitle">Manage Flare\'s storage</string>
@@ -170,17 +170,17 @@
     <string name="settings_appearance_show_compose_in_home_timeline">Show compose box in home timeline</string>
     <string name="settings_appearance_show_compose_in_home_timeline_description">Show compose box in the top of home timeline</string>
     <string name="settings_appearance_show_actions">Show actions</string>
-    <string name="settings_appearance_show_actions_description">Show actions on the bottom of the status</string>
+    <string name="settings_appearance_show_actions_description">Show actions on the bottom of the post</string>
     <string name="settings_appearance_show_media">Show media</string>
-    <string name="settings_appearance_show_media_description">Show media in the status</string>
+    <string name="settings_appearance_show_media_description">Show media in the post</string>
     <string name="settings_appearance_show_numbers">Show numbers</string>
-    <string name="settings_appearance_show_numbers_description">Show numbers on the bottom of the status</string>
+    <string name="settings_appearance_show_numbers_description">Show numbers on the bottom of the post</string>
     <string name="settings_appearance_show_cw_img">Show sensitive content</string>
-    <string name="settings_appearance_show_cw_img_description">Always show sensitive content in the status</string>
+    <string name="settings_appearance_show_cw_img_description">Always show sensitive content in the post</string>
     <string name="settings_appearance_expand_media">Expand media to full size</string>
     <string name="settings_appearance_expand_media_description">Keep the aspectradio of the media in timeline</string>
     <string name="settings_appearance_video_autoplay">Video autoplay</string>
-    <string name="settings_appearance_video_autoplay_description">Automatically play videos in the status</string>
+    <string name="settings_appearance_video_autoplay_description">Automatically play videos in the post</string>
     <string name="settings_appearance_video_autoplay_wifi">Wi-Fi only</string>
     <string name="settings_appearance_video_autoplay_always">Always</string>
     <string name="settings_appearance_video_autoplay_never">Never</string>
@@ -196,9 +196,9 @@
     <string name="settings_appearance_dynamic_theme">Dynamic theme</string>
     <string name="settings_appearance_dynamic_theme_description">Change the theme of the app based on the device\'s wallpaper</string>
     <string name="settings_appearance_show_link_previews">Show link previews</string>
-    <string name="settings_appearance_show_link_previews_description">Show link previews in the status</string>
+    <string name="settings_appearance_show_link_previews_description">Show link previews in the post</string>
     <string name="settings_appearance_compat_link_previews">Simplify link previews</string>
-    <string name="settings_appearance_compat_link_previews_description">Show link previews in simplify mode in the status</string>
+    <string name="settings_appearance_compat_link_previews_description">Show link previews in simplify mode in the post</string>
     <string name="settings_appearance_theme_color">Theme color</string>
     <string name="settings_appearance_theme_color_description">Change the theme color of the app</string>
     <string name="settings_appearance_theme_pure_color">High contrast Mode</string>
@@ -219,7 +219,7 @@
 
     <string name="users">Users</string>
     <string name="hashtags">Hashtags</string>
-    <string name="statues">Statuses</string>
+    <string name="statues">Poses</string>
 
 
     <string name="compose_title">Compose</string>
@@ -244,10 +244,10 @@
     <string name="misskey_visibility_home">Home</string>
     <string name="misskey_visibility_followers">Followers</string>
     <string name="misskey_visibility_specified">Specified</string>
-    <string name="misskey_visibility_public_description">Anyone can see and boost this toot</string>
-    <string name="misskey_visibility_home_description">Only users on this instance can see this toot</string>
-    <string name="misskey_visibility_followers_description">Only followers can see this toot</string>
-    <string name="misskey_visibility_specified_description">Only mentioned users can see this toot</string>
+    <string name="misskey_visibility_public_description">Anyone can see and boost this post</string>
+    <string name="misskey_visibility_home_description">Only users on this instance can see this post</string>
+    <string name="misskey_visibility_followers_description">Only followers can see this post</string>
+    <string name="misskey_visibility_specified_description">Only mentioned users can see this post</string>
 
 
     <string name="rss_sources_title">Rss Sources</string>
@@ -295,14 +295,14 @@
     <string name="edit">Edit</string>
 
     <string name="local_history_search_placeholder">Search local cache</string>
-    <string name="local_history_search_status_title">Status</string>
+    <string name="local_history_search_status_title">Post</string>
     <string name="local_history_search_user_title">User</string>
 
     <string name="settings_storage_clear_image_cache">Clear image cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB of images will be removed</string>
 
     <string name="settings_storage_clear_database">Clear cache database</string>
-    <string name="settings_storage_clear_database_description">%1$s users, %2$s statuses will be removed</string>
+    <string name="settings_storage_clear_database_description">%1$s users, %2$s posts will be removed</string>
     <string name="settings_storage_app_log">Open app log</string>
     <string name="settings_storage_app_log_description">View the app log</string>
 

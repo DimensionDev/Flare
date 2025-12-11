@@ -257,7 +257,7 @@ internal sealed interface Feed {
             @XmlElement(true)
             val link: String,
             @XmlElement(true)
-            val description: String,
+            val description: String? = null,
             @XmlElement(true)
             val language: String? = null,
             @XmlElement(true)
@@ -404,7 +404,7 @@ internal sealed interface Feed {
             @XmlElement(true)
             val link: String,
             @XmlElement(true)
-            val description: String,
+            val description: String? = null,
             @XmlElement(true)
             @XmlSerialName(value = "date", namespace = "http://purl.org/dc/elements/1.1/", prefix = "dc")
             val date: String? = null,
@@ -417,7 +417,7 @@ internal sealed interface Feed {
             @XmlElement(true)
             val link: String,
             @XmlElement(true)
-            val description: String,
+            val description: String? = null,
             @XmlElement(true)
             @XmlSerialName(value = "date", namespace = "http://purl.org/dc/elements/1.1/", prefix = "dc")
             val date: String? = null,

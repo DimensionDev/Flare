@@ -104,8 +104,8 @@ internal class RssTimelineRemoteMediator(
                                         content = StatusContent.Rss(it),
                                         text =
                                             it.data.description
-                                                .let { html -> parseHtml(html) }
-                                                .wholeText(),
+                                                ?.let { html -> parseHtml(html) }
+                                                ?.wholeText(),
                                         createdAt =
                                             it.data.date?.let { parseRssDateToInstant(it) }
                                                 ?: Clock.System.now(),

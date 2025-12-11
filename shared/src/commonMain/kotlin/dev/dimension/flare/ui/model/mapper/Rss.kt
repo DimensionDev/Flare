@@ -101,16 +101,16 @@ internal fun StatusContent.Rss.RssContent.Rss20.render(): UiTimeline =
 internal fun StatusContent.Rss.RssContent.RDF.render(): UiTimeline =
     with(data) {
         val descHtml =
-            description.let {
+            description?.let {
                 Ksoup.parse(it)
             }
-        val img = descHtml.select("img").firstOrNull()
+        val img = descHtml?.select("img")?.firstOrNull()
         return UiTimeline(
             topMessage = null,
             content =
                 UiTimeline.ItemContent.Feed(
                     title = title,
-                    description = descHtml.text(),
+                    description = descHtml?.text(),
                     url = link.replace("http://", "https://"),
                     image = img?.attr("src"),
                     source = source,

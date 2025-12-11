@@ -5,13 +5,9 @@ import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.rss.model.Feed
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.ui.model.mapper.link
-import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
 import io.ktor.http.Url
-import io.ktor.serialization.kotlinx.xml.xml
 import kotlinx.serialization.decodeFromString
 import nl.adaptivity.xmlutil.serialization.XML
 
@@ -25,16 +21,15 @@ internal object RssService {
             defaultToGenericParser = true
         }
     }
+    private val client = ktorClient { }
 
-    suspend fun fetch(url: String): Feed =
-        ktorClient(config = {
-            install(ContentNegotiation) {
-                xml(xml, contentType = ContentType.Any)
-            }
-        }).get(url).body()
+    suspend fun fetch(url: String): Feed {
+        val response = client.get(url).bodyAsText()
+        return xml.decodeFromString(response)
+    }
 
     suspend fun detectLinkSources(url: String): List<String> =
-        ktorClient()
+        client
             .get(url)
             .bodyAsText()
             .let(Ksoup::parse)
@@ -53,9 +48,7 @@ internal object RssService {
     suspend fun fetchIcon(url: String): String? {
         val webContent =
             tryRun {
-                ktorClient(
-                    config = {},
-                ).get(url).bodyAsText()
+                client.get(url).bodyAsText()
             }.getOrNull() ?: return null
         val feed =
             tryRun {
@@ -76,9 +69,7 @@ internal object RssService {
         val html =
             if (feed?.link != null && feed.link != url) {
                 tryRun {
-                    ktorClient(
-                        config = {},
-                    ).get(feedLink).bodyAsText()
+                    client.get(feedLink).bodyAsText()
                 }.getOrNull() ?: return null
             } else {
                 webContent
@@ -106,9 +97,7 @@ internal object RssService {
             val hasFavIcon =
                 tryRun {
                     val response =
-                        ktorClient(
-                            config = {},
-                        ).get(favIcon)
+                        client.get(favIcon)
                     if (response.status.value !in 200..299) {
                         throw Exception("Failed to fetch favicon: ${response.status}")
                     }

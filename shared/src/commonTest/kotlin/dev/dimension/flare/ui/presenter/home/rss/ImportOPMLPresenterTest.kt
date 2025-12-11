@@ -86,10 +86,6 @@ class ImportOPMLPresenterTest {
 
             val finalState = states.last()
 
-            println(
-                "Final state: importing=${finalState.importing}, error=${finalState.error}, total=${finalState.totalCount}, imported=${finalState.importedCount}",
-            )
-
             assertFalse(finalState.importing)
             assertNull(finalState.error)
             assertEquals(2, finalState.totalCount)
@@ -165,5 +161,51 @@ class ImportOPMLPresenterTest {
 
             val df = sources.find { it.url == "https://daringfireball.net/feeds/main" }
             assertEquals("Daring Fireball", df?.title)
+        }
+
+    @Test
+    fun testConcurrencyStressTest() =
+        runTest {
+            val feedCount = 1000
+            val sb = StringBuilder()
+            sb.append("""<opml version="2.0"><head><title>Stress Test</title></head><body>""")
+
+            repeat(feedCount) { i ->
+                sb.append(
+                    """
+                    <outline type="rss" text="Feed $i" title="Title $i" xmlUrl="https://stress.test/feed/$i.xml" />
+                    """.trimIndent(),
+                )
+            }
+            sb.append("</body></opml>")
+
+            val presenter =
+                ImportOPMLPresenter(sb.toString()) { url ->
+                    kotlinx.coroutines.delay((1..10).random().toLong())
+                    "https://icon.url/icon.png"
+                }
+
+            val states = mutableListOf<ImportOPMLPresenter.State>()
+
+            val job =
+                launch {
+                    moleculeFlow(mode = RecompositionMode.Immediate) {
+                        presenter.body()
+                    }.collect {
+                        states.add(it)
+                    }
+                }
+
+            advanceUntilIdle()
+            job.cancel()
+
+            val finalState = states.last()
+            assertNull(finalState.error, "Should verify concurrency without errors")
+            assertFalse(finalState.importing, "Should finish importing")
+            assertEquals(feedCount, finalState.totalCount, "Total count should match input")
+            assertEquals(feedCount, finalState.importedCount, "Imported count should match input")
+            assertEquals(feedCount, finalState.importedSources.size, "UiState list size should match input")
+            val dbSources = db.rssSourceDao().getAll().first()
+            assertEquals(feedCount, dbSources.size, "Database records should match input")
         }
 }

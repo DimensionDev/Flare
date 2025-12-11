@@ -20,6 +20,9 @@ internal class DeepLinkMatcher<T>(
         }
 
         val args = mutableMapOf<String, Any>()
+        // match the host
+        if (request.uri.host != deepLinkPattern.uriPattern.host) return null
+
         // match the path
         request.pathSegments
             .asSequence()
@@ -33,9 +36,16 @@ internal class DeepLinkMatcher<T>(
                 // if the potential match expects a path arg for this segment, try to parse the
                 // requested segment into the expected type
                 if (candidateSegment.isParamArg) {
+                    var valueToParse = requestedSegment
+                    if (!valueToParse.startsWith(candidateSegment.prefix)) return null
+                    valueToParse = valueToParse.removePrefix(candidateSegment.prefix)
+
+                    if (!valueToParse.endsWith(candidateSegment.suffix)) return null
+                    valueToParse = valueToParse.removeSuffix(candidateSegment.suffix)
+
                     val parsedValue =
                         try {
-                            candidateSegment.typeParser.invoke(requestedSegment)
+                            candidateSegment.typeParser.invoke(valueToParse)
                         } catch (e: IllegalArgumentException) {
                             DebugRepository.log(
                                 "${TAG_LOG_ERROR}: Failed to parse path value:[$requestedSegment]" +

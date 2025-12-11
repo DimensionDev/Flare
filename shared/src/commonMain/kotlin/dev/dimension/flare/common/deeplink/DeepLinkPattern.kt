@@ -51,7 +51,7 @@ internal class DeepLinkPattern<T>(
      */
     val pathSegments: List<PathSegment> =
         buildList {
-            uriPattern.segments.forEach { segment ->
+            uriPattern.rawSegments.forEach { segment ->
                 // first, check if it is a path arg
                 var result = regexPatternFillIn.find(segment)
                 if (result != null) {
@@ -60,8 +60,13 @@ internal class DeepLinkPattern<T>(
                     // from [T], read the primitive type of this argument to get the correct type parser
                     val elementIndex = serializer.descriptor.getElementIndex(argName)
                     val elementDescriptor = serializer.descriptor.getElementDescriptor(elementIndex)
+                    // Calculate prefix and suffix
+                    val range = result.range
+                    val prefix = segment.substring(0, range.first)
+                    val suffix = segment.substring(range.last + 1)
+
                     // finally, add the arg name and its respective type parser to the map
-                    add(PathSegment(argName, true, getTypeParser(elementDescriptor.kind)))
+                    add(PathSegment(argName, true, getTypeParser(elementDescriptor.kind), prefix, suffix))
                 } else {
                     // if its not a path arg, then its just a static string path segment
                     add(PathSegment(segment, false, getTypeParser(PrimitiveKind.STRING)))
@@ -90,6 +95,8 @@ internal class DeepLinkPattern<T>(
         val stringValue: String,
         val isParamArg: Boolean,
         val typeParser: TypeParser,
+        val prefix: String = "",
+        val suffix: String = "",
     )
 }
 

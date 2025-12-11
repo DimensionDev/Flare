@@ -14,7 +14,7 @@ internal class DeepLinkRequest(
     /**
      * A list of path segments
      */
-    val pathSegments: List<String> = uri.segments
+    val pathSegments: List<String> = uri.rawSegments
 
     /**
      * A map of query name to query value

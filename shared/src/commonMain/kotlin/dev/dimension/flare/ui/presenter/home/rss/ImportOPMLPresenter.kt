@@ -18,8 +18,8 @@ import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Clock
@@ -58,17 +58,17 @@ public class ImportOPMLPresenter(
 
                 totalCount = outlines.size
 
-                val sources =
+                channelFlow {
                     outlines
                         .filter { it.xmlUrl != null }
-                        .map { outline ->
-                            async {
-                                val url = outline.xmlUrl ?: return@async null
+                        .forEach { outline ->
+                            launch {
+                                val url = outline.xmlUrl ?: return@launch
 
                                 val existing = appDatabase.rssSourceDao().getByUrl(url)
                                 if (existing.isNotEmpty()) {
-                                    importedSources.add(existing.first().render())
-                                    return@async null
+                                    send(existing.first().render())
+                                    return@launch
                                 }
 
                                 val icon =
@@ -78,19 +78,22 @@ public class ImportOPMLPresenter(
                                         null
                                     }
 
-                                DbRssSources(
-                                    url = url,
-                                    title = outline.title ?: outline.text,
-                                    icon = icon,
-                                    lastUpdate = Clock.System.now().toEpochMilliseconds(),
-                                ).apply {
-                                    importedSources.add(this.render())
-                                }
-                            }
-                        }.awaitAll()
-                        .filterNotNull()
+                                val newSource =
+                                    DbRssSources(
+                                        url = url,
+                                        title = outline.title ?: outline.text,
+                                        icon = icon,
+                                        lastUpdate = Clock.System.now().toEpochMilliseconds(),
+                                    )
 
-                appDatabase.rssSourceDao().insertAll(sources)
+                                appDatabase.rssSourceDao().insert(newSource)
+
+                                send(newSource.render())
+                            }
+                        }
+                }.collect { source ->
+                    importedSources.add(source)
+                }
             } catch (e: Exception) {
                 error = e.message
             } finally {

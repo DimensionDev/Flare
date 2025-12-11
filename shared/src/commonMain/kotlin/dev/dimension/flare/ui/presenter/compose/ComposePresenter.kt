@@ -340,13 +340,11 @@ public class ComposePresenter(
             }
         }
         return object : VisibilityState {
-            override val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type
-                get() = visibility
+            override val visibility = visibility
 
-            override val allVisibilities: ImmutableList<UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type>
-                get() =
-                    UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.entries
-                        .toImmutableList()
+            override val allVisibilities =
+                UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.entries
+                    .toImmutableList()
 
             override val showVisibilityMenu: Boolean
                 get() = showVisibilityMenu

@@ -1,6 +1,5 @@
 import SwiftUI
 import KotlinSharedUI
-import Kingfisher
 import AuthenticationServices
 import WebKit
 

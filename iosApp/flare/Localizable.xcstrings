@@ -78949,6 +78949,86 @@
         }
       }
     },
+    "status_visibility_followers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Followers"
+          }
+        }
+      }
+    },
+    "status_visibility_followers_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only followers can see this post"
+          }
+        }
+      }
+    },
+    "status_visibility_home" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        }
+      }
+    },
+    "status_visibility_home_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only users on this instance can see this post"
+          }
+        }
+      }
+    },
+    "status_visibility_public" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Public"
+          }
+        }
+      }
+    },
+    "status_visibility_public_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anyone can see and repost this post"
+          }
+        }
+      }
+    },
+    "status_visibility_specified" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Specified"
+          }
+        }
+      }
+    },
+    "status_visibility_specified_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only mentioned users can see this post"
+          }
+        }
+      }
+    },
     "storage_clear_database_cache_confirm" : {
       "localizations" : {
         "ar" : {

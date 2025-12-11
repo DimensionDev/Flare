@@ -128,7 +128,7 @@ public data class UiTimeline internal constructor(
                     }
 
             val shouldExpandTextByDefault: Boolean by lazy {
-                contentWarning == null && !content.isLongText
+                (contentWarning == null || contentWarning.isEmpty) && !content.isLongText
             }
 
             public sealed class BottomContent {

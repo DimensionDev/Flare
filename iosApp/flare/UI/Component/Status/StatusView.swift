@@ -133,7 +133,7 @@ struct StatusView: View {
                                             })
                                     }
                                     .fixedSize(horizontal: false, vertical: true)
-                                if !data.shouldExpandTextByDefault && !isDetail && !expand && showExpandTextButton {
+                                if !data.shouldExpandTextByDefault, !isDetail, !expand, showExpandTextButton {
                                     Button {
                                         withAnimation {
                                             expand = true

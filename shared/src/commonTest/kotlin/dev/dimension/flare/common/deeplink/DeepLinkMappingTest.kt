@@ -1,5 +1,6 @@
 package dev.dimension.flare.common.deeplink
 
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -271,5 +272,31 @@ class DeepLinkMappingTest {
         // https://x.example/alice/status/12345
         val xPostMatch = DeepLinkMapping.matches("https://x.example/alice/status/12345", mapping)
         assertEquals(DeepLinkMapping.Type.Post("alice", "12345"), xPostMatch[xAccount])
+    }
+
+    @Test
+    fun typeDeepLinkGeneratesCorrectUrl() {
+        val accountKey = MicroBlogKey(id = "1", host = "mastodon.social")
+
+        // Profile with simple handle
+        val simpleProfile = DeepLinkMapping.Type.Profile("alice")
+        assertEquals(
+            AppDeepLink.ProfileWithNameAndHost(accountKey, "alice", "mastodon.social"),
+            simpleProfile.deepLink(accountKey),
+        )
+
+        // Profile with full handle
+        val fullProfile = DeepLinkMapping.Type.Profile("bob@misskey.io")
+        assertEquals(
+            AppDeepLink.ProfileWithNameAndHost(accountKey, "bob", "misskey.io"),
+            fullProfile.deepLink(accountKey),
+        )
+
+        // Post
+        val post = DeepLinkMapping.Type.Post(id = "12345")
+        assertEquals(
+            AppDeepLink.StatusDetail(accountKey, MicroBlogKey("12345", "mastodon.social")),
+            post.deepLink(accountKey),
+        )
     }
 }

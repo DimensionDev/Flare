@@ -1,5 +1,7 @@
 package dev.dimension.flare.common.deeplink
 
+import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import io.ktor.http.Url
@@ -10,16 +12,41 @@ import kotlinx.serialization.Serializable
 
 internal object DeepLinkMapping {
     sealed interface Type {
+        fun deepLink(accountKey: MicroBlogKey): String
+
         @Serializable
         data class Profile(
             val handle: String,
-        ) : Type
+        ) : Type {
+            override fun deepLink(accountKey: MicroBlogKey): String {
+                if (handle.contains('@')) {
+                    val (name, host) = MicroBlogKey.valueOf(handle)
+                    return AppDeepLink.ProfileWithNameAndHost.invoke(
+                        accountKey = accountKey,
+                        userName = name,
+                        host = host,
+                    )
+                } else {
+                    return AppDeepLink.ProfileWithNameAndHost.invoke(
+                        accountKey = accountKey,
+                        userName = handle,
+                        host = accountKey.host,
+                    )
+                }
+            }
+        }
 
         @Serializable
         data class Post(
             val handle: String? = null,
             val id: String,
-        ) : Type
+        ) : Type {
+            override fun deepLink(accountKey: MicroBlogKey): String =
+                AppDeepLink.StatusDetail.invoke(
+                    accountKey = accountKey,
+                    statusKey = MicroBlogKey(id, accountKey.host),
+                )
+        }
     }
 
     fun generatePattern(
@@ -39,6 +66,7 @@ internal object DeepLinkMapping {
                     ),
                 )
             }
+
             PlatformType.Misskey -> {
                 listOf(
                     DeepLinkPattern(
@@ -51,6 +79,7 @@ internal object DeepLinkMapping {
                     ),
                 )
             }
+
             PlatformType.Bluesky -> {
                 listOf(
                     DeepLinkPattern(
@@ -63,6 +92,7 @@ internal object DeepLinkMapping {
                     ),
                 )
             }
+
             PlatformType.xQt -> {
                 listOf(
                     DeepLinkPattern(
@@ -75,6 +105,7 @@ internal object DeepLinkMapping {
                     ),
                 )
             }
+
             PlatformType.VVo -> emptyList()
         }
 

@@ -1,17 +1,18 @@
 package dev.dimension.flare.common.deeplink
 
-import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class DeepLinkMappingTest {
     @Test
@@ -281,21 +282,32 @@ class DeepLinkMappingTest {
         // Profile with simple handle
         val simpleProfile = DeepLinkMapping.Type.Profile("alice")
         assertEquals(
-            AppDeepLink.ProfileWithNameAndHost(accountKey, "alice", "mastodon.social"),
+            DeeplinkRoute.Profile.UserNameWithHost(
+                accountType = AccountType.Specific(accountKey),
+                userName = "alice",
+                host = "mastodon.social",
+            ),
             simpleProfile.deepLink(accountKey),
         )
 
         // Profile with full handle
         val fullProfile = DeepLinkMapping.Type.Profile("bob@misskey.io")
         assertEquals(
-            AppDeepLink.ProfileWithNameAndHost(accountKey, "bob", "misskey.io"),
+            DeeplinkRoute.Profile.UserNameWithHost(
+                accountType = AccountType.Specific(accountKey),
+                userName = "bob",
+                host = "misskey.io",
+            ),
             fullProfile.deepLink(accountKey),
         )
 
         // Post
         val post = DeepLinkMapping.Type.Post(id = "12345")
         assertEquals(
-            AppDeepLink.StatusDetail(accountKey, MicroBlogKey("12345", "mastodon.social")),
+            DeeplinkRoute.Status.Detail(
+                accountType = AccountType.Specific(accountKey),
+                statusKey = MicroBlogKey("12345", "mastodon.social"),
+            ),
             post.deepLink(accountKey),
         )
     }

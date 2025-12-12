@@ -1,9 +1,10 @@
 package dev.dimension.flare.common.deeplink
 
-import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -12,23 +13,23 @@ import kotlinx.serialization.Serializable
 
 internal object DeepLinkMapping {
     sealed interface Type {
-        fun deepLink(accountKey: MicroBlogKey): String
+        fun deepLink(accountKey: MicroBlogKey): DeeplinkRoute
 
         @Serializable
         data class Profile(
             val handle: String,
         ) : Type {
-            override fun deepLink(accountKey: MicroBlogKey): String {
+            override fun deepLink(accountKey: MicroBlogKey): DeeplinkRoute {
                 if (handle.contains('@')) {
                     val (name, host) = MicroBlogKey.valueOf(handle)
-                    return AppDeepLink.ProfileWithNameAndHost.invoke(
-                        accountKey = accountKey,
+                    return DeeplinkRoute.Profile.UserNameWithHost(
+                        accountType = AccountType.Specific(accountKey),
                         userName = name,
                         host = host,
                     )
                 } else {
-                    return AppDeepLink.ProfileWithNameAndHost.invoke(
-                        accountKey = accountKey,
+                    return DeeplinkRoute.Profile.UserNameWithHost(
+                        accountType = AccountType.Specific(accountKey),
                         userName = handle,
                         host = accountKey.host,
                     )
@@ -41,9 +42,9 @@ internal object DeepLinkMapping {
             val handle: String? = null,
             val id: String,
         ) : Type {
-            override fun deepLink(accountKey: MicroBlogKey): String =
-                AppDeepLink.StatusDetail.invoke(
-                    accountKey = accountKey,
+            override fun deepLink(accountKey: MicroBlogKey): DeeplinkRoute =
+                DeeplinkRoute.Status.Detail(
+                    accountType = AccountType.Specific(accountKey),
                     statusKey = MicroBlogKey(id, accountKey.host),
                 )
         }

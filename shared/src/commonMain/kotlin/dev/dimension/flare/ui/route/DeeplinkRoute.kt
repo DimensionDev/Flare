@@ -3,8 +3,10 @@ package dev.dimension.flare.ui.route
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.http.Url
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.serialization.Serializable
 
+@Serializable
 public sealed class DeeplinkRoute {
     @Serializable
     public data object Login : DeeplinkRoute()
@@ -158,6 +160,11 @@ public sealed class DeeplinkRoute {
             val host: String,
         ) : Profile()
     }
+
+    @Serializable
+    public data class DeepLinkAccountPicker(
+        val data: ImmutableMap<MicroBlogKey, DeeplinkRoute>,
+    ): DeeplinkRoute()
 
     public companion object Companion {
         public fun parse(url: String): DeeplinkRoute? {

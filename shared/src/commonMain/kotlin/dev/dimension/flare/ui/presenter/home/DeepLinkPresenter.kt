@@ -6,11 +6,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.dimension.flare.common.APPSCHEMA
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import io.ktor.http.URLProtocol
+import io.ktor.http.buildUrl
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.map
@@ -26,10 +28,6 @@ public class DeepLinkPresenter(
 
     public interface State {
         public fun handle(url: String)
-        public data class MatchResult(
-            val account: UiAccount,
-            val deepLink: DeeplinkRoute,
-        )
     }
 
     private val patternFlow by lazy {
@@ -50,23 +48,40 @@ public class DeepLinkPresenter(
         var pendingUrl by remember { mutableStateOf<String?>(null) }
         pendingUrl?.let { url ->
             LaunchedEffect(url) {
-                patternFlow.collect { pattern ->
-                    val matches = DeepLinkMapping.matches(url, pattern)
-                    if (matches.isEmpty()) {
-                        onLink.invoke(url)
-                    } else if (matches.size == 1) {
-                        val match = matches.toList().first()
-                        onRoute.invoke(match.second.deepLink(match.first.accountKey))
-                    } else {
-                        onRoute.invoke(
-                            DeeplinkRoute.DeepLinkAccountPicker(
-                                data = matches.map {
-                                    it.key.accountKey to it.value.deepLink(it.key.accountKey)
-                                }.toMap().toImmutableMap()
-                            )
-                        )
+                if (url.startsWith("$APPSCHEMA://")) {
+                    DeeplinkRoute.parse(url)?.let {
+                        if (it is DeeplinkRoute.OpenLinkDirectly) {
+                            onLink(it.url)
+                        } else {
+                            onRoute(it)
+                        }
                     }
                     pendingUrl = null
+                } else {
+                    patternFlow.collect { pattern ->
+                        val matches = DeepLinkMapping.matches(url, pattern)
+                        if (matches.isEmpty()) {
+                            onLink.invoke(url)
+                        } else {
+                            onRoute.invoke(
+                                DeeplinkRoute.DeepLinkAccountPicker(
+                                    originalUrl =
+                                        buildUrl {
+                                            protocol = URLProtocol(APPSCHEMA, 0)
+                                            host = "OpenLinkDirectly"
+                                            parameters.append("url", url)
+                                        }.toString(),
+                                    data =
+                                        matches
+                                            .map {
+                                                it.key.accountKey to it.value.deepLink(it.key.accountKey)
+                                            }.toMap()
+                                            .toImmutableMap(),
+                                ),
+                            )
+                        }
+                        pendingUrl = null
+                    }
                 }
             }
         }

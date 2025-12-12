@@ -3,6 +3,8 @@ package dev.dimension.flare.common.deeplink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.xqtHost
+import dev.dimension.flare.model.xqtOldHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
@@ -95,16 +97,32 @@ internal object DeepLinkMapping {
             }
 
             PlatformType.xQt -> {
-                listOf(
+                val profile =
+                    listOf(
+                        "https://$xqtHost/{handle}",
+                        "https://$xqtOldHost/{handle}",
+                        "https://www.$xqtHost/{handle}",
+                        "https://www.$xqtOldHost/{handle}",
+                    )
+                val post =
+                    listOf(
+                        "https://$xqtHost/{handle}/status/{id}",
+                        "https://$xqtOldHost/{handle}/",
+                        "https://www.$xqtHost/{handle}/status/{id}",
+                        "https://www.$xqtOldHost/{handle}/",
+                    )
+                profile.map {
                     DeepLinkPattern(
                         Type.Profile.serializer(),
-                        Url("https://$host/{handle}"),
-                    ),
-                    DeepLinkPattern(
-                        Type.Post.serializer(),
-                        Url("https://$host/{handle}/status/{id}"),
-                    ),
-                )
+                        Url(it),
+                    )
+                } +
+                    post.map {
+                        DeepLinkPattern(
+                            Type.Post.serializer(),
+                            Url(it),
+                        )
+                    }
             }
 
             PlatformType.VVo -> emptyList()

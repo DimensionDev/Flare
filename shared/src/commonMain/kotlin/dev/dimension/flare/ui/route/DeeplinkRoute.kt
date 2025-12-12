@@ -12,18 +12,6 @@ public sealed class DeeplinkRoute {
     public data object Login : DeeplinkRoute()
 
     @Serializable
-    public sealed class Callback : DeeplinkRoute() {
-        @Serializable
-        public object Mastodon : Callback()
-
-        @Serializable
-        public object Misskey : Callback()
-
-        @Serializable
-        public object Bluesky : Callback()
-    }
-
-    @Serializable
     public sealed class Status : DeeplinkRoute() {
         @Serializable
         public data class Detail(
@@ -163,26 +151,26 @@ public sealed class DeeplinkRoute {
 
     @Serializable
     public data class DeepLinkAccountPicker(
+        val originalUrl: String,
         val data: ImmutableMap<MicroBlogKey, DeeplinkRoute>,
-    ): DeeplinkRoute()
+    ) : DeeplinkRoute()
+
+    @Serializable
+    public data class OpenLinkDirectly(
+        val url: String,
+    ) : DeeplinkRoute()
 
     public companion object Companion {
         public fun parse(url: String): DeeplinkRoute? {
             val data = Url(url)
             return when (data.host) {
+                "OpenLinkDirectly" -> {
+                    val url = data.parameters["url"] ?: return null
+                    OpenLinkDirectly(url)
+                }
                 "Login" -> Login
-                "Callback" ->
-                    when (data.segments.getOrNull(0)) {
-                        "SignIn" ->
-                            when (data.segments.getOrNull(1)) {
-                                "Mastodon" -> Callback.Mastodon
-                                "Misskey" -> Callback.Misskey
-                                "Bluesky" -> Callback.Bluesky
-                                else -> null
-                            }
-
-                        else -> null
-                    }
+                // ignore
+                "Callback" -> null
 
                 "Search" -> {
                     val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }

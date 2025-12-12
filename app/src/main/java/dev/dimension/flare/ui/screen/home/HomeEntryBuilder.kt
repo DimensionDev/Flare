@@ -3,6 +3,9 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
@@ -13,6 +16,7 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
     openDrawer: () -> Unit,
+    uriHandler: UriHandler,
 ) {
     entry<Route.Home>(
         metadata = ListDetailSceneStrategy.listPane(
@@ -85,5 +89,19 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
             onBack = onBack,
             navigate = navigate,
         )
+    }
+    entry<Route.DeepLinkAccountPicker>(
+        metadata = BottomSheetSceneStrategy.bottomSheet()
+    ) {
+        CompositionLocalProvider(
+            LocalUriHandler provides uriHandler
+        ) {
+            DeepLinkAccountPickerModal(
+                originalUrl = it.originalUrl,
+                data = it.data,
+                onNavigate = navigate,
+                onDismissRequest = onBack,
+            )
+        }
     }
 }

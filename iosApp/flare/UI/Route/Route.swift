@@ -193,8 +193,6 @@ enum Route: Hashable, Identifiable {
     static func fromDeepLink(url: String) -> Route? {
         if let deeplinkRoute = DeeplinkRoute.companion.parse(url: url) {
             switch onEnum(of: deeplinkRoute) {
-            case .callback:
-                return nil
             case .compose(let compose):
                 return fromCompose(compose)
             case .media(let media):

@@ -3,6 +3,7 @@ package dev.dimension.flare.common.deeplink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
@@ -92,11 +93,11 @@ class DeepLinkMappingTest {
 
     @Test
     fun xqtPatternsUseStatusRoute() {
-        val host = "x.example"
+        val host = xqtHost
 
         val patterns = DeepLinkMapping.generatePattern(PlatformType.xQt, host)
 
-        assertEquals(2, patterns.size)
+        assertEquals(8, patterns.size)
 
         val profile = patterns[0]
         assertEquals(DeepLinkMapping.Type.Profile.serializer(), profile.serializer)
@@ -106,7 +107,7 @@ class DeepLinkMappingTest {
             profile.pathSegments.filter { it.stringValue.isNotEmpty() }.map { it.stringValue to it.isParamArg },
         )
 
-        val post = patterns[1]
+        val post = patterns[4]
         assertEquals(DeepLinkMapping.Type.Post.serializer(), post.serializer)
         assertEquals(Url("https://$host/{handle}/status/{id}"), post.uriPattern)
         assertEquals(
@@ -220,7 +221,7 @@ class DeepLinkMappingTest {
             )
         val xAccount =
             UiAccount.XQT(
-                accountKey = MicroBlogKey(id = "4", host = "x.example"),
+                accountKey = MicroBlogKey(id = "4", host = xqtHost),
             )
 
         val mapping:
@@ -267,11 +268,11 @@ class DeepLinkMappingTest {
         assertEquals(DeepLinkMapping.Type.Post("alice.bsky.social", "12345"), bskyPostMatch[bskyAccount])
 
         // https://x.example/alice
-        val xProfileMatch = DeepLinkMapping.matches("https://x.example/alice", mapping)
+        val xProfileMatch = DeepLinkMapping.matches("https://$xqtHost/alice", mapping)
         assertEquals(DeepLinkMapping.Type.Profile("alice"), xProfileMatch[xAccount])
 
         // https://x.example/alice/status/12345
-        val xPostMatch = DeepLinkMapping.matches("https://x.example/alice/status/12345", mapping)
+        val xPostMatch = DeepLinkMapping.matches("https://$xqtHost/alice/status/12345", mapping)
         assertEquals(DeepLinkMapping.Type.Post("alice", "12345"), xPostMatch[xAccount])
     }
 

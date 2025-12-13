@@ -19,6 +19,7 @@ struct DeepLinkAccountPicker: View {
                     } label: {
                         UserItemView(userKey: userKey)
                     }
+                    .buttonStyle(.plain)
                 }
             }
             Button {
@@ -30,8 +31,8 @@ struct DeepLinkAccountPicker: View {
                 } icon: {
                     Image(.faGlobe)
                 }
-
             }
+            .buttonStyle(.plain)
         }
         .navigationTitle("deep_link_account_picker_title")
         .backport

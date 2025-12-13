@@ -90,6 +90,8 @@ enum Route: Hashable, Identifiable {
             StatusMediaScreen(accountType: accountType, statusKey: statusKey, initialIndex: Int(selectedIndex), preview: preview)
         case .appLog:
             AppLogScreen()
+        case .deepLinkAccountPicker(let originalUrl, let data):
+            DeepLinkAccountPicker(originalUrl: originalUrl, data: data, onNavigate: onNavigate)
         default:
             Text("Not done yet for \(self)")
         }
@@ -133,6 +135,7 @@ enum Route: Hashable, Identifiable {
     case userFans(AccountType, MicroBlogKey)
     case dmConversation(AccountType, MicroBlogKey, String)
     case appLog
+    case deepLinkAccountPicker(String, [MicroBlogKey: Route])
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {
@@ -192,30 +195,37 @@ enum Route: Hashable, Identifiable {
     
     static func fromDeepLink(url: String) -> Route? {
         if let deeplinkRoute = DeeplinkRoute.companion.parse(url: url) {
-            switch onEnum(of: deeplinkRoute) {
-            case .callback:
-                return nil
-            case .compose(let compose):
-                return fromCompose(compose)
-            case .media(let media):
-                return fromMedia(media)
-            case .profile(let profile):
-                return fromProfile(profile)
-            case .rss(let rss):
-                switch onEnum(of: rss) {
-                case .detail(let data):
-                    return Route.rssDetail(data.url)
-                }
-            case .search(let search):
-                return Route.search(search.accountType, search.query)
-            case .status(let status):
-                return fromStatus(status)
-            case .login:
-                return Route.serviceSelect
-            }
+            return fromDeepLinkRoute(deeplinkRoute: deeplinkRoute)
         } else {
             return nil
         }
-
+    }
+    
+    static func fromDeepLinkRoute(deeplinkRoute: DeeplinkRoute) -> Route? {
+        switch onEnum(of: deeplinkRoute) {
+        case .compose(let compose):
+            return fromCompose(compose)
+        case .media(let media):
+            return fromMedia(media)
+        case .profile(let profile):
+            return fromProfile(profile)
+        case .rss(let rss):
+            switch onEnum(of: rss) {
+            case .detail(let data):
+                return Route.rssDetail(data.url)
+            }
+        case .search(let search):
+            return Route.search(search.accountType, search.query)
+        case .status(let status):
+            return fromStatus(status)
+        case .login:
+            return Route.serviceSelect
+        case .deepLinkAccountPicker(let picker):
+            return .deepLinkAccountPicker(picker.originalUrl, picker.data.mapValues { route in
+                return fromDeepLinkRoute(deeplinkRoute: route)
+            }.compactMapValues { $0 })
+        case .openLinkDirectly(_):
+            return nil
+        }
     }
 }

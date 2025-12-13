@@ -4,6 +4,8 @@ import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRssSource
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.toImmutableMap
 
 internal sealed interface Route {
     sealed interface FloatingRoute : Route
@@ -200,12 +202,32 @@ internal sealed interface Route {
         val cookieCallback: ((cookies: String?) -> Unit)?,
     ) : WindowRoute
 
+    data class DeepLinkAccountPicker(
+        val originalUrl: String,
+        val data: ImmutableMap<MicroBlogKey, Route>,
+    ) : FloatingRoute
+
     companion object {
         public fun parse(url: String): Route? {
             val deeplinkRoute = DeeplinkRoute.parse(url) ?: return null
+            return from(deeplinkRoute)
+        }
+
+        public fun from(deeplinkRoute: DeeplinkRoute): Route? {
             return when (deeplinkRoute) {
+                is DeeplinkRoute.OpenLinkDirectly -> null
+                is DeeplinkRoute.DeepLinkAccountPicker ->
+                    DeepLinkAccountPicker(
+                        originalUrl = deeplinkRoute.originalUrl,
+                        data =
+                            deeplinkRoute.data
+                                .mapNotNull { (key, value) ->
+                                    val route = Route.from(value) ?: return@mapNotNull null
+                                    key to route
+                                }.toMap()
+                                .toImmutableMap(),
+                    )
                 is DeeplinkRoute.Login -> ServiceSelect
-                is DeeplinkRoute.Callback -> null
                 is DeeplinkRoute.Compose.New -> Compose.New(deeplinkRoute.accountType)
                 is DeeplinkRoute.Compose.Quote ->
                     Compose.Quote(

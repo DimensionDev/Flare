@@ -4,6 +4,8 @@ import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -404,110 +406,151 @@ internal sealed interface Route : NavKey {
     @Serializable
     data object AccountSelection : Route
 
+    @Serializable
+    data class DeepLinkAccountPicker(
+        val originalUrl: String,
+        val data: ImmutableMap<MicroBlogKey, Route>,
+    ) : Route
+
     companion object {
         public fun parse(url: String): Route? {
             val deeplinkRoute = DeeplinkRoute.parse(url) ?: return null
+            return from(deeplinkRoute)
+        }
+
+        public fun from(deeplinkRoute: DeeplinkRoute): Route? {
             return when (deeplinkRoute) {
-                is DeeplinkRoute.Login -> Route.ServiceSelect.Selection
-                is DeeplinkRoute.Callback -> null
+                is DeeplinkRoute.OpenLinkDirectly -> null
+                is DeeplinkRoute.DeepLinkAccountPicker ->
+                    DeepLinkAccountPicker(
+                        originalUrl = deeplinkRoute.originalUrl,
+                        data =
+                            deeplinkRoute.data
+                                .mapNotNull { (key, value) ->
+                                    val route = Route.from(value) ?: return@mapNotNull null
+                                    key to route
+                                }.toMap()
+                                .toImmutableMap(),
+                    )
+
+                is DeeplinkRoute.Login -> ServiceSelect.Selection
                 is DeeplinkRoute.Compose.New ->
-                    Route.Compose.New(accountType = deeplinkRoute.accountType)
+                    Compose.New(accountType = deeplinkRoute.accountType)
+
                 is DeeplinkRoute.Compose.Quote ->
-                    Route.Compose.Quote(
+                    Compose.Quote(
                         accountKey = deeplinkRoute.accountKey,
                         statusKey = deeplinkRoute.statusKey,
                     )
+
                 is DeeplinkRoute.Compose.Reply ->
-                    Route.Compose.Reply(
+                    Compose.Reply(
                         accountKey = deeplinkRoute.accountKey,
                         statusKey = deeplinkRoute.statusKey,
                     )
+
                 is DeeplinkRoute.Compose.VVOReplyComment ->
-                    Route.Compose.VVOReplyComment(
+                    Compose.VVOReplyComment(
                         accountKey = deeplinkRoute.accountKey,
                         replyTo = deeplinkRoute.replyTo,
                         rootId = deeplinkRoute.rootId,
                     )
+
                 is DeeplinkRoute.Media.Image ->
-                    Route.Media.Image(
+                    Media.Image(
                         uri = deeplinkRoute.uri,
                         previewUrl = deeplinkRoute.previewUrl,
                     )
+
                 is DeeplinkRoute.Media.Podcast ->
-                    Route.Media.Podcast(
+                    Media.Podcast(
                         accountType = deeplinkRoute.accountType,
                         id = deeplinkRoute.id,
                     )
+
                 is DeeplinkRoute.Media.StatusMedia ->
-                    Route.Media.StatusMedia(
+                    Media.StatusMedia(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                         index = deeplinkRoute.index,
                         preview = deeplinkRoute.preview,
                     )
+
                 is DeeplinkRoute.Profile.User ->
-                    Route.Profile.User(
+                    Profile.User(
                         accountType = deeplinkRoute.accountType,
                         userKey = deeplinkRoute.userKey,
                     )
+
                 is DeeplinkRoute.Profile.UserNameWithHost ->
-                    Route.Profile.UserNameWithHost(
+                    Profile.UserNameWithHost(
                         accountType = deeplinkRoute.accountType,
                         name = deeplinkRoute.userName,
                         host = deeplinkRoute.host,
                     )
+
                 is DeeplinkRoute.Rss.Detail ->
-                    Route.Rss.Detail(
+                    Rss.Detail(
                         url = deeplinkRoute.url,
                     )
+
                 is DeeplinkRoute.Search ->
-                    Route.Search(
+                    Search(
                         accountType = deeplinkRoute.accountType,
                         query = deeplinkRoute.query,
                     )
+
                 is DeeplinkRoute.Status.AddReaction ->
-                    Route.Status.AddReaction(
+                    Status.AddReaction(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )
+
                 is DeeplinkRoute.Status.AltText ->
-                    Route.Status.AltText(
+                    Status.AltText(
                         text = deeplinkRoute.text,
                     )
+
                 is DeeplinkRoute.Status.BlueskyReport ->
-                    Route.Status.BlueskyReport(
+                    Status.BlueskyReport(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )
+
                 is DeeplinkRoute.Status.DeleteConfirm ->
-                    Route.Status.DeleteConfirm(
+                    Status.DeleteConfirm(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )
+
                 is DeeplinkRoute.Status.Detail ->
-                    Route.Status.Detail(
+                    Status.Detail(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )
+
                 is DeeplinkRoute.Status.MastodonReport ->
-                    Route.Status.MastodonReport(
+                    Status.MastodonReport(
                         userKey = deeplinkRoute.userKey,
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )
+
                 is DeeplinkRoute.Status.MisskeyReport ->
-                    Route.Status.MisskeyReport(
+                    Status.MisskeyReport(
                         userKey = deeplinkRoute.userKey,
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )
+
                 is DeeplinkRoute.Status.VVOComment ->
-                    Route.Status.VVOComment(
+                    Status.VVOComment(
                         commentKey = deeplinkRoute.commentKey,
                         accountType = deeplinkRoute.accountType,
                     )
+
                 is DeeplinkRoute.Status.VVOStatus ->
-                    Route.Status.VVOStatus(
+                    Status.VVOStatus(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
                     )

@@ -1,8 +1,10 @@
 import SwiftUI
 import KotlinSharedUI
 import LazyPager
+import Combine
 
 struct Router<Root: View>: View {
+    @Environment(\.openURL) private var openURL
     @ViewBuilder let root: (@escaping (Route) -> Void) -> Root
     @State private var backStack: [Route] = []
     @State private var sheet: Route? = nil
@@ -11,6 +13,22 @@ struct Router<Root: View>: View {
     @State private var showDeleteStatusAlert = false
     @State private var showMastodonReportStatusAlert = false
     @State private var mastodonReportStatusData: (AccountType, MicroBlogKey, MicroBlogKey?)? = nil
+    @StateObject private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
+    @StateObject private var deepLinkHandler = DeepLinkHandler()
+    
+    init(@ViewBuilder root: @escaping (@escaping (Route) -> Void) -> Root) {
+        self.root = root
+        let handler = DeepLinkHandler()
+        self._deepLinkHandler = .init(wrappedValue: handler)
+        self._deepLinkPresenter = .init(wrappedValue: .init(presenter: DeepLinkPresenter(onRoute: { [weak handler] deeplinkRoute in
+            if let route = Route.fromDeepLinkRoute(deeplinkRoute: deeplinkRoute){
+                handler?.onRoute?(route)
+            }
+        }, onLink: { [weak handler] link in
+            handler?.onLink?(link)
+        })))
+    }
+    
     var body: some View {
         NavigationStack(path: $backStack) {
             root({ route in
@@ -58,13 +76,19 @@ struct Router<Root: View>: View {
             Text("mastodon_report_status_alert_message")
         }
         .environment(\.openURL, OpenURLAction { url in
-            if let newRoute = Route.fromDeepLink(url: url.absoluteString) {
-                navigate(route: newRoute)
-                return .handled
-            } else {
-                return .systemAction
-            }
+            deepLinkPresenter.state.handle(url: url.absoluteString)
+            return .handled
         })
+        .onAppear {
+            deepLinkHandler.onRoute = { route in
+                navigate(route: route)
+            }
+            deepLinkHandler.onLink = { link in
+                if let url = URL(string: link) {
+                    openURL(url)
+                }
+            }
+        }
     }
 
     func navigate(route: Route) {
@@ -87,7 +111,15 @@ struct Router<Root: View>: View {
     
     func isSheetRoute(route: Route) -> Bool {
         switch route {
-        case .composeNew, .composeQuote, .composeReply, .composeVVOReplyComment, .tabSettings, .statusBlueskyReport, .statusMisskeyReport, .statusAddReaction:
+        case .deepLinkAccountPicker,
+                .composeNew,
+                .composeQuote,
+                .composeReply,
+                .composeVVOReplyComment,
+                .tabSettings,
+                .statusBlueskyReport,
+                .statusMisskeyReport,
+                .statusAddReaction:
             return true
         default:
             return false
@@ -102,4 +134,9 @@ struct Router<Root: View>: View {
             return false
         }
     }
+}
+
+class DeepLinkHandler : ObservableObject {
+    var onRoute: ((Route) -> Void)?
+    var onLink: ((String) -> Void)?
 }

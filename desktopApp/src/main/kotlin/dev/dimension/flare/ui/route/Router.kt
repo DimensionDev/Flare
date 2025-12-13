@@ -29,6 +29,7 @@ import dev.dimension.flare.ui.screen.dm.DmConversationScreen
 import dev.dimension.flare.ui.screen.dm.DmListScreen
 import dev.dimension.flare.ui.screen.dm.UserDMConversationScreen
 import dev.dimension.flare.ui.screen.feeds.FeedListScreen
+import dev.dimension.flare.ui.screen.home.DeepLinkAccountPicker
 import dev.dimension.flare.ui.screen.home.DiscoverScreen
 import dev.dimension.flare.ui.screen.home.FansScreen
 import dev.dimension.flare.ui.screen.home.FollowingScreen
@@ -116,6 +117,14 @@ internal fun WindowScope.RouteContent(
     navigate: (Route) -> Unit,
 ) {
     when (route) {
+        is Route.DeepLinkAccountPicker -> {
+            DeepLinkAccountPicker(
+                originalUrl = route.originalUrl,
+                data = route.data,
+                onNavigate = navigate,
+                onDismissRequest = onBack,
+            )
+        }
         is Route.RssDetail -> Unit
         is Route.AddReaction -> {
             AddReactionSheet(

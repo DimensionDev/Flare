@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
+import dev.dimension.flare.common.APPSCHEMA
 import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -45,7 +46,9 @@ internal fun ServiceSelectScreen(
             openUri = uriHandler::openUri,
             registerDeeplinkCallback = { callback ->
                 OnNewIntent {
-                    callback.invoke(it.dataString.orEmpty())
+                    if (it.dataString?.startsWith("$APPSCHEMA://", ignoreCase = true) == true) {
+                        callback.invoke(it.dataString.orEmpty())
+                    }
                 }
             },
             onBack = onBack,

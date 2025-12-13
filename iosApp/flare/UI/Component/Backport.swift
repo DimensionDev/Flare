@@ -10,6 +10,24 @@ extension Backport where Content: View {
             content.labelStyle(BackportLabelStyle(spacing: spacing))
         }
     }
+    
+    @ViewBuilder
+    func navigationSubtitle(_ subtitle: Text) -> some View {
+        if #available(iOS 26.0, *) {
+            content.navigationSubtitle(subtitle)
+        } else {
+            content
+        }
+    }
+    
+    @ViewBuilder
+    func navigationSubtitle<S>(_ subtitle: S) -> some View where S : StringProtocol {
+        if #available(iOS 26.0, *) {
+            content.navigationSubtitle(subtitle)
+        } else {
+            content
+        }
+    }
 }
 
 struct BackportLabelStyle: LabelStyle {

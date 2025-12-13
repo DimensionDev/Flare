@@ -20,6 +20,7 @@ fun OnNewIntent(
     key1: Any? = null,
     key2: Any? = null,
     key3: Any? = null,
+    withOnCreateIntent: Boolean = false,
     onNewIntent: (Intent) -> Unit,
 ) {
     val context = LocalContext.current
@@ -30,6 +31,9 @@ fun OnNewIntent(
                 onNewIntent(it)
             }
         activity.addOnNewIntentListener(listener)
+        if (withOnCreateIntent) {
+            onNewIntent.invoke(activity.intent)
+        }
         onDispose { activity.removeOnNewIntentListener(listener) }
     }
 }

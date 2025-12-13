@@ -63,11 +63,11 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.HomeTabsPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.AllNotificationBadgePresenter
+import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
-import dev.dimension.flare.ui.route.StackManager
 import dev.dimension.flare.ui.route.rememberStackManager
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.background.Layer
@@ -99,15 +99,37 @@ internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
         val currentRoute = stackManager.currentRoute
 
         fun navigate(route: Route) {
-            if (route is Route.WindowRoute) {
-                onWindowRoute.invoke(route)
-            } else {
-                stackManager.push(route)
+            when (route) {
+                is Route.WindowRoute -> {
+                    onWindowRoute.invoke(route)
+                }
+
+                is Route.UrlRoute -> {
+                    uriHandler.openUri(route.url)
+                }
+
+                else -> {
+                    stackManager.push(route)
+                }
             }
         }
 
         fun goBack() {
             stackManager.pop()
+        }
+
+        val deeplinkPresenter by producePresenter("deeplink_presenter") {
+            DeepLinkPresenter(
+                onRoute = {
+                    val route = Route.from(it)
+                    if (route != null) {
+                        navigate(route)
+                    }
+                },
+                onLink = {
+                    uriHandler.openUri(it)
+                },
+            ).invoke()
         }
 
         Row {
@@ -293,12 +315,12 @@ internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
             }
             CompositionLocalProvider(
                 LocalUriHandler provides
-                    remember(uriHandler, stackManager, onWindowRoute) {
-                        ProxyUriHandler(
-                            stackManager = stackManager,
-                            actualUriHandler = uriHandler,
-                            onWindowRoute = onWindowRoute,
-                        )
+                    remember {
+                        object : UriHandler {
+                            override fun openUri(uri: String) {
+                                deeplinkPresenter.handle(uri)
+                            }
+                        }
                     },
                 LocalScrollToTopRegistry provides state.scrollToTopRegistry,
             ) {
@@ -411,32 +433,6 @@ private fun presenter() =
             val scrollToTopRegistry = scrollToTopRegistry
         }
     }
-
-private class ProxyUriHandler(
-    private val stackManager: StackManager,
-    private val actualUriHandler: UriHandler,
-    private val onWindowRoute: (Route.WindowRoute) -> Unit,
-) : UriHandler {
-    override fun openUri(uri: String) {
-        if (uri.startsWith("flare://")) {
-            Route.parse(uri)?.let {
-                if (it is Route.WindowRoute) {
-                    onWindowRoute.invoke(it)
-                } else if (it is Route.UrlRoute) {
-                    actualUriHandler.openUri(it.url)
-                } else {
-                    stackManager.push(it)
-                }
-            } ?: run {
-                // If the URI does not match any known route, we can handle it as a custom URI scheme
-                // For example, you might want to log it or show an error
-                println("Unhandled URI: $uri")
-            }
-        } else {
-            actualUriHandler.openUri(uri)
-        }
-    }
-}
 
 private class ScrollToTopRegistry {
     private val callbacks = mutableSetOf<() -> Unit>()

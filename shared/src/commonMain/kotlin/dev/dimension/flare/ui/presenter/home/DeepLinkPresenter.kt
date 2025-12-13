@@ -15,7 +15,9 @@ import io.ktor.http.URLProtocol
 import io.ktor.http.buildUrl
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -51,9 +53,13 @@ public class DeepLinkPresenter(
                 if (url.startsWith("$APPSCHEMA://")) {
                     DeeplinkRoute.parse(url)?.let {
                         if (it is DeeplinkRoute.OpenLinkDirectly) {
-                            onLink(it.url)
+                            withContext(Dispatchers.Main) {
+                                onLink(it.url)
+                            }
                         } else {
-                            onRoute(it)
+                            withContext(Dispatchers.Main) {
+                                onRoute(it)
+                            }
                         }
                     }
                     pendingUrl = null
@@ -61,9 +67,11 @@ public class DeepLinkPresenter(
                     patternFlow.collect { pattern ->
                         val matches = DeepLinkMapping.matches(url, pattern)
                         if (matches.isEmpty()) {
-                            onLink.invoke(url)
+                            withContext(Dispatchers.Main) {
+                                onLink.invoke(url)
+                            }
                         } else {
-                            onRoute.invoke(
+                            val route =
                                 DeeplinkRoute.DeepLinkAccountPicker(
                                     originalUrl =
                                         buildUrl {
@@ -77,8 +85,10 @@ public class DeepLinkPresenter(
                                                 it.key.accountKey to it.value.deepLink(it.key.accountKey)
                                             }.toMap()
                                             .toImmutableMap(),
-                                ),
-                            )
+                                )
+                            withContext(Dispatchers.Main) {
+                                onRoute.invoke(route)
+                            }
                         }
                         pendingUrl = null
                     }

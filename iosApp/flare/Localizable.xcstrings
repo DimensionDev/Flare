@@ -18270,6 +18270,26 @@
         }
       }
     },
+    "deep_link_account_picker_open_in_browser" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open in browser"
+          }
+        }
+      }
+    },
+    "deep_link_account_picker_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select account"
+          }
+        }
+      }
+    },
     "delete" : {
       "localizations" : {
         "af" : {

@@ -61,6 +61,7 @@ kotlin {
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
                 api(libs.paging.common)
+                api(libs.paging.compose)
                 implementation(libs.bundles.ktorfit)
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)

@@ -138,17 +138,12 @@
     <string name="settings_ai_config_tldr_description">Омогућите AI сажимање за дуге постове, доступно само у постовима који су дужи од 500 знакова</string>
     <string name="settings_appearance_generic">Опште</string>
     <string name="settings_appearance_show_actions">Прикажи акције</string>
-    <string name="settings_appearance_show_actions_description">Прикажи акције на дну статуса</string>
     <string name="settings_appearance_show_media">Прикажи медије</string>
-    <string name="settings_appearance_show_media_description">Прикажи медије у статусу</string>
     <string name="settings_appearance_show_numbers">Прикажи бројеве</string>
-    <string name="settings_appearance_show_numbers_description">Прикажи бројеве на дну статуса</string>
     <string name="settings_appearance_show_cw_img">Прикажи осетљив садржај</string>
-    <string name="settings_appearance_show_cw_img_description">Увек прикажите осетљив садржај у статусу</string>
     <string name="settings_appearance_expand_media">Проширите медије на целу величину</string>
     <string name="settings_appearance_expand_media_description">Задржите однос екрана медија у временској линији</string>
     <string name="settings_appearance_video_autoplay">Аутоматско репродуковање видеа</string>
-    <string name="settings_appearance_video_autoplay_description">Аутоматски репродукујте видео снимке у статусу</string>
     <string name="settings_appearance_video_autoplay_wifi">Само Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Увек</string>
     <string name="settings_appearance_video_autoplay_never">Никада</string>
@@ -164,9 +159,7 @@
     <string name="settings_appearance_dynamic_theme">Динамична тема</string>
     <string name="settings_appearance_dynamic_theme_description">Промените тему апликације на основу позадине вашег уређаја</string>
     <string name="settings_appearance_show_link_previews">Прикажи прегледе линкова</string>
-    <string name="settings_appearance_show_link_previews_description">Прикажи прегледе линкова у статусу</string>
     <string name="settings_appearance_compat_link_previews">П pojednostavite прегледе линкова</string>
-    <string name="settings_appearance_compat_link_previews_description">Прикажите прегледе линкова у поједностављеном режиму у статусу</string>
     <string name="settings_appearance_theme_color">Боја теме</string>
     <string name="settings_appearance_theme_color_description">Промените боју теме апликације</string>
     <string name="settings_about_source_code">Изворни код</string>
@@ -197,10 +190,6 @@
     <string name="misskey_visibility_home">Почетна</string>
     <string name="misskey_visibility_followers">Пратиоци</string>
     <string name="misskey_visibility_specified">Одређени</string>
-    <string name="misskey_visibility_public_description">Свако може видети и појачати ову објаву</string>
-    <string name="misskey_visibility_home_description">Само корисници на овој инстанци могу видети ову објаву</string>
-    <string name="misskey_visibility_followers_description">Само пратиоци могу видети ову објаву</string>
-    <string name="misskey_visibility_specified_description">Само споменути корисници могу видети ову објаву</string>
     <string name="rss_sources_title">Rss Извори</string>
     <string name="add_rss_source">Додај Rss Извор</string>
     <string name="edit_rss_source">Уреди Rss Извор</string>
@@ -234,12 +223,11 @@
     <string name="edit_tab_with_avatar">С аватаром</string>
     <string name="edit">Уреди</string>
     <string name="local_history_search_placeholder">Претражите локални кеш</string>
-    <string name="local_history_search_status_title">Статус</string>
     <string name="local_history_search_user_title">Корисник</string>
     <string name="settings_storage_clear_image_cache">Очистите кеш слике</string>
     <string name="settings_storage_clear_image_cache_description">%1$s МБ слика биће уклоњено</string>
     <string name="settings_storage_clear_database">Очистите базу кеша</string>
-    <string name="settings_storage_clear_database_description">%1$s корисника, %2$s статуси ће бити уклоњени</string>
     <string name="settings_storage_app_log">Отворите лог апликације</string>
     <string name="settings_storage_app_log_description">Погледајте лог апликације</string>
+    <string name="deeplink_account_selection_browser">Отворите у прегледаћу</string>
 </resources>

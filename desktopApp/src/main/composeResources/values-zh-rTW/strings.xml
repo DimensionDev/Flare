@@ -144,17 +144,12 @@
     <string name="settings_ai_config_tldr_description">啟用長帖子總結，只適用於長度超過500個字符的帖子</string>
     <string name="settings_appearance_generic">通用</string>
     <string name="settings_appearance_show_actions">顯示操作</string>
-    <string name="settings_appearance_show_actions_description">狀態底部顯示操作</string>
     <string name="settings_appearance_show_media">顯示媒體</string>
-    <string name="settings_appearance_show_media_description">在狀態中顯示媒體</string>
     <string name="settings_appearance_show_numbers">顯示數字</string>
-    <string name="settings_appearance_show_numbers_description">狀態底部顯示數字</string>
     <string name="settings_appearance_show_cw_img">顯示敏感內容</string>
-    <string name="settings_appearance_show_cw_img_description">總是顯示狀態中的敏感內容</string>
     <string name="settings_appearance_expand_media">擴展媒體至全尺寸</string>
     <string name="settings_appearance_expand_media_description">在時間線中保持媒體的長寬比例</string>
     <string name="settings_appearance_video_autoplay">視頻自動播放</string>
-    <string name="settings_appearance_video_autoplay_description">在狀態中自動播放視頻</string>
     <string name="settings_appearance_video_autoplay_wifi">僅Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">總是</string>
     <string name="settings_appearance_video_autoplay_never">從不</string>
@@ -170,9 +165,7 @@
     <string name="settings_appearance_dynamic_theme">動態主題</string>
     <string name="settings_appearance_dynamic_theme_description">根據設備的牆紙更改應用主題</string>
     <string name="settings_appearance_show_link_previews">顯示鏈接預覽</string>
-    <string name="settings_appearance_show_link_previews_description">在狀態中顯示鏈接預覽</string>
     <string name="settings_appearance_compat_link_previews">簡化鏈接預覽</string>
-    <string name="settings_appearance_compat_link_previews_description">以簡化模式在狀態中顯示鏈接預覽</string>
     <string name="settings_appearance_theme_color">主題顏色</string>
     <string name="settings_appearance_theme_color_description">更改應用的主題顏色</string>
     <string name="settings_appearance_theme_pure_color">高對比模式</string>
@@ -186,7 +179,6 @@
     <string name="settings_privacy_policy">隱私政策</string>
     <string name="users">用戶</string>
     <string name="hashtags">主題標籤</string>
-    <string name="statues">狀態</string>
     <string name="compose_title">撰寫</string>
     <string name="compose_hint">發生了什麼事？</string>
     <string name="compose_poll_option_hint">選項 %1$s</string>
@@ -208,10 +200,6 @@
     <string name="misskey_visibility_home">首頁</string>
     <string name="misskey_visibility_followers">追隨者</string>
     <string name="misskey_visibility_specified">指定</string>
-    <string name="misskey_visibility_public_description">誰都可以看到並提高此消息的曝光度</string>
-    <string name="misskey_visibility_home_description">只有此實例中的用戶可以看到此消息</string>
-    <string name="misskey_visibility_followers_description">只有追隨者可以看到此消息</string>
-    <string name="misskey_visibility_specified_description">只有被提及的用戶可以看到此消息</string>
     <string name="rss_sources_title">Rss來源</string>
     <string name="add_rss_source">添加Rss來源</string>
     <string name="edit_rss_source">編輯Rss來源</string>
@@ -249,13 +237,12 @@
     <string name="edit_tab_with_avatar">帶頭像</string>
     <string name="edit">編輯</string>
     <string name="local_history_search_placeholder">搜尋本地快取</string>
-    <string name="local_history_search_status_title">狀態</string>
     <string name="local_history_search_user_title">用戶</string>
     <string name="settings_storage_clear_image_cache">清除圖片快取</string>
     <string name="settings_storage_clear_image_cache_description">將移除%1$s MB的圖片</string>
     <string name="settings_storage_clear_database">清除快取數據庫</string>
-    <string name="settings_storage_clear_database_description">將移除%1$s用戶，%2$s狀態</string>
     <string name="settings_storage_app_log">打開應用日誌</string>
     <string name="settings_storage_app_log_description">查看應用日誌</string>
     <string name="copied_to_clipboard">已複製到剪貼簿</string>
+    <string name="deeplink_account_selection_browser">在瀏覽器中打開</string>
 </resources>

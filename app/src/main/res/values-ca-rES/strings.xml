@@ -70,10 +70,6 @@
     <string name="misskey_visibility_home">Inici</string>
     <string name="misskey_visibility_followers">Seguidors</string>
     <string name="misskey_visibility_specified">Especificat</string>
-    <string name="misskey_visibility_public_description">Qualsevol persona pot veure i potenciar aquest toot</string>
-    <string name="misskey_visibility_home_description">Només els usuaris d\'aquesta instància poden veure aquest toot</string>
-    <string name="misskey_visibility_followers_description">Només els seguidors poden veure aquest toot</string>
-    <string name="misskey_visibility_specified_description">Només els usuaris esmentats poden veure aquest toot</string>
     <string name="bluesky_login_username_hint">Nom d\'usuari</string>
     <string name="bluesky_login_password_hint">Contrasenya</string>
     <string name="report_title">Informar</string>
@@ -99,21 +95,15 @@
     <string name="discover_users">Recomanar usuaris</string>
     <string name="discover_hashtags">Etiquetes tendents</string>
     <string name="search_users">Usuaris</string>
-    <string name="search_status">Estat</string>
     <string name="quick_menu_add_account">Afegir compte</string>
     <string name="settings_appearance_generic">Genèric</string>
     <string name="settings_appearance_show_actions">Mostrar accions</string>
-    <string name="settings_appearance_show_actions_description">Mostrar accions a la part inferior de l\'estat</string>
     <string name="settings_appearance_show_media">Mostrar mitjans</string>
-    <string name="settings_appearance_show_media_description">Mostrar mitjans a l\'estat</string>
     <string name="settings_appearance_show_numbers">Mostrar números</string>
-    <string name="settings_appearance_show_numbers_description">Mostrar números a la part inferior de l\'estat</string>
     <string name="settings_appearance_show_cw_img">Mostrar contingut sensible</string>
-    <string name="settings_appearance_show_cw_img_description">Mostrar sempre contingut sensible a l\'estat</string>
     <string name="settings_appearance_expand_media">Ampliar mitjans a mida completa</string>
     <string name="settings_appearance_expand_media_description">Mantenir el ràdio aspecte dels mitjans a la línia de temps</string>
     <string name="settings_appearance_video_autoplay">Reproducció automàtica de vídeo</string>
-    <string name="settings_appearance_video_autoplay_description">Reproduir automàticament vídeos a l\'estat</string>
     <string name="settings_appearance_video_autoplay_wifi">Només Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Sempre</string>
     <string name="settings_appearance_video_autoplay_never">Mai</string>
@@ -129,15 +119,12 @@
     <string name="settings_appearance_dynamic_theme">Tema dinàmic</string>
     <string name="settings_appearance_dynamic_theme_description">Canvia el tema de l\'aplicació segons el fons de pantalla del dispositiu</string>
     <string name="settings_appearance_show_link_previews">Mostrar les previsualitzacions de l\'enllaç</string>
-    <string name="settings_appearance_show_link_previews_description">Mostrar les previsualitzacions de l\'enllaç a l\'estat</string>
     <string name="settings_appearance_compat_link_previews">Simplificar previsualitzacions d\'enllaç</string>
-    <string name="settings_appearance_compat_link_previews_description">Mostrar previsualitzacions d\'enllaç en mode simplificat a l\'estat</string>
     <string name="settings_appearance_theme_color">Color del tema</string>
     <string name="settings_appearance_theme_color_description">Canvia el color del tema de l\'aplicació</string>
     <string name="settings_storage_clear_image_cache">Esborrar la memòria cau d\'imatges</string>
     <string name="settings_storage_clear_image_cache_description">S\'eliminaran %1$s MB d\'imatges</string>
     <string name="settings_storage_clear_database">Esborrar la base de dades de la memòria cau</string>
-    <string name="settings_storage_clear_database_description">S\'eliminaran %1$s usuaris, %2$s estats</string>
     <string name="settings_storage_app_log">Obrir registre de l\'aplicació</string>
     <string name="settings_storage_app_log_description">Visualitzar el registre de l\'aplicació</string>
     <string name="service_select_instance_input_placeholder">URL de la instància</string>
@@ -230,7 +217,6 @@
     <string name="following_title">Seguint</string>
     <string name="fans_title">Seguidor</string>
     <string name="local_history_search_placeholder">Cerca a la memòria cau local</string>
-    <string name="local_history_search_status_title">Estat</string>
     <string name="local_history_search_user_title">Usuari</string>
     <string name="rss_sources_title_label">Títol</string>
     <string name="rss_sources_url_label">Url</string>
@@ -257,4 +243,5 @@
     <string name="home_tab_mixed_timeline_title">Mixt</string>
     <string name="tab_settings_mixed_timeline">Afegir fitxa de línia de temps mixta</string>
     <string name="tab_settings_mixed_timeline_desc">La línia de temps mixta combinarà el resultat de totes les línies de temps en una fitxa</string>
+    <string name="deeplink_account_selection_browser">Obre al navegador</string>
 </resources>

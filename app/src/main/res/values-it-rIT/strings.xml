@@ -74,10 +74,10 @@
     <string name="misskey_visibility_home">Home</string>
     <string name="misskey_visibility_followers">Follower</string>
     <string name="misskey_visibility_specified">Specificato</string>
-    <string name="misskey_visibility_public_description">Chiunque può vedere e aumentare questo toot</string>
-    <string name="misskey_visibility_home_description">Solo gli utenti in questa istanza possono vedere questo toot</string>
-    <string name="misskey_visibility_followers_description">Solo i seguaci possono vedere questo toot</string>
-    <string name="misskey_visibility_specified_description">Solo gli utenti menzionati possono vedere questo toot</string>
+    <string name="misskey_visibility_public_description">Chiunque può vedere e aumentare questo post</string>
+    <string name="misskey_visibility_home_description">Solo gli utenti in questa istanza possono vedere questo post</string>
+    <string name="misskey_visibility_followers_description">Solo i seguaci possono vedere questo post</string>
+    <string name="misskey_visibility_specified_description">Solo gli utenti menzionati possono vedere questo post</string>
     <string name="bluesky_login_username_hint">Username</string>
     <string name="bluesky_login_password_hint">Password</string>
     <string name="bluesky_login_auth_factor_token_hint">Token Del Fattore Di Autenticazione</string>
@@ -108,21 +108,21 @@
     <string name="discover_status">Post Di Tendenza</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Utenti</string>
-    <string name="search_status">Stato</string>
+    <string name="search_status">Post</string>
     <string name="quick_menu_add_account">Aggiungi account</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Mostra azioni</string>
-    <string name="settings_appearance_show_actions_description">Mostra le azioni in fondo allo stato</string>
+    <string name="settings_appearance_show_actions_description">Mostra le azioni in fondo al post</string>
     <string name="settings_appearance_show_media">Mostra media</string>
-    <string name="settings_appearance_show_media_description">Mostra il media nello stato</string>
+    <string name="settings_appearance_show_media_description">Mostra media nel post</string>
     <string name="settings_appearance_show_numbers">Mostra numeri</string>
-    <string name="settings_appearance_show_numbers_description">Mostra i numeri in fondo allo stato</string>
+    <string name="settings_appearance_show_numbers_description">Mostra i numeri in fondo al post</string>
     <string name="settings_appearance_show_cw_img">Mostra contenuti sensibili</string>
-    <string name="settings_appearance_show_cw_img_description">Mostra sempre contenuti sensibili nello stato</string>
+    <string name="settings_appearance_show_cw_img_description">Mostra sempre contenuti sensibili nel post</string>
     <string name="settings_appearance_expand_media">Espandi media a dimensione completa</string>
     <string name="settings_appearance_expand_media_description">Mantieni l\'aspectradio del media nella timeline</string>
     <string name="settings_appearance_video_autoplay">Riproduzione automatica video</string>
-    <string name="settings_appearance_video_autoplay_description">Riproduci automaticamente i video nello stato</string>
+    <string name="settings_appearance_video_autoplay_description">Riproduci automaticamente i video nel post</string>
     <string name="settings_appearance_video_autoplay_wifi">Solo Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Sempre</string>
     <string name="settings_appearance_video_autoplay_never">Mai</string>
@@ -138,9 +138,9 @@
     <string name="settings_appearance_dynamic_theme">Tema dinamico</string>
     <string name="settings_appearance_dynamic_theme_description">Cambia il tema dell\'app in base allo sfondo del dispositivo</string>
     <string name="settings_appearance_show_link_previews">Mostra anteprime link</string>
-    <string name="settings_appearance_show_link_previews_description">Mostra le anteprime dei collegamenti nello stato</string>
+    <string name="settings_appearance_show_link_previews_description">Mostra le anteprime dei link nel post</string>
     <string name="settings_appearance_compat_link_previews">Semplifica anteprime link</string>
-    <string name="settings_appearance_compat_link_previews_description">Mostra le anteprime dei link in modalità semplificata nello stato</string>
+    <string name="settings_appearance_compat_link_previews_description">Mostra le anteprime dei link in modalità semplificata nel post</string>
     <string name="settings_appearance_theme_color">Colore tema</string>
     <string name="settings_appearance_theme_color_description">Cambia il colore del tema dell\'app</string>
     <string name="settings_appearance_theme_pure_color">Modalità alto contrasto</string>
@@ -165,7 +165,7 @@
     <string name="settings_storage_clear_image_cache">Cancella cache immagine</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB di immagini saranno rimossi</string>
     <string name="settings_storage_clear_database">Cancella database cache</string>
-    <string name="settings_storage_clear_database_description">Utenti %1$s , gli stati %2$s verranno rimossi</string>
+    <string name="settings_storage_clear_database_description">%1$s utenti, %2$s messaggi saranno rimossi</string>
     <string name="settings_storage_app_log">Apri registro app</string>
     <string name="settings_storage_app_log_description">Visualizza il registro app</string>
     <string name="service_select_instance_input_placeholder">Url Istanza</string>
@@ -261,7 +261,7 @@
     <string name="following_title">Seguendo</string>
     <string name="fans_title">Follower</string>
     <string name="local_history_search_placeholder">Cerca nella cache locale</string>
-    <string name="local_history_search_status_title">Stato</string>
+    <string name="local_history_search_status_title">Post</string>
     <string name="local_history_search_user_title">Utente</string>
     <string name="rss_sources_title">Sorgenti RSS</string>
     <string name="add_rss_source">Aggiungi Sorgente RSS</string>
@@ -303,6 +303,9 @@
     <string name="tab_settings_mixed_timeline">Aggiungi scheda timeline mista</string>
     <string name="tab_settings_mixed_timeline_desc">La timeline mista mescolerà il risultato di tutte le schede della timeline in una scheda</string>
     <string name="home_tab_social_timeline_title">Social</string>
+    <string name="deeplink_account_selection_title">Seleziona account</string>
+    <string name="deeplink_account_selection_message">Seleziona un account per aprire questo link</string>
+    <string name="deeplink_account_selection_browser">Apri nel browser</string>
     <string name="changelog_current"><![CDATA[            <span>Versione %1$s:</span>
             <ul>
                 <li>Correzioni di bug e miglioramenti delle prestazioni.</li>

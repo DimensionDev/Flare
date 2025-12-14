@@ -139,17 +139,12 @@
     <string name="settings_ai_config_tldr_description">500 karakterden uzun gönderiler için yapay zeka özetlemesini etkinleştirir, sadece 500 karakterden uzun gönderilerde mevcuttur</string>
     <string name="settings_appearance_generic">Genel</string>
     <string name="settings_appearance_show_actions">Eylemleri göster</string>
-    <string name="settings_appearance_show_actions_description">Durumun altında eylemleri göster</string>
     <string name="settings_appearance_show_media">Medya göster</string>
-    <string name="settings_appearance_show_media_description">Durumda medyayı göster</string>
     <string name="settings_appearance_show_numbers">Sayıları göster</string>
-    <string name="settings_appearance_show_numbers_description">Durumun altında sayıları göster</string>
     <string name="settings_appearance_show_cw_img">Duyarlı içerikleri göster</string>
-    <string name="settings_appearance_show_cw_img_description">Durumda her zaman duyarlı içerikleri göster</string>
     <string name="settings_appearance_expand_media">Medya tam boyut olarak genişlet</string>
     <string name="settings_appearance_expand_media_description">Zaman çizelgesindeki medyanın en boy oranını koru</string>
     <string name="settings_appearance_video_autoplay">Videoları otomatik oynatma</string>
-    <string name="settings_appearance_video_autoplay_description">Durumda videoları otomatik oynat</string>
     <string name="settings_appearance_video_autoplay_wifi">Sadece Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Her zaman</string>
     <string name="settings_appearance_video_autoplay_never">Asla</string>
@@ -165,9 +160,7 @@
     <string name="settings_appearance_dynamic_theme">Dinamik tema</string>
     <string name="settings_appearance_dynamic_theme_description">Uygulamanın temasını cihazın duvar kağıdına göre değiştir</string>
     <string name="settings_appearance_show_link_previews">Bağlantı önizlemelerini göster</string>
-    <string name="settings_appearance_show_link_previews_description">Durumda bağlantı önizlemelerini göster</string>
     <string name="settings_appearance_compat_link_previews">Bağlantı önizlemelerini basitleştir</string>
-    <string name="settings_appearance_compat_link_previews_description">Durumda basit modda bağlantı önizlemelerini göster</string>
     <string name="settings_appearance_theme_color">Tema rengi</string>
     <string name="settings_appearance_theme_color_description">Uygulamanın tema rengini değiştir</string>
     <string name="settings_about_source_code">Kaynak kodu</string>
@@ -198,10 +191,6 @@
     <string name="misskey_visibility_home">Ana Sayfa</string>
     <string name="misskey_visibility_followers">Takipçiler</string>
     <string name="misskey_visibility_specified">Belirtilen</string>
-    <string name="misskey_visibility_public_description">Herkes bu paylaşımı görebilir ve yayabilir</string>
-    <string name="misskey_visibility_home_description">Sadece bu örnekteki kullanıcılar bu paylaşımı görebilir</string>
-    <string name="misskey_visibility_followers_description">Sadece takipçiler bu paylaşımı görebilir</string>
-    <string name="misskey_visibility_specified_description">Sadece bahsedilen kullanıcılar bu paylaşımı görebilir</string>
     <string name="rss_sources_title">Rss Kaynakları</string>
     <string name="add_rss_source">Rss Kaynağı Ekle</string>
     <string name="edit_rss_source">Rss Kaynağını Düzenle</string>
@@ -239,12 +228,11 @@
     <string name="edit_tab_with_avatar">Avatar ile</string>
     <string name="edit">Düzenle</string>
     <string name="local_history_search_placeholder">Yerel önbellekte ara</string>
-    <string name="local_history_search_status_title">Durum</string>
     <string name="local_history_search_user_title">Kullanıcı</string>
     <string name="settings_storage_clear_image_cache">Görüntü önbelleğini temizle</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB görüntü silinecek</string>
     <string name="settings_storage_clear_database">Önbellek veritabanını temizle</string>
-    <string name="settings_storage_clear_database_description">%1$s kullanıcı, %2$s durum silinecek</string>
     <string name="settings_storage_app_log">Uygulama günlüğünü aç</string>
     <string name="settings_storage_app_log_description">Uygulama günlüğünü görüntüle</string>
+    <string name="deeplink_account_selection_browser">Tarayıcıda aç</string>
 </resources>

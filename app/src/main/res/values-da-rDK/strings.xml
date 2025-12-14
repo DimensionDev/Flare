@@ -74,10 +74,10 @@
     <string name="misskey_visibility_home">Hjem</string>
     <string name="misskey_visibility_followers">Følgere</string>
     <string name="misskey_visibility_specified">Angivet</string>
-    <string name="misskey_visibility_public_description">Alle kan se og øge dette toot</string>
-    <string name="misskey_visibility_home_description">Kun brugere på denne instans kan se dette toot</string>
-    <string name="misskey_visibility_followers_description">Kun følgere kan se dette toot</string>
-    <string name="misskey_visibility_specified_description">Kun nævnte brugere kan se dette toot</string>
+    <string name="misskey_visibility_public_description">Alle kan se og øge dette indlæg</string>
+    <string name="misskey_visibility_home_description">Kun brugere på denne instans kan se dette indlæg</string>
+    <string name="misskey_visibility_followers_description">Kun følgere kan se dette indlæg</string>
+    <string name="misskey_visibility_specified_description">Kun nævnte brugere kan se dette indlæg</string>
     <string name="bluesky_login_username_hint">Brugernavn</string>
     <string name="bluesky_login_password_hint">Adgangskode</string>
     <string name="bluesky_login_auth_factor_token_hint">Godkendelsesfaktor Token</string>
@@ -108,21 +108,21 @@
     <string name="discover_status">Populære Indlæg</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Brugere</string>
-    <string name="search_status">Status</string>
+    <string name="search_status">Indlæg</string>
     <string name="quick_menu_add_account">Tilføj konto</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Vis handlinger</string>
-    <string name="settings_appearance_show_actions_description">Vis handlinger i bunden af status</string>
+    <string name="settings_appearance_show_actions_description">Vis handlinger i bunden af indlægget</string>
     <string name="settings_appearance_show_media">Vis medier</string>
-    <string name="settings_appearance_show_media_description">Vis medier i status</string>
+    <string name="settings_appearance_show_media_description">Vis medier i indlægget</string>
     <string name="settings_appearance_show_numbers">Vis numre</string>
-    <string name="settings_appearance_show_numbers_description">Vis tal i bunden af status</string>
+    <string name="settings_appearance_show_numbers_description">Vis tal i bunden af indlægget</string>
     <string name="settings_appearance_show_cw_img">Vis følsomt indhold</string>
-    <string name="settings_appearance_show_cw_img_description">Vis altid følsomt indhold i status</string>
+    <string name="settings_appearance_show_cw_img_description">Vis altid følsomt indhold i indlægget</string>
     <string name="settings_appearance_expand_media">Udvid medier til fuld størrelse</string>
     <string name="settings_appearance_expand_media_description">Hold mediernes aspekttradition i tidslinje</string>
     <string name="settings_appearance_video_autoplay">Video autoplay</string>
-    <string name="settings_appearance_video_autoplay_description">Afspil videoer automatisk i status</string>
+    <string name="settings_appearance_video_autoplay_description">Afspil videoer automatisk i indlægget</string>
     <string name="settings_appearance_video_autoplay_wifi">Kun Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Altid</string>
     <string name="settings_appearance_video_autoplay_never">Aldrig</string>
@@ -138,9 +138,9 @@
     <string name="settings_appearance_dynamic_theme">Dynamisk tema</string>
     <string name="settings_appearance_dynamic_theme_description">Skift temaet for app\'en baseret på enhedens baggrund</string>
     <string name="settings_appearance_show_link_previews">Vis link forhåndsvisninger</string>
-    <string name="settings_appearance_show_link_previews_description">Vis link forhåndsvisninger i status</string>
+    <string name="settings_appearance_show_link_previews_description">Vis forhåndsvisninger for link i indlægget</string>
     <string name="settings_appearance_compat_link_previews">Forenkle link forhåndsvisninger</string>
-    <string name="settings_appearance_compat_link_previews_description">Vis link forhåndsvisninger i forenklet tilstand i status</string>
+    <string name="settings_appearance_compat_link_previews_description">Vis link forhåndsvisninger i forenklet tilstand i indlægget</string>
     <string name="settings_appearance_theme_color">Tema farve</string>
     <string name="settings_appearance_theme_color_description">Skift temafarven på app\'en</string>
     <string name="settings_appearance_theme_pure_color">Høj kontrast tilstand</string>
@@ -165,7 +165,7 @@
     <string name="settings_storage_clear_image_cache">Ryd billed-cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB billeder vil blive fjernet</string>
     <string name="settings_storage_clear_database">Ryd cache database</string>
-    <string name="settings_storage_clear_database_description">%1$s brugere, %2$s statusser vil blive fjernet</string>
+    <string name="settings_storage_clear_database_description">%1$s brugere, %2$s indlæg vil blive fjernet</string>
     <string name="settings_storage_app_log">Åbn app-log</string>
     <string name="settings_storage_app_log_description">Se app-loggen</string>
     <string name="service_select_instance_input_placeholder">Instance URL</string>
@@ -261,7 +261,7 @@
     <string name="following_title">Følger</string>
     <string name="fans_title">Følger</string>
     <string name="local_history_search_placeholder">Søg i lokal cache</string>
-    <string name="local_history_search_status_title">Status</string>
+    <string name="local_history_search_status_title">Indlæg</string>
     <string name="local_history_search_user_title">Bruger</string>
     <string name="rss_sources_title">RSS Kilder</string>
     <string name="add_rss_source">Tilføj RSS-kilde</string>
@@ -303,6 +303,9 @@
     <string name="tab_settings_mixed_timeline">Tilføj blandet tidslinje fane</string>
     <string name="tab_settings_mixed_timeline_desc">Blandet tidslinje vil blande alle faner tidslinje resultat i en fane</string>
     <string name="home_tab_social_timeline_title">Social</string>
+    <string name="deeplink_account_selection_title">Vælg konto</string>
+    <string name="deeplink_account_selection_message">Vælg en konto for at åbne dette link</string>
+    <string name="deeplink_account_selection_browser">Åbn i browser</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
                 <li>Fejlrettelser og ydelsesforbedringer.</li>

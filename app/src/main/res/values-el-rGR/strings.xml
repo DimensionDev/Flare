@@ -74,10 +74,10 @@
     <string name="misskey_visibility_home">Αρχική</string>
     <string name="misskey_visibility_followers">Ακόλουθοι</string>
     <string name="misskey_visibility_specified">Καθορίστηκε</string>
-    <string name="misskey_visibility_public_description">Ο καθένας μπορεί να δει και να ενισχύσει αυτή την φωνή</string>
-    <string name="misskey_visibility_home_description">Μόνο οι χρήστες σε αυτήν την παρουσία μπορούν να δουν αυτή την φωνή</string>
-    <string name="misskey_visibility_followers_description">Μόνο οι ακόλουθοι μπορούν να δουν αυτή την φωνή</string>
-    <string name="misskey_visibility_specified_description">Μόνο οι αναφερόμενοι χρήστες μπορούν να δουν αυτή την φωνή</string>
+    <string name="misskey_visibility_public_description">Ο καθένας μπορεί να δει και να ενισχύσει αυτή τη δημοσίευση</string>
+    <string name="misskey_visibility_home_description">Μόνο οι χρήστες σε αυτήν την παρουσία μπορούν να δουν αυτήν την ανάρτηση</string>
+    <string name="misskey_visibility_followers_description">Μόνο οι ακόλουθοι μπορούν να δουν αυτή την ανάρτηση</string>
+    <string name="misskey_visibility_specified_description">Μόνο αναφερόμενοι χρήστες μπορούν να δουν αυτή την ανάρτηση</string>
     <string name="bluesky_login_username_hint">Όνομα Χρήστη</string>
     <string name="bluesky_login_password_hint">Κωδικός</string>
     <string name="bluesky_login_auth_factor_token_hint">Διακριτικό Παράγοντα Ελέγχου Ταυτότητας</string>
@@ -108,21 +108,21 @@
     <string name="discover_status">Δημοφιλή Άρθρα</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Χρήστες</string>
-    <string name="search_status">Κατάσταση</string>
+    <string name="search_status">Δημοσίευση</string>
     <string name="quick_menu_add_account">Προσθήκη λογαριασμού</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Εμφάνιση ενεργειών</string>
-    <string name="settings_appearance_show_actions_description">Εμφάνιση ενεργειών στο κάτω μέρος της κατάστασης</string>
+    <string name="settings_appearance_show_actions_description">Εμφάνιση ενεργειών στο κάτω μέρος της δημοσίευσης</string>
     <string name="settings_appearance_show_media">Εμφάνιση πολυμέσων</string>
-    <string name="settings_appearance_show_media_description">Εμφάνιση πολυμέσων στην κατάσταση</string>
+    <string name="settings_appearance_show_media_description">Εμφάνιση πολυμέσων στην ανάρτηση</string>
     <string name="settings_appearance_show_numbers">Εμφάνιση αριθμών</string>
-    <string name="settings_appearance_show_numbers_description">Εμφάνιση αριθμών στο κάτω μέρος της κατάστασης</string>
+    <string name="settings_appearance_show_numbers_description">Εμφάνιση αριθμών στο κάτω μέρος της δημοσίευσης</string>
     <string name="settings_appearance_show_cw_img">Εμφάνιση ευαίσθητου περιεχομένου</string>
-    <string name="settings_appearance_show_cw_img_description">Να εμφανίζεται πάντα ευαίσθητο περιεχόμενο στην κατάσταση</string>
+    <string name="settings_appearance_show_cw_img_description">Πάντα εμφάνιση ευαίσθητου περιεχομένου στην ανάρτηση</string>
     <string name="settings_appearance_expand_media">Επέκταση πολυμέσων σε πλήρες μέγεθος</string>
     <string name="settings_appearance_expand_media_description">Κρατήστε την πτυχήΠαραδοσιακό των μέσων ενημέρωσης στο χρονοδιάγραμμα</string>
     <string name="settings_appearance_video_autoplay">Αυτόματη αναπαραγωγή βίντεο</string>
-    <string name="settings_appearance_video_autoplay_description">Αυτόματη αναπαραγωγή βίντεο στην κατάσταση</string>
+    <string name="settings_appearance_video_autoplay_description">Αυτόματη αναπαραγωγή βίντεο στην ανάρτηση</string>
     <string name="settings_appearance_video_autoplay_wifi">Wi-Fi μόνο</string>
     <string name="settings_appearance_video_autoplay_always">Πάντα</string>
     <string name="settings_appearance_video_autoplay_never">Ποτέ</string>
@@ -138,9 +138,9 @@
     <string name="settings_appearance_dynamic_theme">Δυναμικό θέμα</string>
     <string name="settings_appearance_dynamic_theme_description">Αλλαγή του θέματος της εφαρμογής με βάση την ταπετσαρία της συσκευής</string>
     <string name="settings_appearance_show_link_previews">Εμφάνιση προεπισκοπήσεων συνδέσμων</string>
-    <string name="settings_appearance_show_link_previews_description">Εμφάνιση προεπισκοπήσεων συνδέσμων στην κατάσταση</string>
+    <string name="settings_appearance_show_link_previews_description">Εμφάνιση προεπισκόπησης συνδέσμου στην ανάρτηση</string>
     <string name="settings_appearance_compat_link_previews">Απλοποίηση προεπισκοπήσεων συνδέσμου</string>
-    <string name="settings_appearance_compat_link_previews_description">Εμφάνιση προεπισκοπήσεων συνδέσμων σε λειτουργία απλοποίησης στην κατάσταση</string>
+    <string name="settings_appearance_compat_link_previews_description">Εμφάνιση προεπισκοπήσεων συνδέσμων σε λειτουργία απλοποίησης στην ανάρτηση</string>
     <string name="settings_appearance_theme_color">Χρώμα θέματος</string>
     <string name="settings_appearance_theme_color_description">Αλλαγή του χρώματος του θέματος της εφαρμογής</string>
     <string name="settings_appearance_theme_pure_color">Λειτουργία υψηλής αντίθεσης</string>
@@ -165,7 +165,7 @@
     <string name="settings_storage_clear_image_cache">Εκκαθάριση προσωρινής μνήμης εικόνας</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB εικόνων θα αφαιρεθούν</string>
     <string name="settings_storage_clear_database">Εκκαθάριση βάσης δεδομένων προσωρινής μνήμης</string>
-    <string name="settings_storage_clear_database_description">%1$s χρήστες, %2$s καταστάσεις θα αφαιρεθούν</string>
+    <string name="settings_storage_clear_database_description">%1$s χρήστες, οι δημοσιεύσεις %2$s θα αφαιρεθούν</string>
     <string name="settings_storage_app_log">Άνοιγμα αρχείου καταγραφής εφαρμογής</string>
     <string name="settings_storage_app_log_description">Δείτε το αρχείο καταγραφής της εφαρμογής</string>
     <string name="service_select_instance_input_placeholder">Διεύθυνση Url Παρουσίας</string>
@@ -261,7 +261,7 @@
     <string name="following_title">Ακολουθεί</string>
     <string name="fans_title">Ακόλουθος</string>
     <string name="local_history_search_placeholder">Αναζήτηση τοπικής προσωρινής μνήμης</string>
-    <string name="local_history_search_status_title">Κατάσταση</string>
+    <string name="local_history_search_status_title">Δημοσίευση</string>
     <string name="local_history_search_user_title">Χρήστης</string>
     <string name="rss_sources_title">Πηγές RSS</string>
     <string name="add_rss_source">Προσθήκη Πηγής RSS</string>
@@ -303,6 +303,9 @@
     <string name="tab_settings_mixed_timeline">Προσθήκη μικτής καρτέλας χρονολογίου</string>
     <string name="tab_settings_mixed_timeline_desc">Μικτή χρονολογική γραμμή θα συνδυάσει όλες τις καρτέλες αποτέλεσμα χρονοδιάγραμμα σε μία καρτέλα</string>
     <string name="home_tab_social_timeline_title">Κοινωνικά</string>
+    <string name="deeplink_account_selection_title">Επιλέξτε λογαριασμό</string>
+    <string name="deeplink_account_selection_message">Επιλέξτε ένα λογαριασμό για να ανοίξετε αυτόν τον σύνδεσμο</string>
+    <string name="deeplink_account_selection_browser">Άνοιγμα σε πρόγραμμα περιήγησης</string>
     <string name="changelog_current"><![CDATA[            <span>Έκδοση %1$s:</span>
             <ul>
                 <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης.</li>

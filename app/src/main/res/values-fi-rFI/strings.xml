@@ -74,10 +74,10 @@
     <string name="misskey_visibility_home">Koti</string>
     <string name="misskey_visibility_followers">Seuraajat</string>
     <string name="misskey_visibility_specified">Määritelty</string>
-    <string name="misskey_visibility_public_description">Kuka tahansa voi nähdä ja tehostaa tätä toottia</string>
-    <string name="misskey_visibility_home_description">Vain tämän instanssin käyttäjät voivat nähdä tämän toottien</string>
-    <string name="misskey_visibility_followers_description">Vain seuraajat näkevät tämän tootin.</string>
-    <string name="misskey_visibility_specified_description">Vain mainitut käyttäjät voivat nähdä tämän tootin.</string>
+    <string name="misskey_visibility_public_description">Kuka tahansa voi nähdä ja tehostaa tätä viestiä</string>
+    <string name="misskey_visibility_home_description">Vain tämän instanssin käyttäjät voivat nähdä tämän viestin</string>
+    <string name="misskey_visibility_followers_description">Vain seuraajat voivat nähdä tämän viestin</string>
+    <string name="misskey_visibility_specified_description">Vain mainitut käyttäjät voivat nähdä tämän viestin</string>
     <string name="bluesky_login_username_hint">Käyttäjätunnus</string>
     <string name="bluesky_login_password_hint">Salasana</string>
     <string name="bluesky_login_auth_factor_token_hint">Todennustekijän Tunnus</string>
@@ -108,21 +108,21 @@
     <string name="discover_status">Suositut Viestit</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Käyttäjät</string>
-    <string name="search_status">Tila</string>
+    <string name="search_status">Julkaise</string>
     <string name="quick_menu_add_account">Lisää tili</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Näytä toiminnot</string>
-    <string name="settings_appearance_show_actions_description">Näytä toiminnot tilan alareunassa</string>
+    <string name="settings_appearance_show_actions_description">Näytä toiminnot viestin alareunassa</string>
     <string name="settings_appearance_show_media">Näytä media</string>
-    <string name="settings_appearance_show_media_description">Näytä media tilassa</string>
+    <string name="settings_appearance_show_media_description">Näytä media viestissä</string>
     <string name="settings_appearance_show_numbers">Näytä numerot</string>
-    <string name="settings_appearance_show_numbers_description">Näytä numerot tilan alareunassa</string>
+    <string name="settings_appearance_show_numbers_description">Näytä numerot viestin alareunassa</string>
     <string name="settings_appearance_show_cw_img">Näytä arkaluontoinen sisältö</string>
-    <string name="settings_appearance_show_cw_img_description">Näytä aina arkaluontoinen sisältö tilassa</string>
+    <string name="settings_appearance_show_cw_img_description">Näytä viesti aina arkaluontoinen sisältö</string>
     <string name="settings_appearance_expand_media">Laajenna media täyteen kokoon</string>
     <string name="settings_appearance_expand_media_description">Pitää tiedotusvälineiden näkökulma ajan tasalla</string>
     <string name="settings_appearance_video_autoplay">Videon automaattinen toisto</string>
-    <string name="settings_appearance_video_autoplay_description">Toista videot automaattisesti tilassa</string>
+    <string name="settings_appearance_video_autoplay_description">Toista videot automaattisesti viestissä</string>
     <string name="settings_appearance_video_autoplay_wifi">Vain Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Aina</string>
     <string name="settings_appearance_video_autoplay_never">Ei Koskaan</string>
@@ -138,9 +138,9 @@
     <string name="settings_appearance_dynamic_theme">Dynaaminen teema</string>
     <string name="settings_appearance_dynamic_theme_description">Muuta sovelluksen teemaa laitteen taustakuvan perusteella</string>
     <string name="settings_appearance_show_link_previews">Näytä linkkien esikatselu</string>
-    <string name="settings_appearance_show_link_previews_description">Näytä linkkien esikatselut tilassa</string>
+    <string name="settings_appearance_show_link_previews_description">Näytä linkkien esikatselut viestissä</string>
     <string name="settings_appearance_compat_link_previews">Yksinkertaista linkkien esikatselua</string>
-    <string name="settings_appearance_compat_link_previews_description">Näytä linkkien esikatselut yksinkertaisuuden tilassa tilassa</string>
+    <string name="settings_appearance_compat_link_previews_description">Näytä linkkien esikatselut yksinkertaisuuden tilassa viestissä</string>
     <string name="settings_appearance_theme_color">Teeman väri</string>
     <string name="settings_appearance_theme_color_description">Muuta sovelluksen teeman väriä</string>
     <string name="settings_appearance_theme_pure_color">Korkea kontrastitila</string>
@@ -165,7 +165,7 @@
     <string name="settings_storage_clear_image_cache">Tyhjennä kuvien välimuisti</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB kuvia poistetaan</string>
     <string name="settings_storage_clear_database">Tyhjennä välimuistin tietokanta</string>
-    <string name="settings_storage_clear_database_description">%1$s käyttäjää, %2$s tilat poistetaan</string>
+    <string name="settings_storage_clear_database_description">%1$s käyttäjää, %2$s viestit poistetaan</string>
     <string name="settings_storage_app_log">Avaa sovelluksen loki</string>
     <string name="settings_storage_app_log_description">Näytä sovellusloki</string>
     <string name="service_select_instance_input_placeholder">Ilmentymän URL</string>
@@ -261,7 +261,7 @@
     <string name="following_title">Seurataan</string>
     <string name="fans_title">Seuraaja</string>
     <string name="local_history_search_placeholder">Etsi paikallista välimuistia</string>
-    <string name="local_history_search_status_title">Tila</string>
+    <string name="local_history_search_status_title">Julkaise</string>
     <string name="local_history_search_user_title">Käyttäjä</string>
     <string name="rss_sources_title">Rss Lähteet</string>
     <string name="add_rss_source">Lisää RSS-lähde</string>
@@ -303,6 +303,9 @@
     <string name="tab_settings_mixed_timeline">Lisää sekoitettu aikajana-välilehti</string>
     <string name="tab_settings_mixed_timeline_desc">Sekoitettu aikajana sekoittaa kaikki välilehdet aikajana tulos yhdessä välilehdessä</string>
     <string name="home_tab_social_timeline_title">Sosiaalinen</string>
+    <string name="deeplink_account_selection_title">Valitse tili</string>
+    <string name="deeplink_account_selection_message">Valitse tili avataksesi tämän linkin</string>
+    <string name="deeplink_account_selection_browser">Avaa selaimessa</string>
     <string name="changelog_current"><![CDATA[            <span>Versio %1$s:</span>
             <ul>
                 <li>Virhekorjauksia ja suorituskyvyn parannuksia.</li>

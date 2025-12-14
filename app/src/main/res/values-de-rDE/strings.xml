@@ -74,10 +74,10 @@
     <string name="misskey_visibility_home">Start</string>
     <string name="misskey_visibility_followers">Follower</string>
     <string name="misskey_visibility_specified">Spezifiziert</string>
-    <string name="misskey_visibility_public_description">Jeder kann diesen Toot sehen und boosten</string>
-    <string name="misskey_visibility_home_description">Nur Benutzer dieser Instanz können diesen Toot sehen</string>
-    <string name="misskey_visibility_followers_description">Nur Follower können diesen Toot sehen</string>
-    <string name="misskey_visibility_specified_description">Nur erwähnte Benutzer können diesen Toot sehen</string>
+    <string name="misskey_visibility_public_description">Jeder kann diesen Beitrag sehen und steigern</string>
+    <string name="misskey_visibility_home_description">Nur Benutzer in dieser Instanz können diesen Beitrag sehen</string>
+    <string name="misskey_visibility_followers_description">Nur Follower können diesen Beitrag sehen</string>
+    <string name="misskey_visibility_specified_description">Nur erwähnte Benutzer können diesen Beitrag sehen</string>
     <string name="bluesky_login_username_hint">Benutzername</string>
     <string name="bluesky_login_password_hint">Passwort</string>
     <string name="bluesky_login_auth_factor_token_hint">Authentifizierungstoken</string>
@@ -108,21 +108,21 @@
     <string name="discover_status">Trend-Beiträge</string>
     <string name="discover_hashtags">Trend-Hashtags</string>
     <string name="search_users">Benutzer</string>
-    <string name="search_status">Status</string>
+    <string name="search_status">Posten</string>
     <string name="quick_menu_add_account">Konto hinzufügen</string>
     <string name="settings_appearance_generic">Generisch</string>
     <string name="settings_appearance_show_actions">Aktionen anzeigen</string>
-    <string name="settings_appearance_show_actions_description">Aktionen am unteren Rand des Status anzeigen</string>
+    <string name="settings_appearance_show_actions_description">Aktionen am Ende des Beitrags anzeigen</string>
     <string name="settings_appearance_show_media">Medien anzeigen</string>
-    <string name="settings_appearance_show_media_description">Medien im Status anzeigen</string>
+    <string name="settings_appearance_show_media_description">Medien im Beitrag anzeigen</string>
     <string name="settings_appearance_show_numbers">Nummern anzeigen</string>
-    <string name="settings_appearance_show_numbers_description">Nummern unten im Status anzeigen</string>
+    <string name="settings_appearance_show_numbers_description">Nummern am unteren Rand des Beitrags anzeigen</string>
     <string name="settings_appearance_show_cw_img">Sensible Inhalte anzeigen</string>
-    <string name="settings_appearance_show_cw_img_description">Zeige sensible Inhalte immer im Status an</string>
+    <string name="settings_appearance_show_cw_img_description">Sensible Inhalte immer im Beitrag anzeigen</string>
     <string name="settings_appearance_expand_media">Medien auf volle Größe erweitern</string>
     <string name="settings_appearance_expand_media_description">Behalte das Seitenverhältnis der Medien in der Zeitleiste bei</string>
     <string name="settings_appearance_video_autoplay">Automatische Videowiedergabe</string>
-    <string name="settings_appearance_video_autoplay_description">Videos automatisch im Status wiedergeben</string>
+    <string name="settings_appearance_video_autoplay_description">Videos automatisch im Beitrag abspielen</string>
     <string name="settings_appearance_video_autoplay_wifi">Nur WLAN</string>
     <string name="settings_appearance_video_autoplay_always">Immer</string>
     <string name="settings_appearance_video_autoplay_never">Nie</string>
@@ -138,9 +138,9 @@
     <string name="settings_appearance_dynamic_theme">Dynamisches Theme</string>
     <string name="settings_appearance_dynamic_theme_description">Ändere das Theme der App basierend auf dem Hintergrundbild des Geräts</string>
     <string name="settings_appearance_show_link_previews">Link-Vorschau anzeigen</string>
-    <string name="settings_appearance_show_link_previews_description">Link-Vorschau im Status anzeigen</string>
+    <string name="settings_appearance_show_link_previews_description">Link-Vorschau im Beitrag anzeigen</string>
     <string name="settings_appearance_compat_link_previews">Link-Vorschau vereinfachen</string>
-    <string name="settings_appearance_compat_link_previews_description">Link-Vorschau im vereinfachten Modus im Status anzeigen</string>
+    <string name="settings_appearance_compat_link_previews_description">Link-Vorschau im vereinfachten Modus im Beitrag anzeigen</string>
     <string name="settings_appearance_theme_color">Theme Farbe</string>
     <string name="settings_appearance_theme_color_description">Ändere die Designfarbe der App</string>
     <string name="settings_appearance_theme_pure_color">Kontrastmodus</string>
@@ -165,7 +165,7 @@
     <string name="settings_storage_clear_image_cache">Bildercache löschen</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB an Bildern werden gelöscht</string>
     <string name="settings_storage_clear_database">Cache-Datenbank löschen</string>
-    <string name="settings_storage_clear_database_description">%1$s Benutzer, %2$s Status werden gelöscht</string>
+    <string name="settings_storage_clear_database_description">%1$s Benutzer, %2$s Beiträge werden entfernt</string>
     <string name="settings_storage_app_log">App-Log öffnen</string>
     <string name="settings_storage_app_log_description">App-Log anzeigen</string>
     <string name="service_select_instance_input_placeholder">Instanz URL</string>
@@ -261,7 +261,7 @@
     <string name="following_title">Folgt</string>
     <string name="fans_title">Follower</string>
     <string name="local_history_search_placeholder">Lokalen Cache durchsuchen</string>
-    <string name="local_history_search_status_title">Status</string>
+    <string name="local_history_search_status_title">Posten</string>
     <string name="local_history_search_user_title">Benutzer</string>
     <string name="rss_sources_title">RSS-Quellen</string>
     <string name="add_rss_source">RSS-Quelle hinzufügen</string>
@@ -303,6 +303,9 @@
     <string name="tab_settings_mixed_timeline">Tab für gemischte Zeitleiste hinzufügen</string>
     <string name="tab_settings_mixed_timeline_desc">Die gemischte Zeitleiste mischt alle Tabs der Zeitleiste in einen Tab</string>
     <string name="home_tab_social_timeline_title">Sozial</string>
+    <string name="deeplink_account_selection_title">Konto auswählen</string>
+    <string name="deeplink_account_selection_message">Wähle ein Konto um diesen Link zu öffnen</string>
+    <string name="deeplink_account_selection_browser">Im Browser öffnen</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
                 <li>Fehlerbehebungen und Leistungsverbesserungen.</li>

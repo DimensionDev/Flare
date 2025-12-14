@@ -74,10 +74,10 @@
     <string name="misskey_visibility_home">المنزل</string>
     <string name="misskey_visibility_followers">المتابِعون</string>
     <string name="misskey_visibility_specified">محدد</string>
-    <string name="misskey_visibility_public_description">يمكن لأي شخص أن يرى و يعزز هذا التبويق</string>
-    <string name="misskey_visibility_home_description">يمكن فقط للمستخدمين في هذا المظهر رؤية هذا التبويق</string>
-    <string name="misskey_visibility_followers_description">يمكن للمتابعين فقط رؤية هذا التبويق</string>
-    <string name="misskey_visibility_specified_description">يمكن للمستخدمين المذكورين فقط رؤية هذا التبويق</string>
+    <string name="misskey_visibility_public_description">يمكن لأي شخص رؤية هذا المنشور وتعزيزه</string>
+    <string name="misskey_visibility_home_description">يمكن فقط للمستخدمين في هذا المظهر رؤية هذه المشاركة</string>
+    <string name="misskey_visibility_followers_description">يمكن فقط للمتابعين رؤية هذا المنشور</string>
+    <string name="misskey_visibility_specified_description">يمكن للمستخدمين المذكورين فقط رؤية هذا المنشور</string>
     <string name="bluesky_login_username_hint">اسم المستخدم</string>
     <string name="bluesky_login_password_hint">كلمة المرور</string>
     <string name="bluesky_login_auth_factor_token_hint">عامل المصادقة رمز</string>
@@ -108,21 +108,21 @@
     <string name="discover_status">المشاركات المتداولة</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">المستخدمون</string>
-    <string name="search_status">الحالة</string>
+    <string name="search_status">نشر</string>
     <string name="quick_menu_add_account">إضافة حساب</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">إظهار الإجراءات</string>
-    <string name="settings_appearance_show_actions_description">إظهار الإجراءات في الجزء السفلي من الحالة</string>
+    <string name="settings_appearance_show_actions_description">إظهار الإجراءات في أسفل المنشور</string>
     <string name="settings_appearance_show_media">إظهار الوسائط</string>
-    <string name="settings_appearance_show_media_description">إظهار الوسائط في الحالة</string>
+    <string name="settings_appearance_show_media_description">إظهار الوسائط في المنشور</string>
     <string name="settings_appearance_show_numbers">إظهار الأرقام</string>
-    <string name="settings_appearance_show_numbers_description">إظهار الأرقام في الجزء السفلي من الحالة</string>
+    <string name="settings_appearance_show_numbers_description">إظهار الأرقام في أسفل المنشور</string>
     <string name="settings_appearance_show_cw_img">إظهار المحتوى الحساس</string>
-    <string name="settings_appearance_show_cw_img_description">إظهار المحتوى الحساس دائماً في الحالة</string>
+    <string name="settings_appearance_show_cw_img_description">إظهار المحتوى الحساس دائماً في المنشور</string>
     <string name="settings_appearance_expand_media">توسيع الوسائط إلى الحجم الكامل</string>
     <string name="settings_appearance_expand_media_description">الحفاظ على الجانب التقليدي لوسائط الإعلام في الجدول الزمني</string>
     <string name="settings_appearance_video_autoplay">تشغيل تلقائي للفيديو</string>
-    <string name="settings_appearance_video_autoplay_description">تشغيل الفيديوهات تلقائياً في الحالة</string>
+    <string name="settings_appearance_video_autoplay_description">تشغيل الفيديوهات تلقائياً في المنشور</string>
     <string name="settings_appearance_video_autoplay_wifi">Wi-Fi فقط</string>
     <string name="settings_appearance_video_autoplay_always">دائما</string>
     <string name="settings_appearance_video_autoplay_never">لا</string>
@@ -138,9 +138,9 @@
     <string name="settings_appearance_dynamic_theme">السمة الديناميكية</string>
     <string name="settings_appearance_dynamic_theme_description">تغيير موضوع التطبيق على أساس خلفية الجهاز</string>
     <string name="settings_appearance_show_link_previews">إظهار معاينات الرابط</string>
-    <string name="settings_appearance_show_link_previews_description">إظهار معاينات الرابط في الحالة</string>
+    <string name="settings_appearance_show_link_previews_description">إظهار معاينات الرابط في المنشور</string>
     <string name="settings_appearance_compat_link_previews">تبسيط معاينات الرابط</string>
-    <string name="settings_appearance_compat_link_previews_description">إظهار معاينات الرابط في وضع التبسيط في الحالة</string>
+    <string name="settings_appearance_compat_link_previews_description">إظهار معاينات الرابط في وضع التبسيط في المشاركة</string>
     <string name="settings_appearance_theme_color">لون السمة</string>
     <string name="settings_appearance_theme_color_description">تغيير لون السمة للتطبيق</string>
     <string name="settings_appearance_theme_pure_color">وضع التباين العالي</string>
@@ -165,7 +165,7 @@
     <string name="settings_storage_clear_image_cache">مسح ذاكرة التخزين المؤقت للصورة</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB من الصور سيتم إزالتها</string>
     <string name="settings_storage_clear_database">مسح قاعدة بيانات ذاكرة التخزين المؤقت</string>
-    <string name="settings_storage_clear_database_description">%1$s مستخدمين، %2$s حالات سيتم إزالتها</string>
+    <string name="settings_storage_clear_database_description">%1$s مستخدمين ، سيتم إزالة مشاركات %2$s</string>
     <string name="settings_storage_app_log">فتح سجل التطبيق</string>
     <string name="settings_storage_app_log_description">عرض سجل التطبيقات</string>
     <string name="service_select_instance_input_placeholder">رابط مثيل</string>
@@ -261,7 +261,7 @@
     <string name="following_title">تابع</string>
     <string name="fans_title">متابع</string>
     <string name="local_history_search_placeholder">البحث عن ذاكرة التخزين المؤقت المحلية</string>
-    <string name="local_history_search_status_title">الحالة</string>
+    <string name="local_history_search_status_title">نشر</string>
     <string name="local_history_search_user_title">المستخدم</string>
     <string name="rss_sources_title">مصادر RSS</string>
     <string name="add_rss_source">إضافة مصدر RSS</string>
@@ -303,6 +303,9 @@
     <string name="tab_settings_mixed_timeline">إضافة علامة تبويب الخيط الزمني المختلط</string>
     <string name="tab_settings_mixed_timeline_desc">سيتم خلط الخط الزمني المختلط بين جميع علامات التبويب في علامة تبويب واحدة</string>
     <string name="home_tab_social_timeline_title">إجتماعي</string>
+    <string name="deeplink_account_selection_title">حدد الحساب</string>
+    <string name="deeplink_account_selection_message">حدد حسابا لفتح هذا الرابط</string>
+    <string name="deeplink_account_selection_browser">فتح في المتصفح</string>
     <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
             <ul>
                 <li>إصلاحات الشوائب وتحسين الأداء.</li>

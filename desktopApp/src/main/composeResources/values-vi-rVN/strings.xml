@@ -138,17 +138,12 @@
     <string name="settings_ai_config_tldr_description">Bật tóm tắt AI cho các bài đăng dài, chỉ có sẵn trong bài viết dài hơn 500 ký tự</string>
     <string name="settings_appearance_generic">Chung</string>
     <string name="settings_appearance_show_actions">Hiển thị hành động</string>
-    <string name="settings_appearance_show_actions_description">Hiển thị hành động ở dưới cùng của trạng thái</string>
     <string name="settings_appearance_show_media">Hiển thị phương tiện</string>
-    <string name="settings_appearance_show_media_description">Hiển thị phương tiện trong trạng thái</string>
     <string name="settings_appearance_show_numbers">Hiển thị số</string>
-    <string name="settings_appearance_show_numbers_description">Hiển thị số ở dưới cùng của trạng thái</string>
     <string name="settings_appearance_show_cw_img">Hiển thị nội dung nhạy cảm</string>
-    <string name="settings_appearance_show_cw_img_description">Luôn hiển thị nội dung nhạy cảm trong trạng thái</string>
     <string name="settings_appearance_expand_media">Mở rộng phương tiện đến kích thước đầy đủ</string>
     <string name="settings_appearance_expand_media_description">Giữ tỉ lệ khung hình của phương tiện trong dòng thời gian</string>
     <string name="settings_appearance_video_autoplay">Video tự động phát</string>
-    <string name="settings_appearance_video_autoplay_description">Tự động phát video trong trạng thái</string>
     <string name="settings_appearance_video_autoplay_wifi">Chỉ có Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Luôn</string>
     <string name="settings_appearance_video_autoplay_never">Không bao giờ</string>
@@ -164,9 +159,7 @@
     <string name="settings_appearance_dynamic_theme">Chủ đề động</string>
     <string name="settings_appearance_dynamic_theme_description">Thay đổi chủ đề của ứng dụng dựa trên hình nền của thiết bị</string>
     <string name="settings_appearance_show_link_previews">Hiển thị bản xem trước liên kết</string>
-    <string name="settings_appearance_show_link_previews_description">Hiển thị bản xem trước liên kết trong trạng thái</string>
     <string name="settings_appearance_compat_link_previews">Đơn giản hóa bản xem trước liên kết</string>
-    <string name="settings_appearance_compat_link_previews_description">Hiển thị bản xem trước liên kết trong chế độ đơn giản hóa trong trạng thái</string>
     <string name="settings_appearance_theme_color">Màu chủ đề</string>
     <string name="settings_appearance_theme_color_description">Thay đổi màu chủ đề của ứng dụng</string>
     <string name="settings_about_source_code">Mã nguồn</string>
@@ -197,10 +190,6 @@
     <string name="misskey_visibility_home">Trang chủ</string>
     <string name="misskey_visibility_followers">Người theo dõi</string>
     <string name="misskey_visibility_specified">Được chỉ định</string>
-    <string name="misskey_visibility_public_description">Bất kỳ ai cũng có thể xem và đẩy toot này</string>
-    <string name="misskey_visibility_home_description">Chỉ người dùng trên phiên bản này mới có thể xem toot này</string>
-    <string name="misskey_visibility_followers_description">Chỉ người theo dõi mới có thể xem toot này</string>
-    <string name="misskey_visibility_specified_description">Chỉ những người được đề cập mới có thể xem toot này</string>
     <string name="rss_sources_title">Nguồn Rss</string>
     <string name="add_rss_source">Thêm Nguồn Rss</string>
     <string name="edit_rss_source">Chỉnh sửa Nguồn Rss</string>
@@ -234,12 +223,11 @@
     <string name="edit_tab_with_avatar">Có đại diện</string>
     <string name="edit">Chỉnh sửa</string>
     <string name="local_history_search_placeholder">Tìm kiếm bộ nhớ đệm địa phương</string>
-    <string name="local_history_search_status_title">Trạng thái</string>
     <string name="local_history_search_user_title">Người dùng</string>
     <string name="settings_storage_clear_image_cache">Xóa bộ nhớ cache hình ảnh</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB hình ảnh sẽ được xóa</string>
     <string name="settings_storage_clear_database">Xóa cơ sở dữ liệu bộ nhớ cache</string>
-    <string name="settings_storage_clear_database_description">%1$s người dùng, %2$s trạng thái sẽ bị xóa</string>
     <string name="settings_storage_app_log">Mở nhật ký ứng dụng</string>
     <string name="settings_storage_app_log_description">Xem nhật ký ứng dụng</string>
+    <string name="deeplink_account_selection_browser">Mở trong trình duyệt</string>
 </resources>

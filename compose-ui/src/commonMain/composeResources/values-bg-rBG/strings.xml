@@ -20,7 +20,6 @@
     <string name="mastodon_notification_item_requested_follow">поиска да ви следва</string>
     <string name="mastodon_item_show_more">Показване на още</string>
     <string name="mastodon_item_show_less">Показване на по-малко</string>
-    <string name="mastodon_item_pinned">Закачена публикация</string>
     <string name="post_show_full_text">Показване на целия текст</string>
     <string name="bluesky_notification_item_followed_you">ви последва</string>
     <string name="bluesky_notification_item_favourited_your_status">хареса</string>
@@ -33,7 +32,6 @@
     <string name="misskey_notification_item_replied_to_you">ви отговори</string>
     <string name="misskey_notification_item_reposted_your_status">препубликува</string>
     <string name="misskey_notification_item_quoted_your_status">цитира</string>
-    <string name="misskey_notification_item_reacted_to_your_status">реагира на вашия статус</string>
     <string name="misskey_notification_item_follow_request_accepted">прие искането ви за следване</string>
     <string name="misskey_notification_item_app">Приложение</string>
     <string name="misskey_notification_item_followed_you">ви последва</string>
@@ -43,9 +41,6 @@
     <string name="mastodon_visibility_unlisted">Безшумно</string>
     <string name="mastodon_visibility_private">Поверително</string>
     <string name="mastodon_visibility_direct">Лично</string>
-    <string name="mastodon_visibility_public_description">Всеки може да види и подсили тази публикация</string>
-    <string name="mastodon_visibility_private_description">Само последователи могат да видят тази публикация</string>
-    <string name="mastodon_visibility_direct_description">Само споменатите потребители могат да видят тази публикация</string>
     <string name="settings_notifications_title">Известия</string>
     <string name="status_loadmore_end">Няма повече публикации</string>
     <string name="status_loadmore_error_retry">Повторен опит</string>
@@ -54,7 +49,6 @@
     <string name="show_media">Показване на медия</string>
     <string name="hide_media">Скриване на медията</string>
     <string name="login_expired_relogin">Повторно вписване</string>
-    <string name="misskey_compose_local_only_description">Само потребители на тази инстанция могат да видят тази публикация</string>
     <string name="misskey_item_action_quote">Цитиране</string>
     <string name="blusky_item_action_repost">Препубликуване</string>
     <string name="blusky_item_action_quote">Цитиране</string>
@@ -86,7 +80,6 @@
     <string name="reply_to">Отговор към %1$s</string>
     <string name="status_detail_translate">Превеждане на публикацията</string>
     <string name="status_detail_tldr">Обобщаване на публикацията</string>
-    <string name="vvo_notification_like">Хареса статуса ви</string>
     <string name="user_follow_edit_list">Добавяне или премахване от списък</string>
     <string name="list_empty">Няма списъци</string>
     <string name="list_error">Неуспешно зареждане на списъци</string>

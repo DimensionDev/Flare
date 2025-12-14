@@ -74,10 +74,10 @@
     <string name="misskey_visibility_home">Startpagina</string>
     <string name="misskey_visibility_followers">Volgers</string>
     <string name="misskey_visibility_specified">Opgegeven</string>
-    <string name="misskey_visibility_public_description">Iedereen kan deze toot zien en boosten</string>
-    <string name="misskey_visibility_home_description">Alleen gebruikers op deze instantie kunnen deze toot zien</string>
-    <string name="misskey_visibility_followers_description">Alleen volgers kunnen deze toot zien</string>
-    <string name="misskey_visibility_specified_description">Alleen vermelde gebruikers kunnen deze toot zien</string>
+    <string name="misskey_visibility_public_description">Iedereen kan dit bericht zien en een boost geven</string>
+    <string name="misskey_visibility_home_description">Alleen gebruikers op dit exemplaar kunnen dit bericht zien</string>
+    <string name="misskey_visibility_followers_description">Alleen volgers kunnen dit bericht zien</string>
+    <string name="misskey_visibility_specified_description">Alleen vermelde gebruikers kunnen dit bericht zien</string>
     <string name="bluesky_login_username_hint">Gebruikersnaam</string>
     <string name="bluesky_login_password_hint">Wachtwoord</string>
     <string name="bluesky_login_auth_factor_token_hint">Authenticatie factor token</string>
@@ -108,21 +108,21 @@
     <string name="discover_status">Populaire berichten</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Gebruikers</string>
-    <string name="search_status">status</string>
+    <string name="search_status">Plaatsen</string>
     <string name="quick_menu_add_account">Account toevoegen</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Toon acties</string>
-    <string name="settings_appearance_show_actions_description">Acties weergeven onderaan de status</string>
+    <string name="settings_appearance_show_actions_description">Toon acties aan de onderkant van het bericht</string>
     <string name="settings_appearance_show_media">Media tonen</string>
-    <string name="settings_appearance_show_media_description">Media in status weergeven</string>
+    <string name="settings_appearance_show_media_description">Media in het bericht weergeven</string>
     <string name="settings_appearance_show_numbers">Getallen weergeven</string>
-    <string name="settings_appearance_show_numbers_description">Toon nummers aan de onderkant van de status</string>
+    <string name="settings_appearance_show_numbers_description">Getallen aan de onderkant van het bericht weergeven</string>
     <string name="settings_appearance_show_cw_img">Gevoelige inhoud weergeven</string>
-    <string name="settings_appearance_show_cw_img_description">Gevoelige inhoud altijd in status weergeven</string>
+    <string name="settings_appearance_show_cw_img_description">Gevoelige inhoud altijd in bericht weergeven</string>
     <string name="settings_appearance_expand_media">Media uitbreiden naar volledige grootte</string>
     <string name="settings_appearance_expand_media_description">Bewaar het aspect van de media op de tijdlijn</string>
     <string name="settings_appearance_video_autoplay">Video automatisch afspelen</string>
-    <string name="settings_appearance_video_autoplay_description">Video\'s automatisch afspelen in status</string>
+    <string name="settings_appearance_video_autoplay_description">Video\'s automatisch afspelen in het bericht</string>
     <string name="settings_appearance_video_autoplay_wifi">Alleen wifi</string>
     <string name="settings_appearance_video_autoplay_always">altijd</string>
     <string name="settings_appearance_video_autoplay_never">Nooit</string>
@@ -138,9 +138,9 @@
     <string name="settings_appearance_dynamic_theme">Dynamisch thema</string>
     <string name="settings_appearance_dynamic_theme_description">Verander het thema van de app op basis van achtergrond van het apparaat</string>
     <string name="settings_appearance_show_link_previews">Toon linkvoorbeelden</string>
-    <string name="settings_appearance_show_link_previews_description">Toon linkvoorbeelden in de status</string>
+    <string name="settings_appearance_show_link_previews_description">Toon linkvoorbeelden in het bericht</string>
     <string name="settings_appearance_compat_link_previews">Link-voorbeelden vereenvoudigen</string>
-    <string name="settings_appearance_compat_link_previews_description">Toon linkvoorbeelden in de eenvoudigere modus in de status</string>
+    <string name="settings_appearance_compat_link_previews_description">Geef voorbeeld van de link weer in de vereenvoudiging modus van de post</string>
     <string name="settings_appearance_theme_color">Thema kleur</string>
     <string name="settings_appearance_theme_color_description">Verander de themakleur van de app</string>
     <string name="settings_appearance_theme_pure_color">Modus hoog contrast</string>
@@ -165,7 +165,7 @@
     <string name="settings_storage_clear_image_cache">Afbeeldingencache legen</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB van afbeeldingen zal worden verwijderd</string>
     <string name="settings_storage_clear_database">Cache database wissen</string>
-    <string name="settings_storage_clear_database_description">%1$s gebruikers, %2$s statussen worden verwijderd</string>
+    <string name="settings_storage_clear_database_description">%1$s gebruikers, %2$s berichten zullen worden verwijderd</string>
     <string name="settings_storage_app_log">Open app-logboek</string>
     <string name="settings_storage_app_log_description">Bekijk het app-logboek</string>
     <string name="service_select_instance_input_placeholder">Aanleg URL</string>
@@ -261,7 +261,7 @@
     <string name="following_title">Volgt</string>
     <string name="fans_title">Volger</string>
     <string name="local_history_search_placeholder">Zoek lokale cache</string>
-    <string name="local_history_search_status_title">status</string>
+    <string name="local_history_search_status_title">Plaatsen</string>
     <string name="local_history_search_user_title">Gebruiker</string>
     <string name="rss_sources_title">RSS bronnen</string>
     <string name="add_rss_source">RSS bron toevoegen</string>
@@ -303,6 +303,9 @@
     <string name="tab_settings_mixed_timeline">Voeg gemengde tabblad tijdlijn toe</string>
     <string name="tab_settings_mixed_timeline_desc">Gemengde tijdlijn mengt alle resultaten van de tabbladen in één tabblad</string>
     <string name="home_tab_social_timeline_title">Sociaal</string>
+    <string name="deeplink_account_selection_title">Selecteer account</string>
+    <string name="deeplink_account_selection_message">Selecteer een account om deze link te openen</string>
+    <string name="deeplink_account_selection_browser">Openen in browser</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
                 <li>Bugs fixes en prestatieverbeteringen.</li>

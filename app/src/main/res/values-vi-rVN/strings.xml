@@ -70,10 +70,6 @@
     <string name="misskey_visibility_home">Trang chủ</string>
     <string name="misskey_visibility_followers">Người theo dõi</string>
     <string name="misskey_visibility_specified">Được chỉ định</string>
-    <string name="misskey_visibility_public_description">Bất kỳ ai cũng có thể xem và đẩy toot này</string>
-    <string name="misskey_visibility_home_description">Chỉ người dùng trên phiên bản này mới có thể xem toot này</string>
-    <string name="misskey_visibility_followers_description">Chỉ người theo dõi mới có thể xem toot này</string>
-    <string name="misskey_visibility_specified_description">Chỉ những người được đề cập mới có thể xem toot này</string>
     <string name="bluesky_login_username_hint">Tên người dùng</string>
     <string name="bluesky_login_password_hint">Mật khẩu</string>
     <string name="report_title">Báo cáo</string>
@@ -99,21 +95,15 @@
     <string name="discover_users">Đề xuất người dùng</string>
     <string name="discover_hashtags">Hashtags đang trending</string>
     <string name="search_users">Người dùng</string>
-    <string name="search_status">Trạng thái</string>
     <string name="quick_menu_add_account">Thêm tài khoản</string>
     <string name="settings_appearance_generic">Chung</string>
     <string name="settings_appearance_show_actions">Hiển thị hành động</string>
-    <string name="settings_appearance_show_actions_description">Hiển thị hành động ở dưới cùng của trạng thái</string>
     <string name="settings_appearance_show_media">Hiển thị phương tiện</string>
-    <string name="settings_appearance_show_media_description">Hiển thị phương tiện trong trạng thái</string>
     <string name="settings_appearance_show_numbers">Hiển thị số</string>
-    <string name="settings_appearance_show_numbers_description">Hiển thị số ở dưới cùng của trạng thái</string>
     <string name="settings_appearance_show_cw_img">Hiển thị nội dung nhạy cảm</string>
-    <string name="settings_appearance_show_cw_img_description">Luôn hiển thị nội dung nhạy cảm trong trạng thái</string>
     <string name="settings_appearance_expand_media">Mở rộng phương tiện đến kích thước đầy đủ</string>
     <string name="settings_appearance_expand_media_description">Giữ tỉ lệ khung hình của phương tiện trong dòng thời gian</string>
     <string name="settings_appearance_video_autoplay">Video tự động phát</string>
-    <string name="settings_appearance_video_autoplay_description">Tự động phát video trong trạng thái</string>
     <string name="settings_appearance_video_autoplay_wifi">Chỉ có Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Luôn</string>
     <string name="settings_appearance_video_autoplay_never">Không bao giờ</string>
@@ -129,15 +119,12 @@
     <string name="settings_appearance_dynamic_theme">Chủ đề động</string>
     <string name="settings_appearance_dynamic_theme_description">Thay đổi chủ đề của ứng dụng dựa trên hình nền của thiết bị</string>
     <string name="settings_appearance_show_link_previews">Hiển thị bản xem trước liên kết</string>
-    <string name="settings_appearance_show_link_previews_description">Hiển thị bản xem trước liên kết trong trạng thái</string>
     <string name="settings_appearance_compat_link_previews">Đơn giản hóa bản xem trước liên kết</string>
-    <string name="settings_appearance_compat_link_previews_description">Hiển thị bản xem trước liên kết trong chế độ đơn giản hóa trong trạng thái</string>
     <string name="settings_appearance_theme_color">Màu chủ đề</string>
     <string name="settings_appearance_theme_color_description">Thay đổi màu chủ đề của ứng dụng</string>
     <string name="settings_storage_clear_image_cache">Xóa bộ nhớ cache hình ảnh</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB hình ảnh sẽ được xóa</string>
     <string name="settings_storage_clear_database">Xóa cơ sở dữ liệu bộ nhớ cache</string>
-    <string name="settings_storage_clear_database_description">%1$s người dùng, %2$s trạng thái sẽ bị xóa</string>
     <string name="settings_storage_app_log">Mở nhật ký ứng dụng</string>
     <string name="settings_storage_app_log_description">Xem nhật ký ứng dụng</string>
     <string name="service_select_instance_input_placeholder">URL phiên bản</string>
@@ -230,7 +217,6 @@
     <string name="following_title">Đang theo dõi</string>
     <string name="fans_title">Người theo dõi</string>
     <string name="local_history_search_placeholder">Tìm kiếm bộ nhớ đệm địa phương</string>
-    <string name="local_history_search_status_title">Trạng thái</string>
     <string name="local_history_search_user_title">Người dùng</string>
     <string name="rss_sources_title_label">Tiêu đề</string>
     <string name="rss_sources_url_label">Url</string>
@@ -257,4 +243,5 @@
     <string name="home_tab_mixed_timeline_title">Hỗn hợp</string>
     <string name="tab_settings_mixed_timeline">Thêm tab dòng thời gian hỗn hợp</string>
     <string name="tab_settings_mixed_timeline_desc">Dòng thời gian hỗn hợp sẽ kết hợp tất cả kết quả dòng thời gian của các tab thành một tab</string>
+    <string name="deeplink_account_selection_browser">Mở trong trình duyệt</string>
 </resources>

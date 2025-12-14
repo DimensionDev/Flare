@@ -74,10 +74,10 @@
     <string name="misskey_visibility_home">Acasă</string>
     <string name="misskey_visibility_followers">Urmăritori</string>
     <string name="misskey_visibility_specified">Specificat</string>
-    <string name="misskey_visibility_public_description">Oricine poate vedea și stimula această notiță</string>
-    <string name="misskey_visibility_home_description">Doar utilizatorii din această instanță pot vedea această notiță</string>
-    <string name="misskey_visibility_followers_description">Doar adepții pot vedea această notiță</string>
-    <string name="misskey_visibility_specified_description">Numai utilizatorii menționați pot vedea această notiță</string>
+    <string name="misskey_visibility_public_description">Oricine poate vedea și stimula acest post</string>
+    <string name="misskey_visibility_home_description">Doar utilizatorii din această instanță pot vedea această postare</string>
+    <string name="misskey_visibility_followers_description">Doar adepții pot vedea acest articol</string>
+    <string name="misskey_visibility_specified_description">Numai utilizatorii menționați pot vedea această postare</string>
     <string name="bluesky_login_username_hint">Nume</string>
     <string name="bluesky_login_password_hint">Parolă</string>
     <string name="bluesky_login_auth_factor_token_hint">Token factor de autentificare</string>
@@ -108,21 +108,21 @@
     <string name="discover_status">Postări populare</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Utilizatori</string>
-    <string name="search_status">Status</string>
+    <string name="search_status">Postează</string>
     <string name="quick_menu_add_account">Adăugare cont</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Afișare acțiuni</string>
-    <string name="settings_appearance_show_actions_description">Arată acțiunile în partea de jos a stării</string>
+    <string name="settings_appearance_show_actions_description">Arată acţiunile în partea de jos a postării</string>
     <string name="settings_appearance_show_media">Arată media</string>
-    <string name="settings_appearance_show_media_description">Arată media în stare</string>
+    <string name="settings_appearance_show_media_description">Arată media în postare</string>
     <string name="settings_appearance_show_numbers">Arată numerele</string>
-    <string name="settings_appearance_show_numbers_description">Arată numerele în partea de jos a stării</string>
+    <string name="settings_appearance_show_numbers_description">Arată numerele în partea de jos a postării</string>
     <string name="settings_appearance_show_cw_img">Afișare conținut sensibil</string>
-    <string name="settings_appearance_show_cw_img_description">Arată întotdeauna conținut sensibil în stare</string>
+    <string name="settings_appearance_show_cw_img_description">Arată întotdeauna conținut sensibil în postare</string>
     <string name="settings_appearance_expand_media">Extinde media la dimensiune completă</string>
     <string name="settings_appearance_expand_media_description">Păstraţi spectradio media în cronologie</string>
     <string name="settings_appearance_video_autoplay">Auto-redare video</string>
-    <string name="settings_appearance_video_autoplay_description">Redă clipuri video automat în stare</string>
+    <string name="settings_appearance_video_autoplay_description">Redă automat videoclipuri în postare</string>
     <string name="settings_appearance_video_autoplay_wifi">Doar Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Întotdeauna</string>
     <string name="settings_appearance_video_autoplay_never">Niciodată</string>
@@ -138,9 +138,9 @@
     <string name="settings_appearance_dynamic_theme">Temă dinamică</string>
     <string name="settings_appearance_dynamic_theme_description">Schimbă tema aplicației pe baza imaginii de fundal a dispozitivului</string>
     <string name="settings_appearance_show_link_previews">Arată previzualizările link-ului</string>
-    <string name="settings_appearance_show_link_previews_description">Arată previzualizările link-ului în stare</string>
+    <string name="settings_appearance_show_link_previews_description">Arată previzualizările link-ului în postare</string>
     <string name="settings_appearance_compat_link_previews">Simplifică previzualizările link-ului</string>
-    <string name="settings_appearance_compat_link_previews_description">Arată previzualizările link-ului în modul de simplificare în stare</string>
+    <string name="settings_appearance_compat_link_previews_description">Arată previzualizările link-ului în modul de simplificare a postării</string>
     <string name="settings_appearance_theme_color">Culoarea temei</string>
     <string name="settings_appearance_theme_color_description">Schimbă culoarea aplicației pentru temă</string>
     <string name="settings_appearance_theme_pure_color">Mod contrast mare</string>
@@ -165,7 +165,7 @@
     <string name="settings_storage_clear_image_cache">Golire cache imagine</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB de imagini vor fi eliminate</string>
     <string name="settings_storage_clear_database">Goliţi baza de date cache</string>
-    <string name="settings_storage_clear_database_description">%1$s utilizatori, stările %2$s vor fi șterse</string>
+    <string name="settings_storage_clear_database_description">%1$s utilizatori, postările %2$s vor fi eliminate</string>
     <string name="settings_storage_app_log">Deschide jurnalul aplicației</string>
     <string name="settings_storage_app_log_description">Vezi jurnalul aplicațiilor</string>
     <string name="service_select_instance_input_placeholder">URL Instanță</string>
@@ -261,7 +261,7 @@
     <string name="following_title">Urmăriți</string>
     <string name="fans_title">Urmăritor</string>
     <string name="local_history_search_placeholder">Caută cache local</string>
-    <string name="local_history_search_status_title">Status</string>
+    <string name="local_history_search_status_title">Postează</string>
     <string name="local_history_search_user_title">Utilizator</string>
     <string name="rss_sources_title">Surse RSS</string>
     <string name="add_rss_source">Adaugă sursă RSS</string>
@@ -303,6 +303,9 @@
     <string name="tab_settings_mixed_timeline">Adaugă cronologie mixtă</string>
     <string name="tab_settings_mixed_timeline_desc">Amestecul cronologiei va amesteca toate tab-urile de cronologie într-o singură filă</string>
     <string name="home_tab_social_timeline_title">Sociale</string>
+    <string name="deeplink_account_selection_title">Selectare cont</string>
+    <string name="deeplink_account_selection_message">Selectați un cont pentru a deschide acest link</string>
+    <string name="deeplink_account_selection_browser">Deschide în browser</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
                 <li>Remedieri ale erorilor şi îmbunătăţiri de performanţă.</li>

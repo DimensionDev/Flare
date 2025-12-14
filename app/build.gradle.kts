@@ -37,8 +37,12 @@ android {
         applicationId = "dev.dimension.flare"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.compileSdk.get().toInt()
-        versionCode = System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: fdroidProp.getProperty("versionCode")?.toIntOrNull() ?: 1
-        versionName = System.getenv("BUILD_VERSION")?.toString() ?: fdroidProp.getProperty("versionName")?.toString() ?: "0.0.0"
+        versionCode =
+            System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: fdroidProp.getProperty("versionCode")
+                ?.toIntOrNull() ?: 1
+        versionName =
+            System.getenv("BUILD_VERSION")?.toString() ?: fdroidProp.getProperty("versionName")
+                ?.toString() ?: "0.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -188,3 +192,57 @@ if (project.file("google-services.json").exists()) {
         uploadCrashlyticsMappingFileRelease.dependsOn(processDebugGoogleServices)
     }
 }
+
+
+abstract class GenerateDeepLinkManifestTask : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val hostsFile: RegularFileProperty
+    @get:OutputFile
+    abstract val manifest: RegularFileProperty
+
+    @TaskAction
+    fun run() {
+        val hosts = hostsFile.get().asFile.readLines()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() && !it.startsWith("#") }
+            .distinct()
+        val dataTags = hosts.joinToString("\n") { host ->
+            """<data android:host="$host" />"""
+        }
+
+        manifest.get().asFile.writeText(
+            """
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <application>
+    <activity android:name="dev.dimension.flare.MainActivity">
+      <intent-filter android:autoVerify="false">
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+         <data android:scheme="https" />
+        $dataTags
+      </intent-filter>
+    </activity>
+  </application>
+</manifest>
+      """.trimIndent()
+        )
+    }
+}
+
+extensions.getByType(com.android.build.api.variant.AndroidComponentsExtension::class.java)
+    .onVariants { variant: com.android.build.api.variant.Variant ->
+        val t = tasks.register(
+            "generate${variant.name.replaceFirstChar { it.uppercase() }}DeepLinkManifest",
+            GenerateDeepLinkManifestTask::class.java
+        ) {
+            hostsFile = project.layout.projectDirectory.file("deeplink.txt")
+        }
+
+        variant.sources.manifests.addGeneratedManifestFile(
+            t,
+            GenerateDeepLinkManifestTask::manifest
+        )
+    }

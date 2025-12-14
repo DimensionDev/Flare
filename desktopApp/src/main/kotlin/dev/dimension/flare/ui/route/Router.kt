@@ -48,6 +48,7 @@ import dev.dimension.flare.ui.screen.rss.EditRssSourceScreen
 import dev.dimension.flare.ui.screen.rss.ImportOPMLScreen
 import dev.dimension.flare.ui.screen.rss.RssListScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
+import dev.dimension.flare.ui.screen.settings.AppLoggingScreen
 import dev.dimension.flare.ui.screen.settings.LocalCacheScreen
 import dev.dimension.flare.ui.screen.settings.SettingsScreen
 import dev.dimension.flare.ui.screen.settings.WebViewLoginScreen
@@ -400,7 +401,14 @@ internal fun WindowScope.RouteContent(
                 toLocalCache = {
                     navigate(Route.LocalCache)
                 },
+                toAppLog = {
+                    navigate(Route.AppLogging)
+                },
             )
+        }
+
+        Route.AppLogging -> {
+            AppLoggingScreen()
         }
 
         is Timeline -> {

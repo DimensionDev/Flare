@@ -114,6 +114,8 @@ import dev.dimension.flare.settings_local_history_title
 import dev.dimension.flare.settings_privacy_policy
 import dev.dimension.flare.settings_status_appearance_subtitle
 import dev.dimension.flare.settings_status_appearance_title
+import dev.dimension.flare.settings_storage_app_log
+import dev.dimension.flare.settings_storage_app_log_description
 import dev.dimension.flare.settings_storage_clear_database
 import dev.dimension.flare.settings_storage_clear_database_description
 import dev.dimension.flare.settings_storage_clear_image_cache
@@ -172,6 +174,7 @@ import java.util.Locale
 internal fun SettingsScreen(
     toLogin: () -> Unit,
     toLocalCache: () -> Unit,
+    toAppLog: () -> Unit,
 ) {
     val state by producePresenter { presenter() }
 
@@ -708,6 +711,23 @@ internal fun SettingsScreen(
                 },
                 icon = null,
             ) {
+                CardExpanderItem(
+                    onClick = toAppLog,
+                    heading = {
+                        Text(stringResource(Res.string.settings_storage_app_log))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_storage_app_log_description))
+                    },
+                    trailing = {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.AngleRight,
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp),
+                        )
+                    },
+                )
+
                 ExpanderItem(
                     heading = {
                         Text(text = stringResource(Res.string.settings_storage_clear_image_cache))

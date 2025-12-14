@@ -29,7 +29,9 @@ class DeepLinkMappingTest {
         assertEquals(Url("https://$host/@{handle}"), profile.uriPattern)
         assertEquals(
             listOf("handle" to true),
-            profile.pathSegments.filter { it.stringValue.isNotEmpty() }.map { it.stringValue to it.isParamArg },
+            profile.pathSegments
+                .filter { it.stringValue.isNotEmpty() }
+                .map { it.stringValue to it.isParamArg },
         )
 
         val post = patterns[1]
@@ -37,7 +39,9 @@ class DeepLinkMappingTest {
         assertEquals(Url("https://$host/@{handle}/{id}"), post.uriPattern)
         assertEquals(
             listOf("handle" to true, "id" to true),
-            post.pathSegments.filter { it.stringValue.isNotEmpty() }.map { it.stringValue to it.isParamArg },
+            post.pathSegments
+                .filter { it.stringValue.isNotEmpty() }
+                .map { it.stringValue to it.isParamArg },
         )
     }
 
@@ -54,7 +58,9 @@ class DeepLinkMappingTest {
         assertEquals(Url("https://$host/@{handle}"), profile.uriPattern)
         assertEquals(
             listOf("handle" to true),
-            profile.pathSegments.filter { it.stringValue.isNotEmpty() }.map { it.stringValue to it.isParamArg },
+            profile.pathSegments
+                .filter { it.stringValue.isNotEmpty() }
+                .map { it.stringValue to it.isParamArg },
         )
 
         val post = patterns[1]
@@ -62,7 +68,9 @@ class DeepLinkMappingTest {
         assertEquals(Url("https://$host/notes/{id}"), post.uriPattern)
         assertEquals(
             listOf("notes" to false, "id" to true),
-            post.pathSegments.filter { it.stringValue.isNotEmpty() }.map { it.stringValue to it.isParamArg },
+            post.pathSegments
+                .filter { it.stringValue.isNotEmpty() }
+                .map { it.stringValue to it.isParamArg },
         )
     }
 
@@ -79,7 +87,9 @@ class DeepLinkMappingTest {
         assertEquals(Url("https://$host/profile/{handle}"), profile.uriPattern)
         assertEquals(
             listOf("profile" to false, "handle" to true),
-            profile.pathSegments.filter { it.stringValue.isNotEmpty() }.map { it.stringValue to it.isParamArg },
+            profile.pathSegments
+                .filter { it.stringValue.isNotEmpty() }
+                .map { it.stringValue to it.isParamArg },
         )
 
         val post = patterns[1]
@@ -87,7 +97,9 @@ class DeepLinkMappingTest {
         assertEquals(Url("https://$host/profile/{handle}/post/{id}"), post.uriPattern)
         assertEquals(
             listOf("profile" to false, "handle" to true, "post" to false, "id" to true),
-            post.pathSegments.filter { it.stringValue.isNotEmpty() }.map { it.stringValue to it.isParamArg },
+            post.pathSegments
+                .filter { it.stringValue.isNotEmpty() }
+                .map { it.stringValue to it.isParamArg },
         )
     }
 
@@ -97,14 +109,16 @@ class DeepLinkMappingTest {
 
         val patterns = DeepLinkMapping.generatePattern(PlatformType.xQt, host)
 
-        assertEquals(8, patterns.size)
+        assertEquals(12, patterns.size)
 
         val profile = patterns[0]
         assertEquals(DeepLinkMapping.Type.Profile.serializer(), profile.serializer)
         assertEquals(Url("https://$host/{handle}"), profile.uriPattern)
         assertEquals(
             listOf("handle" to true),
-            profile.pathSegments.filter { it.stringValue.isNotEmpty() }.map { it.stringValue to it.isParamArg },
+            profile.pathSegments
+                .filter { it.stringValue.isNotEmpty() }
+                .map { it.stringValue to it.isParamArg },
         )
 
         val post = patterns[4]
@@ -112,7 +126,25 @@ class DeepLinkMappingTest {
         assertEquals(Url("https://$host/{handle}/status/{id}"), post.uriPattern)
         assertEquals(
             listOf("handle" to true, "status" to false, "id" to true),
-            post.pathSegments.filter { it.stringValue.isNotEmpty() }.map { it.stringValue to it.isParamArg },
+            post.pathSegments
+                .filter { it.stringValue.isNotEmpty() }
+                .map { it.stringValue to it.isParamArg },
+        )
+
+        val media = patterns[8]
+        assertEquals(DeepLinkMapping.Type.PostMedia.serializer(), media.serializer)
+        assertEquals(Url("https://$host/{handle}/status/{id}/photo/{index}"), media.uriPattern)
+        assertEquals(
+            listOf(
+                "handle" to true,
+                "status" to false,
+                "id" to true,
+                "photo" to false,
+                "index" to true,
+            ),
+            media.pathSegments
+                .filter { it.stringValue.isNotEmpty() }
+                .map { it.stringValue to it.isParamArg },
         )
     }
 
@@ -172,8 +204,18 @@ class DeepLinkMappingTest {
         val mapping:
             ImmutableMap<UiAccount, ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>> =
             persistentMapOf(
-                account1 to DeepLinkMapping.generatePattern(PlatformType.Mastodon, account1.accountKey.host).toImmutableList(),
-                account2 to DeepLinkMapping.generatePattern(PlatformType.Mastodon, account2.accountKey.host).toImmutableList(),
+                account1 to
+                    DeepLinkMapping
+                        .generatePattern(
+                            PlatformType.Mastodon,
+                            account1.accountKey.host,
+                        ).toImmutableList(),
+                account2 to
+                    DeepLinkMapping
+                        .generatePattern(
+                            PlatformType.Mastodon,
+                            account2.accountKey.host,
+                        ).toImmutableList(),
             )
 
         val matches = DeepLinkMapping.matches("https://mastodon.social/@alice", mapping)
@@ -193,7 +235,12 @@ class DeepLinkMappingTest {
         val mapping:
             ImmutableMap<UiAccount, ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>>> =
             persistentMapOf(
-                account to DeepLinkMapping.generatePattern(PlatformType.Mastodon, account.accountKey.host).toImmutableList(),
+                account to
+                    DeepLinkMapping
+                        .generatePattern(
+                            PlatformType.Mastodon,
+                            account.accountKey.host,
+                        ).toImmutableList(),
             )
 
         // URL containing none of the valid hosts
@@ -239,33 +286,60 @@ class DeepLinkMappingTest {
                             PlatformType.Misskey,
                             misskeyAccount.accountKey.host,
                         ).toImmutableList(),
-                bskyAccount to DeepLinkMapping.generatePattern(PlatformType.Bluesky, bskyAccount.accountKey.host).toImmutableList(),
-                xAccount to DeepLinkMapping.generatePattern(PlatformType.xQt, xAccount.accountKey.host).toImmutableList(),
+                bskyAccount to
+                    DeepLinkMapping
+                        .generatePattern(
+                            PlatformType.Bluesky,
+                            bskyAccount.accountKey.host,
+                        ).toImmutableList(),
+                xAccount to
+                    DeepLinkMapping
+                        .generatePattern(
+                            PlatformType.xQt,
+                            xAccount.accountKey.host,
+                        ).toImmutableList(),
             )
 
         // https://mastodon.example/@alice
-        val mastodonProfileMatch = DeepLinkMapping.matches("https://mastodon.example/@alice", mapping)
+        val mastodonProfileMatch =
+            DeepLinkMapping.matches("https://mastodon.example/@alice", mapping)
         assertEquals(DeepLinkMapping.Type.Profile("alice"), mastodonProfileMatch[mastodonAccount])
 
         // https://mastodon.example/@alice/12345
-        val mastodonPostMatch = DeepLinkMapping.matches("https://mastodon.example/@alice/12345", mapping)
-        assertEquals(DeepLinkMapping.Type.Post("alice", "12345"), mastodonPostMatch[mastodonAccount])
+        val mastodonPostMatch =
+            DeepLinkMapping.matches("https://mastodon.example/@alice/12345", mapping)
+        assertEquals(
+            DeepLinkMapping.Type.Post("alice", "12345"),
+            mastodonPostMatch[mastodonAccount],
+        )
 
         // https://misskey.example/@bob
         val misskeyProfileMatch = DeepLinkMapping.matches("https://misskey.example/@bob", mapping)
         assertEquals(DeepLinkMapping.Type.Profile("bob"), misskeyProfileMatch[misskeyAccount])
 
         // https://misskey.example/notes/12345
-        val misskeyPostMatch = DeepLinkMapping.matches("https://misskey.example/notes/12345", mapping)
+        val misskeyPostMatch =
+            DeepLinkMapping.matches("https://misskey.example/notes/12345", mapping)
         assertEquals(DeepLinkMapping.Type.Post(null, "12345"), misskeyPostMatch[misskeyAccount])
 
         // https://bsky.example/profile/alice.bsky.social
-        val bskyProfileMatch = DeepLinkMapping.matches("https://bsky.example/profile/alice.bsky.social", mapping)
-        assertEquals(DeepLinkMapping.Type.Profile("alice.bsky.social"), bskyProfileMatch[bskyAccount])
+        val bskyProfileMatch =
+            DeepLinkMapping.matches("https://bsky.example/profile/alice.bsky.social", mapping)
+        assertEquals(
+            DeepLinkMapping.Type.Profile("alice.bsky.social"),
+            bskyProfileMatch[bskyAccount],
+        )
 
         // https://bsky.example/profile/alice.bsky.social/post/12345
-        val bskyPostMatch = DeepLinkMapping.matches("https://bsky.example/profile/alice.bsky.social/post/12345", mapping)
-        assertEquals(DeepLinkMapping.Type.Post("alice.bsky.social", "12345"), bskyPostMatch[bskyAccount])
+        val bskyPostMatch =
+            DeepLinkMapping.matches(
+                "https://bsky.example/profile/alice.bsky.social/post/12345",
+                mapping,
+            )
+        assertEquals(
+            DeepLinkMapping.Type.Post("alice.bsky.social", "12345"),
+            bskyPostMatch[bskyAccount],
+        )
 
         // https://x.example/alice
         val xProfileMatch = DeepLinkMapping.matches("https://$xqtHost/alice", mapping)
@@ -274,6 +348,11 @@ class DeepLinkMappingTest {
         // https://x.example/alice/status/12345
         val xPostMatch = DeepLinkMapping.matches("https://$xqtHost/alice/status/12345", mapping)
         assertEquals(DeepLinkMapping.Type.Post("alice", "12345"), xPostMatch[xAccount])
+
+        // https://x.example/alice/status/12345/photo/1
+        val xPostPhotoMatch =
+            DeepLinkMapping.matches("https://$xqtHost/alice/status/12345/photo/1", mapping)
+        assertEquals(DeepLinkMapping.Type.PostMedia("alice", "12345", 1), xPostPhotoMatch[xAccount])
     }
 
     @Test

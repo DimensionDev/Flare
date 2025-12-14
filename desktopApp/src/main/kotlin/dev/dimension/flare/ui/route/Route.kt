@@ -51,6 +51,8 @@ internal sealed interface Route {
 
     data object ServiceSelect : ScreenRoute
 
+    data object AppLogging : ScreenRoute
+
     data class AllLists(
         val accountType: AccountType,
     ) : ScreenRoute

@@ -216,13 +216,13 @@ abstract class GenerateDeepLinkManifestTask : DefaultTask() {
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
   <application>
-    <activity android:name="dev.dimension.flare.MainActivity">
+    <activity android:name="dev.dimension.flare.MainActivity" android:exported="true">
       <intent-filter android:autoVerify="false">
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
          <data android:scheme="https" />
-        $dataTags
+         $dataTags
       </intent-filter>
     </activity>
   </application>

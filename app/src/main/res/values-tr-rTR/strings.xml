@@ -70,10 +70,6 @@
     <string name="misskey_visibility_home">Ana Sayfa</string>
     <string name="misskey_visibility_followers">Takipçiler</string>
     <string name="misskey_visibility_specified">Belirtilen</string>
-    <string name="misskey_visibility_public_description">Herkes bu paylaşımı görebilir ve yayabilir</string>
-    <string name="misskey_visibility_home_description">Sadece bu örnekteki kullanıcılar bu paylaşımı görebilir</string>
-    <string name="misskey_visibility_followers_description">Sadece takipçiler bu paylaşımı görebilir</string>
-    <string name="misskey_visibility_specified_description">Sadece bahsedilen kullanıcılar bu paylaşımı görebilir</string>
     <string name="bluesky_login_username_hint">Kullanıcı adı</string>
     <string name="bluesky_login_password_hint">Şifre</string>
     <string name="report_title">Şikayet et</string>
@@ -99,21 +95,15 @@
     <string name="discover_users">Kullanıcıları öner</string>
     <string name="discover_hashtags">Gündemdeki Etiketler</string>
     <string name="search_users">Kullanıcılar</string>
-    <string name="search_status">Durum</string>
     <string name="quick_menu_add_account">Hesap ekle</string>
     <string name="settings_appearance_generic">Genel</string>
     <string name="settings_appearance_show_actions">Eylemleri göster</string>
-    <string name="settings_appearance_show_actions_description">Durumun altında eylemleri göster</string>
     <string name="settings_appearance_show_media">Medya göster</string>
-    <string name="settings_appearance_show_media_description">Durumda medyayı göster</string>
     <string name="settings_appearance_show_numbers">Sayıları göster</string>
-    <string name="settings_appearance_show_numbers_description">Durumun altında sayıları göster</string>
     <string name="settings_appearance_show_cw_img">Duyarlı içerikleri göster</string>
-    <string name="settings_appearance_show_cw_img_description">Durumda her zaman duyarlı içerikleri göster</string>
     <string name="settings_appearance_expand_media">Medya tam boyut olarak genişlet</string>
     <string name="settings_appearance_expand_media_description">Zaman çizelgesindeki medyanın en boy oranını koru</string>
     <string name="settings_appearance_video_autoplay">Videoları otomatik oynatma</string>
-    <string name="settings_appearance_video_autoplay_description">Durumda videoları otomatik oynat</string>
     <string name="settings_appearance_video_autoplay_wifi">Sadece Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Her zaman</string>
     <string name="settings_appearance_video_autoplay_never">Asla</string>
@@ -129,15 +119,12 @@
     <string name="settings_appearance_dynamic_theme">Dinamik tema</string>
     <string name="settings_appearance_dynamic_theme_description">Uygulamanın temasını cihazın duvar kağıdına göre değiştir</string>
     <string name="settings_appearance_show_link_previews">Bağlantı önizlemelerini göster</string>
-    <string name="settings_appearance_show_link_previews_description">Durumda bağlantı önizlemelerini göster</string>
     <string name="settings_appearance_compat_link_previews">Bağlantı önizlemelerini basitleştir</string>
-    <string name="settings_appearance_compat_link_previews_description">Durumda basit modda bağlantı önizlemelerini göster</string>
     <string name="settings_appearance_theme_color">Tema rengi</string>
     <string name="settings_appearance_theme_color_description">Uygulamanın tema rengini değiştir</string>
     <string name="settings_storage_clear_image_cache">Görüntü önbelleğini temizle</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB görüntü silinecek</string>
     <string name="settings_storage_clear_database">Önbellek veritabanını temizle</string>
-    <string name="settings_storage_clear_database_description">%1$s kullanıcı, %2$s durum silinecek</string>
     <string name="settings_storage_app_log">Uygulama günlüğünü aç</string>
     <string name="settings_storage_app_log_description">Uygulama günlüğünü görüntüle</string>
     <string name="service_select_instance_input_placeholder">Örnek URL\'si</string>
@@ -230,7 +217,6 @@
     <string name="following_title">Takip Edilenler</string>
     <string name="fans_title">Takipçi</string>
     <string name="local_history_search_placeholder">Yerel önbellekte ara</string>
-    <string name="local_history_search_status_title">Durum</string>
     <string name="local_history_search_user_title">Kullanıcı</string>
     <string name="rss_sources_title_label">Başlık</string>
     <string name="rss_sources_url_label">Url</string>
@@ -259,4 +245,5 @@
     <string name="tab_settings_mixed_timeline">Karışık zaman çizelgesi sekmesi ekle</string>
     <string name="tab_settings_mixed_timeline_desc">Karışık zaman çizelgesi, tüm sekme zaman çizelgesi sonuçlarını tek bir sekmede karıştırır</string>
     <string name="home_tab_social_timeline_title">Sosyal</string>
+    <string name="deeplink_account_selection_browser">Tarayıcıda aç</string>
 </resources>

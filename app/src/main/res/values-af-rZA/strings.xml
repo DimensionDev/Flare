@@ -70,10 +70,6 @@
     <string name="misskey_visibility_home">Tuis</string>
     <string name="misskey_visibility_followers">Volgers</string>
     <string name="misskey_visibility_specified">Geselekteerde</string>
-    <string name="misskey_visibility_public_description">Enigiemand kan hierdie toot sien en versterk</string>
-    <string name="misskey_visibility_home_description">Slegs gebruikers op hierdie instansie kan hierdie toot sien</string>
-    <string name="misskey_visibility_followers_description">Slegs volgers kan hierdie toot sien</string>
-    <string name="misskey_visibility_specified_description">Slegs genoem gebruikers kan hierdie toot sien</string>
     <string name="bluesky_login_username_hint">Gebruikernaam</string>
     <string name="bluesky_login_password_hint">Wagwoord</string>
     <string name="report_title">Verslag</string>
@@ -99,21 +95,15 @@
     <string name="discover_users">Raadpleeg Gebruikers</string>
     <string name="discover_hashtags">Tendense Hashtags</string>
     <string name="search_users">Gebruikers</string>
-    <string name="search_status">Status</string>
     <string name="quick_menu_add_account">Voeg rekening by</string>
     <string name="settings_appearance_generic">Generies</string>
     <string name="settings_appearance_show_actions">Wys aksies</string>
-    <string name="settings_appearance_show_actions_description">Wys aksies aan die onderkant van die status</string>
     <string name="settings_appearance_show_media">Wys media</string>
-    <string name="settings_appearance_show_media_description">Wys media in die status</string>
     <string name="settings_appearance_show_numbers">Wys nommers</string>
-    <string name="settings_appearance_show_numbers_description">Wys nommers aan die onderkant van die status</string>
     <string name="settings_appearance_show_cw_img">Wys sensitiewe inhoud</string>
-    <string name="settings_appearance_show_cw_img_description">Wys altyd sensitiewe inhoud in die status</string>
     <string name="settings_appearance_expand_media">Strek media na volle grootte</string>
     <string name="settings_appearance_expand_media_description">Hou die verhouding van die media in tydlyn</string>
     <string name="settings_appearance_video_autoplay">Video outomaties speel</string>
-    <string name="settings_appearance_video_autoplay_description">Speel outomaties video\'s in die status</string>
     <string name="settings_appearance_video_autoplay_wifi">Slegs Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Altyd</string>
     <string name="settings_appearance_video_autoplay_never">Nooit</string>
@@ -129,15 +119,12 @@
     <string name="settings_appearance_dynamic_theme">Dynamiese tema</string>
     <string name="settings_appearance_dynamic_theme_description">Verander die tema van die toepassing gebaseer op die toestel se agtergrond</string>
     <string name="settings_appearance_show_link_previews">Wys skakel voorbeelde</string>
-    <string name="settings_appearance_show_link_previews_description">Wys skakel voorbeelde in die status</string>
     <string name="settings_appearance_compat_link_previews">Vereenvoudig skakel voorbeelde</string>
-    <string name="settings_appearance_compat_link_previews_description">Wys skakel voorbeelde in vereenvoudigde modus in die status</string>
     <string name="settings_appearance_theme_color">Tema kleur</string>
     <string name="settings_appearance_theme_color_description">Verander die temakleur van die toepassing</string>
     <string name="settings_storage_clear_image_cache">Maak beeldkas skoon</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB van beelde sal verwyder word</string>
     <string name="settings_storage_clear_database">Maak kas databasis skoon</string>
-    <string name="settings_storage_clear_database_description">%1$s gebruikers, %2$s statusse sal verwyder word</string>
     <string name="settings_storage_app_log">Open app log</string>
     <string name="settings_storage_app_log_description">Kyk die app log</string>
     <string name="service_select_instance_input_placeholder">Instansie URL</string>
@@ -230,7 +217,6 @@
     <string name="following_title">Volgendes</string>
     <string name="fans_title">Volger</string>
     <string name="local_history_search_placeholder">Soek plaaslike kas</string>
-    <string name="local_history_search_status_title">Status</string>
     <string name="local_history_search_user_title">Gebruiker</string>
     <string name="rss_sources_title_label">Titel</string>
     <string name="rss_sources_url_label">Url</string>
@@ -257,4 +243,5 @@
     <string name="home_tab_mixed_timeline_title">Gemengde</string>
     <string name="tab_settings_mixed_timeline">Voeg gemengde tydlyn tab by</string>
     <string name="tab_settings_mixed_timeline_desc">Gemengde tydlyn sal al die tab tydlyn resultate in \'n tab meng</string>
+    <string name="deeplink_account_selection_browser">Open in blaai</string>
 </resources>

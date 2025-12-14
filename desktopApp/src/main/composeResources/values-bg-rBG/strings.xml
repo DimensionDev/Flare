@@ -105,7 +105,6 @@
     <string name="settings_ai_config_enable_tldr">Включване на обобщаването с ИИ</string>
     <string name="settings_appearance_show_actions">Показване на действия</string>
     <string name="settings_appearance_show_media">Показване на медия</string>
-    <string name="settings_appearance_show_media_description">Показване на медия в статуса</string>
     <string name="settings_appearance_show_numbers">Показване на числа</string>
     <string name="settings_appearance_show_cw_img">Показване на чувствително съдържание</string>
     <string name="settings_appearance_expand_media">Разгъване на медията до пълен размер</string>
@@ -124,7 +123,6 @@
     <string name="settings_appearance_theme_auto">Автом.</string>
     <string name="settings_appearance_dynamic_theme">Динамична тема</string>
     <string name="settings_appearance_show_link_previews">Показване на прегледи на връзките</string>
-    <string name="settings_appearance_show_link_previews_description">Показване на прегледи на връзките в статуси</string>
     <string name="settings_appearance_compat_link_previews">Опростяване на прегледите на връзките</string>
     <string name="settings_appearance_theme_color">Цвят на темата</string>
     <string name="settings_appearance_theme_pure_color">Режим с висок контраст</string>
@@ -158,10 +156,6 @@
     <string name="misskey_visibility_home">Начало</string>
     <string name="misskey_visibility_followers">Последователи</string>
     <string name="misskey_visibility_specified">Определени</string>
-    <string name="misskey_visibility_public_description">Всеки може да види и подсили тази публикация</string>
-    <string name="misskey_visibility_home_description">Само потребители на тази инстанция могат да видят тази публикация</string>
-    <string name="misskey_visibility_followers_description">Само последователи могат да видят тази публикация</string>
-    <string name="misskey_visibility_specified_description">Само споменатите потребители могат да видят тази публикация</string>
     <string name="rss_sources_title">Източници на Rss</string>
     <string name="rss_sources_title_label">Заглавие</string>
     <string name="rss_sources_url_label">Url</string>
@@ -188,7 +182,7 @@
     <string name="edit_tab_with_avatar">С аватар</string>
     <string name="edit">Редактиране</string>
     <string name="local_history_search_placeholder">Търсене в локалния кеш</string>
-    <string name="local_history_search_status_title">Състояние</string>
     <string name="local_history_search_user_title">Потребител</string>
     <string name="settings_storage_clear_image_cache">Изчистване на кеша на изображенията</string>
+    <string name="deeplink_account_selection_browser">Отваряне в браузър</string>
 </resources>

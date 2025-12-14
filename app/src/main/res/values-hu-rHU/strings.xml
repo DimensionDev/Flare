@@ -70,10 +70,6 @@
     <string name="misskey_visibility_home">Főoldal</string>
     <string name="misskey_visibility_followers">Követők</string>
     <string name="misskey_visibility_specified">Megadott</string>
-    <string name="misskey_visibility_public_description">Bárki láthatja és megoszthatja ezt a tootot</string>
-    <string name="misskey_visibility_home_description">Csak a példányon lévő felhasználók láthatják ezt a tootot</string>
-    <string name="misskey_visibility_followers_description">Csak a követők láthatják ezt a tootot</string>
-    <string name="misskey_visibility_specified_description">Csak a megemlített felhasználók láthatják ezt a tootot</string>
     <string name="bluesky_login_username_hint">Felhasználónév</string>
     <string name="bluesky_login_password_hint">Jelszó</string>
     <string name="report_title">Jelentés</string>
@@ -99,21 +95,15 @@
     <string name="discover_users">Felhasználók ajánlása</string>
     <string name="discover_hashtags">Trendi hashtagok</string>
     <string name="search_users">Felhasználók</string>
-    <string name="search_status">Állapot</string>
     <string name="quick_menu_add_account">Fiók hozzáadása</string>
     <string name="settings_appearance_generic">Általános</string>
     <string name="settings_appearance_show_actions">Műveletek megjelenítése</string>
-    <string name="settings_appearance_show_actions_description">Műveletek megjelenítése az állapot alatt</string>
     <string name="settings_appearance_show_media">Média megjelenítése</string>
-    <string name="settings_appearance_show_media_description">Média megjelenítése az állapot alatt</string>
     <string name="settings_appearance_show_numbers">Számok megjelenítése</string>
-    <string name="settings_appearance_show_numbers_description">Számok megjelenítése az állapot alatt</string>
     <string name="settings_appearance_show_cw_img">Érzékeny tartalom megjelenítése</string>
-    <string name="settings_appearance_show_cw_img_description">Mindig mutassák az érzékeny tartalmat az állapotban</string>
     <string name="settings_appearance_expand_media">Média teljes méretre bővítése</string>
     <string name="settings_appearance_expand_media_description">Tartja a média arányait az idővonalon</string>
     <string name="settings_appearance_video_autoplay">Videók automatikus lejátszása</string>
-    <string name="settings_appearance_video_autoplay_description">Videók automatikus lejátszása az állapotban</string>
     <string name="settings_appearance_video_autoplay_wifi">Csak Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Mindig</string>
     <string name="settings_appearance_video_autoplay_never">Soha</string>
@@ -129,15 +119,12 @@
     <string name="settings_appearance_dynamic_theme">Dinamikus téma</string>
     <string name="settings_appearance_dynamic_theme_description">Változtassa meg az alkalmazás témáját a készülék háttérképe alapján</string>
     <string name="settings_appearance_show_link_previews">Link előnézetek megjelenítése</string>
-    <string name="settings_appearance_show_link_previews_description">Link előnézetek megjelenítése az állapotban</string>
     <string name="settings_appearance_compat_link_previews">Link előnézetek egyszerűsítése</string>
-    <string name="settings_appearance_compat_link_previews_description">Link előnézetek megjelenítése egyszerűsített módban az állapotban</string>
     <string name="settings_appearance_theme_color">Téma szín</string>
     <string name="settings_appearance_theme_color_description">Változtassa meg az alkalmazás színét</string>
     <string name="settings_storage_clear_image_cache">Kép gyorsítótár törlése</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB kép törlődik</string>
     <string name="settings_storage_clear_database">Gyorsítótár adatbázisának törlése</string>
-    <string name="settings_storage_clear_database_description">%1$s felhasználó, %2$s bejegyzés törlődik</string>
     <string name="settings_storage_app_log">Alkalmazásnapló megnyitása</string>
     <string name="settings_storage_app_log_description">Tekintse meg az alkalmazásnaplót</string>
     <string name="service_select_instance_input_placeholder">Példány URL</string>
@@ -230,7 +217,6 @@
     <string name="following_title">Követés</string>
     <string name="fans_title">Követő</string>
     <string name="local_history_search_placeholder">Helyi gyorsítótár keresése</string>
-    <string name="local_history_search_status_title">Állapot</string>
     <string name="local_history_search_user_title">Felhasználó</string>
     <string name="rss_sources_title_label">Cím</string>
     <string name="rss_sources_url_label">URL</string>
@@ -259,4 +245,5 @@
     <string name="tab_settings_mixed_timeline">Keverve idővonal fül hozzáadása</string>
     <string name="tab_settings_mixed_timeline_desc">A kevert idővonal minden tab idővonalát egy tabba keveri</string>
     <string name="home_tab_social_timeline_title">Szociális</string>
+    <string name="deeplink_account_selection_browser">Megnyitás a böngészőben</string>
 </resources>

@@ -74,10 +74,10 @@
     <string name="misskey_visibility_home">Domicile</string>
     <string name="misskey_visibility_followers">Abonnés</string>
     <string name="misskey_visibility_specified">Spécifié</string>
-    <string name="misskey_visibility_public_description">N\'importe qui peut voir et améliorer ce pouet</string>
-    <string name="misskey_visibility_home_description">Seuls les utilisateurs de cette instance peuvent voir ce pouet</string>
-    <string name="misskey_visibility_followers_description">Seuls les abonnés peuvent voir ce pouet</string>
-    <string name="misskey_visibility_specified_description">Seuls les utilisateurs mentionnés peuvent voir ce pouet</string>
+    <string name="misskey_visibility_public_description">N\'importe qui peut voir et améliorer ce message</string>
+    <string name="misskey_visibility_home_description">Seuls les utilisateurs de cette instance peuvent voir ce message</string>
+    <string name="misskey_visibility_followers_description">Seuls les abonnés peuvent voir ce message</string>
+    <string name="misskey_visibility_specified_description">Seuls les utilisateurs mentionnés peuvent voir ce message</string>
     <string name="bluesky_login_username_hint">Nom d\'utilisateur</string>
     <string name="bluesky_login_password_hint">Mot de passe</string>
     <string name="bluesky_login_auth_factor_token_hint">Jeton de facteur d\'authentification</string>
@@ -108,21 +108,21 @@
     <string name="discover_status">Publications tendances</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Utilisateurs</string>
-    <string name="search_status">Statut</string>
+    <string name="search_status">Poster</string>
     <string name="quick_menu_add_account">Ajouter un compte</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Afficher les actions</string>
-    <string name="settings_appearance_show_actions_description">Afficher les actions en bas du statut</string>
+    <string name="settings_appearance_show_actions_description">Afficher les actions en bas de la publication</string>
     <string name="settings_appearance_show_media">Afficher les médias</string>
-    <string name="settings_appearance_show_media_description">Afficher les médias dans le statut</string>
+    <string name="settings_appearance_show_media_description">Afficher les médias dans la publication</string>
     <string name="settings_appearance_show_numbers">Afficher les numéros</string>
-    <string name="settings_appearance_show_numbers_description">Afficher les numéros en bas du statut</string>
+    <string name="settings_appearance_show_numbers_description">Afficher les numéros en bas du message</string>
     <string name="settings_appearance_show_cw_img">Afficher le contenu sensible</string>
-    <string name="settings_appearance_show_cw_img_description">Toujours afficher le contenu sensible dans l\'état</string>
+    <string name="settings_appearance_show_cw_img_description">Toujours afficher le contenu sensible dans le message</string>
     <string name="settings_appearance_expand_media">Développer le média en pleine taille</string>
     <string name="settings_appearance_expand_media_description">Garder l\'aspectradio des médias dans la chronologie</string>
     <string name="settings_appearance_video_autoplay">Lecture automatique de la vidéo</string>
-    <string name="settings_appearance_video_autoplay_description">Lire automatiquement les vidéos dans l\'état</string>
+    <string name="settings_appearance_video_autoplay_description">Lire automatiquement les vidéos dans la publication</string>
     <string name="settings_appearance_video_autoplay_wifi">Wi-Fi uniquement</string>
     <string name="settings_appearance_video_autoplay_always">Toujours</string>
     <string name="settings_appearance_video_autoplay_never">Jamais</string>
@@ -138,9 +138,9 @@
     <string name="settings_appearance_dynamic_theme">Thème dynamique</string>
     <string name="settings_appearance_dynamic_theme_description">Changer le thème de l\'application en fonction du fond d\'écran de l\'appareil</string>
     <string name="settings_appearance_show_link_previews">Afficher les aperçus des liens</string>
-    <string name="settings_appearance_show_link_previews_description">Afficher les aperçus des liens dans le statut</string>
+    <string name="settings_appearance_show_link_previews_description">Afficher les aperçus des liens dans le message</string>
     <string name="settings_appearance_compat_link_previews">Simplifier les aperçus des liens</string>
-    <string name="settings_appearance_compat_link_previews_description">Afficher les aperçus des liens en mode simplification dans le statut</string>
+    <string name="settings_appearance_compat_link_previews_description">Afficher les aperçus des liens en mode simplification dans la publication</string>
     <string name="settings_appearance_theme_color">Couleur du thème</string>
     <string name="settings_appearance_theme_color_description">Changer la couleur du thème de l\'application</string>
     <string name="settings_appearance_theme_pure_color">Mode contraste élevé</string>
@@ -165,7 +165,7 @@
     <string name="settings_storage_clear_image_cache">Vider le cache des images</string>
     <string name="settings_storage_clear_image_cache_description">%1$s Mo d\'images seront supprimés</string>
     <string name="settings_storage_clear_database">Vider la base de données du cache</string>
-    <string name="settings_storage_clear_database_description">Les utilisateurs %1$s , les statuts %2$s seront supprimés</string>
+    <string name="settings_storage_clear_database_description">Les utilisateurs %1$s , les messages %2$s seront supprimés</string>
     <string name="settings_storage_app_log">Ouvrir le journal de l\'application</string>
     <string name="settings_storage_app_log_description">Voir le journal des applications</string>
     <string name="service_select_instance_input_placeholder">URL de l\'instance</string>
@@ -261,7 +261,7 @@
     <string name="following_title">Abonnements</string>
     <string name="fans_title">Abonné</string>
     <string name="local_history_search_placeholder">Rechercher dans la cache locale</string>
-    <string name="local_history_search_status_title">Statut</string>
+    <string name="local_history_search_status_title">Poster</string>
     <string name="local_history_search_user_title">Utilisateur</string>
     <string name="rss_sources_title">Sources RSS</string>
     <string name="add_rss_source">Ajouter une source RSS</string>
@@ -303,6 +303,9 @@
     <string name="tab_settings_mixed_timeline">Ajouter un onglet de timeline mixte</string>
     <string name="tab_settings_mixed_timeline_desc">La timeline mixte mélangera le résultat de tous les onglets dans un onglet</string>
     <string name="home_tab_social_timeline_title">Réseaux sociaux</string>
+    <string name="deeplink_account_selection_title">Sélectionner un compte</string>
+    <string name="deeplink_account_selection_message">Sélectionnez un compte pour ouvrir ce lien</string>
+    <string name="deeplink_account_selection_browser">Ouvrir dans le navigateur</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
                 <li>Corrections de bugs et améliorations de performances.</li>

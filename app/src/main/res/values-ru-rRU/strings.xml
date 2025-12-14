@@ -74,10 +74,10 @@
     <string name="misskey_visibility_home">Домашний</string>
     <string name="misskey_visibility_followers">Подписчики</string>
     <string name="misskey_visibility_specified">Упомянутые</string>
-    <string name="misskey_visibility_public_description">Любой пользователь может видеть и продвигать эту запись</string>
-    <string name="misskey_visibility_home_description">Только пользователи на вашем экземпляре могут видеть эту запись</string>
-    <string name="misskey_visibility_followers_description">Только пользователи, которые на вас подписаны, могут видеть эту запись</string>
-    <string name="misskey_visibility_specified_description">Только упомянутые пользователи могут видеть эту запись</string>
+    <string name="misskey_visibility_public_description">Любой может увидеть и усилить этот пост</string>
+    <string name="misskey_visibility_home_description">Только пользователи этого экземпляра могут видеть это сообщение</string>
+    <string name="misskey_visibility_followers_description">Только подписчики могут видеть этот пост</string>
+    <string name="misskey_visibility_specified_description">Только упомянутые пользователи могут видеть это сообщение</string>
     <string name="bluesky_login_username_hint">Имя пользователя</string>
     <string name="bluesky_login_password_hint">Пароль</string>
     <string name="bluesky_login_auth_factor_token_hint">Токен фактора аутентификации</string>
@@ -108,21 +108,21 @@
     <string name="discover_status">Популярные записи</string>
     <string name="discover_hashtags">Популярные хэштеги</string>
     <string name="search_users">Пользователи</string>
-    <string name="search_status">Статус</string>
+    <string name="search_status">Пост</string>
     <string name="quick_menu_add_account">Добавить аккаунт</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Показать кнопки действий</string>
-    <string name="settings_appearance_show_actions_description">Показать кнопки действий под записью</string>
+    <string name="settings_appearance_show_actions_description">Показать действия в нижней части записи</string>
     <string name="settings_appearance_show_media">Показать медиа</string>
-    <string name="settings_appearance_show_media_description">Показывать медиафайлы в записи</string>
+    <string name="settings_appearance_show_media_description">Показать медиа в посте</string>
     <string name="settings_appearance_show_numbers">Показать цифры</string>
-    <string name="settings_appearance_show_numbers_description">Показывать количество взаимодействий рядом с кнопками под записью</string>
+    <string name="settings_appearance_show_numbers_description">Показывать номера в нижней части записи</string>
     <string name="settings_appearance_show_cw_img">Показать чувствительный контент</string>
-    <string name="settings_appearance_show_cw_img_description">Всегда показывать конфиденциальный контент в статусе</string>
+    <string name="settings_appearance_show_cw_img_description">Всегда показывать конфиденциальный контент в сообщении</string>
     <string name="settings_appearance_expand_media">Развернуть медиафайлы в полный размер</string>
     <string name="settings_appearance_expand_media_description">Сохранять соотношение сторон медиафайлов в ленте</string>
     <string name="settings_appearance_video_autoplay">Автовоспроизведение видео</string>
-    <string name="settings_appearance_video_autoplay_description">Автоматически воспроизводить видео в записях</string>
+    <string name="settings_appearance_video_autoplay_description">Автоматически воспроизводить видео в посте</string>
     <string name="settings_appearance_video_autoplay_wifi">Только Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Всегда</string>
     <string name="settings_appearance_video_autoplay_never">Никогда</string>
@@ -138,9 +138,9 @@
     <string name="settings_appearance_dynamic_theme">Динамическая тема</string>
     <string name="settings_appearance_dynamic_theme_description">Изменить тему приложения на основе обоев устройства</string>
     <string name="settings_appearance_show_link_previews">Предпросмотр ссылок</string>
-    <string name="settings_appearance_show_link_previews_description">Показывать предпросмотр ссылок в записи</string>
+    <string name="settings_appearance_show_link_previews_description">Показывать предпросмотр ссылок в посте</string>
     <string name="settings_appearance_compat_link_previews">Упростить предпросмотр ссылок</string>
-    <string name="settings_appearance_compat_link_previews_description">Показывать предпросмотр ссылок в упрощенном виде в записи</string>
+    <string name="settings_appearance_compat_link_previews_description">Показывать превью ссылок в упрощенном режиме записи</string>
     <string name="settings_appearance_theme_color">Цвет темы</string>
     <string name="settings_appearance_theme_color_description">Изменить цвет темы приложения</string>
     <string name="settings_appearance_theme_pure_color">Режим высокой контрастности</string>
@@ -165,7 +165,7 @@
     <string name="settings_storage_clear_image_cache">Очистить кэш изображений</string>
     <string name="settings_storage_clear_image_cache_description">%1$s МБ изображений будет удалено</string>
     <string name="settings_storage_clear_database">Очистить базу данных кэша</string>
-    <string name="settings_storage_clear_database_description">%1$s пользователи, статусы %2$s будут удалены</string>
+    <string name="settings_storage_clear_database_description">%1$s пользователи, %2$s сообщения будут удалены</string>
     <string name="settings_storage_app_log">Открыть журнал приложений</string>
     <string name="settings_storage_app_log_description">Просмотр журнала приложений</string>
     <string name="service_select_instance_input_placeholder">URL экземпляра</string>
@@ -261,7 +261,7 @@
     <string name="following_title">Подписки</string>
     <string name="fans_title">Подписчики</string>
     <string name="local_history_search_placeholder">Поиск по локальному кэшу</string>
-    <string name="local_history_search_status_title">Записи</string>
+    <string name="local_history_search_status_title">Пост</string>
     <string name="local_history_search_user_title">Пользователи</string>
     <string name="rss_sources_title">RSS-ленты</string>
     <string name="add_rss_source">Добавить RSS-ленту</string>
@@ -303,6 +303,9 @@
     <string name="tab_settings_mixed_timeline">Добавить вкладку общей ленты</string>
     <string name="tab_settings_mixed_timeline_desc">В общей ленте отображаются записи со всех вкладок</string>
     <string name="home_tab_social_timeline_title">Соцсети</string>
+    <string name="deeplink_account_selection_title">Выберите аккаунт</string>
+    <string name="deeplink_account_selection_message">Выберите аккаунт, чтобы открыть эту ссылку</string>
+    <string name="deeplink_account_selection_browser">Открыть в браузере</string>
     <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
             <ul>
                 <li>Исправления ошибок и улучшения производительности.</li>

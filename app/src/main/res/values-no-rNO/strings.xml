@@ -74,10 +74,10 @@
     <string name="misskey_visibility_home">Hjem</string>
     <string name="misskey_visibility_followers">Følgere</string>
     <string name="misskey_visibility_specified">Spesifisert</string>
-    <string name="misskey_visibility_public_description">Alle kan se og booke dette tootet</string>
-    <string name="misskey_visibility_home_description">Bare brukere i denne forekomsten kan se dette tootet</string>
-    <string name="misskey_visibility_followers_description">Bare tilhengere kan se dette tootet</string>
-    <string name="misskey_visibility_specified_description">Bare nevnte brukere kan se dette tootet</string>
+    <string name="misskey_visibility_public_description">Alle kan se og forsterke dette innlegget</string>
+    <string name="misskey_visibility_home_description">Bare brukere i denne forekomsten kan se dette innlegget</string>
+    <string name="misskey_visibility_followers_description">Bare tilhengere kan se denne posten</string>
+    <string name="misskey_visibility_specified_description">Kun nevnte brukere kan se dette innlegget</string>
     <string name="bluesky_login_username_hint">Brukernavn</string>
     <string name="bluesky_login_password_hint">Passord</string>
     <string name="bluesky_login_auth_factor_token_hint">Autentiseringsfaktor Token</string>
@@ -108,21 +108,21 @@
     <string name="discover_status">Populære innlegg</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Brukere</string>
-    <string name="search_status">Status:</string>
+    <string name="search_status">Innlegg</string>
     <string name="quick_menu_add_account">Legg til konto</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Vis handlinger</string>
-    <string name="settings_appearance_show_actions_description">Vis handlinger på bunnen av statusen</string>
+    <string name="settings_appearance_show_actions_description">Vis handlinger på bunnen av innlegget</string>
     <string name="settings_appearance_show_media">Vis media</string>
-    <string name="settings_appearance_show_media_description">Vis media i status</string>
+    <string name="settings_appearance_show_media_description">Vis media i innlegget</string>
     <string name="settings_appearance_show_numbers">Vis tall</string>
-    <string name="settings_appearance_show_numbers_description">Vis tall fra bunnen av statusen</string>
+    <string name="settings_appearance_show_numbers_description">Vis tall på bunnen av innlegget</string>
     <string name="settings_appearance_show_cw_img">Vis sensitivt innhold</string>
-    <string name="settings_appearance_show_cw_img_description">Vis alltid sensitivt innhold i status</string>
+    <string name="settings_appearance_show_cw_img_description">Vis alltid sensitivt innhold i innlegget</string>
     <string name="settings_appearance_expand_media">Utvid media til full størrelse</string>
     <string name="settings_appearance_expand_media_description">Hold medias erfaring i tidslinje</string>
     <string name="settings_appearance_video_autoplay">Video autokjør</string>
-    <string name="settings_appearance_video_autoplay_description">Automatisk avspilling av videoer i status</string>
+    <string name="settings_appearance_video_autoplay_description">Automatisk spill av videoer i innlegget</string>
     <string name="settings_appearance_video_autoplay_wifi">Kun Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Alltid</string>
     <string name="settings_appearance_video_autoplay_never">Aldri</string>
@@ -138,9 +138,9 @@
     <string name="settings_appearance_dynamic_theme">Dynamisk tema</string>
     <string name="settings_appearance_dynamic_theme_description">Endre appens tema basert på enhetens bakgrunnsbilde</string>
     <string name="settings_appearance_show_link_previews">Vis forhåndsvisning av lenker</string>
-    <string name="settings_appearance_show_link_previews_description">Vis forhåndsvisning av link i status</string>
+    <string name="settings_appearance_show_link_previews_description">Vis forhåndsvisning av lenker i innlegget</string>
     <string name="settings_appearance_compat_link_previews">Forenkle lenkeforhåndsvisninger</string>
-    <string name="settings_appearance_compat_link_previews_description">Vis forhåndsvisninger av link i forenklingsmodus i status</string>
+    <string name="settings_appearance_compat_link_previews_description">Vis forhåndsvisning av lenker i forenkle modus i innlegget</string>
     <string name="settings_appearance_theme_color">Tema farge</string>
     <string name="settings_appearance_theme_color_description">Endre temafargen på appen</string>
     <string name="settings_appearance_theme_pure_color">Høy kontrastmodus</string>
@@ -165,7 +165,7 @@
     <string name="settings_storage_clear_image_cache">Tøm bildebuffer</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder vil bli fjernet</string>
     <string name="settings_storage_clear_database">Slett mellomlagerdatabase</string>
-    <string name="settings_storage_clear_database_description">%1$s brukere, %2$s statuser vil bli fjernet</string>
+    <string name="settings_storage_clear_database_description">%1$s brukere, %2$s innlegg vil bli fjernet</string>
     <string name="settings_storage_app_log">Åpne app-logg</string>
     <string name="settings_storage_app_log_description">Se app-loggen</string>
     <string name="service_select_instance_input_placeholder">Instans URL</string>
@@ -261,7 +261,7 @@
     <string name="following_title">Følger</string>
     <string name="fans_title">Følger</string>
     <string name="local_history_search_placeholder">Søk lokal cache</string>
-    <string name="local_history_search_status_title">Status:</string>
+    <string name="local_history_search_status_title">Innlegg</string>
     <string name="local_history_search_user_title">Bruker</string>
     <string name="rss_sources_title">RSS Kilder</string>
     <string name="add_rss_source">Legge til RSS kilde</string>
@@ -303,6 +303,9 @@
     <string name="tab_settings_mixed_timeline">Legg til blandet tidslinje fane</string>
     <string name="tab_settings_mixed_timeline_desc">Blandet tidslinje vil blande alle faners tidslinjen resulterer i en fane</string>
     <string name="home_tab_social_timeline_title">Sosial</string>
+    <string name="deeplink_account_selection_title">Velg konto</string>
+    <string name="deeplink_account_selection_message">Velg en konto for å åpne denne lenken</string>
+    <string name="deeplink_account_selection_browser">Åpne i nettleser</string>
     <string name="changelog_current"><![CDATA[            <span>Versjon %1$s:</span>
             <ul>
                 <li>Bug fikser og ytelsesforbedringer.</li>

@@ -72,10 +72,6 @@
     <string name="misskey_visibility_home">首頁</string>
     <string name="misskey_visibility_followers">追隨者</string>
     <string name="misskey_visibility_specified">指定</string>
-    <string name="misskey_visibility_public_description">誰都可以看到並提高此消息的曝光度</string>
-    <string name="misskey_visibility_home_description">只有此實例中的用戶可以看到此消息</string>
-    <string name="misskey_visibility_followers_description">只有追隨者可以看到此消息</string>
-    <string name="misskey_visibility_specified_description">只有被提及的用戶可以看到此消息</string>
     <string name="bluesky_login_username_hint">用戶名</string>
     <string name="bluesky_login_password_hint">密碼</string>
     <string name="bluesky_login_oauth_button">透過 OAuth 登入</string>
@@ -104,21 +100,15 @@
     <string name="discover_status">熱門貼文</string>
     <string name="discover_hashtags">熱門標籤</string>
     <string name="search_users">用戶</string>
-    <string name="search_status">狀態</string>
     <string name="quick_menu_add_account">添加帳號</string>
     <string name="settings_appearance_generic">通用</string>
     <string name="settings_appearance_show_actions">顯示操作</string>
-    <string name="settings_appearance_show_actions_description">狀態底部顯示操作</string>
     <string name="settings_appearance_show_media">顯示媒體</string>
-    <string name="settings_appearance_show_media_description">在狀態中顯示媒體</string>
     <string name="settings_appearance_show_numbers">顯示數字</string>
-    <string name="settings_appearance_show_numbers_description">狀態底部顯示數字</string>
     <string name="settings_appearance_show_cw_img">顯示敏感內容</string>
-    <string name="settings_appearance_show_cw_img_description">總是顯示狀態中的敏感內容</string>
     <string name="settings_appearance_expand_media">擴展媒體至全尺寸</string>
     <string name="settings_appearance_expand_media_description">在時間線中保持媒體的長寬比例</string>
     <string name="settings_appearance_video_autoplay">視頻自動播放</string>
-    <string name="settings_appearance_video_autoplay_description">在狀態中自動播放視頻</string>
     <string name="settings_appearance_video_autoplay_wifi">僅Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">總是</string>
     <string name="settings_appearance_video_autoplay_never">從不</string>
@@ -134,9 +124,7 @@
     <string name="settings_appearance_dynamic_theme">動態主題</string>
     <string name="settings_appearance_dynamic_theme_description">根據設備的牆紙更改應用主題</string>
     <string name="settings_appearance_show_link_previews">顯示鏈接預覽</string>
-    <string name="settings_appearance_show_link_previews_description">在狀態中顯示鏈接預覽</string>
     <string name="settings_appearance_compat_link_previews">簡化鏈接預覽</string>
-    <string name="settings_appearance_compat_link_previews_description">以簡化模式在狀態中顯示鏈接預覽</string>
     <string name="settings_appearance_theme_color">主題顏色</string>
     <string name="settings_appearance_theme_color_description">更改應用的主題顏色</string>
     <string name="settings_appearance_theme_pure_color">高對比模式</string>
@@ -155,7 +143,6 @@
     <string name="settings_storage_clear_image_cache">清除圖片快取</string>
     <string name="settings_storage_clear_image_cache_description">將移除%1$s MB的圖片</string>
     <string name="settings_storage_clear_database">清除快取數據庫</string>
-    <string name="settings_storage_clear_database_description">將移除%1$s用戶，%2$s狀態</string>
     <string name="settings_storage_app_log">打開應用日誌</string>
     <string name="settings_storage_app_log_description">查看應用日誌</string>
     <string name="service_select_instance_input_placeholder">實例網址</string>
@@ -250,7 +237,6 @@
     <string name="following_title">追蹤中</string>
     <string name="fans_title">粉絲</string>
     <string name="local_history_search_placeholder">搜尋本地快取</string>
-    <string name="local_history_search_status_title">狀態</string>
     <string name="local_history_search_user_title">用戶</string>
     <string name="rss_sources_title_label">標題</string>
     <string name="rss_sources_url_label">網址</string>
@@ -280,4 +266,5 @@
     <string name="tab_settings_mixed_timeline">添加綜合時間線標籤</string>
     <string name="tab_settings_mixed_timeline_desc">綜合時間線將所有標籤的時間線結果混合成一個標籤</string>
     <string name="home_tab_social_timeline_title">社會</string>
+    <string name="deeplink_account_selection_browser">在瀏覽器中打開</string>
 </resources>

@@ -74,10 +74,10 @@
     <string name="misskey_visibility_home">Hem</string>
     <string name="misskey_visibility_followers">Följare</string>
     <string name="misskey_visibility_specified">Angivet</string>
-    <string name="misskey_visibility_public_description">Vem som helst kan se och öka denna toot</string>
-    <string name="misskey_visibility_home_description">Endast användare på denna instans kan se denna toot</string>
-    <string name="misskey_visibility_followers_description">Endast följare kan se denna toot</string>
-    <string name="misskey_visibility_specified_description">Endast nämnda användare kan se denna toot</string>
+    <string name="misskey_visibility_public_description">Vem som helst kan se och öka detta inlägg</string>
+    <string name="misskey_visibility_home_description">Endast användare på denna instans kan se detta inlägg</string>
+    <string name="misskey_visibility_followers_description">Endast följare kan se det här inlägget</string>
+    <string name="misskey_visibility_specified_description">Endast nämnda användare kan se detta inlägg</string>
     <string name="bluesky_login_username_hint">Användarnamn</string>
     <string name="bluesky_login_password_hint">Lösenord</string>
     <string name="bluesky_login_auth_factor_token_hint">Autentiseringsfaktor token</string>
@@ -108,21 +108,21 @@
     <string name="discover_status">Trendande inlägg</string>
     <string name="discover_hashtags">Trending Hashtags</string>
     <string name="search_users">Användare</string>
-    <string name="search_status">Status</string>
+    <string name="search_status">Inlägg</string>
     <string name="quick_menu_add_account">Lägg till konto</string>
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Visa åtgärder</string>
-    <string name="settings_appearance_show_actions_description">Visa åtgärder längst ner på statusen</string>
+    <string name="settings_appearance_show_actions_description">Visa åtgärder längst ner i inlägget</string>
     <string name="settings_appearance_show_media">Visa media</string>
-    <string name="settings_appearance_show_media_description">Visa media i status</string>
+    <string name="settings_appearance_show_media_description">Visa media i inlägget</string>
     <string name="settings_appearance_show_numbers">Visa nummer</string>
-    <string name="settings_appearance_show_numbers_description">Visa siffror längst ner på statusen</string>
+    <string name="settings_appearance_show_numbers_description">Visa siffror längst ner på inlägget</string>
     <string name="settings_appearance_show_cw_img">Visa känsligt innehåll</string>
-    <string name="settings_appearance_show_cw_img_description">Visa alltid känsligt innehåll i status</string>
+    <string name="settings_appearance_show_cw_img_description">Visa alltid känsligt innehåll i inlägget</string>
     <string name="settings_appearance_expand_media">Expandera media till full storlek</string>
     <string name="settings_appearance_expand_media_description">Håll aspectradio av media i tidslinje</string>
     <string name="settings_appearance_video_autoplay">Spela upp video automatiskt</string>
-    <string name="settings_appearance_video_autoplay_description">Spela automatiskt upp videor i status</string>
+    <string name="settings_appearance_video_autoplay_description">Spela automatiskt upp videor i inlägget</string>
     <string name="settings_appearance_video_autoplay_wifi">Endast Wi-Fi</string>
     <string name="settings_appearance_video_autoplay_always">Alltid</string>
     <string name="settings_appearance_video_autoplay_never">Aldrig</string>
@@ -138,9 +138,9 @@
     <string name="settings_appearance_dynamic_theme">Dynamiskt tema</string>
     <string name="settings_appearance_dynamic_theme_description">Ändra temat för appen baserat på enhetens bakgrundsbild</string>
     <string name="settings_appearance_show_link_previews">Visa förhandsvisningar av länkar</string>
-    <string name="settings_appearance_show_link_previews_description">Visa länkförhandsvisningar i status</string>
+    <string name="settings_appearance_show_link_previews_description">Visa länkförhandsvisningar i inlägget</string>
     <string name="settings_appearance_compat_link_previews">Förenkla länkförhandsvisningar</string>
-    <string name="settings_appearance_compat_link_previews_description">Visa länkförhandsvisningar i förenklat läge i status</string>
+    <string name="settings_appearance_compat_link_previews_description">Visa länkförhandsvisningar i förenklat läge i inlägget</string>
     <string name="settings_appearance_theme_color">Tema färg</string>
     <string name="settings_appearance_theme_color_description">Ändra temafärgen på appen</string>
     <string name="settings_appearance_theme_pure_color">Hög kontrast läge</string>
@@ -165,7 +165,7 @@
     <string name="settings_storage_clear_image_cache">Rensa bildcache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder kommer att tas bort</string>
     <string name="settings_storage_clear_database">Rensa cache-databas</string>
-    <string name="settings_storage_clear_database_description">%1$s användare, %2$s status kommer att tas bort</string>
+    <string name="settings_storage_clear_database_description">%1$s användare, %2$s inlägg kommer att tas bort</string>
     <string name="settings_storage_app_log">Öppna applogg</string>
     <string name="settings_storage_app_log_description">Visa apploggen</string>
     <string name="service_select_instance_input_placeholder">Instans URL</string>
@@ -261,7 +261,7 @@
     <string name="following_title">Följer</string>
     <string name="fans_title">Följare</string>
     <string name="local_history_search_placeholder">Sök lokal cache</string>
-    <string name="local_history_search_status_title">Status</string>
+    <string name="local_history_search_status_title">Inlägg</string>
     <string name="local_history_search_user_title">Användare</string>
     <string name="rss_sources_title">Källor för RSS</string>
     <string name="add_rss_source">Lägg till RSS-källa</string>
@@ -303,6 +303,9 @@
     <string name="tab_settings_mixed_timeline">Lägg till blandad tidslinje</string>
     <string name="tab_settings_mixed_timeline_desc">Blandad tidslinje kommer att blanda alla flikar tidslinje resultat i en flik</string>
     <string name="home_tab_social_timeline_title">Socialt</string>
+    <string name="deeplink_account_selection_title">Välj konto</string>
+    <string name="deeplink_account_selection_message">Välj ett konto för att öppna denna länk</string>
+    <string name="deeplink_account_selection_browser">Öppna i webbläsare</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
                 <li>Felrättelser och prestandaförbättringar.</li>

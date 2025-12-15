@@ -3,6 +3,7 @@ import KotlinSharedUI
 import SwiftUIBackports
 
 struct StatusActionsView: View {
+    @Environment(\.appearanceSettings.postActionStyle) private var postActionStyle
     let data: [StatusAction]
     let useText: Bool
 
@@ -10,7 +11,9 @@ struct StatusActionsView: View {
         HStack {
             ForEach(0..<data.count, id: \.self) { index in
                 let item = data[index]
-                if index == data.count - 1 {
+                if (index == data.count - 1 && postActionStyle == .leftAligned) ||
+                    (postActionStyle == .rightAligned && index == 0) ||
+                    (postActionStyle == .stretch && index != 0) {
                     Spacer()
                 }
                 StatusActionView(data: item, useText: useText, isFixedWidth: index != data.count - 1)
@@ -47,7 +50,7 @@ struct StatusActionView: View {
                 } label: {
                     ZStack {
                         Text("0")
-                            .foregroundStyle(.clear)
+                            .hidden()
                         if !isFixedWidth && group.displayItem.countText == nil {
                             if let color = group.displayItem.color {
                                 StatusActionIcon(item: group.displayItem)
@@ -62,7 +65,7 @@ struct StatusActionView: View {
                                 ) {
                                     if isFixedWidth, !useText {
                                         Text("0000")
-                                            .foregroundStyle(.clear)
+                                            .hidden()
                                     }
                                     if let text = group.displayItem.countText, showNumbers {
                                         if let color = group.displayItem.color {
@@ -130,7 +133,7 @@ struct StatusActionItemView: View {
                     ) {
                         if isFixedWidth, !useText {
                             Text("0000")
-                                .foregroundStyle(Color.clear)
+                                .hidden()
                         }
                         if useText {
                             if let color = data.color {

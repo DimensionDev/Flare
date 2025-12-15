@@ -77,6 +77,7 @@ import dev.dimension.flare.compose_poll_option_hint
 import dev.dimension.flare.compose_poll_single_choice
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.misskey_visibility_followers
 import dev.dimension.flare.misskey_visibility_followers_description
 import dev.dimension.flare.misskey_visibility_home
@@ -612,7 +613,7 @@ fun ComposeDialog(
                                     LocalComponentAppearance.current.copy(
                                         showMedia = false,
                                         expandMediaSize = false,
-                                        showActions = false,
+                                        postActionStyle = PostActionStyle.Hidden,
                                         showLinkPreview = false,
                                     ),
                             ) {

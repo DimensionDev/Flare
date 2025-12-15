@@ -222,7 +222,6 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
                                 AvatarShape.CIRCLE -> ComponentAppearance.AvatarShape.CIRCLE
                                 AvatarShape.SQUARE -> ComponentAppearance.AvatarShape.SQUARE
                             },
-                        showActions = appearanceSettings.showActions,
                         showNumbers = appearanceSettings.showNumbers,
                         showLinkPreview = appearanceSettings.showLinkPreview,
                         showMedia = appearanceSettings.showMedia,
@@ -236,6 +235,7 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
                                 tldr = appSettings.aiConfig.tldr,
                             ),
                         fullWidthPost = appearanceSettings.fullWidthPost,
+                        postActionStyle = appearanceSettings.postActionStyle,
                     )
                 },
             content = {

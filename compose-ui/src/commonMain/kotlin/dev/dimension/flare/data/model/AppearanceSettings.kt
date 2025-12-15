@@ -15,7 +15,8 @@ import kotlinx.serialization.protobuf.ProtoBuf
 import okio.BufferedSink
 import okio.BufferedSource
 
-public val LocalAppearanceSettings: ProvidableCompositionLocal<AppearanceSettings> = staticCompositionLocalOf { AppearanceSettings() }
+public val LocalAppearanceSettings: ProvidableCompositionLocal<AppearanceSettings> =
+    staticCompositionLocalOf { AppearanceSettings() }
 
 @Serializable
 public data class AppearanceSettings(
@@ -23,6 +24,11 @@ public data class AppearanceSettings(
     val dynamicTheme: Boolean = true,
     val colorSeed: ULong = Color(red = 103, green = 80, blue = 164).value,
     val avatarShape: AvatarShape = AvatarShape.CIRCLE,
+    @Deprecated(
+        "Use postActionStyle instead",
+        ReplaceWith("postActionStyle"),
+        DeprecationLevel.ERROR,
+    )
     val showActions: Boolean = true,
     val pureColorMode: Boolean = true,
     val showNumbers: Boolean = true,
@@ -39,11 +45,19 @@ public data class AppearanceSettings(
     val bottomBarBehavior: BottomBarBehavior = BottomBarBehavior.MinimizeOnScroll,
     val inAppBrowser: Boolean = true,
     val fullWidthPost: Boolean = false,
+    val postActionStyle: PostActionStyle = PostActionStyle.LeftAligned,
 ) {
     public companion object {
         // for iOS
         public val Default: AppearanceSettings = AppearanceSettings()
     }
+}
+
+public enum class PostActionStyle {
+    Hidden,
+    LeftAligned,
+    RightAligned,
+    Stretch,
 }
 
 public enum class BottomBarStyle {

@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.component
 
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
+import dev.dimension.flare.data.model.PostActionStyle
 
 public val LocalComponentAppearance: ProvidableCompositionLocal<ComponentAppearance> =
     staticCompositionLocalOf {
@@ -11,7 +12,6 @@ public val LocalComponentAppearance: ProvidableCompositionLocal<ComponentAppeara
 public data class ComponentAppearance(
     val dynamicTheme: Boolean = true,
     val avatarShape: AvatarShape = AvatarShape.CIRCLE,
-    val showActions: Boolean = true,
     val showNumbers: Boolean = true,
     val showLinkPreview: Boolean = true,
     val showMedia: Boolean = true,
@@ -22,6 +22,7 @@ public data class ComponentAppearance(
     val aiConfig: AiConfig = AiConfig(),
     val lineLimit: Int = 5,
     val fullWidthPost: Boolean = false,
+    val postActionStyle: PostActionStyle = PostActionStyle.LeftAligned,
 ) {
     public data class AiConfig(
         val translation: Boolean = false,

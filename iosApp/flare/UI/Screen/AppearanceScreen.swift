@@ -76,17 +76,24 @@ struct AppearanceScreen: View {
                         Text("appearance_fullWidthPost")
                         Text("appearance_fullWidthPost_description")
                     }
-                    Toggle(isOn: Binding(get: {
-                        appearance.showActions
+                    
+                    Picker(selection: Binding(get: {
+                        appearance.postActionStyle
                     }, set: { newValue in
                         presenter.state.updateAppearanceSettings { settings in
-                            settings.copy(showActions: newValue)
+                            settings.copy(postActionStyle: newValue)
                         }
                     })) {
-                        Text("appearance_show_actions")
-                        Text("appearance_show_actions_description")
+                        Text("appearance_ost_action_style_hidden").tag(PostActionStyle.hidden)
+                        Text("appearance_ost_action_style_left_aligned").tag(PostActionStyle.leftAligned)
+                        Text("appearance_ost_action_style_right_aligned").tag(PostActionStyle.rightAligned)
+                        Text("appearance_ost_action_style_stretch").tag(PostActionStyle.stretch)
+                    } label: {
+                        Text("appearance_post_action_style")
+                        Text("appearance_ost_action_style_description")
                     }
-                    if appearance.showActions {
+                    
+                    if appearance.postActionStyle != .hidden {
                         Toggle(isOn: Binding(get: {
                             appearance.showNumbers
                         }, set: { newValue in
@@ -184,7 +191,6 @@ extension AppearanceSettings {
         dynamicTheme: Bool? = nil,
         colorSeed: UInt64? = nil,
         avatarShape: AvatarShape? = nil,
-        showActions: Bool? = nil,
         pureColorMode: Bool? = nil,
         showNumbers: Bool? = nil,
         showLinkPreview: Bool? = nil,
@@ -200,13 +206,14 @@ extension AppearanceSettings {
         bottomBarBehavior: BottomBarBehavior? = nil,
         inAppBrowser: Bool? = nil,
         fullWidthPost: Bool? = nil,
+        postActionStyle: PostActionStyle? = nil,
     ) -> AppearanceSettings {
         AppearanceSettings(
             theme: theme ?? self.theme,
             dynamicTheme: dynamicTheme ?? self.dynamicTheme,
             colorSeed: colorSeed ?? self.colorSeed,
             avatarShape: avatarShape ?? self.avatarShape,
-            showActions: showActions ?? self.showActions,
+            showActions: false,
             pureColorMode: pureColorMode ?? self.pureColorMode,
             showNumbers: showNumbers ?? self.showNumbers,
             showLinkPreview: showLinkPreview ?? self.showLinkPreview,
@@ -222,6 +229,7 @@ extension AppearanceSettings {
             bottomBarBehavior: bottomBarBehavior ?? self.bottomBarBehavior,
             inAppBrowser: inAppBrowser ?? self.inAppBrowser,
             fullWidthPost: fullWidthPost ?? self.fullWidthPost,
+            postActionStyle: postActionStyle ?? self.postActionStyle,
         )
     }
 }

@@ -54,6 +54,7 @@ import dev.dimension.flare.data.model.AppSettings
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.delete
@@ -89,8 +90,12 @@ import dev.dimension.flare.settings_appearance_expand_media
 import dev.dimension.flare.settings_appearance_expand_media_description
 import dev.dimension.flare.settings_appearance_full_width_post
 import dev.dimension.flare.settings_appearance_full_width_post_description
-import dev.dimension.flare.settings_appearance_show_actions
-import dev.dimension.flare.settings_appearance_show_actions_description
+import dev.dimension.flare.settings_appearance_post_action_style
+import dev.dimension.flare.settings_appearance_post_action_style_description
+import dev.dimension.flare.settings_appearance_post_action_style_hidden
+import dev.dimension.flare.settings_appearance_post_action_style_left_aligned
+import dev.dimension.flare.settings_appearance_post_action_style_right_aligned
+import dev.dimension.flare.settings_appearance_post_action_style_stretch
 import dev.dimension.flare.settings_appearance_show_compose_in_home_timeline
 import dev.dimension.flare.settings_appearance_show_compose_in_home_timeline_description
 import dev.dimension.flare.settings_appearance_show_cw_img
@@ -159,6 +164,7 @@ import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -522,25 +528,52 @@ internal fun SettingsScreen(
                 ExpanderItemSeparator()
                 ExpanderItem(
                     heading = {
-                        Text(stringResource(Res.string.settings_appearance_show_actions))
+                        Text(stringResource(Res.string.settings_appearance_post_action_style))
                     },
                     caption = {
-                        Text(stringResource(Res.string.settings_appearance_show_actions_description))
+                        Text(stringResource(Res.string.settings_appearance_post_action_style_description))
                     },
                     trailing = {
-                        Switcher(
-                            checked = LocalAppearanceSettings.current.showActions,
-                            {
-                                state.appearanceState.updateSettings {
-                                    copy(showActions = it)
+                        val items =
+                            remember {
+                                persistentMapOf(
+                                    PostActionStyle.Hidden to Res.string.settings_appearance_post_action_style_hidden,
+                                    PostActionStyle.LeftAligned to Res.string.settings_appearance_post_action_style_left_aligned,
+                                    PostActionStyle.RightAligned to Res.string.settings_appearance_post_action_style_right_aligned,
+                                    PostActionStyle.Stretch to Res.string.settings_appearance_post_action_style_stretch,
+                                )
+                            }
+                        MenuFlyoutContainer(
+                            flyout = {
+                                items.forEach { (key, value) ->
+                                    MenuFlyoutItem(
+                                        onClick = {
+                                            state.appearanceState.updateSettings {
+                                                copy(postActionStyle = key)
+                                            }
+                                            isFlyoutVisible = false
+                                        },
+                                        text = { Text(stringResource(value)) },
+                                    )
                                 }
                             },
-                            textBefore = true,
+                            content = {
+                                DropDownButton(
+                                    onClick = { isFlyoutVisible = !isFlyoutVisible },
+                                    content = {
+                                        items[LocalAppearanceSettings.current.postActionStyle]?.let {
+                                            Text(stringResource(it))
+                                        }
+                                    },
+                                )
+                            },
+                            adaptivePlacement = true,
+                            placement = FlyoutPlacement.BottomAlignedEnd,
                         )
                     },
                 )
                 ExpanderItemSeparator()
-                AnimatedVisibility(LocalAppearanceSettings.current.showActions) {
+                AnimatedVisibility(LocalAppearanceSettings.current.postActionStyle != PostActionStyle.Hidden) {
                     Column {
                         ExpanderItem(
                             heading = {

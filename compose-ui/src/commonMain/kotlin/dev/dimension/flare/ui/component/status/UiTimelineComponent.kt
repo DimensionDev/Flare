@@ -231,6 +231,7 @@ import dev.dimension.flare.compose.ui.notification_item_reject_follow_request
 import dev.dimension.flare.compose.ui.vvo_notification_like
 import dev.dimension.flare.compose.ui.xqt_item_mention_status
 import dev.dimension.flare.compose.ui.xqt_item_reblogged_status
+import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
@@ -474,7 +475,10 @@ private fun UserListContent(
         val status = data.status
         if (status != null) {
             CompositionLocalProvider(
-                LocalComponentAppearance provides LocalComponentAppearance.current.copy(showActions = false),
+                LocalComponentAppearance provides
+                    LocalComponentAppearance.current.copy(
+                        postActionStyle = PostActionStyle.Hidden,
+                    ),
             ) {
                 CommonStatusComponent(
                     item = status,

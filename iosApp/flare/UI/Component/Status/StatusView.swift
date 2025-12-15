@@ -6,7 +6,7 @@ struct StatusView: View {
     @Environment(\.appearanceSettings.fullWidthPost) private var fullWidthPost
     @Environment(\.appearanceSettings.showLinkPreview) private var showLinkPreview
     @Environment(\.appearanceSettings.compatLinkPreview) private var compatLinkPreview
-    @Environment(\.appearanceSettings.showActions) private var showActions
+    @Environment(\.appearanceSettings.postActionStyle) private var postActionStyle
     @Environment(\.openURL) private var openURL
     let data: UiTimeline.ItemContentStatus
     var isDetail: Bool = false
@@ -197,7 +197,7 @@ struct StatusView: View {
                                 .foregroundStyle(.secondary)
                         }
 
-                        if (showActions || isDetail) && !forceHideActions {
+                        if (postActionStyle != .hidden || isDetail) && !forceHideActions {
                             StatusActionsView(data: data.actions, useText: false)
                                 .font(isDetail ? .body : .footnote)
                                 .foregroundStyle(isDetail ? .primary : .secondary)

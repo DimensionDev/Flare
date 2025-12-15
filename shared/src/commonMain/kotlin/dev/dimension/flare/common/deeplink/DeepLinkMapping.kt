@@ -50,6 +50,21 @@ internal object DeepLinkMapping {
                     statusKey = MicroBlogKey(id, accountKey.host),
                 )
         }
+
+        @Serializable
+        data class PostMedia(
+            val handle: String,
+            val id: String,
+            val index: Int,
+        ) : Type {
+            override fun deepLink(accountKey: MicroBlogKey): DeeplinkRoute =
+                DeeplinkRoute.Media.StatusMedia(
+                    accountType = AccountType.Specific(accountKey),
+                    statusKey = MicroBlogKey(id, accountKey.host),
+                    index = index,
+                    preview = null,
+                )
+        }
     }
 
     fun generatePattern(
@@ -111,6 +126,13 @@ internal object DeepLinkMapping {
                         "https://www.$xqtHost/{handle}/status/{id}",
                         "https://www.$xqtOldHost/{handle}/",
                     )
+                val media =
+                    listOf(
+                        "https://$xqtHost/{handle}/status/{id}/photo/{index}",
+                        "https://$xqtOldHost/{handle}/status/{id}/photo/{index}",
+                        "https://www.$xqtHost/{handle}/status/{id}/photo/{index}",
+                        "https://www.$xqtOldHost/{handle}/status/{id}/photo/{index}",
+                    )
                 profile.map {
                     DeepLinkPattern(
                         Type.Profile.serializer(),
@@ -120,6 +142,12 @@ internal object DeepLinkMapping {
                     post.map {
                         DeepLinkPattern(
                             Type.Post.serializer(),
+                            Url(it),
+                        )
+                    } +
+                    media.map {
+                        DeepLinkPattern(
+                            Type.PostMedia.serializer(),
                             Url(it),
                         )
                     }

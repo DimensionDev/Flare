@@ -102,6 +102,7 @@ import dev.dimension.flare.compose.ui.status_detail_translate
 import dev.dimension.flare.compose.ui.unlike
 import dev.dimension.flare.compose.ui.vote
 import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.PlatformShare
 import dev.dimension.flare.ui.component.AdaptiveGrid
@@ -374,7 +375,7 @@ public fun CommonStatusComponent(
                     fullTime = true,
                 )
             }
-            if (appearanceSettings.showActions || isDetail) {
+            if (appearanceSettings.postActionStyle != PostActionStyle.Hidden || isDetail) {
                 Spacer(modifier = Modifier.height(8.dp))
                 if (isDetail) {
                     CompositionLocalProvider(
@@ -483,13 +484,13 @@ private fun StatusQuoteComponent(
                 ),
     ) {
         Column {
-            quotes.forEachIndexed { index, quote ->
-                CompositionLocalProvider(
-                    LocalComponentAppearance provides
-                        LocalComponentAppearance.current.copy(
-                            showActions = false,
-                        ),
-                ) {
+            CompositionLocalProvider(
+                LocalComponentAppearance provides
+                    LocalComponentAppearance.current.copy(
+                        postActionStyle = PostActionStyle.Hidden,
+                    ),
+            ) {
+                quotes.forEachIndexed { index, quote ->
                     CommonStatusComponent(
                         quote,
                         isQuote = true,
@@ -497,9 +498,9 @@ private fun StatusQuoteComponent(
                             Modifier
                                 .padding(8.dp),
                     )
-                }
-                if (index != quotes.lastIndex && quotes.size > 1) {
-                    HorizontalDivider()
+                    if (index != quotes.lastIndex && quotes.size > 1) {
+                        HorizontalDivider()
+                    }
                 }
             }
         }
@@ -718,6 +719,7 @@ internal fun StatusActions(
     items: ImmutableList<StatusAction>,
     modifier: Modifier = Modifier,
 ) {
+    val appearanceSettings = LocalComponentAppearance.current
     val haptics = LocalHapticFeedback.current
     val launcher = LocalUriHandler.current
     Row(
@@ -725,10 +727,17 @@ internal fun StatusActions(
             modifier
                 .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement =
+            when (appearanceSettings.postActionStyle) {
+                PostActionStyle.Hidden -> Arrangement.Start
+                PostActionStyle.LeftAligned -> Arrangement.Start
+                PostActionStyle.RightAligned -> Arrangement.End
+                PostActionStyle.Stretch -> Arrangement.SpaceBetween
+            },
 //        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         items.forEachIndexed { index, action ->
-            if (index == items.lastIndex) {
+            if (index == items.lastIndex && appearanceSettings.postActionStyle == PostActionStyle.LeftAligned) {
                 Spacer(modifier = Modifier.weight(1f))
             }
             when (action) {

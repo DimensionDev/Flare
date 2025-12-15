@@ -207,6 +207,12 @@
     <string name="settings_appearance_full_width_post_description">Show the post in full width</string>
     <string name="settings_language_title">Language</string>
     <string name="settings_language_description">Change the language of the app</string>
+    <string name="settings_appearance_post_action_style">Post action style</string>
+    <string name="settings_appearance_post_action_style_description">Change the style of the post\'s action</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Left aligned</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Right aligned</string>
+    <string name="settings_appearance_post_action_style_stretch">Stretch</string>
 
     <string name="settings_about_source_code">Source code</string>
     <string name="settings_about_telegram">Telegram</string>

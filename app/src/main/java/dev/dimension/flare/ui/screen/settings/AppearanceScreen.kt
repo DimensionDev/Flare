@@ -50,6 +50,7 @@ import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.BottomBarStyle
 import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.repository.SettingsRepository
@@ -424,33 +425,25 @@ internal fun AppearanceScreen(
                                 }
                             },
                 )
-                ListItem(
-                    headlineContent = {
-                        Text(text = stringResource(id = R.string.settings_appearance_show_actions))
+                SingleChoiceSettingsItem(
+                    headline = { Text(text = stringResource(id = R.string.settings_appearance_post_action_style)) },
+                    supporting = { Text(text = stringResource(id = R.string.settings_appearance_post_action_style_description)) },
+                    items =
+                        persistentMapOf(
+                            PostActionStyle.Hidden to stringResource(id = R.string.settings_appearance_post_action_style_hidden),
+                            PostActionStyle.LeftAligned to stringResource(id = R.string.settings_appearance_post_action_style_left_aligned),
+                            PostActionStyle.RightAligned to
+                                stringResource(id = R.string.settings_appearance_post_action_style_right_aligned),
+                            PostActionStyle.Stretch to stringResource(id = R.string.settings_appearance_post_action_style_stretch),
+                        ),
+                    selected = appearanceSettings.postActionStyle,
+                    onSelected = {
+                        state.updateSettings {
+                            copy(postActionStyle = it)
+                        }
                     },
-                    supportingContent = {
-                        Text(text = stringResource(id = R.string.settings_appearance_show_actions_description))
-                    },
-                    trailingContent = {
-                        Switch(
-                            checked = appearanceSettings.showActions,
-                            onCheckedChange = {
-                                state.updateSettings {
-                                    copy(showActions = it)
-                                }
-                            },
-                        )
-                    },
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .clickable {
-                                state.updateSettings {
-                                    copy(showActions = !showActions)
-                                }
-                            },
                 )
-                AnimatedVisibility(appearanceSettings.showActions) {
+                AnimatedVisibility(appearanceSettings.postActionStyle != PostActionStyle.Hidden) {
                     ListItem(
                         headlineContent = {
                             Text(text = stringResource(id = R.string.settings_appearance_show_numbers))

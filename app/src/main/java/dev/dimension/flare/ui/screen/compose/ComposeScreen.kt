@@ -91,6 +91,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.EmojiPicker
@@ -622,8 +623,8 @@ internal fun ComposeScreen(
                                     LocalComponentAppearance.current.copy(
                                         showMedia = false,
                                         expandMediaSize = false,
-                                        showActions = false,
                                         showLinkPreview = false,
+                                        postActionStyle = PostActionStyle.Hidden,
                                     ),
                             ) {
                                 CommonStatusComponent(

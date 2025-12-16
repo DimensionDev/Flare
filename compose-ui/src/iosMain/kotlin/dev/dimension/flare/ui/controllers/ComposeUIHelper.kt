@@ -11,10 +11,12 @@ import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.ui.humanizer.SwiftFormatter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.koin.core.context.startKoin
-import org.koin.dsl.binds
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 public object ComposeUIHelper {
@@ -28,10 +30,10 @@ public object ComposeUIHelper {
                 module {
                     single {
                         ProxyInAppNotification(inAppNotification, get())
-                    } binds arrayOf(InAppNotification::class)
+                    } bind InAppNotification::class
                     single {
                         swiftFormatter
-                    }
+                    } bind SwiftFormatter::class
                 },
             )
             modules(dev.dimension.flare.di.composeUiModule)

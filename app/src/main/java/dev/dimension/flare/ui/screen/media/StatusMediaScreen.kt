@@ -23,17 +23,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +47,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -95,6 +101,7 @@ import dev.dimension.flare.ui.component.Glassify
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.VideoPlayerPool
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
@@ -147,6 +154,7 @@ internal fun StatusMediaScreen(
     uriHandler: UriHandler,
     playerPool: VideoPlayerPool = koinInject(),
 ) {
+    val isBigScreen = isBigScreen()
     val hapticFeedback = LocalHapticFeedback.current
     val context = LocalContext.current
     val permissionState =
@@ -223,345 +231,428 @@ internal fun StatusMediaScreen(
                         }
                     }
                 }
-                Swiper(
-                    state = swiperState,
-                ) {
-                    HorizontalPager(
-                        state = pagerState,
-                        userScrollEnabled = !state.lockPager,
-                        key = {
-                            when (val medias = state.medias) {
-                                is UiState.Error -> preview
-                                is UiState.Loading -> preview
-                                is UiState.Success -> {
-                                    when (val item = medias.data[it]) {
-                                        is UiMedia.Audio -> item.previewUrl
-                                        is UiMedia.Gif -> item.previewUrl
-                                        is UiMedia.Image -> item.previewUrl
-                                        is UiMedia.Video -> item.thumbnailUrl
-                                    }
-                                }
-                            } ?: it
-                        },
-                    ) { index ->
-                        AnimatedContent(
-                            state.medias,
-                            transitionSpec = {
-                                fadeIn() togetherWith fadeOut()
-                            },
-                        ) {
-                            it
-                                .onSuccess { medias ->
-                                    when (val media = medias[index]) {
-                                        is UiMedia.Audio ->
-                                            VideoPlayer(
-                                                uri = media.url,
-                                                previewUri = null,
-                                                contentDescription = media.description,
-                                                autoPlay = false,
-                                                modifier =
-                                                    Modifier
-                                                        .fillMaxSize(),
-                                                onClick = {
-                                                    state.setShowUi(!state.showUi)
-                                                },
-                                                onLongClick = {
-                                                    hapticFeedback.performHapticFeedback(
-                                                        HapticFeedbackType.LongPress,
-                                                    )
-                                                    state.setShowSheet(true)
-                                                },
-                                            )
-
-                                        is UiMedia.Gif ->
-                                            ImageItem(
-                                                modifier =
-                                                    Modifier
-                                                        //                                            .sharedElement(
-                                                        //                                                rememberSharedContentState(media.previewUrl),
-                                                        //                                                animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                                        //                                            )
-                                                        .fillMaxSize(),
-                                                url = media.url,
-                                                previewUrl = media.previewUrl,
-                                                description = media.description,
-                                                onClick = {
-                                                    state.setShowUi(!state.showUi)
-                                                },
-                                                setLockPager = {
-                                                    if (pagerState.currentPage == index) {
-                                                        state.setLockPager(it)
-                                                    }
-                                                },
-                                                onLongClick = {
-                                                    hapticFeedback.performHapticFeedback(
-                                                        HapticFeedbackType.LongPress,
-                                                    )
-                                                    state.setShowSheet(true)
-                                                },
-                                            )
-
-                                        is UiMedia.Image -> {
-                                            ImageItem(
-                                                modifier =
-                                                    Modifier
-                                                        //                                            .sharedElement(
-                                                        //                                                rememberSharedContentState(media.previewUrl),
-                                                        //                                                animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                                        //                                            )
-                                                        .fillMaxSize(),
-                                                url = media.url,
-                                                previewUrl = media.previewUrl,
-                                                description = media.description,
-                                                onClick = {
-                                                    state.setShowUi(!state.showUi)
-                                                },
-                                                setLockPager = {
-                                                    if (pagerState.currentPage == index) {
-                                                        state.setLockPager(it)
-                                                    }
-                                                },
-                                                onLongClick = {
-                                                    hapticFeedback.performHapticFeedback(
-                                                        HapticFeedbackType.LongPress,
-                                                    )
-                                                    state.setShowSheet(true)
-                                                },
-                                            )
-                                        }
-
-                                        is UiMedia.Video ->
-                                            VideoPlayer(
-                                                uri = media.url,
-                                                previewUri = media.thumbnailUrl,
-                                                contentDescription = media.description,
-                                                autoPlay = false,
-                                                modifier =
-                                                    Modifier
-                                                        .fillMaxSize(),
-                                                onClick = {
-                                                    state.setShowUi(!state.showUi)
-                                                },
-                                                aspectRatio = media.aspectRatio,
-                                                showControls = true,
-                                                keepScreenOn = true,
-                                                muted = false,
-                                                contentScale = ContentScale.Fit,
-                                                onLongClick = {
-                                                    hapticFeedback.performHapticFeedback(
-                                                        HapticFeedbackType.LongPress,
-                                                    )
-                                                    state.setShowSheet(true)
-                                                },
-                                            )
-                                    }
-                                }.onLoading {
-                                    if (preview != null) {
-                                        ImageItem(
-                                            url = preview,
-                                            previewUrl = preview,
-                                            description = null,
-                                            onClick = { /*TODO*/ },
-                                            setLockPager = state::setLockPager,
-                                            modifier =
-                                                Modifier
-                                                    .fillMaxSize(),
-                                            onLongClick = { },
-                                        )
-                                    } else {
-                                        Box(
-                                            modifier =
-                                                Modifier
-                                                    .aspectRatio(1f)
-                                                    .fillMaxSize()
-                                                    .placeholder(true),
-                                        )
-                                    }
-                                }
-                        }
-                    }
-                }
-                AnimatedVisibility(
-                    visible = state.showUi,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.TopCenter),
-                    enter = slideInVertically { -it },
-                    exit = slideOutVertically { -it },
-                ) {
-                    Row(
-                        modifier =
-                            Modifier
-                                .systemBarsPadding()
-                                .padding(horizontal = 4.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                Row {
+                    Box(
+                        modifier = Modifier.weight(1f),
                     ) {
-                        Glassify(
-                            onClick = {
-                                onDismiss.invoke()
-                            },
-                            modifier = Modifier.size(40.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-//                            colors = IconButtonDefaults.filledTonalIconButtonColors(
-//                                containerColor = Color.Transparent,
-//                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-//                            )
+                        Swiper(
+                            state = swiperState,
                         ) {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.Xmark,
-                                contentDescription = stringResource(id = R.string.navigate_back),
-                            )
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        state.medias.onSuccess { medias ->
-                            val current = medias[state.currentPage]
-                            if (!current.description.isNullOrEmpty()) {
-                                Glassify(
-                                    onClick = {
-                                        toAltText.invoke(current)
-                                    },
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                    modifier = Modifier.size(40.dp),
-                                    shape = CircleShape,
-                                ) {
-                                    FAIcon(
-                                        FontAwesomeIcons.Solid.CircleInfo,
-                                        contentDescription = stringResource(id = R.string.media_alt_text),
-                                    )
-                                }
-                            }
-                            Glassify(
-                                onClick = {
-                                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                                        if (!permissionState.status.isGranted) {
-                                            permissionState.launchPermissionRequest()
-                                        } else {
-                                            state.save(current)
+                            HorizontalPager(
+                                state = pagerState,
+                                userScrollEnabled = !state.lockPager,
+                                key = {
+                                    when (val medias = state.medias) {
+                                        is UiState.Error -> preview
+                                        is UiState.Loading -> preview
+                                        is UiState.Success -> {
+                                            when (val item = medias.data[it]) {
+                                                is UiMedia.Audio -> item.previewUrl
+                                                is UiMedia.Gif -> item.previewUrl
+                                                is UiMedia.Image -> item.previewUrl
+                                                is UiMedia.Video -> item.thumbnailUrl
+                                            }
                                         }
-                                    } else {
-                                        state.save(current)
-                                    }
+                                    } ?: it
                                 },
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                modifier = Modifier.size(40.dp),
-                                shape = CircleShape,
-                            ) {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.Download,
-                                    contentDescription = stringResource(id = R.string.media_menu_save),
-                                )
-                            }
-                            AnimatedVisibility(current is UiMedia.Image) {
-                                Glassify(
-                                    onClick = {
-                                        state.shareMedia(current)
+                            ) { index ->
+                                AnimatedContent(
+                                    state.medias,
+                                    transitionSpec = {
+                                        fadeIn() togetherWith fadeOut()
                                     },
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                    modifier = Modifier.size(40.dp),
-                                    shape = CircleShape,
                                 ) {
-                                    FAIcon(
-                                        FontAwesomeIcons.Solid.ShareNodes,
-                                        contentDescription = stringResource(id = R.string.media_menu_share_image),
-                                    )
+                                    it
+                                        .onSuccess { medias ->
+                                            when (val media = medias[index]) {
+                                                is UiMedia.Audio ->
+                                                    VideoPlayer(
+                                                        uri = media.url,
+                                                        previewUri = null,
+                                                        contentDescription = media.description,
+                                                        autoPlay = false,
+                                                        modifier =
+                                                            Modifier
+                                                                .fillMaxSize(),
+                                                        onClick = {
+                                                            state.setShowUi(!state.showUi)
+                                                        },
+                                                        onLongClick = {
+                                                            hapticFeedback.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress,
+                                                            )
+                                                            state.setShowSheet(true)
+                                                        },
+                                                    )
+
+                                                is UiMedia.Gif ->
+                                                    ImageItem(
+                                                        modifier =
+                                                            Modifier
+                                                                //                                            .sharedElement(
+                                                                //                                                rememberSharedContentState(media.previewUrl),
+                                                                //                                                animatedVisibilityScope = this@AnimatedVisibilityScope,
+                                                                //                                            )
+                                                                .fillMaxSize(),
+                                                        url = media.url,
+                                                        previewUrl = media.previewUrl,
+                                                        description = media.description,
+                                                        onClick = {
+                                                            state.setShowUi(!state.showUi)
+                                                        },
+                                                        setLockPager = {
+                                                            if (pagerState.currentPage == index) {
+                                                                if (!isBigScreen) {
+                                                                    state.setShowUi(!it)
+                                                                }
+                                                                state.setLockPager(it)
+                                                            }
+                                                        },
+                                                        onLongClick = {
+                                                            hapticFeedback.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress,
+                                                            )
+                                                            state.setShowSheet(true)
+                                                        },
+                                                    )
+
+                                                is UiMedia.Image -> {
+                                                    ImageItem(
+                                                        modifier =
+                                                            Modifier
+                                                                //                                            .sharedElement(
+                                                                //                                                rememberSharedContentState(media.previewUrl),
+                                                                //                                                animatedVisibilityScope = this@AnimatedVisibilityScope,
+                                                                //                                            )
+                                                                .fillMaxSize(),
+                                                        url = media.url,
+                                                        previewUrl = media.previewUrl,
+                                                        description = media.description,
+                                                        onClick = {
+                                                            state.setShowUi(!state.showUi)
+                                                        },
+                                                        setLockPager = {
+                                                            if (pagerState.currentPage == index) {
+                                                                if (!isBigScreen) {
+                                                                    state.setShowUi(!it)
+                                                                }
+                                                                state.setLockPager(it)
+                                                            }
+                                                        },
+                                                        onLongClick = {
+                                                            hapticFeedback.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress,
+                                                            )
+                                                            state.setShowSheet(true)
+                                                        },
+                                                    )
+                                                }
+
+                                                is UiMedia.Video ->
+                                                    VideoPlayer(
+                                                        uri = media.url,
+                                                        previewUri = media.thumbnailUrl,
+                                                        contentDescription = media.description,
+                                                        autoPlay = false,
+                                                        modifier =
+                                                            Modifier
+                                                                .fillMaxSize(),
+                                                        onClick = {
+                                                            state.setShowUi(!state.showUi)
+                                                        },
+                                                        aspectRatio = media.aspectRatio,
+                                                        showControls = true,
+                                                        keepScreenOn = true,
+                                                        muted = false,
+                                                        contentScale = ContentScale.Fit,
+                                                        onLongClick = {
+                                                            hapticFeedback.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress,
+                                                            )
+                                                            state.setShowSheet(true)
+                                                        },
+                                                    )
+                                            }
+                                        }.onLoading {
+                                            if (preview != null) {
+                                                ImageItem(
+                                                    url = preview,
+                                                    previewUrl = preview,
+                                                    description = null,
+                                                    onClick = { /*TODO*/ },
+                                                    setLockPager = {
+                                                        if (!isBigScreen) {
+                                                            state.setShowUi(!it)
+                                                        }
+                                                        state.setLockPager(it)
+                                                    },
+                                                    modifier =
+                                                        Modifier
+                                                            .fillMaxSize(),
+                                                    onLongClick = { },
+                                                )
+                                            } else {
+                                                Box(
+                                                    modifier =
+                                                        Modifier
+                                                            .aspectRatio(1f)
+                                                            .fillMaxSize()
+                                                            .placeholder(true),
+                                                )
+                                            }
+                                        }
                                 }
                             }
                         }
-                    }
-                }
-                state.status.onSuccess { status ->
-                    val content = status.content
-                    if (content is UiTimeline.ItemContent.Status) {
-                        AnimatedVisibility(
+                        androidx.compose.animation.AnimatedVisibility(
                             visible = state.showUi,
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .align(Alignment.BottomCenter),
-                            enter = slideInVertically { it },
-                            exit = slideOutVertically { it },
+                                    .align(Alignment.TopCenter),
+                            enter = slideInVertically { -it },
+                            exit = slideOutVertically { -it },
                         ) {
-                            Glassify(
-                                color = MaterialTheme.colorScheme.surfaceContainer,
-                                contentColor = MaterialTheme.colorScheme.onBackground,
+                            Row(
+                                modifier =
+                                    Modifier
+                                        .systemBarsPadding()
+                                        .padding(horizontal = 4.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                Glassify(
+                                    onClick = {
+                                        onDismiss.invoke()
+                                    },
+                                    modifier = Modifier.size(40.dp),
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+//                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+//                                containerColor = Color.Transparent,
+//                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+//                            )
                                 ) {
-                                    if (pagerState.pageCount > 1) {
-                                        Row(
-                                            modifier =
-                                                Modifier
-                                                    .padding(top = 8.dp),
-                                            horizontalArrangement = Arrangement.Center,
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Xmark,
+                                        contentDescription = stringResource(id = R.string.navigate_back),
+                                    )
+                                }
+                                Spacer(modifier = Modifier.weight(1f))
+                                state.medias.onSuccess { medias ->
+                                    val current = medias[state.currentPage]
+                                    if (!current.description.isNullOrEmpty()) {
+                                        Glassify(
+                                            onClick = {
+                                                toAltText.invoke(current)
+                                            },
+                                            color = MaterialTheme.colorScheme.secondaryContainer,
+                                            modifier = Modifier.size(40.dp),
+                                            shape = CircleShape,
                                         ) {
-                                            repeat(pagerState.pageCount) { iteration ->
-                                                val color =
-                                                    if (pagerState.currentPage == iteration) {
-                                                        MaterialTheme.colorScheme.primary
+                                            FAIcon(
+                                                FontAwesomeIcons.Solid.CircleInfo,
+                                                contentDescription = stringResource(id = R.string.media_alt_text),
+                                            )
+                                        }
+                                    }
+                                    Glassify(
+                                        onClick = {
+                                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                                                if (!permissionState.status.isGranted) {
+                                                    permissionState.launchPermissionRequest()
+                                                } else {
+                                                    state.save(current)
+                                                }
+                                            } else {
+                                                state.save(current)
+                                            }
+                                        },
+                                        color = MaterialTheme.colorScheme.secondaryContainer,
+                                        modifier = Modifier.size(40.dp),
+                                        shape = CircleShape,
+                                    ) {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Download,
+                                            contentDescription = stringResource(id = R.string.media_menu_save),
+                                        )
+                                    }
+                                    AnimatedVisibility(current is UiMedia.Image) {
+                                        Glassify(
+                                            onClick = {
+                                                state.shareMedia(current)
+                                            },
+                                            color = MaterialTheme.colorScheme.secondaryContainer,
+                                            modifier = Modifier.size(40.dp),
+                                            shape = CircleShape,
+                                        ) {
+                                            FAIcon(
+                                                FontAwesomeIcons.Solid.ShareNodes,
+                                                contentDescription = stringResource(id = R.string.media_menu_share_image),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        state.status.onSuccess { status ->
+                            val content = status.content
+                            if (content is UiTimeline.ItemContent.Status) {
+                                androidx.compose.animation.AnimatedVisibility(
+                                    visible = state.showUi,
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.BottomCenter),
+                                    enter = slideInVertically { it },
+                                    exit = slideOutVertically { it },
+                                ) {
+                                    Glassify(
+                                        modifier =
+                                            Modifier
+                                                .let {
+                                                    if (isBigScreen) {
+                                                        it
+                                                            .safeContentPadding()
+                                                            .clip(
+                                                                MaterialTheme.shapes.medium,
+                                                            )
                                                     } else {
-                                                        MaterialTheme.colorScheme.onBackground.copy(
-                                                            alpha = 0.5f,
+                                                        it.fillMaxWidth()
+                                                    }
+                                                },
+                                        color = MaterialTheme.colorScheme.surfaceContainer,
+                                        contentColor = MaterialTheme.colorScheme.onBackground,
+                                    ) {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                        ) {
+                                            if (pagerState.pageCount > 1) {
+                                                Row(
+                                                    modifier =
+                                                        Modifier.let {
+                                                            if (isBigScreen) {
+                                                                it
+                                                            } else {
+                                                                it.padding(top = 8.dp)
+                                                            }
+                                                        },
+                                                    horizontalArrangement = Arrangement.Center,
+                                                ) {
+                                                    repeat(pagerState.pageCount) { iteration ->
+                                                        val color =
+                                                            if (pagerState.currentPage == iteration) {
+                                                                MaterialTheme.colorScheme.primary
+                                                            } else {
+                                                                MaterialTheme.colorScheme.onBackground.copy(
+                                                                    alpha = 0.5f,
+                                                                )
+                                                            }
+                                                        Box(
+                                                            modifier =
+                                                                Modifier
+                                                                    .padding(2.dp)
+                                                                    .clip(CircleShape)
+                                                                    .background(color)
+                                                                    .size(8.dp),
                                                         )
                                                     }
-                                                Box(
-                                                    modifier =
-                                                        Modifier
-                                                            .padding(2.dp)
-                                                            .clip(CircleShape)
-                                                            .background(color)
-                                                            .size(8.dp),
-                                                )
+                                                }
                                             }
-                                        }
-                                    }
-                                    state.medias.onSuccess { medias ->
-                                        val current =
-                                            remember(
-                                                medias,
-                                                state.currentPage,
-                                            ) {
-                                                medias[state.currentPage]
+                                            state.medias.onSuccess { medias ->
+                                                val current =
+                                                    remember(
+                                                        medias,
+                                                        state.currentPage,
+                                                    ) {
+                                                        medias[state.currentPage]
+                                                    }
+                                                if (current is UiMedia.Video) {
+                                                    val player = playerPool.peek(current.url)
+                                                    if (player != null) {
+                                                        PlayerControl(
+                                                            player,
+                                                            modifier =
+                                                                Modifier
+                                                                    .padding(end = screenHorizontalPadding),
+                                                        )
+                                                    }
+                                                }
                                             }
-                                        if (current is UiMedia.Video) {
-                                            val player = playerPool.peek(current.url)
-                                            if (player != null) {
-                                                PlayerControl(
-                                                    player,
-                                                    modifier =
-                                                        Modifier
-                                                            .padding(end = screenHorizontalPadding),
-                                                )
-                                            }
-                                        }
-                                    }
-                                    CompositionLocalProvider(
-                                        LocalComponentAppearance provides
-                                            LocalComponentAppearance.current.copy(
-                                                showMedia = false,
-                                                showLinkPreview = false,
-                                            ),
-                                        LocalUriHandler provides uriHandler,
-                                    ) {
-                                        CommonStatusComponent(
-                                            item = content,
-                                            showMedia = false,
-                                            modifier =
-                                                Modifier
-                                                    .padding(
-                                                        horizontal = screenHorizontalPadding,
-                                                        vertical = 8.dp,
-                                                    ).windowInsetsPadding(
-                                                        WindowInsets.systemBars.only(
-                                                            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                            if (!isBigScreen) {
+                                                CompositionLocalProvider(
+                                                    LocalComponentAppearance provides
+                                                        LocalComponentAppearance.current.copy(
+                                                            showMedia = false,
+                                                            showLinkPreview = false,
                                                         ),
-                                                    ),
-                                            maxLines = 3,
-                                            showExpandButton = false,
-                                            isQuote = true,
-                                        )
+                                                    LocalUriHandler provides uriHandler,
+                                                ) {
+                                                    CommonStatusComponent(
+                                                        item = content,
+                                                        showMedia = false,
+                                                        modifier =
+                                                            Modifier
+                                                                .padding(
+                                                                    horizontal = screenHorizontalPadding,
+                                                                    vertical = 8.dp,
+                                                                ).windowInsetsPadding(
+                                                                    WindowInsets.systemBars.only(
+                                                                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                                                    ),
+                                                                ),
+                                                        maxLines = 3,
+                                                        showExpandButton = false,
+                                                        isQuote = true,
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (isBigScreen) {
+                        AnimatedVisibility(state.showUi) {
+                            Surface(
+                                modifier =
+                                    Modifier
+                                        .width(320.dp)
+                                        .fillMaxHeight()
+                                        .verticalScroll(rememberScrollState()),
+                                color = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                            ) {
+                                state.status.onSuccess {
+                                    val content = it.content
+                                    if (content is UiTimeline.ItemContent.Status) {
+                                        CompositionLocalProvider(
+                                            LocalComponentAppearance provides
+                                                LocalComponentAppearance.current.copy(
+                                                    showMedia = false,
+                                                    showLinkPreview = false,
+                                                ),
+                                            LocalUriHandler provides uriHandler,
+                                        ) {
+                                            CommonStatusComponent(
+                                                item = content,
+                                                showMedia = false,
+                                                modifier =
+                                                    Modifier
+                                                        .padding(
+                                                            horizontal = screenHorizontalPadding,
+                                                            vertical = 8.dp,
+                                                        ).windowInsetsPadding(
+                                                            WindowInsets.systemBars.only(
+                                                                WindowInsetsSides.End + WindowInsetsSides.Vertical,
+                                                            ),
+                                                        ),
+                                                maxLines = Int.MAX_VALUE,
+                                                showExpandButton = false,
+                                                isQuote = false,
+                                                isDetail = true,
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -854,7 +945,6 @@ private fun statusMediaPresenter(
 
         fun setLockPager(value: Boolean) {
             lockPager = value
-            showUi = !value
         }
 
         fun save(data: UiMedia) {

@@ -11,9 +11,7 @@ import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.ui.humanizer.SwiftFormatter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.bind

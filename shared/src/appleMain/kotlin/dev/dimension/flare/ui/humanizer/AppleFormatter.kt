@@ -1,7 +1,5 @@
-package dev.dimension.flare.ui.component
+package dev.dimension.flare.ui.humanizer
 
-import androidx.compose.runtime.saveable.rememberSaveable
-import dev.dimension.flare.ui.render.UiDateTime
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSDateFormatterLongStyle
@@ -10,32 +8,33 @@ import platform.Foundation.NSDateFormatterNoStyle
 import platform.Foundation.NSRelativeDateTimeFormatter
 import platform.Foundation.NSRelativeDateTimeFormatterStyleNumeric
 import platform.Foundation.dateWithTimeIntervalSince1970
+import kotlin.time.Clock
+import kotlin.time.Instant
 
-@androidx.compose.runtime.Composable
-internal actual fun rememberFormattedDateTime(
-    data: UiDateTime,
-    fullTime: Boolean,
-): String =
-    rememberSaveable(data, UiDateTimeSaver) {
-        if (fullTime) {
-            PlatformDateFormatter.formatAsFullDateTime(data.value.toEpochMilliseconds())
-        } else {
-            when (data.diff) {
-                UiDateTime.DiffType.DAYS ->
-                    PlatformDateFormatter.getRelativeTimeSpanString(data.value.toEpochMilliseconds())
-                UiDateTime.DiffType.HOURS ->
-                    PlatformDateFormatter.getRelativeTimeSpanString(data.value.toEpochMilliseconds())
-                UiDateTime.DiffType.MINUTES ->
-                    PlatformDateFormatter.getRelativeTimeSpanString(data.value.toEpochMilliseconds())
-                UiDateTime.DiffType.SECONDS ->
-                    PlatformDateFormatter.getRelativeTimeSpanString(data.value.toEpochMilliseconds())
-                UiDateTime.DiffType.YEAR_MONTH_DAY ->
-                    PlatformDateFormatter.formatAsFullDate(data.value.toEpochMilliseconds())
-                UiDateTime.DiffType.MONTH_DAY ->
-                    PlatformDateFormatter.formatAsFullDateWithoutYear(data.value.toEpochMilliseconds())
+public interface SwiftFormatter {
+    public fun formatNumber(number: Long): String
+}
+
+internal class AppleFormatter(
+    private val formatter: SwiftFormatter,
+) : PlatformFormatter {
+    override fun formatNumber(number: Long): String = formatter.formatNumber(number)
+
+    override fun formatRelativeInstant(instant: Instant): String {
+        val compareTo = Clock.System.now()
+        val diff = compareTo - instant
+        return when {
+            diff.inWholeDays < 7 -> {
+                PlatformDateFormatter.getRelativeTimeSpanString(instant.toEpochMilliseconds())
+            }
+            else -> {
+                PlatformDateFormatter.formatAsFullDate(instant.toEpochMilliseconds())
             }
         }
     }
+
+    override fun formatFullInstant(instant: Instant): String = PlatformDateFormatter.formatAsFullDateTime(instant.toEpochMilliseconds())
+}
 
 private object PlatformDateFormatter {
     fun formatAsFullDateTime(epochMillis: Long): String {

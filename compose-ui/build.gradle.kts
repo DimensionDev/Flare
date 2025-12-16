@@ -81,7 +81,6 @@ kotlin {
                 implementation(libs.fluent.ui)
                 implementation(libs.koin.compose)
                 implementation(libs.androidx.collection)
-                implementation(libs.prettytime)
             }
         }
         val iosMain by getting {

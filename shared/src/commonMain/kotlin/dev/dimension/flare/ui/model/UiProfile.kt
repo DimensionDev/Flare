@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.humanizer.Formatter.humanize
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi

@@ -6,6 +6,7 @@ import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbRssSources
+import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -21,9 +22,18 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ImportOPMLPresenterTest {
+    class TestFormatter : PlatformFormatter {
+        override fun formatNumber(number: Long): String = number.toString()
+
+        override fun formatRelativeInstant(instant: Instant): String = instant.toString()
+
+        override fun formatFullInstant(instant: Instant): String = instant.toString()
+    }
+
     private lateinit var db: AppDatabase
 
     @BeforeTest
@@ -40,6 +50,7 @@ class ImportOPMLPresenterTest {
             modules(
                 module {
                     single { db }
+                    single<PlatformFormatter> { TestFormatter() }
                 },
             )
         }
@@ -204,7 +215,11 @@ class ImportOPMLPresenterTest {
             assertFalse(finalState.importing, "Should finish importing")
             assertEquals(feedCount, finalState.totalCount, "Total count should match input")
             assertEquals(feedCount, finalState.importedCount, "Imported count should match input")
-            assertEquals(feedCount, finalState.importedSources.size, "UiState list size should match input")
+            assertEquals(
+                feedCount,
+                finalState.importedSources.size,
+                "UiState list size should match input",
+            )
             val dbSources = db.rssSourceDao().getAll().first()
             assertEquals(feedCount, dbSources.size, "Database records should match input")
         }

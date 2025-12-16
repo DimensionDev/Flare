@@ -8,6 +8,7 @@ struct FlareApp: App {
         configureAudioSessionForMixing()
         ComposeUIHelper.shared.initialize(
             inAppNotification: SwiftInAppNotification.shared,
+            swiftFormatter: Formatter.shared
         )
     }
     var body: some Scene {

@@ -5,7 +5,7 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.humanizer.humanize
+import dev.dimension.flare.ui.humanizer.Formatter.humanize
 import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText

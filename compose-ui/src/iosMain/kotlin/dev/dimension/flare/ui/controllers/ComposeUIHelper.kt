@@ -8,23 +8,30 @@ import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.KoinHelper
+import dev.dimension.flare.ui.humanizer.SwiftFormatter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.context.startKoin
-import org.koin.dsl.binds
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 public object ComposeUIHelper {
-    public fun initialize(inAppNotification: InAppNotification) {
+    public fun initialize(
+        inAppNotification: InAppNotification,
+        swiftFormatter: SwiftFormatter,
+    ) {
         startKoin {
             modules(KoinHelper.modules())
             modules(
                 module {
                     single {
                         ProxyInAppNotification(inAppNotification, get())
-                    } binds arrayOf(InAppNotification::class)
+                    } bind InAppNotification::class
+                    single {
+                        swiftFormatter
+                    } bind SwiftFormatter::class
                 },
             )
             modules(dev.dimension.flare.di.composeUiModule)

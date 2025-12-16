@@ -3,8 +3,11 @@ package dev.dimension.flare.di
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.ui.humanizer.JVMFormatter
+import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 internal actual val platformModule: Module =
@@ -12,4 +15,5 @@ internal actual val platformModule: Module =
         singleOf(::AppDataStore)
         singleOf(::DriverFactory)
         singleOf(::PlatformPathProducer)
+        singleOf(::JVMFormatter) bind PlatformFormatter::class
     }

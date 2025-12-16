@@ -109,6 +109,28 @@ class DeepLinkMatcherTest {
         assertNull(match)
     }
 
+    @Test
+    fun ignoresUnknownQueryParameters() {
+        val patternUrl =
+            URLBuilder("https://example.com")
+                .apply { path("test", "{param}") }
+                .build()
+        val requestUrl =
+            URLBuilder("https://example.com")
+                .apply {
+                    path("test", "param_value")
+                    parameters.append("q", "test")
+                }.build()
+        val pattern = DeepLinkPattern(TestParamKey.serializer(), patternUrl)
+        val request = DeepLinkRequest(requestUrl)
+
+        val match = DeepLinkMatcher(request, pattern).match()
+
+        assertNotNull(match)
+        assertEquals(TestParamKey.serializer(), match.serializer)
+        assertEquals(mapOf("param" to "param_value"), match.args)
+    }
+
     @Serializable
     private data class HomeKey(
         val value: String = "",
@@ -119,5 +141,10 @@ class DeepLinkMatcherTest {
         val userId: Int,
         val includeHistory: Boolean = false,
         val page: Long = 0,
+    )
+
+    @Serializable
+    private data class TestParamKey(
+        val param: String,
     )
 }

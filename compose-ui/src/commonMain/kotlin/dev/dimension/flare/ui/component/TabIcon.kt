@@ -23,6 +23,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.brands.Bluesky
 import compose.icons.fontawesomeicons.brands.Mastodon
 import compose.icons.fontawesomeicons.brands.Twitter
+import compose.icons.fontawesomeicons.brands.Weibo
 import compose.icons.fontawesomeicons.solid.Bell
 import compose.icons.fontawesomeicons.solid.BookBookmark
 import compose.icons.fontawesomeicons.solid.CircleUser
@@ -302,4 +303,5 @@ internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =
         IconType.Material.MaterialIcon.Feeds -> FontAwesomeIcons.Solid.SquareRss
         IconType.Material.MaterialIcon.Messages -> FontAwesomeIcons.Solid.Message
         IconType.Material.MaterialIcon.Rss -> FontAwesomeIcons.Solid.SquareRss
+        IconType.Material.MaterialIcon.Weibo -> FontAwesomeIcons.Brands.Weibo
     }

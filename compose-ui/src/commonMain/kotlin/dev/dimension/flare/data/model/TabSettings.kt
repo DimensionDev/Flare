@@ -130,6 +130,7 @@ public sealed class IconType {
             Feeds,
             Messages,
             Rss,
+            Weibo,
         }
     }
 

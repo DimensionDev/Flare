@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Afficher les actions</string>
     <string name="settings_appearance_show_actions_description">Afficher les actions en bas de la publication</string>
+    <string name="settings_appearance_post_action_style">Style d\'action de publication</string>
+    <string name="settings_appearance_post_action_style_description">Changer le style de l\'action du message</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Alignement à gauche</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Alignement droit</string>
+    <string name="settings_appearance_post_action_style_stretch">Étirer</string>
     <string name="settings_appearance_show_media">Afficher les médias</string>
     <string name="settings_appearance_show_media_description">Afficher les médias dans la publication</string>
     <string name="settings_appearance_show_numbers">Afficher les numéros</string>

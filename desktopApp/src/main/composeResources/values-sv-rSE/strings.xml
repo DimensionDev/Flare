@@ -186,6 +186,12 @@
     <string name="settings_appearance_full_width_post_description">Visa inlägget i full bredd</string>
     <string name="settings_language_title">Språk</string>
     <string name="settings_language_description">Ändra språket i appen</string>
+    <string name="settings_appearance_post_action_style">Stil på inlägg</string>
+    <string name="settings_appearance_post_action_style_description">Ändra stil på inläggets åtgärd</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Vänster justerad</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Högerjusterad</string>
+    <string name="settings_appearance_post_action_style_stretch">Sträck</string>
     <string name="settings_about_source_code">Källkod</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Gå med i vår Telegramgrupp</string>

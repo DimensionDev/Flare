@@ -186,6 +186,12 @@
     <string name="settings_appearance_full_width_post_description">Vis indlægget i fuld bredde</string>
     <string name="settings_language_title">Sprog</string>
     <string name="settings_language_description">Skift sproget i app\'en</string>
+    <string name="settings_appearance_post_action_style">Indlæg handling stil</string>
+    <string name="settings_appearance_post_action_style_description">Ændr stilen for indlæggets handling</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Venstre justeret</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Højre justeret</string>
+    <string name="settings_appearance_post_action_style_stretch">Stræk</string>
     <string name="settings_about_source_code">Kilde kode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Tilmeld dig vores Telegram gruppe</string>

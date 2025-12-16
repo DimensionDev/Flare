@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Εμφάνιση ενεργειών</string>
     <string name="settings_appearance_show_actions_description">Εμφάνιση ενεργειών στο κάτω μέρος της δημοσίευσης</string>
+    <string name="settings_appearance_post_action_style">Στυλ ενέργειας δημοσίευσης</string>
+    <string name="settings_appearance_post_action_style_description">Αλλαγή του στυλ της ενέργειας της ανάρτησης</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Αριστερά ευθυγραμμίστηκε</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Δεξιά ευθυγράμμιση</string>
+    <string name="settings_appearance_post_action_style_stretch">Τέντωμα</string>
     <string name="settings_appearance_show_media">Εμφάνιση πολυμέσων</string>
     <string name="settings_appearance_show_media_description">Εμφάνιση πολυμέσων στην ανάρτηση</string>
     <string name="settings_appearance_show_numbers">Εμφάνιση αριθμών</string>

@@ -186,6 +186,12 @@
     <string name="settings_appearance_full_width_post_description">Näytä viesti täydellä leveydellä</string>
     <string name="settings_language_title">Kieli</string>
     <string name="settings_language_description">Vaihda sovelluksen kieli</string>
+    <string name="settings_appearance_post_action_style">Viestin toimintotyyli</string>
+    <string name="settings_appearance_post_action_style_description">Muuta postin toiminnan tyyliä</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Vasen tasattu</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Oikealle tasattu</string>
+    <string name="settings_appearance_post_action_style_stretch">Venytä</string>
     <string name="settings_about_source_code">Lähdekoodi</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Liity meidän Telegram ryhmään</string>

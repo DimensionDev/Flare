@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Показать кнопки действий</string>
     <string name="settings_appearance_show_actions_description">Показать действия в нижней части записи</string>
+    <string name="settings_appearance_post_action_style">Стиль поста действия</string>
+    <string name="settings_appearance_post_action_style_description">Изменить стиль действия поста</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Выровнять слева</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Выровнять вправо</string>
+    <string name="settings_appearance_post_action_style_stretch">Растянуть</string>
     <string name="settings_appearance_show_media">Показать медиа</string>
     <string name="settings_appearance_show_media_description">Показать медиа в посте</string>
     <string name="settings_appearance_show_numbers">Показать цифры</string>

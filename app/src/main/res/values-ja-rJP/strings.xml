@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">全般</string>
     <string name="settings_appearance_show_actions">アクションを表示</string>
     <string name="settings_appearance_show_actions_description">投稿の下部にアクションを表示する</string>
+    <string name="settings_appearance_post_action_style">投稿アクションスタイル</string>
+    <string name="settings_appearance_post_action_style_description">投稿のアクションのスタイルを変更する</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">左揃え</string>
+    <string name="settings_appearance_post_action_style_right_aligned">右揃え</string>
+    <string name="settings_appearance_post_action_style_stretch">ストレッチ</string>
     <string name="settings_appearance_show_media">メディアを表示</string>
     <string name="settings_appearance_show_media_description">投稿にメディアを表示する</string>
     <string name="settings_appearance_show_numbers">数字を表示</string>

@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Mostrar acciones</string>
     <string name="settings_appearance_show_actions_description">Mostrar acciones en la parte inferior del post</string>
+    <string name="settings_appearance_post_action_style">Estilo de acción postal</string>
+    <string name="settings_appearance_post_action_style_description">Cambiar el estilo de la acción del post</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Izquierda alineada</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Derecho alineado</string>
+    <string name="settings_appearance_post_action_style_stretch">Escritura</string>
     <string name="settings_appearance_show_media">Mostrar medios</string>
     <string name="settings_appearance_show_media_description">Mostrar medios en el post</string>
     <string name="settings_appearance_show_numbers">Mostrar números</string>

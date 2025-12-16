@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Показати дії</string>
     <string name="settings_appearance_show_actions_description">Відображати дії внизу допису</string>
+    <string name="settings_appearance_post_action_style">Стиль дій після публікації</string>
+    <string name="settings_appearance_post_action_style_description">Змінити стиль дії посту</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">По лівому краю</string>
+    <string name="settings_appearance_post_action_style_right_aligned">По правому краю</string>
+    <string name="settings_appearance_post_action_style_stretch">Розтягнути</string>
     <string name="settings_appearance_show_media">Показати медіа</string>
     <string name="settings_appearance_show_media_description">Показувати медіа в повідомленні</string>
     <string name="settings_appearance_show_numbers">Показати номери</string>

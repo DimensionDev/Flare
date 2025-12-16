@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">إظهار الإجراءات</string>
     <string name="settings_appearance_show_actions_description">إظهار الإجراءات في أسفل المنشور</string>
+    <string name="settings_appearance_post_action_style">نمط إجراء المشاركة</string>
+    <string name="settings_appearance_post_action_style_description">تغيير نمط إجراء المشاركة</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">محاذاة لليسار</string>
+    <string name="settings_appearance_post_action_style_right_aligned">محاذاة لليمين</string>
+    <string name="settings_appearance_post_action_style_stretch">تمدد</string>
     <string name="settings_appearance_show_media">إظهار الوسائط</string>
     <string name="settings_appearance_show_media_description">إظهار الوسائط في المنشور</string>
     <string name="settings_appearance_show_numbers">إظهار الأرقام</string>

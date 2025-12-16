@@ -317,10 +317,10 @@ private fun Status.renderStatus(
         }
     val postUrl =
         buildString {
-            if (!uri.isNullOrEmpty()) {
-                append(uri)
-            } else if (!url.isNullOrEmpty()) {
+            if (!url.isNullOrEmpty()) {
                 append(url)
+            } else if (!uri.isNullOrEmpty()) {
+                append(uri)
             } else {
                 append("https://$host/@${account.acct}/$id")
             }

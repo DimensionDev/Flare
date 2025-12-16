@@ -135,6 +135,7 @@ extension IconType.MaterialMaterialIcon {
         case .feeds:        "fa-square-rss"
         case .messages:     "fa-message"
         case .rss:          "fa-square-rss"
+        case .weibo: "fa-weibo"
         }
     }
 }

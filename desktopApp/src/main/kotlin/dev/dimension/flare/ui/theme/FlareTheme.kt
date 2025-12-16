@@ -36,7 +36,7 @@ import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.LocalComponentAppearance
-import dev.dimension.flare.ui.component.updateTimeFormatterLocale
+import dev.dimension.flare.ui.humanizer.updateTimeFormatterLocale
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.onSuccess
 import io.github.composefluent.ExperimentalFluentApi

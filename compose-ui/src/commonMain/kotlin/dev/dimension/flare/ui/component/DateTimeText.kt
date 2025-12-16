@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.component
 
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextLayoutResult
@@ -17,14 +16,6 @@ import androidx.compose.ui.unit.TextUnit
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.render.UiDateTime
-import dev.dimension.flare.ui.render.toUi
-import kotlin.time.Instant
-
-@Composable
-internal expect fun rememberFormattedDateTime(
-    data: UiDateTime,
-    fullTime: Boolean = false,
-): String
 
 @Composable
 public fun DateTimeText(
@@ -48,10 +39,13 @@ public fun DateTimeText(
     style: TextStyle = PlatformTextStyle.current,
     fullTime: Boolean = false,
 ) {
-    val text = rememberFormattedDateTime(data, fullTime)
-
     PlatformText(
-        text = text,
+        text =
+            if (fullTime) {
+                data.full
+            } else {
+                data.relative
+            },
         modifier = modifier,
         color = color,
         fontSize = fontSize,
@@ -70,10 +64,4 @@ public fun DateTimeText(
         onTextLayout = onTextLayout,
         style = style,
     )
-}
-
-internal data object UiDateTimeSaver : androidx.compose.runtime.saveable.Saver<UiDateTime, Long> {
-    override fun restore(value: Long): UiDateTime? = Instant.fromEpochMilliseconds(value).toUi()
-
-    override fun SaverScope.save(value: UiDateTime): Long = value.value.toEpochMilliseconds()
 }

@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.datasource.microblog
 
-import dev.dimension.flare.ui.humanizer.humanize
+import dev.dimension.flare.ui.humanizer.Formatter.humanize
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.Digit
 import kotlinx.collections.immutable.ImmutableList

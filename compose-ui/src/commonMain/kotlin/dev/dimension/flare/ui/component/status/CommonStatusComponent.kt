@@ -124,7 +124,6 @@ import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextButton
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.platform.placeholder
-import dev.dimension.flare.ui.component.rememberFormattedDateTime
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.Digit
 import dev.dimension.flare.ui.model.UiCard
@@ -1138,13 +1137,11 @@ private fun StatusPollComponent(
             )
         } else {
             poll.expiredAt?.let { expiredAt ->
-                val localizedExpiredTimeline =
-                    rememberFormattedDateTime(expiredAt, fullTime = true)
                 PlatformText(
                     text =
                         stringResource(
                             resource = Res.string.poll_expired_at,
-                            localizedExpiredTimeline,
+                            expiredAt.full,
                         ),
                     modifier =
                         Modifier

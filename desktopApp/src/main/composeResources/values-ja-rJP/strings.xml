@@ -186,6 +186,12 @@
     <string name="settings_appearance_full_width_post_description">投稿を全幅で表示</string>
     <string name="settings_language_title">言語</string>
     <string name="settings_language_description">アプリの言語を変更する</string>
+    <string name="settings_appearance_post_action_style">投稿アクションスタイル</string>
+    <string name="settings_appearance_post_action_style_description">投稿のアクションのスタイルを変更する</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">左揃え</string>
+    <string name="settings_appearance_post_action_style_right_aligned">右揃え</string>
+    <string name="settings_appearance_post_action_style_stretch">ストレッチ</string>
     <string name="settings_about_source_code">ソースコード</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Telegramグループに参加する</string>

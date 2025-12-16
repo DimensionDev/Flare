@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Näytä toiminnot</string>
     <string name="settings_appearance_show_actions_description">Näytä toiminnot viestin alareunassa</string>
+    <string name="settings_appearance_post_action_style">Viestin toimintotyyli</string>
+    <string name="settings_appearance_post_action_style_description">Muuta postin toiminnan tyyliä</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Vasen tasattu</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Oikealle tasattu</string>
+    <string name="settings_appearance_post_action_style_stretch">Venytä</string>
     <string name="settings_appearance_show_media">Näytä media</string>
     <string name="settings_appearance_show_media_description">Näytä media viestissä</string>
     <string name="settings_appearance_show_numbers">Näytä numerot</string>

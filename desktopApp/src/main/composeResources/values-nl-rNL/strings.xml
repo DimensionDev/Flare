@@ -186,6 +186,12 @@
     <string name="settings_appearance_full_width_post_description">Toon bericht in volledige breedte</string>
     <string name="settings_language_title">Taal</string>
     <string name="settings_language_description">De taal van de app wijzigen</string>
+    <string name="settings_appearance_post_action_style">Post actie stijl</string>
+    <string name="settings_appearance_post_action_style_description">Wijzig de stijl van de actie van het bericht</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Links uitgelijnd</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Rechts uitgelijnd</string>
+    <string name="settings_appearance_post_action_style_stretch">Uitrekken</string>
     <string name="settings_about_source_code">Bron code</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Deelnemen aan onze Telegram-groep</string>

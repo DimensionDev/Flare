@@ -186,6 +186,12 @@
     <string name="settings_appearance_full_width_post_description">Pokaż post o pełnej szerokości</string>
     <string name="settings_language_title">Język</string>
     <string name="settings_language_description">Zmień język aplikacji</string>
+    <string name="settings_appearance_post_action_style">Styl akcji postu</string>
+    <string name="settings_appearance_post_action_style_description">Zmień styl akcji wpisu</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Wyrównanie w lewo</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Wyrównanie do prawej</string>
+    <string name="settings_appearance_post_action_style_stretch">Rozciągnięcie</string>
     <string name="settings_about_source_code">Kod źródłowy</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Dołącz do naszej grupy Telegram</string>

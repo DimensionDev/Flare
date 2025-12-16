@@ -186,6 +186,12 @@
     <string name="settings_appearance_full_width_post_description">Показать пост в полной ширине</string>
     <string name="settings_language_title">Язык</string>
     <string name="settings_language_description">Изменить язык приложения</string>
+    <string name="settings_appearance_post_action_style">Стиль поста действия</string>
+    <string name="settings_appearance_post_action_style_description">Изменить стиль действия поста</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Выровнять слева</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Выровнять вправо</string>
+    <string name="settings_appearance_post_action_style_stretch">Растянуть</string>
     <string name="settings_about_source_code">Исходный код</string>
     <string name="settings_about_telegram">Телеграмма</string>
     <string name="settings_about_telegram_description">Присоединяйтесь к нашей группе Telegram</string>

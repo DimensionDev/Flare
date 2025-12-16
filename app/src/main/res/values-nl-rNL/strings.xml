@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Toon acties</string>
     <string name="settings_appearance_show_actions_description">Toon acties aan de onderkant van het bericht</string>
+    <string name="settings_appearance_post_action_style">Post actie stijl</string>
+    <string name="settings_appearance_post_action_style_description">Wijzig de stijl van de actie van het bericht</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Links uitgelijnd</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Rechts uitgelijnd</string>
+    <string name="settings_appearance_post_action_style_stretch">Uitrekken</string>
     <string name="settings_appearance_show_media">Media tonen</string>
     <string name="settings_appearance_show_media_description">Media in het bericht weergeven</string>
     <string name="settings_appearance_show_numbers">Getallen weergeven</string>

@@ -186,6 +186,12 @@
     <string name="settings_appearance_full_width_post_description">Zobrazit příspěvek v plné šířce</string>
     <string name="settings_language_title">Jazyk</string>
     <string name="settings_language_description">Změnit jazyk aplikace</string>
+    <string name="settings_appearance_post_action_style">Styl akce příspěvku</string>
+    <string name="settings_appearance_post_action_style_description">Změnit styl akce příspěvku</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Zarovnáno vlevo</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Zarovnáno vpravo</string>
+    <string name="settings_appearance_post_action_style_stretch">Roztáhnout</string>
     <string name="settings_about_source_code">Zdrojový kód</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Připojte se k naší skupině Telegram</string>

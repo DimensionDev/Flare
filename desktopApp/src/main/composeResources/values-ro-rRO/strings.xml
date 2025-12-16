@@ -186,6 +186,12 @@
     <string name="settings_appearance_full_width_post_description">Arată postarea în lăţime completă</string>
     <string name="settings_language_title">Limba</string>
     <string name="settings_language_description">Schimbă limba aplicației</string>
+    <string name="settings_appearance_post_action_style">Stilul acţiunii postării</string>
+    <string name="settings_appearance_post_action_style_description">Schimbă stilul acțiunii postării</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Aliniere la stânga</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Corect aliniat</string>
+    <string name="settings_appearance_post_action_style_stretch">Întindere</string>
     <string name="settings_about_source_code">Cod sursă</string>
     <string name="settings_about_telegram">Telegramă</string>
     <string name="settings_about_telegram_description">Alătură-te grupului nostru de telegramă</string>

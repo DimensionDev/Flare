@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Zobrazit akce</string>
     <string name="settings_appearance_show_actions_description">Zobrazit akce v dolní části příspěvku</string>
+    <string name="settings_appearance_post_action_style">Styl akce příspěvku</string>
+    <string name="settings_appearance_post_action_style_description">Změnit styl akce příspěvku</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Zarovnáno vlevo</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Zarovnáno vpravo</string>
+    <string name="settings_appearance_post_action_style_stretch">Roztáhnout</string>
     <string name="settings_appearance_show_media">Zobrazit média</string>
     <string name="settings_appearance_show_media_description">Zobrazit média v příspěvku</string>
     <string name="settings_appearance_show_numbers">Zobrazit čísla</string>

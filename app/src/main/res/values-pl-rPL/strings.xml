@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Pokaż akcje</string>
     <string name="settings_appearance_show_actions_description">Pokaż akcje na dole wpisu</string>
+    <string name="settings_appearance_post_action_style">Styl akcji postu</string>
+    <string name="settings_appearance_post_action_style_description">Zmień styl akcji wpisu</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Wyrównanie w lewo</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Wyrównanie do prawej</string>
+    <string name="settings_appearance_post_action_style_stretch">Rozciągnięcie</string>
     <string name="settings_appearance_show_media">Pokaż media</string>
     <string name="settings_appearance_show_media_description">Pokaż media w poście</string>
     <string name="settings_appearance_show_numbers">Pokaż numery</string>

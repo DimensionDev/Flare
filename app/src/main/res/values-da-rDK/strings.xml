@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Vis handlinger</string>
     <string name="settings_appearance_show_actions_description">Vis handlinger i bunden af indlægget</string>
+    <string name="settings_appearance_post_action_style">Indlæg handling stil</string>
+    <string name="settings_appearance_post_action_style_description">Ændr stilen for indlæggets handling</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Venstre justeret</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Højre justeret</string>
+    <string name="settings_appearance_post_action_style_stretch">Stræk</string>
     <string name="settings_appearance_show_media">Vis medier</string>
     <string name="settings_appearance_show_media_description">Vis medier i indlægget</string>
     <string name="settings_appearance_show_numbers">Vis numre</string>

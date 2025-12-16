@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">通用</string>
     <string name="settings_appearance_show_actions">显示操作</string>
     <string name="settings_appearance_show_actions_description">在帖子底部显示动作</string>
+    <string name="settings_appearance_post_action_style">发布动作样式</string>
+    <string name="settings_appearance_post_action_style_description">更改帖子动作样式</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">左对齐</string>
+    <string name="settings_appearance_post_action_style_right_aligned">右对齐</string>
+    <string name="settings_appearance_post_action_style_stretch">拉伸模式</string>
     <string name="settings_appearance_show_media">显示媒体</string>
     <string name="settings_appearance_show_media_description">在帖子中显示媒体</string>
     <string name="settings_appearance_show_numbers">显示数字</string>

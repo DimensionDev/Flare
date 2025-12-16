@@ -186,6 +186,12 @@
     <string name="settings_appearance_full_width_post_description">Afficher le message en pleine largeur</string>
     <string name="settings_language_title">Langue</string>
     <string name="settings_language_description">Changer la langue de l\'application</string>
+    <string name="settings_appearance_post_action_style">Style d\'action de publication</string>
+    <string name="settings_appearance_post_action_style_description">Changer le style de l\'action du message</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Alignement à gauche</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Alignement droit</string>
+    <string name="settings_appearance_post_action_style_stretch">Étirer</string>
     <string name="settings_about_source_code">Code source</string>
     <string name="settings_about_telegram">Télégramme</string>
     <string name="settings_about_telegram_description">Rejoignez notre groupe Telegram</string>

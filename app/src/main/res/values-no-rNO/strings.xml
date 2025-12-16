@@ -113,6 +113,12 @@
     <string name="settings_appearance_generic">Generic</string>
     <string name="settings_appearance_show_actions">Vis handlinger</string>
     <string name="settings_appearance_show_actions_description">Vis handlinger på bunnen av innlegget</string>
+    <string name="settings_appearance_post_action_style">Publiser handlingsstil</string>
+    <string name="settings_appearance_post_action_style_description">Endre stilen til innleggets handling</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">Venstre justert</string>
+    <string name="settings_appearance_post_action_style_right_aligned">Høyre justert</string>
+    <string name="settings_appearance_post_action_style_stretch">Strekk</string>
     <string name="settings_appearance_show_media">Vis media</string>
     <string name="settings_appearance_show_media_description">Vis media i innlegget</string>
     <string name="settings_appearance_show_numbers">Vis tall</string>

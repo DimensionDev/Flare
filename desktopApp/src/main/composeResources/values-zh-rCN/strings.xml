@@ -186,6 +186,12 @@
     <string name="settings_appearance_full_width_post_description">全宽显示帖子</string>
     <string name="settings_language_title">语言</string>
     <string name="settings_language_description">更改应用程序的语言</string>
+    <string name="settings_appearance_post_action_style">发布动作样式</string>
+    <string name="settings_appearance_post_action_style_description">更改帖子动作样式</string>
+    <string name="settings_appearance_post_action_style_hidden">Hidden</string>
+    <string name="settings_appearance_post_action_style_left_aligned">左对齐</string>
+    <string name="settings_appearance_post_action_style_right_aligned">右对齐</string>
+    <string name="settings_appearance_post_action_style_stretch">拉伸模式</string>
     <string name="settings_about_source_code">源代码</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">加入Telegram 群组</string>

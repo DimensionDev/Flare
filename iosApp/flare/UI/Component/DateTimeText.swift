@@ -8,6 +8,8 @@ struct DateTimeText: View {
     var body: some View {
         if fullTime {
             Text(data.platformValue, style: .date) + Text(data.platformValue, style: .time)
+        } else if data.shouldShowFull {
+            Text(data.platformValue, style: .date)
         } else {
             Text(data.platformValue, style: .relative)
         }

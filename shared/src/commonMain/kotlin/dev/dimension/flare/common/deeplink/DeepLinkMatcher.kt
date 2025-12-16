@@ -62,10 +62,11 @@ internal class DeepLinkMatcher<T>(
         // match queries (if any)
         request.queries.forEach { query ->
             val name = query.key
-            val queryStringParser = deepLinkPattern.queryValueParsers[name]
+            // if the query param is not part of the pattern, we just ignore it
+            val queryStringParser = deepLinkPattern.queryValueParsers[name] ?: return@forEach
             val queryParsedValue =
                 try {
-                    queryStringParser!!.invoke(query.value.first())
+                    queryStringParser.invoke(query.value.first())
                 } catch (e: IllegalArgumentException) {
                     DebugRepository.log(
                         "${TAG_LOG_ERROR}: Failed to parse query name:[$name] value:[${query.value}]." +

@@ -59,6 +59,7 @@ internal fun AnimatedNumber(
                 .fastForEach { digit ->
                     PlatformText(
                         digit.digitString,
+                        modifier = Modifier.alignByBaseline(),
                         color = color,
                         fontSize = fontSize,
                         fontStyle = fontStyle,
@@ -87,6 +88,7 @@ internal fun AnimatedNumber(
             digits
                 .fastForEach { digit ->
                     AnimatedContent(
+                        modifier = Modifier.alignByBaseline(),
                         targetState = digit,
                         transitionSpec = {
                             if (targetState > initialState) {

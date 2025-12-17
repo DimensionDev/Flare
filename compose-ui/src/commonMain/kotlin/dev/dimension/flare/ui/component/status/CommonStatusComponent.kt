@@ -725,7 +725,7 @@ internal fun StatusActions(
         modifier =
             modifier
                 .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Bottom,
         horizontalArrangement =
             when (appearanceSettings.postActionStyle) {
                 PostActionStyle.Hidden -> Arrangement.Start
@@ -840,9 +840,6 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
                 imageVector = subActions.icon,
                 contentDescription = null,
                 tint = color,
-                modifier =
-                    Modifier
-                        .height(PlatformTextStyle.current.fontSize.value.dp + 2.dp),
             )
         },
         text = {

@@ -127,7 +127,9 @@ public fun StatusActionButton(
             )
         }
         if (withTextMinWidth || digits != null && appearanceSettings.showNumbers) {
-            Box {
+            Box(
+                modifier = Modifier.align(Alignment.CenterVertically),
+            ) {
                 if (withTextMinWidth) {
                     PlatformText(
                         "0000",
@@ -184,13 +186,13 @@ internal fun StatusActionGroup(
             enabled = enabled,
             withTextMinWidth = withTextMinWidth,
         )
-        CompositionLocalProvider(
-            PlatformContentColor provides PlatformTheme.colorScheme.text,
-            PlatformTextStyle provides PlatformTheme.typography.body,
+        PlatformDropdownMenu(
+            expanded = showMenu,
+            onDismissRequest = { showMenu = false },
         ) {
-            PlatformDropdownMenu(
-                expanded = showMenu,
-                onDismissRequest = { showMenu = false },
+            CompositionLocalProvider(
+                PlatformContentColor provides PlatformTheme.colorScheme.text,
+                PlatformTextStyle provides PlatformTheme.typography.body,
             ) {
                 subMenus.invoke(
                     this,

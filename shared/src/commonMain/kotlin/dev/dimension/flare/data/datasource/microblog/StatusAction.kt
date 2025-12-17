@@ -1,10 +1,8 @@
 package dev.dimension.flare.data.datasource.microblog
 
-import dev.dimension.flare.ui.humanizer.Formatter.humanize
 import dev.dimension.flare.ui.model.ClickContext
-import dev.dimension.flare.ui.model.Digit
+import dev.dimension.flare.ui.model.UiNumber
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 
 public sealed interface StatusAction {
@@ -27,9 +25,7 @@ public sealed interface StatusAction {
         }
 
         public sealed interface Numbered {
-            public val count: Long
-            public val humanizedCount: String
-            public val digits: ImmutableList<Digit>
+            public val count: UiNumber
         }
 
         public sealed interface Colorized {
@@ -46,147 +42,57 @@ public sealed interface StatusAction {
         public data object More : Item
 
         public data class Like internal constructor(
-            override val count: Long,
+            override val count: UiNumber,
             val liked: Boolean,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable,
             Colorized,
             Numbered {
-            public override val humanizedCount: String by lazy {
-                count
-                    .takeIf {
-                        it > 0
-                    }?.humanize()
-                    .orEmpty()
-            }
-
-            override val digits: ImmutableList<Digit>
-                get() =
-                    humanizedCount
-                        .mapIndexed { index, char ->
-                            Digit(char, index, count)
-                        }.toImmutableList()
-
             override val color: Colorized.Color
                 get() = if (liked) Colorized.Color.Red else Colorized.Color.ContentColor
         }
 
         public data class Retweet internal constructor(
-            override val count: Long,
+            override val count: UiNumber,
             val retweeted: Boolean,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable,
             Colorized,
             Numbered {
-            public override val humanizedCount: String by lazy {
-                count
-                    .takeIf {
-                        it > 0
-                    }?.humanize()
-                    .orEmpty()
-            }
-
-            override val digits: ImmutableList<Digit>
-                get() =
-                    humanizedCount
-                        .mapIndexed { index, char ->
-                            Digit(char, index, count)
-                        }.toImmutableList()
-
             override val color: Colorized.Color
                 get() = if (retweeted) Colorized.Color.PrimaryColor else Colorized.Color.ContentColor
         }
 
         public data class Reply internal constructor(
-            override val count: Long,
+            override val count: UiNumber,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable,
-            Numbered {
-            public override val humanizedCount: String by lazy {
-                count
-                    .takeIf {
-                        it > 0
-                    }?.humanize()
-                    .orEmpty()
-            }
-
-            override val digits: ImmutableList<Digit>
-                get() =
-                    humanizedCount
-                        .mapIndexed { index, char ->
-                            Digit(char, index, count)
-                        }.toImmutableList()
-        }
+            Numbered
 
         public data class Comment internal constructor(
-            override val count: Long,
+            override val count: UiNumber,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable,
-            Numbered {
-            public override val humanizedCount: String by lazy {
-                count
-                    .takeIf {
-                        it > 0
-                    }?.humanize()
-                    .orEmpty()
-            }
-
-            override val digits: ImmutableList<Digit>
-                get() =
-                    humanizedCount
-                        .mapIndexed { index, char ->
-                            Digit(char, index, count)
-                        }.toImmutableList()
-        }
+            Numbered
 
         public data class Quote internal constructor(
-            override val count: Long,
+            override val count: UiNumber,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable,
-            Numbered {
-            public override val humanizedCount: String by lazy {
-                count
-                    .takeIf {
-                        it > 0
-                    }?.humanize()
-                    .orEmpty()
-            }
-
-            override val digits: ImmutableList<Digit>
-                get() =
-                    humanizedCount
-                        .mapIndexed { index, char ->
-                            Digit(char, index, count)
-                        }.toImmutableList()
-        }
+            Numbered
 
         public data class Bookmark internal constructor(
-            override val count: Long,
+            override val count: UiNumber,
             val bookmarked: Boolean,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable,
-            Numbered {
-            public override val humanizedCount: String by lazy {
-                count
-                    .takeIf {
-                        it > 0
-                    }?.humanize()
-                    .orEmpty()
-            }
-
-            override val digits: ImmutableList<Digit>
-                get() =
-                    humanizedCount
-                        .mapIndexed { index, char ->
-                            Digit(char, index, count)
-                        }.toImmutableList()
-        }
+            Numbered
 
         public data class Delete internal constructor(
             override val onClicked: ClickContext.() -> Unit,

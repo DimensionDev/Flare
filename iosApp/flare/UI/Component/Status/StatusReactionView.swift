@@ -11,7 +11,7 @@ struct StatusReactionView: View {
                         item.onClicked()
                     } label: {
                         Label {
-                            Text(item.humanizedCount)
+                            Text(item.count.humanized)
                                 .foregroundStyle(item.me ? Color.white : Color(.label))
                         } icon: {
                             if item.isUnicode {

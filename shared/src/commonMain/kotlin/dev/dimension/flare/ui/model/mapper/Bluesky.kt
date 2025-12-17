@@ -35,6 +35,7 @@ import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.toHtml
@@ -537,7 +538,7 @@ internal fun PostView.renderStatus(
         actions =
             listOfNotNull(
                 StatusAction.Item.Reply(
-                    count = replyCount ?: 0,
+                    count = UiNumber(replyCount ?: 0),
                     onClicked = {
                         launcher.launch(
                             AppDeepLink.Compose.Reply(
@@ -550,7 +551,7 @@ internal fun PostView.renderStatus(
                 StatusAction.Group(
                     displayItem =
                         StatusAction.Item.Retweet(
-                            count = repostCount ?: 0,
+                            count = UiNumber(repostCount ?: 0),
                             retweeted = viewer?.repost?.atUri != null,
                             onClicked = {
                             },
@@ -558,7 +559,7 @@ internal fun PostView.renderStatus(
                     actions =
                         listOfNotNull(
                             StatusAction.Item.Retweet(
-                                count = repostCount ?: 0,
+                                count = UiNumber(repostCount ?: 0),
                                 retweeted = viewer?.repost?.atUri != null,
                                 onClicked = {
                                     event.reblog(
@@ -570,7 +571,7 @@ internal fun PostView.renderStatus(
                                 },
                             ),
                             StatusAction.Item.Quote(
-                                count = 0,
+                                count = UiNumber(quoteCount ?: 0),
                                 onClicked = {
                                     launcher.launch(
                                         AppDeepLink.Compose.Quote(
@@ -583,7 +584,7 @@ internal fun PostView.renderStatus(
                         ).toImmutableList(),
                 ),
                 StatusAction.Item.Like(
-                    count = likeCount ?: 0,
+                    count = UiNumber(likeCount ?: 0),
                     liked = viewer?.like?.atUri != null,
                     onClicked = {
                         event.like(
@@ -599,7 +600,7 @@ internal fun PostView.renderStatus(
                     actions =
                         listOfNotNull(
                             StatusAction.Item.Bookmark(
-                                count = 0,
+                                count = UiNumber(bookmarkCount ?: 0),
                                 bookmarked = viewer?.bookmarked == true,
                                 onClicked = {
                                     if (viewer?.bookmarked == true) {
@@ -1060,7 +1061,7 @@ private fun render(
                 actions =
                     listOfNotNull(
                         StatusAction.Item.Reply(
-                            count = record.value.replyCount ?: 0,
+                            count = UiNumber(record.value.replyCount ?: 0),
                             onClicked = {
                                 launcher.launch(
                                     AppDeepLink.Compose.Reply(
@@ -1073,7 +1074,7 @@ private fun render(
                         StatusAction.Group(
                             displayItem =
                                 StatusAction.Item.Retweet(
-                                    count = record.value.repostCount ?: 0,
+                                    count = UiNumber(record.value.repostCount ?: 0),
                                     retweeted = false,
                                     onClicked = {
                                     },
@@ -1081,7 +1082,7 @@ private fun render(
                             actions =
                                 listOfNotNull(
                                     StatusAction.Item.Retweet(
-                                        count = record.value.repostCount ?: 0,
+                                        count = UiNumber(record.value.repostCount ?: 0),
                                         retweeted = false,
                                         onClicked = {
                                             event.reblog(
@@ -1093,7 +1094,7 @@ private fun render(
                                         },
                                     ),
                                     StatusAction.Item.Quote(
-                                        count = 0,
+                                        count = UiNumber(record.value.quoteCount ?: 0),
                                         onClicked = {
                                             launcher.launch(
                                                 AppDeepLink.Compose.Quote(
@@ -1106,7 +1107,7 @@ private fun render(
                                 ).toImmutableList(),
                         ),
                         StatusAction.Item.Like(
-                            count = record.value.likeCount ?: 0,
+                            count = UiNumber(record.value.likeCount ?: 0),
                             liked = false,
                             onClicked = {
                                 event.like(
@@ -1203,7 +1204,7 @@ internal fun GeneratorView.render(accountKey: MicroBlogKey) =
         description = description,
         avatar = avatar?.uri,
         creator = creator.render(accountKey),
-        likedCount = likeCount ?: 0,
+        likedCount = UiNumber(likeCount ?: 0),
         liked = viewer?.like?.atUri != null,
         platformType = PlatformType.Bluesky,
         type = UiList.Type.Feed,

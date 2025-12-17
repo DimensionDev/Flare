@@ -27,6 +27,7 @@ import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
@@ -300,7 +301,7 @@ private fun Status.renderStatus(
                     .map {
                         UiTimeline.ItemContent.Status.BottomContent.Reaction.EmojiReaction(
                             name = it.name.orEmpty(),
-                            count = it.count ?: 0,
+                            count = UiNumber(it.count ?: 0),
                             me = it.me ?: false,
                             url = it.url.orEmpty(),
                             isUnicode = it.url.isNullOrEmpty(),
@@ -365,7 +366,7 @@ private fun Status.renderStatus(
             if (dataSource != null && accountKey != null) {
                 listOfNotNull(
                     StatusAction.Item.Reply(
-                        count = repliesCount ?: 0,
+                        count = UiNumber(repliesCount ?: 0),
                         onClicked = {
                             launcher.launch(
                                 AppDeepLink.Compose.Reply(
@@ -379,7 +380,7 @@ private fun Status.renderStatus(
                         StatusAction.Group(
                             displayItem =
                                 StatusAction.Item.Retweet(
-                                    count = reblogsCount ?: 0,
+                                    count = UiNumber(reblogsCount ?: 0),
                                     retweeted = reblogged ?: false,
                                     onClicked = {
                                     },
@@ -388,7 +389,7 @@ private fun Status.renderStatus(
                                 listOfNotNull(
                                     if (canQuote) {
                                         StatusAction.Item.Quote(
-                                            count = quotesCount ?: 0,
+                                            count = UiNumber(quotesCount ?: 0),
                                             onClicked = {
                                                 launcher.launch(
                                                     AppDeepLink.Compose.Quote(
@@ -402,7 +403,7 @@ private fun Status.renderStatus(
                                         null
                                     },
                                     StatusAction.Item.Retweet(
-                                        count = reblogsCount ?: 0,
+                                        count = UiNumber(reblogsCount ?: 0),
                                         retweeted = reblogged ?: false,
                                         onClicked = {
                                             dataSource.reblog(statusKey, reblogged ?: false)
@@ -415,7 +416,7 @@ private fun Status.renderStatus(
                     },
                     if (quoteApproval == null && canQuote) {
                         StatusAction.Item.Quote(
-                            count = quotesCount ?: 0,
+                            count = UiNumber(quotesCount ?: 0),
                             onClicked = {
                                 launcher.launch(
                                     AppDeepLink.Compose.Quote(
@@ -430,7 +431,7 @@ private fun Status.renderStatus(
                     },
                     if (quoteApproval == null && canReblog) {
                         StatusAction.Item.Retweet(
-                            count = reblogsCount ?: 0,
+                            count = UiNumber(reblogsCount ?: 0),
                             retweeted = reblogged ?: false,
                             onClicked = {
                                 dataSource.reblog(statusKey, reblogged ?: false)
@@ -440,7 +441,7 @@ private fun Status.renderStatus(
                         null
                     },
                     StatusAction.Item.Like(
-                        count = favouritesCount ?: 0,
+                        count = UiNumber(favouritesCount ?: 0),
                         liked = favourited ?: false,
                         onClicked = {
                             dataSource.like(statusKey, favourited ?: false)
@@ -466,7 +467,7 @@ private fun Status.renderStatus(
                         actions =
                             listOfNotNull(
                                 StatusAction.Item.Bookmark(
-                                    count = 0,
+                                    count = UiNumber(0),
                                     bookmarked = bookmarked ?: false,
                                     onClicked = {
                                         dataSource.bookmark(statusKey, bookmarked ?: false)

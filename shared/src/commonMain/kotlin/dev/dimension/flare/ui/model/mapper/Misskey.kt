@@ -25,6 +25,7 @@ import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
@@ -357,7 +358,7 @@ private fun Note.renderStatus(
             .map { emoji ->
                 UiTimeline.ItemContent.Status.BottomContent.Reaction.EmojiReaction(
                     name = emoji.key,
-                    count = emoji.value,
+                    count = UiNumber(emoji.value),
                     url = resolveMisskeyEmoji(emoji.key, accountKey.host, emojis),
                     isUnicode = !emoji.key.startsWith(':') && !emoji.key.endsWith(':'),
                     onClicked = {
@@ -369,7 +370,7 @@ private fun Note.renderStatus(
                     },
                     me = myReaction == emoji.key,
                 )
-            }.sortedByDescending { it.count }
+            }.sortedByDescending { it.count.value }
             .toPersistentList()
     val postUrl =
         buildString {
@@ -423,7 +424,7 @@ private fun Note.renderStatus(
         actions =
             listOfNotNull(
                 StatusAction.Item.Reply(
-                    count = repliesCount.toLong(),
+                    count = UiNumber(repliesCount.toLong()),
                     onClicked = {
                         launcher.launch(
                             AppDeepLink.Compose.Reply(
@@ -437,14 +438,14 @@ private fun Note.renderStatus(
                     StatusAction.Group(
                         displayItem =
                             StatusAction.Item.Retweet(
-                                count = renoteCount.toLong(),
+                                count = UiNumber(renoteCount.toLong()),
                                 retweeted = false,
                                 onClicked = {},
                             ),
                         actions =
                             listOfNotNull(
                                 StatusAction.Item.Retweet(
-                                    count = renoteCount.toLong(),
+                                    count = UiNumber(renoteCount.toLong()),
                                     retweeted = false,
                                     onClicked = {
                                         event.renote(
@@ -453,7 +454,7 @@ private fun Note.renderStatus(
                                     },
                                 ),
                                 StatusAction.Item.Quote(
-                                    count = 0,
+                                    count = UiNumber(0),
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.Compose.Quote(
@@ -498,7 +499,7 @@ private fun Note.renderStatus(
                                             statusKey = statusKey,
                                         ).map {
                                             StatusAction.Item.Like(
-                                                count = 0,
+                                                count = UiNumber(0),
                                                 liked = it,
                                                 onClicked = {
                                                     event.favourite(

@@ -125,9 +125,9 @@ import dev.dimension.flare.ui.component.platform.PlatformTextButton
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.model.ClickContext
-import dev.dimension.flare.ui.model.Digit
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -378,7 +378,8 @@ public fun CommonStatusComponent(
                 Spacer(modifier = Modifier.height(8.dp))
                 if (isDetail) {
                     CompositionLocalProvider(
-//                        PlatformContentColor provides PlatformTheme.colorScheme.caption,
+                        PlatformContentColor provides PlatformTheme.colorScheme.text,
+                        PlatformTextStyle provides PlatformTheme.typography.body,
                     ) {
                         StatusActions(
                             item.actions,
@@ -558,7 +559,7 @@ private fun StatusReactionComponent(
                     }
                     Spacer(modifier = Modifier.width(4.dp))
                     PlatformText(
-                        text = reaction.humanizedCount,
+                        text = reaction.count.humanized,
                     )
                 }
             }
@@ -743,7 +744,7 @@ internal fun StatusActions(
                 is StatusAction.Group -> {
                     StatusActionGroup(
                         icon = action.displayItem.icon,
-                        digits = action.displayItem.iconDigit,
+                        number = action.displayItem.iconNumber,
                         color = statusActionItemColor(item = action.displayItem),
                         withTextMinWidth = index != items.lastIndex,
                     ) { closeMenu, isMenuShown ->
@@ -801,7 +802,7 @@ internal fun StatusActions(
                 is StatusAction.Item -> {
                     StatusActionButton(
                         icon = action.icon,
-                        digits = action.iconDigit,
+                        number = action.iconNumber,
                         color = statusActionItemColor(item = action),
                         withTextMinWidth = index != items.lastIndex,
                         onClicked = {
@@ -906,10 +907,10 @@ private val StatusAction.Item.icon: ImageVector
             is StatusAction.Item.Share -> FontAwesomeIcons.Solid.ShareNodes
         }
 
-private val StatusAction.Item.iconDigit: ImmutableList<Digit>?
+private val StatusAction.Item.iconNumber: UiNumber?
     get() =
         if (this is StatusAction.Item.Numbered) {
-            this.digits
+            this.count
         } else {
             null
         }

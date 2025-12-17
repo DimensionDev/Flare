@@ -39,15 +39,14 @@ import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuScope
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.platform.rippleIndication
-import dev.dimension.flare.ui.model.Digit
+import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
-import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 public fun StatusActionButton(
     icon: ImageVector,
-    digits: ImmutableList<Digit>?,
+    number: UiNumber?,
     onClicked: () -> Unit,
     modifier: Modifier = Modifier,
     color: Color = PlatformContentColor.current,
@@ -126,7 +125,7 @@ public fun StatusActionButton(
                 tint = color,
             )
         }
-        if (withTextMinWidth || digits != null && appearanceSettings.showNumbers) {
+        if (withTextMinWidth || number != null && appearanceSettings.showNumbers) {
             Box(
                 modifier = Modifier.align(Alignment.CenterVertically),
             ) {
@@ -136,9 +135,9 @@ public fun StatusActionButton(
                         color = Color.Transparent,
                     )
                 }
-                if (digits != null && appearanceSettings.showNumbers) {
+                if (number != null && appearanceSettings.showNumbers) {
                     AnimatedNumber(
-                        digits = digits,
+                        number = number,
                         color = color,
                         modifier =
                             Modifier
@@ -163,7 +162,7 @@ public fun StatusActionButton(
 @Composable
 internal fun StatusActionGroup(
     icon: ImageVector,
-    digits: ImmutableList<Digit>?,
+    number: UiNumber?,
     modifier: Modifier = Modifier,
     color: Color = PlatformContentColor.current,
     contentDescription: String? = null,
@@ -177,7 +176,7 @@ internal fun StatusActionGroup(
     ) {
         StatusActionButton(
             icon = icon,
-            digits = digits,
+            number = number,
             contentDescription = contentDescription,
             onClicked = {
                 showMenu = true

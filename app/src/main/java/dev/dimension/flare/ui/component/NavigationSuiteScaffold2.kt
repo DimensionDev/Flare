@@ -83,6 +83,8 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.BottomBarStyle
 import dev.dimension.flare.data.model.LocalAppearanceSettings
+import soup.compose.material.motion.animation.materialElevationScaleIn
+import soup.compose.material.motion.animation.materialElevationScaleOut
 
 val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { 0.dp }
 val LocalBottomBarShowing = androidx.compose.runtime.staticCompositionLocalOf<Boolean> { false }
@@ -351,12 +353,47 @@ fun NavigationSuiteScaffold2(
                 ) {
                     content.invoke()
                 }
+
+                val isFloating =
+                    remember(bottomBarState) {
+                        when (bottomBarState) {
+                            BottomBarState.FloatingNormal -> true
+                            BottomBarState.FloatingMinimized -> true
+                            BottomBarState.FloatingHidden -> true
+                            BottomBarState.ClassicNormal -> false
+                            BottomBarState.ClassicHidden -> false
+                        }
+                    }
+                val isHidden =
+                    remember(bottomBarState) {
+                        when (bottomBarState) {
+                            BottomBarState.FloatingNormal -> false
+                            BottomBarState.FloatingMinimized -> false
+                            BottomBarState.FloatingHidden -> true
+                            BottomBarState.ClassicNormal -> false
+                            BottomBarState.ClassicHidden -> true
+                        }
+                    }
                 Column(
                     modifier =
                         Modifier
                             .fillMaxWidth()
                             .align(Alignment.BottomCenter)
-                            .animateContentSize(),
+                            .windowInsetsPadding(
+                                WindowInsets.systemBars.only(
+                                    WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                ),
+                            ).let {
+                                if (!isHidden) {
+                                    if (isFloating) {
+                                        it.padding(bottom = 56.dp)
+                                    } else {
+                                        it.padding(bottom = 80.dp, end = 56.dp)
+                                    }
+                                } else {
+                                    it
+                                }
+                            }.animateContentSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Bottom,
                 ) {
@@ -378,23 +415,29 @@ fun NavigationSuiteScaffold2(
                                     }
                                 },
                     )
-                    androidx.compose.animation.AnimatedVisibility(
-                        layoutType == NavigationSuiteType.NavigationBar &&
-                            scope.itemList.any { item -> item.selected } &&
-                            (
-                                bottomBarState != BottomBarState.FloatingHidden &&
-                                    bottomBarState != BottomBarState.ClassicHidden
-                            ),
-                        enter = slideInVertically { it },
-                        exit = slideOutVertically { it },
-                    ) {
-                        Box(
+                }
+
+                androidx.compose.animation.AnimatedVisibility(
+                    layoutType == NavigationSuiteType.NavigationBar &&
+                        scope.itemList.any { item -> item.selected } &&
+                        (
+                            bottomBarState != BottomBarState.FloatingHidden &&
+                                bottomBarState != BottomBarState.ClassicHidden
+                        ),
+                    enter = slideInVertically { it },
+                    exit = slideOutVertically { it },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter),
+                ) {
+                    Box(
 //                            horizontalArrangement = Arrangement.SpaceBetween,
 //                            verticalAlignment = Alignment.Bottom,
-                            contentAlignment = Alignment.BottomCenter,
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth(),
+//                            contentAlignment = Alignment.BottomCenter,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth(),
 //                                    .windowInsetsPadding(
 //                                        WindowInsets.systemBars.only(
 //                                            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
@@ -404,41 +447,49 @@ fun NavigationSuiteScaffold2(
 //                                        horizontal = 16.dp,
 //                                        vertical = 8.dp,
 //                                    ),
+                    ) {
+                        SharedTransitionLayout(
+                            modifier = Modifier.align(Alignment.BottomStart),
                         ) {
-                            SharedTransitionLayout(
-                                modifier = Modifier.align(Alignment.BottomStart),
-                            ) {
+                            AnimatedContent(
+                                bottomBarState,
+                            ) { bottomBarState ->
+                                BottomBar(
+                                    state = bottomBarState,
+                                    provider = scope,
+                                    animatedVisibilityScope = this@AnimatedContent,
+                                )
+                            }
+                        }
+                        androidx.compose.animation.AnimatedVisibility(
+                            showFab,
+                            modifier =
+                                Modifier.align(
+                                    if (bottomBarStyle == BottomBarStyle.Classic) {
+                                        Alignment.BottomEnd
+                                    } else {
+                                        Alignment.CenterEnd
+                                    },
+                                ),
+                            enter =
+                                materialElevationScaleIn(
+                                    initialAlpha = 0f,
+                                ),
+                            exit =
+                                materialElevationScaleOut(
+                                    targetAlpha = 0f,
+                                ),
+                        ) {
+                            SharedTransitionLayout {
                                 AnimatedContent(
                                     bottomBarState,
                                 ) { bottomBarState ->
-                                    BottomBar(
+                                    BottomFab(
                                         state = bottomBarState,
                                         provider = scope,
                                         animatedVisibilityScope = this@AnimatedContent,
+                                        onFabClicked = onFabClicked,
                                     )
-                                }
-                            }
-                            if (showFab) {
-                                SharedTransitionLayout(
-                                    modifier =
-                                        Modifier.align(
-                                            if (bottomBarStyle == BottomBarStyle.Classic) {
-                                                Alignment.BottomEnd
-                                            } else {
-                                                Alignment.CenterEnd
-                                            },
-                                        ),
-                                ) {
-                                    AnimatedContent(
-                                        bottomBarState,
-                                    ) { bottomBarState ->
-                                        BottomFab(
-                                            state = bottomBarState,
-                                            provider = scope,
-                                            animatedVisibilityScope = this@AnimatedContent,
-                                            onFabClicked = onFabClicked,
-                                        )
-                                    }
                                 }
                             }
                         }

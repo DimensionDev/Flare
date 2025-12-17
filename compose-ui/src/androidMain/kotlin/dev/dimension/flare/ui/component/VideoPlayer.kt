@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.keepScreenOn
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -99,8 +100,16 @@ public fun VideoPlayer(
     },
 ) {
     var isLoaded by remember { mutableStateOf(false) }
-    Box(modifier = modifier) {
-        if (!isLoaded && LocalIsScrollingInProgress.current) {
+    var visible by remember { mutableStateOf(false) }
+    val isActive = rememberSurfaceBinding(uri)
+    Box(
+        modifier =
+            modifier
+                .onVisibilityChanged(300, 0.66f) {
+                    visible = it
+                },
+    ) {
+        if (!isLoaded && LocalIsScrollingInProgress.current || !visible || !isActive) {
             loadingPlaceholder()
         } else {
             var remainingTime by remember { mutableLongStateOf(0L) }
@@ -143,7 +152,6 @@ public fun VideoPlayer(
                     delay(500)
                 }
             }
-            val isActive = rememberSurfaceBinding(uri)
             val playerModifier =
                 Modifier
                     .clipToBounds()
@@ -166,14 +174,10 @@ public fun VideoPlayer(
                             it
                         }
                     }
-            if (isActive) {
-                PlayerSurface(
-                    player = player,
-                    modifier = playerModifier,
-                )
-            } else {
-                loadingPlaceholder.invoke(this)
-            }
+            PlayerSurface(
+                player = player,
+                modifier = playerModifier,
+            )
             if (!isLoaded) {
                 loadingPlaceholder()
             } else {
@@ -199,7 +203,7 @@ public class VideoPlayerPool(
     private val lockCount = linkedMapOf<String, Long>()
     private val pool =
         lruCache<String, ExoPlayer>(
-            maxSize = 10,
+            maxSize = 4,
             create = { uri ->
                 ExoPlayer
                     .Builder(context)
@@ -291,7 +295,8 @@ private fun rememberSurfaceBinding(
 
 private object SurfaceBindingManager {
     private val bindings = mutableMapOf<String, String>() // uri -> ownerKey
-    private val listeners = mutableMapOf<String, MutableMap<String, (Boolean) -> Unit>>() // uri -> (ownerKey -> callback)
+    private val listeners =
+        mutableMapOf<String, MutableMap<String, (Boolean) -> Unit>>() // uri -> (ownerKey -> callback)
 
     fun register(
         uri: String,

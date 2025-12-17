@@ -51,7 +51,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -180,6 +179,9 @@ internal fun StatusMediaScreen(
                 }
             },
         )
+    LaunchedEffect(pagerState.currentPage) {
+        state.setCurrentPage(pagerState.currentPage)
+    }
     FlareTheme(darkTheme = true) {
         val swiperState =
             rememberSwiperState(
@@ -197,40 +199,6 @@ internal fun StatusMediaScreen(
                     Modifier
                         .fillMaxSize(),
             ) {
-                state.medias.onSuccess { media ->
-                    var lastPage by remember {
-                        mutableIntStateOf(pagerState.currentPage)
-                    }
-                    LaunchedEffect(pagerState.currentPage) {
-                        state.setCurrentPage(pagerState.currentPage)
-                        if (lastPage != pagerState.currentPage) {
-                            val player = playerPool.peek(media[pagerState.currentPage].url)
-                            player?.play()
-                            val lastPlayer = playerPool.peek(media[lastPage].url)
-                            lastPlayer?.pause()
-
-                            // handle pages around without lastPage
-                            if (lastPage == pagerState.currentPage - 1 && pagerState.currentPage + 1 < pagerState.pageCount) {
-                                val nextPlayer =
-                                    playerPool.peek(media[pagerState.currentPage + 1].url)
-                                nextPlayer?.pause()
-                            } else if (lastPage == pagerState.currentPage + 1 && pagerState.currentPage - 1 >= 0) {
-                                val prevPlayer =
-                                    playerPool.peek(media[pagerState.currentPage - 1].url)
-                                prevPlayer?.pause()
-                            }
-
-                            lastPage = pagerState.currentPage
-                        }
-                    }
-                    // TODO: workaround: some video url might change after StatusPresenter load the status
-                    DisposableEffect(pagerState.currentPage) {
-                        val player = playerPool.peek(media[pagerState.currentPage].url)
-                        onDispose {
-                            player?.volume = 0f
-                        }
-                    }
-                }
                 Row {
                     Box(
                         modifier = Modifier.weight(1f),
@@ -264,114 +232,90 @@ internal fun StatusMediaScreen(
                                 ) {
                                     it
                                         .onSuccess { medias ->
-                                            when (val media = medias[index]) {
-                                                is UiMedia.Audio ->
-                                                    VideoPlayer(
-                                                        uri = media.url,
-                                                        previewUri = null,
-                                                        contentDescription = media.description,
-                                                        autoPlay = false,
-                                                        modifier =
-                                                            Modifier
-                                                                .fillMaxSize(),
-                                                        onClick = {
-                                                            state.setShowUi(!state.showUi)
-                                                        },
-                                                        onLongClick = {
-                                                            hapticFeedback.performHapticFeedback(
-                                                                HapticFeedbackType.LongPress,
-                                                            )
-                                                            state.setShowSheet(true)
-                                                        },
-                                                    )
-
-                                                is UiMedia.Gif ->
-                                                    ImageItem(
-                                                        modifier =
-                                                            Modifier
-                                                                //                                            .sharedElement(
-                                                                //                                                rememberSharedContentState(media.previewUrl),
-                                                                //                                                animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                                                //                                            )
-                                                                .fillMaxSize(),
-                                                        url = media.url,
-                                                        previewUrl = media.previewUrl,
-                                                        description = media.description,
-                                                        onClick = {
-                                                            state.setShowUi(!state.showUi)
-                                                        },
-                                                        setLockPager = {
-                                                            if (pagerState.currentPage == index) {
-                                                                if (!isBigScreen) {
-                                                                    state.setShowUi(!it)
-                                                                }
-                                                                state.setLockPager(it)
-                                                            }
-                                                        },
-                                                        onLongClick = {
-                                                            hapticFeedback.performHapticFeedback(
-                                                                HapticFeedbackType.LongPress,
-                                                            )
-                                                            state.setShowSheet(true)
-                                                        },
-                                                    )
-
-                                                is UiMedia.Image -> {
-                                                    ImageItem(
-                                                        modifier =
-                                                            Modifier
-                                                                //                                            .sharedElement(
-                                                                //                                                rememberSharedContentState(media.previewUrl),
-                                                                //                                                animatedVisibilityScope = this@AnimatedVisibilityScope,
-                                                                //                                            )
-                                                                .fillMaxSize(),
-                                                        url = media.url,
-                                                        previewUrl = media.previewUrl,
-                                                        description = media.description,
-                                                        onClick = {
-                                                            state.setShowUi(!state.showUi)
-                                                        },
-                                                        setLockPager = {
-                                                            if (pagerState.currentPage == index) {
-                                                                if (!isBigScreen) {
-                                                                    state.setShowUi(!it)
-                                                                }
-                                                                state.setLockPager(it)
-                                                            }
-                                                        },
-                                                        onLongClick = {
-                                                            hapticFeedback.performHapticFeedback(
-                                                                HapticFeedbackType.LongPress,
-                                                            )
-                                                            state.setShowSheet(true)
-                                                        },
-                                                    )
+                                            val media = medias[index]
+                                            val imageUrl =
+                                                when (media) {
+                                                    is UiMedia.Audio -> media.previewUrl ?: media.url
+                                                    is UiMedia.Gif -> media.url
+                                                    is UiMedia.Image -> media.url
+                                                    is UiMedia.Video -> media.thumbnailUrl
                                                 }
-
-                                                is UiMedia.Video ->
-                                                    VideoPlayer(
-                                                        uri = media.url,
-                                                        previewUri = media.thumbnailUrl,
-                                                        contentDescription = media.description,
-                                                        autoPlay = false,
-                                                        modifier =
-                                                            Modifier
-                                                                .fillMaxSize(),
-                                                        onClick = {
-                                                            state.setShowUi(!state.showUi)
-                                                        },
-                                                        aspectRatio = media.aspectRatio,
-                                                        showControls = true,
-                                                        keepScreenOn = true,
-                                                        muted = false,
-                                                        contentScale = ContentScale.Fit,
-                                                        onLongClick = {
-                                                            hapticFeedback.performHapticFeedback(
-                                                                HapticFeedbackType.LongPress,
-                                                            )
-                                                            state.setShowSheet(true)
-                                                        },
-                                                    )
+                                            val previewUrl =
+                                                when (media) {
+                                                    is UiMedia.Audio -> media.previewUrl ?: media.url
+                                                    is UiMedia.Gif -> media.previewUrl
+                                                    is UiMedia.Image -> media.previewUrl
+                                                    is UiMedia.Video -> media.thumbnailUrl
+                                                }
+                                            if (pagerState.currentPage != index || media is UiMedia.Image || media is UiMedia.Gif) {
+                                                ImageItem(
+                                                    modifier =
+                                                        Modifier
+                                                            .fillMaxSize(),
+                                                    url = imageUrl,
+                                                    previewUrl = previewUrl,
+                                                    description = media.description,
+                                                    onClick = {
+                                                        state.setShowUi(!state.showUi)
+                                                    },
+                                                    setLockPager = {
+                                                        if (pagerState.currentPage == index) {
+                                                            if (!isBigScreen) {
+                                                                state.setShowUi(!it)
+                                                            }
+                                                            state.setLockPager(it)
+                                                        }
+                                                    },
+                                                    onLongClick = {
+                                                        hapticFeedback.performHapticFeedback(
+                                                            HapticFeedbackType.LongPress,
+                                                        )
+                                                        state.setShowSheet(true)
+                                                    },
+                                                )
+                                            } else if (media is UiMedia.Video) {
+                                                VideoPlayer(
+                                                    uri = media.url,
+                                                    previewUri = media.thumbnailUrl,
+                                                    contentDescription = media.description,
+                                                    autoPlay = true,
+                                                    modifier =
+                                                        Modifier
+                                                            .fillMaxSize(),
+                                                    onClick = {
+                                                        state.setShowUi(!state.showUi)
+                                                    },
+                                                    aspectRatio = media.aspectRatio,
+                                                    showControls = true,
+                                                    keepScreenOn = true,
+                                                    muted = false,
+                                                    contentScale = ContentScale.Fit,
+                                                    onLongClick = {
+                                                        hapticFeedback.performHapticFeedback(
+                                                            HapticFeedbackType.LongPress,
+                                                        )
+                                                        state.setShowSheet(true)
+                                                    },
+                                                )
+                                            } else if (media is UiMedia.Audio) {
+                                                VideoPlayer(
+                                                    uri = media.url,
+                                                    previewUri = null,
+                                                    contentDescription = media.description,
+                                                    autoPlay = false,
+                                                    modifier =
+                                                        Modifier
+                                                            .fillMaxSize(),
+                                                    onClick = {
+                                                        state.setShowUi(!state.showUi)
+                                                    },
+                                                    onLongClick = {
+                                                        hapticFeedback.performHapticFeedback(
+                                                            HapticFeedbackType.LongPress,
+                                                        )
+                                                        state.setShowSheet(true)
+                                                    },
+                                                )
                                             }
                                         }.onLoading {
                                             if (preview != null) {

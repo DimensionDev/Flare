@@ -373,10 +373,10 @@ private fun Note.renderStatus(
             .toPersistentList()
     val postUrl =
         buildString {
-            if (!uri.isNullOrEmpty()) {
-                append(uri)
-            } else if (!url.isNullOrEmpty()) {
+            if (!url.isNullOrEmpty()) {
                 append(url)
+            } else if (!uri.isNullOrEmpty()) {
+                append(uri)
             } else {
                 append("https://")
                 append(accountKey.host)

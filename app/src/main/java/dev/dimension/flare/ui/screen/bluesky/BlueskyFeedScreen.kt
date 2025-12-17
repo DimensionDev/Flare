@@ -197,7 +197,7 @@ internal fun BlueskyFeedScreen(
 
                                     StatusActionButton(
                                         icon = if (item.liked) FontAwesomeIcons.Solid.Heart else FontAwesomeIcons.Regular.Heart,
-                                        digits = item.digits,
+                                        number = item.likedCount,
                                         color = if (item.liked) Color.Red else LocalContentColor.current,
                                         onClicked = {
                                             if (item.liked) {

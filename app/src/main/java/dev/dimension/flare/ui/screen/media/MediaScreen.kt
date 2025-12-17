@@ -150,6 +150,7 @@ internal fun MediaScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
+                        .systemBarsPadding()
                         .align(Alignment.TopCenter),
                 enter = slideInVertically { -it },
                 exit = slideOutVertically { -it },

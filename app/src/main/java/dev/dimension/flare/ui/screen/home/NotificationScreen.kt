@@ -188,7 +188,7 @@ internal fun NotificationScreen() {
                 },
                 scrollBehavior = topAppBarScrollBehavior,
                 actions = {
-                    if (!windowInfo.windowSizeClass.isCompat() && state.notifications.size == 1) {
+                    if (!windowInfo.windowSizeClass.isCompat()) {
                         state.supportedNotificationFilters.onSuccess { filters ->
                             if (filters.size > 1) {
                                 NotificationFilterSelector(

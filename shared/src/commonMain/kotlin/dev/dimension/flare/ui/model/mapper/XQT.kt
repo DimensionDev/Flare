@@ -36,6 +36,7 @@ import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
@@ -525,7 +526,7 @@ internal fun Tweet.renderStatus(
         actions =
             listOfNotNull(
                 StatusAction.Item.Reply(
-                    count = legacy?.replyCount?.toLong() ?: 0,
+                    count = UiNumber(legacy?.replyCount?.toLong() ?: 0),
                     onClicked = {
                         launcher.launch(
                             AppDeepLink.Compose.Reply(
@@ -538,7 +539,7 @@ internal fun Tweet.renderStatus(
                 StatusAction.Group(
                     displayItem =
                         StatusAction.Item.Retweet(
-                            count = legacy?.retweetCount?.toLong() ?: 0,
+                            count = UiNumber(legacy?.retweetCount?.toLong() ?: 0),
                             retweeted = legacy?.retweeted ?: false,
                             onClicked = {
                             },
@@ -546,14 +547,14 @@ internal fun Tweet.renderStatus(
                     actions =
                         listOfNotNull(
                             StatusAction.Item.Retweet(
-                                count = legacy?.retweetCount?.toLong() ?: 0,
+                                count = UiNumber(legacy?.retweetCount?.toLong() ?: 0),
                                 retweeted = legacy?.retweeted ?: false,
                                 onClicked = {
                                     event.retweet(statusKey, legacy?.retweeted ?: false)
                                 },
                             ),
                             StatusAction.Item.Quote(
-                                count = 0,
+                                count = UiNumber(legacy?.quoteCount?.toLong() ?: 0),
                                 onClicked = {
                                     launcher.launch(
                                         AppDeepLink.Compose.Quote(
@@ -566,7 +567,7 @@ internal fun Tweet.renderStatus(
                         ).toImmutableList(),
                 ),
                 StatusAction.Item.Like(
-                    count = legacy?.favoriteCount?.toLong() ?: 0,
+                    count = UiNumber(legacy?.favoriteCount?.toLong() ?: 0),
                     liked = legacy?.favorited ?: false,
                     onClicked = {
                         event.like(statusKey, legacy?.favorited ?: false)
@@ -577,7 +578,7 @@ internal fun Tweet.renderStatus(
                     actions =
                         listOfNotNull(
                             StatusAction.Item.Bookmark(
-                                count = legacy?.bookmarkCount?.toLong() ?: 0,
+                                count = UiNumber(legacy?.bookmarkCount?.toLong() ?: 0),
                                 bookmarked = legacy?.bookmarked ?: false,
                                 onClicked = {
                                     event.bookmark(statusKey, legacy?.bookmarked ?: false)

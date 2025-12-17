@@ -5,7 +5,6 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.humanizer.Formatter.humanize
 import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
@@ -138,15 +137,12 @@ public data class UiTimeline internal constructor(
                     public data class EmojiReaction internal constructor(
                         val name: String,
                         val url: String,
-                        val count: Long,
+                        val count: UiNumber,
                         val onClicked: () -> Unit,
                         // TODO: make EmojiReaction a sealed class
                         val isUnicode: Boolean,
                         val me: Boolean,
                     ) {
-                        val humanizedCount: String by lazy {
-                            count.humanize()
-                        }
                         val isImageReaction: Boolean by lazy {
                             name.startsWith(":") && name.endsWith(":")
                         }

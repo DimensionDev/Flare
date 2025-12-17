@@ -18,6 +18,7 @@ import dev.dimension.flare.model.vvoHostLong
 import dev.dimension.flare.model.vvoHostShort
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.render.parseHtml
@@ -174,7 +175,7 @@ internal fun Status.renderStatus(
             listOfNotNull(
                 if (canReblog) {
                     StatusAction.Item.Reply(
-                        count = repostsCount?.content?.toLongOrNull() ?: 0,
+                        count = UiNumber(repostsCount?.content?.toLongOrNull() ?: 0),
                         onClicked = {
                             launcher.launch(
                                 AppDeepLink.Compose.Quote(
@@ -188,7 +189,7 @@ internal fun Status.renderStatus(
                     null
                 },
                 StatusAction.Item.Comment(
-                    count = commentsCount ?: 0,
+                    count = UiNumber(commentsCount ?: 0),
                     onClicked = {
                         launcher.launch(
                             AppDeepLink.Compose.Reply(
@@ -199,7 +200,7 @@ internal fun Status.renderStatus(
                     },
                 ),
                 StatusAction.Item.Like(
-                    count = attitudesCount ?: 0,
+                    count = UiNumber(attitudesCount ?: 0),
                     liked = liked ?: false,
                     onClicked = {
                         event.like(statusKey, liked ?: false)
@@ -210,7 +211,7 @@ internal fun Status.renderStatus(
                     actions =
                         listOfNotNull(
                             StatusAction.Item.Bookmark(
-                                count = 0,
+                                count = UiNumber(0),
                                 bookmarked = favorited ?: false,
                                 onClicked = {
                                     event.favorite(statusKey, favorited ?: false)
@@ -434,7 +435,7 @@ internal fun Comment.renderStatus(
             listOfNotNull(
                 statusMid?.let {
                     StatusAction.Item.Comment(
-                        count = totalNumber ?: 0,
+                        count = UiNumber(totalNumber ?: 0),
                         onClicked = {
                             launcher.launch(
                                 AppDeepLink.VVO.ReplyToComment(
@@ -447,7 +448,7 @@ internal fun Comment.renderStatus(
                     )
                 },
                 StatusAction.Item.Like(
-                    count = likeCount ?: 0,
+                    count = UiNumber(likeCount ?: 0),
                     liked = liked ?: false,
                     onClicked = {
                         event.likeComment(statusKey, liked ?: false)

@@ -20,6 +20,9 @@ internal class TopLevelBackStack<T : NavKey>(
     var topLevelKey by mutableStateOf(startKey)
         private set
 
+    var currentKey by mutableStateOf(startKey)
+        private set
+
     // Expose the back stack so it can be rendered by the NavDisplay
     val backStack = mutableStateListOf(startKey)
 
@@ -27,6 +30,7 @@ internal class TopLevelBackStack<T : NavKey>(
         backStack.apply {
             clear()
             addAll(topLevelStacks.flatMap { it.value })
+            currentKey = last()
         }
 
     fun addTopLevel(key: T) {

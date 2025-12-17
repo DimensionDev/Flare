@@ -118,16 +118,16 @@ public fun createSampleStatus(user: UiUserV2): UiTimeline =
                 actions =
                     persistentListOf(
                         StatusAction.Item.Reply(
-                            count = 10,
+                            count = UiNumber(10),
                             onClicked = {},
                         ),
                         StatusAction.Item.Retweet(
-                            count = 20,
+                            count = UiNumber(20),
                             onClicked = {},
                             retweeted = false,
                         ),
                         StatusAction.Item.Like(
-                            count = 30,
+                            count = UiNumber(30),
                             onClicked = {},
                             liked = false,
                         ),

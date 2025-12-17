@@ -30,6 +30,7 @@ fun RefreshContainer(
     onRefresh: () -> Unit,
     content: @Composable BoxScope.() -> Unit,
     modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.TopStart,
     indicatorPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val hapticFeedback = LocalHapticFeedback.current
@@ -60,6 +61,7 @@ fun RefreshContainer(
         modifier = modifier,
         content = content,
         state = refreshState,
+        contentAlignment = contentAlignment,
         indicator = {
             PullToRefreshDefaults.LoadingIndicator(
                 modifier =

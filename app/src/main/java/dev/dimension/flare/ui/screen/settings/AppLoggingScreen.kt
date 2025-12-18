@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.screen.settings
 
 import android.widget.Toast
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -12,8 +11,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -36,12 +36,11 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.DevModePresenter
 import dev.dimension.flare.ui.screen.media.saveByteArrayToDownloads
-import dev.dimension.flare.ui.theme.listCardContainer
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import dev.dimension.flare.ui.theme.single
 import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.time.Clock
 
@@ -106,11 +105,15 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
             modifier =
                 Modifier
                     .padding(horizontal = screenHorizontalPadding),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
             item {
-                ListItem(
-                    headlineContent = {
+                SegmentedListItem(
+                    onClick = {
+                        state.setEnabled(!state.enabled)
+                    },
+                    shapes = ListItemDefaults.single(),
+                    content = {
                         Text(stringResource(R.string.settings_app_logging_enable_network_logging))
                     },
                     trailingContent = {
@@ -121,28 +124,21 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
                             },
                         )
                     },
-                    modifier =
-                        Modifier
-                            .listCardContainer()
-                            .clickable {
-                                state.setEnabled(!state.enabled)
-                            },
                 )
             }
             item {
                 Spacer(modifier = Modifier.height(12.dp))
             }
             itemsIndexed(state.messages) { index, it ->
-                ListItem(
-                    headlineContent = {
+                SegmentedListItem(
+                    selected = selectedMessage == it,
+                    onClick = {
+                        selectedMessage = it
+                    },
+                    shapes = ListItemDefaults.segmentedShapes(index, state.messages.size),
+                    content = {
                         Text(it, maxLines = 3)
                     },
-                    modifier =
-                        Modifier
-                            .listCard(index = index, totalCount = state.messages.size)
-                            .clickable {
-                                selectedMessage = it
-                            },
                 )
             }
         }

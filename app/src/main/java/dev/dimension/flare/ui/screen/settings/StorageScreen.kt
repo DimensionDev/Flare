@@ -1,14 +1,14 @@
 package dev.dimension.flare.ui.screen.settings
 
 import android.content.Context
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import coil3.imageLoader
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -36,8 +35,9 @@ import dev.dimension.flare.ui.component.ThemedIcon
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
-import dev.dimension.flare.ui.theme.listCardContainer
-import dev.dimension.flare.ui.theme.listCardItem
+import dev.dimension.flare.ui.theme.first
+import dev.dimension.flare.ui.theme.item
+import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -71,12 +71,15 @@ internal fun StorageScreen(
                 Modifier
                     .verticalScroll(rememberScrollState())
                     .padding(it)
-                    .padding(horizontal = screenHorizontalPadding)
-                    .listCardContainer(),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+                    .padding(horizontal = screenHorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
-            ListItem(
-                headlineContent = {
+            SegmentedListItem(
+                onClick = {
+                    state.clearImageCache()
+                },
+                shapes = ListItemDefaults.first(),
+                content = {
                     Text(text = stringResource(id = R.string.settings_storage_clear_image_cache))
                 },
                 supportingContent = {
@@ -88,12 +91,6 @@ internal fun StorageScreen(
                             ),
                     )
                 },
-                modifier =
-                    Modifier
-                        .listCardItem()
-                        .clickable {
-                            state.clearImageCache()
-                        },
                 leadingContent = {
                     ThemedIcon(
                         FontAwesomeIcons.Solid.Images,
@@ -102,8 +99,12 @@ internal fun StorageScreen(
                     )
                 },
             )
-            ListItem(
-                headlineContent = {
+            SegmentedListItem(
+                onClick = {
+                    state.clearCacheDatabase()
+                },
+                shapes = ListItemDefaults.item(),
+                content = {
                     Text(text = stringResource(id = R.string.settings_storage_clear_database))
                 },
                 supportingContent = {
@@ -116,12 +117,6 @@ internal fun StorageScreen(
                             ),
                     )
                 },
-                modifier =
-                    Modifier
-                        .listCardItem()
-                        .clickable {
-                            state.clearCacheDatabase()
-                        },
                 leadingContent = {
                     ThemedIcon(
                         FontAwesomeIcons.Solid.Database,
@@ -130,8 +125,12 @@ internal fun StorageScreen(
                     )
                 },
             )
-            ListItem(
-                headlineContent = {
+            SegmentedListItem(
+                onClick = {
+                    toAppLog.invoke()
+                },
+                shapes = ListItemDefaults.last(),
+                content = {
                     Text(text = stringResource(id = R.string.settings_storage_app_log))
                 },
                 supportingContent = {
@@ -140,12 +139,6 @@ internal fun StorageScreen(
                             stringResource(id = R.string.settings_storage_app_log_description),
                     )
                 },
-                modifier =
-                    Modifier
-                        .listCardItem()
-                        .clickable {
-                            toAppLog.invoke()
-                        },
                 leadingContent = {
                     ThemedIcon(
                         FontAwesomeIcons.Solid.Envelope,

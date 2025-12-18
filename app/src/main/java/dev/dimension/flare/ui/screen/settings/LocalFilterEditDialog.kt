@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.screen.settings
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,9 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -39,9 +39,11 @@ import dev.dimension.flare.ui.model.UiKeywordFilter
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.LocalFilterPresenter
-import dev.dimension.flare.ui.theme.listCardContainer
-import dev.dimension.flare.ui.theme.listCardItem
+import dev.dimension.flare.ui.theme.first
+import dev.dimension.flare.ui.theme.item
+import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import dev.dimension.flare.ui.theme.single
 import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -109,13 +111,14 @@ internal fun LocalFilterEditDialog(
                 modifier = Modifier.fillMaxWidth(),
             )
             Column(
-                modifier =
-                    Modifier
-                        .listCardContainer(),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
-                ListItem(
-                    headlineContent = {
+                SegmentedListItem(
+                    onClick = {
+                        state.setForTimeline(!state.forTimeline)
+                    },
+                    shapes = ListItemDefaults.first(),
+                    content = {
                         Text(text = stringResource(id = R.string.local_filter_for_timeline))
                     },
                     trailingContent = {
@@ -124,15 +127,13 @@ internal fun LocalFilterEditDialog(
                             onCheckedChange = state::setForTimeline,
                         )
                     },
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .clickable {
-                                state.setForTimeline(!state.forTimeline)
-                            },
                 )
-                ListItem(
-                    headlineContent = {
+                SegmentedListItem(
+                    onClick = {
+                        state.setForNotification(!state.forNotification)
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
                         Text(text = stringResource(id = R.string.local_filter_for_notification))
                     },
                     trailingContent = {
@@ -141,15 +142,13 @@ internal fun LocalFilterEditDialog(
                             onCheckedChange = state::setForNotification,
                         )
                     },
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .clickable {
-                                state.setForNotification(!state.forNotification)
-                            },
                 )
-                ListItem(
-                    headlineContent = {
+                SegmentedListItem(
+                    onClick = {
+                        state.setForSearch(!state.forSearch)
+                    },
+                    shapes = ListItemDefaults.last(),
+                    content = {
                         Text(text = stringResource(id = R.string.local_filter_for_search))
                     },
                     trailingContent = {
@@ -158,18 +157,17 @@ internal fun LocalFilterEditDialog(
                             onCheckedChange = state::setForSearch,
                         )
                     },
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .clickable {
-                                state.setForSearch(!state.forSearch)
-                            },
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
             if (keyword != null) {
-                ListItem(
-                    headlineContent = {
+                SegmentedListItem(
+                    onClick = {
+                        state.delete()
+                        onBack()
+                    },
+                    shapes = ListItemDefaults.single(),
+                    content = {
                         Text(
                             text = stringResource(id = R.string.local_filter_delete),
                             color = MaterialTheme.colorScheme.error,
@@ -182,13 +180,6 @@ internal fun LocalFilterEditDialog(
                             tint = MaterialTheme.colorScheme.error,
                         )
                     },
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .clickable {
-                                state.delete()
-                                onBack()
-                            },
                 )
             }
         }

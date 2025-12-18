@@ -38,7 +38,6 @@ import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.mapper.parseBlueskyJson
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.datetime.toStdlibInstant
 import sh.christian.ozone.api.AtUri
 
 internal object Bluesky {
@@ -85,7 +84,7 @@ internal object Bluesky {
         database: CacheDatabase,
         data: List<PostView>,
         sortIdProvider: (PostView) -> Long = {
-            it.indexedAt.toStdlibInstant().toEpochMilliseconds()
+            it.indexedAt.toEpochMilliseconds()
         },
     ) {
         save(database, data.toDb(accountKey, pagingKey, sortIdProvider))
@@ -156,7 +155,7 @@ internal suspend fun List<BookmarkView>.toDb(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: suspend (BookmarkView) -> Long = {
-        it.createdAt?.toStdlibInstant()?.toEpochMilliseconds() ?: SnowflakeIdGenerator.nextId()
+        it.createdAt?.toEpochMilliseconds() ?: SnowflakeIdGenerator.nextId()
     },
 ): List<DbPagingTimelineWithStatus> =
     this.mapNotNull {
@@ -174,7 +173,7 @@ internal suspend fun List<BookmarkView>.toDb(
 internal fun List<PostView>.toDb(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (PostView) -> Long = { it.indexedAt.toStdlibInstant().toEpochMilliseconds() },
+    sortIdProvider: (PostView) -> Long = { it.indexedAt.toEpochMilliseconds() },
 ): List<DbPagingTimelineWithStatus> =
     this.map {
         createDbPagingTimelineWithStatus(
@@ -204,7 +203,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                     createDbPagingTimelineWithStatus(
                         accountKey = accountKey,
                         pagingKey = pagingKey,
-                        sortId = it.indexedAt.toStdlibInstant().toEpochMilliseconds(),
+                        sortId = it.indexedAt.toEpochMilliseconds(),
                         status = it.toDbStatusWithUser(accountKey),
                         references = mapOf(),
                     )
@@ -250,7 +249,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                 userKey = null,
                                 content = content,
                                 text = null,
-                                createdAt = items.first().indexedAt.toStdlibInstant(),
+                                createdAt = items.first().indexedAt,
                             ),
                     )
                 listOf(
@@ -261,7 +260,6 @@ internal fun List<ListNotificationsNotification>.toDb(
                             items
                                 .first()
                                 .indexedAt
-                                .toStdlibInstant()
                                 .toEpochMilliseconds(),
                         status = data,
                         references =
@@ -295,7 +293,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                 userKey = null,
                                 content = content,
                                 text = null,
-                                createdAt = items.first().indexedAt.toStdlibInstant(),
+                                createdAt = items.first().indexedAt,
                             ),
                     )
                 listOfNotNull(
@@ -306,7 +304,6 @@ internal fun List<ListNotificationsNotification>.toDb(
                             items
                                 .first()
                                 .indexedAt
-                                .toStdlibInstant()
                                 .toEpochMilliseconds(),
                         status = data,
                         references = mapOf(),
@@ -336,13 +333,13 @@ internal fun List<ListNotificationsNotification>.toDb(
                                     userKey = user.userKey,
                                     content = content,
                                     text = null,
-                                    createdAt = it.indexedAt.toStdlibInstant(),
+                                    createdAt = it.indexedAt,
                                 ),
                         )
                     createDbPagingTimelineWithStatus(
                         accountKey = accountKey,
                         pagingKey = pagingKey,
-                        sortId = it.indexedAt.toStdlibInstant().toEpochMilliseconds(),
+                        sortId = it.indexedAt.toEpochMilliseconds(),
                         status = data,
                         references =
                             mapOf(
@@ -376,13 +373,13 @@ internal fun List<ListNotificationsNotification>.toDb(
                                     userKey = user.userKey,
                                     content = content,
                                     text = null,
-                                    createdAt = it.indexedAt.toStdlibInstant(),
+                                    createdAt = it.indexedAt,
                                 ),
                         )
                     createDbPagingTimelineWithStatus(
                         accountKey = accountKey,
                         pagingKey = pagingKey,
-                        sortId = it.indexedAt.toStdlibInstant().toEpochMilliseconds(),
+                        sortId = it.indexedAt.toEpochMilliseconds(),
                         status = data,
                         references =
                             mapOf(
@@ -415,13 +412,13 @@ internal fun List<ListNotificationsNotification>.toDb(
                                     userKey = user.userKey,
                                     content = content,
                                     text = null,
-                                    createdAt = it.indexedAt.toStdlibInstant(),
+                                    createdAt = it.indexedAt,
                                 ),
                         )
                     createDbPagingTimelineWithStatus(
                         accountKey = accountKey,
                         pagingKey = pagingKey,
-                        sortId = it.indexedAt.toStdlibInstant().toEpochMilliseconds(),
+                        sortId = it.indexedAt.toEpochMilliseconds(),
                         status = data,
                         references =
                             mapOf(
@@ -454,13 +451,13 @@ internal fun List<ListNotificationsNotification>.toDb(
                                     userKey = user.userKey,
                                     content = content,
                                     text = null,
-                                    createdAt = it.indexedAt.toStdlibInstant(),
+                                    createdAt = it.indexedAt,
                                 ),
                         )
                     createDbPagingTimelineWithStatus(
                         accountKey = accountKey,
                         pagingKey = pagingKey,
-                        sortId = it.indexedAt.toStdlibInstant().toEpochMilliseconds(),
+                        sortId = it.indexedAt.toEpochMilliseconds(),
                         status = data,
                         references =
                             mapOf(
@@ -507,7 +504,7 @@ private fun ListNotificationsNotification.toDbStatus(accountKey: MicroBlogKey): 
         content = StatusContent.BlueskyNotification.Normal(this),
         accountType = AccountType.Specific(accountKey),
         text = null,
-        createdAt = indexedAt.toStdlibInstant(),
+        createdAt = indexedAt,
     )
 }
 
@@ -518,7 +515,7 @@ internal suspend fun List<FeedViewPost>.toDbPagingTimeline(
         when (val reason = it.reason) {
 //            is FeedViewPostReasonUnion.ReasonRepost -> {
 //                reason.value.indexedAt
-//                    .toStdlibInstant()
+//
 //                    .toEpochMilliseconds()
 //            }
 
@@ -529,7 +526,7 @@ internal suspend fun List<FeedViewPost>.toDbPagingTimeline(
             else -> {
                 -SnowflakeIdGenerator.nextId()
 //                it.post.indexedAt
-//                    .toStdlibInstant()
+//
 //                    .toEpochMilliseconds()
             }
         }
@@ -568,7 +565,7 @@ internal suspend fun List<FeedViewPost>.toDbPagingTimeline(
                                 content = StatusContent.BlueskyReason(data),
                                 accountType = AccountType.Specific(accountKey),
                                 text = null,
-                                createdAt = it.post.indexedAt.toStdlibInstant(),
+                                createdAt = it.post.indexedAt,
                             ),
                     )
                 }
@@ -588,7 +585,7 @@ internal suspend fun List<FeedViewPost>.toDbPagingTimeline(
                                 content = StatusContent.BlueskyReason(data),
                                 accountType = AccountType.Specific(accountKey),
                                 text = status.data.text,
-                                createdAt = it.post.indexedAt.toStdlibInstant(),
+                                createdAt = it.post.indexedAt,
                             ),
                     )
                 }
@@ -644,7 +641,7 @@ private fun PostView.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithU
             userKey = user.userKey,
             accountType = AccountType.Specific(accountKey),
             text = parseBlueskyJson(record, accountKey).raw,
-            createdAt = indexedAt.toStdlibInstant(),
+            createdAt = indexedAt,
         )
     return DbStatusWithUser(
         data = status,
@@ -784,7 +781,7 @@ private fun MessageView.toDbMessageItem(roomKey: MicroBlogKey) =
         messageKey = MicroBlogKey(id = id, host = roomKey.host),
         roomKey = roomKey,
         userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host),
-        timestamp = sentAt.toStdlibInstant().toEpochMilliseconds(),
+        timestamp = sentAt.toEpochMilliseconds(),
         content = MessageContent.Bluesky.Message(this),
         showSender = false,
     )
@@ -797,7 +794,7 @@ private fun ConvoViewLastMessageUnion.DeletedMessageView.toDbMessageItem(roomKey
             messageKey = MicroBlogKey(id = id, host = roomKey.host),
             roomKey = roomKey,
             userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host),
-            timestamp = sentAt.toStdlibInstant().toEpochMilliseconds(),
+            timestamp = sentAt.toEpochMilliseconds(),
             content = MessageContent.Bluesky.Deleted(this),
             showSender = false,
         )

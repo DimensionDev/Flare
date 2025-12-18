@@ -75,12 +75,15 @@ internal class StatusDetailRemoteMediator(
                                         }
                                 }
                                 val replies =
-                                    thread.value.replies.mapNotNull {
+                                    thread.value.replies.orEmpty().mapNotNull {
                                         when (it) {
                                             is ThreadViewPostReplieUnion.ThreadViewPost -> {
-                                                if (it.value.replies.any()) {
+                                                if (it.value.replies
+                                                        .orEmpty()
+                                                        .any()
+                                                ) {
                                                     val last =
-                                                        it.value.replies.last().let {
+                                                        it.value.replies.orEmpty().last().let {
                                                             when (it) {
                                                                 is ThreadViewPostReplieUnion.ThreadViewPost -> it.value.post
                                                                 else -> null
@@ -89,7 +92,7 @@ internal class StatusDetailRemoteMediator(
                                                     if (last != null) {
                                                         val parents =
                                                             listOfNotNull(it.value.post) +
-                                                                it.value.replies.toList().dropLast(1).mapNotNull {
+                                                                it.value.replies.orEmpty().toList().dropLast(1).mapNotNull {
                                                                     when (it) {
                                                                         is ThreadViewPostReplieUnion.ThreadViewPost -> it.value.post
                                                                         else -> null

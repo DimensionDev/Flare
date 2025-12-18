@@ -49,7 +49,6 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.datetime.toStdlibInstant
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -203,7 +202,7 @@ private fun parseBluesky(
 ): UiRichText =
     parseBluesky(
         text = post.text,
-        facets = post.facets,
+        facets = post.facets.orEmpty(),
         accountKey = accountKey,
     )
 
@@ -503,7 +502,7 @@ internal fun PostView.renderStatus(
         }
 
     val sensitive =
-        this.labels.any {
+        this.labels.orEmpty().any {
             it.`val` in sensitiveLabels
         }
     val url =
@@ -649,7 +648,7 @@ internal fun PostView.renderStatus(
                         ).toImmutableList(),
                 ),
             ).toImmutableList(),
-        createdAt = indexedAt.toStdlibInstant().toUi(),
+        createdAt = indexedAt.toUi(),
         sensitive = sensitive,
         onClicked = {
             launcher.launch(
@@ -983,6 +982,7 @@ private fun render(
                 user = user,
                 images =
                     record.value.embeds
+                        .orEmpty()
                         .mapNotNull {
                             when (it) {
                                 is RecordViewRecordEmbedUnion.ImagesView ->
@@ -1033,7 +1033,7 @@ private fun render(
                         }.flatten()
                         .toImmutableList(),
                 card =
-                    record.value.embeds.firstNotNullOfOrNull {
+                    record.value.embeds?.firstNotNullOfOrNull {
                         when (it) {
                             is RecordViewRecordEmbedUnion.ExternalView ->
                                 UiCard(
@@ -1159,10 +1159,9 @@ private fun render(
                 quote = persistentListOf(),
                 createdAt =
                     record.value.indexedAt
-                        .toStdlibInstant()
                         .toUi(),
                 sensitive =
-                    record.value.labels.any {
+                    record.value.labels.orEmpty().any {
                         it.`val` in sensitiveLabels
                     },
                 onClicked = {
@@ -1228,5 +1227,5 @@ internal fun MessageContent.Bluesky.render(accountKey: MicroBlogKey) =
 
 internal fun MessageView.render(accountKey: MicroBlogKey) =
     UiDMItem.Message.Text(
-        text = parseBluesky(text, facets, accountKey),
+        text = parseBluesky(text, facets.orEmpty(), accountKey),
     )

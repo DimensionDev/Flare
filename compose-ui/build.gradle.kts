@@ -36,6 +36,11 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings {
+                optIn("androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
+            }
+        }
         val commonMain by getting {
             dependencies {
                 implementation(projects.shared)

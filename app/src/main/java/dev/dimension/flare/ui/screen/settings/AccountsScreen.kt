@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.screen.settings
 
 import androidx.compose.animation.core.AnimationConstants
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,12 +9,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -48,7 +49,6 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.ThemeIconData
 import dev.dimension.flare.ui.component.ThemedIcon
-import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.isError
@@ -102,7 +102,7 @@ internal fun AccountsScreen(
             modifier =
                 Modifier
                     .padding(horizontal = screenHorizontalPadding),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
             when (val accountState = state.accounts) {
                 // TODO: show error
@@ -113,12 +113,7 @@ internal fun AccountsScreen(
                             userState = UiState.Loading(),
                             onClick = {},
                             toLogin = {},
-                            modifier =
-                                Modifier
-                                    .listCard(
-                                        index = it,
-                                        totalCount = 3,
-                                    ),
+                            shapes = ListItemDefaults.segmentedShapes(it, 3),
                         )
                     }
                 }
@@ -140,12 +135,6 @@ internal fun AccountsScreen(
                             }
                         }
                         SwipeToDismissBox(
-                            modifier =
-                                Modifier
-                                    .listCard(
-                                        index = index,
-                                        totalCount = accountState.data.size,
-                                    ),
                             state = swipeState,
                             backgroundContent = {
                                 if (swipeState.dismissDirection != SwipeToDismissBoxValue.Settled) {
@@ -170,6 +159,7 @@ internal fun AccountsScreen(
                             AccountItem(
                                 modifier = Modifier,
                                 userState = data,
+                                shapes = ListItemDefaults.segmentedShapes(index, accountState.data.size),
                                 onClick = {
                                     state.setActiveAccount(it)
                                 },
@@ -193,6 +183,7 @@ internal fun AccountsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun <T : UiUserV2> AccountItem(
     userState: UiState<T>,
@@ -206,22 +197,26 @@ fun <T : UiUserV2> AccountItem(
     supportingContent: @Composable (UiUserV2) -> Unit = {
         Text(text = it.handle, maxLines = 1)
     },
-    tonalElevation: Dp = ListItemDefaults.Elevation,
-    shadowElevation: Dp = ListItemDefaults.Elevation,
     avatarSize: Dp = AvatarComponentDefaults.size,
     colors: ListItemColors = ListItemDefaults.colors(),
+    shapes: ListItemShapes = ListItemDefaults.shapes(),
 ) {
     userState
         .onSuccess { data ->
-            ListItem(
-                headlineContent = {
+            SegmentedListItem(
+                modifier = modifier,
+                onClick = {
+                    onClick.invoke(data.key)
+                },
+                shapes = shapes,
+                content = {
                     headlineContent.invoke(data)
                 },
-                modifier =
-                    modifier
-                        .clickable {
-                            onClick.invoke(data.key)
-                        },
+//                modifier =
+//                    modifier
+//                        .clickable {
+//                            onClick.invoke(data.key)
+//                        },
                 leadingContent = {
                     AvatarComponent(data = data.avatar, size = avatarSize)
                 },
@@ -232,12 +227,12 @@ fun <T : UiUserV2> AccountItem(
                     supportingContent.invoke(data)
                 },
                 colors = colors,
-                shadowElevation = shadowElevation,
-                tonalElevation = tonalElevation,
             )
         }.onLoading {
-            ListItem(
-                headlineContent = {
+            SegmentedListItem(
+                onClick = {},
+                shapes = shapes,
+                content = {
                     Text(text = "Loading...", modifier = Modifier.placeholder(true))
                 },
                 modifier = modifier,
@@ -252,12 +247,12 @@ fun <T : UiUserV2> AccountItem(
                     Text(text = "Loading...", modifier = Modifier.placeholder(true))
                 },
                 colors = colors,
-                shadowElevation = shadowElevation,
-                tonalElevation = tonalElevation,
             )
         }.onError { throwable ->
-            ListItem(
-                headlineContent = {
+            SegmentedListItem(
+                onClick = {},
+                shapes = shapes,
+                content = {
                     if (throwable is LoginExpiredException) {
                         Text(text = stringResource(id = R.string.login_expired, throwable.accountKey.toString()))
                     } else {
@@ -291,8 +286,6 @@ fun <T : UiUserV2> AccountItem(
                         null
                     },
                 colors = colors,
-                shadowElevation = shadowElevation,
-                tonalElevation = tonalElevation,
             )
         }
 }

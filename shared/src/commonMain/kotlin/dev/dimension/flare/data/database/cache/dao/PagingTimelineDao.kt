@@ -15,6 +15,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 internal interface PagingTimelineDao {
@@ -40,6 +41,13 @@ internal interface PagingTimelineDao {
             "WHERE DbStatus.text like :query",
     )
     fun searchHistoryPagingSource(query: String): PagingSource<Int, DbStatusWithReference>
+
+    @Transaction
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountType = :accountType LIMIT 1")
+    fun get(
+        pagingKey: String,
+        accountType: DbAccountType,
+    ): Flow<DbPagingTimelineWithStatus?>
 
     @Transaction
     @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId DESC")

@@ -45,6 +45,7 @@ import chat.bsky.convo.MessageInput
 import chat.bsky.convo.MessageView
 import chat.bsky.convo.SendMessageRequest
 import chat.bsky.convo.UpdateReadRequest
+import com.atproto.identity.ResolveHandleQueryParams
 import com.atproto.moderation.CreateReportRequest
 import com.atproto.moderation.CreateReportRequestSubjectUnion
 import com.atproto.moderation.Token
@@ -310,33 +311,63 @@ internal class BlueskyDataSource(
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
-
         return Cacheable(
             fetchSource = {
-                val result =
-                    service
-                        .getPosts(
-                            GetPostsQueryParams(
-                                persistentListOf(AtUri(statusKey.id)),
-                            ),
-                        ).requireResponse()
-                        .posts
-                        .firstOrNull()
-                        .let {
-                            listOfNotNull(it)
-                        }
-                Bluesky.savePost(
-                    accountKey,
-                    pagingKey,
-                    database,
-                    result,
-                )
+                val isDid = statusKey.id.startsWith("at://did:")
+                if (isDid) {
+                    val result =
+                        service
+                            .getPosts(
+                                GetPostsQueryParams(
+                                    persistentListOf(AtUri(statusKey.id)),
+                                ),
+                            ).requireResponse()
+                            .posts
+                            .firstOrNull()
+                            .let {
+                                listOfNotNull(it)
+                            }
+                    database.connect {
+                        Bluesky.savePost(
+                            accountKey,
+                            pagingKey,
+                            database,
+                            result,
+                        )
+                    }
+                } else {
+                    // "at://${handle}/app.bsky.feed.post/${id}"
+                    val handle = statusKey.id.substringAfter("at://").substringBefore("/")
+                    val id = statusKey.id.substringAfterLast('/')
+                    val did = service.resolveHandle(ResolveHandleQueryParams(Handle(handle))).requireResponse().did
+                    val actualAtUri = AtUri("at://${did.did}/app.bsky.feed.post/$id")
+                    val result =
+                        service
+                            .getPosts(
+                                GetPostsQueryParams(
+                                    persistentListOf(actualAtUri),
+                                ),
+                            ).requireResponse()
+                            .posts
+                            .firstOrNull()
+                            .let {
+                                listOfNotNull(it)
+                            }
+                    database.connect {
+                        Bluesky.savePost(
+                            accountKey,
+                            pagingKey,
+                            database,
+                            result,
+                        )
+                    }
+                }
             },
             cacheSource = {
                 database
-                    .statusDao()
-                    .get(statusKey, accountType = AccountType.Specific(accountKey))
-                    .mapNotNull { it?.content?.render(this) }
+                    .pagingTimelineDao()
+                    .get(pagingKey, accountType = AccountType.Specific(accountKey))
+                    .mapNotNull { it?.render(this) }
             },
         )
     }

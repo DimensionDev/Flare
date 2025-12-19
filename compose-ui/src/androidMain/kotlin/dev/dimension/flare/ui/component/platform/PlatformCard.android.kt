@@ -45,7 +45,12 @@ internal actual fun PlatformCard(
     if (onClick == null) {
         Card(
             modifier = modifier,
-            shape = shape ?: CardDefaults.shape,
+            shape =
+                shape ?: if (elevated) {
+                    CardDefaults.elevatedShape
+                } else {
+                    CardDefaults.shape
+                },
             colors = colors,
             elevation =
                 if (elevated) {
@@ -60,7 +65,12 @@ internal actual fun PlatformCard(
     } else {
         Card(
             modifier = modifier,
-            shape = shape ?: CardDefaults.shape,
+            shape =
+                shape ?: if (elevated) {
+                    CardDefaults.elevatedShape
+                } else {
+                    CardDefaults.shape
+                },
             colors = colors,
             elevation =
                 if (elevated) {

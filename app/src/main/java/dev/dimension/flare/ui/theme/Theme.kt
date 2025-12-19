@@ -51,6 +51,7 @@ private fun ColorScheme.withPureColorLightMode(): ColorScheme =
         surfaceContainerHighest = Color.White,
         onSurfaceVariant = MoreColors.Gray800,
         outlineVariant = MoreColors.Gray400,
+        outline = MoreColors.Gray600,
     )
 
 private fun ColorScheme.withPureColorDarkMode(): ColorScheme =
@@ -66,6 +67,7 @@ private fun ColorScheme.withPureColorDarkMode(): ColorScheme =
         surfaceContainerHighest = MoreColors.Gray900,
         onSurfaceVariant = MoreColors.Gray400,
         outlineVariant = MoreColors.Gray800,
+        outline = MoreColors.Gray500,
     )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

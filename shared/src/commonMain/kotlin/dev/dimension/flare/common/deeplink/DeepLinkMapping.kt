@@ -52,6 +52,22 @@ internal object DeepLinkMapping {
         }
 
         @Serializable
+        data class BlueskyPost(
+            val handle: String,
+            val id: String,
+        ) : Type {
+            override fun deepLink(accountKey: MicroBlogKey): DeeplinkRoute =
+                DeeplinkRoute.Status.Detail(
+                    accountType = AccountType.Specific(accountKey),
+                    statusKey =
+                        MicroBlogKey(
+                            "at://$handle/app.bsky.feed.post/$id",
+                            accountKey.host,
+                        ),
+                )
+        }
+
+        @Serializable
         data class PostMedia(
             val handle: String,
             val id: String,
@@ -105,10 +121,24 @@ internal object DeepLinkMapping {
                         Url("https://$host/profile/{handle}"),
                     ),
                     DeepLinkPattern(
-                        Type.Post.serializer(),
+                        Type.BlueskyPost.serializer(),
                         Url("https://$host/profile/{handle}/post/{id}"),
                     ),
-                )
+                ) +
+                    if (host == "bsky.social") {
+                        listOf(
+                            DeepLinkPattern(
+                                Type.Profile.serializer(),
+                                Url("https://bsky.app/profile/{handle}"),
+                            ),
+                            DeepLinkPattern(
+                                Type.BlueskyPost.serializer(),
+                                Url("https://bsky.app/profile/{handle}/post/{id}"),
+                            ),
+                        )
+                    } else {
+                        emptyList()
+                    }
             }
 
             PlatformType.xQt -> {

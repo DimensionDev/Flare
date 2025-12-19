@@ -19,9 +19,9 @@ import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusContextPresenter
 import io.github.composefluent.component.ProgressBar
@@ -53,7 +53,10 @@ internal fun StatusScreen(
         ) {
             status(
                 state.state.listState,
-                detailStatusKey = statusKey,
+                detailStatusKey =
+                    state.state.current
+                        .takeSuccess()
+                        ?.statusKey,
             )
         }
         if (state.isRefreshing) {

@@ -49,7 +49,9 @@ fun FlareApp(content: @Composable () -> Unit) {
             object : UriHandler {
                 override fun openUri(uri: String) {
                     if (uri.startsWith("http://") || uri.startsWith("https://")) {
-                        openInBrowser(context, uri, appearanceSettings.inAppBrowser)
+                        openInBrowser(context, uri, appearanceSettings.inAppBrowser) {
+                            originalUriHandler.openUri(uri)
+                        }
                     } else {
                         originalUriHandler.openUri(uri)
                     }
@@ -120,20 +122,27 @@ private fun openInBrowser(
     context: Context,
     url: String,
     inAppBrowser: Boolean,
+    fallbackOpenUrl: (String) -> Unit,
 ) {
     val targetPackage = getNonSelfBrowserPackageName(context, url)
     if (targetPackage != null) {
-        if (inAppBrowser) {
-            val builder = CustomTabsIntent.Builder()
-            val customTabsIntent = builder.build()
-            customTabsIntent.intent.setPackage(targetPackage)
-            customTabsIntent.launchUrl(context, url.toUri())
-        } else {
-            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-            intent.addCategory(Intent.CATEGORY_BROWSABLE)
-            intent.setPackage(targetPackage)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
+        runCatching {
+            if (inAppBrowser) {
+                val builder = CustomTabsIntent.Builder()
+                val customTabsIntent = builder.build()
+                customTabsIntent.intent.setPackage(targetPackage)
+                customTabsIntent.launchUrl(context, url.toUri())
+            } else {
+                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                intent.addCategory(Intent.CATEGORY_BROWSABLE)
+                intent.setPackage(targetPackage)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+            }
+        }.onFailure {
+            fallbackOpenUrl.invoke(url)
         }
+    } else {
+        fallbackOpenUrl.invoke(url)
     }
 }

@@ -62,36 +62,36 @@ public fun ProfileMenu(
                     expanded = showMoreMenus,
                     onDismissRequest = { setShowMoreMenus(false) },
                 ) {
-                    profileState.relationState.onSuccess { relation ->
-                        if (!profileState.isGuestMode && relation.following) {
-                            profileState.isListDataSource.onSuccess { isListDataSource ->
-                                if (isListDataSource) {
-                                    PlatformDropdownMenuItem(
-                                        text = {
-                                            PlatformText(
-                                                text =
-                                                    stringResource(
-                                                        Res.string.user_follow_edit_list,
-                                                    ),
-                                            )
-                                        },
-                                        onClick = {
-                                            setShowMoreMenus(false)
-                                            toEditAccountList.invoke()
-                                        },
-                                        leadingIcon = {
-                                            FAIcon(
-                                                imageVector = FontAwesomeIcons.Solid.List,
-                                                contentDescription =
-                                                    stringResource(
-                                                        Res.string.user_follow_edit_list,
-                                                    ),
-                                            )
-                                        },
-                                    )
-                                }
+                    if (!profileState.isGuestMode) {
+                        profileState.isListDataSource.onSuccess { isListDataSource ->
+                            if (isListDataSource) {
+                                PlatformDropdownMenuItem(
+                                    text = {
+                                        PlatformText(
+                                            text =
+                                                stringResource(
+                                                    Res.string.user_follow_edit_list,
+                                                ),
+                                        )
+                                    },
+                                    onClick = {
+                                        setShowMoreMenus(false)
+                                        toEditAccountList.invoke()
+                                    },
+                                    leadingIcon = {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.List,
+                                            contentDescription =
+                                                stringResource(
+                                                    Res.string.user_follow_edit_list,
+                                                ),
+                                        )
+                                    },
+                                )
                             }
                         }
+                    }
+                    profileState.relationState.onSuccess { relation ->
                         profileState.canSendMessage.onSuccess {
                             if (it) {
                                 PlatformDropdownMenuItem(

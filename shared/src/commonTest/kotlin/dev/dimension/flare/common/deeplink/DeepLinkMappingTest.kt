@@ -93,7 +93,7 @@ class DeepLinkMappingTest {
         )
 
         val post = patterns[1]
-        assertEquals(DeepLinkMapping.Type.Post.serializer(), post.serializer)
+        assertEquals(DeepLinkMapping.Type.BlueskyPost.serializer(), post.serializer)
         assertEquals(Url("https://$host/profile/{handle}/post/{id}"), post.uriPattern)
         assertEquals(
             listOf("profile" to false, "handle" to true, "post" to false, "id" to true),
@@ -337,7 +337,7 @@ class DeepLinkMappingTest {
                 mapping,
             )
         assertEquals(
-            DeepLinkMapping.Type.Post("alice.bsky.social", "12345"),
+            DeepLinkMapping.Type.BlueskyPost("alice.bsky.social", "12345"),
             bskyPostMatch[bskyAccount],
         )
 

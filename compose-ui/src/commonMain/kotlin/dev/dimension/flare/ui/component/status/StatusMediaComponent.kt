@@ -33,6 +33,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
 import compose.icons.fontawesomeicons.solid.EyeSlash
 import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.common.SystemUtils
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.status_sensitive_media
 import dev.dimension.flare.ui.component.AdaptiveGrid
@@ -160,16 +161,16 @@ internal fun StatusMediaComponent(
                 Modifier
                     .clip(PlatformTheme.shapes.medium)
                     .let {
-                        if (hideSensitive) {
-                            it.blur(32.dp)
-                        } else {
-                            it
-                        }
-//                        if (hideSensitive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//                        if (hideSensitive) {
 //                            it.blur(32.dp)
 //                        } else {
 //                            it
 //                        }
+                        if (hideSensitive && SystemUtils.isBlurSupported) {
+                            it.blur(32.dp)
+                        } else {
+                            it
+                        }
                     },
             expandedSize = appearanceSettings.expandMediaSize,
         )
@@ -179,12 +180,11 @@ internal fun StatusMediaComponent(
                     Modifier
                         .matchParentSize()
                         .let {
-                            it
-//                            if (hideSensitive && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-//                                it.background(PlatformTheme.colorScheme.surfaceContainer)
-//                            } else {
-//                                it
-//                            }
+                            if (hideSensitive && !SystemUtils.isBlurSupported) {
+                                it.background(PlatformTheme.colorScheme.outline)
+                            } else {
+                                it
+                            }
                         }.let {
                             if (hideSensitive) {
                                 it.clickable {

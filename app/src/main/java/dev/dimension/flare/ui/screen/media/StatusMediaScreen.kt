@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -40,8 +41,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -98,8 +101,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Glassify
 import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.SurfaceBindingManager
 import dev.dimension.flare.ui.component.VideoPlayer
-import dev.dimension.flare.ui.component.VideoPlayerPool
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.humanizer.humanize
@@ -116,6 +119,8 @@ import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
+import java.io.File
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -135,8 +140,6 @@ import moe.tlaster.precompose.molecule.producePresenter
 import moe.tlaster.swiper.Swiper
 import moe.tlaster.swiper.rememberSwiperState
 import org.koin.compose.koinInject
-import java.io.File
-import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(
     ExperimentalMaterial3Api::class,
@@ -151,7 +154,7 @@ internal fun StatusMediaScreen(
     onDismiss: () -> Unit,
     toAltText: (UiMedia) -> Unit,
     uriHandler: UriHandler,
-    playerPool: VideoPlayerPool = koinInject(),
+    surfaceBindingManager: SurfaceBindingManager = koinInject(),
 ) {
     val isBigScreen = isBigScreen()
     val hapticFeedback = LocalHapticFeedback.current
@@ -278,14 +281,11 @@ internal fun StatusMediaScreen(
                                                     uri = media.url,
                                                     previewUri = media.thumbnailUrl,
                                                     contentDescription = media.description,
+                                                    aspectRatio = media.aspectRatio,
                                                     autoPlay = true,
-                                                    modifier =
-                                                        Modifier
-                                                            .fillMaxSize(),
                                                     onClick = {
                                                         state.setShowUi(!state.showUi)
                                                     },
-                                                    aspectRatio = media.aspectRatio,
                                                     showControls = true,
                                                     keepScreenOn = true,
                                                     muted = false,
@@ -303,9 +303,6 @@ internal fun StatusMediaScreen(
                                                     previewUri = null,
                                                     contentDescription = media.description,
                                                     autoPlay = false,
-                                                    modifier =
-                                                        Modifier
-                                                            .fillMaxSize(),
                                                     onClick = {
                                                         state.setShowUi(!state.showUi)
                                                     },
@@ -511,15 +508,12 @@ internal fun StatusMediaScreen(
                                                         medias[state.currentPage]
                                                     }
                                                 if (current is UiMedia.Video) {
-                                                    val player = playerPool.peek(current.url)
-                                                    if (player != null) {
-                                                        PlayerControl(
-                                                            player,
-                                                            modifier =
-                                                                Modifier
-                                                                    .padding(end = screenHorizontalPadding),
-                                                        )
-                                                    }
+                                                    PlayerControl(
+                                                        surfaceBindingManager.player,
+                                                        modifier =
+                                                            Modifier
+                                                                .widthIn(max = 480.dp),
+                                                    )
                                                 }
                                             }
                                             if (!isBigScreen) {
@@ -677,32 +671,18 @@ internal fun StatusMediaScreen(
 }
 
 @androidx.annotation.OptIn(UnstableApi::class)
-@ExperimentalMaterial3Api
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun PlayerControl(
     player: ExoPlayer,
     modifier: Modifier = Modifier,
 ) {
     val playPauseButtonState = rememberPlayPauseButtonState(player)
-    var time by remember { mutableStateOf("") }
-    var isSliderChanging by remember {
-        mutableStateOf(false)
-    }
-    var sliderValue by remember {
-        mutableStateOf(0f)
-    }
-    if (!playPauseButtonState.showPlay && !isSliderChanging) {
-        LaunchedEffect(Unit) {
-            while (true) {
-                sliderValue = player.currentPosition.toFloat() / player.duration.toFloat()
-                time =
-                    buildString {
-                        append(player.currentPosition.milliseconds.humanize())
-                        append(" / ")
-                        append(player.duration.milliseconds.humanize())
-                    }
-                awaitFrame()
-            }
+    var isLoaded by remember { mutableStateOf(false) }
+    LaunchedEffect(player) {
+        while (!isLoaded) {
+            isLoaded = player.isPlaying
+            awaitFrame()
         }
     }
     Row(
@@ -710,41 +690,72 @@ private fun PlayerControl(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        IconButton(
-            onClick = {
-                playPauseButtonState.onClick()
-            },
-            enabled = playPauseButtonState.isEnabled,
-        ) {
-            Icon(
-                if (playPauseButtonState.showPlay) {
-                    FontAwesomeIcons.Solid.Play
-                } else {
-                    FontAwesomeIcons.Solid.Pause
-                },
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
+        if (!isLoaded) {
+            LinearWavyProgressIndicator(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
             )
-        }
-        Slider(
-            value = sliderValue,
-            onValueChange = {
-                isSliderChanging = true
-                sliderValue = it
-                time =
-                    buildString {
-                        append((player.duration * it).toLong().milliseconds.humanize())
-                        append(" / ")
-                        append(player.duration.milliseconds.humanize())
+        } else {
+            var time by remember { mutableStateOf("") }
+            var isSliderChanging by remember {
+                mutableStateOf(false)
+            }
+            var sliderValue by remember {
+                mutableStateOf(0f)
+            }
+            if (!playPauseButtonState.showPlay && !isSliderChanging) {
+                LaunchedEffect(Unit) {
+                    while (true) {
+                        sliderValue = player.currentPosition.toFloat() / player.duration.toFloat()
+                        time =
+                            buildString {
+                                append(player.currentPosition.milliseconds.humanize())
+                                append(" / ")
+                                append(player.duration.milliseconds.humanize())
+                            }
+                        awaitFrame()
                     }
-            },
-            onValueChangeFinished = {
-                player.seekTo((player.duration * sliderValue).toLong())
-                isSliderChanging = false
-            },
-            modifier = Modifier.weight(1f),
-        )
-        Text(time)
+                }
+            }
+            IconButton(
+                onClick = {
+                    playPauseButtonState.onClick()
+                },
+                enabled = playPauseButtonState.isEnabled,
+            ) {
+                Icon(
+                    if (playPauseButtonState.showPlay) {
+                        FontAwesomeIcons.Solid.Play
+                    } else {
+                        FontAwesomeIcons.Solid.Pause
+                    },
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
+            Slider(
+                value = sliderValue,
+                onValueChange = {
+                    isSliderChanging = true
+                    sliderValue = it
+                    time =
+                        buildString {
+                            append((player.duration * it).toLong().milliseconds.humanize())
+                            append(" / ")
+                            append(player.duration.milliseconds.humanize())
+                        }
+                },
+                onValueChangeFinished = {
+                    player.seekTo((player.duration * sliderValue).toLong())
+                    isSliderChanging = false
+                },
+                modifier = Modifier.weight(1f),
+            )
+            Text(time)
+            Spacer(Modifier.width(screenHorizontalPadding))
+        }
     }
 }
 

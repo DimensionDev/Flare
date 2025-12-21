@@ -11,6 +11,7 @@ struct ProfileScreen: View {
     @StateObject private var presenter: KotlinPresenter<ProfileState>
     @State private var selectedTab: Int = 0
     @State private var showEditListSheet = false
+    @State private var showReportSheet = false
     
     var body: some View {
         ZStack {
@@ -133,7 +134,7 @@ struct ProfileScreen: View {
                                 }
                                 Divider()
                             }
-                            Button(role: .destructive,action: { presenter.state.report(userKey: user.data.key) }, label: {
+                            Button(role: .destructive,action: { showReportSheet = true }, label: {
                                 Label("report", systemImage: "exclamationmark.bubble")
                             })
                         } label: {
@@ -142,6 +143,16 @@ struct ProfileScreen: View {
                     }
                 }
             }
+        }
+        .alert("mastodon_report_status_alert_title", isPresented: $showReportSheet) {
+            Button("Cancel", role: .cancel) {}
+            Button("report", role: .destructive) {
+                if case .success(let data) = onEnum(of: presenter.state.userState) {
+                    presenter.state.report(userKey: data.data.key)
+                }
+            }
+        } message: {
+            Text("mastodon_report_status_alert_message")
         }
         .background(Color(.systemGroupedBackground))
     }

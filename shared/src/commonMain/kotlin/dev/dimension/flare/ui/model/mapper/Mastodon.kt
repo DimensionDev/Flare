@@ -363,124 +363,38 @@ private fun Status.renderStatus(
                 )
             },
         actions =
-            if (dataSource != null && accountKey != null) {
-                listOfNotNull(
-                    StatusAction.Item.Reply(
-                        count = UiNumber(repliesCount ?: 0),
-                        onClicked = {
+
+            listOfNotNull(
+                StatusAction.Item.Reply(
+                    count = UiNumber(repliesCount ?: 0),
+                    onClicked = {
+                        if (accountKey != null) {
                             launcher.launch(
                                 AppDeepLink.Compose.Reply(
                                     accountKey = accountKey,
                                     statusKey = statusKey,
                                 ),
                             )
-                        },
-                    ),
-                    if (canReblog && quoteApproval != null) {
-                        StatusAction.Group(
-                            displayItem =
-                                StatusAction.Item.Retweet(
-                                    count = UiNumber(reblogsCount ?: 0),
-                                    retweeted = reblogged ?: false,
-                                    onClicked = {
-                                    },
-                                ),
-                            actions =
-                                listOfNotNull(
-                                    if (canQuote) {
-                                        StatusAction.Item.Quote(
-                                            count = UiNumber(quotesCount ?: 0),
-                                            onClicked = {
-                                                launcher.launch(
-                                                    AppDeepLink.Compose.Quote(
-                                                        accountKey = accountKey,
-                                                        statusKey = statusKey,
-                                                    ),
-                                                )
-                                            },
-                                        )
-                                    } else {
-                                        null
-                                    },
-                                    StatusAction.Item.Retweet(
-                                        count = UiNumber(reblogsCount ?: 0),
-                                        retweeted = reblogged ?: false,
-                                        onClicked = {
-                                            dataSource.reblog(statusKey, reblogged ?: false)
-                                        },
-                                    ),
-                                ).toImmutableList(),
-                        )
-                    } else {
-                        null
+                        }
                     },
-                    if (quoteApproval == null && canQuote) {
-                        StatusAction.Item.Quote(
-                            count = UiNumber(quotesCount ?: 0),
-                            onClicked = {
-                                launcher.launch(
-                                    AppDeepLink.Compose.Quote(
-                                        accountKey = accountKey,
-                                        statusKey = statusKey,
-                                    ),
-                                )
-                            },
-                        )
-                    } else {
-                        null
-                    },
-                    if (quoteApproval == null && canReblog) {
-                        StatusAction.Item.Retweet(
-                            count = UiNumber(reblogsCount ?: 0),
-                            retweeted = reblogged ?: false,
-                            onClicked = {
-                                dataSource.reblog(statusKey, reblogged ?: false)
-                            },
-                        )
-                    } else {
-                        null
-                    },
-                    StatusAction.Item.Like(
-                        count = UiNumber(favouritesCount ?: 0),
-                        liked = favourited ?: false,
-                        onClicked = {
-                            dataSource.like(statusKey, favourited ?: false)
-                        },
-                    ),
-                    if (canReact) {
-                        StatusAction.Item.Reaction(
-                            reacted = false,
-                            onClicked = {
-                                launcher.launch(
-                                    AppDeepLink.AddReaction(
-                                        accountKey = accountKey,
-                                        statusKey = statusKey,
-                                    ),
-                                )
-                            },
-                        )
-                    } else {
-                        null
-                    },
+                ),
+                if (canReblog && quoteApproval != null && accountKey != null) {
                     StatusAction.Group(
-                        displayItem = StatusAction.Item.More,
+                        displayItem =
+                            StatusAction.Item.Retweet(
+                                count = UiNumber(reblogsCount ?: 0),
+                                retweeted = reblogged ?: false,
+                                onClicked = {
+                                },
+                            ),
                         actions =
                             listOfNotNull(
-                                StatusAction.Item.Bookmark(
-                                    count = UiNumber(0),
-                                    bookmarked = bookmarked ?: false,
-                                    onClicked = {
-                                        dataSource.bookmark(statusKey, bookmarked ?: false)
-                                    },
-                                ),
-                                StatusAction.Item.Share(
-                                    content = postUrl,
-                                ),
-                                if (isFromMe) {
-                                    StatusAction.Item.Delete(
+                                if (canQuote) {
+                                    StatusAction.Item.Quote(
+                                        count = UiNumber(quotesCount ?: 0),
                                         onClicked = {
                                             launcher.launch(
-                                                AppDeepLink.DeleteStatus(
+                                                AppDeepLink.Compose.Quote(
                                                     accountKey = accountKey,
                                                     statusKey = statusKey,
                                                 ),
@@ -488,8 +402,110 @@ private fun Status.renderStatus(
                                         },
                                     )
                                 } else {
-                                    StatusAction.Item.Report(
-                                        onClicked = {
+                                    null
+                                },
+                                StatusAction.Item.Retweet(
+                                    count = UiNumber(reblogsCount ?: 0),
+                                    retweeted = reblogged ?: false,
+                                    onClicked = {
+                                        dataSource?.reblog(statusKey, reblogged ?: false)
+                                    },
+                                ),
+                            ).toImmutableList(),
+                    )
+                } else {
+                    StatusAction.Item.Retweet(
+                        count = UiNumber(reblogsCount ?: 0),
+                        retweeted = reblogged ?: false,
+                        onClicked = {
+                        },
+                    )
+                },
+                if (quoteApproval == null && canQuote) {
+                    StatusAction.Item.Quote(
+                        count = UiNumber(quotesCount ?: 0),
+                        onClicked = {
+                            if (accountKey != null) {
+                                launcher.launch(
+                                    AppDeepLink.Compose.Quote(
+                                        accountKey = accountKey,
+                                        statusKey = statusKey,
+                                    ),
+                                )
+                            }
+                        },
+                    )
+                } else {
+                    null
+                },
+                if (quoteApproval == null && canReblog) {
+                    StatusAction.Item.Retweet(
+                        count = UiNumber(reblogsCount ?: 0),
+                        retweeted = reblogged ?: false,
+                        onClicked = {
+                            dataSource?.reblog(statusKey, reblogged ?: false)
+                        },
+                    )
+                } else {
+                    null
+                },
+                StatusAction.Item.Like(
+                    count = UiNumber(favouritesCount ?: 0),
+                    liked = favourited ?: false,
+                    onClicked = {
+                        dataSource?.like(statusKey, favourited ?: false)
+                    },
+                ),
+                if (canReact) {
+                    StatusAction.Item.Reaction(
+                        reacted = false,
+                        onClicked = {
+                            if (accountKey != null) {
+                                launcher.launch(
+                                    AppDeepLink.AddReaction(
+                                        accountKey = accountKey,
+                                        statusKey = statusKey,
+                                    ),
+                                )
+                            }
+                        },
+                    )
+                } else {
+                    null
+                },
+                StatusAction.Group(
+                    displayItem = StatusAction.Item.More,
+                    actions =
+                        listOfNotNull(
+                            if (accountKey != null) {
+                                StatusAction.Item.Bookmark(
+                                    count = UiNumber(0),
+                                    bookmarked = bookmarked ?: false,
+                                    onClicked = {
+                                        dataSource?.bookmark(statusKey, bookmarked ?: false)
+                                    },
+                                )
+                            } else {
+                                null
+                            },
+                            StatusAction.Item.Share(
+                                content = postUrl,
+                            ),
+                            if (isFromMe) {
+                                StatusAction.Item.Delete(
+                                    onClicked = {
+                                        launcher.launch(
+                                            AppDeepLink.DeleteStatus(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ),
+                                        )
+                                    },
+                                )
+                            } else {
+                                StatusAction.Item.Report(
+                                    onClicked = {
+                                        if (accountKey != null) {
                                             launcher.launch(
                                                 AppDeepLink.Mastodon.ReportStatus(
                                                     accountKey = accountKey,
@@ -497,15 +513,21 @@ private fun Status.renderStatus(
                                                     userKey = actualUser.key,
                                                 ),
                                             )
-                                        },
-                                    )
-                                },
-                            ).toImmutableList(),
-                    ),
-                )
-            } else {
-                emptyList()
-            }.toImmutableList(),
+                                        } else {
+                                            launcher.launch(
+                                                AppDeepLink.Mastodon.ReportStatus(
+                                                    accountKey = MicroBlogKey("", ""),
+                                                    statusKey = statusKey,
+                                                    userKey = actualUser.key,
+                                                ),
+                                            )
+                                        }
+                                    },
+                                )
+                            },
+                        ).toImmutableList(),
+                ),
+            ).toImmutableList(),
         poll =
             poll?.let {
                 UiPoll(

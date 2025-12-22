@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import com.slapps.cupertino.CupertinoText
 import com.slapps.cupertino.LocalTextStyle
+import kotlinx.collections.immutable.ImmutableMap
 
 internal actual val PlatformTextStyle: ProvidableCompositionLocal<TextStyle>
     @Composable
@@ -39,7 +40,7 @@ internal actual fun PlatformText(
     softWrap: Boolean,
     maxLines: Int,
     minLines: Int,
-    inlineContent: Map<String, InlineTextContent>,
+    inlineContent: ImmutableMap<String, InlineTextContent>,
     onTextLayout: (TextLayoutResult) -> Unit,
     style: TextStyle,
 ) {

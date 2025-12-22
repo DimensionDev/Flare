@@ -292,12 +292,18 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         LocalScrollToTopRegistry provides state.scrollToTopRegistry,
                     ) {
                         Router(
-                            topLevelBackStack = topLevelBackStack,
+                            backStack = topLevelBackStack.backStack,
                             navigationState = state.navigationState,
                             openDrawer = {
                                 scope.launch {
                                     wideNavigationRailState.toggle()
                                 }
+                            },
+                            navigate = {
+                                topLevelBackStack.add(it)
+                            },
+                            onBack = {
+                                topLevelBackStack.removeLast()
                             },
                         )
                     }

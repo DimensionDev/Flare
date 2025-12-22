@@ -65,9 +65,11 @@ public data class UiTimeline internal constructor(
                 }
             }
 
+    @Immutable
     public sealed class ItemContent {
         public abstract val itemKey: String
 
+        @Immutable
         public data class Feed internal constructor(
             val title: String?,
             val description: String?,
@@ -94,6 +96,7 @@ public data class UiTimeline internal constructor(
             }
         }
 
+        @Immutable
         public data class Status internal constructor(
             val platformType: PlatformType,
             val images: ImmutableList<UiMedia>,
@@ -130,10 +133,13 @@ public data class UiTimeline internal constructor(
                 (contentWarning == null || contentWarning.isEmpty) && !content.isLongText
             }
 
+            @Immutable
             public sealed class BottomContent {
+                @Immutable
                 public data class Reaction internal constructor(
                     val emojiReactions: ImmutableList<EmojiReaction>,
                 ) : BottomContent() {
+                    @Immutable
                     public data class EmojiReaction internal constructor(
                         val name: String,
                         val url: String,
@@ -150,7 +156,9 @@ public data class UiTimeline internal constructor(
                 }
             }
 
+            @Immutable
             public sealed class TopEndContent {
+                @Immutable
                 public data class Visibility internal constructor(
                     val visibility: Type,
                 ) : TopEndContent() {
@@ -164,13 +172,16 @@ public data class UiTimeline internal constructor(
                 }
             }
 
+            @Immutable
             public sealed class AboveTextContent {
+                @Immutable
                 public data class ReplyTo internal constructor(
                     val handle: String,
                 ) : AboveTextContent()
             }
         }
 
+        @Immutable
         public data class User internal constructor(
             val value: UiUserV2,
             val button: ImmutableList<Button> = persistentListOf(),
@@ -185,17 +196,21 @@ public data class UiTimeline internal constructor(
                         append(value.key)
                     }
 
+            @Immutable
             public sealed class Button {
+                @Immutable
                 public data class AcceptFollowRequest internal constructor(
                     val onClicked: ClickContext.() -> Unit,
                 ) : Button()
 
+                @Immutable
                 public data class RejectFollowRequest internal constructor(
                     val onClicked: ClickContext.() -> Unit,
                 ) : Button()
             }
         }
 
+        @Immutable
         public data class UserList internal constructor(
             val users: ImmutableList<UiUserV2>,
             val status: Status? = null,
@@ -215,6 +230,7 @@ public data class UiTimeline internal constructor(
         }
     }
 
+    @Immutable
     public data class TopMessage internal constructor(
         val user: UiUserV2?,
         val icon: Icon,
@@ -249,128 +265,167 @@ public data class UiTimeline internal constructor(
             Pin,
         }
 
+        @Immutable
         public sealed class MessageType {
+            @Immutable
             public sealed class Mastodon : MessageType() {
+                @Immutable
                 public data class Reblogged internal constructor(
                     val id: String,
                 ) : Mastodon()
 
+                @Immutable
                 public data class Follow internal constructor(
                     val id: String,
                 ) : Mastodon()
 
+                @Immutable
                 public data class Favourite internal constructor(
                     val id: String,
                 ) : Mastodon()
 
+                @Immutable
                 public data class Mention internal constructor(
                     val id: String,
                 ) : Mastodon()
 
+                @Immutable
                 public data class Poll internal constructor(
                     val id: String,
                 ) : Mastodon()
 
+                @Immutable
                 public data class FollowRequest internal constructor(
                     val id: String,
                 ) : Mastodon()
 
+                @Immutable
                 public data class Status internal constructor(
                     val id: String,
                 ) : Mastodon()
 
+                @Immutable
                 public data class Update internal constructor(
                     val id: String,
                 ) : Mastodon()
 
+                @Immutable
                 public data class UnKnown internal constructor(
                     val id: String,
                 ) : Mastodon()
 
+                @Immutable
                 public data class Pinned internal constructor(
                     val id: String,
                 ) : Mastodon()
             }
 
+            @Immutable
             public sealed class Misskey : MessageType() {
+                @Immutable
                 public data class Follow internal constructor(
                     val id: String,
                 ) : Misskey()
 
+                @Immutable
                 public data class Mention internal constructor(
                     val id: String,
                 ) : Misskey()
 
+                @Immutable
                 public data class Reply internal constructor(
                     val id: String,
                 ) : Misskey()
 
+                @Immutable
                 public data class Renote internal constructor(
                     val id: String,
                 ) : Misskey()
 
+                @Immutable
                 public data class Quote internal constructor(
                     val id: String,
                 ) : Misskey()
 
+                @Immutable
                 public data class Reaction internal constructor(
                     val id: String,
                 ) : Misskey()
 
+                @Immutable
                 public data class PollEnded internal constructor(
                     val id: String,
                 ) : Misskey()
 
+                @Immutable
                 public data class ReceiveFollowRequest internal constructor(
                     val id: String,
                 ) : Misskey()
 
+                @Immutable
                 public data class FollowRequestAccepted internal constructor(
                     val id: String,
                 ) : Misskey()
 
+                @Immutable
                 public data class AchievementEarned internal constructor(
                     val id: String,
                     val achievement: MisskeyAchievement?,
                 ) : Misskey()
 
+                @Immutable
                 public data class App internal constructor(
                     val id: String,
                 ) : Misskey()
 
+                @Immutable
                 public data class UnKnown internal constructor(
                     val type: String,
                     val id: String,
                 ) : Misskey()
 
+                @Immutable
                 public data class Pinned internal constructor(
                     val id: String,
                 ) : Misskey()
             }
 
+            @Immutable
             public sealed class Bluesky : MessageType() {
+                @Immutable
                 public data object Like : Bluesky()
 
+                @Immutable
                 public data object Repost : Bluesky()
 
+                @Immutable
                 public data object Follow : Bluesky()
 
+                @Immutable
                 public data object Mention : Bluesky()
 
+                @Immutable
                 public data object Reply : Bluesky()
 
+                @Immutable
                 public data object Quote : Bluesky()
 
+                @Immutable
                 public data object UnKnown : Bluesky()
 
+                @Immutable
                 public data object StarterpackJoined : Bluesky()
 
+                @Immutable
                 public data object Pinned : Bluesky()
             }
 
+            @Immutable
             public sealed class XQT : MessageType() {
+                @Immutable
                 public data object Retweet : XQT()
 
+                @Immutable
                 public data class Custom internal constructor(
                     val message: String,
                     val id: String,
@@ -378,14 +433,18 @@ public data class UiTimeline internal constructor(
                     override fun toString(): String = "Custom$id"
                 }
 
+                @Immutable
                 public data object Mention : XQT()
             }
 
+            @Immutable
             public sealed class VVO : MessageType() {
+                @Immutable
                 public data class Custom internal constructor(
                     val message: String,
                 ) : VVO()
 
+                @Immutable
                 public data object Like : VVO()
             }
         }

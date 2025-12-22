@@ -10,10 +10,8 @@ import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.data.repository.activeAccountFlow
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.presenter.home.DirectMessageBadgePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -88,14 +86,5 @@ public class HomeTabsPresenter :
         return object : State {
             override val tabs = tabs
         }
-    }
-
-    @Composable
-    private fun directMessageBadgePresenter(accountType: AccountType): UiState<Int> {
-        val presenter =
-            remember(accountType) {
-                DirectMessageBadgePresenter(accountType)
-            }.body()
-        return presenter.count
     }
 }

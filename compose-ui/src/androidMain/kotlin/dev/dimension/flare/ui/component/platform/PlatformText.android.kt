@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import kotlinx.collections.immutable.ImmutableMap
 
 @Composable
 internal actual fun PlatformText(
@@ -35,7 +36,7 @@ internal actual fun PlatformText(
     softWrap: Boolean,
     maxLines: Int,
     minLines: Int,
-    inlineContent: Map<String, InlineTextContent>,
+    inlineContent: ImmutableMap<String, InlineTextContent>,
     onTextLayout: (TextLayoutResult) -> Unit,
     style: TextStyle,
 ) {

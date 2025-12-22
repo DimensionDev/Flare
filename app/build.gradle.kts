@@ -17,6 +17,7 @@ plugins {
     // END Non-FOSS component
     alias(libs.plugins.compose.compiler)
     id("kotlin-parcelize")
+    alias(libs.plugins.stability.analyzer)
 }
 
 // START Non-FOSS component

@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -19,7 +20,6 @@ import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
-import dev.dimension.flare.ui.component.TopLevelBackStack
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
 import dev.dimension.flare.ui.presenter.invoke
@@ -49,19 +49,13 @@ import soup.compose.material.motion.animation.translateXOut
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun Router(
-    topLevelBackStack: TopLevelBackStack<Route>,
+    backStack: SnapshotStateList<Route>,
+    navigate: (Route) -> Unit,
+    onBack: () -> Unit,
     navigationState: NavigationState,
     openDrawer: () -> Unit,
 ) {
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
-
-    fun navigate(route: Route) {
-        topLevelBackStack.add(route)
-    }
-
-    fun onBack() {
-        topLevelBackStack.removeLast()
-    }
 
     val isBigScreen = isBigScreen()
 
@@ -110,7 +104,7 @@ internal fun Router(
                     rememberSaveableStateHolderNavEntryDecorator(),
                     rememberViewModelStoreNavEntryDecorator(),
                 ),
-            backStack = topLevelBackStack.backStack,
+            backStack = backStack,
             onBack = { onBack() },
             transitionSpec = {
                 if (isBigScreen) {
@@ -138,18 +132,18 @@ internal fun Router(
             },
             entryProvider =
                 entryProvider {
-                    homeEntryBuilder(::navigate, ::onBack, openDrawer, uriHandler = proxyUriHandler)
-                    blueskyEntryBuilder(::navigate, ::onBack)
-                    composeEntryBuilder(::navigate, ::onBack)
-                    dmEntryBuilder(::navigate, ::onBack, navigationState)
-                    listEntryBuilder(::navigate, ::onBack)
-                    mediaEntryBuilder(::navigate, ::onBack, uriHandler = proxyUriHandler)
-                    profileEntryBuilder(::navigate, ::onBack)
-                    rssEntryBuilder(::navigate, ::onBack)
-                    serviceSelectEntryBuilder(::navigate, ::onBack)
-                    settingsSelectEntryBuilder(::navigate, ::onBack)
-                    statusEntryBuilder(::navigate, ::onBack)
-                    misskeyEntryBuilder(::navigate, ::onBack)
+                    homeEntryBuilder(navigate, onBack, openDrawer, uriHandler = proxyUriHandler)
+                    blueskyEntryBuilder(navigate, onBack)
+                    composeEntryBuilder(navigate, onBack)
+                    dmEntryBuilder(navigate, onBack, navigationState)
+                    listEntryBuilder(navigate, onBack)
+                    mediaEntryBuilder(navigate, onBack, uriHandler = proxyUriHandler)
+                    profileEntryBuilder(navigate, onBack)
+                    rssEntryBuilder(navigate, onBack)
+                    serviceSelectEntryBuilder(navigate, onBack)
+                    settingsSelectEntryBuilder(navigate, onBack)
+                    statusEntryBuilder(navigate, onBack)
+                    misskeyEntryBuilder(navigate, onBack)
                 },
         )
     }

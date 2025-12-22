@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.room)
+    alias(libs.plugins.stability.analyzer)
 }
 
 kotlin {

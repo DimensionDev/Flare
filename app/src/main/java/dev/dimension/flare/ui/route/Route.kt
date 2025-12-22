@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.route
 
+import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
@@ -8,6 +9,7 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.serialization.Serializable
 
+@Immutable
 @Serializable
 internal sealed interface Route : NavKey {
     @Serializable

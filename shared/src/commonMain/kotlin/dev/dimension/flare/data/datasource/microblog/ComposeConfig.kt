@@ -1,10 +1,12 @@
 package dev.dimension.flare.data.datasource.microblog
 
+import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.ui.model.UiEmoji
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 
+@Immutable
 public data class ComposeConfig internal constructor(
     val text: Text? = null,
     val media: Media? = null,
@@ -14,6 +16,7 @@ public data class ComposeConfig internal constructor(
     val visibility: Visibility? = null,
     val language: Language? = null,
 ) {
+    @Immutable
     public data class Text internal constructor(
         val maxLength: Int,
     ) {
@@ -23,6 +26,7 @@ public data class ComposeConfig internal constructor(
             )
     }
 
+    @Immutable
     // in ISO 639-1 format
     public data class Language internal constructor(
         val maxCount: Int,
@@ -240,6 +244,7 @@ public data class ComposeConfig internal constructor(
         }
     }
 
+    @Immutable
     public data class Media internal constructor(
         val maxCount: Int,
         val canSensitive: Boolean,
@@ -255,6 +260,7 @@ public data class ComposeConfig internal constructor(
             )
     }
 
+    @Immutable
     public data class Poll internal constructor(
         val maxOptions: Int,
     ) {
@@ -264,6 +270,7 @@ public data class ComposeConfig internal constructor(
             )
     }
 
+    @Immutable
     public data class Emoji internal constructor(
         internal val emoji: CacheData<ImmutableMap<String, ImmutableList<UiEmoji>>>,
         // Emojis picker can be merged only if their mergeTag is the same.
@@ -280,8 +287,10 @@ public data class ComposeConfig internal constructor(
             }
     }
 
+    @Immutable
     public data object ContentWarning
 
+    @Immutable
     public data object Visibility
 
     internal fun merge(other: ComposeConfig): ComposeConfig {

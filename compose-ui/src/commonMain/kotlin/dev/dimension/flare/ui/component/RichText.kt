@@ -45,6 +45,7 @@ import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.isLightTheme
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.toImmutableMap
 
 internal const val TAG_URL = "url"
 private val lightLinkColor = Color(0xff0066cc)
@@ -125,6 +126,7 @@ public fun RichText(
                                         imageHeaders = imageHeaders,
                                     )
                             }.toMap()
+                            .toImmutableMap()
                     PlatformText(
                         modifier =
                             Modifier.pointerInput(Unit) {
@@ -174,6 +176,7 @@ public fun RichText(
                         .map { (key, value) ->
                             key to renderInlineContent(value, LocalDensity.current)
                         }.toMap()
+                        .toImmutableMap()
                 PlatformText(
                     modifier =
                         modifier.pointerInput(Unit) {

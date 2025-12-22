@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.render
 
+import androidx.compose.runtime.Immutable
 import dev.dimension.flare.ui.humanizer.Formatter.full
 import dev.dimension.flare.ui.humanizer.Formatter.relative
 import kotlin.time.Clock
@@ -9,6 +10,7 @@ public expect class PlatformDateTime
 
 internal expect fun Instant.toPlatform(): PlatformDateTime
 
+@Immutable
 public data class UiDateTime internal constructor(
     val value: Instant,
 ) {

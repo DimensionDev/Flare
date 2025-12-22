@@ -23,7 +23,7 @@ import kotlinx.collections.immutable.ImmutableMap
 
 @Composable
 public fun NetworkImage(
-    model: Any?,
+    model: String?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
     alignment: Alignment = Alignment.Center,
@@ -82,7 +82,7 @@ public fun NetworkImage(
 
 @Composable
 public fun SubcomposeNetworkImage(
-    model: Any?,
+    model: String?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
     alignment: Alignment = Alignment.Center,

@@ -51,12 +51,12 @@ struct StatusActionView: View {
                     ZStack {
                         Text("0")
                             .hidden()
-                        if !isFixedWidth && group.displayItem.countText == nil {
-                            if let color = group.displayItem.color {
-                                StatusActionIcon(item: group.displayItem)
+                        if !isFixedWidth && group.displayItem.count == nil {
+                            if let color = group.displayItem.icon?.color {
+                                StatusActionIcon(icon: group.displayItem.icon)
                                     .foregroundStyle(color)
                             } else {
-                                StatusActionIcon(item: group.displayItem)
+                                StatusActionIcon(icon: group.displayItem.icon)
                             }
                         } else {
                             Label {
@@ -67,8 +67,8 @@ struct StatusActionView: View {
                                         Text("0000")
                                             .hidden()
                                     }
-                                    if let text = group.displayItem.countText, showNumbers {
-                                        if let color = group.displayItem.color {
+                                    if let text = group.displayItem.count?.humanized, showNumbers {
+                                        if let color = group.displayItem.icon?.color {
                                             Text(text)
                                                 .foregroundStyle(color)
                                         } else {
@@ -78,11 +78,11 @@ struct StatusActionView: View {
                                 }
                                 .lineLimit(1)
                             } icon: {
-                                if let color = group.displayItem.color {
-                                    StatusActionIcon(item: group.displayItem)
+                                if let color = group.displayItem.icon?.color {
+                                    StatusActionIcon(icon: group.displayItem.icon)
                                         .foregroundStyle(color)
                                 } else {
-                                    StatusActionIcon(item: group.displayItem)
+                                    StatusActionIcon(icon: group.displayItem.icon)
                                 }
                             }
                         }
@@ -117,14 +117,14 @@ struct StatusActionItemView: View {
     let useText: Bool
     let isFixedWidth: Bool
     var body: some View {
-        if let shareable = data as? StatusActionItemShareable {
-            ShareLink(data.textKey, item: .init(string: shareable.content)!)
+        if let shareContent = data.shareContent {
+            ShareLink(data.text?.localizedStringResource ?? LocalizedStringResource("share"), item: .init(string: shareContent)!)
         } else {
             Button(
-                role: data.role,
+                role: data.icon?.role
             ) {
-                if let clickable = data as? StatusActionItemClickable {
-                    clickable.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+                if let onClicked = data.onClicked {
+                    onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                 }
             } label: {
                 Label {
@@ -136,14 +136,14 @@ struct StatusActionItemView: View {
                                 .hidden()
                         }
                         if useText {
-                            if let color = data.color {
-                                Text(data.textKey)
+                            if let color = data.icon?.color {
+                                Text(data.text?.localizedStringResource ?? LocalizedStringResource("more"))
                                     .foregroundStyle(color)
                             } else {
-                                Text(data.textKey)
+                                Text(data.text?.localizedStringResource ?? LocalizedStringResource("more"))
                             }
-                        } else if let text = data.countText, showNumbers {
-                            if let color = data.color {
+                        } else if let text = data.count?.humanized, showNumbers {
+                            if let color = data.icon?.color {
                                 Text(text)
                                     .foregroundStyle(color)
                             } else {
@@ -153,142 +153,105 @@ struct StatusActionItemView: View {
                     }
                     .lineLimit(1)
                 } icon: {
-                    if let color = data.color {
-                        StatusActionIcon(item: data)
+                    if let color = data.icon?.color {
+                        StatusActionIcon(icon: data.icon)
                             .foregroundStyle(color)
                     } else {
-                        StatusActionIcon(item: data)
+                        StatusActionIcon(icon: data.icon)
                     }
                 }
             }
-            .sensoryFeedback(.success, trigger: data.color)
+            .sensoryFeedback(.success, trigger: data.icon?.color)
             .buttonStyle(.plain)
         }
     }
 }
 
-extension StatusActionItem {
-    var countText: String? {
-        if let numbered = self as? StatusActionItemNumbered {
-            return numbered.count.humanized
-        } else {
-            return nil
-        }
-    }
+extension StatusActionItemIcon {
     var color: Color? {
-        if let colorized = self as? StatusActionItemColorized {
-            switch colorized.color {
-            case .contentColor: nil
-            case .error: Color(.systemRed)
-            case .primaryColor: Color.accentColor
-            case .red: Color(.systemRed)
-            }
-        } else {
-            nil
+        switch self {
+        case .unlike: Color(.systemRed)
+        case .delete, .report: Color(.systemRed)
+        case .unretweet: Color.accentColor
+        default: nil
         }
     }
+    
     var role: ButtonRole? {
-        if let colorized = self as? StatusActionItemColorized {
-            switch colorized.color {
-            case .red:
-                    .destructive
-            case .error:
-                    .destructive
-            case .contentColor:
-                    nil
-            case .primaryColor:
-                if #available(iOS 26.0, *) {
+        switch self {
+        case .unlike, .delete, .report:
+                .destructive
+        case .unretweet:
+            if #available(iOS 26.0, *) {
                     .confirm
-                } else {
-                    nil
-                }
+            } else {
+                nil
             }
-        } else {
+        default:
             nil
         }
     }
+}
 
-    var textKey: LocalizedStringResource {
-        switch onEnum(of: self) {
-        case .bookmark(let bookmarked):
-            return bookmarked.bookmarked
-                ? LocalizedStringResource("bookmark_remove")
-                : LocalizedStringResource("bookmark_add")
-
-        case .delete:
-            return LocalizedStringResource("delete")
-
-        case .like(let liked):
-            return liked.liked
-                ? LocalizedStringResource("unlike")
-                : LocalizedStringResource("like")
-
-        case .more:
-            return LocalizedStringResource("more")
-
-        case .quote:
-            return LocalizedStringResource("quote")
-
-        case .reaction(let reacted):
-            return reacted.reacted
-                ? LocalizedStringResource("reaction_remove")
-                : LocalizedStringResource("reaction_add")
-
-        case .reply:
-            return LocalizedStringResource("reply")
-
-        case .report:
-            return LocalizedStringResource("report")
-
-        case .retweet(let retweeted):
-            return retweeted.retweeted
-                ? LocalizedStringResource("retweet_remove")
-                : LocalizedStringResource("retweet")
-        case .comment:
-            return LocalizedStringResource("comment")
-        case .share:
-            return LocalizedStringResource("share")
-        case .fxShare:
-            return LocalizedStringResource("fx_share")
+extension StatusActionItemText {
+    var localizedStringResource: LocalizedStringResource {
+        if let raw = self as? StatusActionItemTextRaw {
+            return LocalizedStringResource(stringLiteral: raw.text)
+        } else if let localized = self as? StatusActionItemTextLocalized {
+            switch localized.type {
+            case .like: return LocalizedStringResource("like")
+            case .unlike: return LocalizedStringResource("unlike")
+            case .retweet: return LocalizedStringResource("retweet")
+            case .unretweet: return LocalizedStringResource("retweet_remove")
+            case .reply: return LocalizedStringResource("reply")
+            case .comment: return LocalizedStringResource("comment")
+            case .quote: return LocalizedStringResource("quote")
+            case .bookmark: return LocalizedStringResource("bookmark_add")
+            case .unbookmark: return LocalizedStringResource("bookmark_remove")
+            case .more: return LocalizedStringResource("more")
+            case .delete: return LocalizedStringResource("delete")
+            case .report: return LocalizedStringResource("report")
+            case .react: return LocalizedStringResource("reaction_add")
+            case .unreact: return LocalizedStringResource("reaction_remove")
+            case .share: return LocalizedStringResource("share")
+            case .fxShare: return LocalizedStringResource("fx_share")
+            default: return LocalizedStringResource("more")
+            }
         }
+        return LocalizedStringResource("more")
     }
 }
 
 struct StatusActionIcon: View {
-    let item: StatusActionItem
+    let icon: StatusActionItemIcon?
 
     var body: some View {
-        Image(item.imageName)
+        if let icon = icon {
+            Image(icon.imageName)
+        }
     }
 }
 
-extension StatusActionItem {
+extension StatusActionItemIcon {
     var imageName: String {
-        switch onEnum(of: self) {
-        case .bookmark(let bookmarked):
-            return bookmarked.bookmarked ? "fa-bookmark.fill" : "fa-bookmark"
-        case .delete:
-            return "fa-trash"
-        case .like(let liked):
-            return liked.liked ? "fa-heart.fill" : "fa-heart"
-        case .more:
-            return "fa-ellipsis"
-        case .quote:
-            return "fa-quote-left"
-        case .reaction(let reacted):
-            return reacted.reacted ? "fa-minus" : "fa-plus"
-        case .reply:
-            return "fa-reply"
-        case .report:
-            return "fa-circle-info"
-        case .retweet:
-            return "fa-retweet"
-        case .comment:
-            return "fa-comment-dots"
-        case .share:
-            return "fa-share-nodes"
-        case .fxShare:
-            return "fa-share-nodes"
+        switch self {
+        case .bookmark: return "fa-bookmark"
+        case .unbookmark: return "fa-bookmark.fill"
+        case .delete: return "fa-trash"
+        case .like: return "fa-heart"
+        case .unlike: return "fa-heart.fill"
+        case .more: return "fa-ellipsis"
+        case .quote: return "fa-quote-left"
+        case .react: return "fa-plus"
+        case .unReact: return "fa-minus"
+        case .reply: return "fa-reply"
+        case .report: return "fa-circle-info"
+        case .retweet: return "fa-retweet"
+        case .unretweet: return "fa-retweet"
+        case .comment: return "fa-comment-dots"
+        case .share: return "fa-share-nodes"
+        case .fxShare: return "fa-share-nodes"
+        default: return "fa-ellipsis"
         }
     }
 }

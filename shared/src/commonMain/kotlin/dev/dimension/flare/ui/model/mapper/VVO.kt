@@ -174,7 +174,9 @@ internal fun Status.renderStatus(
         actions =
             listOfNotNull(
                 if (canReblog) {
-                    StatusAction.Item.Reply(
+                    StatusAction.Item(
+                        icon = StatusAction.Item.Icon.Reply,
+                        text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Reply),
                         count = UiNumber(repostsCount?.content?.toLongOrNull() ?: 0),
                         onClicked = {
                             launcher.launch(
@@ -188,7 +190,9 @@ internal fun Status.renderStatus(
                 } else {
                     null
                 },
-                StatusAction.Item.Comment(
+                StatusAction.Item(
+                    icon = StatusAction.Item.Icon.Comment,
+                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Comment),
                     count = UiNumber(commentsCount ?: 0),
                     onClicked = {
                         launcher.launch(
@@ -199,29 +203,51 @@ internal fun Status.renderStatus(
                         )
                     },
                 ),
-                StatusAction.Item.Like(
+                StatusAction.Item(
+                    icon = if (liked == true) StatusAction.Item.Icon.Unlike else StatusAction.Item.Icon.Like,
+                    text =
+                        StatusAction.Item.Text.Localized(
+                            if (liked == true) StatusAction.Item.Text.Localized.Type.Unlike else StatusAction.Item.Text.Localized.Type.Like,
+                        ),
                     count = UiNumber(attitudesCount ?: 0),
-                    liked = liked ?: false,
                     onClicked = {
                         event.like(statusKey, liked ?: false)
                     },
                 ),
                 StatusAction.Group(
-                    displayItem = StatusAction.Item.More,
+                    displayItem =
+                        StatusAction.Item(
+                            icon = StatusAction.Item.Icon.More,
+                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.More),
+                        ),
                     actions =
                         listOfNotNull(
-                            StatusAction.Item.Bookmark(
+                            StatusAction.Item(
+                                icon = if (favorited == true) StatusAction.Item.Icon.Unbookmark else StatusAction.Item.Icon.Bookmark,
+                                text =
+                                    StatusAction.Item.Text.Localized(
+                                        if (favorited ==
+                                            true
+                                        ) {
+                                            StatusAction.Item.Text.Localized.Type.Unbookmark
+                                        } else {
+                                            StatusAction.Item.Text.Localized.Type.Bookmark
+                                        },
+                                    ),
                                 count = UiNumber(0),
-                                bookmarked = favorited ?: false,
                                 onClicked = {
                                     event.favorite(statusKey, favorited ?: false)
                                 },
                             ),
-                            StatusAction.Item.Share(
-                                content = url,
+                            StatusAction.Item(
+                                icon = StatusAction.Item.Icon.Share,
+                                text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Share),
+                                shareContent = url,
                             ),
                             if (isFromMe) {
-                                StatusAction.Item.Delete(
+                                StatusAction.Item(
+                                    icon = StatusAction.Item.Icon.Delete,
+                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Delete),
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.DeleteStatus(
@@ -232,7 +258,9 @@ internal fun Status.renderStatus(
                                     },
                                 )
                             } else {
-                                StatusAction.Item.Report(
+                                StatusAction.Item(
+                                    icon = StatusAction.Item.Icon.Report,
+                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Report),
                                     onClicked = {
                                         // TODO: Report
                                     },
@@ -434,7 +462,9 @@ internal fun Comment.renderStatus(
         actions =
             listOfNotNull(
                 statusMid?.let {
-                    StatusAction.Item.Comment(
+                    StatusAction.Item(
+                        icon = StatusAction.Item.Icon.Comment,
+                        text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Comment),
                         count = UiNumber(totalNumber ?: 0),
                         onClicked = {
                             launcher.launch(
@@ -447,22 +477,34 @@ internal fun Comment.renderStatus(
                         },
                     )
                 },
-                StatusAction.Item.Like(
+                StatusAction.Item(
+                    icon = if (liked == true) StatusAction.Item.Icon.Unlike else StatusAction.Item.Icon.Like,
+                    text =
+                        StatusAction.Item.Text.Localized(
+                            if (liked == true) StatusAction.Item.Text.Localized.Type.Unlike else StatusAction.Item.Text.Localized.Type.Like,
+                        ),
                     count = UiNumber(likeCount ?: 0),
-                    liked = liked ?: false,
                     onClicked = {
                         event.likeComment(statusKey, liked ?: false)
                     },
                 ),
                 StatusAction.Group(
-                    displayItem = StatusAction.Item.More,
+                    displayItem =
+                        StatusAction.Item(
+                            icon = StatusAction.Item.Icon.More,
+                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.More),
+                        ),
                     actions =
                         listOfNotNull(
-                            StatusAction.Item.Share(
-                                content = url,
+                            StatusAction.Item(
+                                icon = StatusAction.Item.Icon.Share,
+                                text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Share),
+                                shareContent = url,
                             ),
                             if (isFromMe) {
-                                StatusAction.Item.Delete(
+                                StatusAction.Item(
+                                    icon = StatusAction.Item.Icon.Delete,
+                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Delete),
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.DeleteStatus(
@@ -473,7 +515,9 @@ internal fun Comment.renderStatus(
                                     },
                                 )
                             } else {
-                                StatusAction.Item.Report(
+                                StatusAction.Item(
+                                    icon = StatusAction.Item.Icon.Report,
+                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Report),
                                     onClicked = {
                                         // TODO: Report
                                     },

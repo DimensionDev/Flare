@@ -117,21 +117,25 @@ public fun createSampleStatus(user: UiUserV2): UiTimeline =
                         }.toUi(),
                 actions =
                     persistentListOf(
-                        StatusAction.Item.Reply(
+                        StatusAction.Item(
+                            icon = StatusAction.Item.Icon.Reply,
+                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Reply),
                             count = UiNumber(10),
-                            onClicked = {},
                         ),
-                        StatusAction.Item.Retweet(
+                        StatusAction.Item(
+                            icon = StatusAction.Item.Icon.Retweet,
+                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Retweet),
                             count = UiNumber(20),
-                            onClicked = {},
-                            retweeted = false,
                         ),
-                        StatusAction.Item.Like(
+                        StatusAction.Item(
+                            icon = StatusAction.Item.Icon.Like,
+                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Like),
                             count = UiNumber(30),
-                            onClicked = {},
-                            liked = false,
                         ),
-                        StatusAction.Item.More,
+                        StatusAction.Item(
+                            icon = StatusAction.Item.Icon.More,
+                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.More),
+                        ),
                     ),
                 poll = null,
                 statusKey = MicroBlogKey(id = "123", host = user.key.host),

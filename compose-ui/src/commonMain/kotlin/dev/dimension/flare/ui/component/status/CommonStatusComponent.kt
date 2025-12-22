@@ -127,7 +127,6 @@ import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
-import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -743,9 +742,9 @@ internal fun StatusActions(
             when (action) {
                 is StatusAction.Group -> {
                     StatusActionGroup(
-                        icon = action.displayItem.icon,
-                        number = action.displayItem.iconNumber,
-                        color = statusActionItemColor(item = action.displayItem),
+                        icon = action.displayItem.icon?.toImageVector() ?: FontAwesomeIcons.Solid.Ellipsis,
+                        number = action.displayItem.count,
+                        color = action.displayItem.icon?.toColor() ?: PlatformContentColor.current,
                         withTextMinWidth = index != items.lastIndex,
                     ) { closeMenu, isMenuShown ->
                         action.actions.fastForEach { subActions ->
@@ -801,14 +800,14 @@ internal fun StatusActions(
 
                 is StatusAction.Item -> {
                     StatusActionButton(
-                        icon = action.icon,
-                        number = action.iconNumber,
-                        color = statusActionItemColor(item = action),
+                        icon = action.icon?.toImageVector() ?: FontAwesomeIcons.Solid.Ellipsis, // Fallback or handle null
+                        number = action.count,
+                        color = action.icon?.toColor() ?: PlatformContentColor.current,
                         withTextMinWidth = index != items.lastIndex,
                         onClicked = {
-                            if (action is StatusAction.Item.Clickable) {
+                            action.onClicked?.let { onClick ->
                                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                action.onClicked.invoke(
+                                onClick.invoke(
                                     ClickContext(
                                         launcher = {
                                             launcher.openUri(it)
@@ -834,143 +833,98 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
     launcher: UriHandler,
 ) {
     val context = LocalPlatformContext.current
-    val color = statusActionItemColor(subActions)
+    val color = subActions.icon?.toColor() ?: PlatformContentColor.current
     PlatformDropdownMenuItem(
         leadingIcon = {
-            FAIcon(
-                imageVector = subActions.icon,
-                contentDescription = null,
-                tint = color,
-            )
+            subActions.icon?.let {
+                FAIcon(
+                    imageVector = it.toImageVector(),
+                    contentDescription = null,
+                    tint = color,
+                )
+            }
         },
         text = {
-            PlatformText(
-                text = statusActionItemText(item = subActions),
-                color = color,
-            )
+            subActions.text?.let {
+                PlatformText(
+                    text = it.asString(),
+                    color = color,
+                )
+            }
         },
         onClick = {
             closeMenu.invoke()
-            if (subActions is StatusAction.Item.Clickable) {
-                subActions.onClicked.invoke(
-                    ClickContext(
-                        launcher = {
-                            launcher.openUri(it)
-                        },
-                    ),
-                )
-            } else if (subActions is StatusAction.Item.Shareable) {
+            subActions.onClicked?.invoke(
+                ClickContext(
+                    launcher = {
+                        launcher.openUri(it)
+                    },
+                ),
+            )
+            subActions.shareContent?.let {
                 PlatformShare.shareText(
                     context = context,
-                    text = subActions.content,
+                    text = it,
                 )
             }
         },
     )
 }
 
-private val StatusAction.Item.icon: ImageVector
-    get() =
-        when (this) {
-            is StatusAction.Item.Bookmark -> {
-                if (bookmarked) {
-                    FontAwesomeIcons.Solid.Bookmark
-                } else {
-                    FontAwesomeIcons.Regular.Bookmark
-                }
-            }
-
-            is StatusAction.Item.Delete -> FontAwesomeIcons.Solid.Trash
-            is StatusAction.Item.Like -> {
-                if (liked) {
-                    FontAwesomeIcons.Solid.Heart
-                } else {
-                    FontAwesomeIcons.Regular.Heart
-                }
-            }
-
-            StatusAction.Item.More -> FontAwesomeIcons.Solid.Ellipsis
-            is StatusAction.Item.Quote -> FontAwesomeIcons.Solid.QuoteLeft
-            is StatusAction.Item.Reaction -> {
-                if (reacted) {
-                    FontAwesomeIcons.Solid.Minus
-                } else {
-                    FontAwesomeIcons.Solid.Plus
-                }
-            }
-
-            is StatusAction.Item.Reply -> FontAwesomeIcons.Solid.Reply
-            is StatusAction.Item.Report -> FontAwesomeIcons.Solid.CircleInfo
-            is StatusAction.Item.Retweet -> FontAwesomeIcons.Solid.Retweet
-            is StatusAction.Item.Comment -> FontAwesomeIcons.Regular.CommentDots
-            is StatusAction.Item.FxShare -> FontAwesomeIcons.Solid.ShareNodes
-            is StatusAction.Item.Share -> FontAwesomeIcons.Solid.ShareNodes
-        }
-
-private val StatusAction.Item.iconNumber: UiNumber?
-    get() =
-        if (this is StatusAction.Item.Numbered) {
-            this.count
-        } else {
-            null
-        }
-
 @Composable
-private fun statusActionItemColor(item: StatusAction.Item) =
-    if (item is StatusAction.Item.Colorized) {
-        when (item.color) {
-            StatusAction.Item.Colorized.Color.Red -> Color.Red
-            StatusAction.Item.Colorized.Color.Error -> PlatformTheme.colorScheme.error
-            StatusAction.Item.Colorized.Color.ContentColor -> PlatformContentColor.current
-            StatusAction.Item.Colorized.Color.PrimaryColor -> PlatformTheme.colorScheme.primary
+private fun StatusAction.Item.Text.asString(): String =
+    when (this) {
+        is StatusAction.Item.Text.Raw -> text
+        is StatusAction.Item.Text.Localized -> {
+            val resource =
+                when (type) {
+                    StatusAction.Item.Text.Localized.Type.Like -> Res.string.like
+                    StatusAction.Item.Text.Localized.Type.Unlike -> Res.string.unlike
+                    StatusAction.Item.Text.Localized.Type.Retweet -> Res.string.retweet
+                    StatusAction.Item.Text.Localized.Type.Unretweet -> Res.string.retweet_remove
+                    StatusAction.Item.Text.Localized.Type.Reply -> Res.string.reply
+                    StatusAction.Item.Text.Localized.Type.Comment -> Res.string.comment
+                    StatusAction.Item.Text.Localized.Type.Quote -> Res.string.quote
+                    StatusAction.Item.Text.Localized.Type.Bookmark -> Res.string.bookmark_add
+                    StatusAction.Item.Text.Localized.Type.Unbookmark -> Res.string.bookmark_remove
+                    StatusAction.Item.Text.Localized.Type.More -> Res.string.more
+                    StatusAction.Item.Text.Localized.Type.Delete -> Res.string.delete
+                    StatusAction.Item.Text.Localized.Type.Report -> Res.string.report
+                    StatusAction.Item.Text.Localized.Type.React -> Res.string.reaction_add
+                    StatusAction.Item.Text.Localized.Type.UnReact -> Res.string.reaction_remove
+                    StatusAction.Item.Text.Localized.Type.Share -> Res.string.share
+                    StatusAction.Item.Text.Localized.Type.FxShare -> Res.string.fx_share
+                }
+            stringResource(resource, *parameters.toTypedArray())
         }
-    } else {
-        PlatformContentColor.current
     }
 
 @Composable
-private fun statusActionItemText(item: StatusAction.Item) =
-    when (item) {
-        is StatusAction.Item.Bookmark -> {
-            if (item.bookmarked) {
-                stringResource(resource = Res.string.bookmark_remove)
-            } else {
-                stringResource(resource = Res.string.bookmark_add)
-            }
-        }
+private fun StatusAction.Item.Icon.toColor(): Color =
+    when (this) {
+        StatusAction.Item.Icon.Unlike -> Color.Red
+        StatusAction.Item.Icon.Delete, StatusAction.Item.Icon.Report -> PlatformTheme.colorScheme.error
+        StatusAction.Item.Icon.Unretweet -> PlatformTheme.colorScheme.primary
+        else -> PlatformContentColor.current
+    }
 
-        is StatusAction.Item.Delete -> stringResource(resource = Res.string.delete)
-        is StatusAction.Item.Like -> {
-            if (item.liked) {
-                stringResource(resource = Res.string.unlike)
-            } else {
-                stringResource(resource = Res.string.like)
-            }
-        }
-
-        StatusAction.Item.More -> stringResource(resource = Res.string.more)
-        is StatusAction.Item.Quote -> stringResource(resource = Res.string.quote)
-        is StatusAction.Item.Reaction -> {
-            if (item.reacted) {
-                stringResource(resource = Res.string.reaction_remove)
-            } else {
-                stringResource(resource = Res.string.reaction_add)
-            }
-        }
-
-        is StatusAction.Item.Reply -> stringResource(resource = Res.string.reply)
-        is StatusAction.Item.Report -> stringResource(resource = Res.string.report)
-        is StatusAction.Item.Retweet -> {
-            if (item.retweeted) {
-                stringResource(resource = Res.string.retweet_remove)
-            } else {
-                stringResource(resource = Res.string.retweet)
-            }
-        }
-
-        is StatusAction.Item.Comment -> stringResource(resource = Res.string.comment)
-        is StatusAction.Item.FxShare -> stringResource(resource = Res.string.fx_share)
-        is StatusAction.Item.Share -> stringResource(resource = Res.string.share)
+private fun StatusAction.Item.Icon.toImageVector(): ImageVector =
+    when (this) {
+        StatusAction.Item.Icon.Like -> FontAwesomeIcons.Regular.Heart
+        StatusAction.Item.Icon.Unlike -> FontAwesomeIcons.Solid.Heart
+        StatusAction.Item.Icon.Retweet -> FontAwesomeIcons.Solid.Retweet
+        StatusAction.Item.Icon.Unretweet -> FontAwesomeIcons.Solid.Retweet
+        StatusAction.Item.Icon.Reply -> FontAwesomeIcons.Solid.Reply
+        StatusAction.Item.Icon.Comment -> FontAwesomeIcons.Regular.CommentDots
+        StatusAction.Item.Icon.Quote -> FontAwesomeIcons.Solid.QuoteLeft
+        StatusAction.Item.Icon.Bookmark -> FontAwesomeIcons.Regular.Bookmark
+        StatusAction.Item.Icon.Unbookmark -> FontAwesomeIcons.Solid.Bookmark
+        StatusAction.Item.Icon.More -> FontAwesomeIcons.Solid.Ellipsis
+        StatusAction.Item.Icon.Delete -> FontAwesomeIcons.Solid.Trash
+        StatusAction.Item.Icon.Report -> FontAwesomeIcons.Solid.CircleInfo
+        StatusAction.Item.Icon.React -> FontAwesomeIcons.Solid.Plus
+        StatusAction.Item.Icon.UnReact -> FontAwesomeIcons.Solid.Minus
+        StatusAction.Item.Icon.Share -> FontAwesomeIcons.Solid.ShareNodes
     }
 
 @Composable

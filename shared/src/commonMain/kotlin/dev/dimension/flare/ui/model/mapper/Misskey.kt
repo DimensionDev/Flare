@@ -423,7 +423,9 @@ private fun Note.renderStatus(
             },
         actions =
             listOfNotNull(
-                StatusAction.Item.Reply(
+                StatusAction.Item(
+                    icon = StatusAction.Item.Icon.Reply,
+                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Reply),
                     count = UiNumber(repliesCount.toLong()),
                     onClicked = {
                         launcher.launch(
@@ -437,23 +439,26 @@ private fun Note.renderStatus(
                 if (canReblog) {
                     StatusAction.Group(
                         displayItem =
-                            StatusAction.Item.Retweet(
+                            StatusAction.Item(
+                                icon = StatusAction.Item.Icon.Retweet,
+                                text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Retweet),
                                 count = UiNumber(renoteCount.toLong()),
-                                retweeted = false,
-                                onClicked = {},
                             ),
                         actions =
                             listOfNotNull(
-                                StatusAction.Item.Retweet(
+                                StatusAction.Item(
+                                    icon = StatusAction.Item.Icon.Retweet,
+                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Retweet),
                                     count = UiNumber(renoteCount.toLong()),
-                                    retweeted = false,
                                     onClicked = {
                                         event.renote(
                                             statusKey = statusKey,
                                         )
                                     },
                                 ),
-                                StatusAction.Item.Quote(
+                                StatusAction.Item(
+                                    icon = StatusAction.Item.Icon.Quote,
+                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Quote),
                                     count = UiNumber(0),
                                     onClicked = {
                                         launcher.launch(
@@ -469,8 +474,18 @@ private fun Note.renderStatus(
                 } else {
                     null
                 },
-                StatusAction.Item.Reaction(
-                    reacted = myReaction != null,
+                StatusAction.Item(
+                    icon = if (myReaction != null) StatusAction.Item.Icon.UnReact else StatusAction.Item.Icon.React,
+                    text =
+                        StatusAction.Item.Text.Localized(
+                            if (myReaction !=
+                                null
+                            ) {
+                                StatusAction.Item.Text.Localized.Type.UnReact
+                            } else {
+                                StatusAction.Item.Text.Localized.Type.React
+                            },
+                        ),
                     onClicked = {
                         if (myReaction == null) {
                             launcher.launch(
@@ -489,7 +504,11 @@ private fun Note.renderStatus(
                     },
                 ),
                 StatusAction.Group(
-                    displayItem = StatusAction.Item.More,
+                    displayItem =
+                        StatusAction.Item(
+                            icon = StatusAction.Item.Icon.More,
+                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.More),
+                        ),
                     actions =
                         listOfNotNull(
                             StatusAction.AsyncActionItem(
@@ -498,9 +517,17 @@ private fun Note.renderStatus(
                                         .favouriteState(
                                             statusKey = statusKey,
                                         ).map {
-                                            StatusAction.Item.Like(
+                                            StatusAction.Item(
+                                                icon = if (it) StatusAction.Item.Icon.Unlike else StatusAction.Item.Icon.Like,
+                                                text =
+                                                    StatusAction.Item.Text.Localized(
+                                                        if (it) {
+                                                            StatusAction.Item.Text.Localized.Type.Unlike
+                                                        } else {
+                                                            StatusAction.Item.Text.Localized.Type.Like
+                                                        },
+                                                    ),
                                                 count = UiNumber(0),
-                                                liked = it,
                                                 onClicked = {
                                                     event.favourite(
                                                         statusKey = statusKey,
@@ -510,11 +537,15 @@ private fun Note.renderStatus(
                                             )
                                         },
                             ),
-                            StatusAction.Item.Share(
-                                content = postUrl,
+                            StatusAction.Item(
+                                icon = StatusAction.Item.Icon.Share,
+                                text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Share),
+                                shareContent = postUrl,
                             ),
                             if (isFromMe) {
-                                StatusAction.Item.Delete(
+                                StatusAction.Item(
+                                    icon = StatusAction.Item.Icon.Delete,
+                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Delete),
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.DeleteStatus(
@@ -525,7 +556,9 @@ private fun Note.renderStatus(
                                     },
                                 )
                             } else {
-                                StatusAction.Item.Report(
+                                StatusAction.Item(
+                                    icon = StatusAction.Item.Icon.Report,
+                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Report),
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.Misskey.ReportStatus(

@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.microblog
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiNumber
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 
 public sealed interface StatusAction {
@@ -15,117 +16,72 @@ public sealed interface StatusAction {
         val flow: Flow<Item>,
     ) : StatusAction
 
-    public sealed interface Item : StatusAction {
-        public sealed interface Clickable {
-            public val onClicked: ClickContext.() -> Unit
-        }
-
-        public sealed interface Shareable {
-            public val content: String
-        }
-
-        public sealed interface Numbered {
-            public val count: UiNumber
-        }
-
-        public sealed interface Colorized {
-            public val color: Color
-
-            public enum class Color {
-                Red,
-                Error,
-                ContentColor,
-                PrimaryColor,
+    public data class Item internal constructor(
+        val icon: Icon? = null,
+        val text: Text? = null,
+        val count: UiNumber? = null,
+        val onClicked: (ClickContext.() -> Unit)? = null,
+        val shareContent: String? = null,
+    ) : StatusAction {
+        init {
+            require(icon != null || text != null) {
+                "icon and text cannot be both null"
             }
         }
 
-        public data object More : Item
-
-        public data class Like internal constructor(
-            override val count: UiNumber,
-            val liked: Boolean,
-            override val onClicked: ClickContext.() -> Unit,
-        ) : Item,
-            Clickable,
-            Colorized,
-            Numbered {
-            override val color: Colorized.Color
-                get() = if (liked) Colorized.Color.Red else Colorized.Color.ContentColor
+        public enum class Color {
+            Red,
+            Error,
+            ContentColor,
+            PrimaryColor,
         }
 
-        public data class Retweet internal constructor(
-            override val count: UiNumber,
-            val retweeted: Boolean,
-            override val onClicked: ClickContext.() -> Unit,
-        ) : Item,
-            Clickable,
-            Colorized,
-            Numbered {
-            override val color: Colorized.Color
-                get() = if (retweeted) Colorized.Color.PrimaryColor else Colorized.Color.ContentColor
+        public enum class Icon {
+            Like,
+            Unlike,
+            Retweet,
+            Unretweet,
+            Reply,
+            Comment,
+            Quote,
+            Bookmark,
+            Unbookmark,
+            More,
+            Delete,
+            Report,
+            React,
+            UnReact,
+            Share,
         }
 
-        public data class Reply internal constructor(
-            override val count: UiNumber,
-            override val onClicked: ClickContext.() -> Unit,
-        ) : Item,
-            Clickable,
-            Numbered
+        public sealed interface Text {
+            public data class Raw(
+                val text: String,
+            ) : Text
 
-        public data class Comment internal constructor(
-            override val count: UiNumber,
-            override val onClicked: ClickContext.() -> Unit,
-        ) : Item,
-            Clickable,
-            Numbered
-
-        public data class Quote internal constructor(
-            override val count: UiNumber,
-            override val onClicked: ClickContext.() -> Unit,
-        ) : Item,
-            Clickable,
-            Numbered
-
-        public data class Bookmark internal constructor(
-            override val count: UiNumber,
-            val bookmarked: Boolean,
-            override val onClicked: ClickContext.() -> Unit,
-        ) : Item,
-            Clickable,
-            Numbered
-
-        public data class Delete internal constructor(
-            override val onClicked: ClickContext.() -> Unit,
-        ) : Item,
-            Colorized,
-            Clickable {
-            override val color: Colorized.Color
-                get() = Colorized.Color.Error
+            public data class Localized(
+                val type: Type,
+                val parameters: ImmutableList<String> = persistentListOf(),
+            ) : Text {
+                public enum class Type {
+                    Like,
+                    Unlike,
+                    Retweet,
+                    Unretweet,
+                    Reply,
+                    Comment,
+                    Quote,
+                    Bookmark,
+                    Unbookmark,
+                    More,
+                    Delete,
+                    Report,
+                    React,
+                    UnReact,
+                    Share,
+                    FxShare,
+                }
+            }
         }
-
-        public data class Report internal constructor(
-            override val onClicked: ClickContext.() -> Unit,
-        ) : Item,
-            Colorized,
-            Clickable {
-            override val color: Colorized.Color
-                get() = Colorized.Color.Error
-        }
-
-        public data class Reaction internal constructor(
-            val reacted: Boolean,
-            override val onClicked: ClickContext.() -> Unit,
-        ) : Item,
-            Clickable
-
-        public data class Share internal constructor(
-            override val content: String,
-        ) : Item,
-            Shareable
-
-        public data class FxShare internal constructor(
-            override val content: String,
-        ) : Item,
-            Shareable
     }
 }

@@ -52,7 +52,7 @@ struct StatusActionView: View {
                         Text("0")
                             .hidden()
                         if !isFixedWidth && group.displayItem.count == nil {
-                            if let color = group.displayItem.icon?.color {
+                            if let color = group.displayItem.color?.swiftColor {
                                 StatusActionIcon(icon: group.displayItem.icon)
                                     .foregroundStyle(color)
                             } else {
@@ -68,7 +68,7 @@ struct StatusActionView: View {
                                             .hidden()
                                     }
                                     if let text = group.displayItem.count?.humanized, showNumbers {
-                                        if let color = group.displayItem.icon?.color {
+                                        if let color = group.displayItem.color?.swiftColor {
                                             Text(text)
                                                 .foregroundStyle(color)
                                         } else {
@@ -78,7 +78,7 @@ struct StatusActionView: View {
                                 }
                                 .lineLimit(1)
                             } icon: {
-                                if let color = group.displayItem.icon?.color {
+                                if let color = group.displayItem.color?.swiftColor {
                                     StatusActionIcon(icon: group.displayItem.icon)
                                         .foregroundStyle(color)
                                 } else {
@@ -120,8 +120,12 @@ struct StatusActionItemView: View {
         if let shareContent = data.shareContent {
             ShareLink(data.text?.localizedStringResource ?? LocalizedStringResource("share"), item: .init(string: shareContent)!)
         } else {
+        } else {
+        if let shareContent = data.shareContent {
+            ShareLink(data.text?.localizedStringResource ?? LocalizedStringResource("share"), item: .init(string: shareContent)!)
+        } else {
             Button(
-                role: data.icon?.role
+                role: data.color?.role
             ) {
                 if let onClicked = data.onClicked {
                     onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
@@ -136,14 +140,14 @@ struct StatusActionItemView: View {
                                 .hidden()
                         }
                         if useText {
-                            if let color = data.icon?.color {
+                            if let color = data.color?.swiftColor {
                                 Text(data.text?.localizedStringResource ?? LocalizedStringResource("more"))
                                     .foregroundStyle(color)
                             } else {
                                 Text(data.text?.localizedStringResource ?? LocalizedStringResource("more"))
                             }
                         } else if let text = data.count?.humanized, showNumbers {
-                            if let color = data.icon?.color {
+                            if let color = data.color?.swiftColor {
                                 Text(text)
                                     .foregroundStyle(color)
                             } else {
@@ -153,7 +157,7 @@ struct StatusActionItemView: View {
                     }
                     .lineLimit(1)
                 } icon: {
-                    if let color = data.icon?.color {
+                    if let color = data.color?.swiftColor {
                         StatusActionIcon(icon: data.icon)
                             .foregroundStyle(color)
                     } else {
@@ -161,27 +165,27 @@ struct StatusActionItemView: View {
                     }
                 }
             }
-            .sensoryFeedback(.success, trigger: data.icon?.color)
+            .sensoryFeedback(.success, trigger: data.color?.swiftColor)
             .buttonStyle(.plain)
         }
     }
 }
 
-extension StatusActionItemIcon {
-    var color: Color? {
+extension StatusActionItemColor {
+    var swiftColor: Color? {
         switch self {
-        case .unlike: Color(.systemRed)
-        case .delete, .report: Color(.systemRed)
-        case .unretweet: Color.accentColor
-        default: nil
+        case .red: return .red
+        case .contentColor: return .primary
+        case .primaryColor: return .accentColor
+        default: return nil
         }
     }
-    
+
     var role: ButtonRole? {
         switch self {
-        case .unlike, .delete, .report:
+        case .red:
                 .destructive
-        case .unretweet:
+        case .primaryColor:
             if #available(iOS 26.0, *) {
                     .confirm
             } else {

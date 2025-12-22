@@ -486,6 +486,7 @@ private fun Note.renderStatus(
                                 StatusAction.Item.Text.Localized.Type.React
                             },
                         ),
+                    color = if (myReaction != null) StatusAction.Item.Color.Red else null,
                     onClicked = {
                         if (myReaction == null) {
                             launcher.launch(
@@ -528,6 +529,7 @@ private fun Note.renderStatus(
                                                         },
                                                     ),
                                                 count = UiNumber(0),
+                                                color = if (it) StatusAction.Item.Color.Red else null,
                                                 onClicked = {
                                                     event.favourite(
                                                         statusKey = statusKey,
@@ -546,6 +548,7 @@ private fun Note.renderStatus(
                                 StatusAction.Item(
                                     icon = StatusAction.Item.Icon.Delete,
                                     text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Delete),
+                                    color = StatusAction.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.DeleteStatus(
@@ -559,6 +562,7 @@ private fun Note.renderStatus(
                                 StatusAction.Item(
                                     icon = StatusAction.Item.Icon.Report,
                                     text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Report),
+                                    color = StatusAction.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.Misskey.ReportStatus(

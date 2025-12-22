@@ -396,6 +396,7 @@ private fun Status.renderStatus(
                                         },
                                     ),
                                 count = UiNumber(reblogsCount ?: 0),
+                                color = if (reblogged == true) StatusAction.Item.Color.PrimaryColor else null,
                             ),
                         actions =
                             listOfNotNull(
@@ -429,6 +430,7 @@ private fun Status.renderStatus(
                                             },
                                         ),
                                     count = UiNumber(reblogsCount ?: 0),
+                                    color = if (reblogged == true) StatusAction.Item.Color.PrimaryColor else null,
                                     onClicked = {
                                         dataSource?.reblog(statusKey, reblogged ?: false)
                                     },
@@ -449,6 +451,7 @@ private fun Status.renderStatus(
                                 },
                             ),
                         count = UiNumber(reblogsCount ?: 0),
+                        color = if (reblogged == true) StatusAction.Item.Color.PrimaryColor else null,
                     )
                 },
                 if (quoteApproval == null && canQuote) {
@@ -484,6 +487,7 @@ private fun Status.renderStatus(
                                 },
                             ),
                         count = UiNumber(reblogsCount ?: 0),
+                        color = if (reblogged == true) StatusAction.Item.Color.PrimaryColor else null,
                         onClicked = {
                             dataSource?.reblog(statusKey, reblogged ?: false)
                         },
@@ -504,6 +508,7 @@ private fun Status.renderStatus(
                             },
                         ),
                     count = UiNumber(favouritesCount ?: 0),
+                    color = if (favourited == true) StatusAction.Item.Color.Red else null,
                     onClicked = {
                         dataSource?.like(statusKey, favourited ?: false)
                     },
@@ -564,6 +569,7 @@ private fun Status.renderStatus(
                                 StatusAction.Item(
                                     icon = StatusAction.Item.Icon.Delete,
                                     text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Delete),
+                                    color = StatusAction.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.DeleteStatus(
@@ -577,6 +583,7 @@ private fun Status.renderStatus(
                                 StatusAction.Item(
                                     icon = StatusAction.Item.Icon.Report,
                                     text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Report),
+                                    color = StatusAction.Item.Color.Red,
                                     onClicked = {
                                         if (accountKey != null) {
                                             launcher.launch(

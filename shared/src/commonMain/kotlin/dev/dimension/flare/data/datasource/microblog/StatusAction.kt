@@ -22,6 +22,7 @@ public sealed interface StatusAction {
         val count: UiNumber? = null,
         val onClicked: (ClickContext.() -> Unit)? = null,
         val shareContent: String? = null,
+        val color: Color? = null,
     ) : StatusAction {
         init {
             require(icon != null || text != null) {
@@ -31,7 +32,6 @@ public sealed interface StatusAction {
 
         public enum class Color {
             Red,
-            Error,
             ContentColor,
             PrimaryColor,
         }

@@ -210,6 +210,7 @@ internal fun Status.renderStatus(
                             if (liked == true) StatusAction.Item.Text.Localized.Type.Unlike else StatusAction.Item.Text.Localized.Type.Like,
                         ),
                     count = UiNumber(attitudesCount ?: 0),
+                    color = if (liked == true) StatusAction.Item.Color.Red else null,
                     onClicked = {
                         event.like(statusKey, liked ?: false)
                     },
@@ -248,6 +249,7 @@ internal fun Status.renderStatus(
                                 StatusAction.Item(
                                     icon = StatusAction.Item.Icon.Delete,
                                     text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Delete),
+                                    color = StatusAction.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.DeleteStatus(
@@ -261,6 +263,7 @@ internal fun Status.renderStatus(
                                 StatusAction.Item(
                                     icon = StatusAction.Item.Icon.Report,
                                     text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Report),
+                                    color = StatusAction.Item.Color.Red,
                                     onClicked = {
                                         // TODO: Report
                                     },
@@ -484,6 +487,7 @@ internal fun Comment.renderStatus(
                             if (liked == true) StatusAction.Item.Text.Localized.Type.Unlike else StatusAction.Item.Text.Localized.Type.Like,
                         ),
                     count = UiNumber(likeCount ?: 0),
+                    color = if (liked == true) StatusAction.Item.Color.Red else null,
                     onClicked = {
                         event.likeComment(statusKey, liked ?: false)
                     },
@@ -505,6 +509,7 @@ internal fun Comment.renderStatus(
                                 StatusAction.Item(
                                     icon = StatusAction.Item.Icon.Delete,
                                     text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Delete),
+                                    color = StatusAction.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.DeleteStatus(
@@ -518,6 +523,7 @@ internal fun Comment.renderStatus(
                                 StatusAction.Item(
                                     icon = StatusAction.Item.Icon.Report,
                                     text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Report),
+                                    color = StatusAction.Item.Color.Red,
                                     onClicked = {
                                         // TODO: Report
                                     },

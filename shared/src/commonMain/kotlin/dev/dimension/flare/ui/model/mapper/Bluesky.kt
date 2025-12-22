@@ -564,6 +564,7 @@ internal fun PostView.renderStatus(
                                     },
                                 ),
                             count = UiNumber(repostCount ?: 0),
+                            color = if (viewer?.repost?.atUri != null) StatusAction.Item.Color.PrimaryColor else null,
                         ),
                     actions =
                         listOfNotNull(
@@ -587,6 +588,7 @@ internal fun PostView.renderStatus(
                                         },
                                     ),
                                 count = UiNumber(repostCount ?: 0),
+                                color = if (viewer?.repost?.atUri != null) StatusAction.Item.Color.PrimaryColor else null,
                                 onClicked = {
                                     event.reblog(
                                         statusKey = statusKey,
@@ -624,6 +626,7 @@ internal fun PostView.renderStatus(
                             },
                         ),
                     count = UiNumber(likeCount ?: 0),
+                    color = if (viewer?.like?.atUri != null) StatusAction.Item.Color.Red else null,
                     onClicked = {
                         event.like(
                             statusKey = statusKey,
@@ -690,6 +693,7 @@ internal fun PostView.renderStatus(
                                 StatusAction.Item(
                                     icon = StatusAction.Item.Icon.Delete,
                                     text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Delete),
+                                    color = StatusAction.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.DeleteStatus(
@@ -703,6 +707,7 @@ internal fun PostView.renderStatus(
                                 StatusAction.Item(
                                     icon = StatusAction.Item.Icon.Report,
                                     text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Report),
+                                    color = StatusAction.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.Bluesky.ReportStatus(

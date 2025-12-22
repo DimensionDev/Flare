@@ -744,7 +744,7 @@ internal fun StatusActions(
                     StatusActionGroup(
                         icon = action.displayItem.icon?.toImageVector() ?: FontAwesomeIcons.Solid.Ellipsis,
                         number = action.displayItem.count,
-                        color = action.displayItem.icon?.toColor() ?: PlatformContentColor.current,
+                        color = action.displayItem.color?.toComposeColor() ?: PlatformContentColor.current,
                         withTextMinWidth = index != items.lastIndex,
                     ) { closeMenu, isMenuShown ->
                         action.actions.fastForEach { subActions ->
@@ -802,7 +802,7 @@ internal fun StatusActions(
                     StatusActionButton(
                         icon = action.icon?.toImageVector() ?: FontAwesomeIcons.Solid.Ellipsis, // Fallback or handle null
                         number = action.count,
-                        color = action.icon?.toColor() ?: PlatformContentColor.current,
+                        color = action.color?.toComposeColor() ?: PlatformContentColor.current,
                         withTextMinWidth = index != items.lastIndex,
                         onClicked = {
                             action.onClicked?.let { onClick ->
@@ -833,7 +833,7 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
     launcher: UriHandler,
 ) {
     val context = LocalPlatformContext.current
-    val color = subActions.icon?.toColor() ?: PlatformContentColor.current
+    val color = subActions.color?.toComposeColor() ?: PlatformContentColor.current
     PlatformDropdownMenuItem(
         leadingIcon = {
             subActions.icon?.let {
@@ -900,12 +900,11 @@ private fun StatusAction.Item.Text.asString(): String =
     }
 
 @Composable
-private fun StatusAction.Item.Icon.toColor(): Color =
+private fun StatusAction.Item.Color.toComposeColor(): Color =
     when (this) {
-        StatusAction.Item.Icon.Unlike -> Color.Red
-        StatusAction.Item.Icon.Delete, StatusAction.Item.Icon.Report -> PlatformTheme.colorScheme.error
-        StatusAction.Item.Icon.Unretweet -> PlatformTheme.colorScheme.primary
-        else -> PlatformContentColor.current
+        StatusAction.Item.Color.Red -> PlatformTheme.colorScheme.error
+        StatusAction.Item.Color.ContentColor -> PlatformContentColor.current
+        StatusAction.Item.Color.PrimaryColor -> PlatformTheme.colorScheme.primary
     }
 
 private fun StatusAction.Item.Icon.toImageVector(): ImageVector =

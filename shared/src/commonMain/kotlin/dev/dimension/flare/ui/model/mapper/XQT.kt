@@ -553,6 +553,7 @@ internal fun Tweet.renderStatus(
                                     },
                                 ),
                             count = UiNumber(legacy?.retweetCount?.toLong() ?: 0),
+                            color = if (legacy?.retweeted == true) StatusAction.Item.Color.PrimaryColor else null,
                         ),
                     actions =
                         listOfNotNull(
@@ -569,6 +570,7 @@ internal fun Tweet.renderStatus(
                                         },
                                     ),
                                 count = UiNumber(legacy?.retweetCount?.toLong() ?: 0),
+                                color = if (legacy?.retweeted == true) StatusAction.Item.Color.PrimaryColor else null,
                                 onClicked = {
                                     event.retweet(statusKey, legacy?.retweeted ?: false)
                                 },
@@ -601,6 +603,7 @@ internal fun Tweet.renderStatus(
                             },
                         ),
                     count = UiNumber(legacy?.favoriteCount?.toLong() ?: 0),
+                    color = if (legacy?.favorited == true) StatusAction.Item.Color.Red else null,
                     onClicked = {
                         event.like(statusKey, legacy?.favorited ?: false)
                     },
@@ -651,6 +654,7 @@ internal fun Tweet.renderStatus(
                                 StatusAction.Item(
                                     icon = StatusAction.Item.Icon.Delete,
                                     text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Delete),
+                                    color = StatusAction.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.DeleteStatus(
@@ -664,6 +668,7 @@ internal fun Tweet.renderStatus(
                                 StatusAction.Item(
                                     icon = StatusAction.Item.Icon.Report,
                                     text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Report),
+                                    color = StatusAction.Item.Color.Red,
                                     onClicked = {
                                         // TODO: implement report
                                     },

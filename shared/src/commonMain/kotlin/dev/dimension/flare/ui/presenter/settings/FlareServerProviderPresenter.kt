@@ -29,6 +29,7 @@ public class FlareServerProviderPresenter :
     private val appDataStore by inject<AppDataStore>()
     private val scope by inject<CoroutineScope>()
 
+    @androidx.compose.runtime.Immutable
     public interface State {
         public val currentServer: UiState<String>
         public val serverValidation: UiState<Unit>

@@ -35,6 +35,7 @@ public class LocalCacheSearchPresenter :
     private val database: CacheDatabase by inject()
     private val accountRepository: AccountRepository by inject()
 
+    @androidx.compose.runtime.Immutable
     public interface State {
         public val data: PagingState<UiTimeline>
         public val history: PagingState<UiTimeline>

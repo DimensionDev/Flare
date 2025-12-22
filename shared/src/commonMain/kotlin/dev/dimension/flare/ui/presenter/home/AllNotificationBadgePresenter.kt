@@ -18,6 +18,7 @@ public class AllNotificationBadgePresenter :
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
 
+    @androidx.compose.runtime.Immutable
     public interface State {
         public val count: Int
 

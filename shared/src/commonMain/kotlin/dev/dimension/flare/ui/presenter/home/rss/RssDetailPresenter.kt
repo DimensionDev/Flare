@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.home.rss
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,6 +24,7 @@ public class RssDetailPresenter(
     KoinComponent {
     private val readability: Readability by inject()
 
+    @Immutable
     public interface State {
         public val data: UiState<DocumentData>
     }

@@ -28,6 +28,7 @@ public class DeepLinkPresenter(
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
 
+    @androidx.compose.runtime.Immutable
     public interface State {
         public fun handle(url: String)
     }

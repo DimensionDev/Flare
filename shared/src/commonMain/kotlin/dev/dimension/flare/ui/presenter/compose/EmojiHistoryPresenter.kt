@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.compose
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -29,6 +30,7 @@ public class EmojiHistoryPresenter(
     private val accountRepository by inject<AccountRepository>()
     private val scope by inject<CoroutineScope>()
 
+    @Immutable
     public interface State {
         public val history: UiState<ImmutableList<UiEmoji>>
 

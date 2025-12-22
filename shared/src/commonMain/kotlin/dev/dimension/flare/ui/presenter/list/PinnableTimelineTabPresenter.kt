@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -32,6 +33,7 @@ public class PinnableTimelineTabPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<PinnableTimelineTabPresenter.State>(),
     KoinComponent {
+    @Immutable
     public interface State {
         public sealed interface Tab {
             public val data: PagingState<UiList>

@@ -23,6 +23,7 @@ public class RssSourcesPresenter :
     KoinComponent {
     private val appDatabase by inject<AppDatabase>()
 
+    @androidx.compose.runtime.Immutable
     public interface State {
         public val sources: ImmutableList<UiRssSource>
 

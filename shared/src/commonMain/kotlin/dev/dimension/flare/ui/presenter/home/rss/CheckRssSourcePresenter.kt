@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.home.rss
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.network.rss.RssService
 import dev.dimension.flare.ui.model.UiRssSource
@@ -24,6 +25,7 @@ import kotlin.time.Instant
 public class CheckRssSourcePresenter(
     private val url: String,
 ) : PresenterBase<CheckRssSourcePresenter.State>() {
+    @Immutable
     public interface State {
         public val state: UiState<RssState>
 

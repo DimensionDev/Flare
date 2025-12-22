@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.podcast
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
@@ -22,6 +23,7 @@ public class PodcastListPresenter(
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
 
+    @Immutable
     public interface State {
         public val data: UiState<ImmutableList<UiPodcast>>
     }

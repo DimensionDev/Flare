@@ -42,6 +42,7 @@ public class BlueskyOAuthLoginPresenter(
 
     private var request: OAuthAuthorizationRequest? = null
 
+    @androidx.compose.runtime.Immutable
     public interface State {
         public val loading: Boolean
         public val error: String?

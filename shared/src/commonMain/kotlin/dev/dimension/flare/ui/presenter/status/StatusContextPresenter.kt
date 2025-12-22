@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.status
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.BaseTimelineLoader
@@ -36,6 +37,7 @@ public class StatusContextPresenter(
     private val statusKey: MicroBlogKey,
 ) : PresenterBase<StatusContextPresenter.State>(),
     KoinComponent {
+    @Immutable
     public interface State : TimelineState {
         public val current: UiState<UiTimeline.ItemContent.Status>
     }

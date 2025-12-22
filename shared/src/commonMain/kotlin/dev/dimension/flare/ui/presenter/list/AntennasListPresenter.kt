@@ -24,6 +24,7 @@ public class AntennasListPresenter(
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
 
+    @androidx.compose.runtime.Immutable
     public interface State {
         public val data: PagingState<UiList>
 

@@ -259,6 +259,11 @@ public fun VideoPlayer(
                                     it
                                 }
                             }
+                    DisposableEffect(Unit) {
+                        onDispose {
+                            player.clearVideoSurface()
+                        }
+                    }
                     Box {
                         PlayerSurface(
                             player = player,
@@ -303,7 +308,7 @@ public class SurfaceBindingManager(
 ) {
     public val player: ExoPlayer by lazy {
         ExoPlayer
-            .Builder(context)
+            .Builder(context.applicationContext)
             .build()
             .apply {
                 playWhenReady = true

@@ -8,7 +8,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.xqt.model.Admin
 import dev.dimension.flare.data.network.xqt.model.AudioSpace
@@ -525,9 +525,9 @@ internal fun Tweet.renderStatus(
         parents = parents,
         actions =
             listOfNotNull(
-                StatusAction.Item(
-                    icon = StatusAction.Item.Icon.Reply,
-                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Reply),
+                ActionMenu.Item(
+                    icon = ActionMenu.Item.Icon.Reply,
+                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
                     count = UiNumber(legacy?.replyCount?.toLong() ?: 0),
                     onClicked = {
                         launcher.launch(
@@ -538,46 +538,46 @@ internal fun Tweet.renderStatus(
                         )
                     },
                 ),
-                StatusAction.Group(
+                ActionMenu.Group(
                     displayItem =
-                        StatusAction.Item(
-                            icon = if (legacy?.retweeted == true) StatusAction.Item.Icon.Unretweet else StatusAction.Item.Icon.Retweet,
+                        ActionMenu.Item(
+                            icon = if (legacy?.retweeted == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
                             text =
-                                StatusAction.Item.Text.Localized(
+                                ActionMenu.Item.Text.Localized(
                                     if (legacy?.retweeted ==
                                         true
                                     ) {
-                                        StatusAction.Item.Text.Localized.Type.Unretweet
+                                        ActionMenu.Item.Text.Localized.Type.Unretweet
                                     } else {
-                                        StatusAction.Item.Text.Localized.Type.Retweet
+                                        ActionMenu.Item.Text.Localized.Type.Retweet
                                     },
                                 ),
                             count = UiNumber(legacy?.retweetCount?.toLong() ?: 0),
-                            color = if (legacy?.retweeted == true) StatusAction.Item.Color.PrimaryColor else null,
+                            color = if (legacy?.retweeted == true) ActionMenu.Item.Color.PrimaryColor else null,
                         ),
                     actions =
                         listOfNotNull(
-                            StatusAction.Item(
-                                icon = if (legacy?.retweeted == true) StatusAction.Item.Icon.Unretweet else StatusAction.Item.Icon.Retweet,
+                            ActionMenu.Item(
+                                icon = if (legacy?.retweeted == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
                                 text =
-                                    StatusAction.Item.Text.Localized(
+                                    ActionMenu.Item.Text.Localized(
                                         if (legacy?.retweeted ==
                                             true
                                         ) {
-                                            StatusAction.Item.Text.Localized.Type.Unretweet
+                                            ActionMenu.Item.Text.Localized.Type.Unretweet
                                         } else {
-                                            StatusAction.Item.Text.Localized.Type.Retweet
+                                            ActionMenu.Item.Text.Localized.Type.Retweet
                                         },
                                     ),
                                 count = UiNumber(legacy?.retweetCount?.toLong() ?: 0),
-                                color = if (legacy?.retweeted == true) StatusAction.Item.Color.PrimaryColor else null,
+                                color = if (legacy?.retweeted == true) ActionMenu.Item.Color.PrimaryColor else null,
                                 onClicked = {
                                     event.retweet(statusKey, legacy?.retweeted ?: false)
                                 },
                             ),
-                            StatusAction.Item(
-                                icon = StatusAction.Item.Icon.Quote,
-                                text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Quote),
+                            ActionMenu.Item(
+                                icon = ActionMenu.Item.Icon.Quote,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
                                 count = UiNumber(legacy?.quoteCount?.toLong() ?: 0),
                                 onClicked = {
                                     launcher.launch(
@@ -590,49 +590,49 @@ internal fun Tweet.renderStatus(
                             ),
                         ).toImmutableList(),
                 ),
-                StatusAction.Item(
-                    icon = if (legacy?.favorited == true) StatusAction.Item.Icon.Unlike else StatusAction.Item.Icon.Like,
+                ActionMenu.Item(
+                    icon = if (legacy?.favorited == true) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
                     text =
-                        StatusAction.Item.Text.Localized(
+                        ActionMenu.Item.Text.Localized(
                             if (legacy?.favorited ==
                                 true
                             ) {
-                                StatusAction.Item.Text.Localized.Type.Unlike
+                                ActionMenu.Item.Text.Localized.Type.Unlike
                             } else {
-                                StatusAction.Item.Text.Localized.Type.Like
+                                ActionMenu.Item.Text.Localized.Type.Like
                             },
                         ),
                     count = UiNumber(legacy?.favoriteCount?.toLong() ?: 0),
-                    color = if (legacy?.favorited == true) StatusAction.Item.Color.Red else null,
+                    color = if (legacy?.favorited == true) ActionMenu.Item.Color.Red else null,
                     onClicked = {
                         event.like(statusKey, legacy?.favorited ?: false)
                     },
                 ),
-                StatusAction.Group(
+                ActionMenu.Group(
                     displayItem =
-                        StatusAction.Item(
-                            icon = StatusAction.Item.Icon.More,
-                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.More),
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.More,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                         ),
                     actions =
                         listOfNotNull(
-                            StatusAction.Item(
+                            ActionMenu.Item(
                                 icon =
                                     if (legacy?.bookmarked ==
                                         true
                                     ) {
-                                        StatusAction.Item.Icon.Unbookmark
+                                        ActionMenu.Item.Icon.Unbookmark
                                     } else {
-                                        StatusAction.Item.Icon.Bookmark
+                                        ActionMenu.Item.Icon.Bookmark
                                     },
                                 text =
-                                    StatusAction.Item.Text.Localized(
+                                    ActionMenu.Item.Text.Localized(
                                         if (legacy?.bookmarked ==
                                             true
                                         ) {
-                                            StatusAction.Item.Text.Localized.Type.Unbookmark
+                                            ActionMenu.Item.Text.Localized.Type.Unbookmark
                                         } else {
-                                            StatusAction.Item.Text.Localized.Type.Bookmark
+                                            ActionMenu.Item.Text.Localized.Type.Bookmark
                                         },
                                     ),
                                 count = UiNumber(legacy?.bookmarkCount?.toLong() ?: 0),
@@ -640,21 +640,21 @@ internal fun Tweet.renderStatus(
                                     event.bookmark(statusKey, legacy?.bookmarked ?: false)
                                 },
                             ),
-                            StatusAction.Item(
-                                icon = StatusAction.Item.Icon.Share,
-                                text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Share),
+                            ActionMenu.Item(
+                                icon = ActionMenu.Item.Icon.Share,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
                                 shareContent = url,
                             ),
-                            StatusAction.Item(
-                                icon = StatusAction.Item.Icon.Share,
-                                text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.FxShare),
+                            ActionMenu.Item(
+                                icon = ActionMenu.Item.Icon.Share,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.FxShare),
                                 shareContent = fxUrl,
                             ),
                             if (isFromMe) {
-                                StatusAction.Item(
-                                    icon = StatusAction.Item.Icon.Delete,
-                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Delete),
-                                    color = StatusAction.Item.Color.Red,
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Delete,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                    color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.DeleteStatus(
@@ -665,10 +665,10 @@ internal fun Tweet.renderStatus(
                                     },
                                 )
                             } else {
-                                StatusAction.Item(
-                                    icon = StatusAction.Item.Icon.Report,
-                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Report),
-                                    color = StatusAction.Item.Color.Red,
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Report,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                    color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         // TODO: implement report
                                     },

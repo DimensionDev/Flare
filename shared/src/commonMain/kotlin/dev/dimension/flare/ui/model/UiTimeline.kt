@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
@@ -102,7 +102,7 @@ public data class UiTimeline internal constructor(
             val user: UiUserV2?,
             val quote: ImmutableList<Status>,
             val content: UiRichText,
-            val actions: ImmutableList<StatusAction>,
+            val actions: ImmutableList<ActionMenu>,
             val poll: UiPoll?,
             val statusKey: MicroBlogKey,
             val card: UiCard?,

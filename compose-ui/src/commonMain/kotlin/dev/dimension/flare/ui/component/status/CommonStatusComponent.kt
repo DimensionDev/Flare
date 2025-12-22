@@ -57,11 +57,14 @@ import compose.icons.fontawesomeicons.solid.At
 import compose.icons.fontawesomeicons.solid.Bookmark
 import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.Ellipsis
+import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Heart
 import compose.icons.fontawesomeicons.solid.Image
+import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.LockOpen
+import compose.icons.fontawesomeicons.solid.Message
 import compose.icons.fontawesomeicons.solid.Minus
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.QuoteLeft
@@ -69,6 +72,8 @@ import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import compose.icons.fontawesomeicons.solid.Trash
+import compose.icons.fontawesomeicons.solid.UserSlash
+import compose.icons.fontawesomeicons.solid.VolumeXmark
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.bookmark_add
 import dev.dimension.flare.compose.ui.bookmark_remove
@@ -100,8 +105,14 @@ import dev.dimension.flare.compose.ui.show_media
 import dev.dimension.flare.compose.ui.status_detail_tldr
 import dev.dimension.flare.compose.ui.status_detail_translate
 import dev.dimension.flare.compose.ui.unlike
+import dev.dimension.flare.compose.ui.user_block
+import dev.dimension.flare.compose.ui.user_follow_edit_list
+import dev.dimension.flare.compose.ui.user_mute
+import dev.dimension.flare.compose.ui.user_send_message
+import dev.dimension.flare.compose.ui.user_unblock
+import dev.dimension.flare.compose.ui.user_unmute
 import dev.dimension.flare.compose.ui.vote
-import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.PlatformShare
@@ -116,6 +127,7 @@ import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformCheckbox
+import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuDivider
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuItem
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuScope
 import dev.dimension.flare.ui.component.platform.PlatformFilledTonalButton
@@ -382,6 +394,9 @@ public fun CommonStatusComponent(
                     ) {
                         StatusActions(
                             item.actions,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(),
                         )
                     }
                 } else {
@@ -391,6 +406,9 @@ public fun CommonStatusComponent(
                     ) {
                         StatusActions(
                             item.actions,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(),
                         )
                     }
                 }
@@ -715,16 +733,14 @@ public fun StatusVisibilityComponent(
 
 @Composable
 internal fun StatusActions(
-    items: ImmutableList<StatusAction>,
+    items: ImmutableList<ActionMenu>,
     modifier: Modifier = Modifier,
 ) {
     val appearanceSettings = LocalComponentAppearance.current
     val haptics = LocalHapticFeedback.current
     val launcher = LocalUriHandler.current
     Row(
-        modifier =
-            modifier
-                .fillMaxWidth(),
+        modifier = modifier,
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement =
             when (appearanceSettings.postActionStyle) {
@@ -740,7 +756,7 @@ internal fun StatusActions(
                 Spacer(modifier = Modifier.weight(1f))
             }
             when (action) {
-                is StatusAction.Group -> {
+                is ActionMenu.Group -> {
                     StatusActionGroup(
                         icon = action.displayItem.icon?.toImageVector() ?: FontAwesomeIcons.Solid.Ellipsis,
                         number = action.displayItem.count,
@@ -749,11 +765,11 @@ internal fun StatusActions(
                     ) { closeMenu, isMenuShown ->
                         action.actions.fastForEach { subActions ->
                             when (subActions) {
-                                is StatusAction.Item -> {
+                                is ActionMenu.Item -> {
                                     StatusActionItemMenu(subActions, closeMenu, launcher)
                                 }
 
-                                is StatusAction.AsyncActionItem -> {
+                                is ActionMenu.AsyncActionMenuItem -> {
                                     if (isMenuShown) {
                                         val state by subActions.flow.collectAsUiState()
                                         state
@@ -792,13 +808,14 @@ internal fun StatusActions(
                                 }
 
                                 // nested group is not supported
-                                is StatusAction.Group -> Unit
+                                is ActionMenu.Group -> Unit
+                                ActionMenu.Divider -> PlatformDropdownMenuDivider()
                             }
                         }
                     }
                 }
 
-                is StatusAction.Item -> {
+                is ActionMenu.Item -> {
                     StatusActionButton(
                         icon = action.icon?.toImageVector() ?: FontAwesomeIcons.Solid.Ellipsis, // Fallback or handle null
                         number = action.count,
@@ -820,7 +837,9 @@ internal fun StatusActions(
                 }
 
                 // async action item is only supported in group
-                is StatusAction.AsyncActionItem -> Unit
+                is ActionMenu.AsyncActionMenuItem -> Unit
+                // divider is only supported in group
+                ActionMenu.Divider -> Unit
             }
         }
     }
@@ -828,7 +847,7 @@ internal fun StatusActions(
 
 @Composable
 private fun PlatformDropdownMenuScope.StatusActionItemMenu(
-    subActions: StatusAction.Item,
+    subActions: ActionMenu.Item,
     closeMenu: () -> Unit,
     launcher: UriHandler,
 ) {
@@ -872,58 +891,71 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
 }
 
 @Composable
-private fun StatusAction.Item.Text.asString(): String =
+private fun ActionMenu.Item.Text.asString(): String =
     when (this) {
-        is StatusAction.Item.Text.Raw -> text
-        is StatusAction.Item.Text.Localized -> {
+        is ActionMenu.Item.Text.Raw -> text
+        is ActionMenu.Item.Text.Localized -> {
             val resource =
                 when (type) {
-                    StatusAction.Item.Text.Localized.Type.Like -> Res.string.like
-                    StatusAction.Item.Text.Localized.Type.Unlike -> Res.string.unlike
-                    StatusAction.Item.Text.Localized.Type.Retweet -> Res.string.retweet
-                    StatusAction.Item.Text.Localized.Type.Unretweet -> Res.string.retweet_remove
-                    StatusAction.Item.Text.Localized.Type.Reply -> Res.string.reply
-                    StatusAction.Item.Text.Localized.Type.Comment -> Res.string.comment
-                    StatusAction.Item.Text.Localized.Type.Quote -> Res.string.quote
-                    StatusAction.Item.Text.Localized.Type.Bookmark -> Res.string.bookmark_add
-                    StatusAction.Item.Text.Localized.Type.Unbookmark -> Res.string.bookmark_remove
-                    StatusAction.Item.Text.Localized.Type.More -> Res.string.more
-                    StatusAction.Item.Text.Localized.Type.Delete -> Res.string.delete
-                    StatusAction.Item.Text.Localized.Type.Report -> Res.string.report
-                    StatusAction.Item.Text.Localized.Type.React -> Res.string.reaction_add
-                    StatusAction.Item.Text.Localized.Type.UnReact -> Res.string.reaction_remove
-                    StatusAction.Item.Text.Localized.Type.Share -> Res.string.share
-                    StatusAction.Item.Text.Localized.Type.FxShare -> Res.string.fx_share
+                    ActionMenu.Item.Text.Localized.Type.Like -> Res.string.like
+                    ActionMenu.Item.Text.Localized.Type.Unlike -> Res.string.unlike
+                    ActionMenu.Item.Text.Localized.Type.Retweet -> Res.string.retweet
+                    ActionMenu.Item.Text.Localized.Type.Unretweet -> Res.string.retweet_remove
+                    ActionMenu.Item.Text.Localized.Type.Reply -> Res.string.reply
+                    ActionMenu.Item.Text.Localized.Type.Comment -> Res.string.comment
+                    ActionMenu.Item.Text.Localized.Type.Quote -> Res.string.quote
+                    ActionMenu.Item.Text.Localized.Type.Bookmark -> Res.string.bookmark_add
+                    ActionMenu.Item.Text.Localized.Type.Unbookmark -> Res.string.bookmark_remove
+                    ActionMenu.Item.Text.Localized.Type.More -> Res.string.more
+                    ActionMenu.Item.Text.Localized.Type.Delete -> Res.string.delete
+                    ActionMenu.Item.Text.Localized.Type.Report -> Res.string.report
+                    ActionMenu.Item.Text.Localized.Type.React -> Res.string.reaction_add
+                    ActionMenu.Item.Text.Localized.Type.UnReact -> Res.string.reaction_remove
+                    ActionMenu.Item.Text.Localized.Type.Share -> Res.string.share
+                    ActionMenu.Item.Text.Localized.Type.FxShare -> Res.string.fx_share
+                    ActionMenu.Item.Text.Localized.Type.EditUserList -> Res.string.user_follow_edit_list
+                    ActionMenu.Item.Text.Localized.Type.SendMessage -> Res.string.user_send_message
+                    ActionMenu.Item.Text.Localized.Type.Mute -> Res.string.user_mute
+                    ActionMenu.Item.Text.Localized.Type.UnMute -> Res.string.user_unmute
+                    ActionMenu.Item.Text.Localized.Type.Block -> Res.string.user_block
+                    ActionMenu.Item.Text.Localized.Type.UnBlock -> Res.string.user_unblock
                 }
             stringResource(resource, *parameters.toTypedArray())
         }
     }
 
 @Composable
-private fun StatusAction.Item.Color.toComposeColor(): Color =
+private fun ActionMenu.Item.Color.toComposeColor(): Color =
     when (this) {
-        StatusAction.Item.Color.Red -> PlatformTheme.colorScheme.error
-        StatusAction.Item.Color.ContentColor -> PlatformContentColor.current
-        StatusAction.Item.Color.PrimaryColor -> PlatformTheme.colorScheme.primary
+        ActionMenu.Item.Color.Red -> PlatformTheme.colorScheme.error
+        ActionMenu.Item.Color.ContentColor -> PlatformContentColor.current
+        ActionMenu.Item.Color.PrimaryColor -> PlatformTheme.colorScheme.primary
     }
 
-private fun StatusAction.Item.Icon.toImageVector(): ImageVector =
+private fun ActionMenu.Item.Icon.toImageVector(): ImageVector =
     when (this) {
-        StatusAction.Item.Icon.Like -> FontAwesomeIcons.Regular.Heart
-        StatusAction.Item.Icon.Unlike -> FontAwesomeIcons.Solid.Heart
-        StatusAction.Item.Icon.Retweet -> FontAwesomeIcons.Solid.Retweet
-        StatusAction.Item.Icon.Unretweet -> FontAwesomeIcons.Solid.Retweet
-        StatusAction.Item.Icon.Reply -> FontAwesomeIcons.Solid.Reply
-        StatusAction.Item.Icon.Comment -> FontAwesomeIcons.Regular.CommentDots
-        StatusAction.Item.Icon.Quote -> FontAwesomeIcons.Solid.QuoteLeft
-        StatusAction.Item.Icon.Bookmark -> FontAwesomeIcons.Regular.Bookmark
-        StatusAction.Item.Icon.Unbookmark -> FontAwesomeIcons.Solid.Bookmark
-        StatusAction.Item.Icon.More -> FontAwesomeIcons.Solid.Ellipsis
-        StatusAction.Item.Icon.Delete -> FontAwesomeIcons.Solid.Trash
-        StatusAction.Item.Icon.Report -> FontAwesomeIcons.Solid.CircleInfo
-        StatusAction.Item.Icon.React -> FontAwesomeIcons.Solid.Plus
-        StatusAction.Item.Icon.UnReact -> FontAwesomeIcons.Solid.Minus
-        StatusAction.Item.Icon.Share -> FontAwesomeIcons.Solid.ShareNodes
+        ActionMenu.Item.Icon.Like -> FontAwesomeIcons.Regular.Heart
+        ActionMenu.Item.Icon.Unlike -> FontAwesomeIcons.Solid.Heart
+        ActionMenu.Item.Icon.Retweet -> FontAwesomeIcons.Solid.Retweet
+        ActionMenu.Item.Icon.Unretweet -> FontAwesomeIcons.Solid.Retweet
+        ActionMenu.Item.Icon.Reply -> FontAwesomeIcons.Solid.Reply
+        ActionMenu.Item.Icon.Comment -> FontAwesomeIcons.Regular.CommentDots
+        ActionMenu.Item.Icon.Quote -> FontAwesomeIcons.Solid.QuoteLeft
+        ActionMenu.Item.Icon.Bookmark -> FontAwesomeIcons.Regular.Bookmark
+        ActionMenu.Item.Icon.Unbookmark -> FontAwesomeIcons.Solid.Bookmark
+        ActionMenu.Item.Icon.More -> FontAwesomeIcons.Solid.Ellipsis
+        ActionMenu.Item.Icon.Delete -> FontAwesomeIcons.Solid.Trash
+        ActionMenu.Item.Icon.Report -> FontAwesomeIcons.Solid.CircleInfo
+        ActionMenu.Item.Icon.React -> FontAwesomeIcons.Solid.Plus
+        ActionMenu.Item.Icon.UnReact -> FontAwesomeIcons.Solid.Minus
+        ActionMenu.Item.Icon.Share -> FontAwesomeIcons.Solid.ShareNodes
+        ActionMenu.Item.Icon.MoreVerticel -> FontAwesomeIcons.Solid.EllipsisVertical
+        ActionMenu.Item.Icon.List -> FontAwesomeIcons.Solid.List
+        ActionMenu.Item.Icon.ChatMessage -> FontAwesomeIcons.Solid.Message
+        ActionMenu.Item.Icon.Mute -> FontAwesomeIcons.Solid.VolumeXmark
+        ActionMenu.Item.Icon.UnMute -> FontAwesomeIcons.Solid.VolumeXmark
+        ActionMenu.Item.Icon.Block -> FontAwesomeIcons.Solid.UserSlash
+        ActionMenu.Item.Icon.UnBlock -> FontAwesomeIcons.Solid.UserSlash
     }
 
 @Composable

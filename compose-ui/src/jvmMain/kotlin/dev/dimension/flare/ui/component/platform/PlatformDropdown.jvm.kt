@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import io.github.composefluent.component.MenuFlyout
 import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.MenuFlyoutScope
+import io.github.composefluent.component.MenuFlyoutSeparator
 
 @Composable
 internal actual fun PlatformDropdownMenu(
@@ -41,3 +42,8 @@ internal actual fun PlatformDropdownMenuScope.PlatformDropdownMenuItem(
 }
 
 internal actual typealias PlatformDropdownMenuScope = MenuFlyoutScope
+
+@Composable
+internal actual fun PlatformDropdownMenuScope.PlatformDropdownMenuDivider() {
+    MenuFlyoutSeparator()
+}

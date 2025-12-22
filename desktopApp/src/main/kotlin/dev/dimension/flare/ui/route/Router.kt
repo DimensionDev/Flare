@@ -351,23 +351,6 @@ internal fun WindowScope.RouteContent(
             ProfileScreen(
                 accountType = route.accountType,
                 userKey = route.userKey,
-                toEditAccountList = {},
-                toSearchUserUsingAccount = { keyword, accountKey ->
-                    navigate(
-                        Search(
-                            accountType = Specific(accountKey),
-                            keyword = keyword,
-                        ),
-                    )
-                },
-                toStartMessage = {
-                    navigate(
-                        Route.DmUserConversation(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
-                    )
-                },
                 onFollowListClick = {
                     navigate(
                         Route.Following(
@@ -465,23 +448,6 @@ internal fun WindowScope.RouteContent(
                 host = route.host,
                 accountType = route.accountType,
                 onBack = onBack,
-                toEditAccountList = {},
-                toSearchUserUsingAccount = { keyword, accountKey ->
-                    navigate(
-                        Search(
-                            accountType = Specific(accountKey),
-                            keyword = keyword,
-                        ),
-                    )
-                },
-                toStartMessage = {
-                    navigate(
-                        Route.DmUserConversation(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
-                    )
-                },
                 onFollowListClick = {
                     navigate(
                         Route.Following(

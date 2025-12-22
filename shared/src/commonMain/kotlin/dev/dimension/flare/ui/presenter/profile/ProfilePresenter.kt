@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
@@ -25,14 +26,16 @@ import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.flattenUiState
-import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.status.LogUserHistoryPresenter
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -160,40 +163,189 @@ public class ProfilePresenter(
         }
     }
 
+    private val isListDataSourceFlow by lazy {
+        serviceFlow.map { service ->
+            service is ListDataSource
+        }
+    }
+
+    private val isGuestMode by lazy {
+        accountType == AccountType.Guest
+    }
+
     @Composable
     override fun body(): ProfileState {
         val scope = rememberCoroutineScope()
-        val accountServiceState =
-            accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val service by serviceFlow.collectAsUiState()
         val userState by userStateFlow.flattenUiState()
-        accountServiceState.onSuccess {
+        service.onSuccess {
             val userKey =
                 userKey ?: if (it is AuthenticatedMicroblogDataSource) it.accountKey else null
             if (userKey != null) {
                 remember { LogUserHistoryPresenter(accountType, userKey) }.body()
             }
         }
-
-        val mediaState =
-            remember {
-                ProfileMediaPresenter(accountType = accountType, userKey = userKey)
-            }.body().mediaState
+        val isListDataSource by isListDataSourceFlow.collectAsUiState()
         val relationState by relationStateFlow.flattenUiState()
         val isMe by isMeFlow.collectAsUiState()
-        val actions by profileActionsFlow.collectAsUiState()
+        val profileActions by profileActionsFlow.collectAsUiState()
         val canSendMessage by canSendMessageFlow.collectAsUiState()
         val myAccountKey by myAccountKeyFlow.collectAsUiState()
         val tabs by tabsFlow.collectAsUiState()
+
+        val profileMenus =
+            remember(
+                isMe,
+                canSendMessage,
+                relationState,
+                service,
+                profileActions,
+                userState,
+            ) {
+                val user = userState.takeSuccess()
+                if (isMe.takeSuccessOr(false) || user == null) {
+                    emptyList()
+                } else {
+                    listOfNotNull(
+                        if (!isGuestMode) {
+                            ActionMenu.Item(
+                                icon = ActionMenu.Item.Icon.List,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.EditUserList),
+                                onClicked = {
+                                    // navigate to list edit
+                                },
+                            )
+                        } else {
+                            null
+                        },
+                        if (canSendMessage.takeSuccessOr(false)) {
+                            // navigate to send message
+                            ActionMenu.Item(
+                                icon = ActionMenu.Item.Icon.ChatMessage,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.SendMessage),
+                                onClicked = {
+                                    // navigate to send message
+                                },
+                            )
+                        } else {
+                            null
+                        },
+                    ).let { items ->
+                        items +
+                            listOfNotNull(
+                                if (items.isEmpty()) {
+                                    null
+                                } else {
+                                    ActionMenu.Divider
+                                },
+                            ) +
+                            relationState.takeSuccessOr(UiRelation()).let { relation ->
+                                profileActions
+                                    .takeSuccessOr(
+                                        persistentListOf(
+                                            object : ProfileAction.Mute {
+                                                override suspend fun invoke(
+                                                    userKey: MicroBlogKey,
+                                                    relation: UiRelation,
+                                                ) {
+                                                }
+
+                                                override fun relationState(relation: UiRelation): Boolean = false
+                                            },
+                                            object : ProfileAction.Block {
+                                                override suspend fun invoke(
+                                                    userKey: MicroBlogKey,
+                                                    relation: UiRelation,
+                                                ) {
+                                                }
+
+                                                override fun relationState(relation: UiRelation): Boolean = false
+                                            },
+                                        ),
+                                    ).map { action ->
+                                        when (action) {
+                                            is ProfileAction.Block -> {
+                                                ActionMenu.Item(
+                                                    icon =
+                                                        if (action.relationState(relation)) {
+                                                            ActionMenu.Item.Icon.UnBlock
+                                                        } else {
+                                                            ActionMenu.Item.Icon.Block
+                                                        },
+                                                    text =
+                                                        ActionMenu.Item.Text.Localized(
+                                                            if (action.relationState(relation)) {
+                                                                ActionMenu.Item.Text.Localized.Type.UnBlock
+                                                            } else {
+                                                                ActionMenu.Item.Text.Localized.Type.Block
+                                                            },
+                                                        ),
+                                                    onClicked = {
+                                                        // navigate to block dialog
+                                                    },
+                                                )
+                                            }
+                                            is ProfileAction.Mute -> {
+                                                ActionMenu.Item(
+                                                    icon =
+                                                        if (action.relationState(relation)) {
+                                                            ActionMenu.Item.Icon.UnMute
+                                                        } else {
+                                                            ActionMenu.Item.Icon.Mute
+                                                        },
+                                                    text =
+                                                        ActionMenu.Item.Text.Localized(
+                                                            if (action.relationState(relation)) {
+                                                                ActionMenu.Item.Text.Localized.Type.UnMute
+                                                            } else {
+                                                                ActionMenu.Item.Text.Localized.Type.Mute
+                                                            },
+                                                        ),
+                                                    onClicked = {
+                                                        // navigate to mute dialog
+                                                    },
+                                                )
+                                            }
+                                        }
+                                    }
+                            } +
+                            listOf(
+                                ActionMenu.Item(
+                                    text =
+                                        ActionMenu.Item.Text.Localized(
+                                            ActionMenu.Item.Text.Localized.Type.Report,
+                                        ),
+                                    icon = ActionMenu.Item.Icon.Report,
+                                    onClicked = {
+                                    },
+                                    color = ActionMenu.Item.Color.Red,
+                                ),
+                            )
+                    }
+                }.let {
+                    if (it.isEmpty()) {
+                        it
+                    } else {
+                        listOfNotNull(
+                            ActionMenu.Group(
+                                displayItem =
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.MoreVerticel,
+                                    ),
+                                actions = it.toImmutableList(),
+                            ),
+                        )
+                    }
+                }.toImmutableList()
+            }
+
         return object : ProfileState(
             userState = userState,
             relationState = relationState,
             isMe = isMe,
-            actions = actions,
-            isGuestMode = accountType == AccountType.Guest,
-            isListDataSource =
-                accountServiceState.map {
-                    it is ListDataSource
-                },
+            actions = profileMenus,
+            isGuestMode = isGuestMode,
+            isListDataSource = isListDataSource,
             myAccountKey = myAccountKey,
             canSendMessage = canSendMessage,
             tabs = tabs,
@@ -213,7 +365,7 @@ public class ProfilePresenter(
                 data: UiRelation,
             ) {
                 scope.launch {
-                    accountServiceState.onSuccess { service ->
+                    service.onSuccess { service ->
                         if (service is AuthenticatedMicroblogDataSource) {
                             service.follow(userKey, data)
                         }
@@ -232,7 +384,7 @@ public abstract class ProfileState(
     public val userState: UiState<UiProfile>,
     public val relationState: UiState<UiRelation>,
     public val isMe: UiState<Boolean>,
-    public val actions: UiState<ImmutableList<ProfileAction>>,
+    public val actions: ImmutableList<ActionMenu>,
     public val isGuestMode: Boolean,
     public val isListDataSource: UiState<Boolean>,
     public val myAccountKey: UiState<MicroBlogKey>,

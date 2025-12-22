@@ -21,3 +21,6 @@ internal expect fun PlatformDropdownMenuScope.PlatformDropdownMenuItem(
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
 )
+
+@Composable
+internal expect fun PlatformDropdownMenuScope.PlatformDropdownMenuDivider()

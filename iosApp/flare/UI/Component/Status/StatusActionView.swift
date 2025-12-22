@@ -4,7 +4,7 @@ import SwiftUIBackports
 
 struct StatusActionsView: View {
     @Environment(\.appearanceSettings.postActionStyle) private var postActionStyle
-    let data: [StatusAction]
+    let data: [ActionMenu]
     let useText: Bool
 
     var body: some View {
@@ -26,7 +26,7 @@ struct StatusActionsView: View {
 
 struct StatusActionView: View {
     @Environment(\.appearanceSettings.showNumbers) private var showNumbers
-    let data: StatusAction
+    let data: ActionMenu
     let useText: Bool
     let isFixedWidth: Bool
     var body: some View {
@@ -113,7 +113,7 @@ struct AsyncStatusActionView: View {
 struct StatusActionItemView: View {
     @Environment(\.appearanceSettings.showNumbers) private var showNumbers
     @Environment(\.openURL) private var openURL
-    let data: StatusActionItem
+    let data: ActionMenuItem
     let useText: Bool
     let isFixedWidth: Bool
     var body: some View {
@@ -193,11 +193,11 @@ extension StatusActionItemColor {
     }
 }
 
-extension StatusActionItemText {
+extension ActionMenuItemText {
     var resolvedString: String {
-        if let raw = self as? StatusActionItemTextRaw {
+        if let raw = self as? ActionMenuItemTextRaw {
             return raw.text
-        } else if let localized = self as? StatusActionItemTextLocalized {
+        } else if let localized = self as? ActionMenuItemTextLocalized {
             let key: String
             switch localized.type {
             case .like: key = "like"
@@ -229,7 +229,7 @@ extension StatusActionItemText {
 }
 
 struct StatusActionIcon: View {
-    let icon: StatusActionItemIcon?
+    let icon: ActionMenuItemIcon?
 
     var body: some View {
         if let icon = icon {
@@ -238,7 +238,7 @@ struct StatusActionIcon: View {
     }
 }
 
-extension StatusActionItemIcon {
+extension ActionMenuItemIcon {
     var imageName: String {
         switch self {
         case .bookmark: return "fa-bookmark"

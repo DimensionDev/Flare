@@ -4,7 +4,7 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.mastodon.api.model.MastodonList
 import dev.dimension.flare.data.network.vvo.model.Attitude
@@ -174,9 +174,9 @@ internal fun Status.renderStatus(
         actions =
             listOfNotNull(
                 if (canReblog) {
-                    StatusAction.Item(
-                        icon = StatusAction.Item.Icon.Reply,
-                        text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Reply),
+                    ActionMenu.Item(
+                        icon = ActionMenu.Item.Icon.Reply,
+                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
                         count = UiNumber(repostsCount?.content?.toLongOrNull() ?: 0),
                         onClicked = {
                             launcher.launch(
@@ -190,9 +190,9 @@ internal fun Status.renderStatus(
                 } else {
                     null
                 },
-                StatusAction.Item(
-                    icon = StatusAction.Item.Icon.Comment,
-                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Comment),
+                ActionMenu.Item(
+                    icon = ActionMenu.Item.Icon.Comment,
+                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Comment),
                     count = UiNumber(commentsCount ?: 0),
                     onClicked = {
                         launcher.launch(
@@ -203,36 +203,36 @@ internal fun Status.renderStatus(
                         )
                     },
                 ),
-                StatusAction.Item(
-                    icon = if (liked == true) StatusAction.Item.Icon.Unlike else StatusAction.Item.Icon.Like,
+                ActionMenu.Item(
+                    icon = if (liked == true) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
                     text =
-                        StatusAction.Item.Text.Localized(
-                            if (liked == true) StatusAction.Item.Text.Localized.Type.Unlike else StatusAction.Item.Text.Localized.Type.Like,
+                        ActionMenu.Item.Text.Localized(
+                            if (liked == true) ActionMenu.Item.Text.Localized.Type.Unlike else ActionMenu.Item.Text.Localized.Type.Like,
                         ),
                     count = UiNumber(attitudesCount ?: 0),
-                    color = if (liked == true) StatusAction.Item.Color.Red else null,
+                    color = if (liked == true) ActionMenu.Item.Color.Red else null,
                     onClicked = {
                         event.like(statusKey, liked ?: false)
                     },
                 ),
-                StatusAction.Group(
+                ActionMenu.Group(
                     displayItem =
-                        StatusAction.Item(
-                            icon = StatusAction.Item.Icon.More,
-                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.More),
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.More,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                         ),
                     actions =
                         listOfNotNull(
-                            StatusAction.Item(
-                                icon = if (favorited == true) StatusAction.Item.Icon.Unbookmark else StatusAction.Item.Icon.Bookmark,
+                            ActionMenu.Item(
+                                icon = if (favorited == true) ActionMenu.Item.Icon.Unbookmark else ActionMenu.Item.Icon.Bookmark,
                                 text =
-                                    StatusAction.Item.Text.Localized(
+                                    ActionMenu.Item.Text.Localized(
                                         if (favorited ==
                                             true
                                         ) {
-                                            StatusAction.Item.Text.Localized.Type.Unbookmark
+                                            ActionMenu.Item.Text.Localized.Type.Unbookmark
                                         } else {
-                                            StatusAction.Item.Text.Localized.Type.Bookmark
+                                            ActionMenu.Item.Text.Localized.Type.Bookmark
                                         },
                                     ),
                                 count = UiNumber(0),
@@ -240,16 +240,16 @@ internal fun Status.renderStatus(
                                     event.favorite(statusKey, favorited ?: false)
                                 },
                             ),
-                            StatusAction.Item(
-                                icon = StatusAction.Item.Icon.Share,
-                                text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Share),
+                            ActionMenu.Item(
+                                icon = ActionMenu.Item.Icon.Share,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
                                 shareContent = url,
                             ),
                             if (isFromMe) {
-                                StatusAction.Item(
-                                    icon = StatusAction.Item.Icon.Delete,
-                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Delete),
-                                    color = StatusAction.Item.Color.Red,
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Delete,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                    color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.DeleteStatus(
@@ -260,10 +260,10 @@ internal fun Status.renderStatus(
                                     },
                                 )
                             } else {
-                                StatusAction.Item(
-                                    icon = StatusAction.Item.Icon.Report,
-                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Report),
-                                    color = StatusAction.Item.Color.Red,
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Report,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                    color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         // TODO: Report
                                     },
@@ -465,9 +465,9 @@ internal fun Comment.renderStatus(
         actions =
             listOfNotNull(
                 statusMid?.let {
-                    StatusAction.Item(
-                        icon = StatusAction.Item.Icon.Comment,
-                        text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Comment),
+                    ActionMenu.Item(
+                        icon = ActionMenu.Item.Icon.Comment,
+                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Comment),
                         count = UiNumber(totalNumber ?: 0),
                         onClicked = {
                             launcher.launch(
@@ -480,36 +480,36 @@ internal fun Comment.renderStatus(
                         },
                     )
                 },
-                StatusAction.Item(
-                    icon = if (liked == true) StatusAction.Item.Icon.Unlike else StatusAction.Item.Icon.Like,
+                ActionMenu.Item(
+                    icon = if (liked == true) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
                     text =
-                        StatusAction.Item.Text.Localized(
-                            if (liked == true) StatusAction.Item.Text.Localized.Type.Unlike else StatusAction.Item.Text.Localized.Type.Like,
+                        ActionMenu.Item.Text.Localized(
+                            if (liked == true) ActionMenu.Item.Text.Localized.Type.Unlike else ActionMenu.Item.Text.Localized.Type.Like,
                         ),
                     count = UiNumber(likeCount ?: 0),
-                    color = if (liked == true) StatusAction.Item.Color.Red else null,
+                    color = if (liked == true) ActionMenu.Item.Color.Red else null,
                     onClicked = {
                         event.likeComment(statusKey, liked ?: false)
                     },
                 ),
-                StatusAction.Group(
+                ActionMenu.Group(
                     displayItem =
-                        StatusAction.Item(
-                            icon = StatusAction.Item.Icon.More,
-                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.More),
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.More,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                         ),
                     actions =
                         listOfNotNull(
-                            StatusAction.Item(
-                                icon = StatusAction.Item.Icon.Share,
-                                text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Share),
+                            ActionMenu.Item(
+                                icon = ActionMenu.Item.Icon.Share,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
                                 shareContent = url,
                             ),
                             if (isFromMe) {
-                                StatusAction.Item(
-                                    icon = StatusAction.Item.Icon.Delete,
-                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Delete),
-                                    color = StatusAction.Item.Color.Red,
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Delete,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                    color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.DeleteStatus(
@@ -520,10 +520,10 @@ internal fun Comment.renderStatus(
                                     },
                                 )
                             } else {
-                                StatusAction.Item(
-                                    icon = StatusAction.Item.Icon.Report,
-                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Report),
-                                    color = StatusAction.Item.Color.Red,
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Report,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                    color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         // TODO: Report
                                     },

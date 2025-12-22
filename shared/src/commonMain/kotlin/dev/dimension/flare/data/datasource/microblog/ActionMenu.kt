@@ -6,15 +6,17 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 
-public sealed interface StatusAction {
+public sealed interface ActionMenu {
     public data class Group internal constructor(
         val displayItem: Item,
-        val actions: ImmutableList<StatusAction>,
-    ) : StatusAction
+        val actions: ImmutableList<ActionMenu>,
+    ) : ActionMenu
 
-    public data class AsyncActionItem internal constructor(
+    public data class AsyncActionMenuItem internal constructor(
         val flow: Flow<Item>,
-    ) : StatusAction
+    ) : ActionMenu
+
+    public data object Divider : ActionMenu
 
     public data class Item internal constructor(
         val icon: Icon? = null,
@@ -23,7 +25,7 @@ public sealed interface StatusAction {
         val onClicked: (ClickContext.() -> Unit)? = null,
         val shareContent: String? = null,
         val color: Color? = null,
-    ) : StatusAction {
+    ) : ActionMenu {
         init {
             require(icon != null || text != null) {
                 "icon and text cannot be both null"
@@ -47,11 +49,18 @@ public sealed interface StatusAction {
             Bookmark,
             Unbookmark,
             More,
+            MoreVerticel,
             Delete,
             Report,
             React,
             UnReact,
             Share,
+            List,
+            ChatMessage,
+            Mute,
+            UnMute,
+            Block,
+            UnBlock,
         }
 
         public sealed interface Text {
@@ -80,6 +89,12 @@ public sealed interface StatusAction {
                     UnReact,
                     Share,
                     FxShare,
+                    EditUserList,
+                    SendMessage,
+                    Mute,
+                    UnMute,
+                    Block,
+                    UnBlock,
                 }
             }
         }

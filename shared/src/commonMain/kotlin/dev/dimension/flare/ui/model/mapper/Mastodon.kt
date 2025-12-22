@@ -6,7 +6,7 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.database.cache.model.DbEmoji
 import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Attachment
@@ -365,9 +365,9 @@ private fun Status.renderStatus(
         actions =
 
             listOfNotNull(
-                StatusAction.Item(
-                    icon = StatusAction.Item.Icon.Reply,
-                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Reply),
+                ActionMenu.Item(
+                    icon = ActionMenu.Item.Icon.Reply,
+                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
                     count = UiNumber(repliesCount ?: 0),
                     onClicked = {
                         if (accountKey != null) {
@@ -381,29 +381,29 @@ private fun Status.renderStatus(
                     },
                 ),
                 if (canReblog && quoteApproval != null && accountKey != null) {
-                    StatusAction.Group(
+                    ActionMenu.Group(
                         displayItem =
-                            StatusAction.Item(
-                                icon = if (reblogged == true) StatusAction.Item.Icon.Unretweet else StatusAction.Item.Icon.Retweet,
+                            ActionMenu.Item(
+                                icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
                                 text =
-                                    StatusAction.Item.Text.Localized(
+                                    ActionMenu.Item.Text.Localized(
                                         if (reblogged ==
                                             true
                                         ) {
-                                            StatusAction.Item.Text.Localized.Type.Unretweet
+                                            ActionMenu.Item.Text.Localized.Type.Unretweet
                                         } else {
-                                            StatusAction.Item.Text.Localized.Type.Retweet
+                                            ActionMenu.Item.Text.Localized.Type.Retweet
                                         },
                                     ),
                                 count = UiNumber(reblogsCount ?: 0),
-                                color = if (reblogged == true) StatusAction.Item.Color.PrimaryColor else null,
+                                color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
                             ),
                         actions =
                             listOfNotNull(
                                 if (canQuote) {
-                                    StatusAction.Item(
-                                        icon = StatusAction.Item.Icon.Quote,
-                                        text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Quote),
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Quote,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
                                         count = UiNumber(quotesCount ?: 0),
                                         onClicked = {
                                             launcher.launch(
@@ -417,20 +417,20 @@ private fun Status.renderStatus(
                                 } else {
                                     null
                                 },
-                                StatusAction.Item(
-                                    icon = if (reblogged == true) StatusAction.Item.Icon.Unretweet else StatusAction.Item.Icon.Retweet,
+                                ActionMenu.Item(
+                                    icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
                                     text =
-                                        StatusAction.Item.Text.Localized(
+                                        ActionMenu.Item.Text.Localized(
                                             if (reblogged ==
                                                 true
                                             ) {
-                                                StatusAction.Item.Text.Localized.Type.Unretweet
+                                                ActionMenu.Item.Text.Localized.Type.Unretweet
                                             } else {
-                                                StatusAction.Item.Text.Localized.Type.Retweet
+                                                ActionMenu.Item.Text.Localized.Type.Retweet
                                             },
                                         ),
                                     count = UiNumber(reblogsCount ?: 0),
-                                    color = if (reblogged == true) StatusAction.Item.Color.PrimaryColor else null,
+                                    color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
                                     onClicked = {
                                         dataSource?.reblog(statusKey, reblogged ?: false)
                                     },
@@ -438,26 +438,26 @@ private fun Status.renderStatus(
                             ).toImmutableList(),
                     )
                 } else {
-                    StatusAction.Item(
-                        icon = if (reblogged == true) StatusAction.Item.Icon.Unretweet else StatusAction.Item.Icon.Retweet,
+                    ActionMenu.Item(
+                        icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
                         text =
-                            StatusAction.Item.Text.Localized(
+                            ActionMenu.Item.Text.Localized(
                                 if (reblogged ==
                                     true
                                 ) {
-                                    StatusAction.Item.Text.Localized.Type.Unretweet
+                                    ActionMenu.Item.Text.Localized.Type.Unretweet
                                 } else {
-                                    StatusAction.Item.Text.Localized.Type.Retweet
+                                    ActionMenu.Item.Text.Localized.Type.Retweet
                                 },
                             ),
                         count = UiNumber(reblogsCount ?: 0),
-                        color = if (reblogged == true) StatusAction.Item.Color.PrimaryColor else null,
+                        color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
                     )
                 },
                 if (quoteApproval == null && canQuote) {
-                    StatusAction.Item(
-                        icon = StatusAction.Item.Icon.Quote,
-                        text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Quote),
+                    ActionMenu.Item(
+                        icon = ActionMenu.Item.Icon.Quote,
+                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
                         count = UiNumber(quotesCount ?: 0),
                         onClicked = {
                             if (accountKey != null) {
@@ -474,20 +474,20 @@ private fun Status.renderStatus(
                     null
                 },
                 if (quoteApproval == null && canReblog) {
-                    StatusAction.Item(
-                        icon = if (reblogged == true) StatusAction.Item.Icon.Unretweet else StatusAction.Item.Icon.Retweet,
+                    ActionMenu.Item(
+                        icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
                         text =
-                            StatusAction.Item.Text.Localized(
+                            ActionMenu.Item.Text.Localized(
                                 if (reblogged ==
                                     true
                                 ) {
-                                    StatusAction.Item.Text.Localized.Type.Unretweet
+                                    ActionMenu.Item.Text.Localized.Type.Unretweet
                                 } else {
-                                    StatusAction.Item.Text.Localized.Type.Retweet
+                                    ActionMenu.Item.Text.Localized.Type.Retweet
                                 },
                             ),
                         count = UiNumber(reblogsCount ?: 0),
-                        color = if (reblogged == true) StatusAction.Item.Color.PrimaryColor else null,
+                        color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
                         onClicked = {
                             dataSource?.reblog(statusKey, reblogged ?: false)
                         },
@@ -495,28 +495,28 @@ private fun Status.renderStatus(
                 } else {
                     null
                 },
-                StatusAction.Item(
-                    icon = if (favourited == true) StatusAction.Item.Icon.Unlike else StatusAction.Item.Icon.Like,
+                ActionMenu.Item(
+                    icon = if (favourited == true) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
                     text =
-                        StatusAction.Item.Text.Localized(
+                        ActionMenu.Item.Text.Localized(
                             if (favourited ==
                                 true
                             ) {
-                                StatusAction.Item.Text.Localized.Type.Unlike
+                                ActionMenu.Item.Text.Localized.Type.Unlike
                             } else {
-                                StatusAction.Item.Text.Localized.Type.Like
+                                ActionMenu.Item.Text.Localized.Type.Like
                             },
                         ),
                     count = UiNumber(favouritesCount ?: 0),
-                    color = if (favourited == true) StatusAction.Item.Color.Red else null,
+                    color = if (favourited == true) ActionMenu.Item.Color.Red else null,
                     onClicked = {
                         dataSource?.like(statusKey, favourited ?: false)
                     },
                 ),
                 if (canReact) {
-                    StatusAction.Item(
-                        icon = StatusAction.Item.Icon.React,
-                        text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.React),
+                    ActionMenu.Item(
+                        icon = ActionMenu.Item.Icon.React,
+                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.React),
                         onClicked = {
                             if (accountKey != null) {
                                 launcher.launch(
@@ -531,25 +531,25 @@ private fun Status.renderStatus(
                 } else {
                     null
                 },
-                StatusAction.Group(
+                ActionMenu.Group(
                     displayItem =
-                        StatusAction.Item(
-                            icon = StatusAction.Item.Icon.More,
-                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.More),
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.More,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                         ),
                     actions =
                         listOfNotNull(
                             if (accountKey != null) {
-                                StatusAction.Item(
-                                    icon = if (bookmarked == true) StatusAction.Item.Icon.Unbookmark else StatusAction.Item.Icon.Bookmark,
+                                ActionMenu.Item(
+                                    icon = if (bookmarked == true) ActionMenu.Item.Icon.Unbookmark else ActionMenu.Item.Icon.Bookmark,
                                     text =
-                                        StatusAction.Item.Text.Localized(
+                                        ActionMenu.Item.Text.Localized(
                                             if (bookmarked ==
                                                 true
                                             ) {
-                                                StatusAction.Item.Text.Localized.Type.Unbookmark
+                                                ActionMenu.Item.Text.Localized.Type.Unbookmark
                                             } else {
-                                                StatusAction.Item.Text.Localized.Type.Bookmark
+                                                ActionMenu.Item.Text.Localized.Type.Bookmark
                                             },
                                         ),
                                     count = UiNumber(0),
@@ -560,16 +560,16 @@ private fun Status.renderStatus(
                             } else {
                                 null
                             },
-                            StatusAction.Item(
-                                icon = StatusAction.Item.Icon.Share,
-                                text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Share),
+                            ActionMenu.Item(
+                                icon = ActionMenu.Item.Icon.Share,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
                                 shareContent = postUrl,
                             ),
                             if (isFromMe) {
-                                StatusAction.Item(
-                                    icon = StatusAction.Item.Icon.Delete,
-                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Delete),
-                                    color = StatusAction.Item.Color.Red,
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Delete,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                    color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
                                             AppDeepLink.DeleteStatus(
@@ -580,10 +580,10 @@ private fun Status.renderStatus(
                                     },
                                 )
                             } else {
-                                StatusAction.Item(
-                                    icon = StatusAction.Item.Icon.Report,
-                                    text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Report),
-                                    color = StatusAction.Item.Color.Red,
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Report,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                    color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         if (accountKey != null) {
                                             launcher.launch(

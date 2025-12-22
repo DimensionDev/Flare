@@ -4,7 +4,7 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
@@ -117,24 +117,24 @@ public fun createSampleStatus(user: UiUserV2): UiTimeline =
                         }.toUi(),
                 actions =
                     persistentListOf(
-                        StatusAction.Item(
-                            icon = StatusAction.Item.Icon.Reply,
-                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Reply),
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.Reply,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
                             count = UiNumber(10),
                         ),
-                        StatusAction.Item(
-                            icon = StatusAction.Item.Icon.Retweet,
-                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Retweet),
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.Retweet,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Retweet),
                             count = UiNumber(20),
                         ),
-                        StatusAction.Item(
-                            icon = StatusAction.Item.Icon.Like,
-                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.Like),
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.Like,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Like),
                             count = UiNumber(30),
                         ),
-                        StatusAction.Item(
-                            icon = StatusAction.Item.Icon.More,
-                            text = StatusAction.Item.Text.Localized(StatusAction.Item.Text.Localized.Type.More),
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.More,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                         ),
                     ),
                 poll = null,

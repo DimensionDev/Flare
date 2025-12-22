@@ -328,12 +328,7 @@ internal fun ProfileScreen(
                         if (!bigScreen) {
                             ProfileMenu(
                                 profileState = state.state,
-                                setShowMoreMenus = state::setShowMoreMenus,
-                                showMoreMenus = state.showMoreMenus,
-                                toEditAccountList = toEditAccountList,
-                                accountsState = state.allAccountsState,
-                                toSearchUserUsingAccount = toSearchUserUsingAccount,
-                                toStartMessage = toStartMessage,
+                                modifier = Modifier.padding(end = 8.dp),
                             )
                         }
                     },
@@ -363,12 +358,10 @@ internal fun ProfileScreen(
                             menu = {
                                 ProfileMenu(
                                     profileState = state.state,
-                                    setShowMoreMenus = state::setShowMoreMenus,
-                                    showMoreMenus = state.showMoreMenus,
-                                    toEditAccountList = toEditAccountList,
-                                    accountsState = state.allAccountsState,
-                                    toSearchUserUsingAccount = toSearchUserUsingAccount,
-                                    toStartMessage = toStartMessage,
+                                    modifier =
+                                        Modifier
+                                            .padding(8.dp)
+                                            .padding(top = 4.dp),
                                 )
                             },
                             onAvatarClick = {

@@ -118,11 +118,7 @@ struct StatusActionItemView: View {
     let isFixedWidth: Bool
     var body: some View {
         if let shareContent = data.shareContent {
-            ShareLink(data.text?.localizedStringResource ?? LocalizedStringResource("share"), item: .init(string: shareContent)!)
-        } else {
-        } else {
-        if let shareContent = data.shareContent {
-            ShareLink(data.text?.localizedStringResource ?? LocalizedStringResource("share"), item: .init(string: shareContent)!)
+            ShareLink(data.text?.resolvedString ?? NSLocalizedString("share", comment: ""), item: .init(string: shareContent)!)
         } else {
             Button(
                 role: data.color?.role
@@ -141,10 +137,10 @@ struct StatusActionItemView: View {
                         }
                         if useText {
                             if let color = data.color?.swiftColor {
-                                Text(data.text?.localizedStringResource ?? LocalizedStringResource("more"))
+                                Text(data.text?.resolvedString ?? NSLocalizedString("more", comment: ""))
                                     .foregroundStyle(color)
                             } else {
-                                Text(data.text?.localizedStringResource ?? LocalizedStringResource("more"))
+                                Text(data.text?.resolvedString ?? NSLocalizedString("more", comment: ""))
                             }
                         } else if let text = data.count?.humanized, showNumbers {
                             if let color = data.color?.swiftColor {
@@ -198,31 +194,37 @@ extension StatusActionItemColor {
 }
 
 extension StatusActionItemText {
-    var localizedStringResource: LocalizedStringResource {
+    var resolvedString: String {
         if let raw = self as? StatusActionItemTextRaw {
-            return LocalizedStringResource(stringLiteral: raw.text)
+            return raw.text
         } else if let localized = self as? StatusActionItemTextLocalized {
+            let key: String
             switch localized.type {
-            case .like: return LocalizedStringResource("like")
-            case .unlike: return LocalizedStringResource("unlike")
-            case .retweet: return LocalizedStringResource("retweet")
-            case .unretweet: return LocalizedStringResource("retweet_remove")
-            case .reply: return LocalizedStringResource("reply")
-            case .comment: return LocalizedStringResource("comment")
-            case .quote: return LocalizedStringResource("quote")
-            case .bookmark: return LocalizedStringResource("bookmark_add")
-            case .unbookmark: return LocalizedStringResource("bookmark_remove")
-            case .more: return LocalizedStringResource("more")
-            case .delete: return LocalizedStringResource("delete")
-            case .report: return LocalizedStringResource("report")
-            case .react: return LocalizedStringResource("reaction_add")
-            case .unreact: return LocalizedStringResource("reaction_remove")
-            case .share: return LocalizedStringResource("share")
-            case .fxShare: return LocalizedStringResource("fx_share")
-            default: return LocalizedStringResource("more")
+            case .like: key = "like"
+            case .unlike: key = "unlike"
+            case .retweet: key = "retweet"
+            case .unretweet: key = "retweet_remove"
+            case .reply: key = "reply"
+            case .comment: key = "comment"
+            case .quote: key = "quote"
+            case .bookmark: key = "bookmark_add"
+            case .unbookmark: key = "bookmark_remove"
+            case .more: key = "more"
+            case .delete: key = "delete"
+            case .report: key = "report"
+            case .react: key = "reaction_add"
+            case .unreact: key = "reaction_remove"
+            case .share: key = "share"
+            case .fxShare: key = "fx_share"
+            default: key = "more"
             }
+            let format = NSLocalizedString(key, comment: "")
+            if let args = localized.parameters as? [CVarArg], !args.isEmpty {
+                return String(format: format, arguments: args)
+            }
+            return format
         }
-        return LocalizedStringResource("more")
+        return NSLocalizedString("more", comment: "")
     }
 }
 

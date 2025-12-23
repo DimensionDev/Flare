@@ -265,7 +265,7 @@ extension ActionMenuItem.Icon {
         case .share: return "fa-share-nodes"
         case .moreVerticel: return "fa-ellipsis-vertical"
         case .list: return "fa-list"
-        case .chatMessage: return "fa-messatge"
+        case .chatMessage: return "fa-message"
         case .mute: return "fa-volume-xmark"
         case .unMute: return "fa-volume-xmark"
         case .block: return "fa-user-slash"

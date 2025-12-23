@@ -11564,6 +11564,26 @@
         }
       }
     },
+    "block_user_alert_message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to block this user?"
+          }
+        }
+      }
+    },
+    "block_user_alert_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Block user"
+          }
+        }
+      }
+    },
     "bluesky_feeds_title" : {
       "localizations" : {
         "af" : {
@@ -70831,6 +70851,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "靜音"
+          }
+        }
+      }
+    },
+    "mute_user_alert_message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to mute this user?"
+          }
+        }
+      }
+    },
+    "mute_user_alert_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mute user"
           }
         }
       }

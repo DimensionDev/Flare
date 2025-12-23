@@ -10,7 +10,6 @@ struct ProfileScreen: View {
     let onFansClick: (MicroBlogKey) -> Void
     @StateObject private var presenter: KotlinPresenter<ProfileState>
     @State private var selectedTab: Int = 0
-    @State private var showEditListSheet = false
     
     var body: some View {
         ZStack {
@@ -22,13 +21,6 @@ struct ProfileScreen: View {
             }
         }
         .background(Color(.systemGroupedBackground))
-        .sheet(isPresented: $showEditListSheet) {
-            if let userKey {
-                NavigationStack {
-                    EditUserInListScreen(accountType: accountType, userKey: userKey)
-                }
-            }
-        }
         .toolbar {
             if horizontalSizeClass == .regular, case .success(let tabState) = onEnum(of: presenter.state.tabs) {
                 let tabs = tabState.data.cast(ProfileState.Tab.self)

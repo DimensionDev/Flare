@@ -8,8 +8,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class DeeplinkRouteTest {
-    private fun DeeplinkRoute.toUri(): String = with(DeeplinkRoute.Companion) { this@toUri.toUri() }
-
     @Test
     fun testLogin() {
         val route = DeeplinkRoute.Login

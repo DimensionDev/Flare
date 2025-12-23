@@ -92,6 +92,10 @@ enum Route: Hashable, Identifiable {
             AppLogScreen()
         case .deepLinkAccountPicker(let originalUrl, let data):
             DeepLinkAccountPicker(originalUrl: originalUrl, data: data, onNavigate: onNavigate)
+        case .editUserList(let accountType, let userKey):
+            EditUserInListScreen(accountType: accountType, userKey: userKey)
+        case .userDirectMessages(let accountType, let userKey):
+            UserDMConversationScreen(accountType: accountType, userKey: userKey)
         default:
             Text("Not done yet for \(self)")
         }
@@ -136,6 +140,11 @@ enum Route: Hashable, Identifiable {
     case dmConversation(AccountType, MicroBlogKey, String)
     case appLog
     case deepLinkAccountPicker(String, [MicroBlogKey: Route])
+    case blockUser(AccountType?, MicroBlogKey)
+    case muteUser(AccountType?, MicroBlogKey)
+    case reportUser(AccountType?, MicroBlogKey)
+    case editUserList(AccountType, MicroBlogKey)
+    case userDirectMessages(AccountType, MicroBlogKey)
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {
@@ -226,16 +235,97 @@ enum Route: Hashable, Identifiable {
             }.compactMapValues { $0 })
         case .openLinkDirectly(_):
             return nil
-        case .blockUser(_):
-            return nil
-        case .directMessage(_):
-            return nil
-        case .editUserList(_):
-            return nil
-        case .muteUser(_):
-            return nil
-        case .reportUser(_):
+        case .blockUser(let data):
+            if let accountKey = data.accountKey {
+                return .blockUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                return .blockUser(nil, data.userKey)
+            }
+        case .directMessage(let data):
+            return .userDirectMessages(.Specific(accountKey: data.accountKey), data.userKey)
+        case .editUserList(let data):
+            return .editUserList(.Specific(accountKey: data.accountKey), data.userKey)
+        case .muteUser(let data):
+            if let accountKey = data.accountKey {
+                return .muteUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                return .muteUser(nil, data.userKey)
+            }
+        case .reportUser(let data):
+            if let accountKey = data.accountKey {
+                return .reportUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                return .reportUser(nil, data.userKey)
+            }
+        }
+    }
+    var alertTitle: LocalizedStringKey? {
+        switch self {
+        case .statusDeleteConfirm:
+            return "delete_alert_title"
+        case .statusMastodonReport, .statusMisskeyReport, .reportUser: // Assuming misskey uses same key for now or similar pattern, adhering to original code for mastodon
+            return "mastodon_report_status_alert_title"
+        case .blockUser:
+            return "block_user_alert_title"
+        case .muteUser:
+            return "mute_user_alert_title"
+        default:
             return nil
         }
     }
+
+    @ViewBuilder
+    func alertMessage() -> some View {
+        switch self {
+        case .statusDeleteConfirm:
+             Text("delete_status_alert_message")
+        case .statusMastodonReport, .statusMisskeyReport, .reportUser:
+             Text("mastodon_report_status_alert_message")
+        case .blockUser:
+            Text("block_user_alert_message")
+        case .muteUser:
+            Text("mute_user_alert_message")
+        default:
+             EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    func alertActions() -> some View {
+        switch self {
+        case .statusDeleteConfirm(let accountType, let statusKey):
+            Button("Cancel", role: .cancel) {}
+            Button("delete", role: .destructive) {
+                DeleteStatusPresenter(accountType: accountType, statusKey: statusKey).models.value.delete()
+            }
+        case .statusMastodonReport(let accountType, let userKey, let statusKey):
+            Button("Cancel", role: .cancel) {}
+            Button("report", role: .destructive) {
+                MastodonReportPresenter(accountType: accountType, userKey: userKey, statusKey: statusKey).models.value.report()
+            }
+        case .statusMisskeyReport(let accountType, let userKey, let statusKey):
+            Button("Cancel", role: .cancel) {}
+            Button("report", role: .destructive) {
+//                MisskeyReportPresenter(accountType: accountType, userKey: userKey, statusKey: statusKey).models.value.report()
+            }
+        case .reportUser(let accountType, let userKey):
+            Button("Cancel", role: .cancel) {}
+            Button("report", role: .destructive) {
+//                UserReportPresenter(accountType: accountType, userKey: userKey).models.value.report()
+            }
+        case .blockUser(let accountType, let userKey):
+            Button("Cancel", role: .cancel) {}
+            Button("block", role: .destructive) {
+                BlockUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
+            }
+        case .muteUser(let accountType, let userKey):
+            Button("Cancel", role: .cancel) {}
+            Button("mute", role: .destructive) {
+                MuteUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
+            }
+        default:
+            EmptyView()
+        }
+    }
 }
+

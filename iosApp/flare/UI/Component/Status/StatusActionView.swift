@@ -6,6 +6,7 @@ struct StatusActionsView: View {
     @Environment(\.appearanceSettings.postActionStyle) private var postActionStyle
     let data: [ActionMenu]
     let useText: Bool
+    var allowSpacer: Bool = true
 
     var body: some View {
         HStack {
@@ -14,7 +15,9 @@ struct StatusActionsView: View {
                 if (index == data.count - 1 && postActionStyle == .leftAligned) ||
                     (postActionStyle == .rightAligned && index == 0) ||
                     (postActionStyle == .stretch && index != 0) {
-                    Spacer()
+                    if allowSpacer {
+                        Spacer()
+                    }
                 }
                 StatusActionView(data: item, useText: useText, isFixedWidth: index != data.count - 1)
             }
@@ -89,15 +92,17 @@ struct StatusActionView: View {
                     }
                 }
             }
-        case .asyncActionItem(let asyncItem):
+        case .asyncActionMenuItem(let asyncItem):
             EmptyView()
 //            AsyncStatusActionView(data: asyncItem)
+        case .divider:
+            Divider()
         }
     }
 }
 
 struct AsyncStatusActionView: View {
-    let data: StatusActionAsyncActionItem
+    let data: ActionMenuAsyncActionMenuItem
     var body: some View {
         // TODO: Not supported yet
 //        Button {
@@ -117,8 +122,8 @@ struct StatusActionItemView: View {
     let useText: Bool
     let isFixedWidth: Bool
     var body: some View {
-        if let shareContent = data.shareContent {
-            ShareLink(data.text?.resolvedString ?? NSLocalizedString("share", comment: ""), item: .init(string: shareContent)!)
+        if let shareContent = data.shareContent, let title = data.text?.resolvedString {
+            ShareLink(title, item: .init(string: shareContent)!)
         } else {
             Button(
                 role: data.color?.role
@@ -135,12 +140,12 @@ struct StatusActionItemView: View {
                             Text("0000")
                                 .hidden()
                         }
-                        if useText {
+                        if useText, let text = data.text?.resolvedString {
                             if let color = data.color?.swiftColor {
-                                Text(data.text?.resolvedString ?? NSLocalizedString("more", comment: ""))
+                                Text(text)
                                     .foregroundStyle(color)
                             } else {
-                                Text(data.text?.resolvedString ?? NSLocalizedString("more", comment: ""))
+                                Text(text)
                             }
                         } else if let text = data.count?.humanized, showNumbers {
                             if let color = data.color?.swiftColor {
@@ -167,7 +172,7 @@ struct StatusActionItemView: View {
     }
 }
 
-extension StatusActionItemColor {
+extension ActionMenuItem.Color {
     var swiftColor: Color? {
         switch self {
         case .red: return .red
@@ -194,11 +199,11 @@ extension StatusActionItemColor {
 }
 
 extension ActionMenuItemText {
-    var resolvedString: String {
+    var resolvedString: LocalizedStringResource {
         if let raw = self as? ActionMenuItemTextRaw {
-            return raw.text
+            return LocalizedStringResource(stringLiteral: raw.text)
         } else if let localized = self as? ActionMenuItemTextLocalized {
-            let key: String
+            let key: LocalizedStringResource
             switch localized.type {
             case .like: key = "like"
             case .unlike: key = "unlike"
@@ -213,23 +218,25 @@ extension ActionMenuItemText {
             case .delete: key = "delete"
             case .report: key = "report"
             case .react: key = "reaction_add"
-            case .unreact: key = "reaction_remove"
             case .share: key = "share"
             case .fxShare: key = "fx_share"
-            default: key = "more"
+            case .unReact: key = "reaction_remove"
+            case .editUserList: key = "edit_user_in_list"
+            case .sendMessage: key = "send_message"
+            case .mute: key = "mute"
+            case .unMute: key = "unmute"
+            case .block: key = "block"
+            case .unBlock: key = "unblock"
             }
-            let format = NSLocalizedString(key, comment: "")
-            if let args = localized.parameters as? [CVarArg], !args.isEmpty {
-                return String(format: format, arguments: args)
-            }
-            return format
+            return key
+        } else {
+            return LocalizedStringResource(stringLiteral: "")
         }
-        return NSLocalizedString("more", comment: "")
     }
 }
 
 struct StatusActionIcon: View {
-    let icon: ActionMenuItemIcon?
+    let icon: ActionMenuItem.Icon?
 
     var body: some View {
         if let icon = icon {
@@ -238,7 +245,7 @@ struct StatusActionIcon: View {
     }
 }
 
-extension ActionMenuItemIcon {
+extension ActionMenuItem.Icon {
     var imageName: String {
         switch self {
         case .bookmark: return "fa-bookmark"
@@ -256,8 +263,13 @@ extension ActionMenuItemIcon {
         case .unretweet: return "fa-retweet"
         case .comment: return "fa-comment-dots"
         case .share: return "fa-share-nodes"
-        case .fxShare: return "fa-share-nodes"
-        default: return "fa-ellipsis"
+        case .moreVerticel: return "fa-ellipsis-vertical"
+        case .list: return "fa-list"
+        case .chatMessage: return "fa-messatge"
+        case .mute: return "fa-volume-xmark"
+        case .unMute: return "fa-volume-xmark"
+        case .block: return "fa-user-slash"
+        case .unBlock: return "fa-user-slash"
         }
     }
 }

@@ -38,7 +38,7 @@ import com.halilibo.richtext.ui.string.RichTextStringStyle
 import com.halilibo.richtext.ui.string.Text
 import com.halilibo.richtext.ui.string.withFormat
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import dev.dimension.flare.ui.route.DeeplinkRoute.Companion.toUri
+import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.ImmutableMap
 
 private val lightLinkColor = Color(0xff0066cc)

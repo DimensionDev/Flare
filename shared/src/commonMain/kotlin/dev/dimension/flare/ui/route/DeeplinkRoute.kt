@@ -194,7 +194,6 @@ public sealed class DeeplinkRoute {
         val userKey: MicroBlogKey,
     ) : DeeplinkRoute()
 
-    @OptIn(ExperimentalSerializationApi::class)
     public companion object Companion {
         public object Callback {
             public const val MASTODON: String = "$APPSCHEMA://Callback/SignIn/Mastodon"
@@ -202,16 +201,18 @@ public sealed class DeeplinkRoute {
             public const val BLUESKY: String = "$APPSCHEMA://Callback/SignIn/Bluesky"
         }
 
-        public fun DeeplinkRoute.toUri(): String {
-            val protobuf = ProtoBuf.encodeToHexString(RoutePackage(this))
-            return "$APPSCHEMA://$protobuf"
-        }
-
+        @OptIn(ExperimentalSerializationApi::class)
         public fun parse(uri: String): DeeplinkRoute? =
             runCatching {
                 ProtoBuf.decodeFromHexString<RoutePackage>(uri.removePrefix("$APPSCHEMA://")).route
             }.getOrNull()
     }
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+public fun DeeplinkRoute.toUri(): String {
+    val protobuf = ProtoBuf.encodeToHexString(RoutePackage(this))
+    return "$APPSCHEMA://$protobuf"
 }
 
 @Serializable

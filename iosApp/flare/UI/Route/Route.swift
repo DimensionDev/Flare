@@ -194,7 +194,7 @@ enum Route: Hashable, Identifiable {
     }
     
     static func fromDeepLink(url: String) -> Route? {
-        if let deeplinkRoute = DeeplinkRoute.companion.parse(url: url) {
+        if let deeplinkRoute = DeeplinkRoute.companion.parse(uri: url) {
             return fromDeepLinkRoute(deeplinkRoute: deeplinkRoute)
         } else {
             return nil
@@ -225,6 +225,16 @@ enum Route: Hashable, Identifiable {
                 return fromDeepLinkRoute(deeplinkRoute: route)
             }.compactMapValues { $0 })
         case .openLinkDirectly(_):
+            return nil
+        case .blockUser(_):
+            return nil
+        case .directMessage(_):
+            return nil
+        case .editUserList(_):
+            return nil
+        case .muteUser(_):
+            return nil
+        case .reportUser(_):
             return nil
         }
     }

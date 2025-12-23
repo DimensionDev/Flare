@@ -35,7 +35,7 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import dev.dimension.flare.ui.route.DeeplinkRoute.Companion.toUri
+import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.Url
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList

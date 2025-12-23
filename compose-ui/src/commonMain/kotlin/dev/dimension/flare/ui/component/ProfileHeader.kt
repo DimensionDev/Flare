@@ -50,7 +50,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import dev.dimension.flare.ui.route.DeeplinkRoute.Companion.toUri
+import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource

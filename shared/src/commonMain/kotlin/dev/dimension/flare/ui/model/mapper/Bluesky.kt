@@ -42,7 +42,7 @@ import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import dev.dimension.flare.ui.route.DeeplinkRoute.Companion.toUri
+import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.Url
 import io.ktor.utils.io.charsets.Charsets
 import io.ktor.utils.io.core.toByteArray

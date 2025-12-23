@@ -38,7 +38,7 @@ import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import dev.dimension.flare.ui.route.DeeplinkRoute.Companion.toUri
+import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
 import org.jetbrains.compose.resources.stringResource
 

@@ -11,7 +11,6 @@ struct ProfileScreen: View {
     @StateObject private var presenter: KotlinPresenter<ProfileState>
     @State private var selectedTab: Int = 0
     @State private var showEditListSheet = false
-    @State private var showReportSheet = false
     
     var body: some View {
         ZStack {
@@ -69,90 +68,13 @@ struct ProfileScreen: View {
                     ToolbarSpacer()
                 }
             }
-            if case .success(let user) = onEnum(of: presenter.state.userState) {
-//                if horizontalSizeClass == .regular {
-//                    ToolbarItem(placement: .title) {
-//                        RichText(text: user.data.name)
-//                            .lineLimit(1)
-//                    }
-//                }
-                if case .success(let isMe) = onEnum(of: presenter.state.isMe), !isMe.data.boolValue {
-                    ToolbarItem(
-                        placement: .primaryAction
-                    ) {
-                        Menu {
-                            if case .success(let listDataSource) = onEnum(of: presenter.state.isListDataSource), listDataSource.data.boolValue {
-                                Button {
-                                    showEditListSheet = true
-                                } label: {
-                                    Label {
-                                        Text("edit_user_in_list")
-                                    } icon: {
-                                        Image(.faList)
-                                    }
-                                }
-                                Divider()
-                            }
-                            
-                            if case .success(let relation) = onEnum(of: presenter.state.relationState),
-                               case .success(let actionsArray) = onEnum(of: presenter.state.actions),
-                               actionsArray.data.count > 0 {
-                                let actions = actionsArray.data.cast(ProfileAction.self)
-                                ForEach(0..<actions.count, id: \.self) { index in
-                                    let item = actions[index]
-                                    Button(action: {
-                                        Task {
-                                            try? await item.invoke(userKey: user.data.key, relation: relation.data)
-                                        }
-                                    }, label: {
-                                        let text = switch onEnum(of: item) {
-                                        case .block(let block): if block.relationState(relation: relation.data) {
-                                            String(localized: "unblock")
-                                        } else {
-                                            String(localized: "block")
-                                        }
-                                        case .mute(let mute): if mute.relationState(relation: relation.data) {
-                                            String(localized: "unmute")
-                                        } else {
-                                            String(localized: "mute")
-                                        }
-                                        }
-                                        let icon = switch onEnum(of: item) {
-                                        case .block(let block): if block.relationState(relation: relation.data) {
-                                            "xmark.circle"
-                                        } else {
-                                            "checkmark.circle"
-                                        }
-                                        case .mute(let mute): if mute.relationState(relation: relation.data) {
-                                            "speaker"
-                                        } else {
-                                            "speaker.slash"
-                                        }
-                                        }
-                                        Label(text, systemImage: icon)
-                                    })
-                                }
-                                Divider()
-                            }
-                            Button(role: .destructive,action: { showReportSheet = true }, label: {
-                                Label("report", systemImage: "exclamationmark.bubble")
-                            })
-                        } label: {
-                            Image(systemName: "ellipsis")
-                        }
-                    }
+            if !presenter.state.actions.isEmpty {
+                ToolbarItem(
+                    placement: .primaryAction
+                ) {
+                    StatusActionsView(data: presenter.state.actions, useText: false, allowSpacer: false)
                 }
             }
-        }
-        .alert("mastodon_report_status_alert_title", isPresented: $showReportSheet) {
-            Button("Cancel", role: .cancel) {}
-            Button("report", role: .destructive) {
-                if case .success(let data) = onEnum(of: presenter.state.userState) {
-                    presenter.state.report(userKey: data.data.key)
-                }
-            }
-        } message: {
-            Text("mastodon_report_status_alert_message")
         }
         .background(Color(.systemGroupedBackground))
     }

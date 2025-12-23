@@ -19,6 +19,9 @@ internal interface AccountDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(account: DbAccount)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(accounts: List<DbAccount>)
+
     @Query("UPDATE DbAccount SET last_active = :lastActive WHERE account_key = :accountKey")
     suspend fun setLastActive(
         accountKey: MicroBlogKey,
@@ -36,4 +39,7 @@ internal interface AccountDao {
         accountKey: MicroBlogKey,
         credentialJson: String,
     )
+
+    @Query("SELECT * FROM DbAccount WHERE account_key in (:accountKeys)")
+    fun get(accountKeys: List<MicroBlogKey>): Flow<List<DbAccount>>
 }

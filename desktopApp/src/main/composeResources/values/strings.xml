@@ -321,4 +321,13 @@
     <string name="deeplink_account_selection_title">Select account</string>
     <string name="deeplink_account_selection_message">Select an account to open this link</string>
     <string name="deeplink_account_selection_browser">Open in browser</string>
+
+    <string name="block_user_title">Block user</string>
+    <string name="block_user_description">Are you sure you want to block this user?</string>
+
+    <string name="mute_user_title">Mute user</string>
+    <string name="mute_user_description">Are you sure you want to mute this user?</string>
+
+    <string name="report_user_title">Report user</string>
+    <string name="report_user_description">Are you sure you want to report this user?</string>
 </resources>

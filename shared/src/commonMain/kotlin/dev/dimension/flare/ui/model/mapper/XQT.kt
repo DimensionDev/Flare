@@ -3,7 +3,6 @@ package dev.dimension.flare.ui.model.mapper
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
 import de.cketti.codepoints.deluxe.codePointSequence
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.model.MessageContent
@@ -45,6 +44,8 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.DeeplinkRoute.Companion.toUri
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
@@ -215,10 +216,13 @@ internal fun TopLevel.renderNotifications(
                             type = UiTimeline.TopMessage.MessageType.XQT.Mention,
                             onClicked = {
                                 launcher.launch(
-                                    AppDeepLink.Profile(
-                                        accountKey = accountKey,
-                                        userKey = renderedUser.key,
-                                    ),
+                                    DeeplinkRoute.Profile
+                                        .User(
+                                            accountType =
+                                                dev.dimension.flare.model.AccountType
+                                                    .Specific(accountKey),
+                                            userKey = renderedUser.key,
+                                        ).toUri(),
                                 )
                             },
                             statusKey =
@@ -260,10 +264,13 @@ internal fun Tweet.render(
                 type = UiTimeline.TopMessage.MessageType.XQT.Retweet,
                 onClicked = {
                     launcher.launch(
-                        AppDeepLink.Profile(
-                            accountKey = accountKey,
-                            userKey = user.key,
-                        ),
+                        DeeplinkRoute.Profile
+                            .User(
+                                accountType =
+                                    dev.dimension.flare.model.AccountType
+                                        .Specific(accountKey),
+                                userKey = user.key,
+                            ).toUri(),
                     )
                 },
                 statusKey = currentTweet.statusKey,
@@ -348,11 +355,13 @@ internal fun Tweet.renderStatus(
                         media = null,
                         description = null,
                         url =
-                            AppDeepLink
+                            DeeplinkRoute.Media
                                 .Podcast(
-                                    accountKey = accountKey,
+                                    accountType =
+                                        dev.dimension.flare.model.AccountType
+                                            .Specific(accountKey),
                                     id = id,
-                                ).toString(),
+                                ).toUri(),
                     )
                 } else {
                     null
@@ -531,10 +540,11 @@ internal fun Tweet.renderStatus(
                     count = UiNumber(legacy?.replyCount?.toLong() ?: 0),
                     onClicked = {
                         launcher.launch(
-                            AppDeepLink.Compose.Reply(
-                                accountKey = accountKey,
-                                statusKey = statusKey,
-                            ),
+                            DeeplinkRoute.Compose
+                                .Reply(
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
+                                ).toUri(),
                         )
                     },
                 ),
@@ -581,10 +591,11 @@ internal fun Tweet.renderStatus(
                                 count = UiNumber(legacy?.quoteCount?.toLong() ?: 0),
                                 onClicked = {
                                     launcher.launch(
-                                        AppDeepLink.Compose.Quote(
-                                            accountKey = accountKey,
-                                            statusKey = statusKey,
-                                        ),
+                                        DeeplinkRoute.Compose
+                                            .Quote(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ).toUri(),
                                     )
                                 },
                             ),
@@ -657,10 +668,13 @@ internal fun Tweet.renderStatus(
                                     color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
-                                            AppDeepLink.DeleteStatus(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                            ),
+                                            DeeplinkRoute.Status
+                                                .DeleteConfirm(
+                                                    statusKey = statusKey,
+                                                    accountType =
+                                                        dev.dimension.flare.model.AccountType
+                                                            .Specific(accountKey),
+                                                ).toUri(),
                                         )
                                     },
                                 )
@@ -680,27 +694,33 @@ internal fun Tweet.renderStatus(
         sensitive = legacy?.possiblySensitive == true,
         onClicked = {
             launcher.launch(
-                AppDeepLink.StatusDetail(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                ),
+                DeeplinkRoute.Status
+                    .Detail(
+                        statusKey = statusKey,
+                        accountType =
+                            dev.dimension.flare.model.AccountType
+                                .Specific(accountKey),
+                    ).toUri(),
             )
         },
         platformType = PlatformType.xQt,
         onMediaClicked = { media, index ->
             launcher.launch(
-                AppDeepLink.StatusMedia(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                    mediaIndex = index,
-                    preview =
-                        when (media) {
-                            is UiMedia.Image -> media.previewUrl
-                            is UiMedia.Video -> media.thumbnailUrl
-                            is UiMedia.Audio -> null
-                            is UiMedia.Gif -> media.previewUrl
-                        },
-                ),
+                DeeplinkRoute.Media
+                    .StatusMedia(
+                        statusKey = statusKey,
+                        accountType =
+                            dev.dimension.flare.model.AccountType
+                                .Specific(accountKey),
+                        index = index,
+                        preview =
+                            when (media) {
+                                is UiMedia.Image -> media.previewUrl
+                                is UiMedia.Video -> media.thumbnailUrl
+                                is UiMedia.Audio -> null
+                                is UiMedia.Gif -> media.previewUrl
+                            },
+                    ).toUri(),
             )
         },
         url = url,
@@ -808,7 +828,15 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
             },
         platformType = PlatformType.xQt,
         onClicked = {
-            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+            launcher.launch(
+                DeeplinkRoute.Profile
+                    .User(
+                        accountType =
+                            dev.dimension.flare.model.AccountType
+                                .Specific(accountKey),
+                        userKey = userKey,
+                    ).toUri(),
+            )
         },
     )
 }
@@ -1160,7 +1188,15 @@ private fun Admin.render(accountKey: MicroBlogKey): UiUserV2 {
         handle = "@$twitterScreenName@${accountKey.host}",
         platformType = PlatformType.xQt,
         onClicked = {
-            launcher.launch(AppDeepLink.Profile(accountKey, key))
+            launcher.launch(
+                DeeplinkRoute.Profile
+                    .User(
+                        accountType =
+                            dev.dimension.flare.model.AccountType
+                                .Specific(accountKey),
+                        userKey = key,
+                    ).toUri(),
+            )
         },
         description = null,
         banner = null,

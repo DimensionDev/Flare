@@ -204,6 +204,7 @@ internal fun ProfileScreen(
                             menu = {
                                 ProfileMenu(
                                     profileState = state.state,
+                                    modifier = Modifier.padding(horizontal = 8.dp),
                                 )
                             },
                             onAvatarClick = {
@@ -247,6 +248,7 @@ internal fun ProfileScreen(
                                 menu = {
                                     ProfileMenu(
                                         profileState = state.state,
+                                        modifier = Modifier.padding(horizontal = 8.dp),
                                     )
                                 },
                                 onAvatarClick = {

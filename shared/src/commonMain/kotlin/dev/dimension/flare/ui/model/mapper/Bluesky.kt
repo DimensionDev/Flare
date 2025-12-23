@@ -23,11 +23,11 @@ import app.bsky.richtext.FacetTag
 import chat.bsky.convo.MessageView
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
@@ -41,6 +41,8 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.DeeplinkRoute.Companion.toUri
 import io.ktor.http.Url
 import io.ktor.utils.io.charsets.Charsets
 import io.ktor.utils.io.core.toByteArray
@@ -251,14 +253,15 @@ private fun parseBluesky(
                                 appendTextWithBr(facetText)
                                 attributes().put(
                                     "href",
-                                    AppDeepLink.Profile.invoke(
-                                        accountKey = accountKey,
-                                        userKey =
-                                            MicroBlogKey(
-                                                id = feature.value.did.did,
-                                                host = accountKey.host,
-                                            ),
-                                    ),
+                                    DeeplinkRoute.Profile
+                                        .User(
+                                            accountType = AccountType.Specific(accountKey),
+                                            userKey =
+                                                MicroBlogKey(
+                                                    id = feature.value.did.did,
+                                                    host = accountKey.host,
+                                                ),
+                                        ).toUri(),
                                 )
                             },
                     )
@@ -271,10 +274,11 @@ private fun parseBluesky(
                                 appendTextWithBr(facetText)
                                 attributes().put(
                                     "href",
-                                    AppDeepLink.Search(
-                                        accountKey = accountKey,
-                                        keyword = facetText,
-                                    ),
+                                    DeeplinkRoute
+                                        .Search(
+                                            accountType = AccountType.Specific(accountKey),
+                                            query = facetText,
+                                        ).toUri(),
                                 )
                             },
                     )
@@ -330,10 +334,11 @@ internal fun FeedViewPostReasonUnion.render(
                     type = UiTimeline.TopMessage.MessageType.Bluesky.Repost,
                     onClicked = {
                         launcher.launch(
-                            AppDeepLink.Profile(
-                                accountKey = accountKey,
-                                userKey = user.key,
-                            ),
+                            DeeplinkRoute.Profile
+                                .User(
+                                    accountType = AccountType.Specific(accountKey),
+                                    userKey = user.key,
+                                ).toUri(),
                         )
                     },
                     statusKey =
@@ -367,10 +372,11 @@ internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
                     type = data.reason.type,
                     onClicked = {
                         launcher.launch(
-                            AppDeepLink.Profile(
-                                accountKey = accountKey,
-                                userKey = user.key,
-                            ),
+                            DeeplinkRoute.Profile
+                                .User(
+                                    accountType = AccountType.Specific(accountKey),
+                                    userKey = user.key,
+                                ).toUri(),
                         )
                     },
                     statusKey = MicroBlogKey(id = data.uri.atUri, host = accountKey.host),
@@ -542,10 +548,11 @@ internal fun PostView.renderStatus(
                     count = UiNumber(replyCount ?: 0),
                     onClicked = {
                         launcher.launch(
-                            AppDeepLink.Compose.Reply(
-                                accountKey = accountKey,
-                                statusKey = statusKey,
-                            ),
+                            DeeplinkRoute.Compose
+                                .Reply(
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
+                                ).toUri(),
                         )
                     },
                 ),
@@ -604,10 +611,11 @@ internal fun PostView.renderStatus(
                                 count = UiNumber(quoteCount ?: 0),
                                 onClicked = {
                                     launcher.launch(
-                                        AppDeepLink.Compose.Quote(
-                                            accountKey = accountKey,
-                                            statusKey = statusKey,
-                                        ),
+                                        DeeplinkRoute.Compose
+                                            .Quote(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ).toUri(),
                                     )
                                 },
                             ),
@@ -696,10 +704,11 @@ internal fun PostView.renderStatus(
                                     color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
-                                            AppDeepLink.DeleteStatus(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                            ),
+                                            DeeplinkRoute.Status
+                                                .DeleteConfirm(
+                                                    accountType = AccountType.Specific(accountKey),
+                                                    statusKey = statusKey,
+                                                ).toUri(),
                                         )
                                     },
                                 )
@@ -710,10 +719,11 @@ internal fun PostView.renderStatus(
                                     color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
-                                            AppDeepLink.Bluesky.ReportStatus(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                            ),
+                                            DeeplinkRoute.Status
+                                                .BlueskyReport(
+                                                    statusKey = statusKey,
+                                                    accountType = AccountType.Specific(accountKey),
+                                                ).toUri(),
                                         )
                                     },
                                 )
@@ -725,26 +735,28 @@ internal fun PostView.renderStatus(
         sensitive = sensitive,
         onClicked = {
             launcher.launch(
-                AppDeepLink.StatusDetail(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                ),
+                DeeplinkRoute.Status
+                    .Detail(
+                        statusKey = statusKey,
+                        accountType = AccountType.Specific(accountKey),
+                    ).toUri(),
             )
         },
         onMediaClicked = { media, index ->
             launcher.launch(
-                AppDeepLink.StatusMedia(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                    mediaIndex = index,
-                    preview =
-                        when (media) {
-                            is UiMedia.Image -> media.previewUrl
-                            is UiMedia.Video -> media.thumbnailUrl
-                            is UiMedia.Audio -> null
-                            is UiMedia.Gif -> media.previewUrl
-                        },
-                ),
+                DeeplinkRoute.Media
+                    .StatusMedia(
+                        accountType = AccountType.Specific(accountKey),
+                        statusKey = statusKey,
+                        index = index,
+                        preview =
+                            when (media) {
+                                is UiMedia.Image -> media.previewUrl
+                                is UiMedia.Video -> media.thumbnailUrl
+                                is UiMedia.Audio -> null
+                                is UiMedia.Gif -> media.previewUrl
+                            },
+                    ).toUri(),
             )
         },
         url = url,
@@ -778,7 +790,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
         bottomContent = null,
         platformType = PlatformType.Bluesky,
         onClicked = {
-            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
         },
     )
 }
@@ -810,7 +822,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
         bottomContent = null,
         platformType = PlatformType.Bluesky,
         onClicked = {
-            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
         },
     )
 }
@@ -842,7 +854,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
         bottomContent = null,
         platformType = PlatformType.Bluesky,
         onClicked = {
-            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
         },
     )
 }
@@ -1139,10 +1151,11 @@ private fun render(
                             count = UiNumber(record.value.replyCount ?: 0),
                             onClicked = {
                                 launcher.launch(
-                                    AppDeepLink.Compose.Reply(
-                                        accountKey = accountKey,
-                                        statusKey = statusKey,
-                                    ),
+                                    DeeplinkRoute.Compose
+                                        .Reply(
+                                            accountKey = accountKey,
+                                            statusKey = statusKey,
+                                        ).toUri(),
                                 )
                             },
                         ),
@@ -1174,10 +1187,11 @@ private fun render(
                                         count = UiNumber(record.value.quoteCount ?: 0),
                                         onClicked = {
                                             launcher.launch(
-                                                AppDeepLink.Compose.Quote(
-                                                    accountKey = accountKey,
-                                                    statusKey = statusKey,
-                                                ),
+                                                DeeplinkRoute.Compose
+                                                    .Quote(
+                                                        accountKey = accountKey,
+                                                        statusKey = statusKey,
+                                                    ).toUri(),
                                             )
                                         },
                                     ),
@@ -1220,10 +1234,11 @@ private fun render(
                                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
                                             onClicked = {
                                                 launcher.launch(
-                                                    AppDeepLink.DeleteStatus(
-                                                        accountKey = accountKey,
-                                                        statusKey = statusKey,
-                                                    ),
+                                                    DeeplinkRoute.Status
+                                                        .DeleteConfirm(
+                                                            accountType = AccountType.Specific(accountKey),
+                                                            statusKey = statusKey,
+                                                        ).toUri(),
                                                 )
                                             },
                                         )
@@ -1233,10 +1248,11 @@ private fun render(
                                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
                                             onClicked = {
                                                 launcher.launch(
-                                                    AppDeepLink.Bluesky.ReportStatus(
-                                                        accountKey = accountKey,
-                                                        statusKey = statusKey,
-                                                    ),
+                                                    DeeplinkRoute.Status
+                                                        .BlueskyReport(
+                                                            statusKey = statusKey,
+                                                            accountType = AccountType.Specific(accountKey),
+                                                        ).toUri(),
                                                 )
                                             },
                                         )
@@ -1256,27 +1272,29 @@ private fun render(
                     },
                 onClicked = {
                     launcher.launch(
-                        AppDeepLink.StatusDetail(
-                            accountKey = accountKey,
-                            statusKey = statusKey,
-                        ),
+                        DeeplinkRoute.Status
+                            .Detail(
+                                statusKey = statusKey,
+                                accountType = AccountType.Specific(accountKey),
+                            ).toUri(),
                     )
                 },
                 platformType = PlatformType.Bluesky,
                 onMediaClicked = { media, index ->
                     launcher.launch(
-                        AppDeepLink.StatusMedia(
-                            accountKey = accountKey,
-                            statusKey = statusKey,
-                            mediaIndex = index,
-                            preview =
-                                when (media) {
-                                    is UiMedia.Image -> media.previewUrl
-                                    is UiMedia.Video -> media.thumbnailUrl
-                                    is UiMedia.Audio -> null
-                                    is UiMedia.Gif -> media.previewUrl
-                                },
-                        ),
+                        DeeplinkRoute.Media
+                            .StatusMedia(
+                                accountType = AccountType.Specific(accountKey),
+                                statusKey = statusKey,
+                                index = index,
+                                preview =
+                                    when (media) {
+                                        is UiMedia.Image -> media.previewUrl
+                                        is UiMedia.Video -> media.thumbnailUrl
+                                        is UiMedia.Audio -> null
+                                        is UiMedia.Gif -> media.previewUrl
+                                    },
+                            ).toUri(),
                     )
                 },
                 url = url,

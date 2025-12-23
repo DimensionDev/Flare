@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.network.misskey.MisskeyOauthService
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
 import dev.dimension.flare.data.repository.AccountRepository
@@ -17,6 +16,7 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.coroutines.delay
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -108,7 +108,7 @@ internal suspend fun misskeyLoginUseCase(
             MisskeyOauthService(
                 host = host,
                 name = "Flare",
-                callback = AppDeepLink.Callback.MISSKEY,
+                callback = DeeplinkRoute.Companion.Callback.MISSKEY,
                 session = session,
             )
         applicationRepository.addApplication(

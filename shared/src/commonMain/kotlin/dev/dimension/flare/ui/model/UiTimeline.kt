@@ -1,13 +1,14 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.DeeplinkRoute.Companion.toUri
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
@@ -91,7 +92,7 @@ public data class UiTimeline internal constructor(
                 if (openInBrowser) {
                     launcher.launch(url)
                 } else {
-                    launcher.launch(AppDeepLink.RSS.invoke(url))
+                    launcher.launch(DeeplinkRoute.Rss.Detail(url).toUri())
                 }
             }
         }

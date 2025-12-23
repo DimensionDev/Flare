@@ -4,8 +4,14 @@ import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRssSource
+import dev.dimension.flare.ui.route.Route.Compose.New
+import dev.dimension.flare.ui.route.Route.Compose.Quote
+import dev.dimension.flare.ui.route.Route.Compose.Reply
+import dev.dimension.flare.ui.route.Route.Compose.VVOReplyComment
+import dev.dimension.flare.ui.route.Route.VVO.CommentDetail
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.serialization.Serializable
 
 internal sealed interface Route {
     sealed interface FloatingRoute : Route
@@ -209,6 +215,24 @@ internal sealed interface Route {
         val data: ImmutableMap<MicroBlogKey, Route>,
     ) : FloatingRoute
 
+    @Serializable
+    data class BlockUser(
+        val accountType: AccountType?,
+        val userKey: MicroBlogKey,
+    ) : FloatingRoute
+
+    @Serializable
+    data class MuteUser(
+        val accountType: AccountType?,
+        val userKey: MicroBlogKey,
+    ) : FloatingRoute
+
+    @Serializable
+    data class ReportUser(
+        val accountType: AccountType?,
+        val userKey: MicroBlogKey,
+    ) : FloatingRoute
+
     companion object {
         public fun parse(url: String): Route? {
             val deeplinkRoute = DeeplinkRoute.parse(url) ?: return null
@@ -230,21 +254,21 @@ internal sealed interface Route {
                                 .toImmutableMap(),
                     )
                 is DeeplinkRoute.Login -> ServiceSelect
-                is DeeplinkRoute.Compose.New -> Compose.New(deeplinkRoute.accountType)
+                is DeeplinkRoute.Compose.New -> New(deeplinkRoute.accountType)
                 is DeeplinkRoute.Compose.Quote ->
-                    Compose.Quote(
+                    Quote(
                         deeplinkRoute.accountKey,
                         deeplinkRoute.statusKey,
                     )
 
                 is DeeplinkRoute.Compose.Reply ->
-                    Compose.Reply(
+                    Reply(
                         deeplinkRoute.accountKey,
                         deeplinkRoute.statusKey,
                     )
 
                 is DeeplinkRoute.Compose.VVOReplyComment ->
-                    Compose.VVOReplyComment(
+                    VVOReplyComment(
                         deeplinkRoute.accountKey,
                         deeplinkRoute.replyTo,
                         deeplinkRoute.rootId,
@@ -320,7 +344,7 @@ internal sealed interface Route {
                     )
 
                 is DeeplinkRoute.Status.VVOComment ->
-                    VVO.CommentDetail(
+                    CommentDetail(
                         accountType = deeplinkRoute.accountType,
                         statusKey = deeplinkRoute.commentKey,
                     )
@@ -329,6 +353,29 @@ internal sealed interface Route {
                     VVO.StatusDetail(
                         accountType = deeplinkRoute.accountType,
                         statusKey = deeplinkRoute.statusKey,
+                    )
+
+                is DeeplinkRoute.DirectMessage ->
+                    DmUserConversation(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
+                        userKey = deeplinkRoute.userKey,
+                    )
+                is DeeplinkRoute.EditUserList -> null
+                is DeeplinkRoute.MuteUser ->
+                    Route.MuteUser(
+                        accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
+                        userKey = deeplinkRoute.userKey,
+                    )
+                is DeeplinkRoute.ReportUser ->
+                    Route.ReportUser(
+                        accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
+                        userKey = deeplinkRoute.userKey,
+                    )
+
+                is DeeplinkRoute.BlockUser ->
+                    Route.BlockUser(
+                        accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
+                        userKey = deeplinkRoute.userKey,
                     )
             }
         }

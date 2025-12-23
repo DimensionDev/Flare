@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.model.mapper
 
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
@@ -17,6 +16,7 @@ import dev.dimension.flare.data.network.misskey.api.model.User
 import dev.dimension.flare.data.network.misskey.api.model.UserList
 import dev.dimension.flare.data.network.misskey.api.model.UserLite
 import dev.dimension.flare.data.network.misskey.api.model.Visibility
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
@@ -30,6 +30,8 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.DeeplinkRoute.Companion.toUri
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -133,7 +135,7 @@ internal fun Notification.render(
             type = topMessageType,
             onClicked = {
                 if (user != null) {
-                    launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
+                    launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = user.key).toUri())
                 }
             },
             statusKey = MicroBlogKey(id, accountKey.host),
@@ -310,10 +312,11 @@ internal fun Note.render(
                         .Renote(id = id),
                 onClicked = {
                     launcher.launch(
-                        AppDeepLink.Profile(
-                            accountKey = accountKey,
-                            userKey = user.key,
-                        ),
+                        DeeplinkRoute.Profile
+                            .User(
+                                accountType = AccountType.Specific(accountKey),
+                                userKey = user.key,
+                            ).toUri(),
                     )
                 },
                 statusKey = currentStatus.statusKey,
@@ -429,10 +432,11 @@ private fun Note.renderStatus(
                     count = UiNumber(repliesCount.toLong()),
                     onClicked = {
                         launcher.launch(
-                            AppDeepLink.Compose.Reply(
-                                accountKey = accountKey,
-                                statusKey = statusKey,
-                            ),
+                            DeeplinkRoute.Compose
+                                .Reply(
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
+                                ).toUri(),
                         )
                     },
                 ),
@@ -462,10 +466,11 @@ private fun Note.renderStatus(
                                     count = UiNumber(0),
                                     onClicked = {
                                         launcher.launch(
-                                            AppDeepLink.Compose.Quote(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                            ),
+                                            DeeplinkRoute.Compose
+                                                .Quote(
+                                                    accountKey = accountKey,
+                                                    statusKey = statusKey,
+                                                ).toUri(),
                                         )
                                     },
                                 ),
@@ -490,10 +495,11 @@ private fun Note.renderStatus(
                     onClicked = {
                         if (myReaction == null) {
                             launcher.launch(
-                                AppDeepLink.AddReaction(
-                                    accountKey = accountKey,
-                                    statusKey = statusKey,
-                                ),
+                                DeeplinkRoute.Status
+                                    .AddReaction(
+                                        statusKey = statusKey,
+                                        accountType = AccountType.Specific(accountKey),
+                                    ).toUri(),
                             )
                         } else {
                             event.react(
@@ -551,10 +557,11 @@ private fun Note.renderStatus(
                                     color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
-                                            AppDeepLink.DeleteStatus(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                            ),
+                                            DeeplinkRoute.Status
+                                                .DeleteConfirm(
+                                                    accountType = AccountType.Specific(accountKey),
+                                                    statusKey = statusKey,
+                                                ).toUri(),
                                         )
                                     },
                                 )
@@ -565,11 +572,12 @@ private fun Note.renderStatus(
                                     color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
-                                            AppDeepLink.Misskey.ReportStatus(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                                userKey = user.key,
-                                            ),
+                                            DeeplinkRoute.Status
+                                                .MisskeyReport(
+                                                    statusKey = statusKey,
+                                                    userKey = user.key,
+                                                    accountType = AccountType.Specific(accountKey),
+                                                ).toUri(),
                                         )
                                     },
                                 )
@@ -620,27 +628,29 @@ private fun Note.renderStatus(
         sensitive = files?.any { it.isSensitive } ?: false,
         onClicked = {
             launcher.launch(
-                AppDeepLink.StatusDetail(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                ),
+                DeeplinkRoute.Status
+                    .Detail(
+                        statusKey = statusKey,
+                        accountType = AccountType.Specific(accountKey),
+                    ).toUri(),
             )
         },
         platformType = PlatformType.Misskey,
         onMediaClicked = { media, index ->
             launcher.launch(
-                AppDeepLink.StatusMedia(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                    mediaIndex = index,
-                    preview =
-                        when (media) {
-                            is UiMedia.Image -> media.previewUrl
-                            is UiMedia.Video -> media.thumbnailUrl
-                            is UiMedia.Audio -> null
-                            is UiMedia.Gif -> media.previewUrl
-                        },
-                ),
+                DeeplinkRoute.Media
+                    .StatusMedia(
+                        accountType = AccountType.Specific(accountKey),
+                        statusKey = statusKey,
+                        index = index,
+                        preview =
+                            when (media) {
+                                is UiMedia.Image -> media.previewUrl
+                                is UiMedia.Video -> media.thumbnailUrl
+                                is UiMedia.Audio -> null
+                                is UiMedia.Gif -> media.previewUrl
+                            },
+                    ).toUri(),
             )
         },
         url = postUrl,
@@ -701,7 +711,7 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
         bottomContent = null,
         platformType = PlatformType.Misskey,
         onClicked = {
-            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
         },
     )
 }
@@ -759,7 +769,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                 },
         platformType = PlatformType.Misskey,
         onClicked = {
-            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
         },
     )
 }
@@ -914,7 +924,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         is CashNode -> {
             Element("a").apply {
 //                attributes["href"] = AppDeepLink.Search(accountKey, "$$content")
-                attributes().put("href", AppDeepLink.Search(accountKey, "$$content"))
+                attributes().put("href", DeeplinkRoute.Search(AccountType.Specific(accountKey), "$$content").toUri())
                 appendChild(TextNode("$$content"))
             }
         }
@@ -931,7 +941,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         is HashtagNode -> {
             Element("a").apply {
 //                attributes["href"] = AppDeepLink.Search(accountKey, "#$tag")
-                attributes().put("href", AppDeepLink.Search(accountKey, "#$tag"))
+                attributes().put("href", DeeplinkRoute.Search(AccountType.Specific(accountKey), "#$tag").toUri())
                 appendChild(TextNode("#$tag"))
             }
         }
@@ -962,7 +972,13 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
 
         is MentionNode -> {
             Element("a").apply {
-                val deeplink = AppDeepLink.ProfileWithNameAndHost(accountKey, userName, host ?: remoteHost)
+                val deeplink =
+                    DeeplinkRoute.Profile
+                        .UserNameWithHost(
+                            AccountType.Specific(accountKey),
+                            userName,
+                            host ?: remoteHost,
+                        ).toUri()
 //                attributes["href"] = deeplink
                 attributes().put("href", deeplink)
                 appendChild(

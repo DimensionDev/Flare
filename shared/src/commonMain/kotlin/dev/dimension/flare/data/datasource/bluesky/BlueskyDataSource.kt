@@ -89,6 +89,7 @@ import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
 import dev.dimension.flare.data.datasource.microblog.memoryPager
@@ -152,7 +153,8 @@ internal class BlueskyDataSource(
     KoinComponent,
     StatusEvent.Bluesky,
     ListDataSource,
-    DirectMessageDataSource {
+    DirectMessageDataSource,
+    RelationDataSource {
     private val database: CacheDatabase by inject()
     private val appDatabase: AppDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
@@ -857,7 +859,7 @@ internal class BlueskyDataSource(
         }
     }
 
-    suspend fun block(userKey: MicroBlogKey) {
+    override suspend fun block(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
         MemCacheable.updateWith<UiRelation>(
             key = key,
@@ -926,7 +928,7 @@ internal class BlueskyDataSource(
         }
     }
 
-    suspend fun mute(userKey: MicroBlogKey) {
+    override suspend fun mute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
         MemCacheable.updateWith<UiRelation>(
             key = key,

@@ -34,6 +34,8 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.status.LogUserHistoryPresenter
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.DeeplinkRoute.Companion.toUri
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -201,30 +203,44 @@ public class ProfilePresenter(
                 service,
                 profileActions,
                 userState,
+                myAccountKey,
             ) {
                 val user = userState.takeSuccess()
+                val accountKey = myAccountKey.takeSuccess()
                 if (isMe.takeSuccessOr(false) || user == null) {
                     emptyList()
                 } else {
                     listOfNotNull(
-                        if (!isGuestMode) {
+                        if (accountKey != null && userKey != null) {
                             ActionMenu.Item(
                                 icon = ActionMenu.Item.Icon.List,
                                 text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.EditUserList),
                                 onClicked = {
-                                    // navigate to list edit
+                                    launcher.launch(
+                                        DeeplinkRoute
+                                            .EditUserList(
+                                                accountKey = accountKey,
+                                                userKey = userKey,
+                                            ).toUri(),
+                                    )
                                 },
                             )
                         } else {
                             null
                         },
-                        if (canSendMessage.takeSuccessOr(false)) {
+                        if (canSendMessage.takeSuccessOr(false) && accountKey != null && userKey != null) {
                             // navigate to send message
                             ActionMenu.Item(
                                 icon = ActionMenu.Item.Icon.ChatMessage,
                                 text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.SendMessage),
                                 onClicked = {
-                                    // navigate to send message
+                                    launcher.launch(
+                                        DeeplinkRoute
+                                            .DirectMessage(
+                                                accountKey = accountKey,
+                                                userKey = userKey,
+                                            ).toUri(),
+                                    )
                                 },
                             )
                         } else {
@@ -281,10 +297,25 @@ public class ProfilePresenter(
                                                             },
                                                         ),
                                                     onClicked = {
-                                                        // navigate to block dialog
+                                                        if (userKey != null) {
+                                                            if (action.relationState(relation)) {
+                                                                scope.launch {
+                                                                    action.invoke(userKey, relation)
+                                                                }
+                                                            } else {
+                                                                launcher.launch(
+                                                                    DeeplinkRoute
+                                                                        .BlockUser(
+                                                                            accountKey = accountKey,
+                                                                            userKey = userKey,
+                                                                        ).toUri(),
+                                                                )
+                                                            }
+                                                        }
                                                     },
                                                 )
                                             }
+
                                             is ProfileAction.Mute -> {
                                                 ActionMenu.Item(
                                                     icon =
@@ -302,7 +333,21 @@ public class ProfilePresenter(
                                                             },
                                                         ),
                                                     onClicked = {
-                                                        // navigate to mute dialog
+                                                        if (userKey != null) {
+                                                            if (action.relationState(relation)) {
+                                                                scope.launch {
+                                                                    action.invoke(userKey, relation)
+                                                                }
+                                                            } else {
+                                                                launcher.launch(
+                                                                    DeeplinkRoute
+                                                                        .MuteUser(
+                                                                            accountKey = accountKey,
+                                                                            userKey = userKey,
+                                                                        ).toUri(),
+                                                                )
+                                                            }
+                                                        }
                                                     },
                                                 )
                                             }
@@ -317,6 +362,15 @@ public class ProfilePresenter(
                                         ),
                                     icon = ActionMenu.Item.Icon.Report,
                                     onClicked = {
+                                        if (userKey != null) {
+                                            launcher.launch(
+                                                DeeplinkRoute
+                                                    .ReportUser(
+                                                        accountKey = accountKey,
+                                                        userKey = userKey,
+                                                    ).toUri(),
+                                            )
+                                        }
                                     },
                                     color = ActionMenu.Item.Color.Red,
                                 ),

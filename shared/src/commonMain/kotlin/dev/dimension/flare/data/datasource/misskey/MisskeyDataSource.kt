@@ -30,6 +30,7 @@ import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.ReactionDataSource
+import dev.dimension.flare.data.datasource.microblog.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
@@ -93,7 +94,8 @@ internal class MisskeyDataSource(
     KoinComponent,
     StatusEvent.Misskey,
     ListDataSource,
-    ReactionDataSource {
+    ReactionDataSource,
+    RelationDataSource {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
@@ -619,7 +621,7 @@ internal class MisskeyDataSource(
         }
     }
 
-    suspend fun block(userKey: MicroBlogKey) {
+    override suspend fun block(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
         MemCacheable.updateWith<UiRelation>(
             key = key,
@@ -663,7 +665,7 @@ internal class MisskeyDataSource(
         }
     }
 
-    suspend fun mute(userKey: MicroBlogKey) {
+    override suspend fun mute(userKey: MicroBlogKey) {
         val key = relationKeyWithUserKey(userKey)
         MemCacheable.updateWith<UiRelation>(
             key = key,

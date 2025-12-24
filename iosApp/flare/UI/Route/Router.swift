@@ -9,10 +9,7 @@ struct Router<Root: View>: View {
     @State private var backStack: [Route] = []
     @State private var sheet: Route? = nil
     @State private var cover: Route? = nil
-    @State private var deleteStatusData: (AccountType, MicroBlogKey)? = nil
-    @State private var showDeleteStatusAlert = false
-    @State private var showMastodonReportStatusAlert = false
-    @State private var mastodonReportStatusData: (AccountType, MicroBlogKey, MicroBlogKey?)? = nil
+    @State private var alertRoute: Route? = nil
     @StateObject private var deepLinkPresenter: KotlinPresenter<DeepLinkPresenterState>
     @StateObject private var deepLinkHandler = DeepLinkHandler()
     
@@ -59,21 +56,10 @@ struct Router<Root: View>: View {
             .background(ClearFullScreenBackground())
             .colorScheme(.dark)
         }
-        .alert("delete_alert_title", isPresented: $showDeleteStatusAlert, presenting: deleteStatusData) { data in
-            Button("Cancel", role: .cancel) {}
-            Button("delete", role: .destructive) {
-                DeleteStatusPresenter(accountType: data.0, statusKey: data.1).models.value.delete()
-            }
-        } message: { data in
-            Text("delete_status_alert_message")
-        }
-        .alert("mastodon_report_status_alert_title", isPresented: $showMastodonReportStatusAlert, presenting: mastodonReportStatusData) { data in
-            Button("Cancel", role: .cancel) {}
-            Button("report", role: .destructive) {
-                MastodonReportPresenter(accountType: data.0, userKey: data.1, statusKey: data.2).models.value.report()
-            }
-        } message: { data in
-            Text("mastodon_report_status_alert_message")
+        .alert(alertRoute?.alertTitle ?? "", isPresented: Binding(get: { alertRoute != nil }, set: { if !$0 { alertRoute = nil } })) {
+            alertRoute?.alertActions()
+        } message: {
+            alertRoute?.alertMessage()
         }
         .environment(\.openURL, OpenURLAction { url in
             deepLinkPresenter.state.handle(url: url.absoluteString)
@@ -92,12 +78,8 @@ struct Router<Root: View>: View {
     }
 
     func navigate(route: Route) {
-        if case .statusDeleteConfirm(let accountType, let statusKey) = route {
-            deleteStatusData = (accountType, statusKey)
-            showDeleteStatusAlert = true
-        } else if case .statusMastodonReport(let accountType, let userKey, let statusKey) = route {
-            mastodonReportStatusData = (accountType, userKey, statusKey)
-            showMastodonReportStatusAlert = true
+        if route.alertTitle != nil {
+            alertRoute = route
         } else if isSheetRoute(route: route) {
             sheet = route
         } else if isFullScreenCover(route: route) {
@@ -119,6 +101,7 @@ struct Router<Root: View>: View {
                 .tabSettings,
                 .statusBlueskyReport,
                 .statusMisskeyReport,
+                .editUserList,
                 .statusAddReaction:
             return true
         default:

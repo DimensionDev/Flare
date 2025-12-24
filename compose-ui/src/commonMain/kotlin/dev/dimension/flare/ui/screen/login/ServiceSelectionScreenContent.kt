@@ -32,6 +32,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -51,6 +54,8 @@ import dev.dimension.flare.compose.ui.bluesky_login_oauth_hint
 import dev.dimension.flare.compose.ui.bluesky_login_password_hint
 import dev.dimension.flare.compose.ui.bluesky_login_use_password_button
 import dev.dimension.flare.compose.ui.bluesky_login_username_hint
+import dev.dimension.flare.compose.ui.eula_privacy_policy
+import dev.dimension.flare.compose.ui.login_agreement
 import dev.dimension.flare.compose.ui.login_button
 import dev.dimension.flare.compose.ui.mastodon_login_verify_message
 import dev.dimension.flare.compose.ui.service_select_compatibility_warning
@@ -521,6 +526,11 @@ public fun ServiceSelectionScreenContent(
                                     )
                                 }
                             }
+                            LoginAgreement(
+                                platformType = nodeData.platformType,
+                                host = nodeData.host,
+                                openUri = openUri,
+                            )
                         }
                     }
                 }
@@ -656,4 +666,53 @@ private fun ServiceSelectItem(
             )
         }
     }
+}
+
+@Composable
+private fun LoginAgreement(
+    platformType: PlatformType,
+    host: String,
+    openUri: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (platformType == PlatformType.VVo) return
+    val linkText = stringResource(Res.string.eula_privacy_policy)
+    val fullText = stringResource(Res.string.login_agreement, linkText)
+    val color = PlatformTheme.colorScheme.primary
+    val annotatedString =
+        remember {
+            val url =
+                when (platformType) {
+                    PlatformType.Bluesky -> "https://bsky.social/about/support/tos"
+                    PlatformType.xQt -> "https://help.x.com/en/rules-and-policies/x-rules"
+                    else -> "https://$host/about"
+                }
+            buildAnnotatedString {
+                append(fullText)
+                val startIndex = fullText.indexOf(linkText)
+                if (startIndex != -1) {
+                    val endIndex = startIndex + linkText.length
+                    addStyle(
+                        style =
+                            SpanStyle(
+                                color = color,
+                            ),
+                        start = startIndex,
+                        end = endIndex,
+                    )
+                    addLink(
+                        url = LinkAnnotation.Url(url),
+                        start = startIndex,
+                        end = endIndex,
+                    )
+                }
+            }
+        }
+
+    PlatformText(
+        text = annotatedString,
+        modifier = modifier,
+        style = PlatformTheme.typography.caption,
+        textAlign = TextAlign.Center,
+    )
 }

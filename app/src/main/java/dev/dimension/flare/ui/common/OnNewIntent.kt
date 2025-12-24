@@ -17,14 +17,11 @@ private fun Context.getActivity(): Activity {
 
 @Composable
 fun OnNewIntent(
-    key1: Any? = null,
-    key2: Any? = null,
-    key3: Any? = null,
     withOnCreateIntent: Boolean = false,
     onNewIntent: (Intent) -> Unit,
 ) {
     val context = LocalContext.current
-    DisposableEffect(key1 = key1, key2 = key2, key3 = key3) {
+    DisposableEffect(Unit) {
         val activity = (context.getActivity() as ComponentActivity)
         val listener =
             Consumer<Intent> {

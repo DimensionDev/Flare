@@ -1,6 +1,8 @@
 package dev.dimension.flare.data.repository
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.produceState
@@ -34,6 +36,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 
+@Stable
 public class AccountRepository internal constructor(
     private val appDatabase: AppDatabase,
     private val coroutineScope: CoroutineScope,
@@ -142,6 +145,7 @@ public class AccountRepository internal constructor(
 
 public data object NoActiveAccountException : Exception("No active account.")
 
+@Immutable
 public data class LoginExpiredException(
     val accountKey: MicroBlogKey,
     val platformType: PlatformType,

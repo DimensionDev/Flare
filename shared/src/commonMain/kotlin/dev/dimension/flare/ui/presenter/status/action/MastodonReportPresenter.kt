@@ -9,8 +9,8 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -33,11 +33,10 @@ public class MastodonReportPresenter(
                     accountServiceFlow(
                         accountType = accountType,
                         repository = accountRepository,
-                    ).map {
-                        require(it is MastodonDataSource)
-                        it
-                    }.first()
-                        .report(userKey, statusKey)
+                    ).mapNotNull {
+                        it as? MastodonDataSource
+                    }.firstOrNull()
+                        ?.report(userKey, statusKey)
                 }
             }
         }

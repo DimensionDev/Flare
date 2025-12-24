@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.slapps.cupertino.CupertinoDropdownMenu
+import com.slapps.cupertino.CupertinoHorizontalDivider
 import com.slapps.cupertino.CupertinoMenuScope
 import com.slapps.cupertino.ExperimentalCupertinoApi
 import com.slapps.cupertino.MenuAction
@@ -160,4 +161,9 @@ internal actual fun PlatformDropdownMenuScope.PlatformDropdownMenuItem(
             leadingIcon?.invoke()
         },
     )
+}
+
+@Composable
+internal actual fun PlatformDropdownMenuScope.PlatformDropdownMenuDivider() {
+    CupertinoHorizontalDivider()
 }

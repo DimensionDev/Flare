@@ -3,10 +3,12 @@ package dev.dimension.flare.ui.model
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
-import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.persistentListOf
 import moe.tlaster.twitter.parser.CashTagToken
 import moe.tlaster.twitter.parser.EmojiToken
@@ -29,14 +31,14 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node =
     when (this) {
         is CashTagToken ->
             Element("a").apply {
-                attributes().put("href", AppDeepLink.Search(accountKey, value))
+                attributes().put("href", DeeplinkRoute.Search(AccountType.Specific(accountKey), value).toUri())
                 addChildren(TextNode(value))
             }
         // not supported
         is EmojiToken -> TextNode(value)
         is HashTagToken ->
             Element("a").apply {
-                attributes().put("href", AppDeepLink.Search(accountKey, value))
+                attributes().put("href", DeeplinkRoute.Search(AccountType.Specific(accountKey), value).toUri())
                 addChildren(TextNode(value))
             }
 
@@ -62,11 +64,12 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node =
             Element("a").apply {
                 attributes().put(
                     "href",
-                    AppDeepLink.ProfileWithNameAndHost(
-                        accountKey,
-                        value.trimStart('@'),
-                        accountKey.host,
-                    ),
+                    DeeplinkRoute.Profile
+                        .UserNameWithHost(
+                            accountType = AccountType.Specific(accountKey),
+                            userName = value.trimStart('@'),
+                            host = accountKey.host,
+                        ).toUri(),
                 )
                 addChildren(TextNode(value))
             }
@@ -109,7 +112,7 @@ public fun createSampleStatus(user: UiUserV2): UiTimeline =
                                     .apply {
                                         attributes().put(
                                             "href",
-                                            AppDeepLink.Search(user.key, "#flare"),
+                                            DeeplinkRoute.Search(AccountType.Specific(user.key), "#flare").toUri(),
                                         )
                                         addChildren(TextNode("#flare"))
                                     },
@@ -117,21 +120,25 @@ public fun createSampleStatus(user: UiUserV2): UiTimeline =
                         }.toUi(),
                 actions =
                     persistentListOf(
-                        StatusAction.Item.Reply(
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.Reply,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
                             count = UiNumber(10),
-                            onClicked = {},
                         ),
-                        StatusAction.Item.Retweet(
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.Retweet,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Retweet),
                             count = UiNumber(20),
-                            onClicked = {},
-                            retweeted = false,
                         ),
-                        StatusAction.Item.Like(
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.Like,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Like),
                             count = UiNumber(30),
-                            onClicked = {},
-                            liked = false,
                         ),
-                        StatusAction.Item.More,
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.More,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                        ),
                     ),
                 poll = null,
                 statusKey = MicroBlogKey(id = "123", host = user.key.host),

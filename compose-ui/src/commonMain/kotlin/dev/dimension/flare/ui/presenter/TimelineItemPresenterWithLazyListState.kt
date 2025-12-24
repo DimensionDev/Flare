@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -20,6 +21,7 @@ public class TimelineItemPresenterWithLazyListState(
     private val timelineTabItem: TimelineTabItem,
     private val lazyStaggeredGridState: LazyStaggeredGridState? = null,
 ) : PresenterBase<TimelineItemPresenterWithLazyListState.State>() {
+    @Immutable
     public interface State : TimelineItemPresenter.State {
         public val showNewToots: Boolean
         public val lazyListState: LazyStaggeredGridState

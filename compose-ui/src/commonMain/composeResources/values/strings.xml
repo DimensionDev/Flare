@@ -120,11 +120,13 @@
     <string name="fx_share">Share via FxEmbed</string>
     <string name="comment">Comment</string>
 
-    <string name="user_report">Report %1$s</string>
-    <string name="user_block">Block %1$s</string>
-    <string name="user_unblock">Unblock %1$s</string>
-    <string name="user_mute">Mute %1$s</string>
-    <string name="user_unmute">Unmute %1$s</string>
+    <string name="user_report">Report</string>
+    <string name="user_block">Block</string>
+    <string name="user_unblock">Unblock</string>
+    <string name="user_mute">Mute</string>
+    <string name="user_unmute">Unmute</string>
+    <string name="user_mute_with_parameter">Mute %1$s</string>
+    <string name="user_block_with_parameter">Block %1$s</string>
     <string name="mastodon_item_content_warning">Content warning</string>
     <string name="reply_to">Reply to %1$s</string>
     <string name="status_detail_translate">Translate Post</string>
@@ -453,6 +455,8 @@
     <string name="service_select_next_button">Next</string>
     <string name="service_select_empty_message">No instances found</string>
     <string name="service_select_compatibility_warning">This server uses %1$s, Flare will run in compatibility mode. Some features may not work properly.</string>
+    <string name="login_agreement">By logging in, you agree to the %1$s.</string>
+    <string name="eula_privacy_policy">EULA and Privacy Policy</string>
 
     <string name="home_tab_home_title">Home</string>
     <string name="home_tab_notifications_title">Notifications</string>

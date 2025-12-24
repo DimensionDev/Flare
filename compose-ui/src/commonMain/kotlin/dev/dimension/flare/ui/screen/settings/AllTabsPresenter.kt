@@ -100,6 +100,7 @@ public class AllTabsPresenter(
             }.body()
         }
 
+    @Immutable
     public interface State {
         public val defaultTabs: ImmutableList<TabItem>
         public val rssTabs: ImmutableList<TimelineTabItem>

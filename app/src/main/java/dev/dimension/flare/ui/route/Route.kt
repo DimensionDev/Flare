@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.route
 
+import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
@@ -8,6 +9,7 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.serialization.Serializable
 
+@Immutable
 @Serializable
 internal sealed interface Route : NavKey {
     @Serializable
@@ -412,6 +414,24 @@ internal sealed interface Route : NavKey {
         val data: ImmutableMap<MicroBlogKey, Route>,
     ) : Route
 
+    @Serializable
+    public data class BlockUser(
+        val accountType: AccountType?,
+        val userKey: MicroBlogKey,
+    ) : Route
+
+    @Serializable
+    public data class MuteUser(
+        val accountType: AccountType?,
+        val userKey: MicroBlogKey,
+    ) : Route
+
+    @Serializable
+    public data class ReportUser(
+        val accountType: AccountType?,
+        val userKey: MicroBlogKey,
+    ) : Route
+
     companion object {
         public fun parse(url: String): Route? {
             val deeplinkRoute = DeeplinkRoute.parse(url) ?: return null
@@ -553,6 +573,32 @@ internal sealed interface Route : NavKey {
                     Status.VVOStatus(
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
+                    )
+
+                is DeeplinkRoute.BlockUser ->
+                    Route.BlockUser(
+                        accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
+                        userKey = deeplinkRoute.userKey,
+                    )
+                is DeeplinkRoute.DirectMessage ->
+                    DM.UserConversation(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
+                        userKey = deeplinkRoute.userKey,
+                    )
+                is DeeplinkRoute.EditUserList ->
+                    Lists.EditAccountList(
+                        accountType = AccountType.Specific(deeplinkRoute.accountKey),
+                        userKey = deeplinkRoute.userKey,
+                    )
+                is DeeplinkRoute.MuteUser ->
+                    Route.MuteUser(
+                        accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
+                        userKey = deeplinkRoute.userKey,
+                    )
+                is DeeplinkRoute.ReportUser ->
+                    Route.ReportUser(
+                        accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
+                        userKey = deeplinkRoute.userKey,
                     )
             }
         }

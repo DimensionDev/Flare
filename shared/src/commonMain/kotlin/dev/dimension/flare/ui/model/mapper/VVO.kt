@@ -3,14 +3,14 @@ package dev.dimension.flare.ui.model.mapper
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
-import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.mastodon.api.model.MastodonList
 import dev.dimension.flare.data.network.vvo.model.Attitude
 import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
 import dev.dimension.flare.data.network.vvo.model.User
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost
@@ -23,6 +23,8 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.decodeURLPart
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -174,65 +176,99 @@ internal fun Status.renderStatus(
         actions =
             listOfNotNull(
                 if (canReblog) {
-                    StatusAction.Item.Reply(
+                    ActionMenu.Item(
+                        icon = ActionMenu.Item.Icon.Reply,
+                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
                         count = UiNumber(repostsCount?.content?.toLongOrNull() ?: 0),
                         onClicked = {
                             launcher.launch(
-                                AppDeepLink.Compose.Quote(
-                                    accountKey = accountKey,
-                                    statusKey = statusKey,
-                                ),
+                                DeeplinkRoute.Compose
+                                    .Quote(
+                                        accountKey = accountKey,
+                                        statusKey = statusKey,
+                                    ).toUri(),
                             )
                         },
                     )
                 } else {
                     null
                 },
-                StatusAction.Item.Comment(
+                ActionMenu.Item(
+                    icon = ActionMenu.Item.Icon.Comment,
+                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Comment),
                     count = UiNumber(commentsCount ?: 0),
                     onClicked = {
                         launcher.launch(
-                            AppDeepLink.Compose.Reply(
-                                accountKey = accountKey,
-                                statusKey = statusKey,
-                            ),
+                            DeeplinkRoute.Compose
+                                .Reply(
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
+                                ).toUri(),
                         )
                     },
                 ),
-                StatusAction.Item.Like(
+                ActionMenu.Item(
+                    icon = if (liked == true) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
+                    text =
+                        ActionMenu.Item.Text.Localized(
+                            if (liked == true) ActionMenu.Item.Text.Localized.Type.Unlike else ActionMenu.Item.Text.Localized.Type.Like,
+                        ),
                     count = UiNumber(attitudesCount ?: 0),
-                    liked = liked ?: false,
+                    color = if (liked == true) ActionMenu.Item.Color.Red else null,
                     onClicked = {
                         event.like(statusKey, liked ?: false)
                     },
                 ),
-                StatusAction.Group(
-                    displayItem = StatusAction.Item.More,
+                ActionMenu.Group(
+                    displayItem =
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.More,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                        ),
                     actions =
                         listOfNotNull(
-                            StatusAction.Item.Bookmark(
+                            ActionMenu.Item(
+                                icon = if (favorited == true) ActionMenu.Item.Icon.Unbookmark else ActionMenu.Item.Icon.Bookmark,
+                                text =
+                                    ActionMenu.Item.Text.Localized(
+                                        if (favorited ==
+                                            true
+                                        ) {
+                                            ActionMenu.Item.Text.Localized.Type.Unbookmark
+                                        } else {
+                                            ActionMenu.Item.Text.Localized.Type.Bookmark
+                                        },
+                                    ),
                                 count = UiNumber(0),
-                                bookmarked = favorited ?: false,
                                 onClicked = {
                                     event.favorite(statusKey, favorited ?: false)
                                 },
                             ),
-                            StatusAction.Item.Share(
-                                content = url,
+                            ActionMenu.Item(
+                                icon = ActionMenu.Item.Icon.Share,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
+                                shareContent = url,
                             ),
                             if (isFromMe) {
-                                StatusAction.Item.Delete(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Delete,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                    color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
-                                            AppDeepLink.DeleteStatus(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                            ),
+                                            DeeplinkRoute.Status
+                                                .DeleteConfirm(
+                                                    accountType = AccountType.Specific(accountKey),
+                                                    statusKey = statusKey,
+                                                ).toUri(),
                                         )
                                     },
                                 )
                             } else {
-                                StatusAction.Item.Report(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Report,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                    color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         // TODO: Report
                                     },
@@ -246,27 +282,29 @@ internal fun Status.renderStatus(
         sensitive = false,
         onClicked = {
             launcher.launch(
-                AppDeepLink.VVO.StatusDetail(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                ),
+                DeeplinkRoute.Status
+                    .VVOStatus(
+                        statusKey = statusKey,
+                        accountType = AccountType.Specific(accountKey),
+                    ).toUri(),
             )
         },
         platformType = PlatformType.VVo,
         onMediaClicked = { media, index ->
             launcher.launch(
-                AppDeepLink.StatusMedia(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                    mediaIndex = index,
-                    preview =
-                        when (media) {
-                            is UiMedia.Image -> media.previewUrl
-                            is UiMedia.Video -> media.thumbnailUrl
-                            is UiMedia.Audio -> null
-                            is UiMedia.Gif -> media.previewUrl
-                        },
-                ),
+                DeeplinkRoute.Media
+                    .StatusMedia(
+                        accountType = AccountType.Specific(accountKey),
+                        statusKey = statusKey,
+                        index = index,
+                        preview =
+                            when (media) {
+                                is UiMedia.Image -> media.previewUrl
+                                is UiMedia.Video -> media.thumbnailUrl
+                                is UiMedia.Audio -> null
+                                is UiMedia.Gif -> media.previewUrl
+                            },
+                    ).toUri(),
             )
         },
         url = url,
@@ -329,7 +367,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                 },
         platformType = PlatformType.VVo,
         onClicked = {
-            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
         },
     )
 }
@@ -395,10 +433,11 @@ internal fun Comment.renderStatus(
                         ).copy(
                             onClicked = {
                                 launcher.launch(
-                                    AppDeepLink.VVO.CommentDetail(
-                                        accountKey = accountKey,
-                                        statusKey = statusKey,
-                                    ),
+                                    DeeplinkRoute.Status
+                                        .VVOComment(
+                                            commentKey = statusKey,
+                                            accountType = AccountType.Specific(accountKey),
+                                        ).toUri(),
                                 )
                             },
                         )
@@ -434,46 +473,67 @@ internal fun Comment.renderStatus(
         actions =
             listOfNotNull(
                 statusMid?.let {
-                    StatusAction.Item.Comment(
+                    ActionMenu.Item(
+                        icon = ActionMenu.Item.Icon.Comment,
+                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Comment),
                         count = UiNumber(totalNumber ?: 0),
                         onClicked = {
                             launcher.launch(
-                                AppDeepLink.VVO.ReplyToComment(
-                                    accountKey = accountKey,
-                                    replyTo = statusKey,
-                                    rootId = statusMid,
-                                ),
+                                DeeplinkRoute.Compose
+                                    .VVOReplyComment(
+                                        accountKey = accountKey,
+                                        replyTo = statusKey,
+                                        rootId = statusMid,
+                                    ).toUri(),
                             )
                         },
                     )
                 },
-                StatusAction.Item.Like(
+                ActionMenu.Item(
+                    icon = if (liked == true) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
+                    text =
+                        ActionMenu.Item.Text.Localized(
+                            if (liked == true) ActionMenu.Item.Text.Localized.Type.Unlike else ActionMenu.Item.Text.Localized.Type.Like,
+                        ),
                     count = UiNumber(likeCount ?: 0),
-                    liked = liked ?: false,
+                    color = if (liked == true) ActionMenu.Item.Color.Red else null,
                     onClicked = {
                         event.likeComment(statusKey, liked ?: false)
                     },
                 ),
-                StatusAction.Group(
-                    displayItem = StatusAction.Item.More,
+                ActionMenu.Group(
+                    displayItem =
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.More,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                        ),
                     actions =
                         listOfNotNull(
-                            StatusAction.Item.Share(
-                                content = url,
+                            ActionMenu.Item(
+                                icon = ActionMenu.Item.Icon.Share,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
+                                shareContent = url,
                             ),
                             if (isFromMe) {
-                                StatusAction.Item.Delete(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Delete,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                    color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         launcher.launch(
-                                            AppDeepLink.DeleteStatus(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                            ),
+                                            DeeplinkRoute.Status
+                                                .DeleteConfirm(
+                                                    accountType = AccountType.Specific(accountKey),
+                                                    statusKey = statusKey,
+                                                ).toUri(),
                                         )
                                     },
                                 )
                             } else {
-                                StatusAction.Item.Report(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Report,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                    color = ActionMenu.Item.Color.Red,
                                     onClicked = {
                                         // TODO: Report
                                     },
@@ -487,35 +547,38 @@ internal fun Comment.renderStatus(
         onClicked = {
             if (status != null) {
                 launcher.launch(
-                    AppDeepLink.VVO.StatusDetail(
-                        accountKey = accountKey,
-                        statusKey = status.renderStatus(accountKey, event).statusKey,
-                    ),
+                    DeeplinkRoute.Status
+                        .VVOStatus(
+                            statusKey = status.renderStatus(accountKey, event).statusKey,
+                            accountType = AccountType.Specific(accountKey),
+                        ).toUri(),
                 )
             } else {
                 launcher.launch(
-                    AppDeepLink.VVO.CommentDetail(
-                        accountKey = accountKey,
-                        statusKey = statusKey,
-                    ),
+                    DeeplinkRoute.Status
+                        .VVOComment(
+                            commentKey = statusKey,
+                            accountType = AccountType.Specific(accountKey),
+                        ).toUri(),
                 )
             }
         },
         platformType = PlatformType.VVo,
         onMediaClicked = { media, index ->
             launcher.launch(
-                AppDeepLink.StatusMedia(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                    mediaIndex = index,
-                    preview =
-                        when (media) {
-                            is UiMedia.Image -> media.previewUrl
-                            is UiMedia.Video -> media.thumbnailUrl
-                            is UiMedia.Audio -> null
-                            is UiMedia.Gif -> media.previewUrl
-                        },
-                ),
+                DeeplinkRoute.Media
+                    .StatusMedia(
+                        accountType = AccountType.Specific(accountKey),
+                        statusKey = statusKey,
+                        index = index,
+                        preview =
+                            when (media) {
+                                is UiMedia.Image -> media.previewUrl
+                                is UiMedia.Video -> media.thumbnailUrl
+                                is UiMedia.Audio -> null
+                                is UiMedia.Gif -> media.previewUrl
+                            },
+                    ).toUri(),
             )
         },
         url = url,
@@ -542,10 +605,11 @@ internal fun Attitude.render(
                 onClicked = {
                     if (user != null) {
                         launcher.launch(
-                            AppDeepLink.Profile(
-                                accountKey = accountKey,
-                                userKey = user.key,
-                            ),
+                            DeeplinkRoute.Profile
+                                .User(
+                                    accountType = AccountType.Specific(accountKey),
+                                    userKey = user.key,
+                                ).toUri(),
                         )
                     }
                 },
@@ -579,27 +643,29 @@ private fun replaceMentionAndHashtag(
                 val statusId = href
                 node.attributes().put(
                     "href",
-                    AppDeepLink.VVO.StatusDetail(
-                        accountKey = accountKey,
-                        statusKey = MicroBlogKey(statusId, accountKey.host),
-                    ),
+                    DeeplinkRoute.Status
+                        .VVOStatus(
+                            statusKey = MicroBlogKey(statusId, accountKey.host),
+                            accountType = AccountType.Specific(accountKey),
+                        ).toUri(),
                 )
             } else if (href.startsWith("/n/")) {
                 val id = href.removePrefix("/n/")
                 if (id.isNotEmpty()) {
                     node.attributes().put(
                         "href",
-                        AppDeepLink.ProfileWithNameAndHost(
-                            accountKey = accountKey,
-                            userName = id,
-                            host = accountKey.host,
-                        ),
+                        DeeplinkRoute.Profile
+                            .UserNameWithHost(
+                                accountType = AccountType.Specific(accountKey),
+                                userName = id,
+                                host = accountKey.host,
+                            ).toUri(),
                     )
                 }
             } else if (href.startsWith("https://$vvoHost/search")) {
                 node.attributes().put(
                     "href",
-                    AppDeepLink.Search(accountKey, node.text()),
+                    DeeplinkRoute.Search(AccountType.Specific(accountKey), node.text()).toUri(),
                 )
             } else if (href.startsWith("https://$vvoHostShort/sinaurl?u=")) {
                 val url =
@@ -607,7 +673,7 @@ private fun replaceMentionAndHashtag(
                 if (url.contains("sinaimg.cn/")) {
                     node.attributes().put(
                         "href",
-                        AppDeepLink.RawImage(url),
+                        DeeplinkRoute.Media.Image(uri = url, previewUrl = null).toUri(),
                     )
                 }
             }

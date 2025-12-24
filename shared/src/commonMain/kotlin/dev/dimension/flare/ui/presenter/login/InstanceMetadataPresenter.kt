@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.login
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -19,6 +20,7 @@ public class InstanceMetadataPresenter(
     private val host: String,
     private val platformType: PlatformType = PlatformType.Mastodon,
 ) : PresenterBase<InstanceMetadataPresenter.State>() {
+    @Immutable
     public interface State {
         public val data: UiState<UiInstanceMetadata>
     }

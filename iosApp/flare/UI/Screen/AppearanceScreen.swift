@@ -84,13 +84,13 @@ struct AppearanceScreen: View {
                             settings.copy(postActionStyle: newValue)
                         }
                     })) {
-                        Text("appearance_ost_action_style_hidden").tag(PostActionStyle.hidden)
-                        Text("appearance_ost_action_style_left_aligned").tag(PostActionStyle.leftAligned)
-                        Text("appearance_ost_action_style_right_aligned").tag(PostActionStyle.rightAligned)
-                        Text("appearance_ost_action_style_stretch").tag(PostActionStyle.stretch)
+                        Text("appearance_post_action_style_hidden").tag(PostActionStyle.hidden)
+                        Text("appearance_post_action_style_left_aligned").tag(PostActionStyle.leftAligned)
+                        Text("appearance_post_action_style_right_aligned").tag(PostActionStyle.rightAligned)
+                        Text("appearance_post_action_style_stretch").tag(PostActionStyle.stretch)
                     } label: {
                         Text("appearance_post_action_style")
-                        Text("appearance_ost_action_style_description")
+                        Text("appearance_post_action_style_description")
                     }
                     
                     if appearance.postActionStyle != .hidden {

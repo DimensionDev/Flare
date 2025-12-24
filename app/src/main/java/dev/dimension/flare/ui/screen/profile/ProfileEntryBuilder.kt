@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.profile
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.scene.DialogSceneStrategy
 import dev.dimension.flare.ui.route.Route
 
 internal fun EntryProviderScope<NavKey>.profileEntryBuilder(
@@ -210,4 +211,36 @@ internal fun EntryProviderScope<NavKey>.profileEntryBuilder(
             }
         )
     }
+
+    entry<Route.BlockUser>(
+        metadata = DialogSceneStrategy.dialog()
+    ) {
+        BlockUserDialog(
+            accountType = it.accountType,
+            userKey = it.userKey,
+            onBack = onBack,
+        )
+    }
+
+    entry<Route.MuteUser>(
+        metadata = DialogSceneStrategy.dialog()
+    ) {
+        MuteUserDialog(
+            accountType = it.accountType,
+            userKey = it.userKey,
+            onBack = onBack,
+        )
+    }
+
+    entry<Route.ReportUser>(
+        metadata = DialogSceneStrategy.dialog()
+    ) {
+        ReportUserDialog(
+            accountType = it.accountType,
+            userKey = it.userKey,
+            onBack = onBack,
+        )
+    }
+
+
 }

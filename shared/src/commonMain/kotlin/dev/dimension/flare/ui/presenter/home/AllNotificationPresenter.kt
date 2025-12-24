@@ -45,6 +45,7 @@ public class AllNotificationPresenter :
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
 
+    @androidx.compose.runtime.Immutable
     public interface State {
         public val notifications: ImmutableMap<UiProfile, Int>
         public val supportedNotificationFilters: UiState<ImmutableList<NotificationFilter>>

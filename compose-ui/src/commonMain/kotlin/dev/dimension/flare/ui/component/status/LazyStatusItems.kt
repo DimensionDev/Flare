@@ -26,7 +26,6 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleExclamation
 import compose.icons.fontawesomeicons.solid.File
 import compose.icons.fontawesomeicons.solid.FileCircleExclamation
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onEndOfList
@@ -45,6 +44,8 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
@@ -258,7 +259,7 @@ private fun LoginExpiredError(
         modifier =
             modifier
                 .clickable {
-                    uriHandler.openUri(AppDeepLink.LOGIN)
+                    uriHandler.openUri(DeeplinkRoute.Login.toUri())
                 },
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,

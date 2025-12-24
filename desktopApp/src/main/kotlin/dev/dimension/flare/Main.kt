@@ -14,7 +14,6 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
-import dev.dimension.flare.common.APPSCHEMA
 import dev.dimension.flare.common.DeeplinkHandler
 import dev.dimension.flare.common.FlareWindowManager
 import dev.dimension.flare.common.NativeWindowBridge
@@ -25,6 +24,7 @@ import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.di.composeUiModule
 import dev.dimension.flare.di.desktopModule
+import dev.dimension.flare.ui.route.APPSCHEMA
 import dev.dimension.flare.ui.route.FloatingWindowState
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.WindowRouter

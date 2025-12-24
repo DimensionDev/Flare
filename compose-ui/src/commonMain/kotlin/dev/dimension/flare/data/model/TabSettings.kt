@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.model
 
+import androidx.compose.runtime.Immutable
 import androidx.datastore.core.okio.OkioSerializer
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -27,6 +28,7 @@ import kotlinx.serialization.protobuf.ProtoBuf
 import okio.BufferedSink
 import okio.BufferedSource
 
+@Immutable
 @Serializable
 public data class TabSettings(
     val secondaryItems: List<TabItem>? = null,
@@ -34,6 +36,7 @@ public data class TabSettings(
     val mainTabs: List<TimelineTabItem> = listOf(),
 )
 
+@Immutable
 @Serializable
 public sealed class TabItem {
     // for iOS
@@ -47,6 +50,7 @@ public sealed class TabItem {
     public abstract fun update(metaData: TabMetaData = this.metaData): TabItem
 }
 
+@Immutable
 @Serializable
 public data class TabMetaData(
     val title: TitleType,
@@ -55,11 +59,13 @@ public data class TabMetaData(
 
 @Serializable
 public sealed class TitleType {
+    @Immutable
     @Serializable
     public data class Text(
         val content: String,
     ) : TitleType()
 
+    @Immutable
     @Serializable
     public data class Localized(
         val key: LocalizedKey,
@@ -91,21 +97,25 @@ public sealed class TitleType {
 
 @Serializable
 public sealed class IconType {
+    @Immutable
     @Serializable
     public data class Avatar(
         val userKey: MicroBlogKey,
     ) : IconType()
 
+    @Immutable
     @Serializable
     public data class Url(
         val url: String,
     ) : IconType()
 
+    @Immutable
     @Serializable
     public data class FavIcon(
         val host: String,
     ) : IconType()
 
+    @Immutable
     @Serializable
     public data class Material(
         val icon: MaterialIcon,
@@ -134,6 +144,7 @@ public sealed class IconType {
         }
     }
 
+    @Immutable
     @Serializable
     public data class Mixed(
         val icon: Material.MaterialIcon,
@@ -155,6 +166,7 @@ public data object AllNotificationTabItem : TabItem() {
 }
 
 // keep this here for compatibility
+@Immutable
 @Serializable
 public data class NotificationTabItem(
     override val account: AccountType,
@@ -165,6 +177,7 @@ public data class NotificationTabItem(
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
+@Immutable
 @Serializable
 public sealed class TimelineTabItem : TabItem() {
     public abstract fun createPresenter(): TimelinePresenter
@@ -595,6 +608,7 @@ public sealed class TimelineTabItem : TabItem() {
     }
 }
 
+@Immutable
 @Serializable
 public data class HomeTimelineTabItem(
     override val metaData: TabMetaData,
@@ -626,6 +640,7 @@ public data class HomeTimelineTabItem(
         )
 }
 
+@Immutable
 @Serializable
 public data class MixedTimelineTabItem(
     val subTimelineTabItem: List<TimelineTabItem>,
@@ -651,6 +666,7 @@ public data class MixedTimelineTabItem(
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
+@Immutable
 @Serializable
 public data class ListTimelineTabItem(
     override val account: AccountType,
@@ -678,6 +694,7 @@ public data class ListTimelineTabItem(
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
+@Immutable
 @Serializable
 public data class AllListTabItem(
     override val account: AccountType,
@@ -689,6 +706,7 @@ public data class AllListTabItem(
 }
 
 public object Mastodon {
+    @Immutable
     @Serializable
     public data class LocalTimelineTabItem(
         override val account: AccountType,
@@ -703,6 +721,7 @@ public object Mastodon {
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
+    @Immutable
     @Serializable
     public data class PublicTimelineTabItem(
         override val account: AccountType,
@@ -717,6 +736,7 @@ public object Mastodon {
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
+    @Immutable
     @Serializable
     public data class BookmarkTimelineTabItem(
         override val account: AccountType,
@@ -731,6 +751,7 @@ public object Mastodon {
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
+    @Immutable
     @Serializable
     public data class FavouriteTimelineTabItem(
         override val account: AccountType,
@@ -747,6 +768,7 @@ public object Mastodon {
 }
 
 public object Misskey {
+    @Immutable
     @Serializable
     public data class LocalTimelineTabItem(
         override val account: AccountType,
@@ -761,6 +783,7 @@ public object Misskey {
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
+    @Immutable
     @Serializable
     public data class GlobalTimelineTabItem(
         override val account: AccountType,
@@ -775,6 +798,7 @@ public object Misskey {
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
+    @Immutable
     @Serializable
     public data class HybridTimelineTabItem(
         override val account: AccountType,
@@ -789,6 +813,7 @@ public object Misskey {
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
+    @Immutable
     @Serializable
     public data class FavouriteTimelineTabItem(
         override val account: AccountType,
@@ -803,6 +828,7 @@ public object Misskey {
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
+    @Immutable
     @Serializable
     public data class AntennasListTabItem(
         override val account: AccountType,
@@ -813,6 +839,7 @@ public object Misskey {
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
+    @Immutable
     @Serializable
     public data class AntennasTimelineTabItem(
         val antennasId: String,
@@ -844,6 +871,7 @@ public object Misskey {
 }
 
 public object XQT {
+    @Immutable
     @Serializable
     public data class FeaturedTimelineTabItem(
         override val account: AccountType,
@@ -858,6 +886,7 @@ public object XQT {
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
+    @Immutable
     @Serializable
     public data class BookmarkTimelineTabItem(
         override val account: AccountType,
@@ -874,6 +903,7 @@ public object XQT {
 }
 
 public object Bluesky {
+    @Immutable
     @Serializable
     public data class FeedsTabItem(
         override val account: AccountType,
@@ -884,6 +914,7 @@ public object Bluesky {
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
+    @Immutable
     @Serializable
     public data class FeedTabItem(
         override val account: AccountType,
@@ -913,6 +944,7 @@ public object Bluesky {
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
+    @Immutable
     @Serializable
     public data class BookmarkTimelineTabItem(
         override val account: AccountType,
@@ -939,6 +971,7 @@ public object Bluesky {
 }
 
 public object VVo {
+    @Immutable
     @Serializable
     public data class FeaturedTimelineTabItem(
         override val account: AccountType,
@@ -953,6 +986,7 @@ public object VVo {
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
+    @Immutable
     @Serializable
     public data class FavoriteTimelineTabItem(
         override val account: AccountType,
@@ -967,6 +1001,7 @@ public object VVo {
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
 
+    @Immutable
     @Serializable
     public data class LikedTimelineTabItem(
         override val account: AccountType,
@@ -982,6 +1017,7 @@ public object VVo {
     }
 }
 
+@Immutable
 @Serializable
 public data class RssTimelineTabItem(
     val feedUrl: String,
@@ -1023,6 +1059,7 @@ public data class RssTimelineTabItem(
 //    )
 }
 
+@Immutable
 @Serializable
 public data class AllRssTimelineTabItem(
     override val metaData: TabMetaData =
@@ -1041,6 +1078,7 @@ public data class AllRssTimelineTabItem(
             .AllRssTimelinePresenter()
 }
 
+@Immutable
 @Serializable
 public data class ProfileTabItem(
     override val account: AccountType,
@@ -1065,6 +1103,7 @@ public data class ProfileTabItem(
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
+@Immutable
 @Serializable
 public data class DiscoverTabItem(
     override val account: AccountType,
@@ -1091,6 +1130,7 @@ public data object SettingsTabItem : TabItem() {
     override fun update(metaData: TabMetaData): TabItem = this
 }
 
+@Immutable
 @Serializable
 public data class DirectMessageTabItem(
     override val account: AccountType,
@@ -1101,6 +1141,7 @@ public data class DirectMessageTabItem(
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
+@Immutable
 @Serializable
 public data class RssTabItem(
     override val metaData: TabMetaData,

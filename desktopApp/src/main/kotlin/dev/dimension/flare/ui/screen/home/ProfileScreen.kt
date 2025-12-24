@@ -90,9 +90,6 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     userName: String,
     host: String,
     accountType: AccountType,
-    toEditAccountList: (userKey: MicroBlogKey) -> Unit,
-    toSearchUserUsingAccount: (String, MicroBlogKey) -> Unit,
-    toStartMessage: (MicroBlogKey) -> Unit,
     onFollowListClick: (userKey: MicroBlogKey) -> Unit,
     onFansListClick: (userKey: MicroBlogKey) -> Unit,
     onBack: () -> Unit = {},
@@ -108,11 +105,6 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
         .onSuccess {
             ProfileScreen(
                 accountType = accountType,
-                toEditAccountList = {
-                    toEditAccountList(it.key)
-                },
-                toSearchUserUsingAccount = toSearchUserUsingAccount,
-                toStartMessage = toStartMessage,
                 onFollowListClick = onFollowListClick,
                 onFansListClick = onFansListClick,
                 userKey = it.key,
@@ -179,9 +171,6 @@ private fun profileWithUserNameAndHostPresenter(
 internal fun ProfileScreen(
     accountType: AccountType,
     userKey: MicroBlogKey?,
-    toEditAccountList: () -> Unit = {},
-    toSearchUserUsingAccount: (String, MicroBlogKey) -> Unit = { _, _ -> },
-    toStartMessage: (MicroBlogKey) -> Unit = {},
     onFollowListClick: (userKey: MicroBlogKey) -> Unit = {},
     onFansListClick: (userKey: MicroBlogKey) -> Unit = {},
 ) {
@@ -215,12 +204,7 @@ internal fun ProfileScreen(
                             menu = {
                                 ProfileMenu(
                                     profileState = state.state,
-                                    setShowMoreMenus = state::setShowMoreMenus,
-                                    showMoreMenus = state.showMoreMenus,
-                                    toEditAccountList = toEditAccountList,
-                                    accountsState = state.allAccountsState,
-                                    toSearchUserUsingAccount = toSearchUserUsingAccount,
-                                    toStartMessage = toStartMessage,
+                                    modifier = Modifier.padding(horizontal = 8.dp),
                                 )
                             },
                             onAvatarClick = {
@@ -264,12 +248,7 @@ internal fun ProfileScreen(
                                 menu = {
                                     ProfileMenu(
                                         profileState = state.state,
-                                        setShowMoreMenus = state::setShowMoreMenus,
-                                        showMoreMenus = state.showMoreMenus,
-                                        toEditAccountList = toEditAccountList,
-                                        accountsState = state.allAccountsState,
-                                        toSearchUserUsingAccount = toSearchUserUsingAccount,
-                                        toStartMessage = toStartMessage,
+                                        modifier = Modifier.padding(horizontal = 8.dp),
                                     )
                                 },
                                 onAvatarClick = {

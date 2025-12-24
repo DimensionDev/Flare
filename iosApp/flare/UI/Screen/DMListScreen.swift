@@ -78,6 +78,27 @@ extension DMListScreen {
     }
 }
 
+struct UserDMConversationScreen: View {
+    @StateObject private var presenter: KotlinPresenter<UserDMConversationPresenterState>
+    private let accountType: AccountType
+    
+    init(accountType: AccountType, userKey: MicroBlogKey) {
+        self.accountType = accountType
+        self._presenter = .init(wrappedValue: .init(presenter: UserDMConversationPresenter(accountType: accountType, userKey: userKey)))
+    }
+    
+    var body: some View {
+        StateView(state: presenter.state.roomKey) { roomKey in
+            DMConversationScreen(accountType: accountType, roomKey: roomKey)
+        } errorContent: { error in
+            ListErrorView(error: error) {
+                
+            }
+        } loadingContent: {
+            ProgressView()
+        }
+    }
+}
 
 struct DMConversationScreen: View {
     @State private var inputText: String = ""

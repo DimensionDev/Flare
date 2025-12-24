@@ -43,6 +43,12 @@ internal interface AuthenticatedMicroblogDataSource :
     fun notificationBadgeCount(): CacheData<Int> = Cacheable({ }, { flowOf(0) })
 }
 
+internal interface RelationDataSource {
+    suspend fun block(userKey: MicroBlogKey)
+
+    suspend fun mute(userKey: MicroBlogKey)
+}
+
 internal enum class ComposeType {
     New,
     Quote,

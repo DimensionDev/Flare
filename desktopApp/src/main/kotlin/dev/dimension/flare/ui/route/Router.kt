@@ -29,14 +29,17 @@ import dev.dimension.flare.ui.screen.dm.DmConversationScreen
 import dev.dimension.flare.ui.screen.dm.DmListScreen
 import dev.dimension.flare.ui.screen.dm.UserDMConversationScreen
 import dev.dimension.flare.ui.screen.feeds.FeedListScreen
+import dev.dimension.flare.ui.screen.home.BlockUserDialog
 import dev.dimension.flare.ui.screen.home.DeepLinkAccountPicker
 import dev.dimension.flare.ui.screen.home.DiscoverScreen
 import dev.dimension.flare.ui.screen.home.FansScreen
 import dev.dimension.flare.ui.screen.home.FollowingScreen
 import dev.dimension.flare.ui.screen.home.HomeTimelineScreen
+import dev.dimension.flare.ui.screen.home.MuteUserDialog
 import dev.dimension.flare.ui.screen.home.NotificationScreen
 import dev.dimension.flare.ui.screen.home.ProfileScreen
 import dev.dimension.flare.ui.screen.home.ProfileWithUserNameAndHostDeeplinkRoute
+import dev.dimension.flare.ui.screen.home.ReportUserDialog
 import dev.dimension.flare.ui.screen.home.SearchScreen
 import dev.dimension.flare.ui.screen.home.TabSettingScreen
 import dev.dimension.flare.ui.screen.home.TimelineScreen
@@ -351,23 +354,6 @@ internal fun WindowScope.RouteContent(
             ProfileScreen(
                 accountType = route.accountType,
                 userKey = route.userKey,
-                toEditAccountList = {},
-                toSearchUserUsingAccount = { keyword, accountKey ->
-                    navigate(
-                        Search(
-                            accountType = Specific(accountKey),
-                            keyword = keyword,
-                        ),
-                    )
-                },
-                toStartMessage = {
-                    navigate(
-                        Route.DmUserConversation(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
-                    )
-                },
                 onFollowListClick = {
                     navigate(
                         Route.Following(
@@ -465,23 +451,6 @@ internal fun WindowScope.RouteContent(
                 host = route.host,
                 accountType = route.accountType,
                 onBack = onBack,
-                toEditAccountList = {},
-                toSearchUserUsingAccount = { keyword, accountKey ->
-                    navigate(
-                        Search(
-                            accountType = Specific(accountKey),
-                            keyword = keyword,
-                        ),
-                    )
-                },
-                toStartMessage = {
-                    navigate(
-                        Route.DmUserConversation(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
-                    )
-                },
                 onFollowListClick = {
                     navigate(
                         Route.Following(
@@ -634,5 +603,24 @@ internal fun WindowScope.RouteContent(
 
         is Route.WebViewLogin ->
             WebViewLoginScreen(route = route)
+
+        is Route.BlockUser ->
+            BlockUserDialog(
+                accountType = route.accountType,
+                userKey = route.userKey,
+                onBack = onBack,
+            )
+        is Route.MuteUser ->
+            MuteUserDialog(
+                accountType = route.accountType,
+                userKey = route.userKey,
+                onBack = onBack,
+            )
+        is Route.ReportUser ->
+            ReportUserDialog(
+                accountType = route.accountType,
+                userKey = route.userKey,
+                onBack = onBack,
+            )
     }
 }

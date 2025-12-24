@@ -160,7 +160,7 @@ internal fun EditListScreen(
                                 ) {
                                     if (state.avatar != null) {
                                         NetworkImage(
-                                            model = state.avatar,
+                                            model = state.avatar.toString(),
                                             contentDescription = null,
                                             modifier =
                                                 Modifier

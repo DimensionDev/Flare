@@ -32,7 +32,6 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
 import compose.icons.fontawesomeicons.solid.EyeSlash
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.SystemUtils
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.status_sensitive_media
@@ -50,6 +49,8 @@ import dev.dimension.flare.ui.component.platform.PlatformVideoPlayer
 import dev.dimension.flare.ui.component.platform.rememberPlatformWifiState
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.stringResource
@@ -136,7 +137,7 @@ internal fun StatusMediaComponent(
                                                 ).clickable {
                                                     if (!requestShowFlyout.invoke()) {
                                                         media.description?.let {
-                                                            uriHandler.openUri(AppDeepLink.AltText(it))
+                                                            uriHandler.openUri(DeeplinkRoute.Status.AltText(it).toUri())
                                                         }
                                                     }
                                                 },

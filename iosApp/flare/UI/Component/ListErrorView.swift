@@ -17,7 +17,7 @@ struct ListErrorView: View {
                     .multilineTextAlignment(.center)
                     .font(.headline)
                 Button {
-                    openURL(URL(string: AppDeepLink.shared.LOGIN)!)
+                    openURL(URL(string: DeeplinkRoute.Login.shared.toUri())!)
                 } label: {
                     Text("error_login_expired_action")
                 }

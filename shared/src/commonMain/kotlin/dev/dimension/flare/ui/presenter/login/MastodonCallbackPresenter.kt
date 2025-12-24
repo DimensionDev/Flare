@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.mastodon.MastodonOAuthService
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
@@ -18,6 +17,7 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -70,7 +70,7 @@ public class MastodonCallbackPresenter(
                 baseUrl = "https://$host/",
                 client_name = "Flare",
                 website = "https://github.com/DimensionDev/Flare",
-                redirect_uri = AppDeepLink.Callback.MASTODON,
+                redirect_uri = DeeplinkRoute.Companion.Callback.MASTODON,
             )
         val accessTokenResponse = service.getAccessToken(code, application.application)
         requireNotNull(accessTokenResponse.accessToken) { "Invalid access token" }
@@ -127,7 +127,7 @@ internal suspend fun mastodonLoginUseCase(
                 baseUrl = baseUrl.toString(),
                 client_name = "Flare",
                 website = "https://github.com/DimensionDev/Flare",
-                redirect_uri = AppDeepLink.Callback.MASTODON,
+                redirect_uri = DeeplinkRoute.Companion.Callback.MASTODON,
             )
 
         val application =

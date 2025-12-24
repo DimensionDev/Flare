@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleExclamation
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.dm_deleted
 import dev.dimension.flare.compose.ui.dm_sending
@@ -38,6 +37,8 @@ import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
 import org.jetbrains.compose.resources.stringResource
 
@@ -130,7 +131,13 @@ public fun DMItem(
                                     .clip(PlatformTheme.shapes.large)
                                     .clickable {
                                         if (message.media is UiMedia.Image) {
-                                            uriHandler.openUri(AppDeepLink.RawImage.invoke(message.media.url))
+                                            uriHandler.openUri(
+                                                DeeplinkRoute.Media
+                                                    .Image(
+                                                        message.media.url,
+                                                        previewUrl = null,
+                                                    ).toUri(),
+                                            )
                                         }
                                     },
                         )

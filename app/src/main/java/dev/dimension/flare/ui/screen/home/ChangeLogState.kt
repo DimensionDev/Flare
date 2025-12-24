@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.home
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -54,6 +55,7 @@ internal fun changeLogPresenter(
     }
 }
 
+@Immutable
 interface ChangeLogState {
     val shouldShowChangeLog: UiState<Boolean>
     val changeLog: AnnotatedString?

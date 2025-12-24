@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.component.platform
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.dimension.flare.ui.component.FlareDropdownMenu
@@ -39,3 +40,8 @@ internal actual fun PlatformDropdownMenuScope.PlatformDropdownMenuItem(
 }
 
 internal actual typealias PlatformDropdownMenuScope = ColumnScope
+
+@Composable
+internal actual fun PlatformDropdownMenuScope.PlatformDropdownMenuDivider() {
+    HorizontalDivider()
+}

@@ -37,7 +37,8 @@ import com.halilibo.richtext.ui.string.RichTextString
 import com.halilibo.richtext.ui.string.RichTextStringStyle
 import com.halilibo.richtext.ui.string.Text
 import com.halilibo.richtext.ui.string.withFormat
-import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.ImmutableMap
 
 private val lightLinkColor = Color(0xff0066cc)
@@ -85,7 +86,7 @@ fun RssRichText(
                 imageHeader = imageHeader,
                 onMediaClick = {
                     uriHandler.openUri(
-                        AppDeepLink.RawImage(it),
+                        DeeplinkRoute.Media.Image(it, previewUrl = null).toUri(),
                     )
                 },
             )

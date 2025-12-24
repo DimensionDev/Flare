@@ -17,6 +17,7 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.ui.render.UiRichText
+import kotlinx.collections.immutable.toImmutableMap
 
 
 internal class RichTextState(
@@ -31,7 +32,7 @@ internal class RichTextState(
             styleData = styleData,
         )
     val inlineContent by lazy {
-        context.inlineContent
+        context.inlineContent.toImmutableMap()
     }
     val hasBlockImage: Boolean by lazy {
         context.inlineContent.values.any {

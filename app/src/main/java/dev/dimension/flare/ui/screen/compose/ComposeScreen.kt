@@ -59,6 +59,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -387,10 +388,10 @@ internal fun ComposeScreen(
                                     .horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            mediaState.medias.forEach { (uri, altTextState) ->
+                            mediaState.medias.forEach { media ->
                                 Box {
                                     NetworkImage(
-                                        model = uri,
+                                        model = media.url,
                                         contentDescription = null,
                                         modifier =
                                             Modifier
@@ -438,7 +439,7 @@ internal fun ComposeScreen(
                                                         },
                                                         icon = {
                                                             NetworkImage(
-                                                                model = uri,
+                                                                model = media.url,
                                                                 contentDescription = null,
                                                                 modifier =
                                                                     Modifier
@@ -451,10 +452,10 @@ internal fun ComposeScreen(
                                                         },
                                                         text = {
                                                             OutlinedTextField(
-                                                                altTextState,
+                                                                media.textState,
                                                                 trailingIcon = {
                                                                     val remainingLength =
-                                                                        mediaState.altTextMaxLength - altTextState.text.length
+                                                                        mediaState.altTextMaxLength - media.textState.text.length
                                                                     Text(
                                                                         remainingLength.toString(),
                                                                         color =
@@ -473,7 +474,7 @@ internal fun ComposeScreen(
                                         }
                                         IconButton(
                                             onClick = {
-                                                mediaState.removeMedia(uri)
+                                                mediaState.removeMedia(media.uri)
                                             },
                                             colors =
                                                 IconButtonDefaults.iconButtonColors(
@@ -1147,10 +1148,13 @@ private fun mediaPresenter(
     }
 }
 
+@Immutable
 private data class MediaData(
     val uri: Uri,
     val textState: TextFieldState = TextFieldState(),
-)
+) {
+    val url = uri.toString()
+}
 
 @Composable
 private fun pollPresenter(config: ComposeConfig.Poll) =

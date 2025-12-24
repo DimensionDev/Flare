@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.login
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,6 +12,7 @@ import androidx.compose.runtime.setValue
 import dev.dimension.flare.ui.presenter.PresenterBase
 
 public class BlueskyInputPresenter : PresenterBase<BlueskyInputPresenter.State>() {
+    @Immutable
     public interface State {
         public val username: TextFieldState
         public val password: TextFieldState

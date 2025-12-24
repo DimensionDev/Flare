@@ -24,6 +24,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -168,8 +169,7 @@ public fun VideoPlayer(
     var isLoaded by remember { mutableStateOf(false) }
     var visible by remember { mutableStateOf(false) }
     var currentRect by remember { mutableStateOf(IntRect.Zero) }
-    val manager: SurfaceBindingManager = koinInject()
-    val binding = rememberSurfaceBinding(uri, manager)
+    val binding = rememberSurfaceBinding(uri)
     val player = binding.first
 
     LaunchedEffect(binding.second, currentRect, visible) {
@@ -282,10 +282,8 @@ public fun VideoPlayer(
 }
 
 @Composable
-private fun rememberSurfaceBinding(
-    uri: String,
-    manager: SurfaceBindingManager,
-): Pair<ExoPlayer?, SurfaceBindingManager.Binding> {
+private fun rememberSurfaceBinding(uri: String): Pair<ExoPlayer?, SurfaceBindingManager.Binding> {
+    val manager: SurfaceBindingManager = koinInject()
     var player by remember { mutableStateOf<ExoPlayer?>(null) }
     val binding =
         remember(uri, manager) {
@@ -303,6 +301,7 @@ private fun rememberSurfaceBinding(
     return player to binding
 }
 
+@Stable
 public class SurfaceBindingManager(
     private val context: Context,
 ) {

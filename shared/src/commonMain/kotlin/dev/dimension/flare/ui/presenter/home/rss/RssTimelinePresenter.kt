@@ -58,6 +58,7 @@ public class RssSourcePresenter(
     KoinComponent {
     private val appDatabase by inject<AppDatabase>()
 
+    @androidx.compose.runtime.Immutable
     public interface State {
         public val data: UiState<UiRssSource>
         public val timelineState: UiState<TimelineState>

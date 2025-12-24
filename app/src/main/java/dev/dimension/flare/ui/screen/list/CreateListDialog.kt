@@ -114,7 +114,7 @@ internal fun CreateListDialog(
                             ) {
                                 if (state.uri != null) {
                                     NetworkImage(
-                                        model = state.uri,
+                                        model = state.uri.toString(),
                                         contentDescription = null,
                                         modifier =
                                             Modifier

@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.os.Environment
 import android.util.Log
 import android.webkit.MimeTypeMap
+import androidx.compose.runtime.Stable
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 
@@ -15,6 +16,7 @@ import androidx.core.net.toUri
  * Download Manager Helper - Simplified Version
  * Encapsulates Android's DownloadManager, provides simple video download functionality
  */
+@Stable
 internal class VideoDownloadHelper(
     private val context: Context,
 ) {

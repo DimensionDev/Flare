@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.repository
 
+import androidx.compose.runtime.Stable
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import okio.FileSystem
 import okio.SYSTEM
 
+@Stable
 public class SettingsRepository internal constructor(
     private val pathProducer: PlatformPathProducer,
 ) {

@@ -57,11 +57,14 @@ import compose.icons.fontawesomeicons.solid.At
 import compose.icons.fontawesomeicons.solid.Bookmark
 import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.Ellipsis
+import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Heart
 import compose.icons.fontawesomeicons.solid.Image
+import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.LockOpen
+import compose.icons.fontawesomeicons.solid.Message
 import compose.icons.fontawesomeicons.solid.Minus
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.QuoteLeft
@@ -69,6 +72,8 @@ import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import compose.icons.fontawesomeicons.solid.Trash
+import compose.icons.fontawesomeicons.solid.UserSlash
+import compose.icons.fontawesomeicons.solid.VolumeXmark
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.bookmark_add
 import dev.dimension.flare.compose.ui.bookmark_remove
@@ -100,8 +105,16 @@ import dev.dimension.flare.compose.ui.show_media
 import dev.dimension.flare.compose.ui.status_detail_tldr
 import dev.dimension.flare.compose.ui.status_detail_translate
 import dev.dimension.flare.compose.ui.unlike
+import dev.dimension.flare.compose.ui.user_block
+import dev.dimension.flare.compose.ui.user_block_with_parameter
+import dev.dimension.flare.compose.ui.user_follow_edit_list
+import dev.dimension.flare.compose.ui.user_mute
+import dev.dimension.flare.compose.ui.user_mute_with_parameter
+import dev.dimension.flare.compose.ui.user_send_message
+import dev.dimension.flare.compose.ui.user_unblock
+import dev.dimension.flare.compose.ui.user_unmute
 import dev.dimension.flare.compose.ui.vote
-import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.PlatformShare
@@ -116,6 +129,7 @@ import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformCheckbox
+import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuDivider
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuItem
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuScope
 import dev.dimension.flare.ui.component.platform.PlatformFilledTonalButton
@@ -127,7 +141,6 @@ import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
-import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -383,6 +396,9 @@ public fun CommonStatusComponent(
                     ) {
                         StatusActions(
                             item.actions,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(),
                         )
                     }
                 } else {
@@ -392,6 +408,9 @@ public fun CommonStatusComponent(
                     ) {
                         StatusActions(
                             item.actions,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(),
                         )
                     }
                 }
@@ -716,16 +735,14 @@ public fun StatusVisibilityComponent(
 
 @Composable
 internal fun StatusActions(
-    items: ImmutableList<StatusAction>,
+    items: ImmutableList<ActionMenu>,
     modifier: Modifier = Modifier,
 ) {
     val appearanceSettings = LocalComponentAppearance.current
     val haptics = LocalHapticFeedback.current
     val launcher = LocalUriHandler.current
     Row(
-        modifier =
-            modifier
-                .fillMaxWidth(),
+        modifier = modifier,
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement =
             when (appearanceSettings.postActionStyle) {
@@ -741,20 +758,20 @@ internal fun StatusActions(
                 Spacer(modifier = Modifier.weight(1f))
             }
             when (action) {
-                is StatusAction.Group -> {
+                is ActionMenu.Group -> {
                     StatusActionGroup(
-                        icon = action.displayItem.icon,
-                        number = action.displayItem.iconNumber,
-                        color = statusActionItemColor(item = action.displayItem),
+                        icon = action.displayItem.icon?.toImageVector() ?: FontAwesomeIcons.Solid.Ellipsis,
+                        number = action.displayItem.count,
+                        color = action.displayItem.color?.toComposeColor() ?: PlatformContentColor.current,
                         withTextMinWidth = index != items.lastIndex,
                     ) { closeMenu, isMenuShown ->
                         action.actions.fastForEach { subActions ->
                             when (subActions) {
-                                is StatusAction.Item -> {
+                                is ActionMenu.Item -> {
                                     StatusActionItemMenu(subActions, closeMenu, launcher)
                                 }
 
-                                is StatusAction.AsyncActionItem -> {
+                                is ActionMenu.AsyncActionMenuItem -> {
                                     if (isMenuShown) {
                                         val state by subActions.flow.collectAsUiState()
                                         state
@@ -793,22 +810,23 @@ internal fun StatusActions(
                                 }
 
                                 // nested group is not supported
-                                is StatusAction.Group -> Unit
+                                is ActionMenu.Group -> Unit
+                                ActionMenu.Divider -> PlatformDropdownMenuDivider()
                             }
                         }
                     }
                 }
 
-                is StatusAction.Item -> {
+                is ActionMenu.Item -> {
                     StatusActionButton(
-                        icon = action.icon,
-                        number = action.iconNumber,
-                        color = statusActionItemColor(item = action),
+                        icon = action.icon?.toImageVector() ?: FontAwesomeIcons.Solid.Ellipsis, // Fallback or handle null
+                        number = action.count,
+                        color = action.color?.toComposeColor() ?: PlatformContentColor.current,
                         withTextMinWidth = index != items.lastIndex,
                         onClicked = {
-                            if (action is StatusAction.Item.Clickable) {
+                            action.onClicked?.let { onClick ->
                                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                action.onClicked.invoke(
+                                onClick.invoke(
                                     ClickContext(
                                         launcher = {
                                             launcher.openUri(it)
@@ -821,7 +839,9 @@ internal fun StatusActions(
                 }
 
                 // async action item is only supported in group
-                is StatusAction.AsyncActionItem -> Unit
+                is ActionMenu.AsyncActionMenuItem -> Unit
+                // divider is only supported in group
+                ActionMenu.Divider -> Unit
             }
         }
     }
@@ -829,148 +849,117 @@ internal fun StatusActions(
 
 @Composable
 private fun PlatformDropdownMenuScope.StatusActionItemMenu(
-    subActions: StatusAction.Item,
+    subActions: ActionMenu.Item,
     closeMenu: () -> Unit,
     launcher: UriHandler,
 ) {
     val context = LocalPlatformContext.current
-    val color = statusActionItemColor(subActions)
+    val color = subActions.color?.toComposeColor() ?: PlatformContentColor.current
     PlatformDropdownMenuItem(
         leadingIcon = {
-            FAIcon(
-                imageVector = subActions.icon,
-                contentDescription = null,
-                tint = color,
-            )
+            subActions.icon?.let {
+                FAIcon(
+                    imageVector = it.toImageVector(),
+                    contentDescription = null,
+                    tint = color,
+                )
+            }
         },
         text = {
-            PlatformText(
-                text = statusActionItemText(item = subActions),
-                color = color,
-            )
+            subActions.text?.let {
+                PlatformText(
+                    text = it.asString(),
+                    color = color,
+                )
+            }
         },
         onClick = {
             closeMenu.invoke()
-            if (subActions is StatusAction.Item.Clickable) {
-                subActions.onClicked.invoke(
-                    ClickContext(
-                        launcher = {
-                            launcher.openUri(it)
-                        },
-                    ),
-                )
-            } else if (subActions is StatusAction.Item.Shareable) {
+            subActions.onClicked?.invoke(
+                ClickContext(
+                    launcher = {
+                        launcher.openUri(it)
+                    },
+                ),
+            )
+            subActions.shareContent?.let {
                 PlatformShare.shareText(
                     context = context,
-                    text = subActions.content,
+                    text = it,
                 )
             }
         },
     )
 }
 
-private val StatusAction.Item.icon: ImageVector
-    get() =
-        when (this) {
-            is StatusAction.Item.Bookmark -> {
-                if (bookmarked) {
-                    FontAwesomeIcons.Solid.Bookmark
-                } else {
-                    FontAwesomeIcons.Regular.Bookmark
-                }
-            }
-
-            is StatusAction.Item.Delete -> FontAwesomeIcons.Solid.Trash
-            is StatusAction.Item.Like -> {
-                if (liked) {
-                    FontAwesomeIcons.Solid.Heart
-                } else {
-                    FontAwesomeIcons.Regular.Heart
-                }
-            }
-
-            StatusAction.Item.More -> FontAwesomeIcons.Solid.Ellipsis
-            is StatusAction.Item.Quote -> FontAwesomeIcons.Solid.QuoteLeft
-            is StatusAction.Item.Reaction -> {
-                if (reacted) {
-                    FontAwesomeIcons.Solid.Minus
-                } else {
-                    FontAwesomeIcons.Solid.Plus
-                }
-            }
-
-            is StatusAction.Item.Reply -> FontAwesomeIcons.Solid.Reply
-            is StatusAction.Item.Report -> FontAwesomeIcons.Solid.CircleInfo
-            is StatusAction.Item.Retweet -> FontAwesomeIcons.Solid.Retweet
-            is StatusAction.Item.Comment -> FontAwesomeIcons.Regular.CommentDots
-            is StatusAction.Item.FxShare -> FontAwesomeIcons.Solid.ShareNodes
-            is StatusAction.Item.Share -> FontAwesomeIcons.Solid.ShareNodes
-        }
-
-private val StatusAction.Item.iconNumber: UiNumber?
-    get() =
-        if (this is StatusAction.Item.Numbered) {
-            this.count
-        } else {
-            null
-        }
-
 @Composable
-private fun statusActionItemColor(item: StatusAction.Item) =
-    if (item is StatusAction.Item.Colorized) {
-        when (item.color) {
-            StatusAction.Item.Colorized.Color.Red -> Color.Red
-            StatusAction.Item.Colorized.Color.Error -> PlatformTheme.colorScheme.error
-            StatusAction.Item.Colorized.Color.ContentColor -> PlatformContentColor.current
-            StatusAction.Item.Colorized.Color.PrimaryColor -> PlatformTheme.colorScheme.primary
+private fun ActionMenu.Item.Text.asString(): String =
+    when (this) {
+        is ActionMenu.Item.Text.Raw -> text
+        is ActionMenu.Item.Text.Localized -> {
+            val resource =
+                when (type) {
+                    ActionMenu.Item.Text.Localized.Type.Like -> Res.string.like
+                    ActionMenu.Item.Text.Localized.Type.Unlike -> Res.string.unlike
+                    ActionMenu.Item.Text.Localized.Type.Retweet -> Res.string.retweet
+                    ActionMenu.Item.Text.Localized.Type.Unretweet -> Res.string.retweet_remove
+                    ActionMenu.Item.Text.Localized.Type.Reply -> Res.string.reply
+                    ActionMenu.Item.Text.Localized.Type.Comment -> Res.string.comment
+                    ActionMenu.Item.Text.Localized.Type.Quote -> Res.string.quote
+                    ActionMenu.Item.Text.Localized.Type.Bookmark -> Res.string.bookmark_add
+                    ActionMenu.Item.Text.Localized.Type.Unbookmark -> Res.string.bookmark_remove
+                    ActionMenu.Item.Text.Localized.Type.More -> Res.string.more
+                    ActionMenu.Item.Text.Localized.Type.Delete -> Res.string.delete
+                    ActionMenu.Item.Text.Localized.Type.Report -> Res.string.report
+                    ActionMenu.Item.Text.Localized.Type.React -> Res.string.reaction_add
+                    ActionMenu.Item.Text.Localized.Type.UnReact -> Res.string.reaction_remove
+                    ActionMenu.Item.Text.Localized.Type.Share -> Res.string.share
+                    ActionMenu.Item.Text.Localized.Type.FxShare -> Res.string.fx_share
+                    ActionMenu.Item.Text.Localized.Type.EditUserList -> Res.string.user_follow_edit_list
+                    ActionMenu.Item.Text.Localized.Type.SendMessage -> Res.string.user_send_message
+                    ActionMenu.Item.Text.Localized.Type.Mute -> Res.string.user_mute
+                    ActionMenu.Item.Text.Localized.Type.UnMute -> Res.string.user_unmute
+                    ActionMenu.Item.Text.Localized.Type.Block -> Res.string.user_block
+                    ActionMenu.Item.Text.Localized.Type.UnBlock -> Res.string.user_unblock
+                    ActionMenu.Item.Text.Localized.Type.BlockWithHandleParameter -> Res.string.user_block_with_parameter
+                    ActionMenu.Item.Text.Localized.Type.MuteWithHandleParameter -> Res.string.user_mute_with_parameter
+                }
+            stringResource(resource, *parameters.toTypedArray())
         }
-    } else {
-        PlatformContentColor.current
     }
 
 @Composable
-private fun statusActionItemText(item: StatusAction.Item) =
-    when (item) {
-        is StatusAction.Item.Bookmark -> {
-            if (item.bookmarked) {
-                stringResource(resource = Res.string.bookmark_remove)
-            } else {
-                stringResource(resource = Res.string.bookmark_add)
-            }
-        }
+private fun ActionMenu.Item.Color.toComposeColor(): Color =
+    when (this) {
+        ActionMenu.Item.Color.Red -> PlatformTheme.colorScheme.error
+        ActionMenu.Item.Color.ContentColor -> PlatformContentColor.current
+        ActionMenu.Item.Color.PrimaryColor -> PlatformTheme.colorScheme.primary
+    }
 
-        is StatusAction.Item.Delete -> stringResource(resource = Res.string.delete)
-        is StatusAction.Item.Like -> {
-            if (item.liked) {
-                stringResource(resource = Res.string.unlike)
-            } else {
-                stringResource(resource = Res.string.like)
-            }
-        }
-
-        StatusAction.Item.More -> stringResource(resource = Res.string.more)
-        is StatusAction.Item.Quote -> stringResource(resource = Res.string.quote)
-        is StatusAction.Item.Reaction -> {
-            if (item.reacted) {
-                stringResource(resource = Res.string.reaction_remove)
-            } else {
-                stringResource(resource = Res.string.reaction_add)
-            }
-        }
-
-        is StatusAction.Item.Reply -> stringResource(resource = Res.string.reply)
-        is StatusAction.Item.Report -> stringResource(resource = Res.string.report)
-        is StatusAction.Item.Retweet -> {
-            if (item.retweeted) {
-                stringResource(resource = Res.string.retweet_remove)
-            } else {
-                stringResource(resource = Res.string.retweet)
-            }
-        }
-
-        is StatusAction.Item.Comment -> stringResource(resource = Res.string.comment)
-        is StatusAction.Item.FxShare -> stringResource(resource = Res.string.fx_share)
-        is StatusAction.Item.Share -> stringResource(resource = Res.string.share)
+private fun ActionMenu.Item.Icon.toImageVector(): ImageVector =
+    when (this) {
+        ActionMenu.Item.Icon.Like -> FontAwesomeIcons.Regular.Heart
+        ActionMenu.Item.Icon.Unlike -> FontAwesomeIcons.Solid.Heart
+        ActionMenu.Item.Icon.Retweet -> FontAwesomeIcons.Solid.Retweet
+        ActionMenu.Item.Icon.Unretweet -> FontAwesomeIcons.Solid.Retweet
+        ActionMenu.Item.Icon.Reply -> FontAwesomeIcons.Solid.Reply
+        ActionMenu.Item.Icon.Comment -> FontAwesomeIcons.Regular.CommentDots
+        ActionMenu.Item.Icon.Quote -> FontAwesomeIcons.Solid.QuoteLeft
+        ActionMenu.Item.Icon.Bookmark -> FontAwesomeIcons.Regular.Bookmark
+        ActionMenu.Item.Icon.Unbookmark -> FontAwesomeIcons.Solid.Bookmark
+        ActionMenu.Item.Icon.More -> FontAwesomeIcons.Solid.Ellipsis
+        ActionMenu.Item.Icon.Delete -> FontAwesomeIcons.Solid.Trash
+        ActionMenu.Item.Icon.Report -> FontAwesomeIcons.Solid.CircleInfo
+        ActionMenu.Item.Icon.React -> FontAwesomeIcons.Solid.Plus
+        ActionMenu.Item.Icon.UnReact -> FontAwesomeIcons.Solid.Minus
+        ActionMenu.Item.Icon.Share -> FontAwesomeIcons.Solid.ShareNodes
+        ActionMenu.Item.Icon.MoreVerticel -> FontAwesomeIcons.Solid.EllipsisVertical
+        ActionMenu.Item.Icon.List -> FontAwesomeIcons.Solid.List
+        ActionMenu.Item.Icon.ChatMessage -> FontAwesomeIcons.Solid.Message
+        ActionMenu.Item.Icon.Mute -> FontAwesomeIcons.Solid.VolumeXmark
+        ActionMenu.Item.Icon.UnMute -> FontAwesomeIcons.Solid.VolumeXmark
+        ActionMenu.Item.Icon.Block -> FontAwesomeIcons.Solid.UserSlash
+        ActionMenu.Item.Icon.UnBlock -> FontAwesomeIcons.Solid.UserSlash
     }
 
 @Composable

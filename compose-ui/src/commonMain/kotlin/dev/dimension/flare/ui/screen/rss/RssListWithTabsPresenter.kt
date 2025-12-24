@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.rss
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TimelineTabItem
@@ -35,6 +36,7 @@ public class RssListWithTabsPresenter : PresenterBase<RssListWithTabsPresenter.S
         }
     }
 
+    @Immutable
     public interface State :
         RssSourcesPresenter.State,
         PinTabsPresenter.State<UiRssSource>

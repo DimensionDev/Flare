@@ -6,10 +6,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.common.APPSCHEMA
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.route.APPSCHEMA
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.URLProtocol
 import io.ktor.http.buildUrl
@@ -28,6 +28,7 @@ public class DeepLinkPresenter(
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
 
+    @androidx.compose.runtime.Immutable
     public interface State {
         public fun handle(url: String)
     }

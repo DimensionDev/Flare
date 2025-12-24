@@ -2,9 +2,13 @@ package dev.dimension.flare.ui.route
 
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import io.ktor.http.Url
-import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromHexString
+import kotlinx.serialization.encodeToHexString
+import kotlinx.serialization.protobuf.ProtoBuf
+
+public const val APPSCHEMA: String = "flare"
 
 @Serializable
 public sealed class DeeplinkRoute {
@@ -152,7 +156,7 @@ public sealed class DeeplinkRoute {
     @Serializable
     public data class DeepLinkAccountPicker(
         val originalUrl: String,
-        val data: ImmutableMap<MicroBlogKey, DeeplinkRoute>,
+        val data: Map<MicroBlogKey, DeeplinkRoute>,
     ) : DeeplinkRoute()
 
     @Serializable
@@ -160,181 +164,58 @@ public sealed class DeeplinkRoute {
         val url: String,
     ) : DeeplinkRoute()
 
+    @Serializable
+    public data class EditUserList(
+        val accountKey: MicroBlogKey,
+        val userKey: MicroBlogKey,
+    ) : DeeplinkRoute()
+
+    @Serializable
+    public data class DirectMessage(
+        val accountKey: MicroBlogKey,
+        val userKey: MicroBlogKey,
+    ) : DeeplinkRoute()
+
+    @Serializable
+    public data class BlockUser(
+        val accountKey: MicroBlogKey?,
+        val userKey: MicroBlogKey,
+    ) : DeeplinkRoute()
+
+    @Serializable
+    public data class MuteUser(
+        val accountKey: MicroBlogKey?,
+        val userKey: MicroBlogKey,
+    ) : DeeplinkRoute()
+
+    @Serializable
+    public data class ReportUser(
+        val accountKey: MicroBlogKey?,
+        val userKey: MicroBlogKey,
+    ) : DeeplinkRoute()
+
     public companion object Companion {
-        public fun parse(url: String): DeeplinkRoute? {
-            val data = Url(url)
-            return when (data.host) {
-                "OpenLinkDirectly" -> {
-                    val url = data.parameters["url"] ?: return null
-                    OpenLinkDirectly(url)
-                }
-                "Login" -> Login
-                // ignore
-                "Callback" -> null
-
-                "Search" -> {
-                    val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
-                    val keyword = data.segments.getOrNull(0) ?: return null
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-                    Search(accountType, keyword)
-                }
-
-                "Profile" -> {
-                    val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
-                    val userKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-                    Profile.User(accountType, userKey)
-                }
-
-                "ProfileWithNameAndHost" -> {
-                    val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
-                    val userName = data.segments.getOrNull(0) ?: return null
-                    val host = data.segments.getOrNull(1) ?: return null
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-                    Profile.UserNameWithHost(accountType, userName, host)
-                }
-
-                "StatusDetail" -> {
-                    val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
-                    val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-                    Status.Detail(statusKey, accountType)
-                }
-
-                "Compose" ->
-                    when (data.segments.getOrNull(0)) {
-                        "Reply" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            Compose.Reply(accountKey, statusKey)
-                        }
-
-                        "Quote" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            Compose.Quote(accountKey, statusKey)
-                        }
-
-                        "New" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            Compose.New(AccountType.Specific(accountKey))
-                        }
-
-                        else -> null
-                    }
-
-                "RawImage" -> {
-                    val rawImage = data.segments.getOrNull(0) ?: return null
-                    Media.Image(rawImage, previewUrl = null)
-                }
-
-                "VVO" ->
-                    when (data.segments.getOrNull(0)) {
-                        "StatusDetail" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            Status.VVOStatus(statusKey, AccountType.Specific(accountKey))
-                        }
-
-                        "CommentDetail" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            Status.VVOComment(statusKey, AccountType.Specific(accountKey))
-                        }
-
-                        "ReplyToComment" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val replyTo = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            val rootId = data.segments.getOrNull(3) ?: return null
-                            Compose.VVOReplyComment(accountKey, replyTo, rootId)
-                        }
-
-                        else -> null
-                    }
-
-                "DeleteStatus" -> {
-                    val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                    Status.DeleteConfirm(statusKey, AccountType.Specific(accountKey))
-                }
-
-                "AddReaction" -> {
-                    val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                    Status.AddReaction(statusKey, AccountType.Specific(accountKey))
-                }
-
-                "Bluesky" ->
-                    when (data.segments.getOrNull(0)) {
-                        "ReportStatus" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            Status.BlueskyReport(statusKey, AccountType.Specific(accountKey))
-                        }
-
-                        else -> null
-                    }
-
-                "Mastodon" ->
-                    when (data.segments.getOrNull(0)) {
-                        "ReportStatus" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            val userKey = MicroBlogKey.valueOf(data.segments.getOrNull(3) ?: return null)
-                            Status.MastodonReport(
-                                statusKey = statusKey,
-                                userKey = userKey,
-                                accountType = AccountType.Specific(accountKey),
-                            )
-                        }
-
-                        else -> null
-                    }
-
-                "Misskey" ->
-                    when (data.segments.getOrNull(0)) {
-                        "ReportStatus" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            val userKey = MicroBlogKey.valueOf(data.segments.getOrNull(3) ?: return null)
-                            Status.MisskeyReport(
-                                accountType = AccountType.Specific(accountKey),
-                                statusKey = statusKey,
-                                userKey = userKey,
-                            )
-                        }
-
-                        else -> null
-                    }
-
-                "StatusMedia" -> {
-                    val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
-                    val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val index = data.segments.getOrNull(1)?.toIntOrNull() ?: return null
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-                    val preview = data.parameters["preview"]
-                    Media.StatusMedia(accountType = accountType, statusKey = statusKey, index = index, preview = preview)
-                }
-
-                "Podcast" -> {
-                    val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val id = data.segments.getOrNull(1) ?: return null
-                    val accountType = accountKey.let { AccountType.Specific(it) }
-                    Media.Podcast(accountType = accountType, id = id)
-                }
-
-                "AltText" -> {
-                    val text = data.segments.getOrNull(0) ?: return null
-                    Status.AltText(text)
-                }
-
-                "RSS" -> {
-                    val feedUrl = data.segments.getOrNull(0) ?: return null
-                    Rss.Detail(feedUrl)
-                }
-
-                else -> null
-            }
+        public object Callback {
+            public const val MASTODON: String = "$APPSCHEMA://Callback/SignIn/Mastodon"
+            public const val MISSKEY: String = "$APPSCHEMA://Callback/SignIn/Misskey"
+            public const val BLUESKY: String = "$APPSCHEMA://Callback/SignIn/Bluesky"
         }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        public fun parse(uri: String): DeeplinkRoute? =
+            runCatching {
+                ProtoBuf.decodeFromHexString<RoutePackage>(uri.removePrefix("$APPSCHEMA://")).route
+            }.getOrNull()
     }
 }
+
+@OptIn(ExperimentalSerializationApi::class)
+public fun DeeplinkRoute.toUri(): String {
+    val protobuf = ProtoBuf.encodeToHexString(RoutePackage(this))
+    return "$APPSCHEMA://$protobuf"
+}
+
+@Serializable
+private data class RoutePackage(
+    val route: DeeplinkRoute,
+)

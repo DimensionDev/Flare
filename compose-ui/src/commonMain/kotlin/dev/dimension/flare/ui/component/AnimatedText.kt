@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.TextUnit
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.model.UiNumber
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentMapOf
 
 @Composable
 internal fun AnimatedNumber(
@@ -41,7 +43,7 @@ internal fun AnimatedNumber(
     softWrap: Boolean = true,
     maxLines: Int = 1,
     minLines: Int = 1,
-    inlineContent: Map<String, InlineTextContent> = mapOf(),
+    inlineContent: ImmutableMap<String, InlineTextContent> = persistentMapOf(),
     onTextLayout: (TextLayoutResult) -> Unit = {},
     style: TextStyle = PlatformTextStyle.current,
 ) {

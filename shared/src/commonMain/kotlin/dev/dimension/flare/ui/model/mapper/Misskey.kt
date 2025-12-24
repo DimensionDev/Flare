@@ -2,10 +2,10 @@ package dev.dimension.flare.ui.model.mapper
 
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.misskey.api.model.Antenna
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.EmojiSimple
@@ -17,6 +17,7 @@ import dev.dimension.flare.data.network.misskey.api.model.User
 import dev.dimension.flare.data.network.misskey.api.model.UserList
 import dev.dimension.flare.data.network.misskey.api.model.UserLite
 import dev.dimension.flare.data.network.misskey.api.model.Visibility
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
@@ -30,6 +31,8 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -133,7 +136,7 @@ internal fun Notification.render(
             type = topMessageType,
             onClicked = {
                 if (user != null) {
-                    launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
+                    launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = user.key).toUri())
                 }
             },
             statusKey = MicroBlogKey(id, accountKey.host),
@@ -310,10 +313,11 @@ internal fun Note.render(
                         .Renote(id = id),
                 onClicked = {
                     launcher.launch(
-                        AppDeepLink.Profile(
-                            accountKey = accountKey,
-                            userKey = user.key,
-                        ),
+                        DeeplinkRoute.Profile
+                            .User(
+                                accountType = AccountType.Specific(accountKey),
+                                userKey = user.key,
+                            ).toUri(),
                     )
                 },
                 statusKey = currentStatus.statusKey,
@@ -423,44 +427,51 @@ private fun Note.renderStatus(
             },
         actions =
             listOfNotNull(
-                StatusAction.Item.Reply(
+                ActionMenu.Item(
+                    icon = ActionMenu.Item.Icon.Reply,
+                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
                     count = UiNumber(repliesCount.toLong()),
                     onClicked = {
                         launcher.launch(
-                            AppDeepLink.Compose.Reply(
-                                accountKey = accountKey,
-                                statusKey = statusKey,
-                            ),
+                            DeeplinkRoute.Compose
+                                .Reply(
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
+                                ).toUri(),
                         )
                     },
                 ),
                 if (canReblog) {
-                    StatusAction.Group(
+                    ActionMenu.Group(
                         displayItem =
-                            StatusAction.Item.Retweet(
+                            ActionMenu.Item(
+                                icon = ActionMenu.Item.Icon.Retweet,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Retweet),
                                 count = UiNumber(renoteCount.toLong()),
-                                retweeted = false,
-                                onClicked = {},
                             ),
                         actions =
                             listOfNotNull(
-                                StatusAction.Item.Retweet(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Retweet,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Retweet),
                                     count = UiNumber(renoteCount.toLong()),
-                                    retweeted = false,
                                     onClicked = {
                                         event.renote(
                                             statusKey = statusKey,
                                         )
                                     },
                                 ),
-                                StatusAction.Item.Quote(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Quote,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
                                     count = UiNumber(0),
                                     onClicked = {
                                         launcher.launch(
-                                            AppDeepLink.Compose.Quote(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                            ),
+                                            DeeplinkRoute.Compose
+                                                .Quote(
+                                                    accountKey = accountKey,
+                                                    statusKey = statusKey,
+                                                ).toUri(),
                                         )
                                     },
                                 ),
@@ -469,15 +480,27 @@ private fun Note.renderStatus(
                 } else {
                     null
                 },
-                StatusAction.Item.Reaction(
-                    reacted = myReaction != null,
+                ActionMenu.Item(
+                    icon = if (myReaction != null) ActionMenu.Item.Icon.UnReact else ActionMenu.Item.Icon.React,
+                    text =
+                        ActionMenu.Item.Text.Localized(
+                            if (myReaction !=
+                                null
+                            ) {
+                                ActionMenu.Item.Text.Localized.Type.UnReact
+                            } else {
+                                ActionMenu.Item.Text.Localized.Type.React
+                            },
+                        ),
+                    color = if (myReaction != null) ActionMenu.Item.Color.Red else null,
                     onClicked = {
                         if (myReaction == null) {
                             launcher.launch(
-                                AppDeepLink.AddReaction(
-                                    accountKey = accountKey,
-                                    statusKey = statusKey,
-                                ),
+                                DeeplinkRoute.Status
+                                    .AddReaction(
+                                        statusKey = statusKey,
+                                        accountType = AccountType.Specific(accountKey),
+                                    ).toUri(),
                             )
                         } else {
                             event.react(
@@ -488,56 +511,96 @@ private fun Note.renderStatus(
                         }
                     },
                 ),
-                StatusAction.Group(
-                    displayItem = StatusAction.Item.More,
+                ActionMenu.Group(
+                    displayItem =
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.More,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                        ),
                     actions =
-                        listOfNotNull(
-                            StatusAction.AsyncActionItem(
-                                flow =
-                                    event
-                                        .favouriteState(
-                                            statusKey = statusKey,
-                                        ).map {
-                                            StatusAction.Item.Like(
-                                                count = UiNumber(0),
-                                                liked = it,
-                                                onClicked = {
-                                                    event.favourite(
+                        buildList {
+                            add(
+                                ActionMenu.AsyncActionMenuItem(
+                                    flow =
+                                        event
+                                            .favouriteState(
+                                                statusKey = statusKey,
+                                            ).map {
+                                                ActionMenu.Item(
+                                                    icon = if (it) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
+                                                    text =
+                                                        ActionMenu.Item.Text.Localized(
+                                                            if (it) {
+                                                                ActionMenu.Item.Text.Localized.Type.Unlike
+                                                            } else {
+                                                                ActionMenu.Item.Text.Localized.Type.Like
+                                                            },
+                                                        ),
+                                                    count = UiNumber(0),
+                                                    color = if (it) ActionMenu.Item.Color.Red else null,
+                                                    onClicked = {
+                                                        event.favourite(
+                                                            statusKey = statusKey,
+                                                            favourited = it,
+                                                        )
+                                                    },
+                                                )
+                                            },
+                                ),
+                            )
+                            add(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Share,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
+                                    shareContent = postUrl,
+                                ),
+                            )
+                            if (isFromMe) {
+                                add(
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Delete,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                        color = ActionMenu.Item.Color.Red,
+                                        onClicked = {
+                                            launcher.launch(
+                                                DeeplinkRoute.Status
+                                                    .DeleteConfirm(
+                                                        accountType = AccountType.Specific(accountKey),
                                                         statusKey = statusKey,
-                                                        favourited = it,
-                                                    )
-                                                },
+                                                    ).toUri(),
                                             )
                                         },
-                            ),
-                            StatusAction.Item.Share(
-                                content = postUrl,
-                            ),
-                            if (isFromMe) {
-                                StatusAction.Item.Delete(
-                                    onClicked = {
-                                        launcher.launch(
-                                            AppDeepLink.DeleteStatus(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                            ),
-                                        )
-                                    },
+                                    ),
                                 )
                             } else {
-                                StatusAction.Item.Report(
-                                    onClicked = {
-                                        launcher.launch(
-                                            AppDeepLink.Misskey.ReportStatus(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                                userKey = user.key,
-                                            ),
-                                        )
-                                    },
+                                add(ActionMenu.Divider)
+                                addAll(
+                                    userActionsMenu(
+                                        accountKey = accountKey,
+                                        userKey = user.key,
+                                        handle = user.handle,
+                                    ),
                                 )
-                            },
-                        ).toImmutableList(),
+                                add(ActionMenu.Divider)
+                                add(
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Report,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                        color = ActionMenu.Item.Color.Red,
+                                        onClicked = {
+                                            launcher.launch(
+                                                DeeplinkRoute.Status
+                                                    .MisskeyReport(
+                                                        statusKey = statusKey,
+                                                        userKey = user.key,
+                                                        accountType = AccountType.Specific(accountKey),
+                                                    ).toUri(),
+                                            )
+                                        },
+                                    ),
+                                )
+                            }
+                        }.toImmutableList(),
                 ),
             ).toImmutableList(),
         poll =
@@ -583,27 +646,29 @@ private fun Note.renderStatus(
         sensitive = files?.any { it.isSensitive } ?: false,
         onClicked = {
             launcher.launch(
-                AppDeepLink.StatusDetail(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                ),
+                DeeplinkRoute.Status
+                    .Detail(
+                        statusKey = statusKey,
+                        accountType = AccountType.Specific(accountKey),
+                    ).toUri(),
             )
         },
         platformType = PlatformType.Misskey,
         onMediaClicked = { media, index ->
             launcher.launch(
-                AppDeepLink.StatusMedia(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                    mediaIndex = index,
-                    preview =
-                        when (media) {
-                            is UiMedia.Image -> media.previewUrl
-                            is UiMedia.Video -> media.thumbnailUrl
-                            is UiMedia.Audio -> null
-                            is UiMedia.Gif -> media.previewUrl
-                        },
-                ),
+                DeeplinkRoute.Media
+                    .StatusMedia(
+                        accountType = AccountType.Specific(accountKey),
+                        statusKey = statusKey,
+                        index = index,
+                        preview =
+                            when (media) {
+                                is UiMedia.Image -> media.previewUrl
+                                is UiMedia.Video -> media.thumbnailUrl
+                                is UiMedia.Audio -> null
+                                is UiMedia.Gif -> media.previewUrl
+                            },
+                    ).toUri(),
             )
         },
         url = postUrl,
@@ -664,7 +729,7 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
         bottomContent = null,
         platformType = PlatformType.Misskey,
         onClicked = {
-            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
         },
     )
 }
@@ -722,7 +787,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                 },
         platformType = PlatformType.Misskey,
         onClicked = {
-            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
         },
     )
 }
@@ -877,7 +942,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         is CashNode -> {
             Element("a").apply {
 //                attributes["href"] = AppDeepLink.Search(accountKey, "$$content")
-                attributes().put("href", AppDeepLink.Search(accountKey, "$$content"))
+                attributes().put("href", DeeplinkRoute.Search(AccountType.Specific(accountKey), "$$content").toUri())
                 appendChild(TextNode("$$content"))
             }
         }
@@ -894,7 +959,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         is HashtagNode -> {
             Element("a").apply {
 //                attributes["href"] = AppDeepLink.Search(accountKey, "#$tag")
-                attributes().put("href", AppDeepLink.Search(accountKey, "#$tag"))
+                attributes().put("href", DeeplinkRoute.Search(AccountType.Specific(accountKey), "#$tag").toUri())
                 appendChild(TextNode("#$tag"))
             }
         }
@@ -925,7 +990,13 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
 
         is MentionNode -> {
             Element("a").apply {
-                val deeplink = AppDeepLink.ProfileWithNameAndHost(accountKey, userName, host ?: remoteHost)
+                val deeplink =
+                    DeeplinkRoute.Profile
+                        .UserNameWithHost(
+                            AccountType.Specific(accountKey),
+                            userName,
+                            host ?: remoteHost,
+                        ).toUri()
 //                attributes["href"] = deeplink
                 attributes().put("href", deeplink)
                 appendChild(

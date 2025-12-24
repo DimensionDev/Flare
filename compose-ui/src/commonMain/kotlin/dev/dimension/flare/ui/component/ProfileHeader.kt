@@ -33,7 +33,6 @@ import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.LocationDot
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.Robot
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.profile_header_button_blocked
 import dev.dimension.flare.compose.ui.profile_header_button_follow
@@ -50,6 +49,8 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.profile.ProfileState
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
@@ -175,10 +176,10 @@ private fun ProfileHeaderSuccess(
             menu.invoke(this)
         },
         onAvatarClick = {
-            uriLauncher.openUri(AppDeepLink.RawImage.invoke(user.avatar))
+            uriLauncher.openUri(DeeplinkRoute.Media.Image(user.avatar, null).toUri())
         },
         onBannerClick = {
-            user.banner?.let { uriLauncher.openUri(AppDeepLink.RawImage.invoke(it)) }
+            user.banner?.let { uriLauncher.openUri(DeeplinkRoute.Media.Image(it, null).toUri()) }
         },
         handleTrailing = {
             user.mark.fastForEach {

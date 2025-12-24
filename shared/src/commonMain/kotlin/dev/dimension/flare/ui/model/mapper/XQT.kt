@@ -3,13 +3,13 @@ package dev.dimension.flare.ui.model.mapper
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
 import de.cketti.codepoints.deluxe.codePointSequence
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.datasource.microblog.StatusAction
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.xqt.model.Admin
 import dev.dimension.flare.data.network.xqt.model.AudioSpace
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
@@ -45,6 +45,8 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
@@ -215,10 +217,13 @@ internal fun TopLevel.renderNotifications(
                             type = UiTimeline.TopMessage.MessageType.XQT.Mention,
                             onClicked = {
                                 launcher.launch(
-                                    AppDeepLink.Profile(
-                                        accountKey = accountKey,
-                                        userKey = renderedUser.key,
-                                    ),
+                                    DeeplinkRoute.Profile
+                                        .User(
+                                            accountType =
+                                                dev.dimension.flare.model.AccountType
+                                                    .Specific(accountKey),
+                                            userKey = renderedUser.key,
+                                        ).toUri(),
                                 )
                             },
                             statusKey =
@@ -260,10 +265,13 @@ internal fun Tweet.render(
                 type = UiTimeline.TopMessage.MessageType.XQT.Retweet,
                 onClicked = {
                     launcher.launch(
-                        AppDeepLink.Profile(
-                            accountKey = accountKey,
-                            userKey = user.key,
-                        ),
+                        DeeplinkRoute.Profile
+                            .User(
+                                accountType =
+                                    dev.dimension.flare.model.AccountType
+                                        .Specific(accountKey),
+                                userKey = user.key,
+                            ).toUri(),
                     )
                 },
                 statusKey = currentTweet.statusKey,
@@ -348,11 +356,13 @@ internal fun Tweet.renderStatus(
                         media = null,
                         description = null,
                         url =
-                            AppDeepLink
+                            DeeplinkRoute.Media
                                 .Podcast(
-                                    accountKey = accountKey,
+                                    accountType =
+                                        dev.dimension.flare.model.AccountType
+                                            .Specific(accountKey),
                                     id = id,
-                                ).toString(),
+                                ).toUri(),
                     )
                 } else {
                     null
@@ -525,116 +535,215 @@ internal fun Tweet.renderStatus(
         parents = parents,
         actions =
             listOfNotNull(
-                StatusAction.Item.Reply(
+                ActionMenu.Item(
+                    icon = ActionMenu.Item.Icon.Reply,
+                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
                     count = UiNumber(legacy?.replyCount?.toLong() ?: 0),
                     onClicked = {
                         launcher.launch(
-                            AppDeepLink.Compose.Reply(
-                                accountKey = accountKey,
-                                statusKey = statusKey,
-                            ),
+                            DeeplinkRoute.Compose
+                                .Reply(
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
+                                ).toUri(),
                         )
                     },
                 ),
-                StatusAction.Group(
+                ActionMenu.Group(
                     displayItem =
-                        StatusAction.Item.Retweet(
+                        ActionMenu.Item(
+                            icon = if (legacy?.retweeted == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
+                            text =
+                                ActionMenu.Item.Text.Localized(
+                                    if (legacy?.retweeted ==
+                                        true
+                                    ) {
+                                        ActionMenu.Item.Text.Localized.Type.Unretweet
+                                    } else {
+                                        ActionMenu.Item.Text.Localized.Type.Retweet
+                                    },
+                                ),
                             count = UiNumber(legacy?.retweetCount?.toLong() ?: 0),
-                            retweeted = legacy?.retweeted ?: false,
-                            onClicked = {
-                            },
+                            color = if (legacy?.retweeted == true) ActionMenu.Item.Color.PrimaryColor else null,
                         ),
                     actions =
                         listOfNotNull(
-                            StatusAction.Item.Retweet(
+                            ActionMenu.Item(
+                                icon = if (legacy?.retweeted == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
+                                text =
+                                    ActionMenu.Item.Text.Localized(
+                                        if (legacy?.retweeted ==
+                                            true
+                                        ) {
+                                            ActionMenu.Item.Text.Localized.Type.Unretweet
+                                        } else {
+                                            ActionMenu.Item.Text.Localized.Type.Retweet
+                                        },
+                                    ),
                                 count = UiNumber(legacy?.retweetCount?.toLong() ?: 0),
-                                retweeted = legacy?.retweeted ?: false,
+                                color = if (legacy?.retweeted == true) ActionMenu.Item.Color.PrimaryColor else null,
                                 onClicked = {
                                     event.retweet(statusKey, legacy?.retweeted ?: false)
                                 },
                             ),
-                            StatusAction.Item.Quote(
+                            ActionMenu.Item(
+                                icon = ActionMenu.Item.Icon.Quote,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
                                 count = UiNumber(legacy?.quoteCount?.toLong() ?: 0),
                                 onClicked = {
                                     launcher.launch(
-                                        AppDeepLink.Compose.Quote(
-                                            accountKey = accountKey,
-                                            statusKey = statusKey,
-                                        ),
+                                        DeeplinkRoute.Compose
+                                            .Quote(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ).toUri(),
                                     )
                                 },
                             ),
                         ).toImmutableList(),
                 ),
-                StatusAction.Item.Like(
+                ActionMenu.Item(
+                    icon = if (legacy?.favorited == true) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
+                    text =
+                        ActionMenu.Item.Text.Localized(
+                            if (legacy?.favorited ==
+                                true
+                            ) {
+                                ActionMenu.Item.Text.Localized.Type.Unlike
+                            } else {
+                                ActionMenu.Item.Text.Localized.Type.Like
+                            },
+                        ),
                     count = UiNumber(legacy?.favoriteCount?.toLong() ?: 0),
-                    liked = legacy?.favorited ?: false,
+                    color = if (legacy?.favorited == true) ActionMenu.Item.Color.Red else null,
                     onClicked = {
                         event.like(statusKey, legacy?.favorited ?: false)
                     },
                 ),
-                StatusAction.Group(
-                    displayItem = StatusAction.Item.More,
+                ActionMenu.Group(
+                    displayItem =
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.More,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                        ),
                     actions =
-                        listOfNotNull(
-                            StatusAction.Item.Bookmark(
-                                count = UiNumber(legacy?.bookmarkCount?.toLong() ?: 0),
-                                bookmarked = legacy?.bookmarked ?: false,
-                                onClicked = {
-                                    event.bookmark(statusKey, legacy?.bookmarked ?: false)
-                                },
-                            ),
-                            StatusAction.Item.Share(
-                                content = url,
-                            ),
-                            StatusAction.Item.FxShare(
-                                content = fxUrl,
-                            ),
-                            if (isFromMe) {
-                                StatusAction.Item.Delete(
+                        buildList {
+                            add(
+                                ActionMenu.Item(
+                                    icon =
+                                        if (legacy?.bookmarked ==
+                                            true
+                                        ) {
+                                            ActionMenu.Item.Icon.Unbookmark
+                                        } else {
+                                            ActionMenu.Item.Icon.Bookmark
+                                        },
+                                    text =
+                                        ActionMenu.Item.Text.Localized(
+                                            if (legacy?.bookmarked ==
+                                                true
+                                            ) {
+                                                ActionMenu.Item.Text.Localized.Type.Unbookmark
+                                            } else {
+                                                ActionMenu.Item.Text.Localized.Type.Bookmark
+                                            },
+                                        ),
+                                    count = UiNumber(legacy?.bookmarkCount?.toLong() ?: 0),
                                     onClicked = {
-                                        launcher.launch(
-                                            AppDeepLink.DeleteStatus(
-                                                accountKey = accountKey,
-                                                statusKey = statusKey,
-                                            ),
-                                        )
+                                        event.bookmark(statusKey, legacy?.bookmarked ?: false)
                                     },
+                                ),
+                            )
+                            add(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Share,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
+                                    shareContent = url,
+                                ),
+                            )
+                            add(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Share,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.FxShare),
+                                    shareContent = fxUrl,
+                                ),
+                            )
+
+                            if (isFromMe) {
+                                add(
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Delete,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                        color = ActionMenu.Item.Color.Red,
+                                        onClicked = {
+                                            launcher.launch(
+                                                DeeplinkRoute.Status
+                                                    .DeleteConfirm(
+                                                        statusKey = statusKey,
+                                                        accountType =
+                                                            dev.dimension.flare.model.AccountType
+                                                                .Specific(accountKey),
+                                                    ).toUri(),
+                                            )
+                                        },
+                                    ),
                                 )
                             } else {
-                                StatusAction.Item.Report(
-                                    onClicked = {
-                                        // TODO: implement report
-                                    },
+                                if (user != null) {
+                                    add(ActionMenu.Divider)
+                                    addAll(
+                                        userActionsMenu(
+                                            accountKey = accountKey,
+                                            userKey = user.key,
+                                            handle = user.handle,
+                                        ),
+                                    )
+                                    add(ActionMenu.Divider)
+                                }
+                                add(
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Report,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                        color = ActionMenu.Item.Color.Red,
+                                        onClicked = {
+                                            // TODO: implement report
+                                        },
+                                    ),
                                 )
-                            },
-                        ).toImmutableList(),
+                            }
+                        }.toImmutableList(),
                 ),
             ).toImmutableList(),
         sensitive = legacy?.possiblySensitive == true,
         onClicked = {
             launcher.launch(
-                AppDeepLink.StatusDetail(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                ),
+                DeeplinkRoute.Status
+                    .Detail(
+                        statusKey = statusKey,
+                        accountType =
+                            dev.dimension.flare.model.AccountType
+                                .Specific(accountKey),
+                    ).toUri(),
             )
         },
         platformType = PlatformType.xQt,
         onMediaClicked = { media, index ->
             launcher.launch(
-                AppDeepLink.StatusMedia(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                    mediaIndex = index,
-                    preview =
-                        when (media) {
-                            is UiMedia.Image -> media.previewUrl
-                            is UiMedia.Video -> media.thumbnailUrl
-                            is UiMedia.Audio -> null
-                            is UiMedia.Gif -> media.previewUrl
-                        },
-                ),
+                DeeplinkRoute.Media
+                    .StatusMedia(
+                        statusKey = statusKey,
+                        accountType =
+                            dev.dimension.flare.model.AccountType
+                                .Specific(accountKey),
+                        index = index,
+                        preview =
+                            when (media) {
+                                is UiMedia.Image -> media.previewUrl
+                                is UiMedia.Video -> media.thumbnailUrl
+                                is UiMedia.Audio -> null
+                                is UiMedia.Gif -> media.previewUrl
+                            },
+                    ).toUri(),
             )
         },
         url = url,
@@ -742,7 +851,15 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
             },
         platformType = PlatformType.xQt,
         onClicked = {
-            launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = userKey))
+            launcher.launch(
+                DeeplinkRoute.Profile
+                    .User(
+                        accountType =
+                            dev.dimension.flare.model.AccountType
+                                .Specific(accountKey),
+                        userKey = userKey,
+                    ).toUri(),
+            )
         },
     )
 }
@@ -1094,7 +1211,15 @@ private fun Admin.render(accountKey: MicroBlogKey): UiUserV2 {
         handle = "@$twitterScreenName@${accountKey.host}",
         platformType = PlatformType.xQt,
         onClicked = {
-            launcher.launch(AppDeepLink.Profile(accountKey, key))
+            launcher.launch(
+                DeeplinkRoute.Profile
+                    .User(
+                        accountType =
+                            dev.dimension.flare.model.AccountType
+                                .Specific(accountKey),
+                        userKey = key,
+                    ).toUri(),
+            )
         },
         description = null,
         banner = null,

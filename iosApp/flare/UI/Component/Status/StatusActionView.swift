@@ -200,37 +200,36 @@ extension ActionMenuItem.Color {
 
 extension ActionMenuItemText {
     var resolvedString: LocalizedStringResource {
-        if let raw = self as? ActionMenuItemTextRaw {
+        switch onEnum(of: self) {
+        case .raw(let raw):
             return LocalizedStringResource(stringLiteral: raw.text)
-        } else if let localized = self as? ActionMenuItemTextLocalized {
-            let key: LocalizedStringResource
+        case .localized(let localized):
             switch localized.type {
-            case .like: key = "like"
-            case .unlike: key = "unlike"
-            case .retweet: key = "retweet"
-            case .unretweet: key = "retweet_remove"
-            case .reply: key = "reply"
-            case .comment: key = "comment"
-            case .quote: key = "quote"
-            case .bookmark: key = "bookmark_add"
-            case .unbookmark: key = "bookmark_remove"
-            case .more: key = "more"
-            case .delete: key = "delete"
-            case .report: key = "report"
-            case .react: key = "reaction_add"
-            case .share: key = "share"
-            case .fxShare: key = "fx_share"
-            case .unReact: key = "reaction_remove"
-            case .editUserList: key = "edit_user_in_list"
-            case .sendMessage: key = "send_message"
-            case .mute: key = "mute"
-            case .unMute: key = "unmute"
-            case .block: key = "block"
-            case .unBlock: key = "unblock"
+            case .like: return "like"
+            case .unlike: return "unlike"
+            case .retweet: return "retweet"
+            case .unretweet: return "retweet_remove"
+            case .reply: return "reply"
+            case .comment: return "comment"
+            case .quote: return "quote"
+            case .bookmark: return "bookmark_add"
+            case .unbookmark: return "bookmark_remove"
+            case .more: return "more"
+            case .delete: return "delete"
+            case .report: return "report"
+            case .react: return "reaction_add"
+            case .share: return "share"
+            case .fxShare: return "fx_share"
+            case .unReact: return "reaction_remove"
+            case .editUserList: return "edit_user_in_list"
+            case .sendMessage: return "send_message"
+            case .mute: return "mute"
+            case .unMute: return "unmute"
+            case .block: return "block"
+            case .unBlock: return "unblock"
+            case .blockWithHandleParameter: return "block_user_with_handle \(localized.parameters.first ?? "")"
+            case .muteWithHandleParameter: return "mute_user_with_handle \(localized.parameters.first ?? "")"
             }
-            return key
-        } else {
-            return LocalizedStringResource(stringLiteral: "")
         }
     }
 }

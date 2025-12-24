@@ -11584,6 +11584,16 @@
         }
       }
     },
+    "block_user_with_handle %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Block %@"
+          }
+        }
+      }
+    },
     "bluesky_feeds_title" : {
       "localizations" : {
         "af" : {
@@ -70871,6 +70881,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mute user"
+          }
+        }
+      }
+    },
+    "mute_user_with_handle %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mute %@"
           }
         }
       }

@@ -280,4 +280,10 @@
     <string name="deeplink_account_selection_title">Selecionar conta</string>
     <string name="deeplink_account_selection_message">Selecione uma conta para abrir este link</string>
     <string name="deeplink_account_selection_browser">Abrir no navegador</string>
+    <string name="block_user_title">Bloquear usuário</string>
+    <string name="block_user_description">Tem certeza que deseja bloquear este usuário?</string>
+    <string name="mute_user_title">Silenciar usuário</string>
+    <string name="mute_user_description">Tem certeza que deseja silenciar este usuário?</string>
+    <string name="report_user_title">Denunciar usuário</string>
+    <string name="report_user_description">Tem certeza que deseja denunciar este usuário?</string>
 </resources>

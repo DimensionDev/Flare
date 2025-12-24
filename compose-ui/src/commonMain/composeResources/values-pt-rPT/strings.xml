@@ -103,11 +103,13 @@
     <string name="share">Compartilhar</string>
     <string name="fx_share">Compartilhar via FxEmbed</string>
     <string name="comment">Comentar</string>
-    <string name="user_report">Denunciar %1$s</string>
-    <string name="user_block">Bloquear %1$s</string>
-    <string name="user_unblock">Desbloquear %1$s</string>
-    <string name="user_mute">Silenciar %1$s</string>
-    <string name="user_unmute">Reativar %1$s</string>
+    <string name="user_report">Denunciar</string>
+    <string name="user_block">Bloquear</string>
+    <string name="user_unblock">Desbloquear</string>
+    <string name="user_mute">Silenciar</string>
+    <string name="user_unmute">Desbloquear</string>
+    <string name="user_mute_with_parameter">Silenciar %1$s</string>
+    <string name="user_block_with_parameter">Bloquear %1$s</string>
     <string name="mastodon_item_content_warning">Aviso de conteúdo</string>
     <string name="reply_to">Responder à %1$s</string>
     <string name="status_detail_translate">Traduzir Post</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">Próximo</string>
     <string name="service_select_empty_message">Nenhuma instância encontrada</string>
     <string name="service_select_compatibility_warning">Este servidor usa %1$s, Sinalizador será executado em modo de compatibilidade. Alguns recursos podem não funcionar corretamente.</string>
+    <string name="login_agreement">Ao fazer o login, você concorda com %1$s.</string>
+    <string name="eula_privacy_policy">EULA e Política de Privacidade</string>
     <string name="home_tab_home_title">Residencial</string>
     <string name="home_tab_notifications_title">Notificações</string>
     <string name="home_tab_me_title">Eu</string>

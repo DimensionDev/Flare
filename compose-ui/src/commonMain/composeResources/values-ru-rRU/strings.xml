@@ -103,11 +103,13 @@
     <string name="share">Поделиться</string>
     <string name="fx_share">Поделиться через FxEmbed</string>
     <string name="comment">Комментарий</string>
-    <string name="user_report">Отчёт %1$s</string>
-    <string name="user_block">Блокировать %1$s</string>
-    <string name="user_unblock">Разблокировать %1$s</string>
-    <string name="user_mute">Выключить звук %1$s</string>
-    <string name="user_unmute">Включить звук %1$s</string>
+    <string name="user_report">Пожаловаться</string>
+    <string name="user_block">Блок</string>
+    <string name="user_unblock">Разблокировать</string>
+    <string name="user_mute">Заглушить</string>
+    <string name="user_unmute">Включить звук</string>
+    <string name="user_mute_with_parameter">Выключить звук %1$s</string>
+    <string name="user_block_with_parameter">Блокировать %1$s</string>
     <string name="mastodon_item_content_warning">Предупреждение о содержании</string>
     <string name="reply_to">Ответить %1$s</string>
     <string name="status_detail_translate">Перевести пост</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">Следующий</string>
     <string name="service_select_empty_message">Экземпляров не найдено</string>
     <string name="service_select_compatibility_warning">Этот сервер использует %1$s, Flare будет работать в режиме совместимости. Некоторые функции могут работать некорректно.</string>
+    <string name="login_agreement">Входя в систему, вы соглашаетесь с %1$s.</string>
+    <string name="eula_privacy_policy">EULA и политика конфиденциальности</string>
     <string name="home_tab_home_title">Домашний</string>
     <string name="home_tab_notifications_title">Уведомления</string>
     <string name="home_tab_me_title">Я</string>

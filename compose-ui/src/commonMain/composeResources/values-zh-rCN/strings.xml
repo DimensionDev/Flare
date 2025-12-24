@@ -103,11 +103,13 @@
     <string name="share">分享</string>
     <string name="fx_share">通过FxEmbed分享</string>
     <string name="comment">评论</string>
-    <string name="user_report">举报 %1$s</string>
-    <string name="user_block">屏蔽 %1$s</string>
-    <string name="user_unblock">取消屏蔽 %1$s</string>
-    <string name="user_mute">静音 %1$s</string>
-    <string name="user_unmute">取消静音 %1$s</string>
+    <string name="user_report">举报</string>
+    <string name="user_block">拉黑</string>
+    <string name="user_unblock">取消屏蔽</string>
+    <string name="user_mute">静音</string>
+    <string name="user_unmute">取消静音</string>
+    <string name="user_mute_with_parameter">静音 %1$s</string>
+    <string name="user_block_with_parameter">屏蔽 %1$s</string>
     <string name="mastodon_item_content_warning">内容警告</string>
     <string name="reply_to">回复 %1$s</string>
     <string name="status_detail_translate">翻译帖子</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">下一步</string>
     <string name="service_select_empty_message">没有找到实例</string>
     <string name="service_select_compatibility_warning">此服务器使用 %1$s，Flare将以兼容模式运行。有些功能可能无法正常工作。</string>
+    <string name="login_agreement">通过登录，您同意 %1$s</string>
+    <string name="eula_privacy_policy">EULA和隐私政策</string>
     <string name="home_tab_home_title">首页</string>
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">我</string>

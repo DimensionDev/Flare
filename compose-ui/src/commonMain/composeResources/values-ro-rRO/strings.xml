@@ -103,11 +103,13 @@
     <string name="share">Distribuie</string>
     <string name="fx_share">Distribuie prin FxEmbed</string>
     <string name="comment">Comentariu</string>
-    <string name="user_report">Raportează %1$s</string>
-    <string name="user_block">Blochează %1$s</string>
-    <string name="user_unblock">Deblochează %1$s</string>
-    <string name="user_mute">Amuțește %1$s</string>
-    <string name="user_unmute">Demutizează %1$s</string>
+    <string name="user_report">Raport</string>
+    <string name="user_block">Blochează</string>
+    <string name="user_unblock">Deblochează</string>
+    <string name="user_mute">Amuțit</string>
+    <string name="user_unmute">Deblochează</string>
+    <string name="user_mute_with_parameter">Amuțește %1$s</string>
+    <string name="user_block_with_parameter">Blochează %1$s</string>
     <string name="mastodon_item_content_warning">Avertisment conținut</string>
     <string name="reply_to">Răspunde la %1$s</string>
     <string name="status_detail_translate">Tradu Postare</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">Următoarea</string>
     <string name="service_select_empty_message">Nu s-au găsit instanțe</string>
     <string name="service_select_compatibility_warning">Acest server folosește %1$s, Flare va rula în modul compatibilitate. Este posibil ca unele caracteristici să nu funcționeze corect.</string>
+    <string name="login_agreement">Prin autentificare, ești de acord cu %1$s.</string>
+    <string name="eula_privacy_policy">EULA și politica de confidențialitate</string>
     <string name="home_tab_home_title">Acasă</string>
     <string name="home_tab_notifications_title">Notificări</string>
     <string name="home_tab_me_title">Eu</string>

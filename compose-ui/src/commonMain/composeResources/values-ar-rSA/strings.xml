@@ -103,11 +103,13 @@
     <string name="share">مشاركة</string>
     <string name="fx_share">مشاركة عبر FxEmbed</string>
     <string name="comment">تعليق</string>
-    <string name="user_report">التقرير %1$s</string>
-    <string name="user_block">حظر %1$s</string>
-    <string name="user_unblock">إلغاء حظر %1$s</string>
-    <string name="user_mute">كتم صوت %1$s</string>
-    <string name="user_unmute">إلغاء كتم %1$s</string>
+    <string name="user_report">تقرير</string>
+    <string name="user_block">كتلة</string>
+    <string name="user_unblock">إلغاء الحظر</string>
+    <string name="user_mute">كتم</string>
+    <string name="user_unmute">إلغاء الكتم</string>
+    <string name="user_mute_with_parameter">كتم صوت %1$s</string>
+    <string name="user_block_with_parameter">حظر %1$s</string>
     <string name="mastodon_item_content_warning">تحذير المحتوى</string>
     <string name="reply_to">الرد على %1$s</string>
     <string name="status_detail_translate">ترجمة المنشور</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">التالي</string>
     <string name="service_select_empty_message">لا يوجد مثيلات</string>
     <string name="service_select_compatibility_warning">هذا الخادم يستخدم %1$s، سيتم تشغيل Fflowفي وضع التوافق. قد لا تعمل بعض الميزات بشكل صحيح.</string>
+    <string name="login_agreement">من خلال تسجيل الدخول، أنت توافق على %1$s.</string>
+    <string name="eula_privacy_policy">EULA وسياسة الخصوصية</string>
     <string name="home_tab_home_title">المنزل</string>
     <string name="home_tab_notifications_title">الإشعارات</string>
     <string name="home_tab_me_title">أنا</string>

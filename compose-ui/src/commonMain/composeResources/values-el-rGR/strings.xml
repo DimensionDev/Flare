@@ -101,11 +101,13 @@
     <string name="share">Κοινοποίηση</string>
     <string name="fx_share">Κοινοποίηση μέσω FxEmbed</string>
     <string name="comment">Σχόλιο</string>
-    <string name="user_report">Αναφορά %1$s</string>
-    <string name="user_block">Αποκλεισμός %1$s</string>
-    <string name="user_unblock">Ξεμπλοκάρισμα %1$s</string>
-    <string name="user_mute">Σίγαση %1$s</string>
-    <string name="user_unmute">Κατάργηση Σίγασης %1$s</string>
+    <string name="user_report">Αναφορά</string>
+    <string name="user_block">Αποκλεισμός</string>
+    <string name="user_unblock">Ξεμπλοκή</string>
+    <string name="user_mute">Σίγαση</string>
+    <string name="user_unmute">Κατάργηση Σίγασης</string>
+    <string name="user_mute_with_parameter">Σίγαση %1$s</string>
+    <string name="user_block_with_parameter">Αποκλεισμός %1$s</string>
     <string name="mastodon_item_content_warning">Προειδοποίηση περιεχομένου</string>
     <string name="reply_to">Απάντηση σε %1$s</string>
     <string name="status_detail_translate">Μετάφραση Ανάρτησης</string>
@@ -342,6 +344,8 @@
     <string name="service_select_next_button">Επόμενο</string>
     <string name="service_select_empty_message">Δεν βρέθηκαν παρουσίες</string>
     <string name="service_select_compatibility_warning">Αυτός ο διακομιστής χρησιμοποιεί %1$s, η Flare θα εκτελείται σε λειτουργία συμβατότητας. Ορισμένες λειτουργίες ενδέχεται να μην λειτουργούν σωστά.</string>
+    <string name="login_agreement">Με τη σύνδεσή σας, συμφωνείτε με το %1$s.</string>
+    <string name="eula_privacy_policy">EULA και Πολιτική Απορρήτου</string>
     <string name="home_tab_home_title">Αρχική</string>
     <string name="home_tab_notifications_title">Ειδοποιήσεις</string>
     <string name="home_tab_me_title">Εγώ</string>

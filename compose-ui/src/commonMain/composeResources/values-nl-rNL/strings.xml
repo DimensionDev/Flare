@@ -103,11 +103,13 @@
     <string name="share">Delen</string>
     <string name="fx_share">Delen via FxEmbed</string>
     <string name="comment">Opmerking</string>
-    <string name="user_report">Rapporteer %1$s</string>
-    <string name="user_block">Blokkeren %1$s</string>
-    <string name="user_unblock">Deblokkeer %1$s</string>
-    <string name="user_mute">Demp %1$s</string>
-    <string name="user_unmute">Deblokkeer %1$s</string>
+    <string name="user_report">Rapporteren</string>
+    <string name="user_block">Blokkeren</string>
+    <string name="user_unblock">Deblokkeer</string>
+    <string name="user_mute">Dempen</string>
+    <string name="user_unmute">Deblokkeer</string>
+    <string name="user_mute_with_parameter">Demp %1$s</string>
+    <string name="user_block_with_parameter">Blokkeren %1$s</string>
     <string name="mastodon_item_content_warning">Waarschuwing inhoud</string>
     <string name="reply_to">Antwoord aan %1$s</string>
     <string name="status_detail_translate">Post vertalen</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">Volgende</string>
     <string name="service_select_empty_message">Geen instanties gevonden</string>
     <string name="service_select_compatibility_warning">Deze server maakt gebruik van %1$s, Flare werkt in compatibiliteitsmodus. Sommige functies werken mogelijk niet goed.</string>
+    <string name="login_agreement">Door in te loggen, gaat u akkoord met de %1$s.</string>
+    <string name="eula_privacy_policy">Gebruikersovereenkomst en privacybeleid</string>
     <string name="home_tab_home_title">Startpagina</string>
     <string name="home_tab_notifications_title">Notificaties</string>
     <string name="home_tab_me_title">IK</string>

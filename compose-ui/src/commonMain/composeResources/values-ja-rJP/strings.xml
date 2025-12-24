@@ -103,11 +103,13 @@
     <string name="share">共有</string>
     <string name="fx_share">FxEmbedで共有</string>
     <string name="comment">コメント</string>
-    <string name="user_report">%1$sを報告</string>
-    <string name="user_block">%1$sをブロック</string>
-    <string name="user_unblock">%1$sのブロックを解除</string>
-    <string name="user_mute">%1$sをミュート</string>
-    <string name="user_unmute">%1$sのミュートを解除</string>
+    <string name="user_report">レポート</string>
+    <string name="user_block">ブロック</string>
+    <string name="user_unblock">ブロックを解除</string>
+    <string name="user_mute">ミュート</string>
+    <string name="user_unmute">ミュート解除</string>
+    <string name="user_mute_with_parameter">%1$sをミュート</string>
+    <string name="user_block_with_parameter">%1$sをブロック</string>
     <string name="mastodon_item_content_warning">閲覧注意:</string>
     <string name="reply_to">%1$sに返信</string>
     <string name="status_detail_translate">投稿を翻訳</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">次へ</string>
     <string name="service_select_empty_message">インスタンスが見つかりません</string>
     <string name="service_select_compatibility_warning">このサーバーは %1$sを使用しています。Flare は互換モードで実行されます。一部の機能が正常に動作しない可能性があります。</string>
+    <string name="login_agreement">ログインすると、 %1$sに同意したことになります。</string>
+    <string name="eula_privacy_policy">EULAおよびプライバシーポリシー</string>
     <string name="home_tab_home_title">ホーム</string>
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">自分</string>

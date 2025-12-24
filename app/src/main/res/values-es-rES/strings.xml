@@ -312,6 +312,12 @@
     <string name="deeplink_account_selection_title">Seleccionar cuenta</string>
     <string name="deeplink_account_selection_message">Seleccione una cuenta para abrir este enlace</string>
     <string name="deeplink_account_selection_browser">Abrir en el navegador</string>
+    <string name="block_user_title">Bloquear usuario</string>
+    <string name="block_user_description">¿Estás seguro de que quieres bloquear a este usuario?</string>
+    <string name="mute_user_title">Silenciar usuario</string>
+    <string name="mute_user_description">¿Estás seguro de que quieres silenciar a este usuario?</string>
+    <string name="report_user_title">Denunciar usuario</string>
+    <string name="report_user_description">¿Está seguro que desea reportar a este usuario?</string>
     <string name="changelog_current"><![CDATA[            <span>Versión %1$s:</span>
             <ul>
                 <li>Error corrigiendo y mejorando el rendimiento.</li>

@@ -312,4 +312,10 @@
     <string name="deeplink_account_selection_title">アカウントを選択</string>
     <string name="deeplink_account_selection_message">このリンクを開くアカウントを選択してください</string>
     <string name="deeplink_account_selection_browser">ブラウザで開く</string>
+    <string name="block_user_title">ユーザーをブロック</string>
+    <string name="block_user_description">このユーザーをブロックしてもよろしいですか？</string>
+    <string name="mute_user_title">ユーザーをミュート</string>
+    <string name="mute_user_description">このユーザーをミュートしてもよろしいですか？</string>
+    <string name="report_user_title">ユーザーを報告</string>
+    <string name="report_user_description">このユーザーを報告してもよろしいですか？</string>
 </resources>

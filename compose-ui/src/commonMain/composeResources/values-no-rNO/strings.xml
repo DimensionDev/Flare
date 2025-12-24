@@ -103,11 +103,13 @@
     <string name="share">Del</string>
     <string name="fx_share">Del via FxEmbed</string>
     <string name="comment">Kommentar</string>
-    <string name="user_report">Rapport %1$s</string>
-    <string name="user_block">Blokker %1$s</string>
-    <string name="user_unblock">Opphev blokkering %1$s</string>
-    <string name="user_mute">Demp %1$s</string>
-    <string name="user_unmute">Udemp %1$s</string>
+    <string name="user_report">Rapporter</string>
+    <string name="user_block">Blokker</string>
+    <string name="user_unblock">Avblokker</string>
+    <string name="user_mute">Demp</string>
+    <string name="user_unmute">Udemp</string>
+    <string name="user_mute_with_parameter">Demp %1$s</string>
+    <string name="user_block_with_parameter">Blokker %1$s</string>
     <string name="mastodon_item_content_warning">Advarsel for innhold</string>
     <string name="reply_to">Svar til %1$s</string>
     <string name="status_detail_translate">Oversett innlegg</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">Neste</string>
     <string name="service_select_empty_message">Ingen instanser funnet</string>
     <string name="service_select_compatibility_warning">Denne serveren bruker %1$s, Flare vil kjøre i kompatibilitetsmodus. Noen funksjoner fungerer kanskje ikke skikkelig.</string>
+    <string name="login_agreement">Ved å logge inn samtykker du til %1$s.</string>
+    <string name="eula_privacy_policy">EULA og Personvernerklæring</string>
     <string name="home_tab_home_title">Hjem</string>
     <string name="home_tab_notifications_title">Varsler</string>
     <string name="home_tab_me_title">Meg</string>

@@ -280,4 +280,10 @@
     <string name="deeplink_account_selection_title">Selectare cont</string>
     <string name="deeplink_account_selection_message">Selectați un cont pentru a deschide acest link</string>
     <string name="deeplink_account_selection_browser">Deschide în browser</string>
+    <string name="block_user_title">Blochează utilizator</string>
+    <string name="block_user_description">Sunteţi sigur că doriţi să blocaţi acest utilizator?</string>
+    <string name="mute_user_title">Amuțește utilizatorul</string>
+    <string name="mute_user_description">Sunteţi sigur că doriţi să dezactivaţi acest utilizator?</string>
+    <string name="report_user_title">Raportează utilizatorul</string>
+    <string name="report_user_description">Ești sigur că vrei să raportezi acest utilizator?</string>
 </resources>

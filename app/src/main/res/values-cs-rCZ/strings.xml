@@ -312,4 +312,10 @@
     <string name="deeplink_account_selection_title">Vybrat účet</string>
     <string name="deeplink_account_selection_message">Vyberte účet pro otevření tohoto odkazu</string>
     <string name="deeplink_account_selection_browser">Otevřít v prohlížeči</string>
+    <string name="block_user_title">Blokovat uživatele</string>
+    <string name="block_user_description">Opravdu chcete zablokovat tohoto uživatele?</string>
+    <string name="mute_user_title">Ztlumit uživatele</string>
+    <string name="mute_user_description">Opravdu chcete ztlumit tohoto uživatele?</string>
+    <string name="report_user_title">Nahlásit uživatele</string>
+    <string name="report_user_description">Opravdu chcete nahlásit tohoto uživatele?</string>
 </resources>

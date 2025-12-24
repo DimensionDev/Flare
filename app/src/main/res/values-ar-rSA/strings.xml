@@ -312,6 +312,12 @@
     <string name="deeplink_account_selection_title">حدد الحساب</string>
     <string name="deeplink_account_selection_message">حدد حسابا لفتح هذا الرابط</string>
     <string name="deeplink_account_selection_browser">فتح في المتصفح</string>
+    <string name="block_user_title">حظر المستخدم</string>
+    <string name="block_user_description">هل أنت متأكد من أنك تريد حظر هذا المستخدم؟</string>
+    <string name="mute_user_title">كتم صوت المستخدم</string>
+    <string name="mute_user_description">هل أنت متأكد من أنك تريد كتم هذا المستخدم؟</string>
+    <string name="report_user_title">الإبلاغ عن المستخدم</string>
+    <string name="report_user_description">هل أنت متأكد من أنك تريد الإبلاغ عن هذا المستخدم؟</string>
     <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
             <ul>
                 <li>إصلاحات الشوائب وتحسين الأداء.</li>

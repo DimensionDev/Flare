@@ -103,11 +103,13 @@
     <string name="share">Jaa</string>
     <string name="fx_share">Jaa FxEmbedin kautta</string>
     <string name="comment">Kommentti</string>
-    <string name="user_report">Ilmoita %1$s</string>
-    <string name="user_block">Estä %1$s</string>
-    <string name="user_unblock">Poista %1$s Esto</string>
-    <string name="user_mute">Mykistä %1$s</string>
-    <string name="user_unmute">Poista Mykistys %1$s</string>
+    <string name="user_report">Raportoi</string>
+    <string name="user_block">Estä</string>
+    <string name="user_unblock">Poista</string>
+    <string name="user_mute">Mykistä</string>
+    <string name="user_unmute">Poista Mykistys</string>
+    <string name="user_mute_with_parameter">Mykistä %1$s</string>
+    <string name="user_block_with_parameter">Estä %1$s</string>
     <string name="mastodon_item_content_warning">Sisällön varoitus</string>
     <string name="reply_to">Vastaa %1$s</string>
     <string name="status_detail_translate">Käännä Viesti</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">Seuraava</string>
     <string name="service_select_empty_message">Esiintymiä ei löytynyt</string>
     <string name="service_select_compatibility_warning">Tämä palvelin käyttää %1$s, Flare toimii yhteensopivuustilassa. Jotkin ominaisuudet eivät välttämättä toimi oikein.</string>
+    <string name="login_agreement">Kirjautumalla sisään hyväksyt %1$s:n .</string>
+    <string name="eula_privacy_policy">EULA ja yksityisyyden suoja</string>
     <string name="home_tab_home_title">Koti</string>
     <string name="home_tab_notifications_title">Ilmoitukset</string>
     <string name="home_tab_me_title">Minä</string>

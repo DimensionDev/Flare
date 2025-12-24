@@ -312,6 +312,12 @@
     <string name="deeplink_account_selection_title">Επιλέξτε λογαριασμό</string>
     <string name="deeplink_account_selection_message">Επιλέξτε ένα λογαριασμό για να ανοίξετε αυτόν τον σύνδεσμο</string>
     <string name="deeplink_account_selection_browser">Άνοιγμα σε πρόγραμμα περιήγησης</string>
+    <string name="block_user_title">Αποκλεισμός χρήστη</string>
+    <string name="block_user_description">Είστε βέβαιοι ότι θέλετε να μπλοκάρετε αυτόν τον χρήστη?</string>
+    <string name="mute_user_title">Σίγαση χρήστη</string>
+    <string name="mute_user_description">Είστε βέβαιοι ότι θέλετε να κάνετε σίγαση αυτού του χρήστη?</string>
+    <string name="report_user_title">Αναφορά χρήστη</string>
+    <string name="report_user_description">Είστε βέβαιοι ότι θέλετε να αναφέρετε αυτόν τον χρήστη?</string>
     <string name="changelog_current"><![CDATA[            <span>Έκδοση %1$s:</span>
             <ul>
                 <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης.</li>

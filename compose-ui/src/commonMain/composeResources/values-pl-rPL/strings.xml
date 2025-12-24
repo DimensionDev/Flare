@@ -103,11 +103,13 @@
     <string name="share">Udostępnij</string>
     <string name="fx_share">Udostępnij przez FxEmbed</string>
     <string name="comment">Komentarz</string>
-    <string name="user_report">Zgłoś %1$s</string>
-    <string name="user_block">Blok %1$s</string>
-    <string name="user_unblock">Odblokuj %1$s</string>
-    <string name="user_mute">Wycisz %1$s</string>
-    <string name="user_unmute">Wyłącz wyciszenie %1$s</string>
+    <string name="user_report">Zgłoszenie</string>
+    <string name="user_block">Blok</string>
+    <string name="user_unblock">Odblokuj</string>
+    <string name="user_mute">Wycisz</string>
+    <string name="user_unmute">Wyłącz wyciszenie</string>
+    <string name="user_mute_with_parameter">Wycisz %1$s</string>
+    <string name="user_block_with_parameter">Blok %1$s</string>
     <string name="mastodon_item_content_warning">Ostrzeżenie o zawartości</string>
     <string name="reply_to">Odpowiedz %1$s</string>
     <string name="status_detail_translate">Przetłumacz post</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">Następny</string>
     <string name="service_select_empty_message">Nie znaleziono instancji</string>
     <string name="service_select_compatibility_warning">Ten serwer używa %1$s, Flara będzie działać w trybie zgodności. Niektóre funkcje mogą nie działać poprawnie.</string>
+    <string name="login_agreement">Logując się, zgadzasz się z %1$s.</string>
+    <string name="eula_privacy_policy">Licencja i polityka prywatności</string>
     <string name="home_tab_home_title">Strona główna</string>
     <string name="home_tab_notifications_title">Powiadomienia</string>
     <string name="home_tab_me_title">Pr</string>

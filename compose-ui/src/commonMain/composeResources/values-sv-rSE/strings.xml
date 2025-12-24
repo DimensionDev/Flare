@@ -103,11 +103,13 @@
     <string name="share">Dela</string>
     <string name="fx_share">Dela via FxEmbed</string>
     <string name="comment">Kommentar</string>
-    <string name="user_report">Rapportera %1$s</string>
-    <string name="user_block">Blockera %1$s</string>
-    <string name="user_unblock">Avblockera %1$s</string>
-    <string name="user_mute">Tysta %1$s</string>
-    <string name="user_unmute">Avtysta %1$s</string>
+    <string name="user_report">Rapportera</string>
+    <string name="user_block">Blockera</string>
+    <string name="user_unblock">Avblockera</string>
+    <string name="user_mute">Tysta</string>
+    <string name="user_unmute">Avtysta</string>
+    <string name="user_mute_with_parameter">Tysta %1$s</string>
+    <string name="user_block_with_parameter">Blockera %1$s</string>
     <string name="mastodon_item_content_warning">Varning för innehåll</string>
     <string name="reply_to">Svara %1$s</string>
     <string name="status_detail_translate">Översätt inlägg</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">Nästa</string>
     <string name="service_select_empty_message">Inga instanser hittades</string>
     <string name="service_select_compatibility_warning">Denna server använder %1$s, Flare kommer att köras i kompatibilitetsläge. Vissa funktioner kanske inte fungerar som de ska.</string>
+    <string name="login_agreement">Genom att logga in godkänner du %1$s.</string>
+    <string name="eula_privacy_policy">EULA och sekretesspolicy</string>
     <string name="home_tab_home_title">Hem</string>
     <string name="home_tab_notifications_title">Aviseringar</string>
     <string name="home_tab_me_title">Jag</string>

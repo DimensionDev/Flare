@@ -73,9 +73,12 @@
     <string name="share">Споделяне</string>
     <string name="fx_share">Споделяне чрез FxEmbed</string>
     <string name="comment">Коментар</string>
-    <string name="user_report">Докладване на %1$s</string>
-    <string name="user_block">Блокиране на %1$s</string>
-    <string name="user_mute">Заглушаване на %1$s</string>
+    <string name="user_report">Докладване</string>
+    <string name="user_block">Блокиране</string>
+    <string name="user_unblock">Отблокирване</string>
+    <string name="user_mute">Заглушаване</string>
+    <string name="user_mute_with_parameter">Заглушаване на %1$s</string>
+    <string name="user_block_with_parameter">Блокиране на %1$s</string>
     <string name="mastodon_item_content_warning">Предупреждение за съдържание</string>
     <string name="reply_to">Отговор към %1$s</string>
     <string name="status_detail_translate">Превеждане на публикацията</string>

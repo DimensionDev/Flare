@@ -312,4 +312,10 @@
     <string name="deeplink_account_selection_title">选择帐户</string>
     <string name="deeplink_account_selection_message">选择要打开此链接的帐户</string>
     <string name="deeplink_account_selection_browser">在浏览器中打开</string>
+    <string name="block_user_title">屏蔽用户</string>
+    <string name="block_user_description">您确定要屏蔽此用户吗？</string>
+    <string name="mute_user_title">静音用户</string>
+    <string name="mute_user_description">您确定要静音此用户吗？</string>
+    <string name="report_user_title">报告用户</string>
+    <string name="report_user_description">您确定要报告此用户吗？</string>
 </resources>

@@ -103,11 +103,13 @@
     <string name="share">Teilen</string>
     <string name="fx_share">Über FxEmbed teilen</string>
     <string name="comment">Kommentar</string>
-    <string name="user_report">Bericht %1$s</string>
-    <string name="user_block">Blockieren %1$s</string>
-    <string name="user_unblock">%1$s entsperren</string>
-    <string name="user_mute">Stumm %1$s</string>
-    <string name="user_unmute">Entmute %1$s</string>
+    <string name="user_report">Bericht</string>
+    <string name="user_block">Blockieren</string>
+    <string name="user_unblock">Entsperren</string>
+    <string name="user_mute">Stumm</string>
+    <string name="user_unmute">Entstumm</string>
+    <string name="user_mute_with_parameter">Stumm %1$s</string>
+    <string name="user_block_with_parameter">Blockieren %1$s</string>
     <string name="mastodon_item_content_warning">Inhaltswarnung</string>
     <string name="reply_to">Auf %1$s antworten</string>
     <string name="status_detail_translate">Beitrag übersetzen</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">Nächste</string>
     <string name="service_select_empty_message">Keine Instanzen gefunden</string>
     <string name="service_select_compatibility_warning">Dieser Server verwendet %1$s, Leuchten wird im Kompatibilitätsmodus ausgeführt. Einige Funktionen funktionieren möglicherweise nicht richtig.</string>
+    <string name="login_agreement">Indem Sie sich anmelden, stimmen Sie der %1$s zu.</string>
+    <string name="eula_privacy_policy">EULA und Datenschutzerklärung</string>
     <string name="home_tab_home_title">Start</string>
     <string name="home_tab_notifications_title">Benachrichtigungen</string>
     <string name="home_tab_me_title">Ich</string>

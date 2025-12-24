@@ -279,4 +279,10 @@
     <string name="deeplink_account_selection_title">Виберіть обліковий запис</string>
     <string name="deeplink_account_selection_message">Виберіть обліковий запис, щоб відкрити це посилання</string>
     <string name="deeplink_account_selection_browser">Відкрити у браузері</string>
+    <string name="block_user_title">Заблокувати користувача</string>
+    <string name="block_user_description">Ви впевнені, що хочете заблокувати цього користувача?</string>
+    <string name="mute_user_title">Заглушити користувача</string>
+    <string name="mute_user_description">Ви дійсно бажаєте вимкнути цього користувача?</string>
+    <string name="report_user_title">Повідомити про порушення Правил користувачем</string>
+    <string name="report_user_description">Ви впевнені, що хочете повідомити про цього користувача?</string>
 </resources>

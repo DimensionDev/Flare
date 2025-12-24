@@ -103,11 +103,13 @@
     <string name="share">Sdílet</string>
     <string name="fx_share">Sdílet přes FxEmbed</string>
     <string name="comment">Komentář</string>
-    <string name="user_report">Nahlásit %1$s</string>
-    <string name="user_block">Blokovat %1$s</string>
-    <string name="user_unblock">Odblokovat %1$s</string>
-    <string name="user_mute">Ztlumit %1$s</string>
-    <string name="user_unmute">Zrušit ztlumení %1$s</string>
+    <string name="user_report">Nahlásit</string>
+    <string name="user_block">Blokovat</string>
+    <string name="user_unblock">Odblokovat</string>
+    <string name="user_mute">Ztlumit</string>
+    <string name="user_unmute">Zrušit ztlumení</string>
+    <string name="user_mute_with_parameter">Ztlumit %1$s</string>
+    <string name="user_block_with_parameter">Blokovat %1$s</string>
     <string name="mastodon_item_content_warning">Upozornění na obsah</string>
     <string name="reply_to">Odpovědět %1$s</string>
     <string name="status_detail_translate">Přeložit příspěvek</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">Další</string>
     <string name="service_select_empty_message">Nebyly nalezeny žádné instance</string>
     <string name="service_select_compatibility_warning">Tento server používá %1$s, Flare bude spuštěn v režimu kompatibility. Některé funkce nemusí fungovat správně.</string>
+    <string name="login_agreement">Přihlášením souhlasíte s %1$s.</string>
+    <string name="eula_privacy_policy">EULA a zásady ochrany osobních údajů</string>
     <string name="home_tab_home_title">Domů</string>
     <string name="home_tab_notifications_title">Oznámení</string>
     <string name="home_tab_me_title">Já</string>

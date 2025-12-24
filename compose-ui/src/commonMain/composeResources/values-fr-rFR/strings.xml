@@ -103,11 +103,13 @@
     <string name="share">Partager</string>
     <string name="fx_share">Partager via FxEmbed</string>
     <string name="comment">Commenter</string>
-    <string name="user_report">Signaler %1$s</string>
-    <string name="user_block">Bloquer %1$s</string>
-    <string name="user_unblock">Débloquer %1$s</string>
-    <string name="user_mute">Couper le son %1$s</string>
-    <string name="user_unmute">Rétablir le son %1$s</string>
+    <string name="user_report">Rapporter</string>
+    <string name="user_block">Bloquer</string>
+    <string name="user_unblock">Débloquer</string>
+    <string name="user_mute">Couper le son</string>
+    <string name="user_unmute">Rétablir le son</string>
+    <string name="user_mute_with_parameter">Couper le son %1$s</string>
+    <string name="user_block_with_parameter">Bloquer %1$s</string>
     <string name="mastodon_item_content_warning">Avertissement de contenu</string>
     <string name="reply_to">Répondre à %1$s</string>
     <string name="status_detail_translate">Traduire le message</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">Suivant</string>
     <string name="service_select_empty_message">Aucune instance trouvée</string>
     <string name="service_select_compatibility_warning">Ce serveur utilise %1$s, Fusée éclairante fonctionnera en mode de compatibilité. Certaines fonctionnalités peuvent ne pas fonctionner correctement.</string>
+    <string name="login_agreement">En vous connectant, vous acceptez l\' %1$s.</string>
+    <string name="eula_privacy_policy">CLUF et politique de confidentialité</string>
     <string name="home_tab_home_title">Domicile</string>
     <string name="home_tab_notifications_title">Notifications</string>
     <string name="home_tab_me_title">Moi</string>

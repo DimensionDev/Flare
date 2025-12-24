@@ -280,4 +280,10 @@
     <string name="deeplink_account_selection_title">Velg konto</string>
     <string name="deeplink_account_selection_message">Velg en konto for å åpne denne lenken</string>
     <string name="deeplink_account_selection_browser">Åpne i nettleser</string>
+    <string name="block_user_title">Blokker bruker</string>
+    <string name="block_user_description">Er du sikker på at du vil blokkere denne brukeren?</string>
+    <string name="mute_user_title">Demp bruker</string>
+    <string name="mute_user_description">Er du sikker på at du vil dempe denne brukeren?</string>
+    <string name="report_user_title">Rapporter bruker</string>
+    <string name="report_user_description">Er du sikker på at du vil rapportere denne brukeren?</string>
 </resources>

@@ -312,6 +312,12 @@
     <string name="deeplink_account_selection_title">Выберите аккаунт</string>
     <string name="deeplink_account_selection_message">Выберите аккаунт, чтобы открыть эту ссылку</string>
     <string name="deeplink_account_selection_browser">Открыть в браузере</string>
+    <string name="block_user_title">Заблокировать пользователя</string>
+    <string name="block_user_description">Вы уверены, что хотите заблокировать этого пользователя?</string>
+    <string name="mute_user_title">Заглушить</string>
+    <string name="mute_user_description">Вы уверены, что хотите отключить этого пользователя?</string>
+    <string name="report_user_title">Пожаловаться на пользователя</string>
+    <string name="report_user_description">Вы уверены, что хотите пожаловаться на этого пользователя?</string>
     <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
             <ul>
                 <li>Исправления ошибок и улучшения производительности.</li>

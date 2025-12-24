@@ -280,4 +280,10 @@
     <string name="deeplink_account_selection_title">Valitse tili</string>
     <string name="deeplink_account_selection_message">Valitse tili avataksesi tämän linkin</string>
     <string name="deeplink_account_selection_browser">Avaa selaimessa</string>
+    <string name="block_user_title">Estä käyttäjä</string>
+    <string name="block_user_description">Oletko varma, että haluat estää tämän käyttäjän?</string>
+    <string name="mute_user_title">Mykistä käyttäjä</string>
+    <string name="mute_user_description">Oletko varma, että haluat mykistää tämän käyttäjän?</string>
+    <string name="report_user_title">Raportoi käyttäjä</string>
+    <string name="report_user_description">Oletko varma, että haluat raportoida tämän käyttäjän?</string>
 </resources>

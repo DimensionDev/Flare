@@ -103,11 +103,13 @@
     <string name="share">Compartir</string>
     <string name="fx_share">Compartir vía FxEmbed</string>
     <string name="comment">Comentario</string>
-    <string name="user_report">Informe %1$s</string>
-    <string name="user_block">Bloquear %1$s</string>
-    <string name="user_unblock">Desbloquear %1$s</string>
-    <string name="user_mute">Silenciar %1$s</string>
-    <string name="user_unmute">Dejar de silenciar %1$s</string>
+    <string name="user_report">Reporte</string>
+    <string name="user_block">Bloque</string>
+    <string name="user_unblock">Desbloquear</string>
+    <string name="user_mute">Silenciar</string>
+    <string name="user_unmute">Reactivar</string>
+    <string name="user_mute_with_parameter">Silenciar %1$s</string>
+    <string name="user_block_with_parameter">Bloquear %1$s</string>
     <string name="mastodon_item_content_warning">Advertencia de contenido</string>
     <string name="reply_to">Responder a %1$s</string>
     <string name="status_detail_translate">Traducir Post</string>
@@ -344,6 +346,8 @@
     <string name="service_select_next_button">Siguiente</string>
     <string name="service_select_empty_message">No se encontraron instancias</string>
     <string name="service_select_compatibility_warning">Este servidor usa %1$s, Bengala se ejecutará en modo de compatibilidad. Algunas características pueden no funcionar correctamente.</string>
+    <string name="login_agreement">Al iniciar sesión, aceptas el %1$s.</string>
+    <string name="eula_privacy_policy">EULA y Política de Privacidad</string>
     <string name="home_tab_home_title">Inicio</string>
     <string name="home_tab_notifications_title">Notificaciones</string>
     <string name="home_tab_me_title">Yo</string>

@@ -9,6 +9,7 @@ import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.xqt.model.Admin
 import dev.dimension.flare.data.network.xqt.model.AudioSpace
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
@@ -626,69 +627,91 @@ internal fun Tweet.renderStatus(
                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                         ),
                     actions =
-                        listOfNotNull(
-                            ActionMenu.Item(
-                                icon =
-                                    if (legacy?.bookmarked ==
-                                        true
-                                    ) {
-                                        ActionMenu.Item.Icon.Unbookmark
-                                    } else {
-                                        ActionMenu.Item.Icon.Bookmark
-                                    },
-                                text =
-                                    ActionMenu.Item.Text.Localized(
+                        buildList {
+                            add(
+                                ActionMenu.Item(
+                                    icon =
                                         if (legacy?.bookmarked ==
                                             true
                                         ) {
-                                            ActionMenu.Item.Text.Localized.Type.Unbookmark
+                                            ActionMenu.Item.Icon.Unbookmark
                                         } else {
-                                            ActionMenu.Item.Text.Localized.Type.Bookmark
+                                            ActionMenu.Item.Icon.Bookmark
+                                        },
+                                    text =
+                                        ActionMenu.Item.Text.Localized(
+                                            if (legacy?.bookmarked ==
+                                                true
+                                            ) {
+                                                ActionMenu.Item.Text.Localized.Type.Unbookmark
+                                            } else {
+                                                ActionMenu.Item.Text.Localized.Type.Bookmark
+                                            },
+                                        ),
+                                    count = UiNumber(legacy?.bookmarkCount?.toLong() ?: 0),
+                                    onClicked = {
+                                        event.bookmark(statusKey, legacy?.bookmarked ?: false)
+                                    },
+                                ),
+                            )
+                            add(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Share,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
+                                    shareContent = url,
+                                ),
+                            )
+                            add(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Share,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.FxShare),
+                                    shareContent = fxUrl,
+                                ),
+                            )
+
+                            if (isFromMe) {
+                                add(
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Delete,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                        color = ActionMenu.Item.Color.Red,
+                                        onClicked = {
+                                            launcher.launch(
+                                                DeeplinkRoute.Status
+                                                    .DeleteConfirm(
+                                                        statusKey = statusKey,
+                                                        accountType =
+                                                            dev.dimension.flare.model.AccountType
+                                                                .Specific(accountKey),
+                                                    ).toUri(),
+                                            )
                                         },
                                     ),
-                                count = UiNumber(legacy?.bookmarkCount?.toLong() ?: 0),
-                                onClicked = {
-                                    event.bookmark(statusKey, legacy?.bookmarked ?: false)
-                                },
-                            ),
-                            ActionMenu.Item(
-                                icon = ActionMenu.Item.Icon.Share,
-                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                shareContent = url,
-                            ),
-                            ActionMenu.Item(
-                                icon = ActionMenu.Item.Icon.Share,
-                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.FxShare),
-                                shareContent = fxUrl,
-                            ),
-                            if (isFromMe) {
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Delete,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
-                                    color = ActionMenu.Item.Color.Red,
-                                    onClicked = {
-                                        launcher.launch(
-                                            DeeplinkRoute.Status
-                                                .DeleteConfirm(
-                                                    statusKey = statusKey,
-                                                    accountType =
-                                                        dev.dimension.flare.model.AccountType
-                                                            .Specific(accountKey),
-                                                ).toUri(),
-                                        )
-                                    },
                                 )
                             } else {
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Report,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
-                                    color = ActionMenu.Item.Color.Red,
-                                    onClicked = {
-                                        // TODO: implement report
-                                    },
+                                if (user != null) {
+                                    add(ActionMenu.Divider)
+                                    addAll(
+                                        userActionsMenu(
+                                            accountKey = accountKey,
+                                            userKey = user.key,
+                                            handle = user.handle,
+                                        ),
+                                    )
+                                    add(ActionMenu.Divider)
+                                }
+                                add(
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Report,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                        color = ActionMenu.Item.Color.Red,
+                                        onClicked = {
+                                            // TODO: implement report
+                                        },
+                                    ),
                                 )
-                            },
-                        ).toImmutableList(),
+                            }
+                        }.toImmutableList(),
                 ),
             ).toImmutableList(),
         sensitive = legacy?.possiblySensitive == true,

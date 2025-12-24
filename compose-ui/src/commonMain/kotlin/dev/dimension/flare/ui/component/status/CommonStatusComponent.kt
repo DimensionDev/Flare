@@ -106,8 +106,10 @@ import dev.dimension.flare.compose.ui.status_detail_tldr
 import dev.dimension.flare.compose.ui.status_detail_translate
 import dev.dimension.flare.compose.ui.unlike
 import dev.dimension.flare.compose.ui.user_block
+import dev.dimension.flare.compose.ui.user_block_with_parameter
 import dev.dimension.flare.compose.ui.user_follow_edit_list
 import dev.dimension.flare.compose.ui.user_mute
+import dev.dimension.flare.compose.ui.user_mute_with_parameter
 import dev.dimension.flare.compose.ui.user_send_message
 import dev.dimension.flare.compose.ui.user_unblock
 import dev.dimension.flare.compose.ui.user_unmute
@@ -919,6 +921,8 @@ private fun ActionMenu.Item.Text.asString(): String =
                     ActionMenu.Item.Text.Localized.Type.UnMute -> Res.string.user_unmute
                     ActionMenu.Item.Text.Localized.Type.Block -> Res.string.user_block
                     ActionMenu.Item.Text.Localized.Type.UnBlock -> Res.string.user_unblock
+                    ActionMenu.Item.Text.Localized.Type.BlockWithHandleParameter -> Res.string.user_block_with_parameter
+                    ActionMenu.Item.Text.Localized.Type.MuteWithHandleParameter -> Res.string.user_mute_with_parameter
                 }
             stringResource(resource, *parameters.toTypedArray())
         }

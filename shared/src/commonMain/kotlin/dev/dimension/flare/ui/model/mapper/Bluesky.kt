@@ -27,6 +27,7 @@ import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -651,84 +652,110 @@ internal fun PostView.renderStatus(
                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                         ),
                     actions =
-                        listOfNotNull(
-                            ActionMenu.Item(
-                                icon =
-                                    if (viewer?.bookmarked ==
-                                        true
-                                    ) {
-                                        ActionMenu.Item.Icon.Unbookmark
-                                    } else {
-                                        ActionMenu.Item.Icon.Bookmark
-                                    },
-                                text =
-                                    ActionMenu.Item.Text.Localized(
+                        buildList {
+                            add(
+                                ActionMenu.Item(
+                                    icon =
                                         if (viewer?.bookmarked ==
                                             true
                                         ) {
-                                            ActionMenu.Item.Text.Localized.Type.Unbookmark
+                                            ActionMenu.Item.Icon.Unbookmark
                                         } else {
-                                            ActionMenu.Item.Text.Localized.Type.Bookmark
+                                            ActionMenu.Item.Icon.Bookmark
+                                        },
+                                    text =
+                                        ActionMenu.Item.Text.Localized(
+                                            if (viewer?.bookmarked ==
+                                                true
+                                            ) {
+                                                ActionMenu.Item.Text.Localized.Type.Unbookmark
+                                            } else {
+                                                ActionMenu.Item.Text.Localized.Type.Bookmark
+                                            },
+                                        ),
+                                    count = UiNumber(bookmarkCount ?: 0),
+                                    onClicked = {
+                                        if (viewer?.bookmarked == true) {
+                                            event.unbookmark(
+                                                statusKey = statusKey,
+                                                uri = uri.atUri,
+                                            )
+                                        } else {
+                                            event.bookmark(
+                                                statusKey = statusKey,
+                                                uri = uri.atUri,
+                                                cid = cid.cid,
+                                            )
+                                        }
+                                    },
+                                ),
+                            )
+                            add(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Share,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
+                                    shareContent = url,
+                                ),
+                            )
+                            add(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Share,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.FxShare),
+                                    shareContent = fxUrl,
+                                ),
+                            )
+
+                            if (isFromMe) {
+                                add(
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Delete,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                        color = ActionMenu.Item.Color.Red,
+                                        onClicked = {
+                                            launcher.launch(
+                                                DeeplinkRoute.Status
+                                                    .DeleteConfirm(
+                                                        accountType =
+                                                            AccountType.Specific(
+                                                                accountKey,
+                                                            ),
+                                                        statusKey = statusKey,
+                                                    ).toUri(),
+                                            )
                                         },
                                     ),
-                                count = UiNumber(bookmarkCount ?: 0),
-                                onClicked = {
-                                    if (viewer?.bookmarked == true) {
-                                        event.unbookmark(
-                                            statusKey = statusKey,
-                                            uri = uri.atUri,
-                                        )
-                                    } else {
-                                        event.bookmark(
-                                            statusKey = statusKey,
-                                            uri = uri.atUri,
-                                            cid = cid.cid,
-                                        )
-                                    }
-                                },
-                            ),
-                            ActionMenu.Item(
-                                icon = ActionMenu.Item.Icon.Share,
-                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                shareContent = url,
-                            ),
-                            ActionMenu.Item(
-                                icon = ActionMenu.Item.Icon.Share,
-                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.FxShare),
-                                shareContent = fxUrl,
-                            ),
-                            if (isFromMe) {
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Delete,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
-                                    color = ActionMenu.Item.Color.Red,
-                                    onClicked = {
-                                        launcher.launch(
-                                            DeeplinkRoute.Status
-                                                .DeleteConfirm(
-                                                    accountType = AccountType.Specific(accountKey),
-                                                    statusKey = statusKey,
-                                                ).toUri(),
-                                        )
-                                    },
                                 )
                             } else {
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Report,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
-                                    color = ActionMenu.Item.Color.Red,
-                                    onClicked = {
-                                        launcher.launch(
-                                            DeeplinkRoute.Status
-                                                .BlueskyReport(
-                                                    statusKey = statusKey,
-                                                    accountType = AccountType.Specific(accountKey),
-                                                ).toUri(),
-                                        )
-                                    },
+                                add(ActionMenu.Divider)
+                                addAll(
+                                    userActionsMenu(
+                                        accountKey = accountKey,
+                                        userKey = user.key,
+                                        handle = user.handle,
+                                    ),
                                 )
-                            },
-                        ).toImmutableList(),
+                                add(ActionMenu.Divider)
+                                add(
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Report,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                        color = ActionMenu.Item.Color.Red,
+                                        onClicked = {
+                                            launcher.launch(
+                                                DeeplinkRoute.Status
+                                                    .BlueskyReport(
+                                                        statusKey = statusKey,
+                                                        accountType =
+                                                            AccountType.Specific(
+                                                                accountKey,
+                                                            ),
+                                                    ).toUri(),
+                                            )
+                                        },
+                                    ),
+                                )
+                            }
+                        }.toImmutableList(),
                 ),
             ).toImmutableList(),
         createdAt = indexedAt.toUi(),
@@ -790,7 +817,13 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
         bottomContent = null,
         platformType = PlatformType.Bluesky,
         onClicked = {
-            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
+            launcher.launch(
+                DeeplinkRoute.Profile
+                    .User(
+                        accountType = AccountType.Specific(accountKey),
+                        userKey = userKey,
+                    ).toUri(),
+            )
         },
     )
 }
@@ -822,7 +855,13 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
         bottomContent = null,
         platformType = PlatformType.Bluesky,
         onClicked = {
-            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
+            launcher.launch(
+                DeeplinkRoute.Profile
+                    .User(
+                        accountType = AccountType.Specific(accountKey),
+                        userKey = userKey,
+                    ).toUri(),
+            )
         },
     )
 }
@@ -854,7 +893,13 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
         bottomContent = null,
         platformType = PlatformType.Bluesky,
         onClicked = {
-            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
+            launcher.launch(
+                DeeplinkRoute.Profile
+                    .User(
+                        accountType = AccountType.Specific(accountKey),
+                        userKey = userKey,
+                    ).toUri(),
+            )
         },
     )
 }
@@ -1081,6 +1126,7 @@ private fun render(
                                             sensitive = false,
                                         )
                                     }
+
                                 is RecordViewRecordEmbedUnion.RecordWithMediaView ->
                                     when (val media = it.value.media) {
                                         is RecordWithMediaViewMediaUnion.ImagesView ->
@@ -1090,10 +1136,13 @@ private fun render(
                                                     previewUrl = it.thumb.uri,
                                                     description = it.alt,
                                                     width = it.aspectRatio?.width?.toFloat() ?: 0f,
-                                                    height = it.aspectRatio?.height?.toFloat() ?: 0f,
+                                                    height =
+                                                        it.aspectRatio?.height?.toFloat()
+                                                            ?: 0f,
                                                     sensitive = false,
                                                 )
                                             }
+
                                         is RecordWithMediaViewMediaUnion.VideoView ->
                                             persistentListOf(
                                                 UiMedia.Video(
@@ -1110,6 +1159,7 @@ private fun render(
                                                             ?.toFloat() ?: 0f,
                                                 ),
                                             )
+
                                         else -> null
                                     }
 
@@ -1236,7 +1286,10 @@ private fun render(
                                                 launcher.launch(
                                                     DeeplinkRoute.Status
                                                         .DeleteConfirm(
-                                                            accountType = AccountType.Specific(accountKey),
+                                                            accountType =
+                                                                AccountType.Specific(
+                                                                    accountKey,
+                                                                ),
                                                             statusKey = statusKey,
                                                         ).toUri(),
                                                 )
@@ -1251,7 +1304,10 @@ private fun render(
                                                     DeeplinkRoute.Status
                                                         .BlueskyReport(
                                                             statusKey = statusKey,
-                                                            accountType = AccountType.Specific(accountKey),
+                                                            accountType =
+                                                                AccountType.Specific(
+                                                                    accountKey,
+                                                                ),
                                                         ).toUri(),
                                                 )
                                             },

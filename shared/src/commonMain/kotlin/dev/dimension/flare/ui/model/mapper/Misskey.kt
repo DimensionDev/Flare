@@ -5,6 +5,7 @@ import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.misskey.api.model.Antenna
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.EmojiSimple
@@ -517,72 +518,89 @@ private fun Note.renderStatus(
                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                         ),
                     actions =
-                        listOfNotNull(
-                            ActionMenu.AsyncActionMenuItem(
-                                flow =
-                                    event
-                                        .favouriteState(
-                                            statusKey = statusKey,
-                                        ).map {
-                                            ActionMenu.Item(
-                                                icon = if (it) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
-                                                text =
-                                                    ActionMenu.Item.Text.Localized(
-                                                        if (it) {
-                                                            ActionMenu.Item.Text.Localized.Type.Unlike
-                                                        } else {
-                                                            ActionMenu.Item.Text.Localized.Type.Like
-                                                        },
-                                                    ),
-                                                count = UiNumber(0),
-                                                color = if (it) ActionMenu.Item.Color.Red else null,
-                                                onClicked = {
-                                                    event.favourite(
+                        buildList {
+                            add(
+                                ActionMenu.AsyncActionMenuItem(
+                                    flow =
+                                        event
+                                            .favouriteState(
+                                                statusKey = statusKey,
+                                            ).map {
+                                                ActionMenu.Item(
+                                                    icon = if (it) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
+                                                    text =
+                                                        ActionMenu.Item.Text.Localized(
+                                                            if (it) {
+                                                                ActionMenu.Item.Text.Localized.Type.Unlike
+                                                            } else {
+                                                                ActionMenu.Item.Text.Localized.Type.Like
+                                                            },
+                                                        ),
+                                                    count = UiNumber(0),
+                                                    color = if (it) ActionMenu.Item.Color.Red else null,
+                                                    onClicked = {
+                                                        event.favourite(
+                                                            statusKey = statusKey,
+                                                            favourited = it,
+                                                        )
+                                                    },
+                                                )
+                                            },
+                                ),
+                            )
+                            add(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Share,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
+                                    shareContent = postUrl,
+                                ),
+                            )
+                            if (isFromMe) {
+                                add(
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Delete,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                        color = ActionMenu.Item.Color.Red,
+                                        onClicked = {
+                                            launcher.launch(
+                                                DeeplinkRoute.Status
+                                                    .DeleteConfirm(
+                                                        accountType = AccountType.Specific(accountKey),
                                                         statusKey = statusKey,
-                                                        favourited = it,
-                                                    )
-                                                },
+                                                    ).toUri(),
                                             )
                                         },
-                            ),
-                            ActionMenu.Item(
-                                icon = ActionMenu.Item.Icon.Share,
-                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                shareContent = postUrl,
-                            ),
-                            if (isFromMe) {
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Delete,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
-                                    color = ActionMenu.Item.Color.Red,
-                                    onClicked = {
-                                        launcher.launch(
-                                            DeeplinkRoute.Status
-                                                .DeleteConfirm(
-                                                    accountType = AccountType.Specific(accountKey),
-                                                    statusKey = statusKey,
-                                                ).toUri(),
-                                        )
-                                    },
+                                    ),
                                 )
                             } else {
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Report,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
-                                    color = ActionMenu.Item.Color.Red,
-                                    onClicked = {
-                                        launcher.launch(
-                                            DeeplinkRoute.Status
-                                                .MisskeyReport(
-                                                    statusKey = statusKey,
-                                                    userKey = user.key,
-                                                    accountType = AccountType.Specific(accountKey),
-                                                ).toUri(),
-                                        )
-                                    },
+                                add(ActionMenu.Divider)
+                                addAll(
+                                    userActionsMenu(
+                                        accountKey = accountKey,
+                                        userKey = user.key,
+                                        handle = user.handle,
+                                    ),
                                 )
-                            },
-                        ).toImmutableList(),
+                                add(ActionMenu.Divider)
+                                add(
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Report,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                        color = ActionMenu.Item.Color.Red,
+                                        onClicked = {
+                                            launcher.launch(
+                                                DeeplinkRoute.Status
+                                                    .MisskeyReport(
+                                                        statusKey = statusKey,
+                                                        userKey = user.key,
+                                                        accountType = AccountType.Specific(accountKey),
+                                                    ).toUri(),
+                                            )
+                                        },
+                                    ),
+                                )
+                            }
+                        }.toImmutableList(),
                 ),
             ).toImmutableList(),
         poll =

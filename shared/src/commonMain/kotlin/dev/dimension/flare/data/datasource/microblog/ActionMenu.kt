@@ -1,8 +1,11 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiNumber
+import dev.dimension.flare.ui.model.launch
+import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
@@ -104,8 +107,40 @@ public sealed interface ActionMenu {
                     UnMute,
                     Block,
                     UnBlock,
+                    BlockWithHandleParameter,
+                    MuteWithHandleParameter,
                 }
             }
         }
     }
 }
+
+internal fun userActionsMenu(
+    accountKey: MicroBlogKey?,
+    userKey: MicroBlogKey,
+    handle: String,
+): List<ActionMenu> =
+    listOfNotNull(
+        ActionMenu.Item(
+            icon = ActionMenu.Item.Icon.Mute,
+            text =
+                ActionMenu.Item.Text.Localized(
+                    type = ActionMenu.Item.Text.Localized.Type.MuteWithHandleParameter,
+                    parameters = persistentListOf(handle),
+                ),
+            onClicked = {
+                launcher.launch(DeeplinkRoute.MuteUser(accountKey, userKey))
+            },
+        ),
+        ActionMenu.Item(
+            icon = ActionMenu.Item.Icon.Block,
+            text =
+                ActionMenu.Item.Text.Localized(
+                    type = ActionMenu.Item.Text.Localized.Type.BlockWithHandleParameter,
+                    parameters = persistentListOf(handle),
+                ),
+            onClicked = {
+                launcher.launch(DeeplinkRoute.BlockUser(accountKey, userKey))
+            },
+        ),
+    )

@@ -7,6 +7,7 @@ import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Attachment
 import dev.dimension.flare.data.network.mastodon.api.model.InstanceData
@@ -369,7 +370,6 @@ private fun Status.renderStatus(
                 )
             },
         actions =
-
             listOfNotNull(
                 ActionMenu.Item(
                     icon = ActionMenu.Item.Icon.Reply,
@@ -548,83 +548,105 @@ private fun Status.renderStatus(
                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                         ),
                     actions =
-                        listOfNotNull(
+                        buildList {
                             if (accountKey != null) {
-                                ActionMenu.Item(
-                                    icon = if (bookmarked == true) ActionMenu.Item.Icon.Unbookmark else ActionMenu.Item.Icon.Bookmark,
-                                    text =
-                                        ActionMenu.Item.Text.Localized(
-                                            if (bookmarked ==
-                                                true
-                                            ) {
-                                                ActionMenu.Item.Text.Localized.Type.Unbookmark
-                                            } else {
-                                                ActionMenu.Item.Text.Localized.Type.Bookmark
-                                            },
-                                        ),
-                                    count = UiNumber(0),
-                                    onClicked = {
-                                        dataSource?.bookmark(statusKey, bookmarked ?: false)
-                                    },
+                                add(
+                                    ActionMenu.Item(
+                                        icon = if (bookmarked == true) ActionMenu.Item.Icon.Unbookmark else ActionMenu.Item.Icon.Bookmark,
+                                        text =
+                                            ActionMenu.Item.Text.Localized(
+                                                if (bookmarked ==
+                                                    true
+                                                ) {
+                                                    ActionMenu.Item.Text.Localized.Type.Unbookmark
+                                                } else {
+                                                    ActionMenu.Item.Text.Localized.Type.Bookmark
+                                                },
+                                            ),
+                                        count = UiNumber(0),
+                                        onClicked = {
+                                            dataSource?.bookmark(statusKey, bookmarked ?: false)
+                                        },
+                                    ),
                                 )
-                            } else {
-                                null
-                            },
-                            ActionMenu.Item(
-                                icon = ActionMenu.Item.Icon.Share,
-                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                shareContent = postUrl,
-                            ),
+                            }
+                            add(
+                                ActionMenu.Item(
+                                    icon = ActionMenu.Item.Icon.Share,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
+                                    shareContent = postUrl,
+                                ),
+                            )
+
                             if (isFromMe) {
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Delete,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
-                                    color = ActionMenu.Item.Color.Red,
-                                    onClicked = {
-                                        launcher.launch(
-                                            DeeplinkRoute.Status
-                                                .DeleteConfirm(
-                                                    accountType = AccountType.Specific(accountKey!!),
-                                                    statusKey = statusKey,
-                                                ).toUri(),
-                                        )
-                                    },
-                                )
-                            } else {
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Report,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
-                                    color = ActionMenu.Item.Color.Red,
-                                    onClicked = {
-                                        if (accountKey != null) {
+                                add(
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Delete,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                        color = ActionMenu.Item.Color.Red,
+                                        onClicked = {
                                             launcher.launch(
                                                 DeeplinkRoute.Status
-                                                    .MastodonReport(
-                                                        statusKey = statusKey,
-                                                        userKey = actualUser.key,
-                                                        accountType = AccountType.Specific(accountKey),
-                                                    ).toUri(),
-                                            )
-                                        } else {
-                                            launcher.launch(
-                                                DeeplinkRoute.Status
-                                                    .MastodonReport(
-                                                        statusKey = statusKey,
-                                                        userKey = actualUser.key,
+                                                    .DeleteConfirm(
                                                         accountType =
                                                             AccountType.Specific(
-                                                                MicroBlogKey(
-                                                                    "",
-                                                                    "",
-                                                                ),
+                                                                accountKey,
                                                             ),
+                                                        statusKey = statusKey,
                                                     ).toUri(),
                                             )
-                                        }
-                                    },
+                                        },
+                                    ),
                                 )
-                            },
-                        ).toImmutableList(),
+                            } else {
+                                add(ActionMenu.Divider)
+                                addAll(
+                                    userActionsMenu(
+                                        accountKey = accountKey,
+                                        userKey = actualUser.key,
+                                        handle = actualUser.handle,
+                                    ),
+                                )
+                                add(ActionMenu.Divider)
+                                add(
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Report,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                        color = ActionMenu.Item.Color.Red,
+                                        onClicked = {
+                                            if (accountKey != null) {
+                                                launcher.launch(
+                                                    DeeplinkRoute.Status
+                                                        .MastodonReport(
+                                                            statusKey = statusKey,
+                                                            userKey = actualUser.key,
+                                                            accountType =
+                                                                AccountType.Specific(
+                                                                    accountKey,
+                                                                ),
+                                                        ).toUri(),
+                                                )
+                                            } else {
+                                                launcher.launch(
+                                                    DeeplinkRoute.Status
+                                                        .MastodonReport(
+                                                            statusKey = statusKey,
+                                                            userKey = actualUser.key,
+                                                            accountType =
+                                                                AccountType.Specific(
+                                                                    MicroBlogKey(
+                                                                        "",
+                                                                        "",
+                                                                    ),
+                                                                ),
+                                                        ).toUri(),
+                                                )
+                                            }
+                                        },
+                                    ),
+                                )
+                            }
+                        }.toImmutableList(),
                 ),
             ).toImmutableList(),
         poll =
@@ -673,7 +695,9 @@ private fun Status.renderStatus(
                 DeeplinkRoute.Status
                     .Detail(
                         statusKey = statusKey,
-                        accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest,
+                        accountType =
+                            accountKey?.let { AccountType.Specific(it) }
+                                ?: AccountType.Guest,
                     ).toUri(),
             )
         },
@@ -682,7 +706,9 @@ private fun Status.renderStatus(
             launcher.launch(
                 DeeplinkRoute.Media
                     .StatusMedia(
-                        accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest,
+                        accountType =
+                            accountKey?.let { AccountType.Specific(it) }
+                                ?: AccountType.Guest,
                         statusKey = statusKey,
                         index = index,
                         preview =

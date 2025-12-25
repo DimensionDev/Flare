@@ -247,3 +247,13 @@ extensions.getByType(com.android.build.api.variant.AndroidComponentsExtension::c
             GenerateDeepLinkManifestTask::manifest
         )
     }
+
+kotlin {
+    sourceSets {
+        all {
+            languageSettings {
+                optIn("androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
+            }
+        }
+    }
+}

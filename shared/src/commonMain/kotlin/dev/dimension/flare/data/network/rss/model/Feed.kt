@@ -58,7 +58,7 @@ internal sealed interface Feed {
             val id: String,
             @XmlSerialName("title")
             @XmlElement(true)
-            val title: Text,
+            val title: Text? = null,
             @XmlSerialName("updated")
             @XmlElement(true)
             val updated: String? = null, // ISO-8601 datetime string

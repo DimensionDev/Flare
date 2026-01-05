@@ -43,7 +43,7 @@ class FeedTest {
 
         val entry = feed.entries.first()
         assertEquals("urn:uuid:1225c695-cfb8-4ebb-aaaa-80da344efa6a", entry.id)
-        assertEquals("Atom-Powered Robots Run Amok", entry.title.value)
+        assertEquals("Atom-Powered Robots Run Amok", entry.title?.value)
         assertEquals("2025-11-19T10:00:00Z", entry.updated)
         assertEquals("<p>Some content.</p>", entry.content?.value)
         assertEquals("https://example.com/entries/1", entry.links.first().href)

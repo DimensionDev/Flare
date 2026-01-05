@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.list
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,50 +78,52 @@ public fun LazyListScope.uiListWithTabs(
                     mutableStateOf(false)
                 }
                 PlatformIconButton(onClick = { showDropdown = true }) {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
-                        contentDescription = stringResource(Res.string.more),
-                    )
-                    PlatformDropdownMenu(
-                        expanded = showDropdown,
-                        onDismissRequest = { showDropdown = false },
-                    ) {
-                        PlatformDropdownMenuItem(
-                            text = {
-                                PlatformText(
-                                    text = stringResource(Res.string.list_edit),
-                                )
-                            },
-                            onClick = {
-                                editList(item)
-                                showDropdown = false
-                            },
-                            leadingIcon = {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Pen,
-                                    contentDescription = stringResource(Res.string.list_edit),
-                                )
-                            },
+                    Box {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
+                            contentDescription = stringResource(Res.string.more),
                         )
-                        PlatformDropdownMenuItem(
-                            text = {
-                                PlatformText(
-                                    text = stringResource(Res.string.list_delete),
-                                    color = PlatformTheme.colorScheme.error,
-                                )
-                            },
-                            onClick = {
-                                deleteList(item)
-                                showDropdown = false
-                            },
-                            leadingIcon = {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Trash,
-                                    contentDescription = stringResource(Res.string.list_delete),
-                                    tint = PlatformTheme.colorScheme.error,
-                                )
-                            },
-                        )
+                        PlatformDropdownMenu(
+                            expanded = showDropdown,
+                            onDismissRequest = { showDropdown = false },
+                        ) {
+                            PlatformDropdownMenuItem(
+                                text = {
+                                    PlatformText(
+                                        text = stringResource(Res.string.list_edit),
+                                    )
+                                },
+                                onClick = {
+                                    editList(item)
+                                    showDropdown = false
+                                },
+                                leadingIcon = {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.Pen,
+                                        contentDescription = stringResource(Res.string.list_edit),
+                                    )
+                                },
+                            )
+                            PlatformDropdownMenuItem(
+                                text = {
+                                    PlatformText(
+                                        text = stringResource(Res.string.list_delete),
+                                        color = PlatformTheme.colorScheme.error,
+                                    )
+                                },
+                                onClick = {
+                                    deleteList(item)
+                                    showDropdown = false
+                                },
+                                leadingIcon = {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.Trash,
+                                        contentDescription = stringResource(Res.string.list_delete),
+                                        tint = PlatformTheme.colorScheme.error,
+                                    )
+                                },
+                            )
+                        }
                     }
                 }
             }

@@ -43,13 +43,15 @@ internal fun StatusContent.Rss.RssContent.Atom.render(): UiTimeline =
         val descHtml =
             content?.value?.let {
                 Ksoup.parse(it)
+            } ?: summary?.value?.let {
+                Ksoup.parse(it)
             }
         val img = descHtml?.select("img")?.firstOrNull()?.attr("src") ?: media?.thumbnail?.url
         return UiTimeline(
             topMessage = null,
             content =
                 UiTimeline.ItemContent.Feed(
-                    title = title.value,
+                    title = title?.value?.takeIf { it.isNotEmpty() && it.isNotBlank() },
                     description = descHtml?.text(),
                     url = links.first().href.replace("http://", "https://"),
                     image = img,

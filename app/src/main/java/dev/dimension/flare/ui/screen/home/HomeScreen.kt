@@ -396,6 +396,7 @@ private fun HomeRailHeader(
                             Column(
                                 modifier =
                                     Modifier
+                                        .weight(1f)
                                         .padding(
                                             horizontal =
                                                 if (layoutType ==

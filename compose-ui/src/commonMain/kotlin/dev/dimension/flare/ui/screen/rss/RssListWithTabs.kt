@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.screen.rss
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,11 +32,10 @@ import dev.dimension.flare.compose.ui.tab_settings_add
 import dev.dimension.flare.compose.ui.tab_settings_remove
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
-import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenu
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuItem
 import dev.dimension.flare.ui.component.platform.PlatformIconButton
-import dev.dimension.flare.ui.component.platform.PlatformListItem
+import dev.dimension.flare.ui.component.platform.PlatformSegmentedListItem
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.onSuccess
@@ -77,15 +75,12 @@ public fun LazyListScope.rssListWithTabs(
         itemsIndexed(
             state.sources,
         ) { index, it ->
-            PlatformListItem(
-                modifier =
-                    Modifier
-                        .listCard(
-                            index = index,
-                            totalCount = state.sources.size,
-                        ).clickable {
-                            onClicked.invoke(it)
-                        },
+            PlatformSegmentedListItem(
+                onClick = {
+                    onClicked.invoke(it)
+                },
+                index = index,
+                totalCount = state.sources.size,
                 headlineContent = {
                     it.title?.let {
                         PlatformText(text = it)

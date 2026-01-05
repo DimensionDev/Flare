@@ -3,10 +3,10 @@ package dev.dimension.flare.ui.screen.settings
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,8 +18,10 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -33,7 +35,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -61,14 +62,16 @@ import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.StatusItem
+import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AppearancePresenter
 import dev.dimension.flare.ui.presenter.settings.AppearanceState
-import dev.dimension.flare.ui.theme.listCardContainer
-import dev.dimension.flare.ui.theme.listCardItem
+import dev.dimension.flare.ui.theme.first
+import dev.dimension.flare.ui.theme.item
+import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
@@ -111,10 +114,7 @@ internal fun AppearanceScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column(
-                modifier =
-                    Modifier
-                        .listCardContainer(),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
                 SingleChoiceSettingsItem(
                     headline = { Text(text = stringResource(id = R.string.settings_appearance_theme)) },
@@ -131,10 +131,16 @@ internal fun AppearanceScreen(
                             copy(theme = it)
                         }
                     },
-                    modifier = Modifier.listCardItem(),
+                    shapes = ListItemDefaults.first(),
                 )
-                ListItem(
-                    headlineContent = {
+                SegmentedListItem(
+                    onClick = {
+                        state.updateSettings {
+                            copy(pureColorMode = !pureColorMode)
+                        }
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
                         Text(text = stringResource(id = R.string.settings_appearance_theme_pure_color))
                     },
                     supportingContent = {
@@ -150,18 +156,16 @@ internal fun AppearanceScreen(
                             },
                         )
                     },
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .clickable {
-                                state.updateSettings {
-                                    copy(pureColorMode = !pureColorMode)
-                                }
-                            },
                 )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    ListItem(
-                        headlineContent = {
+                    SegmentedListItem(
+                        onClick = {
+                            state.updateSettings {
+                                copy(dynamicTheme = !dynamicTheme)
+                            }
+                        },
+                        shapes = ListItemDefaults.item(),
+                        content = {
                             Text(text = stringResource(id = R.string.settings_appearance_dynamic_theme))
                         },
                         supportingContent = {
@@ -177,19 +181,15 @@ internal fun AppearanceScreen(
                                 },
                             )
                         },
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    state.updateSettings {
-                                        copy(dynamicTheme = !dynamicTheme)
-                                    }
-                                },
                     )
                 }
                 AnimatedVisibility(visible = !appearanceSettings.dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                    ListItem(
-                        headlineContent = {
+                    SegmentedListItem(
+                        onClick = {
+                            toColorPicker.invoke()
+                        },
+                        shapes = ListItemDefaults.item(),
+                        content = {
                             Text(text = stringResource(id = R.string.settings_appearance_theme_color))
                         },
                         supportingContent = {
@@ -205,12 +205,6 @@ internal fun AppearanceScreen(
                                         ).size(36.dp),
                             )
                         },
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    toColorPicker.invoke()
-                                },
                     )
                 }
 
@@ -228,7 +222,7 @@ internal fun AppearanceScreen(
                             copy(bottomBarStyle = it)
                         }
                     },
-                    modifier = Modifier.listCardItem(),
+                    shapes = ListItemDefaults.item(),
                 )
 
                 SingleChoiceSettingsItem(
@@ -249,99 +243,102 @@ internal fun AppearanceScreen(
                             copy(bottomBarBehavior = it)
                         }
                     },
-                    modifier = Modifier.listCardItem(),
+                    shapes = ListItemDefaults.item(),
                 )
 
                 var fontSizeDiff by remember { mutableFloatStateOf(appearanceSettings.fontSizeDiff) }
-                Column(
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(vertical = 8.dp, horizontal = 16.dp),
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.settings_appearance_font_size_diff),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        text = stringResource(id = R.string.settings_appearance_font_size_diff_description),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Row(
-                        horizontalArrangement =
-                            Arrangement.spacedBy(
-                                8.dp,
-                                Alignment.CenterHorizontally,
-                            ),
-                    ) {
-                        IconButton(
-                            onClick = {
-                                if (fontSizeDiff > -4f) {
-                                    fontSizeDiff -= 1f
-                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                                    state.updateSettings {
-                                        copy(
-                                            fontSizeDiff = fontSizeDiff,
-                                            lineHeightDiff = fontSizeDiff * 2,
-                                        )
-                                    }
-                                }
-                            },
-                            enabled = fontSizeDiff > -4f,
-                        ) {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.Minus,
-                                contentDescription = stringResource(R.string.settings_appearance_font_size_diff_decrease),
+                SegmentedListItem(
+                    onClick = {},
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Column {
+                            Text(
+                                text = stringResource(id = R.string.settings_appearance_font_size_diff),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
                             )
                         }
-                        Slider(
-                            value = fontSizeDiff,
-                            onValueChange = {
-                                fontSizeDiff = it
-                                hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                            },
-                            onValueChangeFinished = {
-                                state.updateSettings {
-                                    copy(
-                                        fontSizeDiff = fontSizeDiff,
-                                        lineHeightDiff = fontSizeDiff * 2,
+                    },
+                    supportingContent = {
+                        Column {
+                            Text(
+                                text = stringResource(id = R.string.settings_appearance_font_size_diff_description),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Row {
+                                IconButton(
+                                    onClick = {
+                                        if (fontSizeDiff > -4f) {
+                                            fontSizeDiff -= 1f
+                                            hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                                            state.updateSettings {
+                                                copy(
+                                                    fontSizeDiff = fontSizeDiff,
+                                                    lineHeightDiff = fontSizeDiff * 2,
+                                                )
+                                            }
+                                        }
+                                    },
+                                    enabled = fontSizeDiff > -4f,
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Minus,
+                                        contentDescription = stringResource(R.string.settings_appearance_font_size_diff_decrease),
                                     )
                                 }
-                            },
-                            valueRange = -4f..4f,
-                            steps = 7,
-                            modifier =
-                                Modifier
-                                    .weight(1f),
-                        )
-                        IconButton(
-                            onClick = {
-                                if (fontSizeDiff < 4f) {
-                                    fontSizeDiff += 1f
-                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                                    state.updateSettings {
-                                        copy(
-                                            fontSizeDiff = fontSizeDiff,
-                                            lineHeightDiff = fontSizeDiff * 2,
-                                        )
-                                    }
+                                Slider(
+                                    value = fontSizeDiff,
+                                    onValueChange = {
+                                        fontSizeDiff = it
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                                    },
+                                    onValueChangeFinished = {
+                                        state.updateSettings {
+                                            copy(
+                                                fontSizeDiff = fontSizeDiff,
+                                                lineHeightDiff = fontSizeDiff * 2,
+                                            )
+                                        }
+                                    },
+                                    valueRange = -4f..4f,
+                                    steps = 7,
+                                    modifier =
+                                        Modifier
+                                            .weight(1f),
+                                )
+                                IconButton(
+                                    onClick = {
+                                        if (fontSizeDiff < 4f) {
+                                            fontSizeDiff += 1f
+                                            hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                                            state.updateSettings {
+                                                copy(
+                                                    fontSizeDiff = fontSizeDiff,
+                                                    lineHeightDiff = fontSizeDiff * 2,
+                                                )
+                                            }
+                                        }
+                                    },
+                                    enabled = fontSizeDiff < 4f,
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Plus,
+                                        contentDescription = stringResource(R.string.settings_appearance_font_size_diff_increase),
+                                    )
                                 }
-                            },
-                            enabled = fontSizeDiff < 4f,
-                        ) {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.Plus,
-                                contentDescription = stringResource(R.string.settings_appearance_font_size_diff_increase),
-                            )
+                            }
                         }
-                    }
-                }
-
-                ListItem(
-                    headlineContent = {
+                    },
+                )
+                SegmentedListItem(
+                    onClick = {
+                        state.updateSettings {
+                            copy(inAppBrowser = !inAppBrowser)
+                        }
+                    },
+                    shapes = ListItemDefaults.last(),
+                    content = {
                         Text(text = stringResource(id = R.string.settings_appearance_in_app_browser))
                     },
                     supportingContent = {
@@ -357,31 +354,25 @@ internal fun AppearanceScreen(
                             },
                         )
                     },
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .clickable {
-                                state.updateSettings {
-                                    copy(inAppBrowser = !inAppBrowser)
-                                }
-                            },
                 )
             }
 
             Column(
-                modifier =
-                    Modifier
-                        .listCardContainer(),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
                 state.sampleStatus.onSuccess {
-                    StatusItem(
-                        it,
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .background(MaterialTheme.colorScheme.surface),
-                    )
+                    SegmentedListItem(
+                        onClick = {},
+                        shapes = ListItemDefaults.first(),
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
+                        StatusItem(
+                            it,
+                            modifier =
+                                Modifier
+                                    .background(MaterialTheme.colorScheme.surface),
+                        )
+                    }
                 }
                 SingleChoiceSettingsItem(
                     headline = { Text(text = stringResource(id = R.string.settings_appearance_avatar_shape)) },
@@ -397,10 +388,21 @@ internal fun AppearanceScreen(
                             copy(avatarShape = it)
                         }
                     },
-                    modifier = Modifier.listCardItem(),
+                    shapes =
+                        if (state.sampleStatus.isSuccess) {
+                            ListItemDefaults.item()
+                        } else {
+                            ListItemDefaults.first()
+                        },
                 )
-                ListItem(
-                    headlineContent = {
+                SegmentedListItem(
+                    onClick = {
+                        state.updateSettings {
+                            copy(fullWidthPost = !fullWidthPost)
+                        }
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
                         Text(text = stringResource(id = R.string.settings_appearance_full_width_post))
                     },
                     supportingContent = {
@@ -416,14 +418,6 @@ internal fun AppearanceScreen(
                             },
                         )
                     },
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .clickable {
-                                state.updateSettings {
-                                    copy(fullWidthPost = !fullWidthPost)
-                                }
-                            },
                 )
                 SingleChoiceSettingsItem(
                     headline = { Text(text = stringResource(id = R.string.settings_appearance_post_action_style)) },
@@ -442,10 +436,17 @@ internal fun AppearanceScreen(
                             copy(postActionStyle = it)
                         }
                     },
+                    shapes = ListItemDefaults.item(),
                 )
                 AnimatedVisibility(appearanceSettings.postActionStyle != PostActionStyle.Hidden) {
-                    ListItem(
-                        headlineContent = {
+                    SegmentedListItem(
+                        onClick = {
+                            state.updateSettings {
+                                copy(showNumbers = !showNumbers)
+                            }
+                        },
+                        shapes = ListItemDefaults.item(),
+                        content = {
                             Text(text = stringResource(id = R.string.settings_appearance_show_numbers))
                         },
                         supportingContent = {
@@ -461,18 +462,16 @@ internal fun AppearanceScreen(
                                 },
                             )
                         },
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    state.updateSettings {
-                                        copy(showNumbers = !showNumbers)
-                                    }
-                                },
                     )
                 }
-                ListItem(
-                    headlineContent = {
+                SegmentedListItem(
+                    onClick = {
+                        state.updateSettings {
+                            copy(showLinkPreview = !showLinkPreview)
+                        }
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
                         Text(text = stringResource(id = R.string.settings_appearance_show_link_previews))
                     },
                     supportingContent = {
@@ -488,18 +487,16 @@ internal fun AppearanceScreen(
                             },
                         )
                     },
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .clickable {
-                                state.updateSettings {
-                                    copy(showLinkPreview = !showLinkPreview)
-                                }
-                            },
                 )
                 AnimatedVisibility(visible = appearanceSettings.showLinkPreview) {
-                    ListItem(
-                        headlineContent = {
+                    SegmentedListItem(
+                        onClick = {
+                            state.updateSettings {
+                                copy(compatLinkPreview = !compatLinkPreview)
+                            }
+                        },
+                        shapes = ListItemDefaults.item(),
+                        content = {
                             Text(text = stringResource(id = R.string.settings_appearance_compat_link_previews))
                         },
                         supportingContent = {
@@ -515,18 +512,16 @@ internal fun AppearanceScreen(
                                 },
                             )
                         },
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    state.updateSettings {
-                                        copy(compatLinkPreview = !compatLinkPreview)
-                                    }
-                                },
                     )
                 }
-                ListItem(
-                    headlineContent = {
+                SegmentedListItem(
+                    onClick = {
+                        state.updateSettings {
+                            copy(showMedia = !showMedia)
+                        }
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
                         Text(text = stringResource(id = R.string.settings_appearance_show_media))
                     },
                     supportingContent = {
@@ -542,18 +537,16 @@ internal fun AppearanceScreen(
                             },
                         )
                     },
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .clickable {
-                                state.updateSettings {
-                                    copy(showMedia = !showMedia)
-                                }
-                            },
                 )
                 AnimatedVisibility(appearanceSettings.showMedia) {
-                    ListItem(
-                        headlineContent = {
+                    SegmentedListItem(
+                        onClick = {
+                            state.updateSettings {
+                                copy(showSensitiveContent = !showSensitiveContent)
+                            }
+                        },
+                        shapes = ListItemDefaults.item(),
+                        content = {
                             Text(text = stringResource(id = R.string.settings_appearance_show_cw_img))
                         },
                         supportingContent = {
@@ -569,19 +562,17 @@ internal fun AppearanceScreen(
                                 },
                             )
                         },
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    state.updateSettings {
-                                        copy(showSensitiveContent = !showSensitiveContent)
-                                    }
-                                },
                     )
                 }
                 AnimatedVisibility(appearanceSettings.showMedia) {
-                    ListItem(
-                        headlineContent = {
+                    SegmentedListItem(
+                        onClick = {
+                            state.updateSettings {
+                                copy(expandMediaSize = !expandMediaSize)
+                            }
+                        },
+                        shapes = ListItemDefaults.item(),
+                        content = {
                             Text(text = stringResource(id = R.string.settings_appearance_expand_media))
                         },
                         supportingContent = {
@@ -597,14 +588,6 @@ internal fun AppearanceScreen(
                                 },
                             )
                         },
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    state.updateSettings {
-                                        copy(expandMediaSize = !expandMediaSize)
-                                    }
-                                },
                     )
                 }
                 AnimatedVisibility(appearanceSettings.showMedia) {
@@ -623,7 +606,7 @@ internal fun AppearanceScreen(
                                 copy(videoAutoplay = it)
                             }
                         },
-                        modifier = Modifier.listCardItem(),
+                        shapes = ListItemDefaults.last(),
                     )
                 }
             }
@@ -639,20 +622,21 @@ private fun <T> SingleChoiceSettingsItem(
     items: ImmutableMap<T, String>,
     selected: T,
     onSelected: (T) -> Unit,
+    shapes: ListItemShapes,
     modifier: Modifier = Modifier,
 ) {
     val isBigScreen = isBigScreen()
     var showMenu by remember { mutableStateOf(false) }
-
-    ListItem(
-        modifier =
-            modifier
-                .clickable {
-                    if (!isBigScreen) {
-                        showMenu = true
-                    }
-                },
-        headlineContent = headline,
+    SegmentedListItem(
+        modifier = modifier,
+        checked = showMenu,
+        onCheckedChange = {
+            if (!isBigScreen) {
+                showMenu = it
+            }
+        },
+        shapes = shapes,
+        content = headline,
         supportingContent = supporting,
         trailingContent = {
             if (isBigScreen) {

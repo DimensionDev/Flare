@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.screen.settings
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -41,10 +40,8 @@ import dev.dimension.flare.compose.ui.settings_about_source_code
 import dev.dimension.flare.compose.ui.settings_about_telegram
 import dev.dimension.flare.compose.ui.settings_about_telegram_description
 import dev.dimension.flare.compose.ui.settings_privacy_policy
-import dev.dimension.flare.ui.component.listCardContainer
-import dev.dimension.flare.ui.component.listCardItem
 import dev.dimension.flare.ui.component.platform.PlatformIcon
-import dev.dimension.flare.ui.component.platform.PlatformListItem
+import dev.dimension.flare.ui.component.platform.PlatformSegmentedListItem
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.theme.PlatformTheme
 import org.jetbrains.compose.resources.painterResource
@@ -97,12 +94,9 @@ public fun AboutScreenContent(
         )
         Spacer(Modifier.height(16.dp))
         Column(
-            modifier =
-                Modifier
-                    .listCardContainer(),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            PlatformListItem(
+            PlatformSegmentedListItem(
                 headlineContent = {
                     PlatformText(text = stringResource(resource = Res.string.settings_about_source_code))
                 },
@@ -111,12 +105,11 @@ public fun AboutScreenContent(
                         text = "https://github.com/DimensionDev/Flare",
                     )
                 },
-                modifier =
-                    Modifier
-                        .listCardItem()
-                        .clickable {
-                            uriHandler.openUri("https://github.com/DimensionDev/Flare")
-                        },
+                onClick = {
+                    uriHandler.openUri("https://github.com/DimensionDev/Flare")
+                },
+                index = 0,
+                totalCount = 6,
                 leadingContent = {
                     PlatformIcon(
                         imageVector = FontAwesomeIcons.Brands.Github,
@@ -125,7 +118,7 @@ public fun AboutScreenContent(
                     )
                 },
             )
-            PlatformListItem(
+            PlatformSegmentedListItem(
                 headlineContent = {
                     PlatformText(text = stringResource(resource = Res.string.settings_about_telegram))
                 },
@@ -134,12 +127,11 @@ public fun AboutScreenContent(
                         text = stringResource(resource = Res.string.settings_about_telegram_description),
                     )
                 },
-                modifier =
-                    Modifier
-                        .listCardItem()
-                        .clickable {
-                            uriHandler.openUri("https://t.me/+0UtcP6_qcDoyOWE1")
-                        },
+                onClick = {
+                    uriHandler.openUri("https://t.me/+0UtcP6_qcDoyOWE1")
+                },
+                index = 1,
+                totalCount = 6,
                 leadingContent = {
                     PlatformIcon(
                         imageVector = FontAwesomeIcons.Brands.Telegram,
@@ -148,7 +140,7 @@ public fun AboutScreenContent(
                     )
                 },
             )
-            PlatformListItem(
+            PlatformSegmentedListItem(
                 headlineContent = {
                     PlatformText(text = stringResource(resource = Res.string.settings_about_discord))
                 },
@@ -157,12 +149,11 @@ public fun AboutScreenContent(
                         text = stringResource(resource = Res.string.settings_about_discord_description),
                     )
                 },
-                modifier =
-                    Modifier
-                        .listCardItem()
-                        .clickable {
-                            uriHandler.openUri("https://discord.gg/De9NhXBryT")
-                        },
+                onClick = {
+                    uriHandler.openUri("https://discord.gg/De9NhXBryT")
+                },
+                index = 2,
+                totalCount = 6,
                 leadingContent = {
                     PlatformIcon(
                         imageVector = FontAwesomeIcons.Brands.Discord,
@@ -171,7 +162,7 @@ public fun AboutScreenContent(
                     )
                 },
             )
-            PlatformListItem(
+            PlatformSegmentedListItem(
                 headlineContent = {
                     PlatformText(text = stringResource(resource = Res.string.settings_about_line))
                 },
@@ -180,12 +171,11 @@ public fun AboutScreenContent(
                         text = stringResource(resource = Res.string.settings_about_line_description),
                     )
                 },
-                modifier =
-                    Modifier
-                        .listCardItem()
-                        .clickable {
-                            uriHandler.openUri("https://line.me/ti/g/hf95HyGJ9k")
-                        },
+                onClick = {
+                    uriHandler.openUri("https://line.me/ti/g/hf95HyGJ9k")
+                },
+                index = 3,
+                totalCount = 6,
                 leadingContent = {
                     PlatformIcon(
                         imageVector = FontAwesomeIcons.Brands.Line,
@@ -194,7 +184,7 @@ public fun AboutScreenContent(
                     )
                 },
             )
-            PlatformListItem(
+            PlatformSegmentedListItem(
                 headlineContent = {
                     PlatformText(text = stringResource(resource = Res.string.settings_about_localization))
                 },
@@ -203,12 +193,11 @@ public fun AboutScreenContent(
                         text = stringResource(resource = Res.string.settings_about_localization_description),
                     )
                 },
-                modifier =
-                    Modifier
-                        .listCardItem()
-                        .clickable {
-                            uriHandler.openUri("https://crowdin.com/project/flareapp")
-                        },
+                onClick = {
+                    uriHandler.openUri("https://crowdin.com/project/flareapp")
+                },
+                index = 4,
+                totalCount = 6,
                 leadingContent = {
                     PlatformIcon(
                         imageVector = FontAwesomeIcons.Solid.Language,
@@ -217,7 +206,7 @@ public fun AboutScreenContent(
                     )
                 },
             )
-            PlatformListItem(
+            PlatformSegmentedListItem(
                 headlineContent = {
                     PlatformText(text = stringResource(resource = Res.string.settings_privacy_policy))
                 },
@@ -226,12 +215,11 @@ public fun AboutScreenContent(
                         text = "https://legal.mask.io/maskbook",
                     )
                 },
-                modifier =
-                    Modifier
-                        .listCardItem()
-                        .clickable {
-                            uriHandler.openUri("https://legal.mask.io/maskbook/")
-                        },
+                onClick = {
+                    uriHandler.openUri("https://legal.mask.io/maskbook/")
+                },
+                index = 5,
+                totalCount = 6,
                 leadingContent = {
                     PlatformIcon(
                         imageVector = FontAwesomeIcons.Solid.Lock,

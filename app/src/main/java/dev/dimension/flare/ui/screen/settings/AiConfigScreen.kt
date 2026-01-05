@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.screen.settings
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,9 +12,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -50,8 +50,9 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.FlareServerProviderPresenter
-import dev.dimension.flare.ui.theme.listCardContainer
-import dev.dimension.flare.ui.theme.listCardItem
+import dev.dimension.flare.ui.theme.first
+import dev.dimension.flare.ui.theme.item
+import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -88,23 +89,20 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                 Modifier
                     .verticalScroll(rememberScrollState())
                     .padding(it)
-                    .padding(horizontal = screenHorizontalPadding)
-                    .listCardContainer(),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+                    .padding(horizontal = screenHorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
-            ListItem(
-                modifier =
-                    Modifier
-                        .listCardItem()
-                        .clickable {
-                            state.setShowServerDialog(true)
-                        },
+            SegmentedListItem(
+                onClick = {
+                    state.setShowServerDialog(true)
+                },
+                shapes = ListItemDefaults.first(),
                 overlineContent = {
                     Text(
                         text = stringResource(id = R.string.settings_ai_config_server),
                     )
                 },
-                headlineContent = {
+                content = {
                     state.currentServer.onSuccess {
                         Text(
                             text = it,
@@ -118,8 +116,14 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     )
                 },
             )
-            ListItem(
-                headlineContent = {
+            SegmentedListItem(
+                onClick = {
+                    state.update {
+                        copy(translation = !state.aiConfig.translation)
+                    }
+                },
+                shapes = ListItemDefaults.item(),
+                content = {
                     Text(
                         text = stringResource(id = R.string.settings_ai_config_entable_translation),
                     )
@@ -139,17 +143,15 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                         },
                     )
                 },
-                modifier =
-                    Modifier
-                        .listCardItem()
-                        .clickable {
-                            state.update {
-                                copy(translation = !state.aiConfig.translation)
-                            }
-                        },
             )
-            ListItem(
-                headlineContent = {
+            SegmentedListItem(
+                onClick = {
+                    state.update {
+                        copy(tldr = !state.aiConfig.tldr)
+                    }
+                },
+                shapes = ListItemDefaults.last(),
+                content = {
                     Text(
                         text = stringResource(id = R.string.settings_ai_config_enable_tldr),
                     )
@@ -169,14 +171,6 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                         },
                     )
                 },
-                modifier =
-                    Modifier
-                        .listCardItem()
-                        .clickable {
-                            state.update {
-                                copy(tldr = !state.aiConfig.tldr)
-                            }
-                        },
             )
         }
     }

@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.screen.settings
 
 import android.content.Intent
 import android.provider.Settings
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +11,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -46,14 +46,17 @@ import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeIconData
 import dev.dimension.flare.ui.component.ThemedIcon
+import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.theme.listCardContainer
-import dev.dimension.flare.ui.theme.listCardItem
+import dev.dimension.flare.ui.theme.first
+import dev.dimension.flare.ui.theme.item
+import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import dev.dimension.flare.ui.theme.single
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
@@ -126,98 +129,78 @@ internal fun SettingsScreen(
         ) {
             state.user
                 .onSuccess {
-                    Column(
-                        modifier =
-                            Modifier
-                                .listCardContainer(),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                    ) {
-                        AccountItem(
-                            userState = state.user,
-                            avatarSize = 40.dp,
-                            onClick = {
-                                toAccounts.invoke()
-                            },
-                            supportingContent = {
-                                Text(text = stringResource(id = R.string.settings_accounts_title))
-                            },
-                            toLogin = {
-                                toAccounts.invoke()
-                            },
-                            modifier =
-                                Modifier
-                                    .listCardItem(),
-                        )
-                    }
+                    AccountItem(
+                        userState = state.user,
+                        avatarSize = 40.dp,
+                        onClick = {
+                            toAccounts.invoke()
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_accounts_title))
+                        },
+                        toLogin = {
+                            toAccounts.invoke()
+                        },
+                        shapes = ListItemDefaults.single(),
+                    )
                 }.onError {
-                    Column(
-                        modifier =
-                            Modifier
-                                .listCardContainer(),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                    ) {
-                        ListItem(
-                            headlineContent = {
-                                Text(text = stringResource(id = R.string.settings_accounts_title))
-                            },
-                            modifier =
-                                Modifier
-                                    .listCardItem()
-                                    .clickable {
-                                        toAccounts.invoke()
-                                    },
-                            leadingContent = {
-                                ThemedIcon(
-                                    imageVector = FontAwesomeIcons.Solid.CircleUser,
-                                    contentDescription = null,
-                                    color = ThemeIconData.Color.ImperialMagenta,
-                                )
-                            },
-                            supportingContent = {
-                                Text(text = stringResource(id = R.string.settings_accounts_title))
-                            },
-                        )
-                    }
+                    SegmentedListItem(
+                        onClick = {
+                            toAccounts.invoke()
+                        },
+                        shapes = ListItemDefaults.single(),
+                        content = {
+                            Text(text = stringResource(id = R.string.settings_accounts_title))
+                        },
+                        leadingContent = {
+                            ThemedIcon(
+                                imageVector = FontAwesomeIcons.Solid.CircleUser,
+                                contentDescription = null,
+                                color = ThemeIconData.Color.ImperialMagenta,
+                            )
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_accounts_title))
+                        },
+                    )
                 }
 
             state.user
                 .onError {
-                    Column(
-                        modifier =
-                            Modifier
-                                .listCardContainer(),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
-                    ) {
-                        ListItem(
-                            headlineContent = {
-                                Text(text = stringResource(id = R.string.settings_guest_setting_title))
-                            },
-                            modifier =
-                                Modifier
-                                    .listCardItem()
-                                    .clickable {
-                                        toGuestSettings.invoke()
-                                    },
-                            leadingContent = {
-                                ThemedIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Globe,
-                                    contentDescription = stringResource(id = R.string.settings_guest_setting_title),
-                                    color = ThemeIconData.Color.SapphireBlue,
-                                )
-                            },
-                            supportingContent = {
-                                Text(text = stringResource(id = R.string.settings_guest_setting_description))
-                            },
-                        )
-                    }
+                    SegmentedListItem(
+                        onClick = {
+                            toGuestSettings.invoke()
+                        },
+                        shapes = ListItemDefaults.single(),
+                        content = {
+                            Text(text = stringResource(id = R.string.settings_guest_setting_title))
+                        },
+                        leadingContent = {
+                            ThemedIcon(
+                                imageVector = FontAwesomeIcons.Solid.Globe,
+                                contentDescription = stringResource(id = R.string.settings_guest_setting_title),
+                                color = ThemeIconData.Color.SapphireBlue,
+                            )
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_guest_setting_description))
+                        },
+                    )
                 }
             Column(
-                modifier =
-                    Modifier.listCardContainer(),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
-                ListItem(
-                    headlineContent = {
+                SegmentedListItem(
+                    onClick = {
+                        toAppearance.invoke()
+                    },
+                    shapes =
+                        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU && !state.user.isSuccess) {
+                            ListItemDefaults.single()
+                        } else {
+                            ListItemDefaults.first()
+                        },
+                    content = {
                         Text(text = stringResource(id = R.string.settings_appearance_title))
                     },
                     leadingContent = {
@@ -230,16 +213,27 @@ internal fun SettingsScreen(
                     supportingContent = {
                         Text(text = stringResource(id = R.string.settings_appearance_subtitle))
                     },
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .clickable {
-                                toAppearance.invoke()
-                            },
                 )
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                    ListItem(
-                        headlineContent = {
+                    SegmentedListItem(
+                        onClick = {
+                            try {
+                                val intent =
+                                    Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
+                                        data = "package:${BuildConfig.APPLICATION_ID}".toUri()
+                                    }
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        },
+                        shapes =
+                            if (state.user.isSuccess) {
+                                ListItemDefaults.item()
+                            } else {
+                                ListItemDefaults.last()
+                            },
+                        content = {
                             Text(text = stringResource(id = R.string.settings_language_title))
                         },
                         leadingContent = {
@@ -252,25 +246,15 @@ internal fun SettingsScreen(
                         supportingContent = {
                             Text(text = stringResource(id = R.string.settings_language_description))
                         },
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    try {
-                                        val intent =
-                                            Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
-                                                data = "package:${BuildConfig.APPLICATION_ID}".toUri()
-                                            }
-                                        context.startActivity(intent)
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
-                                    }
-                                },
                     )
                 }
                 state.user.onSuccess {
-                    ListItem(
-                        headlineContent = {
+                    SegmentedListItem(
+                        onClick = {
+                            toTabCustomization.invoke()
+                        },
+                        shapes = ListItemDefaults.last(),
+                        content = {
                             Text(text = stringResource(id = R.string.settings_side_panel))
                         },
                         leadingContent = {
@@ -283,25 +267,20 @@ internal fun SettingsScreen(
                         supportingContent = {
                             Text(text = stringResource(id = R.string.settings_side_panel_description))
                         },
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    toTabCustomization.invoke()
-                                },
                     )
                 }
             }
 
             state.user.onSuccess {
                 Column(
-                    modifier =
-                        Modifier
-                            .listCardContainer(),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
                 ) {
-                    ListItem(
-                        headlineContent = {
+                    SegmentedListItem(
+                        onClick = {
+                            toLocalFilter.invoke()
+                        },
+                        shapes = ListItemDefaults.first(),
+                        content = {
                             Text(text = stringResource(id = R.string.settings_local_filter_title))
                         },
                         leadingContent = {
@@ -314,23 +293,15 @@ internal fun SettingsScreen(
                         supportingContent = {
                             Text(text = stringResource(id = R.string.settings_local_filter_description))
                         },
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    toLocalFilter.invoke()
-                                },
                     )
-                    ListItem(
-                        headlineContent = {
+                    SegmentedListItem(
+                        onClick = {
+                            toLocalHistory.invoke()
+                        },
+                        shapes = ListItemDefaults.item(),
+                        content = {
                             Text(text = stringResource(id = R.string.settings_local_history_title))
                         },
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    toLocalHistory.invoke()
-                                },
                         leadingContent = {
                             ThemedIcon(
                                 imageVector = FontAwesomeIcons.Solid.ClockRotateLeft,
@@ -342,8 +313,12 @@ internal fun SettingsScreen(
                             Text(text = stringResource(id = R.string.settings_local_history_description))
                         },
                     )
-                    ListItem(
-                        headlineContent = {
+                    SegmentedListItem(
+                        onClick = {
+                            toStorage.invoke()
+                        },
+                        shapes = ListItemDefaults.last(),
+                        content = {
                             Text(text = stringResource(id = R.string.settings_storage_title))
                         },
                         leadingContent = {
@@ -356,12 +331,6 @@ internal fun SettingsScreen(
                         supportingContent = {
                             Text(text = stringResource(id = R.string.settings_storage_subtitle))
                         },
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    toStorage.invoke()
-                                },
                     )
                 }
 //            ListItem(
@@ -383,43 +352,35 @@ internal fun SettingsScreen(
 //                    },
 //            )
             }
+            SegmentedListItem(
+                onClick = {
+                    toAiConfig.invoke()
+                },
+                shapes = ListItemDefaults.single(),
+                content = {
+                    Text(text = stringResource(id = R.string.settings_ai_config_title))
+                },
+                leadingContent = {
+                    ThemedIcon(
+                        imageVector = FontAwesomeIcons.Solid.Robot,
+                        contentDescription = stringResource(id = R.string.settings_ai_config_title),
+                        color = ThemeIconData.Color.ForestGreen,
+                    )
+                },
+                supportingContent = {
+                    Text(text = stringResource(id = R.string.settings_ai_config_description))
+                },
+            )
             Column(
-                modifier =
-                    Modifier
-                        .listCardContainer(),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
-                ListItem(
-                    headlineContent = {
-                        Text(text = stringResource(id = R.string.settings_ai_config_title))
-                    },
-                    leadingContent = {
-                        ThemedIcon(
-                            imageVector = FontAwesomeIcons.Solid.Robot,
-                            contentDescription = stringResource(id = R.string.settings_ai_config_title),
-                            color = ThemeIconData.Color.ForestGreen,
-                        )
-                    },
-                    supportingContent = {
-                        Text(text = stringResource(id = R.string.settings_ai_config_description))
-                    },
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .clickable {
-                                toAiConfig.invoke()
-                            },
-                )
-            }
-            Column(
-                modifier =
-                    Modifier
-                        .listCardContainer(),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
                 if (BuildConfig.DEBUG) {
-                    ListItem(
-                        headlineContent = {
+                    SegmentedListItem(
+                        onClick = {
+                            toColorSpace.invoke()
+                        },
+                        shapes = ListItemDefaults.first(),
+                        content = {
                             Text(text = "Color Space")
                         },
                         leadingContent = {
@@ -429,16 +390,19 @@ internal fun SettingsScreen(
                                 color = ThemeIconData.Color.CharcoalGrey,
                             )
                         },
-                        modifier =
-                            Modifier
-                                .listCardItem()
-                                .clickable {
-                                    toColorSpace.invoke()
-                                },
                     )
                 }
-                ListItem(
-                    headlineContent = {
+                SegmentedListItem(
+                    onClick = {
+                        toAbout.invoke()
+                    },
+                    shapes =
+                        if (BuildConfig.DEBUG) {
+                            ListItemDefaults.last()
+                        } else {
+                            ListItemDefaults.single()
+                        },
+                    content = {
                         Text(text = stringResource(id = R.string.settings_about_title))
                     },
                     leadingContent = {
@@ -451,12 +415,6 @@ internal fun SettingsScreen(
                     supportingContent = {
                         Text(text = stringResource(id = R.string.settings_about_subtitle))
                     },
-                    modifier =
-                        Modifier
-                            .listCardItem()
-                            .clickable {
-                                toAbout.invoke()
-                            },
                 )
             }
         }

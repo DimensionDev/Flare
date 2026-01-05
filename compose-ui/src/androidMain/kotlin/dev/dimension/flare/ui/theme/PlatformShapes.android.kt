@@ -1,20 +1,13 @@
 package dev.dimension.flare.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -34,28 +27,20 @@ internal actual object PlatformShapes {
 
     actual val topCardShape: Shape
         @Composable
-        get() =
-            listCardItemShape.copy(
-                topStart = listCardContainerShape.topStart,
-                topEnd = listCardContainerShape.topEnd,
-            )
+        get() = ListItemDefaults.first().shape
 
     actual val bottomCardShape: Shape
         @Composable
-        get() =
-            listCardItemShape.copy(
-                bottomStart = listCardContainerShape.bottomStart,
-                bottomEnd = listCardContainerShape.bottomEnd,
-            )
+        get() = ListItemDefaults.last().shape
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     actual val listCardContainerShape: CornerBasedShape
         @Composable
-        get() = MaterialTheme.shapes.largeIncreased
+        get() = ListItemDefaults.single().shape as? CornerBasedShape ?: MaterialTheme.shapes.large
 
     actual val listCardItemShape: CornerBasedShape
         @Composable
-        get() = MaterialTheme.shapes.extraSmall
+        get() = ListItemDefaults.item().shape as? CornerBasedShape ?: MaterialTheme.shapes.extraSmall
     actual val dmShapeFromMe: CornerBasedShape
         @Composable
         get() =
@@ -84,38 +69,49 @@ public object ListCardShapes {
     public fun bottomCard(): Shape = PlatformShapes.bottomCardShape
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-public fun Modifier.listCardContainer(): Modifier =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        this.clip(PlatformShapes.listCardContainerShape)
+public fun ListItemDefaults.first(): ListItemShapes = ListItemDefaults.segmentedShapes(0, 2)
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+public fun ListItemDefaults.item(): ListItemShapes = ListItemDefaults.segmentedShapes(1, 3)
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+public fun ListItemDefaults.last(): ListItemShapes = ListItemDefaults.segmentedShapes(1, 2)
+
+@Composable
+public fun ListItemDefaults.segmentedShapes2(
+    index: Int,
+    count: Int,
+): ListItemShapes {
+    if (count == 1) {
+        return ListItemDefaults.single()
     } else {
-        this.compatClip(PlatformShapes.listCardContainerShape)
+        return ListItemDefaults.segmentedShapes(
+            index = index,
+            count = count,
+        )
     }
+}
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-public fun Modifier.listCardItem(): Modifier =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        this.clip(PlatformShapes.listCardItemShape)
+public fun ListItemDefaults.single(): ListItemShapes {
+    val first = first()
+    val last = last()
+    val firstShape = first.shape
+    val lastShape = last.shape
+    if (firstShape is CornerBasedShape && lastShape is CornerBasedShape) {
+        return first.copy(
+            shape =
+                firstShape.copy(
+                    bottomStart = lastShape.bottomStart,
+                    bottomEnd = lastShape.bottomEnd,
+                ),
+        )
     } else {
-        this.compatClip(PlatformShapes.listCardItemShape)
-    }
-
-@Composable
-private fun Modifier.compatClip(shape: Shape): Modifier {
-    val layoutDirection = LocalLayoutDirection.current
-    val density = LocalDensity.current
-    return this.drawWithContent {
-        val outline = shape.createOutline(size, layoutDirection, density)
-
-        val clipPath =
-            when (outline) {
-                is Outline.Rectangle -> Path().apply { addRect(outline.rect) }
-                is Outline.Rounded -> Path().apply { addRoundRect(outline.roundRect) }
-                is Outline.Generic -> outline.path
-            }
-
-        clipPath(path = clipPath) {
-            this@drawWithContent.drawContent()
-        }
+        return ListItemDefaults.segmentedShapes(0, 1)
     }
 }

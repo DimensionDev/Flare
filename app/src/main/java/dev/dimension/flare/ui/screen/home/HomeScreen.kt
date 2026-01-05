@@ -38,12 +38,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -114,32 +114,30 @@ internal fun HomeScreen(afterInit: () -> Unit) {
     val wideNavigationRailState = rememberWideNavigationRailState()
     state.tabs
         .onSuccess { tabs ->
-            val topLevelBackStack by producePresenter(
-                key = "home_top_level_back_stack_${tabs.all.first().key}",
-                useImmediateClock = true,
-            ) {
-                TopLevelBackStack<Route>(
-                    getDirection(tabs.all.first()),
-                )
-            }
+            val topLevelBackStack =
+                retain(
+                    "home_top_level_back_stack_${tabs.all.first().key}",
+                ) {
+                    TopLevelBackStack(
+                        getDirection(tabs.all.first()),
+                    )
+                }
 
-            fun navigate(route: Route) {
-                topLevelBackStack.addTopLevel(route)
-                scope.launch {
-                    wideNavigationRailState.collapse()
-                }
-            }
+            val topLevelBackStackState by rememberUpdatedState(topLevelBackStack)
 
-            val currentRoute by remember {
-                derivedStateOf {
-                    topLevelBackStack.topLevelKey
+            val navigate =
+                remember(topLevelBackStack, wideNavigationRailState) {
+                    { route: Route ->
+                        topLevelBackStack.addTopLevel(route)
+                        scope.launch {
+                            wideNavigationRailState.collapse()
+                        }
+                        Unit
+                    }
                 }
-            }
-            val accountType by remember {
-                derivedStateOf {
-                    currentRoute.accountTypeOr(AccountType.Active)
-                }
-            }
+
+            val currentRoute = topLevelBackStack.topLevelKey
+            val accountType = currentRoute.accountTypeOr(AccountType.Active)
             val userState by producePresenter(key = "home_account_type_$accountType") {
                 userPresenter(accountType)
             }
@@ -177,7 +175,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                             userState,
                             layoutType,
                             currentRoute,
-                            ::navigate,
+                            navigate,
                         )
                     },
                     navigationSuiteItems = {
@@ -300,10 +298,10 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                 }
                             },
                             navigate = {
-                                topLevelBackStack.add(it)
+                                topLevelBackStackState.add(it)
                             },
                             onBack = {
-                                topLevelBackStack.removeLast()
+                                topLevelBackStackState.removeLast()
                             },
                         )
                     }

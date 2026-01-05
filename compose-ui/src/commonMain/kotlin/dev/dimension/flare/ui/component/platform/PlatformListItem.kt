@@ -11,3 +11,17 @@ internal expect fun PlatformListItem(
     supportingContent: @Composable () -> Unit = {},
     trailingContent: @Composable () -> Unit = {},
 )
+
+@Composable
+internal expect fun PlatformSegmentedListItem(
+    headlineContent: @Composable () -> Unit,
+    index: Int,
+    totalCount: Int,
+    modifier: Modifier = Modifier,
+    leadingContent: @Composable () -> Unit = {},
+    supportingContent: @Composable () -> Unit = {},
+    trailingContent: @Composable () -> Unit = {},
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
+    onLongClickLabel: String? = null,
+)

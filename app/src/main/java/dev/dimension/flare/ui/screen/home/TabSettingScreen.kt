@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -51,6 +52,7 @@ import dev.dimension.flare.ui.screen.settings.EditTabDialog
 import dev.dimension.flare.ui.screen.settings.TabAddBottomSheet
 import dev.dimension.flare.ui.screen.settings.TabCustomItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import dev.dimension.flare.ui.theme.segmentedShapes2
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
@@ -129,7 +131,7 @@ internal fun TabSettingScreen(
             modifier =
                 Modifier
                     .padding(horizontal = screenHorizontalPadding),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
             state.enableMixedTimeline.onSuccess { enabled ->
                 if (state.currentTabs.size > 1) {
@@ -166,6 +168,7 @@ internal fun TabSettingScreen(
             itemsIndexed(state.currentTabs, key = { _, item -> item.key }) { index, item ->
                 TabCustomItem(
                     item = item,
+                    shapes = ListItemDefaults.segmentedShapes2(index, state.currentTabs.size),
                     deleteTab = {
                         if (it is TimelineTabItem) {
                             state.deleteTab(item)
@@ -178,12 +181,6 @@ internal fun TabSettingScreen(
                     },
                     reorderableLazyColumnState = reorderableLazyColumnState,
                     canSwipeToDelete = state.canSwipeToDelete,
-                    modifier =
-                        Modifier
-                            .listCard(
-                                index = index,
-                                totalCount = state.currentTabs.size,
-                            ),
                 )
             }
         }
@@ -243,7 +240,7 @@ private fun presenter(
     object {
         val currentTabs = cacheTabs
         val allTabsState = allTabsState
-        val canSwipeToDelete = cacheTabs.size > 1
+        val canSwipeToDelete = true
         val showAddTab = showAddTab
         val selectedEditTab = selectedEditTab
         val enableMixedTimeline = enableMixedTimeline
@@ -285,16 +282,10 @@ private fun presenter(
         }
 
         fun deleteTab(tab: TimelineTabItem) {
-            if (cacheTabs.size <= 1) {
-                return
-            }
             cacheTabs.removeIf { it.key == tab.key }
         }
 
         fun deleteTab(key: String) {
-            if (cacheTabs.size <= 1) {
-                return
-            }
             cacheTabs.removeIf { it.key == key }
         }
 

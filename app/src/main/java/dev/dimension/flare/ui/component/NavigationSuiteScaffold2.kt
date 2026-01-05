@@ -9,7 +9,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -37,12 +36,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults.floatingToolbarVerticalNestedScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalWideNavigationRail
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.WideNavigationRailState
@@ -83,6 +83,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.model.BottomBarBehavior
 import dev.dimension.flare.data.model.BottomBarStyle
 import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.ui.theme.segmentedShapes2
 import soup.compose.material.motion.animation.materialElevationScaleIn
 import soup.compose.material.motion.animation.materialElevationScaleOut
 
@@ -244,26 +245,26 @@ fun NavigationSuiteScaffold2(
                         }
                         if (layoutType == NavigationSuiteType.NavigationBar) {
                             Column(
-                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                                verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
                             ) {
                                 secondaryScope.itemList.forEachIndexed { index, it ->
-                                    ListItem(
-                                        headlineContent = {
+                                    SegmentedListItem(
+                                        onClick = {
+                                            it.onClick()
+                                        },
+                                        shapes =
+                                            ListItemDefaults.segmentedShapes2(
+                                                index,
+                                                secondaryScope.itemsCount,
+                                            ),
+                                        content = {
                                             it.label?.invoke()
                                         },
                                         leadingContent = it.icon,
                                         trailingContent = it.badge,
                                         modifier =
                                             it.modifier
-                                                .padding(horizontal = 16.dp)
-                                                .listCard(
-                                                    index = index,
-                                                    totalCount = secondaryScope.itemsCount,
-                                                ).clickable(
-                                                    enabled = it.enabled,
-                                                    onClick = it.onClick,
-                                                    interactionSource = it.interactionSource,
-                                                ),
+                                                .padding(horizontal = 16.dp),
                                     )
                                 }
                             }
@@ -286,26 +287,26 @@ fun NavigationSuiteScaffold2(
                     Spacer(modifier = Modifier.weight(1f))
                     if (layoutType == NavigationSuiteType.NavigationBar) {
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
                         ) {
                             footerScope.itemList.forEachIndexed { index, it ->
-                                ListItem(
-                                    headlineContent = {
+                                SegmentedListItem(
+                                    content = {
                                         it.label?.invoke()
                                     },
+                                    onClick = {
+                                        it.onClick()
+                                    },
+                                    shapes =
+                                        ListItemDefaults.segmentedShapes2(
+                                            index,
+                                            footerScope.itemsCount,
+                                        ),
                                     leadingContent = it.icon,
                                     trailingContent = it.badge,
                                     modifier =
                                         it.modifier
-                                            .padding(horizontal = 16.dp)
-                                            .listCard(
-                                                index = index,
-                                                totalCount = footerScope.itemsCount,
-                                            ).clickable(
-                                                enabled = it.enabled,
-                                                onClick = it.onClick,
-                                                interactionSource = it.interactionSource,
-                                            ),
+                                            .padding(horizontal = 16.dp),
                                 )
                             }
                         }

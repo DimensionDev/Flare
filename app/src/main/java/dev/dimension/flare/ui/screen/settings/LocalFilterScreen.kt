@@ -29,6 +29,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.LocalFilterPresenter
 import dev.dimension.flare.ui.presenter.settings.LocalFilterState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import dev.dimension.flare.ui.theme.segmentedShapes2
 import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,7 +80,7 @@ internal fun LocalFilterScreen(
                     val item = list[index]
                     SegmentedListItem(
                         onClick = {},
-                        shapes = ListItemDefaults.segmentedShapes(index, list.size),
+                        shapes = ListItemDefaults.segmentedShapes2(index, list.size),
                         content = {
                             Text(text = item.keyword)
                         },

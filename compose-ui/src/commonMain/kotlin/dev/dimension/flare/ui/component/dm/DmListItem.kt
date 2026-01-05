@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.component.dm
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +34,7 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.ItemPlaceHolder
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.listCard
-import dev.dimension.flare.ui.component.platform.PlatformListItem
+import dev.dimension.flare.ui.component.platform.PlatformSegmentedListItem
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.theme.PlatformTheme
@@ -107,7 +106,12 @@ public fun LazyListScope.dmList(
             }
         },
         itemContent = { index, itemCount, item ->
-            PlatformListItem(
+            PlatformSegmentedListItem(
+                onClick = {
+                    onItemClicked.invoke(item.key)
+                },
+                index = index,
+                totalCount = itemCount,
                 headlineContent = {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -223,14 +227,6 @@ public fun LazyListScope.dmList(
                         )
                     }
                 },
-                modifier =
-                    Modifier
-                        .listCard(
-                            index = index,
-                            totalCount = itemCount,
-                        ).clickable {
-                            onItemClicked.invoke(item.key)
-                        },
             )
         },
     )

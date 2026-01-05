@@ -28,6 +28,7 @@ import dev.dimension.flare.compose.ui.list_empty
 import dev.dimension.flare.compose.ui.list_error
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.platform.PlatformListItem
+import dev.dimension.flare.ui.component.platform.PlatformSegmentedListItem
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.model.UiList
@@ -96,12 +97,8 @@ public fun LazyListScope.uiListItemComponent(
             onClicked = onClicked,
             item = item,
             trailingContent = trailingContent,
-            modifier =
-                Modifier
-                    .listCard(
-                        index = index,
-                        totalCount = itemCount,
-                    ),
+            index = index,
+            totalCount = itemCount,
         )
     }
 }
@@ -111,24 +108,99 @@ public fun UiListItem(
     onClicked: ((UiList) -> Unit)?,
     item: UiList,
     trailingContent: @Composable (RowScope.(UiList) -> Unit),
+    index: Int,
+    totalCount: Int,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier =
-            modifier
-                .background(PlatformTheme.colorScheme.card)
-                .let {
-                    if (onClicked == null) {
-                        it
+    if (item.description?.takeIf { it.isNotEmpty() } != null) {
+        Column(
+            modifier =
+                modifier
+                    .listCard(
+                        index = index,
+                        totalCount = totalCount,
+                    ).background(PlatformTheme.colorScheme.card)
+                    .let {
+                        if (onClicked == null) {
+                            it
+                        } else {
+                            it
+                                .clickable {
+                                    onClicked(item)
+                                }
+                        }
+                    },
+        ) {
+            PlatformListItem(
+                headlineContent = {
+                    PlatformText(text = item.title)
+                },
+                leadingContent = {
+                    if (item.avatar != null) {
+                        NetworkImage(
+                            model = item.avatar,
+                            contentDescription = item.title,
+                            modifier =
+                                Modifier
+                                    .size(AvatarComponentDefaults.size)
+                                    .clip(PlatformTheme.shapes.medium),
+                        )
                     } else {
-                        it
-                            .clickable {
-                                onClicked(item)
-                            }
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Rss,
+                            contentDescription = null,
+                            modifier =
+                                Modifier
+                                    .size(AvatarComponentDefaults.size)
+                                    .background(
+                                        color = PlatformTheme.colorScheme.primaryContainer,
+                                        shape = PlatformTheme.shapes.medium,
+                                    ).padding(8.dp),
+                            tint = PlatformTheme.colorScheme.onPrimaryContainer,
+                        )
                     }
                 },
-    ) {
-        PlatformListItem(
+                supportingContent = {
+                    if (item.creator != null) {
+                        PlatformText(
+                            text =
+                                stringResource(
+                                    Res.string.feeds_discover_feeds_created_by,
+                                    item.creator?.handle ?: "Unknown",
+                                ),
+                            style = PlatformTheme.typography.caption,
+                            color = PlatformTheme.colorScheme.caption,
+                        )
+                    }
+                },
+                trailingContent = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        trailingContent.invoke(this, item)
+                    }
+                },
+            )
+            item.description?.takeIf { it.isNotEmpty() }?.let {
+                PlatformText(
+                    text = it,
+                    modifier =
+                        Modifier
+                            .background(PlatformTheme.colorScheme.card)
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                            .padding(horizontal = screenHorizontalPadding),
+                )
+            }
+        }
+    } else {
+        PlatformSegmentedListItem(
+            modifier = modifier,
+            index = index,
+            totalCount = totalCount,
+            onClick = {
+                onClicked?.invoke(item)
+            },
             headlineContent = {
                 PlatformText(text = item.title)
             },
@@ -178,17 +250,6 @@ public fun UiListItem(
                 }
             },
         )
-        item.description?.takeIf { it.isNotEmpty() }?.let {
-            PlatformText(
-                text = it,
-                modifier =
-                    Modifier
-                        .background(PlatformTheme.colorScheme.card)
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                        .padding(horizontal = screenHorizontalPadding),
-            )
-        }
     }
 }
 

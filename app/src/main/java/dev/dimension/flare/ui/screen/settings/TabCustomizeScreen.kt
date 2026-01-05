@@ -23,8 +23,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -65,13 +67,13 @@ import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabTitle
-import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import dev.dimension.flare.ui.theme.segmentedShapes2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -180,7 +182,7 @@ internal fun TabCustomizeScreen(
             modifier =
                 Modifier
                     .padding(horizontal = screenHorizontalPadding),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
             itemsIndexed(
                 state.tabs,
@@ -188,18 +190,13 @@ internal fun TabCustomizeScreen(
             ) { index, item ->
                 TabCustomItem(
                     item = item,
+                    shapes = ListItemDefaults.segmentedShapes2(index, state.tabs.size),
                     deleteTab = state::deleteTab,
                     editTab = {
                         state.setEditTab(it)
                     },
                     reorderableLazyColumnState = reorderableLazyColumnState,
                     canSwipeToDelete = state.canSwipeToDelete,
-                    modifier =
-                        Modifier
-                            .listCard(
-                                index = index,
-                                totalCount = state.tabs.size,
-                            ),
                 )
             }
         }
@@ -263,6 +260,7 @@ internal fun LazyItemScope.TabCustomItem(
     reorderableLazyColumnState: ReorderableLazyListState,
     canSwipeToDelete: Boolean,
     modifier: Modifier = Modifier,
+    shapes: ListItemShapes = ListItemDefaults.shapes(),
 ) {
     val haptics = LocalHapticFeedback.current
     val swipeState =
@@ -284,87 +282,88 @@ internal fun LazyItemScope.TabCustomItem(
                 ) + fadeOut(),
         ) {
             val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
-            Surface(
-                shadowElevation = elevation,
-            ) {
-                SwipeToDismissBox(
-                    state = swipeState,
-                    enableDismissFromEndToStart = canSwipeToDelete,
-                    enableDismissFromStartToEnd = canSwipeToDelete,
-                    backgroundContent = {
-                        val alignment =
-                            when (swipeState.dismissDirection) {
-                                SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                                SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                                SwipeToDismissBoxValue.Settled -> Alignment.Center
-                            }
-                        if (swipeState.dismissDirection != SwipeToDismissBoxValue.Settled) {
-                            Box(
+            val isSwiping =
+                swipeState.dismissDirection != SwipeToDismissBoxValue.Settled
+            SwipeToDismissBox(
+                state = swipeState,
+                enableDismissFromEndToStart = canSwipeToDelete,
+                enableDismissFromStartToEnd = canSwipeToDelete,
+                backgroundContent = {
+                    val alignment =
+                        when (swipeState.dismissDirection) {
+                            SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                            SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                            SwipeToDismissBoxValue.Settled -> Alignment.Center
+                        }
+                    if (swipeState.dismissDirection != SwipeToDismissBoxValue.Settled) {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.error, shape = shapes.draggedShape)
+                                    .padding(16.dp),
+                        ) {
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.Trash,
+                                contentDescription = stringResource(id = R.string.tab_settings_remove),
                                 modifier =
                                     Modifier
-                                        .fillMaxSize()
-                                        .background(MaterialTheme.colorScheme.error)
-                                        .padding(16.dp),
+                                        .align(alignment),
+                                tint = MaterialTheme.colorScheme.onError,
+                            )
+                        }
+                    }
+                },
+            ) {
+                SegmentedListItem(
+                    elevation = ListItemDefaults.elevation(elevation),
+                    selected = isDragging || isSwiping,
+                    onClick = {},
+                    shapes = shapes,
+                    content = {
+                        TabTitle(item.metaData.title)
+                    },
+                    leadingContent = {
+                        TabIcon(
+                            item,
+                        )
+                    },
+                    trailingContent = {
+                        Row {
+                            IconButton(
+                                onClick = {
+                                    editTab.invoke(item)
+                                },
                             ) {
                                 FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Trash,
-                                    contentDescription = stringResource(id = R.string.tab_settings_remove),
-                                    modifier =
-                                        Modifier
-//                                            .size(24.dp)
-                                            .align(alignment),
-                                    tint = MaterialTheme.colorScheme.onError,
+                                    FontAwesomeIcons.Solid.Pen,
+                                    contentDescription = stringResource(id = R.string.tab_settings_edit),
+                                )
+                            }
+                            IconButton(
+                                modifier =
+                                    Modifier.draggableHandle(
+                                        onDragStarted = {
+                                            haptics.performHapticFeedback(
+                                                HapticFeedbackType.Confirm,
+                                            )
+                                        },
+                                        onDragStopped = {
+                                            haptics.performHapticFeedback(
+                                                HapticFeedbackType.Confirm,
+                                            )
+                                        },
+                                    ),
+                                onClick = {},
+                            ) {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.Bars,
+                                    contentDescription = stringResource(id = R.string.tab_settings_drag),
                                 )
                             }
                         }
                     },
-                ) {
-                    ListItem(
-                        headlineContent = {
-                            TabTitle(item.metaData.title)
-                        },
-                        leadingContent = {
-                            TabIcon(
-                                item,
-                            )
-                        },
-                        trailingContent = {
-                            Row {
-                                IconButton(
-                                    onClick = {
-                                        editTab.invoke(item)
-                                    },
-                                ) {
-                                    FAIcon(
-                                        FontAwesomeIcons.Solid.Pen,
-                                        contentDescription = stringResource(id = R.string.tab_settings_edit),
-                                    )
-                                }
-                                IconButton(
-                                    modifier =
-                                        Modifier.draggableHandle(
-                                            onDragStarted = {
-                                                haptics.performHapticFeedback(
-                                                    HapticFeedbackType.Confirm,
-                                                )
-                                            },
-                                            onDragStopped = {
-                                                haptics.performHapticFeedback(
-                                                    HapticFeedbackType.Confirm,
-                                                )
-                                            },
-                                        ),
-                                    onClick = {},
-                                ) {
-                                    FAIcon(
-                                        FontAwesomeIcons.Solid.Bars,
-                                        contentDescription = stringResource(id = R.string.tab_settings_drag),
-                                    )
-                                }
-                            }
-                        },
-                    )
-                }
+                )
             }
         }
     }

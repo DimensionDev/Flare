@@ -40,6 +40,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.DevModePresenter
 import dev.dimension.flare.ui.screen.media.saveByteArrayToDownloads
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import dev.dimension.flare.ui.theme.segmentedShapes2
 import dev.dimension.flare.ui.theme.single
 import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.time.Clock
@@ -135,7 +136,7 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
                     onClick = {
                         selectedMessage = it
                     },
-                    shapes = ListItemDefaults.segmentedShapes(index, state.messages.size),
+                    shapes = ListItemDefaults.segmentedShapes2(index, state.messages.size),
                     content = {
                         Text(it, maxLines = 3)
                     },

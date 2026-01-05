@@ -116,12 +116,8 @@ public fun LazyListScope.popularBlueskyFeedWithTabs(
                     }
                 }
             },
-            modifier =
-                Modifier
-                    .listCard(
-                        index = index,
-                        totalCount = itemCount,
-                    ),
+            index = index,
+            totalCount = itemCount,
         )
     }
 }

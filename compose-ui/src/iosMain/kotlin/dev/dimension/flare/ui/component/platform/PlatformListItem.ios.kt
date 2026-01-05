@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.component.platform
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -9,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import com.slapps.cupertino.LocalContentColor
 import com.slapps.cupertino.ProvideTextStyle
 import com.slapps.cupertino.theme.CupertinoTheme
+import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.status.ListComponent
 import dev.dimension.flare.ui.theme.PlatformTheme
 
@@ -41,5 +43,37 @@ internal actual fun PlatformListItem(
         trailingContent = {
             trailingContent.invoke()
         },
+    )
+}
+
+@Composable
+internal actual fun PlatformSegmentedListItem(
+    headlineContent: @Composable (() -> Unit),
+    index: Int,
+    totalCount: Int,
+    modifier: Modifier,
+    leadingContent: @Composable (() -> Unit),
+    supportingContent: @Composable (() -> Unit),
+    trailingContent: @Composable (() -> Unit),
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)?,
+    onLongClickLabel: String?,
+) {
+    // iOS does not have a native segmented list item, so we use the regular list item
+    PlatformListItem(
+        headlineContent = headlineContent,
+        modifier =
+            modifier
+                .listCard(
+                    index = index,
+                    totalCount = totalCount,
+                ).combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                    onLongClickLabel = onLongClickLabel,
+                ),
+        leadingContent = leadingContent,
+        supportingContent = supportingContent,
+        trailingContent = trailingContent,
     )
 }

@@ -72,7 +72,6 @@ import dev.dimension.flare.ui.presenter.settings.AppearanceState
 import dev.dimension.flare.ui.theme.first
 import dev.dimension.flare.ui.theme.item
 import dev.dimension.flare.ui.theme.last
-import dev.dimension.flare.ui.theme.listCardItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
@@ -371,7 +370,6 @@ internal fun AppearanceScreen(
                             it,
                             modifier =
                                 Modifier
-                                    .listCardItem()
                                     .background(MaterialTheme.colorScheme.surface),
                         )
                     }
@@ -608,7 +606,6 @@ internal fun AppearanceScreen(
                                 copy(videoAutoplay = it)
                             }
                         },
-                        modifier = Modifier.listCardItem(),
                         shapes = ListItemDefaults.last(),
                     )
                 }

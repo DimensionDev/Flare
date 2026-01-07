@@ -271,68 +271,69 @@ internal fun SettingsScreen(
                 }
             }
 
-            state.user.onSuccess {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
-                ) {
-                    SegmentedListItem(
-                        onClick = {
-                            toLocalFilter.invoke()
-                        },
-                        shapes = ListItemDefaults.first(),
-                        content = {
-                            Text(text = stringResource(id = R.string.settings_local_filter_title))
-                        },
-                        leadingContent = {
-                            ThemedIcon(
-                                imageVector = FontAwesomeIcons.Solid.Filter,
-                                contentDescription = stringResource(id = R.string.settings_local_filter_title),
-                                color = ThemeIconData.Color.BurntUmber,
-                            )
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_local_filter_description))
-                        },
-                    )
-                    SegmentedListItem(
-                        onClick = {
-                            toLocalHistory.invoke()
-                        },
-                        shapes = ListItemDefaults.item(),
-                        content = {
-                            Text(text = stringResource(id = R.string.settings_local_history_title))
-                        },
-                        leadingContent = {
-                            ThemedIcon(
-                                imageVector = FontAwesomeIcons.Solid.ClockRotateLeft,
-                                contentDescription = stringResource(id = R.string.settings_local_history_title),
-                                color = ThemeIconData.Color.BurntUmber,
-                            )
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_local_history_description))
-                        },
-                    )
-                    SegmentedListItem(
-                        onClick = {
-                            toStorage.invoke()
-                        },
-                        shapes = ListItemDefaults.last(),
-                        content = {
-                            Text(text = stringResource(id = R.string.settings_storage_title))
-                        },
-                        leadingContent = {
-                            ThemedIcon(
-                                imageVector = FontAwesomeIcons.Solid.Database,
-                                contentDescription = stringResource(id = R.string.settings_storage_title),
-                                color = ThemeIconData.Color.DarkAmber,
-                            )
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_storage_subtitle))
-                        },
-                    )
-                }
+            state.user
+                .onSuccess {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+                    ) {
+                        SegmentedListItem(
+                            onClick = {
+                                toLocalFilter.invoke()
+                            },
+                            shapes = ListItemDefaults.first(),
+                            content = {
+                                Text(text = stringResource(id = R.string.settings_local_filter_title))
+                            },
+                            leadingContent = {
+                                ThemedIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Filter,
+                                    contentDescription = stringResource(id = R.string.settings_local_filter_title),
+                                    color = ThemeIconData.Color.BurntUmber,
+                                )
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_local_filter_description))
+                            },
+                        )
+                        SegmentedListItem(
+                            onClick = {
+                                toLocalHistory.invoke()
+                            },
+                            shapes = ListItemDefaults.item(),
+                            content = {
+                                Text(text = stringResource(id = R.string.settings_local_history_title))
+                            },
+                            leadingContent = {
+                                ThemedIcon(
+                                    imageVector = FontAwesomeIcons.Solid.ClockRotateLeft,
+                                    contentDescription = stringResource(id = R.string.settings_local_history_title),
+                                    color = ThemeIconData.Color.BurntUmber,
+                                )
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_local_history_description))
+                            },
+                        )
+                        SegmentedListItem(
+                            onClick = {
+                                toStorage.invoke()
+                            },
+                            shapes = ListItemDefaults.last(),
+                            content = {
+                                Text(text = stringResource(id = R.string.settings_storage_title))
+                            },
+                            leadingContent = {
+                                ThemedIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Database,
+                                    contentDescription = stringResource(id = R.string.settings_storage_title),
+                                    color = ThemeIconData.Color.DarkAmber,
+                                )
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_storage_subtitle))
+                            },
+                        )
+                    }
 //            ListItem(
 //                headlineContent = {
 //                    Text(text = stringResource(id = R.string.settings_notifications_title))
@@ -351,7 +352,27 @@ internal fun SettingsScreen(
 //                        toNotifications.invoke()
 //                    },
 //            )
-            }
+                }.onError {
+                    SegmentedListItem(
+                        onClick = {
+                            toStorage.invoke()
+                        },
+                        shapes = ListItemDefaults.single(),
+                        content = {
+                            Text(text = stringResource(id = R.string.settings_storage_title))
+                        },
+                        leadingContent = {
+                            ThemedIcon(
+                                imageVector = FontAwesomeIcons.Solid.Database,
+                                contentDescription = stringResource(id = R.string.settings_storage_title),
+                                color = ThemeIconData.Color.DarkAmber,
+                            )
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_storage_subtitle))
+                        },
+                    )
+                }
             SegmentedListItem(
                 onClick = {
                     toAiConfig.invoke()

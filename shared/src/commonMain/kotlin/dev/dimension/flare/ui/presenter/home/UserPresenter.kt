@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-public class UserPresenter(
+public open class UserPresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey?,
 ) : PresenterBase<UserState>(),

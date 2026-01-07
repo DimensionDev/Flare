@@ -330,4 +330,11 @@
 
     <string name="report_user_title">Report user</string>
     <string name="report_user_description">Are you sure you want to report this user?</string>
+
+    <string name="settings_storage_export_data">Export Data</string>
+    <string name="settings_storage_export_data_description">Export all data including database and settings</string>
+    <string name="settings_storage_import_data">Import Data</string>
+    <string name="settings_storage_import_data_description">Import data from file (overwrites existing data)</string>
+    <string name="action_export">Export</string>
+    <string name="action_import">Import</string>
 </resources>

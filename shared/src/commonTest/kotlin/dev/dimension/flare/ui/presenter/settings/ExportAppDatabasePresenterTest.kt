@@ -13,9 +13,7 @@ import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.app.model.DbSearchHistory
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.isSuccess
-import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.presenter.ExportState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -29,7 +27,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ExportAppDatabasePresenterTest {
@@ -110,7 +107,7 @@ class ExportAppDatabasePresenterTest {
 
             val presenter = ExportAppDatabasePresenter()
 
-            val states = mutableListOf<UiState<String>>()
+            val states = mutableListOf<ExportState>()
             val job =
                 launch {
                     moleculeFlow(mode = RecompositionMode.Immediate) {
@@ -124,8 +121,7 @@ class ExportAppDatabasePresenterTest {
             job.cancel()
 
             val finalState = states.last()
-            assertTrue(finalState.isSuccess)
-            val jsonString = finalState.takeSuccess()!!
+            val jsonString = finalState.export()
 
             val export = json.decodeFromString<AppDatabaseExport>(jsonString)
 

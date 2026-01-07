@@ -47,6 +47,8 @@ import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.SupportedLocales
+import dev.dimension.flare.action_export
+import dev.dimension.flare.action_import
 import dev.dimension.flare.add_account
 import dev.dimension.flare.app_name
 import dev.dimension.flare.cancel
@@ -62,6 +64,7 @@ import dev.dimension.flare.edit
 import dev.dimension.flare.home_login
 import dev.dimension.flare.ok
 import dev.dimension.flare.remove_account
+import dev.dimension.flare.save_completed
 import dev.dimension.flare.settings_about_line
 import dev.dimension.flare.settings_about_line_description
 import dev.dimension.flare.settings_about_localization
@@ -125,10 +128,15 @@ import dev.dimension.flare.settings_storage_clear_database
 import dev.dimension.flare.settings_storage_clear_database_description
 import dev.dimension.flare.settings_storage_clear_image_cache
 import dev.dimension.flare.settings_storage_clear_image_cache_description
+import dev.dimension.flare.settings_storage_export_data
+import dev.dimension.flare.settings_storage_export_data_description
+import dev.dimension.flare.settings_storage_import_data
+import dev.dimension.flare.settings_storage_import_data_description
 import dev.dimension.flare.settings_storage_subtitle
 import dev.dimension.flare.settings_storage_title
 import dev.dimension.flare.ui.component.AccountItem
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Header
 import dev.dimension.flare.ui.component.RichText
@@ -136,12 +144,15 @@ import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.ExportDataPresenter
+import dev.dimension.flare.ui.presenter.ImportDataPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.FlareServerProviderPresenter
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
+import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.Button
@@ -174,6 +185,7 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import java.io.File
 import java.util.Locale
 
 @Composable
@@ -182,7 +194,38 @@ internal fun SettingsScreen(
     toLocalCache: () -> Unit,
     toAppLog: () -> Unit,
 ) {
-    val state by producePresenter { presenter() }
+    val window = LocalComposeWindow.current
+    val state by producePresenter {
+        presenter(
+            onExportFilePicker = {
+                java.awt
+                    .FileDialog(window, "Export Data", java.awt.FileDialog.SAVE)
+                    .apply {
+                        file = "flare_data_export.json"
+                        isVisible = true
+                    }.let {
+                        if (it.directory != null && it.file != null) {
+                            java.io.File(it.directory, it.file)
+                        } else {
+                            null
+                        }
+                    }
+            },
+            onImportFilePicker = {
+                java.awt
+                    .FileDialog(window, "Import Data", java.awt.FileDialog.LOAD)
+                    .apply {
+                        isVisible = true
+                    }.let {
+                        if (it.directory != null && it.file != null) {
+                            java.io.File(it.directory, it.file)
+                        } else {
+                            null
+                        }
+                    }
+            },
+        )
+    }
 
     val scrollState = rememberScrollState()
     ScrollbarContainer(
@@ -809,6 +852,44 @@ internal fun SettingsScreen(
                         }
                     },
                 )
+
+                ExpanderItemSeparator()
+
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_storage_export_data))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_storage_export_data_description))
+                    },
+                    trailing = {
+                        Button(
+                            onClick = {
+                                state.storageState.export()
+                            },
+                        ) {
+                            Text(stringResource(Res.string.action_export))
+                        }
+                    },
+                )
+
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_storage_import_data))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_storage_import_data_description))
+                    },
+                    trailing = {
+                        Button(
+                            onClick = {
+                                state.storageState.import()
+                            },
+                        ) {
+                            Text(stringResource(Res.string.action_import))
+                        }
+                    },
+                )
             }
 
             Header(stringResource(Res.string.settings_ai_config_title))
@@ -1078,73 +1159,117 @@ internal fun SettingsScreen(
 }
 
 @Composable
-private fun presenter() =
-    run {
-        val scope = rememberCoroutineScope()
-        val settingsRepository = koinInject<SettingsRepository>()
-        val accountState = accountsPresenter()
-        val appearanceState = appearancePresenter()
-        val storageState = storagePresenter()
-        val aiConfigState = aiConfigPresenter()
-        var aboutExpanded by remember { mutableStateOf(false) }
+private fun presenter(
+    onExportFilePicker: () -> File?,
+    onImportFilePicker: () -> File?,
+) = run {
+    val scope = rememberCoroutineScope()
+    val settingsRepository = koinInject<SettingsRepository>()
+    val accountState = accountsPresenter()
+    val appearanceState = appearancePresenter()
+    val storageState = storagePresenter(onExportFilePicker, onImportFilePicker)
+    val aiConfigState = aiConfigPresenter()
+    var aboutExpanded by remember { mutableStateOf(false) }
 
-        object {
-            val accountState = accountState
-            val appearanceState = appearanceState
-            val aiConfigState = aiConfigState
-            val storageState = storageState
-            val aboutExpanded = aboutExpanded
+    object {
+        val accountState = accountState
+        val appearanceState = appearanceState
+        val aiConfigState = aiConfigState
+        val storageState = storageState
+        val aboutExpanded = aboutExpanded
 
-            fun setAboutExpanded(value: Boolean) {
-                aboutExpanded = value
-            }
+        fun setAboutExpanded(value: Boolean) {
+            aboutExpanded = value
+        }
 
-            fun setLanguage(tag: String) {
-                scope.launch {
-                    settingsRepository.updateAppSettings {
-                        copy(language = tag)
-                    }
+        fun setLanguage(tag: String) {
+            scope.launch {
+                settingsRepository.updateAppSettings {
+                    copy(language = tag)
                 }
             }
         }
     }
+}
 
 @Composable
-private fun storagePresenter() =
-    run {
-        var refreshKey by remember { mutableStateOf(0) }
-        val state = remember { StoragePresenter() }.invoke()
-        var imageCacheSize by remember(refreshKey) {
-            mutableLongStateOf(
-                SingletonImageLoader
-                    .get(PlatformContext.INSTANCE)
-                    .diskCache
-                    ?.size
-                    ?.div(1024L * 1024L) ?: 0L,
-            )
-        }
-        var expanded by remember { mutableStateOf(false) }
-        object : StorageState by state {
-            val expanded = expanded
-            val imageCacheSize = imageCacheSize
+private fun storagePresenter(
+    onExportFilePicker: () -> File?,
+    onImportFilePicker: () -> File?,
+) = run {
+    var refreshKey by remember { mutableStateOf(0) }
+    val state = remember { StoragePresenter() }.invoke()
 
-            fun clearImageCache() {
-                SingletonImageLoader.get(PlatformContext.INSTANCE).diskCache?.clear()
+    val notification = koinInject<ComposeInAppNotification>()
+    val exportPresenter = remember { ExportDataPresenter() }
+    val exportState = exportPresenter.body()
+    val scope = rememberCoroutineScope()
+
+    var importJson by remember { mutableStateOf<String?>(null) }
+    val importPresenter = remember(importJson) { importJson?.let { ImportDataPresenter(it) } }
+    val importState = importPresenter?.body()
+
+    LaunchedEffect(importState) {
+        importState?.let {
+            try {
+                it.import()
+                notification.message(Res.string.ok)
+            } catch (e: Exception) {
+                // notification.message(e.message ?: "Error")
+            } finally {
+                importJson = null
                 refreshKey++
-            }
-
-            fun clearCacheDatabase() {
-                state.clearCache()
-            }
-
-            fun setExpanded(value: Boolean) {
-                expanded = value
-                if (value) {
-                    refreshKey++
-                }
             }
         }
     }
+
+    var imageCacheSize by remember(refreshKey) {
+        mutableLongStateOf(
+            SingletonImageLoader
+                .get(PlatformContext.INSTANCE)
+                .diskCache
+                ?.size
+                ?.div(1024L * 1024L) ?: 0L,
+        )
+    }
+    var expanded by remember { mutableStateOf(false) }
+    object : StorageState by state {
+        val expanded = expanded
+        val imageCacheSize = imageCacheSize
+
+        fun clearImageCache() {
+            SingletonImageLoader.get(PlatformContext.INSTANCE).diskCache?.clear()
+            refreshKey++
+        }
+
+        fun clearCacheDatabase() {
+            state.clearCache()
+        }
+
+        fun export() {
+            scope.launch {
+                val json = exportState.export()
+                onExportFilePicker()?.let { file ->
+                    file.writeText(json)
+                    notification.message(Res.string.save_completed)
+                }
+            }
+        }
+
+        fun import() {
+            onImportFilePicker()?.let { file ->
+                importJson = file.readText()
+            }
+        }
+
+        fun setExpanded(value: Boolean) {
+            expanded = value
+            if (value) {
+                refreshKey++
+            }
+        }
+    }
+}
 
 @Composable
 private fun appearancePresenter() =

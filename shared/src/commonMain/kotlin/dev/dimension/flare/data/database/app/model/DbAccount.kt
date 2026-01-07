@@ -4,7 +4,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity
 internal data class DbAccount(
     @PrimaryKey val account_key: MicroBlogKey,

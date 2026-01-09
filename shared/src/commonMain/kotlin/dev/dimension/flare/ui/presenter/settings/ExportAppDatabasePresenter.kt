@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.AppDatabaseExport
+import dev.dimension.flare.data.database.app.model.toExport
 import dev.dimension.flare.ui.presenter.ExportState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.first

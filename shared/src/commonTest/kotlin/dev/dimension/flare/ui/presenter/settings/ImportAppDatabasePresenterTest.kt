@@ -396,4 +396,55 @@ class ImportAppDatabasePresenterTest {
             assertTrue(accounts.contains(account1))
             assertTrue(accounts.contains(account2))
         }
+
+    @Test
+    fun testTransactionRollbackOnError() =
+        runTest {
+            // Given - insert some initial data to verify database state preservation
+            val existingAccount =
+                DbAccount(
+                    account_key = MicroBlogKey("existing", "example.com"),
+                    credential_json = "{}",
+                    platform_type = PlatformType.Mastodon,
+                    last_active = 999999999L,
+                )
+            db.accountDao().insert(existingAccount)
+
+            // Verify initial state
+            val initialAccounts = db.accountDao().allAccounts().first()
+            assertEquals(1, initialAccounts.size)
+
+            // When - try to import malformed JSON that will fail during parsing
+            val malformedJson = "{this is not valid json"
+            val presenter = ImportAppDatabasePresenter(malformedJson)
+
+            val states = mutableListOf<ImportState>()
+            val job =
+                launch {
+                    moleculeFlow(mode = RecompositionMode.Immediate) {
+                        presenter.body()
+                    }.collect {
+                        states.add(it)
+                    }
+                }
+
+            advanceUntilIdle()
+            
+            val finalState = states.last()
+            
+            // Then - import should fail
+            assertFailsWith<Exception> {
+                finalState.import()
+            }
+            
+            job.cancel()
+
+            // Verify database state is unchanged (no partial import)
+            val accountsAfterError = db.accountDao().allAccounts().first()
+            assertEquals(1, accountsAfterError.size)
+            assertEquals(existingAccount, accountsAfterError.first())
+
+            val applicationsAfterError = db.applicationDao().allApplication().first()
+            assertEquals(0, applicationsAfterError.size)
+        }
 }

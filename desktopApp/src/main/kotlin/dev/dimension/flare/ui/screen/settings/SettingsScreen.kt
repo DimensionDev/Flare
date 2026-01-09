@@ -63,6 +63,8 @@ import dev.dimension.flare.delete
 import dev.dimension.flare.edit
 import dev.dimension.flare.home_login
 import dev.dimension.flare.import_completed
+import dev.dimension.flare.import_confirmation_message
+import dev.dimension.flare.import_confirmation_title
 import dev.dimension.flare.import_error
 import dev.dimension.flare.ok
 import dev.dimension.flare.remove_account
@@ -950,6 +952,30 @@ internal fun SettingsScreen(
                     }
                 },
             )
+
+            ContentDialog(
+                title = stringResource(Res.string.import_confirmation_title),
+                visible = state.storageState.showImportConfirmation,
+                content = {
+                    Text(
+                        text = stringResource(Res.string.import_confirmation_message),
+                        modifier = Modifier.padding(16.dp),
+                    )
+                },
+                primaryButtonText = stringResource(Res.string.ok),
+                closeButtonText = stringResource(Res.string.cancel),
+                onButtonClick = {
+                    when (it) {
+                        ContentDialogButton.Primary -> {
+                            state.storageState.confirmImport()
+                        }
+                        else -> {
+                            state.storageState.cancelImport()
+                        }
+                    }
+                },
+            )
+
             Expander(
                 state.aiConfigState.expanded,
                 onExpandedChanged = state.aiConfigState::setExpanded,
@@ -1212,6 +1238,9 @@ private fun storagePresenter(
     val importPresenter = remember(importJson) { importJson?.let { ImportDataPresenter(it) } }
     val importState = importPresenter?.body()
 
+    var showImportConfirmation by remember { mutableStateOf(false) }
+    var pendingImportFile by remember { mutableStateOf<File?>(null) }
+
     LaunchedEffect(importState) {
         importState?.let {
             try {
@@ -1239,6 +1268,7 @@ private fun storagePresenter(
     object : StorageState by state {
         val expanded = expanded
         val imageCacheSize = imageCacheSize
+        val showImportConfirmation = showImportConfirmation
 
         fun clearImageCache() {
             SingletonImageLoader.get(PlatformContext.INSTANCE).diskCache?.clear()
@@ -1265,8 +1295,22 @@ private fun storagePresenter(
 
         fun import() {
             onImportFilePicker()?.let { file ->
+                pendingImportFile = file
+                showImportConfirmation = true
+            }
+        }
+
+        fun confirmImport() {
+            pendingImportFile?.let { file ->
                 importJson = file.readText()
             }
+            showImportConfirmation = false
+            pendingImportFile = null
+        }
+
+        fun cancelImport() {
+            showImportConfirmation = false
+            pendingImportFile = null
         }
 
         fun setExpanded(value: Boolean) {

@@ -81095,7 +81095,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Export all data including database and settings"
+            "value" : "Export data (excludes account credentials for security - you will need to re-login after import)"
           }
         }
       }
@@ -81115,7 +81115,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Import data from file (overwrites existing data)"
+            "value" : "Import data from file (accounts will need re-authentication)"
           }
         }
       }

@@ -382,9 +382,9 @@
     <string name="report_user_description">Are you sure you want to report this user?</string>
 
     <string name="settings_storage_export_data">Export Data</string>
-    <string name="settings_storage_export_data_description">Export all data including accounts and credentials (keep file secure)</string>
+    <string name="settings_storage_export_data_description">Export data (excludes account credentials for security - you will need to re-login after import)</string>
     <string name="settings_storage_import_data">Import Data</string>
-    <string name="settings_storage_import_data_description">Import data from file (overwrites existing data)</string>
+    <string name="settings_storage_import_data_description">Import data from file (accounts will need re-authentication)</string>
     <string name="save_completed">Save completed</string>
     <string name="save_error">Failed to save data</string>
     <string name="import_completed">Import completed</string>

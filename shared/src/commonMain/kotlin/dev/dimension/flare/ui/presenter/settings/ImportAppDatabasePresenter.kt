@@ -27,9 +27,9 @@ public class ImportAppDatabasePresenter(
     public suspend fun import() {
         val export = jsonContent.decodeJson<AppDatabaseExport>()
         appDatabase.connect {
-            export.accounts.forEach { appDatabase.accountDao().insert(it) }
-
-            export.applications.forEach { appDatabase.applicationDao().insert(it) }
+            // Note: Accounts and applications are not imported because the export
+            // does not contain credentials for security reasons. Users will need to
+            // re-authenticate their accounts after importing.
 
             export.keywordFilters.forEach { appDatabase.keywordFilterDao().insert(it) }
 

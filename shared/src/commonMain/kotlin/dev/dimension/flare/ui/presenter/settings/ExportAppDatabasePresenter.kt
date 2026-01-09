@@ -24,8 +24,8 @@ public class ExportAppDatabasePresenter :
     public suspend fun export(): String {
         val export =
             AppDatabaseExport(
-                accounts = appDatabase.accountDao().allAccounts().first(),
-                applications = appDatabase.applicationDao().allApplication().first(),
+                accounts = appDatabase.accountDao().allAccounts().first().map { it.toExport() },
+                applications = appDatabase.applicationDao().allApplication().first().map { it.toExport() },
                 keywordFilters = appDatabase.keywordFilterDao().selectAll().first(),
                 searchHistories = appDatabase.searchHistoryDao().select().first(),
                 rssSources = appDatabase.rssSourceDao().getAll().first(),

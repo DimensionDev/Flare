@@ -126,10 +126,18 @@ class ExportAppDatabasePresenterTest {
             val export = json.decodeFromString<AppDatabaseExport>(jsonString)
 
             assertEquals(1, export.accounts.size)
-            assertEquals(account, export.accounts.first())
+            val exportedAccount = export.accounts.first()
+            assertEquals(account.account_key, exportedAccount.account_key)
+            assertEquals(account.platform_type, exportedAccount.platform_type)
+            assertEquals(account.last_active, exportedAccount.last_active)
+            // credential_json should not be exported for security reasons
 
             assertEquals(1, export.applications.size)
-            assertEquals(application, export.applications.first())
+            val exportedApplication = export.applications.first()
+            assertEquals(application.host, exportedApplication.host)
+            assertEquals(application.platform_type, exportedApplication.platform_type)
+            assertEquals(application.has_pending_oauth_request, exportedApplication.has_pending_oauth_request)
+            // credential_json should not be exported for security reasons
 
             assertEquals(1, export.keywordFilters.size)
             assertEquals(keywordFilter, export.keywordFilters.first())

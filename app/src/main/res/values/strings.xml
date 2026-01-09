@@ -386,6 +386,9 @@
     <string name="settings_storage_import_data">Import Data</string>
     <string name="settings_storage_import_data_description">Import data from file (overwrites existing data)</string>
     <string name="save_completed">Save completed</string>
+    <string name="save_error">Failed to save data</string>
+    <string name="import_completed">Import completed</string>
+    <string name="import_error">Failed to import data</string>
 
     <string name="changelog_current">
         <![CDATA[

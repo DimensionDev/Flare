@@ -62,6 +62,8 @@ import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.delete
 import dev.dimension.flare.edit
 import dev.dimension.flare.home_login
+import dev.dimension.flare.import_completed
+import dev.dimension.flare.import_error
 import dev.dimension.flare.ok
 import dev.dimension.flare.remove_account
 import dev.dimension.flare.save_completed
@@ -1213,9 +1215,9 @@ private fun storagePresenter(
         importState?.let {
             try {
                 it.import()
-                notification.message(Res.string.ok)
+                notification.message(Res.string.import_completed)
             } catch (e: Exception) {
-                // notification.message(e.message ?: "Error")
+                notification.message(Res.string.import_error, success = false)
             } finally {
                 importJson = null
                 refreshKey++

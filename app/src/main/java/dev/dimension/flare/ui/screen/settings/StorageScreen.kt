@@ -247,9 +247,9 @@ private fun storagePresenter(context: Context) =
             importState?.let {
                 try {
                     it.import()
-                    notification.message(R.string.save_completed)
+                    notification.message(R.string.import_completed)
                 } catch (e: Exception) {
-                    notification.message(R.string.account_item_error_title)
+                    notification.message(R.string.import_error)
                 } finally {
                     importJson = null
                 }

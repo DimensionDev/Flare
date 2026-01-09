@@ -90,8 +90,11 @@ internal class ComposeInAppNotification : InAppNotification {
             )
     }
 
-    fun message(messageId: StringResource) {
-        _source.value = Event(Notification.StringNotification(messageId, success = true))
+    fun message(
+        messageId: StringResource,
+        success: Boolean = true,
+    ) {
+        _source.value = Event(Notification.StringNotification(messageId, success = success))
     }
 }
 

@@ -69,7 +69,6 @@ struct StorageScreen: View {
                         self.jsonFile = JSONFile(text: json)
                         self.showFileExporter = true
                     } catch {
-                        print(error)
                     }
                 }
             } label: {
@@ -83,11 +82,9 @@ struct StorageScreen: View {
             .fileExporter(isPresented: $showFileExporter, document: jsonFile, contentType: .json, defaultFilename: "flare_data_export") { result in
                 switch result {
                 case .success(let url):
-                    print("Saved to \(url)")
-                    // show success message
-                    Drops.show(.init(stringLiteral: "save_completed"))
+                    Drops.show(.init(stringLiteral: .init(localized: "save_completed")))
                 case .failure(let error):
-                    print(error.localizedDescription)
+                    Drops.show(.init(stringLiteral: .init(localized: "save_error")))
                 }
             }
             
@@ -114,17 +111,16 @@ struct StorageScreen: View {
                             Task {
                                 do {
                                     try await importPresenter.models.value.import()
-                                    Drops.show(.init(stringLiteral: "save_completed"))
+                                    Drops.show(.init(stringLiteral: .init(localized: "import_completed")))
                                 } catch {
-                                    Drops.show(.init(stringLiteral: "error"))
+                                    Drops.show(.init(stringLiteral: .init(localized: "import_error")))
                                 }
                             }
                         }
                     } catch {
-                        print(error.localizedDescription)
                     }
                 case .failure(let error):
-                    print(error.localizedDescription)
+                    Drops.show(.init(stringLiteral: .init(localized: "import_error")))
                 }
             }
         }

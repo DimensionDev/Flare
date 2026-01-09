@@ -25,7 +25,19 @@ public class ImportAppDatabasePresenter(
         }
 
     public suspend fun import() {
-        val export = jsonContent.decodeJson<AppDatabaseExport>()
+        // Parse and validate JSON structure
+        val export =
+            try {
+                jsonContent.decodeJson<AppDatabaseExport>()
+            } catch (e: Exception) {
+                throw IllegalArgumentException("Invalid import file format: ${e.message}", e)
+            }
+
+        // Validate imported data
+        validateImportData(export)
+
+        // Perform import within a transaction (automatically rolls back on error)
+        // Note: Using OnConflictStrategy.REPLACE - existing records with same keys will be replaced
         appDatabase.connect {
             export.accounts.forEach { appDatabase.accountDao().insert(it) }
 
@@ -37,6 +49,43 @@ public class ImportAppDatabasePresenter(
 
             if (export.rssSources.isNotEmpty()) {
                 appDatabase.rssSourceDao().insertAll(export.rssSources)
+            }
+        }
+    }
+
+    private fun validateImportData(export: AppDatabaseExport) {
+        // Validate account data
+        export.accounts.forEach { account ->
+            require(account.credential_json.isNotBlank()) {
+                "Invalid account data: credential_json cannot be empty"
+            }
+        }
+
+        // Validate application data
+        export.applications.forEach { application ->
+            require(application.host.isNotBlank()) {
+                "Invalid application data: host cannot be empty"
+            }
+        }
+
+        // Validate keyword filters
+        export.keywordFilters.forEach { filter ->
+            require(filter.keyword.isNotBlank()) {
+                "Invalid keyword filter: keyword cannot be empty"
+            }
+        }
+
+        // Validate search histories
+        export.searchHistories.forEach { history ->
+            require(history.search.isNotBlank()) {
+                "Invalid search history: search term cannot be empty"
+            }
+        }
+
+        // Validate RSS sources
+        export.rssSources.forEach { source ->
+            require(source.url.isNotBlank()) {
+                "Invalid RSS source: URL cannot be empty"
             }
         }
     }

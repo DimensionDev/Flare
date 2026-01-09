@@ -11,6 +11,8 @@ struct StorageScreen: View {
     @State private var showImageClearAlert = false
     @State private var showFileExporter = false
     @State private var showFileImporter = false
+    @State private var showImportConfirmation = false
+    @State private var pendingImportJson: String?
     @State private var jsonFile: JSONFile?
     var body: some View {
         List {
@@ -108,15 +110,8 @@ struct StorageScreen: View {
                     do {
                         let data = try Data(contentsOf: url)
                         if let json = String(data: data, encoding: .utf8) {
-                            let importPresenter = ImportDataPresenter(jsonContent: json)
-                            Task {
-                                do {
-                                    try await importPresenter.models.value.import()
-                                    Drops.show(.init(stringLiteral: .init(localized: "import_completed")))
-                                } catch {
-                                    Drops.show(.init(stringLiteral: .init(localized: "import_error")))
-                                }
-                            }
+                            pendingImportJson = json
+                            showImportConfirmation = true
                         }
                     } catch {
                         Drops.show(.init(stringLiteral: .init(localized: "import_error")))
@@ -124,6 +119,29 @@ struct StorageScreen: View {
                 case .failure(let error):
                     Drops.show(.init(stringLiteral: .init(localized: "import_error")))
                 }
+            }
+            .alert("import_confirmation_title", isPresented: $showImportConfirmation) {
+                Button("Cancel", role: .cancel) {
+                    showImportConfirmation = false
+                    pendingImportJson = nil
+                }
+                Button("Ok") {
+                    if let json = pendingImportJson {
+                        let importPresenter = ImportDataPresenter(jsonContent: json)
+                        Task {
+                            do {
+                                try await importPresenter.models.value.import()
+                                Drops.show(.init(stringLiteral: .init(localized: "import_completed")))
+                            } catch {
+                                Drops.show(.init(stringLiteral: .init(localized: "import_error")))
+                            }
+                        }
+                    }
+                    showImportConfirmation = false
+                    pendingImportJson = nil
+                }
+            } message: {
+                Text("import_confirmation_message")
             }
         }
         .navigationTitle("storage_title")

@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -68,6 +70,46 @@ internal fun StorageScreen(
     val state by producePresenter {
         storagePresenter(context = context)
     }
+    
+    var showImportConfirmation by remember { mutableStateOf(false) }
+    var pendingImportUri by remember { mutableStateOf<android.net.Uri?>(null) }
+
+    if (showImportConfirmation) {
+        AlertDialog(
+            onDismissRequest = {
+                showImportConfirmation = false
+                pendingImportUri = null
+            },
+            title = {
+                Text(text = stringResource(id = R.string.import_confirmation_title))
+            },
+            text = {
+                Text(text = stringResource(id = R.string.import_confirmation_message))
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        pendingImportUri?.let { state.import(it) }
+                        showImportConfirmation = false
+                        pendingImportUri = null
+                    },
+                ) {
+                    Text(text = stringResource(id = android.R.string.ok))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showImportConfirmation = false
+                        pendingImportUri = null
+                    },
+                ) {
+                    Text(text = stringResource(id = android.R.string.cancel))
+                }
+            },
+        )
+    }
+
     FlareScaffold(
         topBar = {
             FlareLargeFlexibleTopAppBar(
@@ -199,7 +241,10 @@ internal fun StorageScreen(
                 rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.OpenDocument(),
                     onResult = { uri ->
-                        uri?.let { state.import(it) }
+                        uri?.let {
+                            pendingImportUri = it
+                            showImportConfirmation = true
+                        }
                     },
                 )
 

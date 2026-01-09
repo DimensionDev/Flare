@@ -70,7 +70,7 @@ internal fun StorageScreen(
     val state by producePresenter {
         storagePresenter(context = context)
     }
-    
+
     var showImportConfirmation by remember { mutableStateOf(false) }
     var pendingImportUri by remember { mutableStateOf<android.net.Uri?>(null) }
 

@@ -63,6 +63,8 @@ import dev.dimension.flare.delete
 import dev.dimension.flare.edit
 import dev.dimension.flare.home_login
 import dev.dimension.flare.import_completed
+import dev.dimension.flare.import_confirmation_message
+import dev.dimension.flare.import_confirmation_title
 import dev.dimension.flare.import_error
 import dev.dimension.flare.ok
 import dev.dimension.flare.remove_account
@@ -950,7 +952,7 @@ internal fun SettingsScreen(
                     }
                 },
             )
-            
+
             ContentDialog(
                 title = stringResource(Res.string.import_confirmation_title),
                 visible = state.storageState.showImportConfirmation,
@@ -973,7 +975,7 @@ internal fun SettingsScreen(
                     }
                 },
             )
-            
+
             Expander(
                 state.aiConfigState.expanded,
                 onExpandedChanged = state.aiConfigState::setExpanded,
@@ -1235,7 +1237,7 @@ private fun storagePresenter(
     var importJson by remember { mutableStateOf<String?>(null) }
     val importPresenter = remember(importJson) { importJson?.let { ImportDataPresenter(it) } }
     val importState = importPresenter?.body()
-    
+
     var showImportConfirmation by remember { mutableStateOf(false) }
     var pendingImportFile by remember { mutableStateOf<File?>(null) }
 
@@ -1297,7 +1299,7 @@ private fun storagePresenter(
                 showImportConfirmation = true
             }
         }
-        
+
         fun confirmImport() {
             pendingImportFile?.let { file ->
                 importJson = file.readText()
@@ -1305,7 +1307,7 @@ private fun storagePresenter(
             showImportConfirmation = false
             pendingImportFile = null
         }
-        
+
         fun cancelImport() {
             showImportConfirmation = false
             pendingImportFile = null

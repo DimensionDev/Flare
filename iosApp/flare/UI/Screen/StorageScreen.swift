@@ -69,6 +69,7 @@ struct StorageScreen: View {
                         self.jsonFile = JSONFile(text: json)
                         self.showFileExporter = true
                     } catch {
+                        Drops.show(.init(stringLiteral: .init(localized: "export_error")))
                     }
                 }
             } label: {

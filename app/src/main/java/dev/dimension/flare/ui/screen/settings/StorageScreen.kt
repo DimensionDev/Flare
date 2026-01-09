@@ -278,13 +278,17 @@ private fun storagePresenter(context: Context) =
 
             fun export(uri: android.net.Uri) {
                 scope.launch {
-                    val json = exportState.export()
-                    withContext(Dispatchers.IO) {
-                        context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                            outputStream.write(json.toByteArray())
+                    try {
+                        val json = exportState.export()
+                        withContext(Dispatchers.IO) {
+                            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                                outputStream.write(json.toByteArray())
+                            }
                         }
+                        notification.message(R.string.save_completed)
+                    } catch (e: Exception) {
+                        notification.message(R.string.save_error)
                     }
-                    notification.message(R.string.save_completed)
                 }
             }
 

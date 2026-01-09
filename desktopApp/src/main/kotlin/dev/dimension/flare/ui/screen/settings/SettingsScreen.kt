@@ -67,6 +67,7 @@ import dev.dimension.flare.import_error
 import dev.dimension.flare.ok
 import dev.dimension.flare.remove_account
 import dev.dimension.flare.save_completed
+import dev.dimension.flare.save_error
 import dev.dimension.flare.settings_about_line
 import dev.dimension.flare.settings_about_line_description
 import dev.dimension.flare.settings_about_localization
@@ -1250,10 +1251,14 @@ private fun storagePresenter(
 
         fun export() {
             scope.launch {
-                val json = exportState.export()
-                onExportFilePicker()?.let { file ->
-                    file.writeText(json)
-                    notification.message(Res.string.save_completed)
+                try {
+                    val json = exportState.export()
+                    onExportFilePicker()?.let { file ->
+                        file.writeText(json)
+                        notification.message(Res.string.save_completed)
+                    }
+                } catch (e: Exception) {
+                    notification.message(Res.string.save_error, success = false)
                 }
             }
         }

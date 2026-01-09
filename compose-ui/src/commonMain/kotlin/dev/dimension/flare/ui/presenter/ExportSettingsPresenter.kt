@@ -1,8 +1,6 @@
 package dev.dimension.flare.ui.presenter
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.model.SettingsExport
 import dev.dimension.flare.data.repository.SettingsRepository

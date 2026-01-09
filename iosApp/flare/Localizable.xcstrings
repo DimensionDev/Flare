@@ -24844,6 +24844,16 @@
         }
       }
     },
+    "export_error" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to export data"
+          }
+        }
+      }
+    },
     "fx_share" : {
       "localizations" : {
         "ar" : {

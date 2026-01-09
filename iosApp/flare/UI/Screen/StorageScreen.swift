@@ -119,6 +119,7 @@ struct StorageScreen: View {
                             }
                         }
                     } catch {
+                        Drops.show(.init(stringLiteral: .init(localized: "import_error")))
                     }
                 case .failure(let error):
                     Drops.show(.init(stringLiteral: .init(localized: "import_error")))

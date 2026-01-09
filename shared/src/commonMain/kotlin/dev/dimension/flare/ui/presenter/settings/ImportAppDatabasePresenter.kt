@@ -37,7 +37,7 @@ public class ImportAppDatabasePresenter(
         validateImportData(export)
 
         // Perform import within a transaction (automatically rolls back on error)
-        // Note: Using OnConflictStrategy.REPLACE - existing records with same keys will be replaced
+        // Note: DAO insert methods use OnConflictStrategy.REPLACE - existing records with matching primary keys will be replaced
         appDatabase.connect {
             export.accounts.forEach { appDatabase.accountDao().insert(it) }
 

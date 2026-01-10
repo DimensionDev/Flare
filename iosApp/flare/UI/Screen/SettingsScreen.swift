@@ -62,8 +62,8 @@ struct SettingsScreen: View {
 //                }
             }
 
-            StateView(state: presenter.state.user) { _ in
-                Section {
+            Section {
+                StateView(state: presenter.state.user) { _ in
                     NavigationLink(value: Route.localFilter) {
                         Label {
                             Text("local_filter_title")
@@ -80,13 +80,13 @@ struct SettingsScreen: View {
                             Image("fa-clock-rotate-left")
                         }
                     }
-                    NavigationLink(value: Route.storage) {
-                        Label {
-                            Text("storage_title")
-                            Text("storage_description")
-                        } icon: {
-                            Image("fa-database")
-                        }
+                }
+                NavigationLink(value: Route.storage) {
+                    Label {
+                        Text("storage_title")
+                        Text("storage_description")
+                    } icon: {
+                        Image("fa-database")
                     }
                 }
             }

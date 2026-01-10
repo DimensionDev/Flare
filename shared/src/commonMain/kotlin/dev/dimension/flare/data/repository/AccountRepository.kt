@@ -27,9 +27,11 @@ import dev.dimension.flare.ui.model.takeSuccess
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -189,6 +191,7 @@ internal fun accountServiceProvider(
         )
     }.collectAsUiState().value
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal fun accountServiceFlow(
     accountType: AccountType,
     repository: AccountRepository,
@@ -197,9 +200,26 @@ internal fun accountServiceFlow(
         AccountType.Active -> {
             repository
                 .activeAccount
-                .map { it.takeSuccess() ?: throw NoActiveAccountException }
-                .distinctUntilChangedBy { it.accountKey }
-                .map { it.dataSource }
+                .map { it.takeSuccess() }
+                .distinctUntilChangedBy { it?.accountKey }
+                .flatMapLatest {
+                    if (it != null) {
+                        flowOf(it.dataSource)
+                    } else {
+                        val guestData = repository.appDataStore.guestDataStore.data
+                        guestData.map {
+                            when (it.platformType) {
+                                PlatformType.Mastodon ->
+                                    GuestMastodonDataSource(
+                                        host = it.host,
+                                        locale = Locale.language,
+                                    )
+
+                                else -> throw UnsupportedOperationException()
+                            }
+                        }
+                    }
+                }
         }
 
         AccountType.Guest -> {

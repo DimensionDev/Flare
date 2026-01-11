@@ -286,4 +286,15 @@
     <string name="mute_user_description">Вы уверены, что хотите отключить этого пользователя?</string>
     <string name="report_user_title">Пожаловаться на пользователя</string>
     <string name="report_user_description">Вы уверены, что хотите пожаловаться на этого пользователя?</string>
+    <string name="settings_storage_export_data">Экспорт данных</string>
+    <string name="settings_storage_export_data_description">Экспортировать все данные, включая аккаунты и учетные данные (храните файл в безопасности)</string>
+    <string name="settings_storage_import_data">Импорт данных</string>
+    <string name="settings_storage_import_data_description">Импорт данных из файла (слияния с существующими данными, заменяет дубликаты)</string>
+    <string name="action_export">Экспорт</string>
+    <string name="action_import">Импорт</string>
+    <string name="save_error">Не удалось сохранить данные</string>
+    <string name="import_completed">Импорт завершён</string>
+    <string name="import_error">Не удалось импортировать данные</string>
+    <string name="import_confirmation_title">Подтвердить импорт</string>
+    <string name="import_confirmation_message">Это импортирует данные из файла. Существующие записи с соответствующими идентификаторами будут заменены. Вы хотите продолжить?</string>
 </resources>

@@ -286,4 +286,15 @@
     <string name="mute_user_description">هل أنت متأكد من أنك تريد كتم هذا المستخدم؟</string>
     <string name="report_user_title">الإبلاغ عن المستخدم</string>
     <string name="report_user_description">هل أنت متأكد من أنك تريد الإبلاغ عن هذا المستخدم؟</string>
+    <string name="settings_storage_export_data">تصدير البيانات</string>
+    <string name="settings_storage_export_data_description">تصدير جميع البيانات بما في ذلك الحسابات ووثائق التفويض (الحفاظ على أمن الملف)</string>
+    <string name="settings_storage_import_data">استيراد البيانات</string>
+    <string name="settings_storage_import_data_description">استيراد البيانات من الملف (دمج مع البيانات الموجودة، استبدال التكرار)</string>
+    <string name="action_export">تصدير</string>
+    <string name="action_import">استيراد</string>
+    <string name="save_error">فشل في حفظ البيانات</string>
+    <string name="import_completed">اكتمل الاستيراد</string>
+    <string name="import_error">فشل استيراد البيانات</string>
+    <string name="import_confirmation_title">تأكيد الاستيراد</string>
+    <string name="import_confirmation_message">سيتم استيراد البيانات من الملف. سيتم استبدال السجلات الموجودة مع مطابقة المعرفات. هل تريد المتابعة؟</string>
 </resources>

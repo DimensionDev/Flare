@@ -318,6 +318,16 @@
     <string name="mute_user_description">Tem certeza que deseja silenciar este usuário?</string>
     <string name="report_user_title">Denunciar usuário</string>
     <string name="report_user_description">Tem certeza que deseja denunciar este usuário?</string>
+    <string name="settings_storage_export_data">Exportar dados</string>
+    <string name="settings_storage_export_data_description">Exportar todos os dados incluindo contas e credenciais (manter arquivo seguro)</string>
+    <string name="settings_storage_import_data">Importar dados</string>
+    <string name="settings_storage_import_data_description">Importar dados do arquivo (mesclar com dados existentes, substituir duplicados)</string>
+    <string name="save_completed">Salvo com sucesso</string>
+    <string name="save_error">Falha ao salvar dados</string>
+    <string name="import_completed">Importação concluída</string>
+    <string name="import_error">Falha ao importar dados</string>
+    <string name="import_confirmation_title">Confirmar Importação</string>
+    <string name="import_confirmation_message">Isto irá importar dados do arquivo. Registros existentes com IDs correspondentes serão substituídos. Você quer continuar?</string>
     <string name="changelog_current"><![CDATA[            <span>Versão %1$s:</span>
             <ul>
                 <li>Correções de erros e melhorias de desempenho.</li>

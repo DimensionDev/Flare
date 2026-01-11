@@ -318,6 +318,16 @@
     <string name="mute_user_description">Είστε βέβαιοι ότι θέλετε να κάνετε σίγαση αυτού του χρήστη?</string>
     <string name="report_user_title">Αναφορά χρήστη</string>
     <string name="report_user_description">Είστε βέβαιοι ότι θέλετε να αναφέρετε αυτόν τον χρήστη?</string>
+    <string name="settings_storage_export_data">Εξαγωγή Δεδομένων</string>
+    <string name="settings_storage_export_data_description">Εξαγωγή όλων των δεδομένων, συμπεριλαμβανομένων των λογαριασμών και των διαπιστευτηρίων (διατήρηση του αρχείου ασφαλή)</string>
+    <string name="settings_storage_import_data">Εισαγωγή Δεδομένων</string>
+    <string name="settings_storage_import_data_description">Εισαγωγή δεδομένων από αρχείο (συγχωνεύσεις με υπάρχοντα δεδομένα, αντικαθιστά διπλότυπα)</string>
+    <string name="save_completed">Ολοκλήρωση αποθήκευσης</string>
+    <string name="save_error">Αποτυχία αποθήκευσης δεδομένων</string>
+    <string name="import_completed">Η εισαγωγή ολοκληρώθηκε</string>
+    <string name="import_error">Αποτυχία εισαγωγής δεδομένων</string>
+    <string name="import_confirmation_title">Επιβεβαίωση Εισαγωγής</string>
+    <string name="import_confirmation_message">Αυτό θα εισάγει δεδομένα από το αρχείο. Οι υπάρχουσες εγγραφές με ταυτότητες που ταιριάζουν θα αντικατασταθούν. Θέλετε να συνεχίσετε?</string>
     <string name="changelog_current"><![CDATA[            <span>Έκδοση %1$s:</span>
             <ul>
                 <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης.</li>

@@ -318,6 +318,16 @@
     <string name="mute_user_description">Oletko varma, että haluat mykistää tämän käyttäjän?</string>
     <string name="report_user_title">Raportoi käyttäjä</string>
     <string name="report_user_description">Oletko varma, että haluat raportoida tämän käyttäjän?</string>
+    <string name="settings_storage_export_data">Vie Tiedot</string>
+    <string name="settings_storage_export_data_description">Vie kaikki tiedot, mukaan lukien tilit ja käyttäjätunnukset (säilytä tiedostojen suojaus)</string>
+    <string name="settings_storage_import_data">Tuo Tiedot</string>
+    <string name="settings_storage_import_data_description">Tuo tiedot tiedostosta (yhdistää olemassa oleviin tietoihin, korvaa kaksoiskappaleet)</string>
+    <string name="save_completed">Tallennus valmis</string>
+    <string name="save_error">Tietojen tallentaminen epäonnistui</string>
+    <string name="import_completed">Tuonti valmis</string>
+    <string name="import_error">Tietojen tuonti epäonnistui</string>
+    <string name="import_confirmation_title">Vahvista Tuonti</string>
+    <string name="import_confirmation_message">Tämä tuo tiedostosta tietoja. Olemassa olevat tietueet ja vastaavat ID:t korvataan. Haluatko jatkaa?</string>
     <string name="changelog_current"><![CDATA[            <span>Versio %1$s:</span>
             <ul>
                 <li>Virhekorjauksia ja suorituskyvyn parannuksia.</li>

@@ -286,4 +286,15 @@
     <string name="mute_user_description">Sei sicuro di voler disattivare questo utente?</string>
     <string name="report_user_title">Segnala utente</string>
     <string name="report_user_description">Sei sicuro di voler segnalare questo utente?</string>
+    <string name="settings_storage_export_data">Esporta Dati</string>
+    <string name="settings_storage_export_data_description">Esporta tutti i dati, inclusi gli account e le credenziali (mantieni il file al sicuro)</string>
+    <string name="settings_storage_import_data">Importa Dati</string>
+    <string name="settings_storage_import_data_description">Importa dati da file (fonde con dati esistenti, sostituisce duplicati)</string>
+    <string name="action_export">Esporta</string>
+    <string name="action_import">Importa</string>
+    <string name="save_error">Impossibile salvare i dati</string>
+    <string name="import_completed">Importazione completata</string>
+    <string name="import_error">Importazione dati non riuscita</string>
+    <string name="import_confirmation_title">Conferma Importazione</string>
+    <string name="import_confirmation_message">Questo importerà i dati dal file. I record esistenti con gli ID corrispondenti saranno sostituiti. Vuoi continuare?</string>
 </resources>

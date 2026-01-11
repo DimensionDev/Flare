@@ -286,4 +286,15 @@
     <string name="mute_user_description">Er du sikker på at du vil dempe denne brukeren?</string>
     <string name="report_user_title">Rapporter bruker</string>
     <string name="report_user_description">Er du sikker på at du vil rapportere denne brukeren?</string>
+    <string name="settings_storage_export_data">Eksporter data</string>
+    <string name="settings_storage_export_data_description">Eksporter alle data, inkludert kontoer og legitimasjon (behold filen sikker)</string>
+    <string name="settings_storage_import_data">Importer data</string>
+    <string name="settings_storage_import_data_description">Importer data fra fil (sammenslåing med eksisterende data, erstatter duplikater)</string>
+    <string name="action_export">Eksporter</string>
+    <string name="action_import">Importer</string>
+    <string name="save_error">Klarte ikke å lagre data</string>
+    <string name="import_completed">Import fullført</string>
+    <string name="import_error">Kan ikke importere data</string>
+    <string name="import_confirmation_title">Bekreft import</string>
+    <string name="import_confirmation_message">Dette vil importere data fra filen. Eksisterende poster med samsvarende ID-er vil bli erstattet. Vil du fortsette?</string>
 </resources>

@@ -286,4 +286,15 @@
     <string name="mute_user_description">Êtes-vous sûr de vouloir rendre muet cet utilisateur ?</string>
     <string name="report_user_title">Signaler l\'utilisateur</string>
     <string name="report_user_description">Êtes-vous sûr de vouloir signaler cet utilisateur ?</string>
+    <string name="settings_storage_export_data">Exporter les données</string>
+    <string name="settings_storage_export_data_description">Exporter toutes les données, y compris les comptes et les identifiants (garder le fichier sécurisé)</string>
+    <string name="settings_storage_import_data">Importer des données</string>
+    <string name="settings_storage_import_data_description">Importer des données depuis un fichier (fusionne avec des données existantes, remplace les doublons)</string>
+    <string name="action_export">Exportation</string>
+    <string name="action_import">Importation</string>
+    <string name="save_error">Échec de l\'enregistrement des données</string>
+    <string name="import_completed">Importation terminée</string>
+    <string name="import_error">Impossible d\'importer les données</string>
+    <string name="import_confirmation_title">Confirmer l\'importation</string>
+    <string name="import_confirmation_message">Cela va importer des données à partir du fichier. Les enregistrements existants avec des identifiants correspondants seront remplacés. Voulez-vous continuer ?</string>
 </resources>

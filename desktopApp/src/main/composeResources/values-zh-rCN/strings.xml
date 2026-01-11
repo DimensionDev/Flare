@@ -286,4 +286,15 @@
     <string name="mute_user_description">您确定要静音此用户吗？</string>
     <string name="report_user_title">报告用户</string>
     <string name="report_user_description">您确定要报告此用户吗？</string>
+    <string name="settings_storage_export_data">导出数据</string>
+    <string name="settings_storage_export_data_description">导出所有数据，包括账户和凭据(保持文件安全)</string>
+    <string name="settings_storage_import_data">导入数据</string>
+    <string name="settings_storage_import_data_description">从文件导入数据(与现有数据合并，替换重复)</string>
+    <string name="action_export">导出</string>
+    <string name="action_import">导入</string>
+    <string name="save_error">保存数据失败</string>
+    <string name="import_completed">导入完成</string>
+    <string name="import_error">导入数据失败</string>
+    <string name="import_confirmation_title">确认导入</string>
+    <string name="import_confirmation_message">这将从文件中导入数据。将替换匹配ID的现有记录。您确定要继续吗？</string>
 </resources>

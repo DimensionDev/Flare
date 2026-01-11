@@ -286,4 +286,15 @@
     <string name="mute_user_description">Er du sikker på, at du vil gøre denne bruger tavs?</string>
     <string name="report_user_title">Anmeld bruger</string>
     <string name="report_user_description">Er du sikker på, at du vil rapportere denne bruger?</string>
+    <string name="settings_storage_export_data">Eksporter Data</string>
+    <string name="settings_storage_export_data_description">Eksporter alle data, herunder konti og legitimationsoplysninger (hold filen sikker)</string>
+    <string name="settings_storage_import_data">Importér Data</string>
+    <string name="settings_storage_import_data_description">Importer data fra fil (fletter med eksisterende data, erstatter dubletter)</string>
+    <string name="action_export">Eksporter</string>
+    <string name="action_import">Importér</string>
+    <string name="save_error">Kunne ikke gemme data</string>
+    <string name="import_completed">Import fuldført</string>
+    <string name="import_error">Import af data mislykkedes</string>
+    <string name="import_confirmation_title">Bekræft Import</string>
+    <string name="import_confirmation_message">Dette vil importere data fra filen. Eksisterende poster med matchende ID\'er vil blive erstattet. Vil du fortsætte?</string>
 </resources>

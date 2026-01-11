@@ -317,4 +317,14 @@
     <string name="mute_user_description">Ви дійсно бажаєте вимкнути цього користувача?</string>
     <string name="report_user_title">Повідомити про порушення Правил користувачем</string>
     <string name="report_user_description">Ви впевнені, що хочете повідомити про цього користувача?</string>
+    <string name="settings_storage_export_data">Експорт даних</string>
+    <string name="settings_storage_export_data_description">Експортувати всі дані, включаючи облікові записи і облікові дані (зберігати захищені файли)</string>
+    <string name="settings_storage_import_data">Імпорт даних</string>
+    <string name="settings_storage_import_data_description">Імпортувати дані з файлу (злиття з існуючими даними, замінити дубліката)</string>
+    <string name="save_completed">Зберегти завершене</string>
+    <string name="save_error">Не вдалося зберегти дані</string>
+    <string name="import_completed">Імпорт завершено</string>
+    <string name="import_error">Не вдалося імпортувати дані</string>
+    <string name="import_confirmation_title">Підтвердити імпортування</string>
+    <string name="import_confirmation_message">Буде імпортовано дані з файлу. Існуючі записи з відповідних ID будуть замінені. Продовжити?</string>
 </resources>

@@ -318,6 +318,16 @@
     <string name="mute_user_description">Czy na pewno chcesz wyciszyć tego użytkownika?</string>
     <string name="report_user_title">Zgłoś użytkownika</string>
     <string name="report_user_description">Czy na pewno chcesz zgłosić tego użytkownika?</string>
+    <string name="settings_storage_export_data">Eksportuj dane</string>
+    <string name="settings_storage_export_data_description">Eksportuj wszystkie dane, w tym konta i dane logowania (przechowuj plik bezpieczny)</string>
+    <string name="settings_storage_import_data">Importuj dane</string>
+    <string name="settings_storage_import_data_description">Importuj dane z pliku (scala z istniejącymi danymi, zastępuje duplikaty)</string>
+    <string name="save_completed">Zapisywanie zakończone</string>
+    <string name="save_error">Nie udało się zapisać danych</string>
+    <string name="import_completed">Import zakończony</string>
+    <string name="import_error">Nie udało się zaimportować danych</string>
+    <string name="import_confirmation_title">Potwierdź import</string>
+    <string name="import_confirmation_message">Spowoduje to zaimportowanie danych z pliku. Istniejące rekordy z pasującymi identyfikatorami zostaną zastąpione. Czy chcesz kontynuować?</string>
     <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
                 <li>Poprawki błędów i ulepszenia wydajności.</li>

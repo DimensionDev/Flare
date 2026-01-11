@@ -286,4 +286,15 @@
     <string name="mute_user_description">Är du säker på att du vill tysta den här användaren?</string>
     <string name="report_user_title">Rapportera användare</string>
     <string name="report_user_description">Är du säker på att du vill rapportera den här användaren?</string>
+    <string name="settings_storage_export_data">Exportera data</string>
+    <string name="settings_storage_export_data_description">Exportera alla data inklusive konton och uppgifter (håll filen säker)</string>
+    <string name="settings_storage_import_data">Importera data</string>
+    <string name="settings_storage_import_data_description">Importera data från fil (sammanfogningar med befintliga data, ersätter dubbletter)</string>
+    <string name="action_export">Exportera</string>
+    <string name="action_import">Importera</string>
+    <string name="save_error">Det gick inte att spara data</string>
+    <string name="import_completed">Import slutförd</string>
+    <string name="import_error">Det gick inte att importera data</string>
+    <string name="import_confirmation_title">Bekräfta import</string>
+    <string name="import_confirmation_message">Detta kommer att importera data från filen. Befintliga poster med matchande ID kommer att ersättas. Vill du fortsätta?</string>
 </resources>

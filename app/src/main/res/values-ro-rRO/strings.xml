@@ -318,6 +318,16 @@
     <string name="mute_user_description">Sunteţi sigur că doriţi să dezactivaţi acest utilizator?</string>
     <string name="report_user_title">Raportează utilizatorul</string>
     <string name="report_user_description">Ești sigur că vrei să raportezi acest utilizator?</string>
+    <string name="settings_storage_export_data">Exportă Datele</string>
+    <string name="settings_storage_export_data_description">Exportă toate datele, inclusiv conturile și acreditările (păstrează fișierul securizat)</string>
+    <string name="settings_storage_import_data">Importă date</string>
+    <string name="settings_storage_import_data_description">Importă date din fișier (îmbină cu date existente, înlocuiește duplicatele)</string>
+    <string name="save_completed">Salvare completă</string>
+    <string name="save_error">Salvarea datelor a eșuat</string>
+    <string name="import_completed">Importare completă</string>
+    <string name="import_error">Importarea datelor a eșuat</string>
+    <string name="import_confirmation_title">Confirmare import</string>
+    <string name="import_confirmation_message">Acest lucru va importa date din fișier. Înregistrările existente cu ID-uri de potrivire vor fi înlocuite. Doriți să continuați?</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
                 <li>Remedieri ale erorilor şi îmbunătăţiri de performanţă.</li>

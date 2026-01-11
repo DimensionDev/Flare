@@ -286,4 +286,15 @@
     <string name="mute_user_description">Opravdu chcete ztlumit tohoto uživatele?</string>
     <string name="report_user_title">Nahlásit uživatele</string>
     <string name="report_user_description">Opravdu chcete nahlásit tohoto uživatele?</string>
+    <string name="settings_storage_export_data">Exportovat data</string>
+    <string name="settings_storage_export_data_description">Exportovat všechna data včetně účtů a přihlašovacích údajů (zabezpečit soubor)</string>
+    <string name="settings_storage_import_data">Importovat data</string>
+    <string name="settings_storage_import_data_description">Import dat ze souboru (sloučení s existujícími daty, nahrazuje duplicitní data)</string>
+    <string name="action_export">Exportovat</string>
+    <string name="action_import">Importovat</string>
+    <string name="save_error">Uložení dat se nezdařilo</string>
+    <string name="import_completed">Import dokončen</string>
+    <string name="import_error">Import dat se nezdařil</string>
+    <string name="import_confirmation_title">Potvrdit import</string>
+    <string name="import_confirmation_message">Toto importuje data ze souboru. Existující záznamy s odpovídajícími ID budou nahrazeny. Chcete pokračovat?</string>
 </resources>

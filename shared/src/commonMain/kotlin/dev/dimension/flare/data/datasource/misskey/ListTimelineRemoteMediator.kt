@@ -55,9 +55,7 @@ internal class ListTimelineRemoteMediator(
                             ),
                         )
                 }
-            } ?: return Result(
-                endOfPaginationReached = true,
-            )
+            }
 
         return Result(
             endOfPaginationReached = response.isEmpty(),

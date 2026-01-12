@@ -45,7 +45,7 @@ internal data class VVOResponse<T>(
 )
 
 @OptIn(ExperimentalSerializationApi::class)
-private class VVOResponseSerializer<T>(
+internal class VVOResponseSerializer<T>(
     private val dataSer: KSerializer<T>,
 ) : KSerializer<VVOResponse<T>> {
     override val descriptor: SerialDescriptor =

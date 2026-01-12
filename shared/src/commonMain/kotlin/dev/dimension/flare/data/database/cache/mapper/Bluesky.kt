@@ -218,9 +218,8 @@ internal fun List<ListNotificationsNotification>.toDb(
                             when (reason) {
                                 ListNotificationsNotificationReason.Repost -> it.decodeAs<Repost>().subject
                                 ListNotificationsNotificationReason.Like -> it.decodeAs<Like>().subject
-                                else -> null
                             }
-                        }?.uri
+                        }.uri
                         .let {
                             references[it]
                         }
@@ -233,7 +232,6 @@ internal fun List<ListNotificationsNotification>.toDb(
                     when (reason) {
                         ListNotificationsNotificationReason.Repost -> "_repost"
                         ListNotificationsNotificationReason.Like -> "_like"
-                        else -> ""
                     }
                 val data =
                     DbStatusWithUser(

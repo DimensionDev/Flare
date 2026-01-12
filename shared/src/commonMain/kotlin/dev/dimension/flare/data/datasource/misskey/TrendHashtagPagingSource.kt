@@ -13,8 +13,7 @@ internal class TrendHashtagPagingSource(
     override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiHashtag> {
         service
             .hashtagsTrend()
-
-            ?.map {
+            .map {
                 UiHashtag(
                     hashtag = it.tag,
                     description = null,
@@ -22,7 +21,7 @@ internal class TrendHashtagPagingSource(
                 )
             }.let {
                 return LoadResult.Page(
-                    data = it ?: emptyList(),
+                    data = it,
                     prevKey = null,
                     nextKey = null,
                 )

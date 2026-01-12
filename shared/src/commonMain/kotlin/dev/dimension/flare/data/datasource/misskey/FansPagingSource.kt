@@ -34,7 +34,7 @@ internal class FansPagingSource(
                     it.follower?.render(accountKey = accountKey)
                 },
             prevKey = null,
-            nextKey = response?.lastOrNull()?.id,
+            nextKey = response.lastOrNull()?.id,
         )
     }
 }

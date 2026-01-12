@@ -43,9 +43,7 @@ internal class NotificationRemoteMediator(
                         ),
                     )
                 }
-            } ?: return Result(
-                endOfPaginationReached = true,
-            )
+            }
 
         return Result(
             endOfPaginationReached = response.isEmpty(),

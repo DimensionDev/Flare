@@ -209,9 +209,7 @@ internal class MisskeyDataSource(
                 val user =
                     service
                         .usersShow(UsersShowRequest(username = name, host = host))
-
-                        ?.toDbUser(accountKey.host)
-                        ?: throw Exception("User not found")
+                        .toDbUser(accountKey.host)
                 database.userDao().insert(user)
             },
             cacheSource = {
@@ -231,9 +229,7 @@ internal class MisskeyDataSource(
                 val user =
                     service
                         .usersShow(UsersShowRequest(userId = id))
-
-                        ?.toDbUser(accountKey.host)
-                        ?: throw Exception("User not found")
+                        .toDbUser(accountKey.host)
                 database.userDao().insert(user)
             },
             cacheSource = {
@@ -315,8 +311,7 @@ internal class MisskeyDataSource(
                 val emojis =
                     service
                         .emojis()
-
-                        ?.emojis
+                        .emojis
                         .orEmpty()
                         .toImmutableList()
                 database.emojiDao().insert(
@@ -921,7 +916,7 @@ internal class MisskeyDataSource(
                 )
             }.fold(
                 onSuccess = {
-                    emit(it?.isFavorited == true)
+                    emit(it.isFavorited == true)
                 },
                 onFailure = {
                     emit(false)
@@ -1053,7 +1048,7 @@ internal class MisskeyDataSource(
                     ),
                 )
         }.onSuccess { response ->
-            if (response?.id != null) {
+            if (response.id != null) {
                 MemoryPagingSource.updateWith<UiList>(
                     key = listKey,
                 ) {
@@ -1122,7 +1117,7 @@ internal class MisskeyDataSource(
                         UsersListsShowRequest(
                             listId = listId,
                         ),
-                    )?.render() ?: throw Exception("List not found")
+                    ).render()
             },
         )
 
@@ -1207,8 +1202,8 @@ internal class MisskeyDataSource(
                         UsersShowRequest(
                             userId = userKey.id,
                         ),
-                    )?.toDbUser(accountKey.host)
-                    ?.render(accountKey)
+                    ).toDbUser(accountKey.host)
+                    .render(accountKey)
             MemoryPagingSource.updateWith(
                 key = listMemberKey(listId),
             ) {
@@ -1224,7 +1219,7 @@ internal class MisskeyDataSource(
                             listId = listId,
                         ),
                     )
-            if (list?.id != null) {
+            if (list.id != null) {
                 MemCacheable.updateWith<ImmutableList<UiList>>(
                     key = userListsKey(userKey),
                 ) {

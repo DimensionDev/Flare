@@ -35,7 +35,7 @@ internal class FollowingPagingSource(
                     it.followee?.render(accountKey = accountKey)
                 },
             prevKey = null,
-            nextKey = response?.lastOrNull()?.id,
+            nextKey = response.lastOrNull()?.id,
         )
     }
 }

@@ -23,7 +23,7 @@ internal class SearchUserPagingSource(
                     limit = params.loadSize,
                     offset = params.key ?: 0,
                 ),
-            )?.let {
+            ).let {
                 return LoadResult.Page(
                     data = it.map { it.render(accountKey) },
                     prevKey = null,

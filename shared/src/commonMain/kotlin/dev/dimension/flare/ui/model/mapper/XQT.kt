@@ -85,7 +85,7 @@ internal fun TopLevel.renderNotifications(
                 val users =
                     data?.template?.aggregateUserActionsV1?.fromUsers?.mapNotNull { ref ->
                         globalObjects
-                            ?.users
+                            .users
                             ?.get(ref.user?.id)
                             ?.let { userLegacy ->
                                 User(

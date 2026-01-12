@@ -55,7 +55,7 @@ internal class SearchStatusRemoteMediator(
                         ),
                     )
                 }
-            } ?: emptyList()
+            }
 
         return Result(
             endOfPaginationReached = response.isEmpty(),

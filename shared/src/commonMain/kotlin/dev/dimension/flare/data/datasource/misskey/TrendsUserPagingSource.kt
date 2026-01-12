@@ -17,12 +17,11 @@ internal class TrendsUserPagingSource(
     override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiUserV2> {
         service
             .pinnedUsers(PinnedUsersRequest(limit = params.loadSize))
-
-            ?.map {
+            .map {
                 it.render(accountKey)
             }.let {
                 return LoadResult.Page(
-                    data = it ?: emptyList(),
+                    data = it,
                     prevKey = null,
                     nextKey = null,
                 )

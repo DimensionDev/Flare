@@ -50,9 +50,7 @@ internal class FavouriteTimelineRemoteMediator(
                         ),
                     )
                 }
-            } ?: return Result(
-                endOfPaginationReached = true,
-            )
+            }
 
         val notes = response.map { it.note }
         val data =

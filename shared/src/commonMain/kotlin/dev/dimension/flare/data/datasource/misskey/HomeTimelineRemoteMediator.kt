@@ -46,9 +46,7 @@ internal class HomeTimelineRemoteMediator(
                         ),
                     )
                 }
-            } ?: return Result(
-                endOfPaginationReached = true,
-            )
+            }
 
         return Result(
             endOfPaginationReached = response.isEmpty(),

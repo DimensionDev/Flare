@@ -43,9 +43,7 @@ internal class MentionTimelineRemoteMediator(
                         ),
                     )
                 }
-            } ?: return Result(
-                endOfPaginationReached = true,
-            )
+            }
 
         return Result(
             endOfPaginationReached = response.isEmpty(),

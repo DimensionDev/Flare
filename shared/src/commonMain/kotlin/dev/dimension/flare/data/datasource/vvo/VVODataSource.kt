@@ -229,7 +229,7 @@ internal class VVODataSource(
                     ?.user
             requireNotNull(user) { "user not found" }
             UiRelation(
-                following = user.following ?: false,
+                following = user.following,
                 isFans = user.followMe ?: false,
             )
         }.toUi()

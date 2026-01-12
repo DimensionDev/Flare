@@ -46,7 +46,7 @@ internal class BasicKtorWebSocket(
         socketJob =
             scope.launch {
                 try {
-                    val startTime = Clock.System.now().toEpochMilliseconds() // 或者 System.currentTimeMillis()
+                    val startTime = Clock.System.now().toEpochMilliseconds()
 
                     httpClient(url).webSocket(urlString = url.url) {
                         session = this

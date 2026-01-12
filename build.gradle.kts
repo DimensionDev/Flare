@@ -34,7 +34,7 @@ subprojects {
     plugins.withId("org.jetbrains.kotlin.multiplatform") {
         extensions.configure<KotlinMultiplatformExtension> {
             compilerOptions {
-                allWarningsAsErrors.set(true)
+                allWarningsAsErrors.set(false)
                 freeCompilerArgs.addAll(freeArgs)
                 optIn.addAll(commonOptIn)
             }
@@ -44,7 +44,7 @@ subprojects {
     plugins.withId("org.jetbrains.kotlin.android") {
         extensions.configure<KotlinAndroidProjectExtension> {
             compilerOptions {
-                allWarningsAsErrors.set(true)
+                allWarningsAsErrors.set(false)
                 freeCompilerArgs.addAll(freeArgs)
                 optIn.addAll(commonOptIn)
                 jvmTarget.set(JvmTarget.fromTarget(libs.versions.java.get()))

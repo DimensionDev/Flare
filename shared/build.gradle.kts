@@ -128,6 +128,10 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
+ktorfit {
+    compilerPluginVersion.set("2.3.3")
+}
+
 ktlint {
     version.set(libs.versions.ktlint)
     filter {

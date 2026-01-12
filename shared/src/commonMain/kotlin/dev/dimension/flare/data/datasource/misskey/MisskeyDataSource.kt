@@ -1048,19 +1048,17 @@ internal class MisskeyDataSource(
                     ),
                 )
         }.onSuccess { response ->
-            if (response.id != null) {
-                MemoryPagingSource.updateWith<UiList>(
-                    key = listKey,
-                ) {
-                    it
-                        .plus(
-                            UiList(
-                                id = response.id,
-                                title = metaData.title,
-                                platformType = PlatformType.Mastodon,
-                            ),
-                        ).toImmutableList()
-                }
+            MemoryPagingSource.updateWith<UiList>(
+                key = listKey,
+            ) {
+                it
+                    .plus(
+                        UiList(
+                            id = response.id,
+                            title = metaData.title,
+                            platformType = PlatformType.Mastodon,
+                        ),
+                    ).toImmutableList()
             }
         }
     }
@@ -1219,14 +1217,12 @@ internal class MisskeyDataSource(
                             listId = listId,
                         ),
                     )
-            if (list.id != null) {
-                MemCacheable.updateWith<ImmutableList<UiList>>(
-                    key = userListsKey(userKey),
-                ) {
-                    it
-                        .plus(list.render())
-                        .toImmutableList()
-                }
+            MemCacheable.updateWith<ImmutableList<UiList>>(
+                key = userListsKey(userKey),
+            ) {
+                it
+                    .plus(list.render())
+                    .toImmutableList()
             }
         }
     }

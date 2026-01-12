@@ -21,7 +21,7 @@ internal class TrendHashtagPagingSource(
                 )
             }.let {
                 return LoadResult.Page(
-                    data = it ?: emptyList(),
+                    data = it,
                     prevKey = null,
                     nextKey = null,
                 )

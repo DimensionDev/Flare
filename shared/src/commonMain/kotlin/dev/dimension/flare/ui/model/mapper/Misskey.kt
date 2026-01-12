@@ -832,7 +832,7 @@ private fun parseName(
     if (name.isEmpty()) {
         return Element("body")
     }
-    return misskeyNameParser.parse(name).toHtml(accountKey, emojis, accountKey.host) as Element
+    return misskeyNameParser.parse(name).toHtml(accountKey, emojis, accountKey.host)
 }
 
 private fun moe.tlaster.mfm.parser.tree.Node.toHtml(

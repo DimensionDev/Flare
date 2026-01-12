@@ -219,7 +219,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                 ListNotificationsNotificationReason.Repost -> it.decodeAs<Repost>().subject
                                 ListNotificationsNotificationReason.Like -> it.decodeAs<Like>().subject
                             }
-                        }?.uri
+                        }.uri
                         .let {
                             references[it]
                         }

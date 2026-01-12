@@ -34,8 +34,6 @@ internal class SearchUserPagingSource(
                             (params.key ?: 0) + params.loadSize
                         },
                 )
-            } ?: run {
-            return LoadResult.Error(Exception("No data"))
-        }
+            }
     }
 }

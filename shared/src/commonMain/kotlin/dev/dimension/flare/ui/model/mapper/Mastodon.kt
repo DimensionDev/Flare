@@ -998,7 +998,7 @@ private fun parseName(status: Account): Element {
                 "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
             )
     }
-    return parseHtml(content) as Element
+    return parseHtml(content)
 }
 
 internal fun parseMastodonContent(

@@ -82,6 +82,8 @@ kotlin {
                 implementation(projects.shared.api)
                 implementation(libs.ktor.client.resources)
                 implementation("dev.whyoleg.cryptography:cryptography-provider-optimal:0.5.0")
+                implementation("com.vitorpamplona.quartz:quartz:1.05.1")
+                implementation(libs.ktor.client.websockets)
             }
         }
         val commonTest by getting {

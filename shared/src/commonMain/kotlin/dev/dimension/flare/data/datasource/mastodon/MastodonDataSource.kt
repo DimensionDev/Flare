@@ -9,6 +9,7 @@ import androidx.paging.cachedIn
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
+import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
@@ -50,6 +51,7 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiHashtag
@@ -92,6 +94,7 @@ internal open class MastodonDataSource(
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
     private val accountRepository: AccountRepository by inject()
+    private val imageCompressor: ImageCompressor by inject() // [NEW] Inject ImageCompressor
     private val service by lazy {
         MastodonService(
             baseUrl = "https://$instance/",
@@ -365,9 +368,22 @@ internal open class MastodonDataSource(
         val mediaIds =
             data.medias
                 .mapIndexed { index, (file, altText) ->
+                    val bytes = file.readBytes()
+                    val isImage = file.type == FileType.Image
+
+                    val finalBytes =
+                        if (isImage) {
+                            imageCompressor.compress(
+                                imageBytes = bytes,
+                                maxSize = 16 * 1024 * 1024,
+                                maxDimensions = 2880 to 2880,
+                            )
+                        } else {
+                            bytes
+                        }
                     service
                         .upload(
-                            file.readBytes(),
+                            finalBytes,
                             name = file.name ?: "unknown",
                             description = altText,
                         ).also {

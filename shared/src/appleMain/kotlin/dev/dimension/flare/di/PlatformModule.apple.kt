@@ -4,6 +4,8 @@ import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.rss.NativeWebScraper
+import dev.dimension.flare.shared.image.ImageCompressor
+import dev.dimension.flare.shared.image.IosImageCompressor
 import dev.dimension.flare.ui.humanizer.AppleFormatter
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import org.koin.core.module.Module
@@ -18,4 +20,5 @@ internal actual val platformModule: Module =
         singleOf(::PlatformPathProducer)
         singleOf(::NativeWebScraper)
         singleOf(::AppleFormatter) bind PlatformFormatter::class
+        singleOf(::IosImageCompressor) bind ImageCompressor::class
     }

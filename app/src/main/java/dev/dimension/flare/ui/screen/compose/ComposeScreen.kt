@@ -1136,7 +1136,7 @@ private fun mediaPresenter(
         }
 
         fun removeMedia(uri: Uri) {
-            medias = medias.filterNot { it == uri }
+            medias = medias.filterNot { it.uri == uri }
             if (medias.isEmpty()) {
                 isMediaSensitive = false
             }

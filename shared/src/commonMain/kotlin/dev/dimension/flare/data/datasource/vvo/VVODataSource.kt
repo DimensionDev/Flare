@@ -8,6 +8,7 @@ import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
@@ -40,6 +41,7 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiHashtag
@@ -79,6 +81,7 @@ internal class VVODataSource(
     private val coroutineScope: CoroutineScope by inject()
     private val accountRepository: AccountRepository by inject()
     private val inAppNotification: InAppNotification by inject()
+    private val imageCompressor: ImageCompressor by inject() // [NEW] Inject ImageCompressor
     private val service by lazy {
         VVOService(
             chocolateFlow =
@@ -327,10 +330,22 @@ internal class VVODataSource(
         st: String,
     ): String {
         val bytes = fileItem.readBytes()
+        val isImage = fileItem.type == FileType.Image
+
+        val finalBytes =
+            if (isImage) {
+                imageCompressor.compress(
+                    imageBytes = bytes,
+                    maxSize = 5 * 1024 * 1024,
+                    maxDimensions = 4096 to 4096,
+                )
+            } else {
+                bytes
+            }
         val response =
             service.uploadPic(
                 st = st,
-                bytes = bytes,
+                bytes = finalBytes,
                 filename = fileItem.name ?: "file",
             )
         return response.picID ?: throw Exception("upload failed")

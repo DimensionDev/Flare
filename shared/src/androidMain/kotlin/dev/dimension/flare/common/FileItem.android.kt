@@ -13,4 +13,25 @@ public actual class FileItem(
         context.contentResolver.openInputStream(uri)?.use {
             it.readBytes()
         } ?: throw IllegalStateException("Cannot read file: $uri")
+
+    internal actual val type: FileType
+        get() {
+            val mimeType = context.contentResolver.getType(uri)
+            return when {
+                mimeType?.startsWith("image/") == true -> FileType.Image
+                mimeType?.startsWith("video/") == true -> FileType.Video
+                else -> {
+                    val extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(uri.toString())
+                    val type =
+                        android.webkit.MimeTypeMap
+                            .getSingleton()
+                            .getMimeTypeFromExtension(extension?.lowercase())
+                    when {
+                        type?.startsWith("image/") == true -> FileType.Image
+                        type?.startsWith("video/") == true -> FileType.Video
+                        else -> FileType.Other
+                    }
+                }
+            }
+        }
 }

@@ -69,7 +69,7 @@ struct CreateListScreen: View {
                                 listMetaData: .init(
                                     title: self.listName,
                                     description: self.listDescription.isEmpty ? nil : self.listDescription,
-                                    avatar: .init(name: avatar.itemIdentifier, data: imageByteArray)
+                                    avatar: .init(name: avatar.itemIdentifier, data: imageByteArray, type: .image)
                                 )
                             )
                         } else {

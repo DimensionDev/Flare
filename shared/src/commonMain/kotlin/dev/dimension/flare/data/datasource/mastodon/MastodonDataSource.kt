@@ -94,7 +94,7 @@ internal open class MastodonDataSource(
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
     private val accountRepository: AccountRepository by inject()
-    private val imageCompressor: ImageCompressor by inject() // [NEW] Inject ImageCompressor
+    private val imageCompressor: ImageCompressor by inject()
     private val service by lazy {
         MastodonService(
             baseUrl = "https://$instance/",

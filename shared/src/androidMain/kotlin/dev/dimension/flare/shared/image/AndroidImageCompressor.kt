@@ -34,9 +34,12 @@ public class AndroidImageCompressor : ImageCompressor {
 
             // Decode the actual bitmap with subsampling
             options.inJustDecodeBounds = false
-            var bitmap =
+            val decodedBitmap =
                 BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, options)
-                    ?: return@withContext ByteArray(0)
+                    ?: throw IllegalArgumentException(
+                        "Failed to decode image from provided byte array (size=${imageBytes.size} bytes)"
+                    )
+            var bitmap = decodedBitmap
 
             // --- Step 2: Exact Resizing ---
             // inSampleSize is not exact (powers of 2), so we resize to fit strict dimensions

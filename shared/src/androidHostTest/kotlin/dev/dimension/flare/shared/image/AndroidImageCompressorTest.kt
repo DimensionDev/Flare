@@ -36,7 +36,7 @@ class AndroidImageCompressorTest {
 
             val compressedBytes = compressor.compress(originalBytes, maxSize, maxDimensions)
 
-            // Since it's PNG to JPEG, sizes might value, but dimensions should be preserved if they fit
+            // Since it's PNG to JPEG, sizes might vary, but dimensions should be preserved if they fit
             val options = BitmapFactory.Options()
             BitmapFactory.decodeByteArray(compressedBytes, 0, compressedBytes.size, options)
 

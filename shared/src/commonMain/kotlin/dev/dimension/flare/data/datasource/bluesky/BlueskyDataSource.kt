@@ -163,7 +163,7 @@ internal class BlueskyDataSource(
     private val coroutineScope: CoroutineScope by inject()
     private val accountRepository: AccountRepository by inject()
     private val inAppNotification: InAppNotification by inject()
-    private val imageCompressor: ImageCompressor by inject() // [NEW] Inject ImageCompressor
+    private val imageCompressor: ImageCompressor by inject()
     private val credentialFlow by lazy {
         accountRepository.credentialFlow<UiAccount.Bluesky.Credential>(accountKey)
     }

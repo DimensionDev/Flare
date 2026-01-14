@@ -78,7 +78,8 @@ public class IosImageCompressor : ImageCompressor {
                 attempt++
             }
 
-            return@withContext resultData?.toByteArray() ?: ByteArray(0)
+            return@withContext resultData?.toByteArray()
+                ?: throw IllegalStateException("Image compression failed: unable to meet max size $maxSize bytes after all attempts")
         }
 
     private fun UIImage.resize(

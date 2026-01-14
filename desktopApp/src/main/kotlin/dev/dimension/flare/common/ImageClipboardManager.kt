@@ -1,5 +1,6 @@
 package dev.dimension.flare.common
 
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.NativeClipboard
@@ -16,6 +17,7 @@ import java.io.File
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalComposeUiApi::class)
 class ImageClipboardManager(
     private val onImagePasted: (File) -> Unit,
 ) : Clipboard {

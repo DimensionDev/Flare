@@ -4,6 +4,7 @@ import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
+import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.AppDatabaseExport
 import dev.dimension.flare.data.database.app.model.DbAccount
@@ -11,6 +12,7 @@ import dev.dimension.flare.data.database.app.model.DbApplication
 import dev.dimension.flare.data.database.app.model.DbKeywordFilter
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.app.model.DbSearchHistory
+import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.presenter.ExportState
@@ -29,7 +31,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ExportAppDatabasePresenterTest {
+class ExportAppDatabasePresenterTest : RobolectricTest() {
     private lateinit var db: AppDatabase
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -37,7 +39,7 @@ class ExportAppDatabasePresenterTest {
     fun setup() {
         val db =
             Room
-                .inMemoryDatabaseBuilder<AppDatabase>()
+                .memoryDatabaseBuilder<AppDatabase>()
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()

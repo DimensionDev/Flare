@@ -33,6 +33,10 @@ kotlin {
         compileSdk = libs.versions.compileSdk.get().toInt()
         namespace = "dev.dimension.flare.shared"
         minSdk = libs.versions.minSdk.get().toInt()
+        withDeviceTest {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+            execution = "HOST"
+        }
     }
     jvm()
     iosArm64()
@@ -104,6 +108,13 @@ kotlin {
                 implementation(libs.koin.android)
             }
         }
+        val androidDeviceTest by getting {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.robolectric)
+                implementation(libs.kotlinx.coroutines.test)
+            }
+        }
         val jvmMain by getting {
             dependencies {
                 implementation(libs.commons.lang3)
@@ -113,12 +124,6 @@ kotlin {
         val appleMain by getting {
             dependencies {
                 implementation(libs.ktor.client.darwin)
-            }
-        }
-        val nativeMain by getting {
-            dependencies {
-                implementation(libs.stately.isolate)
-                implementation(libs.stately.iso.collections)
             }
         }
     }

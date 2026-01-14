@@ -9,6 +9,7 @@ import androidx.paging.cachedIn
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
+import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
@@ -57,6 +58,7 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiHashtag
@@ -100,6 +102,7 @@ internal class MisskeyDataSource(
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
     private val accountRepository: AccountRepository by inject()
+    private val imageCompressor: ImageCompressor by inject()
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
             baseUrl = "https://$host/api/",
@@ -356,9 +359,22 @@ internal class MisskeyDataSource(
         val mediaIds =
             data.medias
                 .mapIndexed { index, (item, altText) ->
+                    val bytes = item.readBytes()
+                    val isImage = item.type == FileType.Image
+
+                    val finalBytes =
+                        if (isImage) {
+                            imageCompressor.compress(
+                                imageBytes = bytes,
+                                maxSize = 200L * 1024 * 1024,
+                                maxDimensions = 8192 to 8192,
+                            )
+                        } else {
+                            bytes
+                        }
                     service
                         .upload(
-                            item.readBytes(),
+                            finalBytes,
                             name = item.name ?: "unknown",
                             sensitive = data.sensitive,
                             comment = altText,

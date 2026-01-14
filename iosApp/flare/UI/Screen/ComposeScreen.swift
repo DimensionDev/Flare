@@ -467,7 +467,7 @@ struct ComposeScreen: View {
     
     private func getMedia() -> [ComposeData.Media] {
         return viewModel.mediaViewModel.items.map { item in
-                .init(file: .init(name: item.item.itemIdentifier, data: KotlinByteArray.from(data: item.data!)), altText: item.altText.isEmpty ? nil : item.altText)
+                .init(file: .init(name: item.item.itemIdentifier, data: KotlinByteArray.from(data: item.data!), type: item.type), altText: item.altText.isEmpty ? nil : item.altText)
         }
     }
     private func getReferenceStatus() -> ComposeData.ReferenceStatus? {
@@ -566,10 +566,20 @@ class MediaItem: Equatable, Identifiable {
     var data: Data?
     var altText: String = ""
     let id: String
+    var type: FileType = .other
     
     init(item: PhotosPickerItem) {
         self.item = item
         self.id = item.itemIdentifier ?? UUID().uuidString
+        
+        if let contentType = item.supportedContentTypes.first {
+            if contentType.conforms(to: .image) {
+                self.type = .image
+            } else if contentType.conforms(to: .movie) {
+                self.type = .video
+            }
+        }
+        
         item.loadTransferable(type: Data.self) { result in
             do {
                 if let data = try result.get() {

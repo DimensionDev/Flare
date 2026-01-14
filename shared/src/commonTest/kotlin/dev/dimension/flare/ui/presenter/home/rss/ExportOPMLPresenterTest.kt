@@ -4,8 +4,10 @@ import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
+import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbRssSources
+import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.takeSuccess
@@ -25,14 +27,14 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ExportOPMLPresenterTest {
+class ExportOPMLPresenterTest : RobolectricTest() {
     private lateinit var db: AppDatabase
 
     @BeforeTest
     fun setup() {
         val db =
             Room
-                .inMemoryDatabaseBuilder<AppDatabase>()
+                .memoryDatabaseBuilder<AppDatabase>()
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()

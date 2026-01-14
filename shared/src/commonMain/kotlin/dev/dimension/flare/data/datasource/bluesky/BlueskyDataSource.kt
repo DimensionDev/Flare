@@ -65,6 +65,7 @@ import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.encodeJson
@@ -104,6 +105,7 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
@@ -161,6 +163,7 @@ internal class BlueskyDataSource(
     private val coroutineScope: CoroutineScope by inject()
     private val accountRepository: AccountRepository by inject()
     private val inAppNotification: InAppNotification by inject()
+    private val imageCompressor: ImageCompressor by inject()
     private val credentialFlow by lazy {
         accountRepository.credentialFlow<UiAccount.Bluesky.Credential>(accountKey)
     }
@@ -396,8 +399,21 @@ internal class BlueskyDataSource(
         val mediaBlob =
             data.medias
                 .mapIndexedNotNull { index, (item, altText) ->
+                    val bytes = item.readBytes()
+                    val isImage = item.type == FileType.Image
+
+                    val finalBytes =
+                        if (isImage) {
+                            imageCompressor.compress(
+                                imageBytes = bytes,
+                                maxSize = 1 * 1024 * 1024,
+                                maxDimensions = 2000 to 2000,
+                            )
+                        } else {
+                            bytes
+                        }
                     service
-                        .uploadBlob(item.readBytes())
+                        .uploadBlob(finalBytes)
                         .also {
                             progress(ComposeProgress(index + 1, maxProgress))
                         }.maybeResponse()

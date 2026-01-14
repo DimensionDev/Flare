@@ -2,9 +2,11 @@ package dev.dimension.flare.data.datasource.rss
 
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.network.rss.model.Feed
+import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.ui.model.mapper.parseRssDateToInstant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,14 +17,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class RssTimelineRemoteMediatorTest {
+class RssTimelineRemoteMediatorTest : RobolectricTest() {
     private lateinit var cacheDb: CacheDatabase
 
     @BeforeTest
     fun setup() {
         cacheDb =
             Room
-                .inMemoryDatabaseBuilder<CacheDatabase>()
+                .memoryDatabaseBuilder<CacheDatabase>()
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()

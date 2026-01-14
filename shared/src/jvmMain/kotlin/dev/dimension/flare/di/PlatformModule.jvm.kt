@@ -3,6 +3,8 @@ package dev.dimension.flare.di
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.shared.image.ImageCompressor
+import dev.dimension.flare.shared.image.JvmImageCompressor
 import dev.dimension.flare.ui.humanizer.JVMFormatter
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import org.koin.core.module.Module
@@ -16,4 +18,5 @@ internal actual val platformModule: Module =
         singleOf(::DriverFactory)
         singleOf(::PlatformPathProducer)
         singleOf(::JVMFormatter) bind PlatformFormatter::class
+        singleOf(::JvmImageCompressor) bind ImageCompressor::class
     }

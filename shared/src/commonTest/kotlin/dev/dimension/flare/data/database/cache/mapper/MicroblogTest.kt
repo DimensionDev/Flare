@@ -5,6 +5,7 @@ import androidx.paging.PagingSource
 import androidx.paging.testing.TestPager
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
@@ -12,6 +13,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
+import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -30,14 +32,14 @@ import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class MicroblogTest {
+class MicroblogTest : RobolectricTest() {
     private lateinit var db: CacheDatabase
 
     @BeforeTest
     fun setup() {
         val db =
             Room
-                .inMemoryDatabaseBuilder<CacheDatabase>()
+                .memoryDatabaseBuilder<CacheDatabase>()
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()

@@ -4,8 +4,10 @@ import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
+import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbRssSources
+import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,7 +27,7 @@ import kotlin.test.assertNull
 import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ImportOPMLPresenterTest {
+class ImportOPMLPresenterTest : RobolectricTest() {
     class TestFormatter : PlatformFormatter {
         override fun formatNumber(number: Long): String = number.toString()
 
@@ -40,7 +42,7 @@ class ImportOPMLPresenterTest {
     fun setup() {
         val db =
             Room
-                .inMemoryDatabaseBuilder<AppDatabase>()
+                .memoryDatabaseBuilder<AppDatabase>()
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()

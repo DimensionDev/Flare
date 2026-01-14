@@ -277,7 +277,6 @@ internal fun <T> FlareComposeUIViewController(
 ): UIViewController =
     ComposeUIViewController(
         configure = {
-            enableBackGesture = false
             opaque = false
         },
     ) {

@@ -4,7 +4,7 @@ collection = "1.5.0"
 compileSdk = "36"
 jna = "5.18.1"
 lifecycleViewmodelComposeVersion = "2.9.6"
-minSdk = "23"
+minSdk = "26"
 java = "21"
 agp = "8.13.2"
 kotlin = "2.3.0"
@@ -162,6 +162,7 @@ ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.r
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-curl = { group = "io.ktor", name = "ktor-client-curl", version.ref = "ktor" }
 ktor-client-mock = { group = "io.ktor", name = "ktor-client-mock", version.ref = "ktor" }
+ktor-client-websockets = { group = "io.ktor", name = "ktor-client-websockets", version.ref = "ktor" }
 
 twitter-parser = { group = "moe.tlaster", name = "twitter-parser", version.ref = "twitter-parser" }
 swiper = { group = "com.github.tlaster", name = "swiper", version = "0.7.1" }

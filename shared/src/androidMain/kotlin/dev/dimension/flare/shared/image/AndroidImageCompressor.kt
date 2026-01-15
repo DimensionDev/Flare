@@ -37,7 +37,7 @@ public class AndroidImageCompressor : ImageCompressor {
             val decodedBitmap =
                 BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, options)
                     ?: throw IllegalArgumentException(
-                        "Failed to decode image from provided byte array (size=${imageBytes.size} bytes)"
+                        "Failed to decode image from provided byte array (size=${imageBytes.size} bytes)",
                     )
             var bitmap = decodedBitmap
 

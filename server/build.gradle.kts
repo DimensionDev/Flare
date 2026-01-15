@@ -14,7 +14,7 @@ kotlin {
             binaries {
                 executable {
                     entryPoint = "dev.dimension.flare.server.main"
-                    runTask?.apply {
+                    runTaskProvider?.configure {
                         val argsProp = providers.gradleProperty("runArgs")
                         argumentProviders.add(CommandLineArgumentProvider {
                             argsProp.orNull?.split(" ") ?: emptyList()

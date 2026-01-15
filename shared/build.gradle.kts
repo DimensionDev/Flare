@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
+import org.jetbrains.compose.compose
 import java.util.Locale
 
 plugins {
@@ -61,7 +62,7 @@ kotlin {
         }
         val commonMain by getting {
             dependencies {
-                implementation(compose.runtime)
+                implementation(compose("org.jetbrains.compose.runtime:runtime"))
                 implementation(libs.bundles.kotlinx)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
@@ -85,7 +86,7 @@ kotlin {
                 implementation(libs.xmlUtil)
                 implementation(projects.shared.api)
                 implementation(libs.ktor.client.resources)
-                implementation("dev.whyoleg.cryptography:cryptography-provider-optimal:0.5.0")
+                implementation(libs.cryptography.provider.optimal)
             }
         }
         val commonTest by getting {
@@ -98,7 +99,7 @@ kotlin {
         }
         val androidJvmMain by getting {
             dependencies {
-                implementation(compose.foundation)
+                implementation(compose("org.jetbrains.compose.foundation:foundation"))
                 implementation(libs.ktor.client.okhttp)
             }
         }

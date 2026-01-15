@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.route
 
+import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -13,7 +14,7 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.serialization.Serializable
 
-internal sealed interface Route {
+internal sealed interface Route : NavKey {
     sealed interface FloatingRoute : Route
 
     sealed interface ScreenRoute : Route

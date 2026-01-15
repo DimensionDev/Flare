@@ -1,4 +1,5 @@
 
+import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -14,18 +15,21 @@ dependencies {
     implementation(projects.shared)
     implementation(projects.composeUi)
 
-    implementation(compose.runtime)
-    implementation(compose.foundation)
-    implementation(compose.ui)
-    implementation(compose.desktop.common)
-    implementation(compose.components.resources)
+    implementation(compose("org.jetbrains.compose.runtime:runtime"))
+    implementation(compose("org.jetbrains.compose.foundation:foundation"))
+    implementation(compose("org.jetbrains.compose.ui:ui"))
+    implementation(compose("org.jetbrains.compose.desktop:desktop"))
+    implementation(compose("org.jetbrains.compose.components:components-resources"))
     implementation(libs.precompose.molecule)
     implementation(libs.lifecycle.runtime.compose)
     implementation(compose.desktop.currentOs)
     implementation(libs.kotlinx.coroutines.swing)
     implementation(libs.fluent.ui)
     implementation(libs.composeIcons.fontAwesome)
+    implementation(libs.navigation3.desktop)
     implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.lifecycle.viewmodel.navigation3)
+    implementation(libs.adaptive.navigation3)
     implementation(libs.bundles.coil3)
     implementation(libs.bundles.kotlinx)
     implementation(libs.ksoup)
@@ -38,7 +42,7 @@ dependencies {
     implementation(libs.reorderable)
     implementation(libs.platformtools.darkmodedetector)
     implementation(libs.jna)
-    implementation("it.sauronsoftware:junique:1.0.4")
+    implementation(libs.junique)
 }
 
 compose.desktop {

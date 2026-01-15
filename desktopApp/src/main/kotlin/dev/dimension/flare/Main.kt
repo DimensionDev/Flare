@@ -1,9 +1,6 @@
 package dev.dimension.flare
 
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -15,8 +12,6 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.DeeplinkHandler
-import dev.dimension.flare.common.FlareWindowManager
-import dev.dimension.flare.common.NativeWindowBridge
 import dev.dimension.flare.common.NoopIPC
 import dev.dimension.flare.common.SandboxHelper
 import dev.dimension.flare.common.windows.WindowsIPC
@@ -25,9 +20,6 @@ import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.di.composeUiModule
 import dev.dimension.flare.di.desktopModule
 import dev.dimension.flare.ui.route.APPSCHEMA
-import dev.dimension.flare.ui.route.FloatingWindowState
-import dev.dimension.flare.ui.route.Route
-import dev.dimension.flare.ui.route.WindowRouter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.ProvideThemeSettings
 import io.github.kdroidfilter.platformtools.darkmodedetector.windows.setWindowsAdaptiveTitleBar
@@ -36,9 +28,7 @@ import it.sauronsoftware.junique.JUnique
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
-import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import java.awt.Desktop
 import java.io.File
@@ -72,7 +62,6 @@ fun main(args: Array<String>) {
             desktopModule + KoinHelper.modules() + composeUiModule +
                 module {
                     single { platformIPC }
-                    singleOf(::FlareWindowManager)
                 },
         )
     }
@@ -97,26 +86,6 @@ fun main(args: Array<String>) {
                 }.crossfade(true)
                 .build()
         }
-        val extraWindowRoutes = koinInject<FlareWindowManager>()
-        val nativeWindowBridge = koinInject<NativeWindowBridge>()
-
-        fun openWindow(
-            key: String,
-            route: Route.WindowRoute,
-        ) {
-            if (route is Route.RawImage) {
-                nativeWindowBridge.openImageImageViewer(route.rawImage)
-            } else if (route is Route.StatusMedia) {
-                nativeWindowBridge.openStatusImageViewer(route)
-            } else if (extraWindowRoutes.containsKey(key)) {
-                extraWindowRoutes[key]?.bringToFront?.invoke()
-            } else {
-                extraWindowRoutes.put(
-                    key,
-                    FloatingWindowState(route),
-                )
-            }
-        }
         ProvideThemeSettings {
             Window(
                 onCloseRequest = {
@@ -135,54 +104,8 @@ fun main(args: Array<String>) {
                     window.setWindowsAdaptiveTitleBar()
                 }
                 FlareTheme {
-                    FlareApp(
-                        onWindowRoute = {
-                            openWindow(
-                                it.toString(),
-                                it,
-                            )
-                        },
-                    )
+                    FlareApp()
                 }
-            }
-
-            extraWindowRoutes.forEach { (key, value) ->
-                val windowState =
-                    rememberWindowState(
-                        position = WindowPosition(Alignment.Center),
-                        size = DpSize(1200.dp, 800.dp),
-                    )
-                Window(
-                    title = stringResource(Res.string.app_name),
-                    icon = painterResource(Res.drawable.flare_logo),
-                    onCloseRequest = {
-                        extraWindowRoutes.remove(key)
-                    },
-                    state = windowState,
-                    onKeyEvent = {
-                        if (it.key == Key.Escape) {
-                            extraWindowRoutes.remove(key)
-                            true
-                        } else {
-                            false
-                        }
-                    },
-                    content = {
-                        LaunchedEffect(key) {
-                            value.bringToFront = {
-                                window.toFront()
-                            }
-                        }
-                        FlareTheme {
-                            WindowRouter(
-                                route = value.route,
-                                onBack = {
-                                    extraWindowRoutes.remove(key)
-                                },
-                            )
-                        }
-                    },
-                )
             }
         }
     }

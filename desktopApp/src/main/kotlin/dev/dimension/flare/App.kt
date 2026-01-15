@@ -29,6 +29,7 @@ import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -40,6 +41,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.UserPlus
+import dev.dimension.flare.common.NativeWindowBridge
 import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.AllNotificationTabItem
 import dev.dimension.flare.data.model.Bluesky
@@ -68,7 +70,7 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
-import dev.dimension.flare.ui.route.rememberStackManager
+import dev.dimension.flare.ui.route.TopLevelBackStack
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.background.Layer
 import io.github.composefluent.component.Badge
@@ -82,26 +84,35 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 
 @Composable
-internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
+internal fun WindowScope.FlareApp() {
     val state by producePresenter { presenter() }
     val uriHandler = LocalUriHandler.current
+    val nativeWindowBridge = koinInject<NativeWindowBridge>()
 
     state.tabs.onSuccess { tabs ->
-        val stackManager =
-            rememberStackManager(
-                startRoute = getRoute(tabs.primary.first()),
-                key = tabs.all.joinToString { it.key },
-                topLevelRoutes = tabs.all.map { getRoute(it) },
-            )
+        val topLevelBackStack =
+            retain(
+                "home_top_level_back_stack_${tabs.all.first().key}",
+            ) {
+                TopLevelBackStack(
+                    getRoute(tabs.all.first()),
+                    topLevelRoutes = tabs.all.map { getRoute(it) },
+                )
+            }
 
-        val currentRoute = stackManager.currentRoute
+        val currentRoute = topLevelBackStack.currentRoute
 
         fun navigate(route: Route) {
             when (route) {
-                is Route.WindowRoute -> {
-                    onWindowRoute.invoke(route)
+                is Route.RawImage if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS) -> {
+                    nativeWindowBridge.openImageImageViewer(route.rawImage)
+                }
+
+                is Route.StatusMedia if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS) -> {
+                    nativeWindowBridge.openStatusImageViewer(route)
                 }
 
                 is Route.UrlRoute -> {
@@ -109,13 +120,13 @@ internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
                 }
 
                 else -> {
-                    stackManager.push(route)
+                    topLevelBackStack.push(route)
                 }
             }
         }
 
         fun goBack() {
-            stackManager.pop()
+            topLevelBackStack.pop()
         }
 
         val deeplinkPresenter by producePresenter("deeplink_presenter") {
@@ -332,15 +343,16 @@ internal fun WindowScope.FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
                 ) {
                     Box {
                         Router(
-                            manager = stackManager,
-                            onWindowRoute = onWindowRoute,
+                            backStack = topLevelBackStack.stack,
+                            navigate = { route -> navigate(route) },
+                            onBack = { goBack() },
                         )
-                        if (stackManager.canGoBack) {
+                        if (topLevelBackStack.canGoBack) {
                             NavigationDefaults.BackButton(
                                 onClick = {
                                     goBack()
                                 },
-                                disabled = !stackManager.canGoBack,
+                                disabled = !topLevelBackStack.canGoBack,
                                 modifier = Modifier.align(Alignment.TopStart),
                             )
                         }

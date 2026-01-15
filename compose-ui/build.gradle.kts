@@ -39,12 +39,12 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(projects.shared)
-                implementation(compose.ui)
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.uiUtil)
+                implementation(compose("org.jetbrains.compose.ui:ui"))
+                implementation(compose("org.jetbrains.compose.runtime:runtime"))
+                implementation(compose("org.jetbrains.compose.foundation:foundation"))
+                implementation(compose("org.jetbrains.compose.ui:ui-util"))
                 implementation(compose("org.jetbrains.compose.ui:ui-graphics"))
-                implementation(compose.components.resources)
+                implementation(compose("org.jetbrains.compose.components:components-resources"))
                 implementation(libs.composeIcons.fontAwesome)
                 implementation(libs.coil3.compose)
                 implementation(libs.coil3.ktor3)
@@ -91,8 +91,8 @@ kotlin {
             dependencies {
                 api(projects.shared)
                 implementation(libs.cupertino)
-                api(compose.uiUtil)
-                implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.9.6")
+                api(compose("org.jetbrains.compose.ui:ui-util"))
+                implementation(libs.lifecycle.viewmodel.compose)
             }
         }
     }

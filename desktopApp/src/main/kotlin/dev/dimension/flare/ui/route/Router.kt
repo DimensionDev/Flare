@@ -1,11 +1,27 @@
 package dev.dimension.flare.ui.route
 
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowScope
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavEntryDecorator
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import dev.dimension.flare.common.OnDeepLink
 import dev.dimension.flare.data.model.Bluesky.FeedTabItem
 import dev.dimension.flare.data.model.IconType
@@ -16,14 +32,17 @@ import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.model.AccountType.Specific
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Quote
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Reply
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus.VVOComment
+import dev.dimension.flare.ui.route.FluentDialogSceneStrategy.Companion.dialog
 import dev.dimension.flare.ui.route.Route.EditRssSource
 import dev.dimension.flare.ui.route.Route.Profile
 import dev.dimension.flare.ui.route.Route.RssTimeline
 import dev.dimension.flare.ui.route.Route.Search
 import dev.dimension.flare.ui.route.Route.Timeline
+import dev.dimension.flare.ui.route.WindowSceneStrategy.Companion.window
 import dev.dimension.flare.ui.screen.compose.ComposeDialog
 import dev.dimension.flare.ui.screen.dm.DmConversationScreen
 import dev.dimension.flare.ui.screen.dm.DmListScreen
@@ -63,27 +82,23 @@ import dev.dimension.flare.ui.screen.status.action.BlueskyReportStatusDialog
 import dev.dimension.flare.ui.screen.status.action.DeleteStatusConfirmDialog
 import dev.dimension.flare.ui.screen.status.action.MastodonReportDialog
 import dev.dimension.flare.ui.screen.status.action.MisskeyReportDialog
+import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.Flyout
 import io.github.composefluent.component.Text
+import kotlinx.collections.immutable.ImmutableList
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 internal fun WindowScope.Router(
-    manager: StackManager,
-    onWindowRoute: (Route.WindowRoute) -> Unit,
+    backStack: ImmutableList<Route>,
+    navigate: (Route) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    fun navigate(route: Route) {
-        if (route is Route.WindowRoute) {
-            onWindowRoute(route)
-        } else {
-            manager.push(route)
-        }
-    }
+    val listDetailStrategy = rememberListDetailSceneStrategy<Route>()
 
-    fun onBack() {
-        manager.pop()
-    }
+    val isBigScreen = isBigScreen()
     OnDeepLink {
         val route = Route.parse(it)
         if (route != null) {
@@ -91,536 +106,646 @@ internal fun WindowScope.Router(
         }
         route != null
     }
-    AnimatedContent(
-        manager.currentScreenEntry,
+    NavDisplay(
         modifier = modifier,
-    ) { entry ->
-        entry.Content { route ->
-            RouteContent(
-                route = route,
-                onBack = ::onBack,
-                navigate = ::navigate,
-            )
-        }
-    }
-    manager.currentFloatingEntry?.let { entry ->
-        entry.Content { route ->
-            RouteContent(
-                route = route,
-                onBack = ::onBack,
-                navigate = ::navigate,
-            )
-        }
-    }
-}
-
-@Composable
-internal fun WindowScope.RouteContent(
-    route: Route,
-    onBack: () -> Unit,
-    navigate: (Route) -> Unit,
-) {
-    when (route) {
-        is Route.DeepLinkAccountPicker -> {
-            DeepLinkAccountPicker(
-                originalUrl = route.originalUrl,
-                data = route.data,
-                onNavigate = navigate,
-                onDismissRequest = onBack,
-            )
-        }
-        is Route.RssDetail -> Unit
-        is Route.AddReaction -> {
-            AddReactionSheet(
-                accountType = route.accountType,
-                statusKey = route.statusKey,
-                onBack = onBack,
-            )
-        }
-
-        is Route.BlueskyReport -> {
-            BlueskyReportStatusDialog(
-                accountType = route.accountType,
-                statusKey = route.statusKey,
-                onBack = onBack,
-            )
-        }
-
-        is Route.DeleteStatus -> {
-            DeleteStatusConfirmDialog(
-                accountType = route.accountType,
-                statusKey = route.statusKey,
-                onBack = onBack,
-            )
-        }
-
-        is Route.MastodonReport -> {
-            MastodonReportDialog(
-                accountType = route.accountType,
-                statusKey = route.statusKey,
-                onBack = onBack,
-                userKey = route.userKey,
-            )
-        }
-
-        is Route.MisskeyReport -> {
-            MisskeyReportDialog(
-                accountType = route.accountType,
-                statusKey = route.statusKey,
-                onBack = onBack,
-                userKey = route.userKey,
-            )
-        }
-
-        is Route.AltText -> {
-            Flyout(
-                visible = true,
-                onDismissRequest = {
-                    onBack()
+        sceneStrategy =
+            remember {
+                FluentDialogSceneStrategy<Route>()
+                    .then(WindowSceneStrategy())
+                    .then(listDetailStrategy)
+            },
+        entryDecorators =
+            listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator(),
+                remember {
+                    NavEntryDecorator {
+                        Box(
+                            modifier = Modifier.background(FluentTheme.colors.background.solid.base),
+                        ) {
+                            it.Content()
+                        }
+                    }
                 },
-            ) {
-                Text(
-                    text = route.text,
-                    modifier = Modifier.padding(16.dp),
-                )
-            }
-        }
-
-        Route.CreateRssSource -> {
-            EditRssSourceScreen(
-                onDismissRequest = onBack,
-                id = null,
-                onImport = {
-                    navigate(
-                        Route.ImportOPML(it),
+            ),
+        backStack = backStack,
+        onBack = { onBack() },
+        transitionSpec = {
+            if (isBigScreen) {
+                fadeIn(
+                    initialAlpha = 0.85f,
+                    animationSpec = tween(),
+                ) + scaleIn(initialScale = 0.85f, animationSpec = tween()) togetherWith
+                    fadeOut(
+                        targetAlpha = 0f,
+                        animationSpec = tween(),
+                    ) + scaleOut(targetScale = 1.15f, animationSpec = tween())
+            } else {
+                slideIntoContainer(SlideDirection.Start, animationSpec = tween()) togetherWith
+                    slideOutOfContainer(
+                        SlideDirection.Start,
+                        targetOffset = { it / 2 },
+                        animationSpec = tween(),
                     )
-                },
-            )
-        }
-
-        is Route.EditRssSource -> {
-            EditRssSourceScreen(
-                onDismissRequest = onBack,
-                id = route.id,
-                onImport = {
-                    navigate(
-                        Route.ImportOPML(it),
+            }
+        },
+        popTransitionSpec = {
+            if (isBigScreen) {
+                fadeIn(
+                    initialAlpha = 0f,
+                    animationSpec = tween(),
+                ) + scaleIn(initialScale = 1.15f, animationSpec = tween()) togetherWith
+                    fadeOut(
+                        targetAlpha = 0f,
+                        animationSpec = tween(),
+                    ) + scaleOut(targetScale = 0.85f, animationSpec = tween())
+            } else {
+                slideIntoContainer(
+                    SlideDirection.End,
+                    initialOffset = { it / 2 },
+                    animationSpec = tween(),
+                ) togetherWith
+                    slideOutOfContainer(SlideDirection.End, animationSpec = tween())
+            }
+        },
+        predictivePopTransitionSpec = {
+            if (isBigScreen) {
+                fadeIn(
+                    initialAlpha = 0f,
+                    animationSpec = tween(),
+                ) + scaleIn(initialScale = 0.85f, animationSpec = tween()) togetherWith
+                    fadeOut(
+                        targetAlpha = 0f,
+                        animationSpec = tween(),
+                    ) + scaleOut(targetScale = 1.15f, animationSpec = tween())
+            } else {
+                slideIntoContainer(SlideDirection.Start, animationSpec = tween()) togetherWith
+                    slideOutOfContainer(
+                        SlideDirection.Start,
+                        targetOffset = { it / 2 },
+                        animationSpec = tween(),
                     )
-                },
-            )
-        }
-
-        is Route.ImportOPML -> {
-            ImportOPMLScreen(
-                onDismissRequest = onBack,
-                filePath = route.filePath,
-            )
-        }
-
-        is Route.Compose.New ->
-            FluentDialog(
-                visible = true,
-            ) {
-                ComposeDialog(
-                    onBack = onBack,
-                    accountType = route.accountType,
-                )
             }
+        },
+        entryProvider =
+            entryProvider {
+                entry<Route.DeepLinkAccountPicker>(
+                    metadata = dialog(),
+                ) { args ->
+                    DeepLinkAccountPicker(
+                        originalUrl = args.originalUrl,
+                        data = args.data,
+                        onNavigate = navigate,
+                        onDismissRequest = onBack,
+                    )
+                }
+                entry<Route.RssDetail> { }
+                entry<Route.AddReaction>(
+                    metadata = dialog(),
+                ) { args ->
+                    AddReactionSheet(
+                        accountType = args.accountType,
+                        statusKey = args.statusKey,
+                        onBack = onBack,
+                    )
+                }
+                entry<Route.BlueskyReport>(
+                    metadata = dialog(),
+                ) { args ->
+                    BlueskyReportStatusDialog(
+                        accountType = args.accountType,
+                        statusKey = args.statusKey,
+                        onBack = onBack,
+                    )
+                }
 
-        is Route.Compose.Quote ->
-            FluentDialog(visible = true) {
-                ComposeDialog(
-                    onBack = onBack,
-                    status = Quote(route.statusKey),
-                    accountType = Specific(accountKey = route.accountKey),
-                )
-            }
+                entry<Route.DeleteStatus>(
+                    metadata = dialog(),
+                ) { args ->
+                    DeleteStatusConfirmDialog(
+                        accountType = args.accountType,
+                        statusKey = args.statusKey,
+                        onBack = onBack,
+                    )
+                }
 
-        is Route.Compose.Reply ->
-            FluentDialog(visible = true) {
-                ComposeDialog(
-                    onBack = onBack,
-                    status = Reply(route.statusKey),
-                    accountType = Specific(accountKey = route.accountKey),
-                )
-            }
+                entry<Route.MastodonReport>(
+                    metadata = dialog(),
+                ) { args ->
+                    MastodonReportDialog(
+                        accountType = args.accountType,
+                        statusKey = args.statusKey,
+                        onBack = onBack,
+                        userKey = args.userKey,
+                    )
+                }
 
-        is Route.Compose.VVOReplyComment ->
-            FluentDialog(visible = true) {
-                ComposeDialog(
-                    onBack = onBack,
-                    accountType = Specific(accountKey = route.accountKey),
-                    status = VVOComment(route.replyTo, route.rootId),
-                )
-            }
+                entry<Route.MisskeyReport>(
+                    metadata = dialog(),
+                ) { args ->
+                    MisskeyReportDialog(
+                        accountType = args.accountType,
+                        statusKey = args.statusKey,
+                        onBack = onBack,
+                        userKey = args.userKey,
+                    )
+                }
 
-        is Route.AllLists -> {
-            AllListScreen(
-                accountType = route.accountType,
-                onAddList = {
-                },
-                toList = {
-                    navigate(
-                        Timeline(
-                            ListTimelineTabItem(
-                                account = route.accountType,
-                                listId = it.id,
-                                metaData =
-                                    TabMetaData(
-                                        title = TitleType.Text(it.title),
-                                        icon = Material(Material.MaterialIcon.List),
+                entry<Route.AltText>(
+                    metadata = dialog(),
+                ) { args ->
+                    Flyout(
+                        visible = true,
+                        onDismissRequest = {
+                            onBack()
+                        },
+                    ) {
+                        Text(
+                            text = args.text,
+                            modifier = Modifier.padding(16.dp),
+                        )
+                    }
+                }
+
+                entry<Route.CreateRssSource>(
+                    metadata = dialog(),
+                ) { args ->
+                    EditRssSourceScreen(
+                        onDismissRequest = onBack,
+                        id = null,
+                        onImport = {
+                            navigate(
+                                Route.ImportOPML(it),
+                            )
+                        },
+                    )
+                }
+
+                entry<EditRssSource>(
+                    metadata = dialog(),
+                ) { args ->
+                    EditRssSourceScreen(
+                        onDismissRequest = onBack,
+                        id = args.id,
+                        onImport = {
+                            navigate(
+                                Route.ImportOPML(it),
+                            )
+                        },
+                    )
+                }
+
+                entry<Route.ImportOPML>(
+                    metadata = dialog(),
+                ) { args ->
+                    ImportOPMLScreen(
+                        onDismissRequest = onBack,
+                        filePath = args.filePath,
+                    )
+                }
+
+                entry<Route.Compose.New>(
+                    metadata = dialog(),
+                ) { args ->
+                    FluentDialog(
+                        visible = true,
+                    ) {
+                        ComposeDialog(
+                            onBack = onBack,
+                            accountType = args.accountType,
+                        )
+                    }
+                }
+
+                entry<Route.Compose.Quote>(
+                    metadata = dialog(),
+                ) { args ->
+                    FluentDialog(visible = true) {
+                        ComposeDialog(
+                            onBack = onBack,
+                            status = Quote(args.statusKey),
+                            accountType = Specific(accountKey = args.accountKey),
+                        )
+                    }
+                }
+
+                entry<Route.Compose.Reply>(
+                    metadata = dialog(),
+                ) { args ->
+                    FluentDialog(visible = true) {
+                        ComposeDialog(
+                            onBack = onBack,
+                            status = Reply(args.statusKey),
+                            accountType = Specific(accountKey = args.accountKey),
+                        )
+                    }
+                }
+
+                entry<Route.Compose.VVOReplyComment>(
+                    metadata = dialog(),
+                ) { args ->
+                    FluentDialog(visible = true) {
+                        ComposeDialog(
+                            onBack = onBack,
+                            accountType = Specific(accountKey = args.accountKey),
+                            status = VVOComment(args.replyTo, args.rootId),
+                        )
+                    }
+                }
+
+                entry<Route.AllLists> { args ->
+                    AllListScreen(
+                        accountType = args.accountType,
+                        onAddList = {
+                        },
+                        toList = {
+                            navigate(
+                                Timeline(
+                                    ListTimelineTabItem(
+                                        account = args.accountType,
+                                        listId = it.id,
+                                        metaData =
+                                            TabMetaData(
+                                                title = TitleType.Text(it.title),
+                                                icon = Material(Material.MaterialIcon.List),
+                                            ),
                                     ),
-                            ),
-                        ),
+                                ),
+                            )
+                        },
+                        editList = {
+                        },
+                        deleteList = {
+                        },
                     )
-                },
-                editList = {
-                },
-                deleteList = {
-                },
-            )
-        }
+                }
 
-        is Route.BlueskyFeeds -> {
-            FeedListScreen(
-                accountType = route.accountType,
-                toFeed = {
-                    navigate(
-                        Timeline(
-                            FeedTabItem(
-                                account = route.accountType,
-                                uri = it.id,
-                                metaData =
-                                    TabMetaData(
-                                        title = TitleType.Text(it.title),
-                                        icon = Material(Material.MaterialIcon.Feeds),
+                entry<Route.BlueskyFeeds> { args ->
+                    FeedListScreen(
+                        accountType = args.accountType,
+                        toFeed = {
+                            navigate(
+                                Timeline(
+                                    FeedTabItem(
+                                        account = args.accountType,
+                                        uri = it.id,
+                                        metaData =
+                                            TabMetaData(
+                                                title = TitleType.Text(it.title),
+                                                icon = Material(Material.MaterialIcon.Feeds),
+                                            ),
                                     ),
-                            ),
+                                ),
+                            )
+                        },
+                    )
+                }
+
+                entry<Route.Discover> { args ->
+                    DiscoverScreen(
+                        accountType = args.accountType,
+                        toUser = {
+                            navigate(
+                                Profile(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
+                        toSearch = {
+                            navigate(
+                                Search(
+                                    accountType = args.accountType,
+                                    keyword = it,
+                                ),
+                            )
+                        },
+                    )
+                }
+
+                entry<Search> { args ->
+                    SearchScreen(
+                        initialQuery = args.keyword,
+                        accountType = args.accountType,
+                        toUser = {
+                            navigate(
+                                Profile(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
+                    )
+                }
+
+                entry<Route.MeRoute> { args ->
+                    ProfileScreen(
+                        accountType = args.accountType,
+                        userKey = null,
+                    )
+                }
+
+                entry<Route.Notification> {
+                    NotificationScreen()
+                }
+
+                entry<Profile> { args ->
+                    ProfileScreen(
+                        accountType = args.accountType,
+                        userKey = args.userKey,
+                        onFollowListClick = {
+                            navigate(
+                                Route.Following(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
+                        onFansListClick = {
+                            navigate(
+                                Route.Fans(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
+                    )
+                }
+
+                entry<Route.ServiceSelect> {
+                    ServiceSelectScreen(
+                        onBack = onBack,
+                    )
+                }
+
+                entry<Route.Settings> {
+                    SettingsScreen(
+                        toLogin = {
+                            navigate(Route.ServiceSelect)
+                        },
+                        toLocalCache = {
+                            navigate(Route.LocalCache)
+                        },
+                        toAppLog = {
+                            navigate(Route.AppLogging)
+                        },
+                    )
+                }
+
+                entry<Route.AppLogging> {
+                    AppLoggingScreen()
+                }
+
+                entry<Timeline> { args ->
+                    TimelineScreen(
+                        args.tabItem,
+                    )
+                }
+
+                entry<Route.Home> { args ->
+                    HomeTimelineScreen(
+                        args.accountType,
+                        onAddTab = {
+                            navigate(
+                                Route.TabSetting,
+                            )
+                        },
+                    )
+                }
+
+                entry<Route.TabSetting> {
+                    TabSettingScreen(
+                        toAddRssSource = {
+                            navigate(
+                                Route.CreateRssSource,
+                            )
+                        },
+                    )
+                }
+
+                entry<Route.StatusDetail> { args ->
+                    StatusScreen(
+                        statusKey = args.statusKey,
+                        accountType = args.accountType,
+                    )
+                }
+
+                entry<Route.VVO.CommentDetail> { args ->
+                    VVOCommentScreen(
+                        commentKey = args.statusKey,
+                        accountType = args.accountType,
+                    )
+                }
+
+                entry<Route.VVO.StatusDetail> { args ->
+                    VVOStatusScreen(
+                        statusKey = args.statusKey,
+                        accountType = args.accountType,
+                    )
+                }
+
+                entry<Route.ProfileWithNameAndHost> { args ->
+                    ProfileWithUserNameAndHostDeeplinkRoute(
+                        userName = args.userName,
+                        host = args.host,
+                        accountType = args.accountType,
+                        onBack = onBack,
+                        onFollowListClick = {
+                            navigate(
+                                Route.Following(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
+                        onFansListClick = {
+                            navigate(
+                                Route.Fans(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
+                    )
+                }
+
+                entry<Route.RssList> { args ->
+                    RssListScreen(
+                        toItem = {
+                            navigate(
+                                RssTimeline(it),
+                            )
+                        },
+                        onEdit = {
+                            navigate(
+                                EditRssSource(
+                                    id = it,
+                                ),
+                            )
+                        },
+                        onAdd = {
+                            navigate(Route.CreateRssSource)
+                        },
+                    )
+                }
+
+                entry<RssTimeline> { args ->
+                    TimelineScreen(
+                        RssTimelineTabItem(
+                            args.data,
                         ),
                     )
-                },
-            )
-        }
+                }
 
-        is Route.Discover -> {
-            DiscoverScreen(
-                accountType = route.accountType,
-                toUser = {
-                    navigate(
-                        Profile(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
+                entry<Route.RawImage>(
+                    metadata = window(),
+                ) { args ->
+                    RawMediaScreen(url = args.rawImage)
+                }
+                entry<Route.StatusMedia>(
+                    metadata = window(),
+                ) { args ->
+                    StatusMediaScreen(
+                        accountType = args.accountType,
+                        statusKey = args.statusKey,
+                        index = args.index,
                     )
-                },
-                toSearch = {
-                    navigate(
-                        Search(
-                            accountType = route.accountType,
-                            keyword = it,
-                        ),
+                }
+
+                entry<Route.DmList> { args ->
+                    DmListScreen(
+                        accountType = args.accountType,
+                        onItemClicked = {
+                            navigate(
+                                Route.DmConversation(
+                                    accountType = args.accountType,
+                                    roomKey = it,
+                                ),
+                            )
+                        },
                     )
-                },
-            )
-        }
+                }
 
-        is Search -> {
-            SearchScreen(
-                initialQuery = route.keyword,
-                accountType = route.accountType,
-                toUser = {
-                    navigate(
-                        Profile(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
+                entry<Route.DmConversation> { args ->
+                    DmConversationScreen(
+                        accountType = args.accountType,
+                        roomKey = args.roomKey,
+                        onBack = onBack,
+                        toProfile = {
+                            navigate(
+                                Profile(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
                     )
-                },
-            )
-        }
+                }
 
-        is Route.MeRoute -> {
-            ProfileScreen(
-                accountType = route.accountType,
-                userKey = null,
-            )
-        }
-
-        is Route.Notification -> {
-            NotificationScreen()
-        }
-
-        is Profile -> {
-            ProfileScreen(
-                accountType = route.accountType,
-                userKey = route.userKey,
-                onFollowListClick = {
-                    navigate(
-                        Route.Following(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
+                entry<Route.DmUserConversation> { args ->
+                    UserDMConversationScreen(
+                        accountType = args.accountType,
+                        userKey = args.userKey,
+                        onBack = onBack,
+                        toProfile = {
+                            navigate(
+                                Profile(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
                     )
-                },
-                onFansListClick = {
-                    navigate(
-                        Route.Fans(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
-                    )
-                },
-            )
-        }
+                }
 
-        Route.ServiceSelect -> {
-            ServiceSelectScreen(
-                onBack = onBack,
-            )
-        }
-
-        Route.Settings -> {
-            SettingsScreen(
-                toLogin = {
-                    navigate(Route.ServiceSelect)
-                },
-                toLocalCache = {
-                    navigate(Route.LocalCache)
-                },
-                toAppLog = {
-                    navigate(Route.AppLogging)
-                },
-            )
-        }
-
-        Route.AppLogging -> {
-            AppLoggingScreen()
-        }
-
-        is Timeline -> {
-            TimelineScreen(
-                route.tabItem,
-            )
-        }
-
-        is Route.Home -> {
-            HomeTimelineScreen(
-                route.accountType,
-                onAddTab = {
-                    navigate(
-                        Route.TabSetting,
-                    )
-                },
-            )
-        }
-
-        Route.TabSetting -> {
-            TabSettingScreen(
-                toAddRssSource = {
-                    navigate(
-                        Route.CreateRssSource,
-                    )
-                },
-            )
-        }
-
-        is Route.StatusDetail -> {
-            StatusScreen(
-                statusKey = route.statusKey,
-                accountType = route.accountType,
-            )
-        }
-
-        is Route.VVO.CommentDetail -> {
-            VVOCommentScreen(
-                commentKey = route.statusKey,
-                accountType = route.accountType,
-            )
-        }
-
-        is Route.VVO.StatusDetail -> {
-            VVOStatusScreen(
-                statusKey = route.statusKey,
-                accountType = route.accountType,
-            )
-        }
-
-        is Route.ProfileWithNameAndHost -> {
-            ProfileWithUserNameAndHostDeeplinkRoute(
-                userName = route.userName,
-                host = route.host,
-                accountType = route.accountType,
-                onBack = onBack,
-                onFollowListClick = {
-                    navigate(
-                        Route.Following(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
-                    )
-                },
-                onFansListClick = {
-                    navigate(
-                        Route.Fans(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
-                    )
-                },
-            )
-        }
-
-        Route.RssList ->
-            RssListScreen(
-                toItem = {
-                    navigate(
-                        RssTimeline(it),
-                    )
-                },
-                onEdit = {
-                    navigate(
-                        EditRssSource(
-                            id = it,
-                        ),
-                    )
-                },
-                onAdd = {
-                    navigate(Route.CreateRssSource)
-                },
-            )
-
-        is Route.RssTimeline -> {
-            TimelineScreen(
-                RssTimelineTabItem(
-                    route.data,
-                ),
-            )
-        }
-
-        is Route.RawImage ->
-            RawMediaScreen(url = route.rawImage)
-        is Route.StatusMedia ->
-            StatusMediaScreen(
-                accountType = route.accountType,
-                statusKey = route.statusKey,
-                index = route.index,
-            )
-
-        is Route.DmList ->
-            DmListScreen(
-                accountType = route.accountType,
-                onItemClicked = {
-                    navigate(
-                        Route.DmConversation(
-                            accountType = route.accountType,
-                            roomKey = it,
-                        ),
-                    )
-                },
-            )
-
-        is Route.DmConversation ->
-            DmConversationScreen(
-                accountType = route.accountType,
-                roomKey = route.roomKey,
-                onBack = onBack,
-                toProfile = {
-                    navigate(
-                        Profile(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
-                    )
-                },
-            )
-
-        is Route.DmUserConversation -> {
-            UserDMConversationScreen(
-                accountType = route.accountType,
-                userKey = route.userKey,
-                onBack = onBack,
-                toProfile = {
-                    navigate(
-                        Profile(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
-                    )
-                },
-            )
-        }
-
-        is Route.MisskeyAntennas ->
-            AntennasListScreen(
-                accountType = route.accountType,
-                toTimeline = {
-                    navigate(
-                        Timeline(
-                            Misskey.AntennasTimelineTabItem(
-                                account = route.accountType,
-                                antennasId = it.id,
-                                metaData =
-                                    TabMetaData(
-                                        title = TitleType.Text(it.title),
-                                        icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+                entry<Route.MisskeyAntennas> { args ->
+                    AntennasListScreen(
+                        accountType = args.accountType,
+                        toTimeline = {
+                            navigate(
+                                Timeline(
+                                    Misskey.AntennasTimelineTabItem(
+                                        account = args.accountType,
+                                        antennasId = it.id,
+                                        metaData =
+                                            TabMetaData(
+                                                title = TitleType.Text(it.title),
+                                                icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+                                            ),
                                     ),
-                            ),
-                        ),
+                                ),
+                            )
+                        },
                     )
-                },
-            )
+                }
 
-        Route.LocalCache ->
-            LocalCacheScreen()
+                entry<Route.LocalCache> {
+                    LocalCacheScreen()
+                }
 
-        is Route.Following ->
-            FollowingScreen(
-                accountType = route.accountType,
-                userKey = route.userKey,
-                onUserClick = {
-                    navigate(
-                        Profile(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
+                entry<Route.Following> { args ->
+                    FollowingScreen(
+                        accountType = args.accountType,
+                        userKey = args.userKey,
+                        onUserClick = {
+                            navigate(
+                                Profile(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
                     )
-                },
-            )
+                }
 
-        is Route.Fans ->
-            FansScreen(
-                accountType = route.accountType,
-                userKey = route.userKey,
-                onUserClick = {
-                    navigate(
-                        Profile(
-                            accountType = route.accountType,
-                            userKey = it,
-                        ),
+                entry<Route.Fans> { args ->
+                    FansScreen(
+                        accountType = args.accountType,
+                        userKey = args.userKey,
+                        onUserClick = {
+                            navigate(
+                                Profile(
+                                    accountType = args.accountType,
+                                    userKey = it,
+                                ),
+                            )
+                        },
                     )
-                },
-            )
+                }
 
-        is Route.WebViewLogin ->
-            WebViewLoginScreen(route = route)
+                entry<Route.WebViewLogin>(
+                    metadata = window(),
+                ) { args ->
+                    WebViewLoginScreen(route = args)
+                }
 
-        is Route.BlockUser ->
-            BlockUserDialog(
-                accountType = route.accountType,
-                userKey = route.userKey,
-                onBack = onBack,
-            )
-        is Route.MuteUser ->
-            MuteUserDialog(
-                accountType = route.accountType,
-                userKey = route.userKey,
-                onBack = onBack,
-            )
-        is Route.ReportUser ->
-            ReportUserDialog(
-                accountType = route.accountType,
-                userKey = route.userKey,
-                onBack = onBack,
-            )
-    }
+                entry<Route.BlockUser>(
+                    metadata = dialog(),
+                ) { args ->
+                    BlockUserDialog(
+                        accountType = args.accountType,
+                        userKey = args.userKey,
+                        onBack = onBack,
+                    )
+                }
+                entry<Route.MuteUser>(
+                    metadata = dialog(),
+                ) { args ->
+                    MuteUserDialog(
+                        accountType = args.accountType,
+                        userKey = args.userKey,
+                        onBack = onBack,
+                    )
+                }
+                entry<Route.ReportUser>(
+                    metadata = dialog(),
+                ) { args ->
+                    ReportUserDialog(
+                        accountType = args.accountType,
+                        userKey = args.userKey,
+                        onBack = onBack,
+                    )
+                }
+            },
+    )
 }

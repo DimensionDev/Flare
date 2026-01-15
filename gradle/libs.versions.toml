@@ -1,9 +1,12 @@
 [versions]
+adaptiveNavigation3 = "1.3.0-alpha02"
 clikt = "5.0.3"
 collection = "1.5.0"
 compileSdk = "36"
+cryptographyProviderOptimal = "0.5.0"
 jna = "5.18.1"
-lifecycleViewmodelComposeVersion = "2.9.6"
+junique = "1.0.4"
+lifecycleViewmodelComposeVersion = "2.10.0-alpha06"
 minSdk = "23"
 java = "21"
 agp = "8.13.2"
@@ -14,7 +17,7 @@ androidx-test-ext-junit = "1.3.0"
 espresso-core = "3.7.0"
 lifecycle-runtime-ktx = "2.10.0"
 activity-compose = "1.12.2"
-compose-bom = "2025.12.01"
+compose-bom = "2026.01.00"
 ksp = "2.3.4"
 openaiClient = "4.0.1"
 paging = "3.4.0-rc01"
@@ -62,12 +65,15 @@ robolectric = "4.16"
 
 
 [libraries]
+adaptive-navigation3 = { module = "org.jetbrains.compose.material3.adaptive:adaptive-navigation3", version.ref = "adaptiveNavigation3" }
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
 bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }
 bluesky-oauth = { module = "moe.tlaster.ozone:oauth", version.ref = "bluesky" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+cryptography-provider-optimal = { module = "dev.whyoleg.cryptography:cryptography-provider-optimal", version.ref = "cryptographyProviderOptimal" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+junique = { module = "it.sauronsoftware:junique", version.ref = "junique" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
@@ -77,6 +83,7 @@ lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-ru
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelComposeVersion" }
+lifecycle-viewmodel-navigation3 = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelComposeVersion" }
 openai-client = { module = "com.aallam.openai:openai-client", version.ref = "openaiClient" }
 platformtools-darkmodedetector = { module = "io.github.kdroidfilter:platformtools.darkmodedetector", version.ref = "platformtoolsDarkmodedetector" }
 prettytime = { module = "org.ocpsoft.prettytime:prettytime", version.ref = "prettytime" }
@@ -216,6 +223,8 @@ bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref 
 cupertino = { group = "io.github.schott12521", name = "cupertino", version.ref = "cupertino" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
+navigation3-desktop = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version = "1.0.0-alpha06" }
+
 ### Server ###
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
 ktor-resources = { module = "io.ktor:ktor-resources", version.ref = "ktor" }
@@ -261,4 +270,4 @@ firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 room = { id = "androidx.room", version.ref = "room" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
-stability-analyzer = { id = "com.github.skydoves.compose.stability.analyzer", version = "0.6.4" }
+stability-analyzer = { id = "com.github.skydoves.compose.stability.analyzer", version = "0.6.6" }

@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,6 +46,8 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.statues
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Header
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
@@ -62,6 +65,8 @@ import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.component.AutoSuggestBoxDefaults
 import io.github.composefluent.component.AutoSuggestionBox
 import io.github.composefluent.component.ListItem
+import io.github.composefluent.component.LiteFilter
+import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
@@ -76,7 +81,7 @@ import org.jetbrains.compose.resources.stringResource
 fun SearchScreen(
     initialQuery: String?,
     accountType: AccountType,
-    toUser: (MicroBlogKey) -> Unit,
+    toUser: (AccountType, MicroBlogKey) -> Unit,
 ) {
     val state by producePresenter("search_${accountType}_$initialQuery") {
         presenter(initialQuery, accountType)
@@ -109,7 +114,9 @@ fun SearchScreen(
                             lineLimits = TextFieldLineLimits.SingleLine,
                             onKeyboardAction = {
                                 if (state.textState.text.isNotBlank()) {
-                                    state.commitSearch(state.textState.text.toString())
+                                    state.selectedAccount?.let { user ->
+                                        state.search(state.textState.text.toString())
+                                    }
                                 }
                             },
                             keyboardOptions =
@@ -169,6 +176,44 @@ fun SearchScreen(
                     }
                 }
             }
+            state.accounts.onSuccess { accounts ->
+                if (accounts.size > 1) {
+                    item(
+                        span = StaggeredGridItemSpan.FullLine,
+                    ) {
+                        LiteFilter(
+                            modifier =
+                                Modifier
+                                    .padding(top = 8.dp),
+                        ) {
+                            accounts.forEach { profile ->
+                                PillButton(
+                                    selected = state.selectedAccount?.key == profile.key,
+                                    onSelectedChanged = {
+                                        if (it) {
+                                            state.setAccount(profile)
+                                        }
+                                    },
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        AvatarComponent(
+                                            data = profile.avatar,
+                                            size = AvatarComponentDefaults.compatSize,
+                                        )
+                                        Text(
+                                            profile.handle,
+                                            maxLines = 1,
+                                            modifier = Modifier.padding(start = 8.dp),
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             state.users
                 .onSuccess {
@@ -200,7 +245,14 @@ fun SearchScreen(
                                     if (user != null) {
                                         CommonStatusHeaderComponent(
                                             data = user,
-                                            onUserClick = toUser,
+                                            onUserClick = {
+                                                state.selectedAccount?.let { account ->
+                                                    toUser.invoke(
+                                                        AccountType.Specific(account.key),
+                                                        user.key,
+                                                    )
+                                                }
+                                            },
                                             modifier = Modifier.padding(8.dp),
                                         )
                                     } else {

@@ -33,9 +33,7 @@ internal sealed interface Route : NavKey {
         val accountType: AccountType,
     ) : ScreenRoute
 
-    data class Discover(
-        val accountType: AccountType,
-    ) : ScreenRoute
+    data object Discover : ScreenRoute
 
     data object Notification : ScreenRoute
 

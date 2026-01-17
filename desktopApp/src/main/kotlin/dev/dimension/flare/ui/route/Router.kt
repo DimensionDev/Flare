@@ -403,20 +403,19 @@ internal fun WindowScope.Router(
 
                 entry<Route.Discover> { args ->
                     DiscoverScreen(
-                        accountType = args.accountType,
-                        toUser = {
+                        toUser = { accountType, userKey ->
                             navigate(
                                 Profile(
-                                    accountType = args.accountType,
-                                    userKey = it,
+                                    accountType = accountType,
+                                    userKey = userKey,
                                 ),
                             )
                         },
-                        toSearch = {
+                        toSearch = { accountType, keyword ->
                             navigate(
                                 Search(
-                                    accountType = args.accountType,
-                                    keyword = it,
+                                    accountType = accountType,
+                                    keyword = keyword,
                                 ),
                             )
                         },
@@ -427,11 +426,11 @@ internal fun WindowScope.Router(
                     SearchScreen(
                         initialQuery = args.keyword,
                         accountType = args.accountType,
-                        toUser = {
+                        toUser = { accountType, userKey ->
                             navigate(
                                 Profile(
-                                    accountType = args.accountType,
-                                    userKey = it,
+                                    accountType = accountType,
+                                    userKey = userKey,
                                 ),
                             )
                         },

@@ -85,7 +85,6 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.isError
 import dev.dimension.flare.ui.model.isSuccess
-import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
@@ -141,16 +140,9 @@ internal fun HomeScreen(afterInit: () -> Unit) {
             val userState by producePresenter(key = "home_account_type_$accountType") {
                 userPresenter(accountType)
             }
-            userState
-                .onSuccess {
-                    LaunchedEffect(Unit) {
-                        afterInit.invoke()
-                    }
-                }.onError {
-                    LaunchedEffect(Unit) {
-                        afterInit.invoke()
-                    }
-                }
+            LaunchedEffect(Unit) {
+                afterInit.invoke()
+            }
             val layoutType =
                 NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
                     currentWindowAdaptiveInfo(),
@@ -533,7 +525,7 @@ private fun getDirection(
     accountType: AccountType = tab.account,
 ): Route =
     when (tab) {
-        is DiscoverTabItem -> Route.Discover(accountType)
+        is DiscoverTabItem -> Route.Discover
         is ProfileTabItem -> Route.Profile.Me(accountType)
         is HomeTimelineTabItem -> Route.Home(accountType)
         is TimelineTabItem -> Route.Timeline(accountType, tab)

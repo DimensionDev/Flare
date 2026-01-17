@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
+import compose.icons.fontawesomeicons.solid.Bars
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
@@ -74,6 +75,7 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
 import dev.dimension.flare.ui.presenter.TimelineItemPresenterWithLazyListState
@@ -183,18 +185,43 @@ internal fun HomeTimelineScreen(
                 scrollBehavior = topAppBarScrollBehavior,
                 navigationIcon = {
                     if (LocalBottomBarShowing.current) {
-                        state.user.onSuccess {
-                            IconButton(
-                                onClick = {
-                                    toQuickMenu.invoke()
-                                },
-                            ) {
-                                AvatarComponent(
-                                    it.avatar,
-                                    size = 24.dp,
-                                )
+                        state.user
+                            .onSuccess {
+                                IconButton(
+                                    onClick = {
+                                        toQuickMenu.invoke()
+                                    },
+                                ) {
+                                    AvatarComponent(
+                                        it.avatar,
+                                        size = 24.dp,
+                                    )
+                                }
+                            }.onError {
+                                IconButton(
+                                    onClick = {
+                                        toQuickMenu.invoke()
+                                    },
+                                ) {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.Bars,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                }
+                            }.onLoading {
+                                IconButton(
+                                    onClick = {
+                                        toQuickMenu.invoke()
+                                    },
+                                ) {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.Bars,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                }
                             }
-                        }
                     }
                 },
                 actions = {

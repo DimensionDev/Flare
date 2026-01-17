@@ -104,14 +104,15 @@ internal class BlueskyAuthPlugin(
                 if (credential != null) {
                     var shouldRetry = false
                     var error = response.getOrNull()?.error
+                    val isRefresh = context.url.toString().endsWith("/xrpc/com.atproto.server.refreshSession")
                     if (error == "ExpiredToken" || error == "invalid_token" || error == "use_dpop_nonce") {
-                        shouldRetry = true
+                        shouldRetry = true && !isRefresh
                     }
                     var currentCredential: UiAccount.Bluesky.Credential = credential
                     var retryCount = 0
                     while (shouldRetry) {
                         retryCount++
-                        if (retryCount > 5) {
+                        if (retryCount > 3) {
                             // Prevent infinite retry loop
                             throw LoginExpiredException(
                                 plugin.accountKey ?: MicroBlogKey("unknown", "unknown"),

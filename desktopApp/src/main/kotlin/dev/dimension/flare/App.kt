@@ -417,7 +417,7 @@ private fun NavigationItemIcon(
 
 private fun getRoute(tab: TabItem): Route =
     when (tab) {
-        is DiscoverTabItem -> Route.Discover(tab.account)
+        is DiscoverTabItem -> Route.Discover
         is ProfileTabItem -> Route.MeRoute(tab.account)
         is HomeTimelineTabItem -> Route.Home(tab.account)
         is TimelineTabItem -> Route.Timeline(tab)

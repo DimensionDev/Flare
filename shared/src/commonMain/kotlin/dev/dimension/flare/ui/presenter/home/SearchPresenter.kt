@@ -100,11 +100,13 @@ public class SearchPresenter(
                 }.toPagingState()
 
         val status =
-            remember(currentAccountType) {
-                SearchStatusTimelinePresenter(
-                    accountType = currentAccountType,
-                    initialQuery = query,
-                )
+            key(currentAccountType) {
+                remember(currentAccountType) {
+                    SearchStatusTimelinePresenter(
+                        accountType = currentAccountType,
+                        initialQuery = query,
+                    )
+                }
             }
         val stateState =
             key(currentAccountType) {

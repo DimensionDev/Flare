@@ -72,7 +72,7 @@ private class MediaTimelinePresenter(
             }
 
     fun createTransformedPager(scope: CoroutineScope): Flow<PagingData<ProfileMedia>> =
-        createPager(scope).map { data ->
+        createPager().map { data ->
             data.flatMap { status ->
                 val content = status.content
                 if (content is UiTimeline.ItemContent.Status) {

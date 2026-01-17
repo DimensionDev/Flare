@@ -42,7 +42,6 @@ import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
@@ -55,8 +54,6 @@ import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.SearchHistoryPresenter
 import dev.dimension.flare.ui.presenter.home.SearchHistoryState
-import dev.dimension.flare.ui.presenter.home.UserPresenter
-import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 
 @Composable
@@ -68,7 +65,6 @@ internal fun SearchBar(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     SearchContent(
-        user = state.user,
         onSearch = {
             onSearch.invoke(it)
             state.setQuery(it)
@@ -95,7 +91,6 @@ internal fun SearchBar(
 )
 @Composable
 private fun SearchContent(
-    user: UiState<UiUserV2>?,
     historyState: UiState<ImmutableListWrapper<UiSearchHistory>>,
     onDelete: (UiSearchHistory) -> Unit,
     queryTextState: TextFieldState,
@@ -110,20 +105,11 @@ private fun SearchContent(
         inputField = {
             SearchBarDefaults.InputField(
                 expanded = expanded,
-                onExpandedChange = onExpandedChange,
+                onExpandedChange = { },
                 state = queryTextState,
                 onSearch = onSearch,
                 placeholder = {
                     Text(text = stringResource(R.string.discover_search_placeholder))
-                },
-                trailingIcon = {
-                    user?.onSuccess {
-                        IconButton(onClick = {
-                            onAccountClick.invoke()
-                        }) {
-                            AvatarComponent(it.avatar, size = 30.dp)
-                        }
-                    }
                 },
                 leadingIcon = {
                     AnimatedContent(
@@ -280,13 +266,8 @@ internal fun LazyStaggeredGridScope.searchContent(
 }
 
 @Composable
-internal fun searchBarPresenter(
-    accountType: AccountType,
-    initialQuery: String = "",
-): SearchBarState =
+internal fun searchBarPresenter(initialQuery: String = ""): SearchBarState =
     run {
-        val accountState =
-            remember { UserPresenter(accountType = accountType, userKey = null) }.invoke()
         val searchHistoryState = remember { SearchHistoryPresenter() }.invoke()
         var expanded by remember { mutableStateOf(false) }
         LaunchedEffect(Unit) {
@@ -298,10 +279,8 @@ internal fun searchBarPresenter(
 
         object :
             SearchBarState,
-            UserState by accountState,
             SearchHistoryState by searchHistoryState {
-            override val expanded: Boolean
-                get() = expanded
+            override val expanded = expanded
 
             override fun setExpanded(value: Boolean) {
                 expanded = value
@@ -324,9 +303,7 @@ internal fun searchBarPresenter(
         }
     }
 
-internal interface SearchBarState :
-    UserState,
-    SearchHistoryState {
+internal interface SearchBarState : SearchHistoryState {
     val expanded: Boolean
     val queryTextState: TextFieldState
 

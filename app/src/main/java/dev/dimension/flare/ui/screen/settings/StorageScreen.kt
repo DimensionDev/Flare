@@ -250,7 +250,7 @@ internal fun StorageScreen(
 
             SegmentedListItem(
                 onClick = {
-                    importLauncher.launch(arrayOf("application/json"))
+                    importLauncher.launch(arrayOf("*/*"))
                 },
                 shapes = ListItemDefaults.last(),
                 content = {

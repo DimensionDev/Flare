@@ -5,9 +5,14 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.cachePagingState
 import dev.dimension.flare.common.combineLatestFlowLists
+import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.repository.AccountRepository
@@ -25,10 +30,10 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
@@ -73,7 +78,7 @@ public class DiscoverPresenter :
                 .flatMapLatest { dataSource ->
                     runCatching {
                         dataSource.discoverUsers()
-                    }.getOrElse { emptyFlow() }
+                    }.getOrElse { PagingData.emptyFlow(isError = true) }
                 }
         }
     }
@@ -84,25 +89,28 @@ public class DiscoverPresenter :
                 .flatMapLatest { dataSource ->
                     runCatching {
                         dataSource.discoverHashtags()
-                    }.getOrElse { emptyFlow() }
+                    }.getOrElse { PagingData.emptyFlow(isError = true) }
                 }
         }
     }
 
-    private val statusFlow by lazy {
+    private fun statusFlow(scope: CoroutineScope) =
         selectedAccountTypeFlow.flatMapLatest { accountType ->
-            DiscoverStatusTimelinePresenter(accountType).pagerFlow
+            DiscoverStatusTimelinePresenter(accountType).createPager(scope)
         }
-    }
 
     @Composable
     override fun body(): DiscoverState {
+        val scope = rememberCoroutineScope()
         val accounts by accountsFlow.collectAsUiState()
-        val selectedAccount by selectedAccountFlow.collectAsState(null)
+        val selectedAccount by selectedAccountFlow.collectAsState()
         val selectedAccountType by selectedAccountTypeFlow.collectAsState(AccountType.Guest)
-        val users = usersFlow.collectAsLazyPagingItems().toPagingState()
-        val hashtags = hashtagsFlow.collectAsLazyPagingItems().toPagingState()
-        val status = statusFlow.collectAsLazyPagingItems().toPagingState()
+        val users = usersFlow.cachePagingState()
+        val hashtags = hashtagsFlow.cachePagingState()
+        val status =
+            remember {
+                statusFlow(scope)
+            }.collectAsLazyPagingItems().toPagingState()
 
         accounts.onSuccess {
             LaunchedEffect(it.size) {

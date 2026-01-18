@@ -36,7 +36,6 @@ import moe.tlaster.precompose.molecule.producePresenter
 internal fun SearchScreen(
     initialQuery: String,
     accountType: AccountType,
-    onAccountClick: () -> Unit,
     onUserClick: (AccountType, MicroBlogKey) -> Unit,
 ) {
     val state by producePresenter("search_${accountType}_$initialQuery") { presenter(accountType, initialQuery) }
@@ -57,7 +56,6 @@ internal fun SearchScreen(
             ) {
                 SearchBar(
                     state = state,
-                    onAccountClick = onAccountClick,
                     onSearch = {
                         state.commitSearch(it)
                     },

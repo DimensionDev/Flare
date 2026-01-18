@@ -19,8 +19,8 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -61,10 +61,7 @@ import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun DiscoverScreen(
-    onUserClick: (AccountType, MicroBlogKey) -> Unit,
-    onAccountClick: () -> Unit,
-) {
+internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
     val state by producePresenter("discover") { discoverPresenter() }
     val lazyListState = rememberLazyStaggeredGridState()
     RegisterTabCallback(
@@ -86,7 +83,6 @@ internal fun DiscoverScreen(
             ) {
                 SearchBar(
                     state = state,
-                    onAccountClick = onAccountClick,
                     onSearch = {
                         state.commitSearch(it)
                     },
@@ -318,11 +314,15 @@ private fun discoverPresenter() =
         val state = remember { DiscoverPresenter() }.invoke()
         val searchBarState = searchBarPresenter()
         val searchState =
-            key(state.selectedAccountType) {
-                remember(state.selectedAccountType) {
-                    SearchPresenter(accountType = state.selectedAccountType)
-                }.invoke()
+            remember {
+                SearchPresenter(accountType = state.selectedAccountType)
+            }.invoke()
+
+        LaunchedEffect(state.selectedAccount) {
+            state.selectedAccount?.let { profile ->
+                searchState.setAccount(profile)
             }
+        }
 
         object : DiscoverState by state, SearchBarState by searchBarState {
             val searchState = searchState

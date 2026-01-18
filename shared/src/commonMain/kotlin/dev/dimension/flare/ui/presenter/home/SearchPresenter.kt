@@ -3,36 +3,40 @@ package dev.dimension.flare.ui.presenter.home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.PagingData
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.cachePagingState
 import dev.dimension.flare.common.combineLatestFlowLists
+import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.refreshSuspend
-import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.accountServiceProvider
+import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 public class SearchPresenter(
     private val accountType: AccountType,
     private val initialQuery: String = "",
@@ -55,87 +59,90 @@ public class SearchPresenter(
             }
     }
 
+    private val queryFlow by lazy {
+        MutableStateFlow(initialQuery)
+    }
+
+    private val selectedAccountFlow by lazy {
+        MutableStateFlow<UiProfile?>(null)
+    }
+
+    private val selectedAccountTypeFlow: Flow<AccountType> by lazy {
+        selectedAccountFlow.map { profile ->
+            profile?.let {
+                AccountType.Specific(it.key)
+            } ?: accountType
+        }
+    }
+
+    private val usersFlow by lazy {
+        selectedAccountTypeFlow.flatMapLatest { accountType ->
+            accountServiceFlow(accountType = accountType, repository = accountRepository).flatMapLatest { dataSource ->
+                queryFlow.flatMapLatest { query ->
+                    runCatching {
+                        if (query.isEmpty()) {
+                            PagingData.emptyFlow(isError = true)
+                        } else {
+                            dataSource.searchUser(query)
+                        }
+                    }.getOrElse { PagingData.emptyFlow(isError = true) }
+                }
+            }
+        }
+    }
+
+    private fun statusFlow(scope: CoroutineScope) =
+        selectedAccountTypeFlow.flatMapLatest { accountType ->
+            SearchStatusTimelinePresenter(
+                accountType = accountType,
+                queryFlow = queryFlow,
+            ).createPager(
+                scope = scope,
+            )
+        }
+
     @Composable
     override fun body(): SearchState {
         val scope = rememberCoroutineScope()
-
+        val users = usersFlow.cachePagingState()
+        val status =
+            remember {
+                statusFlow(scope)
+            }.cachePagingState()
         val accounts by accountsFlow.collectAsUiState()
-        var selectedAccount by remember {
-            mutableStateOf<UiProfile?>(null)
-        }
+        val query by queryFlow.collectAsState()
+        val selectedAccount by selectedAccountFlow.collectAsState()
 
-        accounts.onSuccess { profiles ->
-            LaunchedEffect(profiles) {
+        accounts.onSuccess {
+            LaunchedEffect(it.size) {
                 if (selectedAccount == null) {
-                    selectedAccount = if (accountType is AccountType.Specific) {
-                        profiles.find { it.key == accountType.accountKey }
+                    selectedAccountFlow.value = if (accountType is AccountType.Specific) {
+                        it.find { profile -> profile.key == accountType.accountKey }
                     } else {
                         null
-                    } ?: profiles.firstOrNull()
+                    } ?: it.firstOrNull()
                 }
             }
         }
-
-        val currentAccountType =
-            remember(selectedAccount) {
-                selectedAccount?.let { AccountType.Specific(it.key) } ?: accountType
-            }
-
-        val accountState =
-            accountServiceProvider(accountType = currentAccountType, repository = accountRepository)
-        var query by remember { mutableStateOf(initialQuery) }
-
-        val user =
-            accountState
-                .flatMap { service ->
-                    if (query.isEmpty()) {
-                        UiState.Error(IllegalStateException("Query is empty"))
-                    } else {
-                        UiState.Success(
-                            remember(service, query) {
-                                service.searchUser(query, scope = scope)
-                            }.collectAsLazyPagingItems(),
-                        )
-                    }
-                }.toPagingState()
-
-        val status =
-            key(currentAccountType) {
-                remember(currentAccountType) {
-                    SearchStatusTimelinePresenter(
-                        accountType = currentAccountType,
-                        initialQuery = query,
-                    )
-                }
-            }
-        val stateState =
-            key(currentAccountType) {
-                status.body().listState
-            }
-        LaunchedEffect(query) {
-            status.setQuery(query)
-        }
-
-        val isSearching = query.isNotEmpty()
 
         return object : SearchState {
-            override val users = user
-            override val status = stateState
-            override val searching = isSearching
+            override val users = users
+            override val status = status
+            override val searching = query.isNotEmpty()
             override val accounts = accounts
             override val selectedAccount = selectedAccount
 
             override fun search(new: String) {
-                query = new
+                queryFlow.value = new
             }
 
             override suspend fun refreshSuspend() {
-                user.refreshSuspend()
-                stateState.refreshSuspend()
+                users.refreshSuspend()
+                status.refreshSuspend()
             }
 
             override fun setAccount(profile: UiProfile) {
-                selectedAccount = profile
+                selectedAccountFlow.value = profile
             }
         }
     }

@@ -998,7 +998,6 @@ internal class BlueskyDataSource(
 
     override fun searchUser(
         query: String,
-        scope: CoroutineScope,
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
@@ -1009,7 +1008,7 @@ internal class BlueskyDataSource(
                 accountKey,
                 query,
             )
-        }.flow.cachedIn(scope)
+        }.flow
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
         Pager(

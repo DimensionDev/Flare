@@ -7,12 +7,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.paging.LoadState
+import androidx.paging.LoadStates
+import androidx.paging.PagingData
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
@@ -182,3 +185,20 @@ private fun <T : Any> CacheableState<ImmutableList<T>>.toPagingState(): PagingSt
         PagingState.Empty(this::refresh)
     }
 }
+
+internal fun <T : Any> PagingData.Companion.emptyFlow(isError: Boolean = false): Flow<PagingData<T>> =
+    flowOf(
+        PagingData.empty(
+            sourceLoadStates =
+                LoadStates(
+                    refresh =
+                        if (isError) {
+                            LoadState.Error(Exception("Empty paging data"))
+                        } else {
+                            LoadState.NotLoading(endOfPaginationReached = true)
+                        },
+                    prepend = LoadState.NotLoading(endOfPaginationReached = true),
+                    append = LoadState.NotLoading(endOfPaginationReached = true),
+                ),
+        ),
+    )

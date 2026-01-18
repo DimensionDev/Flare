@@ -14,13 +14,18 @@ import org.koin.core.component.inject
 
 public class SearchStatusTimelinePresenter(
     private val accountType: AccountType,
-    private val initialQuery: String,
+    private val queryFlow: MutableStateFlow<String> = MutableStateFlow(""),
 ) : TimelinePresenter(),
     KoinComponent {
+    public constructor(
+        accountType: AccountType,
+        initialQuery: String,
+    ) : this(
+        accountType = accountType,
+        queryFlow = MutableStateFlow(initialQuery),
+    )
+
     private val accountRepository: AccountRepository by inject()
-    private val queryFlow by lazy {
-        MutableStateFlow(initialQuery)
-    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val loader: Flow<BaseTimelineLoader> by lazy {

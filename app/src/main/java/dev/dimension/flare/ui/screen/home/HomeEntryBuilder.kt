@@ -53,9 +53,6 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
             onUserClick = { accountType, userKey ->
                 navigate(Route.Profile.User(accountType, userKey))
             },
-            onAccountClick = {
-                openDrawer.invoke()
-            },
         )
     }
     entry<Route.Notification> {
@@ -65,9 +62,6 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
         SearchScreen(
             initialQuery = args.query,
             accountType = args.accountType,
-            onAccountClick = {
-                openDrawer.invoke()
-            },
             onUserClick = { accountType, userKey ->
                 navigate(Route.Profile.User(accountType, userKey))
             },

@@ -59,7 +59,6 @@ import dev.dimension.flare.ui.presenter.invoke
 @Composable
 internal fun SearchBar(
     state: SearchBarState,
-    onAccountClick: () -> Unit,
     onSearch: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -76,7 +75,6 @@ internal fun SearchBar(
         onBack = {
             state.setExpanded(false)
         },
-        onAccountClick = onAccountClick,
         historyState = state.searchHistories,
         modifier = modifier,
         onDelete = {
@@ -98,14 +96,13 @@ private fun SearchContent(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onBack: () -> Unit,
-    onAccountClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     androidx.compose.material3.SearchBar(
         inputField = {
             SearchBarDefaults.InputField(
                 expanded = expanded,
-                onExpandedChange = { },
+                onExpandedChange = onExpandedChange,
                 state = queryTextState,
                 onSearch = onSearch,
                 placeholder = {

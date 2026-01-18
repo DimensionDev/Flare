@@ -32,7 +32,6 @@ internal interface MicroblogDataSource {
 
     fun searchUser(
         query: String,
-        scope: CoroutineScope,
         pageSize: Int = 20,
     ): Flow<PagingData<UiUserV2>>
 

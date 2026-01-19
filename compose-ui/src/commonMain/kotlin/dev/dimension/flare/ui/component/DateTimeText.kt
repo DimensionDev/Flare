@@ -45,7 +45,9 @@ public fun DateTimeText(
     val appearanceSettings = LocalAppearanceSettings.current
     PlatformText(
         text =
-            if (fullTime || appearanceSettings.absoluteTimestamp) {
+            if (appearanceSettings.absoluteTimestamp) {
+                data.absolute
+            } else if (fullTime) {
                 data.full
             } else {
                 data.relative

@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.humanizer
 
+import platform.Foundation.NSCalendar
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSDateFormatterLongStyle
@@ -34,6 +35,27 @@ internal class AppleFormatter(
     }
 
     override fun formatFullInstant(instant: Instant): String = PlatformDateFormatter.formatAsFullDateTime(instant.toEpochMilliseconds())
+
+    override fun formatAbsoluteInstant(instant: Instant): String {
+        val now = Clock.System.now()
+        val diff = now - instant
+        val date = NSDate.dateWithTimeIntervalSince1970(instant.toEpochMilliseconds() / 1000.0)
+        val calendar = NSCalendar.currentCalendar
+        val nowComponents = calendar.components(platform.Foundation.NSCalendarUnitYear, fromDate = NSDate())
+        val dateComponents = calendar.components(platform.Foundation.NSCalendarUnitYear, fromDate = date)
+
+        val datePattern = when {
+            diff.inWholeDays < 7 -> "EEE"
+            nowComponents.year == dateComponents.year -> "d MMM"
+            else -> "yyyy-MM-dd"
+        }
+        val timePattern = "h:mm a"
+
+        val formatter = NSDateFormatter().apply {
+            setDateFormat("$datePattern $timePattern")
+        }
+        return formatter.stringFromDate(date)
+    }
 }
 
 private object PlatformDateFormatter {

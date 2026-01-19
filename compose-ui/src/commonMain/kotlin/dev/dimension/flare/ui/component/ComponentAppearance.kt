@@ -23,6 +23,7 @@ public data class ComponentAppearance(
     val lineLimit: Int = 5,
     val fullWidthPost: Boolean = false,
     val postActionStyle: PostActionStyle = PostActionStyle.LeftAligned,
+    val absoluteTimestamp: Boolean = false,
 ) {
     public data class AiConfig(
         val translation: Boolean = false,

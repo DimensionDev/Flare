@@ -3,7 +3,10 @@ package dev.dimension.flare.ui.humanizer
 import org.ocpsoft.prettytime.PrettyTime
 import java.math.RoundingMode
 import java.text.NumberFormat
+import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Clock
@@ -56,4 +59,23 @@ internal class JVMFormatter : PlatformFormatter {
                     .atZone(java.time.ZoneId.systemDefault())
                     .toLocalDateTime(),
             )
+
+    override fun formatAbsoluteInstant(instant: Instant): String {
+        val now = Clock.System.now()
+        val zoneId = ZoneId.systemDefault()
+        val nowDate = java.time.Instant.ofEpochMilli(now.toEpochMilliseconds()).atZone(zoneId).toLocalDate()
+        val instantZonedDateTime = java.time.Instant.ofEpochMilli(instant.toEpochMilliseconds()).atZone(zoneId)
+        val instantDate = instantZonedDateTime.toLocalDate()
+        val daysDiff = ChronoUnit.DAYS.between(instantDate, nowDate)
+
+        val datePattern = when {
+            daysDiff < 7 -> "EEE"
+            nowDate.year == instantDate.year -> "d MMM"
+            else -> "yyyy-MM-dd"
+        }
+        val timePattern = "h:mma"
+
+        val formatter = DateTimeFormatter.ofPattern("$datePattern $timePattern", Locale.getDefault())
+        return formatter.format(instantZonedDateTime)
+    }
 }

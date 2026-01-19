@@ -14,7 +14,6 @@ struct SearchScreen: View {
     var body: some View {
         List {
             accountSection
-            
             if case .success(let usersState) = onEnum(of: searchPresenter.state.users) {
                 Section {
                     ScrollView(.horizontal) {
@@ -57,7 +56,6 @@ struct SearchScreen: View {
             .padding(.horizontal)
             .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
             .listRowBackground(Color.clear)
-            
         }
         .scrollContentBackground(.hidden)
         .listRowSpacing(2)

@@ -1524,9 +1524,6 @@
         }
       }
     },
-    "accounts" : {
-
-    },
     "action_retry" : {
       "localizations" : {
         "af" : {

@@ -116,11 +116,12 @@ public class SearchPresenter(
         accounts.onSuccess {
             LaunchedEffect(it.size) {
                 if (selectedAccount == null) {
-                    selectedAccountFlow.value = if (accountType is AccountType.Specific) {
-                        it.find { profile -> profile.key == accountType.accountKey }
-                    } else {
-                        null
-                    } ?: it.firstOrNull()
+                    selectedAccountFlow.value =
+                        if (accountType is AccountType.Specific) {
+                            it.find { profile -> profile.key == accountType.accountKey }
+                        } else {
+                            null
+                        }
                 }
             }
         }

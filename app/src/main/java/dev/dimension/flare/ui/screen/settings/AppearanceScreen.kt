@@ -467,6 +467,30 @@ internal fun AppearanceScreen(
                 SegmentedListItem(
                     onClick = {
                         state.updateSettings {
+                            copy(absoluteTimestamp = !absoluteTimestamp)
+                        }
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_appearance_absolute_timestamp))
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_absolute_timestamp_description))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = appearanceSettings.absoluteTimestamp,
+                            onCheckedChange = {
+                                state.updateSettings {
+                                    copy(absoluteTimestamp = it)
+                                }
+                            },
+                        )
+                    },
+                )
+                SegmentedListItem(
+                    onClick = {
+                        state.updateSettings {
                             copy(showLinkPreview = !showLinkPreview)
                         }
                     },

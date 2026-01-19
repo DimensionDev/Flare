@@ -13,6 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.render.UiDateTime
@@ -41,9 +42,10 @@ public fun DateTimeText(
     style: TextStyle = PlatformTextStyle.current,
     fullTime: Boolean = false,
 ) {
+    val appearanceSettings = LocalAppearanceSettings.current
     PlatformText(
         text =
-            if (fullTime) {
+            if (fullTime || appearanceSettings.absoluteTimestamp) {
                 data.full
             } else {
                 data.relative

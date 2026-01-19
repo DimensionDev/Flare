@@ -192,6 +192,8 @@
     <string name="settings_appearance_in_app_browser_description">Open links in the in-app browser</string>
     <string name="settings_appearance_full_width_post">Full width post</string>
     <string name="settings_appearance_full_width_post_description">Show the post in full width</string>
+    <string name="settings_appearance_absolute_timestamp">Absolute timestamp</string>
+    <string name="settings_appearance_absolute_timestamp_description">Display absolute timestamps on posts</string>
 
     <string name="settings_storage_clear_image_cache">Clear image cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB of images will be removed</string>

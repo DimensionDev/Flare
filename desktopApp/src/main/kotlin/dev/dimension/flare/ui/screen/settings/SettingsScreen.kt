@@ -88,6 +88,8 @@ import dev.dimension.flare.settings_ai_config_server_self_host_description
 import dev.dimension.flare.settings_ai_config_title
 import dev.dimension.flare.settings_ai_config_tldr_description
 import dev.dimension.flare.settings_ai_config_translation_description
+import dev.dimension.flare.settings_appearance_absolute_timestamp
+import dev.dimension.flare.settings_appearance_absolute_timestamp_description
 import dev.dimension.flare.settings_appearance_avatar_shape
 import dev.dimension.flare.settings_appearance_avatar_shape_description
 import dev.dimension.flare.settings_appearance_avatar_shape_round
@@ -645,6 +647,26 @@ internal fun SettingsScreen(
                         ExpanderItemSeparator()
                     }
                 }
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_appearance_absolute_timestamp))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_absolute_timestamp_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = LocalAppearanceSettings.current.absoluteTimestamp,
+                            {
+                                state.appearanceState.updateSettings {
+                                    copy(absoluteTimestamp = it)
+                                }
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+                ExpanderItemSeparator()
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_appearance_show_link_previews))

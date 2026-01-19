@@ -477,6 +477,8 @@
     <string name="liked_title">Liked</string>
     <string name="all_rss_feeds_title">All Rss Feeds</string>
 
+    <string name="settings_appearance_absolute_timestamp">Absolute timestamp</string>
+    <string name="settings_appearance_absolute_timestamp_description">Display absolute timestamps on posts</string>
 
     <string name="settings_about_description">The ultimate next generation open-sourced AI powered decentralized social network client.</string>
     <string name="settings_about_source_code">Source code</string>

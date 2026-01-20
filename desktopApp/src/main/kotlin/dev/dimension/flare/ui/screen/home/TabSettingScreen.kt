@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,10 +32,13 @@ import compose.icons.fontawesomeicons.solid.Rss
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
+import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.tab_settings_add
+import dev.dimension.flare.tab_settings_add_group
+import dev.dimension.flare.tab_settings_add_tab
 import dev.dimension.flare.tab_settings_drag
 import dev.dimension.flare.tab_settings_edit
 import dev.dimension.flare.tab_settings_mixed_timeline
@@ -53,6 +57,8 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.CardExpanderItem
+import io.github.composefluent.component.MenuFlyout
+import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
@@ -67,7 +73,10 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
-internal fun TabSettingScreen(toAddRssSource: () -> Unit) {
+internal fun TabSettingScreen(
+    toAddRssSource: () -> Unit,
+    toGroupConfig: (MixedTimelineTabItem?) -> Unit,
+) {
     val state by producePresenter {
         presenter()
     }
@@ -120,33 +129,55 @@ internal fun TabSettingScreen(toAddRssSource: () -> Unit) {
                                 .animateItem(),
                     )
                 }
+                item {
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
             }
         }
         item {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        item {
             Box(
+                modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.CenterEnd,
-                modifier = Modifier.fillParentMaxWidth(),
             ) {
+                var showMenu by remember { mutableStateOf(false) }
                 AccentButton(
                     onClick = {
-                        state.setAddTab(true)
+                        showMenu = true
                     },
                 ) {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.Plus,
                         contentDescription = stringResource(Res.string.tab_settings_add),
                     )
-                    Text(
-                        text = stringResource(Res.string.tab_settings_add),
-                    )
+                    Box {
+                        Text(
+                            text = stringResource(Res.string.tab_settings_add),
+                        )
+                        MenuFlyout(
+                            visible = showMenu,
+                            onDismissRequest = { showMenu = false },
+                        ) {
+                            MenuFlyoutItem(
+                                text = { Text(stringResource(Res.string.tab_settings_add_group)) },
+                                onClick = {
+                                    showMenu = false
+                                    toGroupConfig(null)
+                                },
+                            )
+                            MenuFlyoutItem(
+                                text = { Text(stringResource(Res.string.tab_settings_add_tab)) },
+                                onClick = {
+                                    showMenu = false
+                                    state.setAddTab(true)
+                                },
+                            )
+                        }
+                    }
                 }
             }
         }
         item {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
         }
         itemsIndexed(state.currentTabs, key = { _, item -> item.key }) { index, item ->
             ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
@@ -161,7 +192,11 @@ internal fun TabSettingScreen(toAddRssSource: () -> Unit) {
                         Row {
                             SubtleButton(
                                 onClick = {
-                                    state.setEditTab(item)
+                                    if (item is MixedTimelineTabItem) {
+                                        toGroupConfig(item)
+                                    } else {
+                                        state.setEditTab(item)
+                                    }
                                 },
                                 iconOnly = true,
                             ) {

@@ -9,6 +9,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
@@ -53,6 +54,7 @@ import dev.dimension.flare.ui.screen.home.DeepLinkAccountPicker
 import dev.dimension.flare.ui.screen.home.DiscoverScreen
 import dev.dimension.flare.ui.screen.home.FansScreen
 import dev.dimension.flare.ui.screen.home.FollowingScreen
+import dev.dimension.flare.ui.screen.home.GroupConfigScreen
 import dev.dimension.flare.ui.screen.home.HomeTimelineScreen
 import dev.dimension.flare.ui.screen.home.MuteUserDialog
 import dev.dimension.flare.ui.screen.home.NotificationScreen
@@ -121,7 +123,10 @@ internal fun WindowScope.Router(
                 remember {
                     NavEntryDecorator {
                         Box(
-                            modifier = Modifier.background(FluentTheme.colors.background.solid.base),
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .background(FluentTheme.colors.background.solid.base),
                         ) {
                             it.Content()
                         }
@@ -514,6 +519,22 @@ internal fun WindowScope.Router(
 
                 entry<Route.TabSetting> {
                     TabSettingScreen(
+                        toAddRssSource = {
+                            navigate(
+                                Route.CreateRssSource,
+                            )
+                        },
+                        toGroupConfig = {
+                            navigate(
+                                Route.TabGroupConfig(it),
+                            )
+                        },
+                    )
+                }
+
+                entry<Route.TabGroupConfig> { args ->
+                    GroupConfigScreen(
+                        item = args.item,
                         toAddRssSource = {
                             navigate(
                                 Route.CreateRssSource,

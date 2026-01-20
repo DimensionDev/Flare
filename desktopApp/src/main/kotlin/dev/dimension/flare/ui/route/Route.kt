@@ -192,6 +192,10 @@ internal sealed interface Route : NavKey {
 
     data object TabSetting : ScreenRoute
 
+    data class TabGroupConfig(
+        val item: dev.dimension.flare.data.model.MixedTimelineTabItem? = null,
+    ) : ScreenRoute
+
     data object LocalCache : ScreenRoute
 
     data class Following(

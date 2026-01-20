@@ -34,6 +34,8 @@ class ImportOPMLPresenterTest : RobolectricTest() {
         override fun formatRelativeInstant(instant: Instant): String = instant.toString()
 
         override fun formatFullInstant(instant: Instant): String = instant.toString()
+
+        override fun formatAbsoluteInstant(instant: Instant): String = instant.toString()
     }
 
     private lateinit var db: AppDatabase

@@ -1,13 +1,17 @@
 package dev.dimension.flare.ui.humanizer
 
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.toLocalDateTime
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSDateFormatterLongStyle
 import platform.Foundation.NSDateFormatterMediumStyle
 import platform.Foundation.NSDateFormatterNoStyle
+import platform.Foundation.NSLocale
 import platform.Foundation.NSRelativeDateTimeFormatter
 import platform.Foundation.NSRelativeDateTimeFormatterStyleNumeric
+import platform.Foundation.currentLocale
 import platform.Foundation.dateWithTimeIntervalSince1970
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -38,14 +42,22 @@ internal class AppleFormatter(
 
     override fun formatAbsoluteInstant(instant: Instant): String {
         val now = Clock.System.now()
-        val datePattern = getAbsoluteDatePattern(instant, now, TimeZone.currentSystemDefault())
+        val timeZone = TimeZone.currentSystemDefault()
+        val nowDate = now.toLocalDateTime(timeZone).date
+        val instantDate = instant.toLocalDateTime(timeZone).date
+        val daysDiff = instantDate.daysUntil(nowDate)
+
+        val template = when {
+            daysDiff == 0 -> "jm"
+            daysDiff < 7 -> "EEEjm"
+            nowDate.year == instantDate.year -> "MMMdjm"
+            else -> "yyyyMMMdjm"
+        }
 
         val date = NSDate.dateWithTimeIntervalSince1970(instant.toEpochMilliseconds() / 1000.0)
-        val formatter =
-            NSDateFormatter().apply {
-                val pattern = if (datePattern.isEmpty()) ABSOLUTE_TIME_PATTERN else "$datePattern $ABSOLUTE_TIME_PATTERN"
-                setDateFormat(pattern)
-            }
+        val formatter = NSDateFormatter().apply {
+            dateFormat = NSDateFormatter.dateFormatFromTemplate(template, 0, NSLocale.currentLocale)
+        }
         return formatter.stringFromDate(date)
     }
 }

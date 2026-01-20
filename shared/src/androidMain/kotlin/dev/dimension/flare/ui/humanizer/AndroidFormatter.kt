@@ -4,10 +4,9 @@ import android.content.Context
 import android.icu.text.CompactDecimalFormat
 import android.text.format.DateUtils
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
 import java.math.RoundingMode
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -101,11 +100,26 @@ internal class AndroidFormatter(
     override fun formatAbsoluteInstant(instant: Instant): String {
         val now = Clock.System.now()
         val timeZone = TimeZone.currentSystemDefault()
-        val datePattern = getAbsoluteDatePattern(instant, now, timeZone)
+        val nowDate = now.toLocalDateTime(timeZone).date
+        val instantDate = instant.toLocalDateTime(timeZone).date
+        val daysDiff = instantDate.daysUntil(nowDate)
 
-        val locale = Locale.getDefault()
-        val pattern = if (datePattern.isEmpty()) ABSOLUTE_TIME_PATTERN else "$datePattern $ABSOLUTE_TIME_PATTERN"
-        val sdf = SimpleDateFormat(pattern, locale)
-        return sdf.format(Date(instant.toEpochMilliseconds()))
+        var flags = DateUtils.FORMAT_SHOW_TIME
+        if (daysDiff != 0) {
+            flags = flags or DateUtils.FORMAT_SHOW_DATE
+            when {
+                daysDiff < 7 -> {
+                    flags = flags or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY
+                }
+                nowDate.year == instantDate.year -> {
+                    flags = flags or DateUtils.FORMAT_ABBREV_MONTH
+                }
+                else -> {
+                    flags = flags or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_NUMERIC_DATE
+                }
+            }
+        }
+
+        return DateUtils.formatDateTime(context, instant.toEpochMilliseconds(), flags)
     }
 }

@@ -1,11 +1,15 @@
 package dev.dimension.flare.ui.humanizer
 
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.toJavaInstant
+import kotlinx.datetime.toLocalDateTime
 import org.ocpsoft.prettytime.PrettyTime
 import java.math.RoundingMode
 import java.text.NumberFormat
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Clock
@@ -39,11 +43,11 @@ internal class JVMFormatter : PlatformFormatter {
                 prettyTime.format(Date(-diff.inWholeMilliseconds))
             }
             else -> {
-                DateTimeFormatter.ISO_DATE
+                DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+                    .withLocale(Locale.getDefault())
                     .format(
-                        java.time.Instant
-                            .ofEpochMilli(instant.toEpochMilliseconds())
-                            .atZone(java.time.ZoneId.systemDefault())
+                        instant.toJavaInstant()
+                            .atZone(ZoneId.systemDefault())
                             .toLocalDate(),
                     )
             }
@@ -51,25 +55,45 @@ internal class JVMFormatter : PlatformFormatter {
     }
 
     override fun formatFullInstant(instant: Instant): String =
-        DateTimeFormatter.ISO_DATE_TIME
+        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
+            .withLocale(Locale.getDefault())
             .format(
-                java.time.Instant
-                    .ofEpochMilli(instant.toEpochMilliseconds())
-                    .atZone(java.time.ZoneId.systemDefault())
+                instant.toJavaInstant()
+                    .atZone(ZoneId.systemDefault())
                     .toLocalDateTime(),
             )
 
     override fun formatAbsoluteInstant(instant: Instant): String {
         val now = Clock.System.now()
         val timeZone = TimeZone.currentSystemDefault()
-        val datePattern = getAbsoluteDatePattern(instant, now, timeZone)
+        val nowDate = now.toLocalDateTime(timeZone).date
+        val instantDate = instant.toLocalDateTime(timeZone).date
+        val daysDiff = instantDate.daysUntil(nowDate)
+        val locale = Locale.getDefault()
 
-        val pattern = if (datePattern.isEmpty()) ABSOLUTE_TIME_PATTERN else "$datePattern $ABSOLUTE_TIME_PATTERN"
-        val instantZonedDateTime =
-            java.time.Instant
-                .ofEpochMilli(instant.toEpochMilliseconds())
-                .atZone(ZoneId.systemDefault())
-        val formatter = DateTimeFormatter.ofPattern(pattern, Locale.getDefault())
-        return formatter.format(instantZonedDateTime)
+        val zonedDateTime = instant.toJavaInstant().atZone(ZoneId.systemDefault())
+
+        return when {
+            daysDiff == 0 -> {
+                DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+                    .withLocale(locale)
+                    .format(zonedDateTime)
+            }
+            daysDiff < 7 -> {
+                val day = DateTimeFormatter.ofPattern("EEE", locale).format(zonedDateTime)
+                val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale).format(zonedDateTime)
+                "$day $time"
+            }
+            nowDate.year == instantDate.year -> {
+                val date = DateTimeFormatter.ofPattern("MMM d", locale).format(zonedDateTime)
+                val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale).format(zonedDateTime)
+                "$date, $time"
+            }
+            else -> {
+                DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                    .withLocale(locale)
+                    .format(zonedDateTime)
+            }
+        }
     }
 }

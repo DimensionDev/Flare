@@ -104,7 +104,8 @@ internal class AndroidFormatter(
         val datePattern = getAbsoluteDatePattern(instant, now, timeZone)
         
         val locale = Locale.getDefault()
-        val sdf = SimpleDateFormat("$datePattern $ABSOLUTE_TIME_PATTERN", locale)
+        val pattern = if (datePattern.isEmpty()) ABSOLUTE_TIME_PATTERN else "$datePattern $ABSOLUTE_TIME_PATTERN"
+        val sdf = SimpleDateFormat(pattern, locale)
         return sdf.format(Date(instant.toEpochMilliseconds()))
     }
 }

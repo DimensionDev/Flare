@@ -64,8 +64,9 @@ internal class JVMFormatter : PlatformFormatter {
         val timeZone = TimeZone.currentSystemDefault()
         val datePattern = getAbsoluteDatePattern(instant, now, timeZone)
         
+        val pattern = if (datePattern.isEmpty()) ABSOLUTE_TIME_PATTERN else "$datePattern $ABSOLUTE_TIME_PATTERN"
         val instantZonedDateTime = java.time.Instant.ofEpochMilli(instant.toEpochMilliseconds()).atZone(ZoneId.systemDefault())
-        val formatter = DateTimeFormatter.ofPattern("$datePattern $ABSOLUTE_TIME_PATTERN", Locale.getDefault())
+        val formatter = DateTimeFormatter.ofPattern(pattern, Locale.getDefault())
         return formatter.format(instantZonedDateTime)
     }
 }

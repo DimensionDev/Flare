@@ -42,7 +42,8 @@ internal class AppleFormatter(
 
         val date = NSDate.dateWithTimeIntervalSince1970(instant.toEpochMilliseconds() / 1000.0)
         val formatter = NSDateFormatter().apply {
-            setDateFormat("$datePattern $ABSOLUTE_TIME_PATTERN")
+            val pattern = if (datePattern.isEmpty()) ABSOLUTE_TIME_PATTERN else "$datePattern $ABSOLUTE_TIME_PATTERN"
+            setDateFormat(pattern)
         }
         return formatter.stringFromDate(date)
     }

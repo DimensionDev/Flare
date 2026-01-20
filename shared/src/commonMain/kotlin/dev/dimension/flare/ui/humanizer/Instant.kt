@@ -41,6 +41,7 @@ internal fun getAbsoluteDatePattern(
     val daysDiff = instantDate.daysUntil(nowDate)
 
     return when {
+        daysDiff == 0 -> ""
         daysDiff < 7 -> "EEE"
         nowDate.year == instantDate.year -> "d MMM"
         else -> "yyyy-MM-dd"

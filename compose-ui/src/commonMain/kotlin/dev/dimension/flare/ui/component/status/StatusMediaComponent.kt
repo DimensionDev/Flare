@@ -41,12 +41,12 @@ import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.platform.LocalWifiState
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformFlyoutContainer
 import dev.dimension.flare.ui.component.platform.PlatformIconButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformVideoPlayer
-import dev.dimension.flare.ui.component.platform.rememberPlatformWifiState
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -275,7 +275,7 @@ public fun MediaItem(
         }
 
         is UiMedia.Video -> {
-            val wifiState by rememberPlatformWifiState()
+            val wifiState = LocalWifiState.current
             val shouldPlay =
                 remember(appearanceSettings.videoAutoplay, wifiState) {
                     appearanceSettings.videoAutoplay == ComponentAppearance.VideoAutoplay.ALWAYS ||

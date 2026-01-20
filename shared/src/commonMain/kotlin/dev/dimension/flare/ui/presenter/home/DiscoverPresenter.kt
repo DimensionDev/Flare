@@ -114,7 +114,9 @@ public class DiscoverPresenter :
 
         accounts.onSuccess {
             LaunchedEffect(it.size) {
-                selectedAccountFlow.value = it.firstOrNull()
+                if (selectedAccountFlow.value == null) {
+                    selectedAccountFlow.value = it.firstOrNull()
+                }
             }
         }
 

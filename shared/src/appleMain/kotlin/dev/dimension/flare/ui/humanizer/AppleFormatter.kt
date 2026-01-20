@@ -47,17 +47,19 @@ internal class AppleFormatter(
         val instantDate = instant.toLocalDateTime(timeZone).date
         val daysDiff = instantDate.daysUntil(nowDate)
 
-        val template = when {
-            daysDiff == 0 -> "jm"
-            daysDiff < 7 -> "EEEjm"
-            nowDate.year == instantDate.year -> "MMMdjm"
-            else -> "yyyyMMMdjm"
-        }
+        val template =
+            when {
+                daysDiff == 0 -> "jm"
+                daysDiff < 7 -> "EEEjm"
+                nowDate.year == instantDate.year -> "MMMdjm"
+                else -> "yyyyMMMdjm"
+            }
 
         val date = NSDate.dateWithTimeIntervalSince1970(instant.toEpochMilliseconds() / 1000.0)
-        val formatter = NSDateFormatter().apply {
-            dateFormat = NSDateFormatter.dateFormatFromTemplate(template, 0, NSLocale.currentLocale)
-        }
+        val formatter =
+            NSDateFormatter().apply {
+                dateFormat = NSDateFormatter.dateFormatFromTemplate(template, 0u, NSLocale.currentLocale) ?: template
+            }
         return formatter.stringFromDate(date)
     }
 }

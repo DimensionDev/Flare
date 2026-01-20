@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.humanizer
 
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
-import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toLocalDateTime
 import org.ocpsoft.prettytime.PrettyTime
 import java.math.RoundingMode
@@ -43,10 +42,12 @@ internal class JVMFormatter : PlatformFormatter {
                 prettyTime.format(Date(-diff.inWholeMilliseconds))
             }
             else -> {
-                DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+                DateTimeFormatter
+                    .ofLocalizedDate(FormatStyle.MEDIUM)
                     .withLocale(Locale.getDefault())
                     .format(
-                        instant.toJavaInstant()
+                        java.time.Instant
+                            .ofEpochMilli(instant.toEpochMilliseconds())
                             .atZone(ZoneId.systemDefault())
                             .toLocalDate(),
                     )
@@ -55,10 +56,12 @@ internal class JVMFormatter : PlatformFormatter {
     }
 
     override fun formatFullInstant(instant: Instant): String =
-        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
+        DateTimeFormatter
+            .ofLocalizedDateTime(FormatStyle.MEDIUM)
             .withLocale(Locale.getDefault())
             .format(
-                instant.toJavaInstant()
+                java.time.Instant
+                    .ofEpochMilli(instant.toEpochMilliseconds())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDateTime(),
             )
@@ -71,11 +74,15 @@ internal class JVMFormatter : PlatformFormatter {
         val daysDiff = instantDate.daysUntil(nowDate)
         val locale = Locale.getDefault()
 
-        val zonedDateTime = instant.toJavaInstant().atZone(ZoneId.systemDefault())
+        val zonedDateTime =
+            java.time.Instant
+                .ofEpochMilli(instant.toEpochMilliseconds())
+                .atZone(ZoneId.systemDefault())
 
         return when {
             daysDiff == 0 -> {
-                DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+                DateTimeFormatter
+                    .ofLocalizedTime(FormatStyle.SHORT)
                     .withLocale(locale)
                     .format(zonedDateTime)
             }
@@ -90,7 +97,8 @@ internal class JVMFormatter : PlatformFormatter {
                 "$date, $time"
             }
             else -> {
-                DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+                DateTimeFormatter
+                    .ofLocalizedDateTime(FormatStyle.SHORT)
                     .withLocale(locale)
                     .format(zonedDateTime)
             }

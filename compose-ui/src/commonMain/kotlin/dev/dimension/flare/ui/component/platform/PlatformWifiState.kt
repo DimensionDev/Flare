@@ -1,7 +1,9 @@
 package dev.dimension.flare.ui.component.platform
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.staticCompositionLocalOf
 
-@Composable
-internal expect fun rememberPlatformWifiState(): State<Boolean>
+public val LocalWifiState: ProvidableCompositionLocal<Boolean> =
+    staticCompositionLocalOf {
+        false
+    }

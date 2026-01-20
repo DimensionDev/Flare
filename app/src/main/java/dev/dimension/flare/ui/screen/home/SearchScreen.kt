@@ -95,12 +95,10 @@ internal fun SearchScreen(
                                                 Text(profile.handle)
                                             },
                                             leadingIcon = {
-                                                if (state.searchState.selectedAccount?.key == profile.key) {
-                                                    AvatarComponent(
-                                                        data = profile.avatar,
-                                                        size = 18.dp,
-                                                    )
-                                                }
+                                                AvatarComponent(
+                                                    data = profile.avatar,
+                                                    size = 18.dp,
+                                                )
                                             },
                                         )
                                     }

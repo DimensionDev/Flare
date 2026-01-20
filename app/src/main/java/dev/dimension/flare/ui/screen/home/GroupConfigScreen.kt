@@ -77,7 +77,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun GroupConfigScreen(
-    item: MixedTimelineTabItem? = null,
+    item: MixedTimelineTabItem?,
     onBack: () -> Unit,
     toAddRssSource: () -> Unit,
 ) {

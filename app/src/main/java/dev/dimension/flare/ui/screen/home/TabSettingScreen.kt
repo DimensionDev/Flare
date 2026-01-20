@@ -3,12 +3,15 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -35,6 +38,7 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
+import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
@@ -66,6 +70,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 internal fun TabSettingScreen(
     onBack: () -> Unit,
     toAddRssSource: () -> Unit,
+    toGroupConfig: (MixedTimelineTabItem?) -> Unit,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val haptics = LocalHapticFeedback.current
@@ -101,15 +106,37 @@ internal fun TabSettingScreen(
                     BackButton(onBack = onBack)
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            state.setAddTab(true)
-                        },
-                    ) {
-                        FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.Plus,
-                            contentDescription = stringResource(id = R.string.tab_settings_add),
-                        )
+                    Box {
+                        var showMenu by remember { mutableStateOf(false) }
+                        IconButton(
+                            onClick = {
+                                showMenu = true
+                            },
+                        ) {
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.Plus,
+                                contentDescription = stringResource(id = R.string.tab_settings_add),
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.tab_settings_add_group)) },
+                                onClick = {
+                                    showMenu = false
+                                    toGroupConfig(null)
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.tab_settings_add_tab)) },
+                                onClick = {
+                                    showMenu = false
+                                    state.setAddTab(true)
+                                },
+                            )
+                        }
                     }
                 },
                 scrollBehavior = topAppBarScrollBehavior,
@@ -175,12 +202,15 @@ internal fun TabSettingScreen(
                         }
                     },
                     editTab = {
-                        if (it is TimelineTabItem) {
+                        if (it is MixedTimelineTabItem) {
+                            toGroupConfig(it)
+                        } else if (it is TimelineTabItem) {
                             state.setEditTab(it)
                         }
                     },
                     reorderableLazyColumnState = reorderableLazyColumnState,
                     canSwipeToDelete = state.canSwipeToDelete,
+                    isEditing = state.selectedEditTab == item,
                 )
             }
         }

@@ -400,4 +400,8 @@
             </ul>
         ]]>
     </string>
+    <string name="tab_settings_add_group">Add Group</string>
+    <string name="tab_settings_add_tab">Add Tab</string>
+    <string name="tab_settings_edit_group">Edit Group</string>
+    <string name="tab_settings_group_empty">No tabs in this group</string>
 </resources>

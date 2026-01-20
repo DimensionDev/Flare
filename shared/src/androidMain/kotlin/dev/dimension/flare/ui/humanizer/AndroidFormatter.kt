@@ -4,7 +4,6 @@ import android.content.Context
 import android.icu.text.CompactDecimalFormat
 import android.text.format.DateUtils
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
 import java.math.RoundingMode
 import java.text.SimpleDateFormat
@@ -102,19 +101,10 @@ internal class AndroidFormatter(
     override fun formatAbsoluteInstant(instant: Instant): String {
         val now = Clock.System.now()
         val timeZone = TimeZone.currentSystemDefault()
-        val nowDate = now.toLocalDateTime(timeZone).date
-        val instantDate = instant.toLocalDateTime(timeZone).date
-        val daysDiff = instantDate.daysUntil(nowDate)
-
-        val datePattern = when {
-            daysDiff < 7 -> "EEE"
-            nowDate.year == instantDate.year -> "d MMM"
-            else -> "yyyy-MM-dd"
-        }
-        val timePattern = "h:mma"
-
+        val datePattern = getAbsoluteDatePattern(instant, now, timeZone)
+        
         val locale = Locale.getDefault()
-        val sdf = SimpleDateFormat("$datePattern $timePattern", locale)
+        val sdf = SimpleDateFormat("$datePattern $ABSOLUTE_TIME_PATTERN", locale)
         return sdf.format(Date(instant.toEpochMilliseconds()))
     }
 }

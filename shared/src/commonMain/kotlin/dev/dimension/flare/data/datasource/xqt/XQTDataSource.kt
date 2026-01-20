@@ -616,7 +616,6 @@ internal class XQTDataSource(
 
     override fun searchUser(
         query: String,
-        scope: CoroutineScope,
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
@@ -627,7 +626,7 @@ internal class XQTDataSource(
                 accountKey = accountKey,
                 query = query,
             )
-        }.flow.cachedIn(scope)
+        }.flow
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
         Pager(

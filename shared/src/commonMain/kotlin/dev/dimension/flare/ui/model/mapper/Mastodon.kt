@@ -370,61 +370,29 @@ private fun Status.renderStatus(
                 )
             },
         actions =
-            listOfNotNull(
-                ActionMenu.Item(
-                    icon = ActionMenu.Item.Icon.Reply,
-                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
-                    count = UiNumber(repliesCount ?: 0),
-                    onClicked = {
-                        if (accountKey != null) {
-                            launcher.launch(
-                                DeeplinkRoute.Compose
-                                    .Reply(
-                                        accountKey = accountKey,
-                                        statusKey = statusKey,
-                                    ).toUri(),
-                            )
-                        }
-                    },
-                ),
-                if (canReblog && quoteApproval != null && accountKey != null) {
-                    ActionMenu.Group(
-                        displayItem =
-                            ActionMenu.Item(
-                                icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
-                                text =
-                                    ActionMenu.Item.Text.Localized(
-                                        if (reblogged ==
-                                            true
-                                        ) {
-                                            ActionMenu.Item.Text.Localized.Type.Unretweet
-                                        } else {
-                                            ActionMenu.Item.Text.Localized.Type.Retweet
-                                        },
-                                    ),
-                                count = UiNumber(reblogsCount ?: 0),
-                                color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
-                            ),
-                        actions =
-                            listOfNotNull(
-                                if (canQuote) {
-                                    ActionMenu.Item(
-                                        icon = ActionMenu.Item.Icon.Quote,
-                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
-                                        count = UiNumber(quotesCount ?: 0),
-                                        onClicked = {
-                                            launcher.launch(
-                                                DeeplinkRoute.Compose
-                                                    .Quote(
-                                                        accountKey = accountKey,
-                                                        statusKey = statusKey,
-                                                    ).toUri(),
-                                            )
-                                        },
-                                    )
-                                } else {
-                                    null
-                                },
+            buildList {
+                add(
+                    ActionMenu.Item(
+                        icon = ActionMenu.Item.Icon.Reply,
+                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
+                        count = UiNumber(repliesCount ?: 0),
+                        onClicked = {
+                            if (accountKey != null) {
+                                launcher.launch(
+                                    DeeplinkRoute.Compose
+                                        .Reply(
+                                            accountKey = accountKey,
+                                            statusKey = statusKey,
+                                        ).toUri(),
+                                )
+                            }
+                        },
+                    ),
+                )
+                if (canReblog && canQuote && accountKey != null) {
+                    add(
+                        ActionMenu.Group(
+                            displayItem =
                                 ActionMenu.Item(
                                     icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
                                     text =
@@ -439,216 +407,265 @@ private fun Status.renderStatus(
                                         ),
                                     count = UiNumber(reblogsCount ?: 0),
                                     color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
-                                    onClicked = {
-                                        dataSource?.reblog(statusKey, reblogged ?: false)
-                                    },
                                 ),
-                            ).toImmutableList(),
+                            actions =
+                                buildList {
+                                    if (canQuote) {
+                                        add(
+                                            ActionMenu.Item(
+                                                icon = ActionMenu.Item.Icon.Quote,
+                                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
+                                                count = UiNumber(quotesCount ?: 0),
+                                                onClicked = {
+                                                    launcher.launch(
+                                                        DeeplinkRoute.Compose
+                                                            .Quote(
+                                                                accountKey = accountKey,
+                                                                statusKey = statusKey,
+                                                            ).toUri(),
+                                                    )
+                                                },
+                                            ),
+                                        )
+                                    }
+                                    add(
+                                        ActionMenu.Item(
+                                            icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
+                                            text =
+                                                ActionMenu.Item.Text.Localized(
+                                                    if (reblogged ==
+                                                        true
+                                                    ) {
+                                                        ActionMenu.Item.Text.Localized.Type.Unretweet
+                                                    } else {
+                                                        ActionMenu.Item.Text.Localized.Type.Retweet
+                                                    },
+                                                ),
+                                            count = UiNumber(reblogsCount ?: 0),
+                                            color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
+                                            onClicked = {
+                                                dataSource?.reblog(statusKey, reblogged ?: false)
+                                            },
+                                        ),
+                                    )
+                                }.toImmutableList(),
+                        ),
                     )
-                } else {
-                    ActionMenu.Item(
-                        icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
-                        text =
-                            ActionMenu.Item.Text.Localized(
-                                if (reblogged ==
-                                    true
-                                ) {
-                                    ActionMenu.Item.Text.Localized.Type.Unretweet
-                                } else {
-                                    ActionMenu.Item.Text.Localized.Type.Retweet
-                                },
-                            ),
-                        count = UiNumber(reblogsCount ?: 0),
-                        color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
-                    )
-                },
-                if (quoteApproval == null && canQuote) {
-                    ActionMenu.Item(
-                        icon = ActionMenu.Item.Icon.Quote,
-                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
-                        count = UiNumber(quotesCount ?: 0),
-                        onClicked = {
-                            if (accountKey != null) {
-                                launcher.launch(
-                                    DeeplinkRoute.Compose
-                                        .Quote(
-                                            accountKey = accountKey,
-                                            statusKey = statusKey,
-                                        ).toUri(),
-                                )
-                            }
-                        },
-                    )
-                } else {
-                    null
-                },
-                if (quoteApproval == null && canReblog) {
-                    ActionMenu.Item(
-                        icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
-                        text =
-                            ActionMenu.Item.Text.Localized(
-                                if (reblogged ==
-                                    true
-                                ) {
-                                    ActionMenu.Item.Text.Localized.Type.Unretweet
-                                } else {
-                                    ActionMenu.Item.Text.Localized.Type.Retweet
-                                },
-                            ),
-                        count = UiNumber(reblogsCount ?: 0),
-                        color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
-                        onClicked = {
-                            dataSource?.reblog(statusKey, reblogged ?: false)
-                        },
-                    )
-                } else {
-                    null
-                },
-                ActionMenu.Item(
-                    icon = if (favourited == true) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
-                    text =
-                        ActionMenu.Item.Text.Localized(
-                            if (favourited ==
-                                true
-                            ) {
-                                ActionMenu.Item.Text.Localized.Type.Unlike
-                            } else {
-                                ActionMenu.Item.Text.Localized.Type.Like
+                } else if (canQuote) {
+                    add(
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.Quote,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
+                            count = UiNumber(quotesCount ?: 0),
+                            onClicked = {
+                                if (accountKey != null) {
+                                    launcher.launch(
+                                        DeeplinkRoute.Compose
+                                            .Quote(
+                                                accountKey = accountKey,
+                                                statusKey = statusKey,
+                                            ).toUri(),
+                                    )
+                                }
                             },
                         ),
-                    count = UiNumber(favouritesCount ?: 0),
-                    color = if (favourited == true) ActionMenu.Item.Color.Red else null,
-                    onClicked = {
-                        dataSource?.like(statusKey, favourited ?: false)
-                    },
-                ),
-                if (canReact) {
-                    ActionMenu.Item(
-                        icon = ActionMenu.Item.Icon.React,
-                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.React),
-                        onClicked = {
-                            if (accountKey != null) {
-                                launcher.launch(
-                                    DeeplinkRoute.Status
-                                        .AddReaction(
-                                            statusKey = statusKey,
-                                            accountType = AccountType.Specific(accountKey),
-                                        ).toUri(),
-                                )
-                            }
-                        },
+                    )
+                } else if (canReblog) {
+                    add(
+                        ActionMenu.Item(
+                            icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
+                            text =
+                                ActionMenu.Item.Text.Localized(
+                                    if (reblogged ==
+                                        true
+                                    ) {
+                                        ActionMenu.Item.Text.Localized.Type.Unretweet
+                                    } else {
+                                        ActionMenu.Item.Text.Localized.Type.Retweet
+                                    },
+                                ),
+                            count = UiNumber(reblogsCount ?: 0),
+                            color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
+                            onClicked = {
+                                dataSource?.reblog(statusKey, reblogged ?: false)
+                            },
+                        ),
                     )
                 } else {
-                    null
-                },
-                ActionMenu.Group(
-                    displayItem =
+                    add(
                         ActionMenu.Item(
-                            icon = ActionMenu.Item.Icon.More,
-                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                            icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
+                            text =
+                                ActionMenu.Item.Text.Localized(
+                                    if (reblogged ==
+                                        true
+                                    ) {
+                                        ActionMenu.Item.Text.Localized.Type.Unretweet
+                                    } else {
+                                        ActionMenu.Item.Text.Localized.Type.Retweet
+                                    },
+                                ),
+                            count = UiNumber(reblogsCount ?: 0),
+                            color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
                         ),
-                    actions =
-                        buildList {
-                            if (accountKey != null) {
-                                add(
-                                    ActionMenu.Item(
-                                        icon = if (bookmarked == true) ActionMenu.Item.Icon.Unbookmark else ActionMenu.Item.Icon.Bookmark,
-                                        text =
-                                            ActionMenu.Item.Text.Localized(
+                    )
+                }
+                add(
+                    ActionMenu.Item(
+                        icon = if (favourited == true) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
+                        text =
+                            ActionMenu.Item.Text.Localized(
+                                if (favourited ==
+                                    true
+                                ) {
+                                    ActionMenu.Item.Text.Localized.Type.Unlike
+                                } else {
+                                    ActionMenu.Item.Text.Localized.Type.Like
+                                },
+                            ),
+                        count = UiNumber(favouritesCount ?: 0),
+                        color = if (favourited == true) ActionMenu.Item.Color.Red else null,
+                        onClicked = {
+                            dataSource?.like(statusKey, favourited ?: false)
+                        },
+                    ),
+                )
+                if (canReact) {
+                    add(
+                        ActionMenu.Item(
+                            icon = ActionMenu.Item.Icon.React,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.React),
+                            onClicked = {
+                                if (accountKey != null) {
+                                    launcher.launch(
+                                        DeeplinkRoute.Status
+                                            .AddReaction(
+                                                statusKey = statusKey,
+                                                accountType = AccountType.Specific(accountKey),
+                                            ).toUri(),
+                                    )
+                                }
+                            },
+                        ),
+                    )
+                }
+                add(
+                    ActionMenu.Group(
+                        displayItem =
+                            ActionMenu.Item(
+                                icon = ActionMenu.Item.Icon.More,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                            ),
+                        actions =
+                            buildList {
+                                if (accountKey != null) {
+                                    add(
+                                        ActionMenu.Item(
+                                            icon =
                                                 if (bookmarked ==
                                                     true
                                                 ) {
-                                                    ActionMenu.Item.Text.Localized.Type.Unbookmark
+                                                    ActionMenu.Item.Icon.Unbookmark
                                                 } else {
-                                                    ActionMenu.Item.Text.Localized.Type.Bookmark
+                                                    ActionMenu.Item.Icon.Bookmark
                                                 },
-                                            ),
-                                        count = UiNumber(0),
-                                        onClicked = {
-                                            dataSource?.bookmark(statusKey, bookmarked ?: false)
-                                        },
+                                            text =
+                                                ActionMenu.Item.Text.Localized(
+                                                    if (bookmarked ==
+                                                        true
+                                                    ) {
+                                                        ActionMenu.Item.Text.Localized.Type.Unbookmark
+                                                    } else {
+                                                        ActionMenu.Item.Text.Localized.Type.Bookmark
+                                                    },
+                                                ),
+                                            count = UiNumber(0),
+                                            onClicked = {
+                                                dataSource?.bookmark(statusKey, bookmarked ?: false)
+                                            },
+                                        ),
+                                    )
+                                }
+                                add(
+                                    ActionMenu.Item(
+                                        icon = ActionMenu.Item.Icon.Share,
+                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
+                                        shareContent = postUrl,
                                     ),
                                 )
-                            }
-                            add(
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Share,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                    shareContent = postUrl,
-                                ),
-                            )
 
-                            if (isFromMe) {
-                                add(
-                                    ActionMenu.Item(
-                                        icon = ActionMenu.Item.Icon.Delete,
-                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
-                                        color = ActionMenu.Item.Color.Red,
-                                        onClicked = {
-                                            launcher.launch(
-                                                DeeplinkRoute.Status
-                                                    .DeleteConfirm(
-                                                        accountType =
-                                                            AccountType.Specific(
-                                                                accountKey,
-                                                            ),
-                                                        statusKey = statusKey,
-                                                    ).toUri(),
-                                            )
-                                        },
-                                    ),
-                                )
-                            } else {
-                                add(ActionMenu.Divider)
-                                addAll(
-                                    userActionsMenu(
-                                        accountKey = accountKey,
-                                        userKey = actualUser.key,
-                                        handle = actualUser.handle,
-                                    ),
-                                )
-                                add(ActionMenu.Divider)
-                                add(
-                                    ActionMenu.Item(
-                                        icon = ActionMenu.Item.Icon.Report,
-                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
-                                        color = ActionMenu.Item.Color.Red,
-                                        onClicked = {
-                                            if (accountKey != null) {
+                                if (isFromMe) {
+                                    add(
+                                        ActionMenu.Item(
+                                            icon = ActionMenu.Item.Icon.Delete,
+                                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                            color = ActionMenu.Item.Color.Red,
+                                            onClicked = {
                                                 launcher.launch(
                                                     DeeplinkRoute.Status
-                                                        .MastodonReport(
-                                                            statusKey = statusKey,
-                                                            userKey = actualUser.key,
+                                                        .DeleteConfirm(
                                                             accountType =
                                                                 AccountType.Specific(
                                                                     accountKey,
                                                                 ),
-                                                        ).toUri(),
-                                                )
-                                            } else {
-                                                launcher.launch(
-                                                    DeeplinkRoute.Status
-                                                        .MastodonReport(
                                                             statusKey = statusKey,
-                                                            userKey = actualUser.key,
-                                                            accountType =
-                                                                AccountType.Specific(
-                                                                    MicroBlogKey(
-                                                                        "",
-                                                                        "",
-                                                                    ),
-                                                                ),
                                                         ).toUri(),
                                                 )
-                                            }
-                                        },
-                                    ),
-                                )
-                            }
-                        }.toImmutableList(),
-                ),
-            ).toImmutableList(),
+                                            },
+                                        ),
+                                    )
+                                } else {
+                                    add(ActionMenu.Divider)
+                                    addAll(
+                                        userActionsMenu(
+                                            accountKey = accountKey,
+                                            userKey = actualUser.key,
+                                            handle = actualUser.handle,
+                                        ),
+                                    )
+                                    add(ActionMenu.Divider)
+                                    add(
+                                        ActionMenu.Item(
+                                            icon = ActionMenu.Item.Icon.Report,
+                                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                            color = ActionMenu.Item.Color.Red,
+                                            onClicked = {
+                                                if (accountKey != null) {
+                                                    launcher.launch(
+                                                        DeeplinkRoute.Status
+                                                            .MastodonReport(
+                                                                statusKey = statusKey,
+                                                                userKey = actualUser.key,
+                                                                accountType =
+                                                                    AccountType.Specific(
+                                                                        accountKey,
+                                                                    ),
+                                                            ).toUri(),
+                                                    )
+                                                } else {
+                                                    launcher.launch(
+                                                        DeeplinkRoute.Status
+                                                            .MastodonReport(
+                                                                statusKey = statusKey,
+                                                                userKey = actualUser.key,
+                                                                accountType =
+                                                                    AccountType.Specific(
+                                                                        MicroBlogKey(
+                                                                            "",
+                                                                            "",
+                                                                        ),
+                                                                    ),
+                                                            ).toUri(),
+                                                    )
+                                                }
+                                            },
+                                        ),
+                                    )
+                                }
+                            }.toImmutableList(),
+                    ),
+                )
+            }.toImmutableList(),
         poll =
             poll?.let {
                 UiPoll(

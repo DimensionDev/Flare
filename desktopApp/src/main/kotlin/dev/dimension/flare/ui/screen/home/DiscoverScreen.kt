@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -47,7 +48,8 @@ import dev.dimension.flare.hashtags
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.statues
-import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Header
 import dev.dimension.flare.ui.component.platform.placeholder
@@ -66,6 +68,8 @@ import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.component.AutoSuggestBoxDefaults
 import io.github.composefluent.component.AutoSuggestionBox
 import io.github.composefluent.component.ListItem
+import io.github.composefluent.component.LiteFilter
+import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
@@ -78,14 +82,13 @@ import org.jetbrains.compose.resources.stringResource
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFluentApi::class)
 @Composable
 internal fun DiscoverScreen(
-    accountType: AccountType,
-    toUser: (MicroBlogKey) -> Unit,
-    toSearch: (String) -> Unit,
+    toUser: (AccountType, MicroBlogKey) -> Unit,
+    toSearch: (AccountType, String) -> Unit,
 ) {
     val state by producePresenter(
-        key = "discover_$accountType",
+        key = "discover",
     ) {
-        presenter(accountType)
+        presenter()
     }
     val lazyListState = rememberLazyStaggeredGridState()
     RegisterTabCallback(lazyListState = lazyListState, onRefresh = state::refresh)
@@ -95,148 +98,169 @@ internal fun DiscoverScreen(
         state = lazyListState,
         contentPadding = LocalWindowPadding.current,
     ) {
-        if (true) {
-            item(
-                span = StaggeredGridItemSpan.FullLine,
+        item(
+            span = StaggeredGridItemSpan.FullLine,
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
+                AutoSuggestionBox(
+                    expanded = state.isHistoryExpanded,
+                    onExpandedChange = state::setHistoryExpanded,
                 ) {
-                    AutoSuggestionBox(
-                        expanded = state.isHistoryExpanded,
-                        onExpandedChange = state::setHistoryExpanded,
-                    ) {
-                        TextField(
-                            state = state.textState,
-                            shape = AutoSuggestBoxDefaults.textFieldShape(state.isHistoryExpanded),
-                            modifier = Modifier.widthIn(300.dp).flyoutAnchor(),
-                            lineLimits = TextFieldLineLimits.SingleLine,
-                            onKeyboardAction = {
-                                if (state.textState.text.isNotBlank()) {
-                                    toSearch(state.textState.text.toString())
+                    TextField(
+                        state = state.textState,
+                        shape = AutoSuggestBoxDefaults.textFieldShape(state.isHistoryExpanded),
+                        modifier = Modifier.widthIn(300.dp).flyoutAnchor(),
+                        lineLimits = TextFieldLineLimits.SingleLine,
+                        onKeyboardAction = {
+                            if (state.textState.text.isNotBlank()) {
+                                state.selectedAccount?.let { user ->
+                                    toSearch(
+                                        AccountType.Specific(user.key),
+                                        state.textState.text.toString(),
+                                    )
                                 }
-                            },
-                            keyboardOptions =
-                                KeyboardOptions(
-                                    imeAction = ImeAction.Search,
-                                ),
-                            trailing = {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.MagnifyingGlass,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                            },
-                        )
-                        state.searchHistories.onSuccess { history ->
-                            val searchResult by remember(history) {
-                                snapshotFlow { state.textState.text }.map {
-                                    history.toImmutableList().filter { item ->
-                                        item.keyword.contains(
-                                            it,
-                                            ignoreCase = true,
-                                        )
-                                    }
-                                }
-                            }.collectAsState(emptyList())
-
-                            AutoSuggestBoxDefaults.suggestFlyout(
-                                expanded = state.isHistoryExpanded,
-                                onDismissRequest = { state.setHistoryExpanded(false) },
-                                itemsContent = {
-                                    items(searchResult) {
-                                        ListItem(
-                                            onClick = {
-                                                toSearch(it.keyword)
-                                                state.setHistoryExpanded(false)
-                                            },
-                                            text = { Text(it.keyword, maxLines = 1) },
-                                            modifier = Modifier.fillMaxWidth(),
-                                            trailing = {
-                                                SubtleButton(
-                                                    onClick = {
-                                                        state.deleteSearchHistory(it.keyword)
-                                                    },
-                                                ) {
-                                                    FAIcon(
-                                                        FontAwesomeIcons.Solid.Trash,
-                                                        contentDescription = stringResource(Res.string.delete),
-                                                    )
-                                                }
-                                            },
-                                        )
-                                    }
-                                },
-                                modifier = Modifier.flyoutSize(matchAnchorWidth = true),
+                            }
+                        },
+                        keyboardOptions =
+                            KeyboardOptions(
+                                imeAction = ImeAction.Search,
+                            ),
+                        trailing = {
+                            FAIcon(
+                                FontAwesomeIcons.Solid.MagnifyingGlass,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
                             )
-                        }
+                        },
+                    )
+                    state.searchHistories.onSuccess { history ->
+                        val searchResult by remember(history) {
+                            snapshotFlow { state.textState.text }.map {
+                                history.toImmutableList().filter { item ->
+                                    item.keyword.contains(
+                                        it,
+                                        ignoreCase = true,
+                                    )
+                                }
+                            }
+                        }.collectAsState(emptyList())
+
+                        AutoSuggestBoxDefaults.suggestFlyout(
+                            expanded = state.isHistoryExpanded,
+                            onDismissRequest = { state.setHistoryExpanded(false) },
+                            itemsContent = {
+                                items(searchResult) {
+                                    ListItem(
+                                        onClick = {
+                                            state.selectedAccount?.let { user ->
+                                                toSearch(AccountType.Specific(user.key), it.keyword)
+                                            }
+                                            state.setHistoryExpanded(false)
+                                        },
+                                        text = { Text(it.keyword, maxLines = 1) },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        trailing = {
+                                            SubtleButton(
+                                                onClick = {
+                                                    state.deleteSearchHistory(it.keyword)
+                                                },
+                                            ) {
+                                                FAIcon(
+                                                    FontAwesomeIcons.Solid.Trash,
+                                                    contentDescription = stringResource(Res.string.delete),
+                                                )
+                                            }
+                                        },
+                                    )
+                                }
+                            },
+                            modifier = Modifier.flyoutSize(matchAnchorWidth = true),
+                        )
                     }
                 }
             }
-            state.users
-                .onSuccess {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
+        }
+        state.accounts.onSuccess { accounts ->
+            if (accounts.size > 1) {
+                item(
+                    span = StaggeredGridItemSpan.FullLine,
+                ) {
+                    LiteFilter(
+                        modifier =
+                            Modifier
+                                .padding(top = 8.dp),
                     ) {
-                        Header(stringResource(Res.string.users))
-                    }
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        LazyHorizontalGrid(
-                            modifier = Modifier.height(128.dp),
-                            rows = GridCells.Fixed(2),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            items(
-                                itemCount,
-                            ) {
-                                val user = get(it)
-                                Card(
-                                    modifier =
-                                        Modifier
-                                            .width(256.dp),
-                                    onClick = {
-                                    },
-                                ) {
-                                    if (user != null) {
-                                        CommonStatusHeaderComponent(
-                                            data = user,
-                                            onUserClick = toUser,
-                                            modifier = Modifier.padding(8.dp),
-                                        )
-                                    } else {
-                                        UserPlaceholder(
-                                            modifier = Modifier.padding(8.dp),
-                                        )
+                        accounts.forEach { profile ->
+                            PillButton(
+                                selected = state.selectedAccount?.key == profile.key,
+                                onSelectedChanged = {
+                                    if (it) {
+                                        state.setAccount(profile)
                                     }
+                                },
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    AvatarComponent(
+                                        data = profile.avatar,
+                                        size = AvatarComponentDefaults.compatSize,
+                                    )
+                                    Text(
+                                        profile.handle,
+                                        maxLines = 1,
+                                        modifier = Modifier.padding(start = 8.dp),
+                                    )
                                 }
                             }
                         }
                     }
-                }.onLoading {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
+                }
+            }
+        }
+        state.users
+            .onSuccess {
+                item(
+                    span = StaggeredGridItemSpan.FullLine,
+                ) {
+                    Header(stringResource(Res.string.users))
+                }
+                item(
+                    span = StaggeredGridItemSpan.FullLine,
+                ) {
+                    LazyHorizontalGrid(
+                        modifier = Modifier.height(128.dp),
+                        rows = GridCells.Fixed(2),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Header(stringResource(Res.string.users))
-                    }
-
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        LazyHorizontalGrid(
-                            modifier = Modifier.height(128.dp),
-                            rows = GridCells.Fixed(2),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        items(
+                            itemCount,
                         ) {
-                            items(10) {
-                                Card(
-                                    modifier =
-                                        Modifier
-                                            .width(256.dp),
-                                ) {
+                            val user = get(it)
+                            Card(
+                                modifier =
+                                    Modifier
+                                        .width(256.dp),
+                                onClick = {
+                                },
+                            ) {
+                                if (user != null) {
+                                    CommonStatusHeaderComponent(
+                                        data = user,
+                                        onUserClick = {
+                                            state.selectedAccount?.let {
+                                                toUser.invoke(
+                                                    AccountType.Specific(it.key),
+                                                    user.key,
+                                                )
+                                            }
+                                        },
+                                        modifier = Modifier.padding(8.dp),
+                                    )
+                                } else {
                                     UserPlaceholder(
                                         modifier = Modifier.padding(8.dp),
                                     )
@@ -245,83 +269,113 @@ internal fun DiscoverScreen(
                         }
                     }
                 }
-            state.hashtags.onSuccess {
+            }.onLoading {
                 item(
                     span = StaggeredGridItemSpan.FullLine,
                 ) {
-                    Header(stringResource(Res.string.hashtags))
+                    Header(stringResource(Res.string.users))
                 }
+
                 item(
                     span = StaggeredGridItemSpan.FullLine,
                 ) {
-                    FlowRow(
+                    LazyHorizontalGrid(
+                        modifier = Modifier.height(128.dp),
+                        rows = GridCells.Fixed(2),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        repeat(
-                            itemCount,
-                        ) {
-                            val hashtag = get(it)
+                        items(10) {
                             Card(
-                                modifier = Modifier.weight(1f),
-                                onClick = {
-                                    hashtag?.searchContent?.let { it1 ->
-                                        toSearch(it1)
-                                    }
-                                },
+                                modifier =
+                                    Modifier
+                                        .width(256.dp),
                             ) {
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .padding(8.dp),
-                                ) {
-                                    if (hashtag != null) {
-                                        Text(
-                                            text = hashtag.hashtag,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
-                                    } else {
-                                        Text(
-                                            text = "Lorem Ipsum is simply dummy text",
-                                            modifier =
-                                                Modifier.placeholder(
-                                                    true,
-                                                ),
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
+                                UserPlaceholder(
+                                    modifier = Modifier.padding(8.dp),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        state.hashtags.onSuccess {
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
+                Header(stringResource(Res.string.hashtags))
+            }
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    repeat(
+                        itemCount,
+                    ) {
+                        val hashtag = get(it)
+                        Card(
+                            onClick = {
+                                hashtag?.searchContent?.let { it1 ->
+                                    state.selectedAccount?.let { user ->
+                                        toSearch(AccountType.Specific(user.key), it1)
                                     }
+                                }
+                            },
+                        ) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .padding(8.dp),
+                            ) {
+                                if (hashtag != null) {
+                                    Text(
+                                        text = hashtag.hashtag,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                } else {
+                                    Text(
+                                        text = "Lorem Ipsum is simply dummy text",
+                                        modifier =
+                                            Modifier.placeholder(
+                                                true,
+                                            ),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
                                 }
                             }
                         }
                     }
                 }
             }
-            state.status
-                .onSuccess {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        Header(stringResource(Res.string.statues))
-                    }
-                    status(state.status)
-                }.onLoading {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        Header(stringResource(Res.string.statues))
-                    }
-                    status(state.status)
-                }
         }
+        state.status
+            .onSuccess {
+                item(
+                    span = StaggeredGridItemSpan.FullLine,
+                ) {
+                    Header(stringResource(Res.string.statues))
+                }
+                status(state.status)
+            }.onLoading {
+                item(
+                    span = StaggeredGridItemSpan.FullLine,
+                ) {
+                    Header(stringResource(Res.string.statues))
+                }
+                status(state.status)
+            }
     }
 }
 
 @Composable
-private fun presenter(accountType: AccountType) =
+private fun presenter() =
     run {
-        val state = remember(accountType) { DiscoverPresenter(accountType = accountType) }.invoke()
+        val state = remember { DiscoverPresenter() }.invoke()
         val scope = rememberCoroutineScope()
 
         val textState = rememberTextFieldState()

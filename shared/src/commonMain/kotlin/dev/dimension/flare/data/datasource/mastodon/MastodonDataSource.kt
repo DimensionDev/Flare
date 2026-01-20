@@ -814,7 +814,6 @@ internal open class MastodonDataSource(
 
     override fun searchUser(
         query: String,
-        scope: CoroutineScope,
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
@@ -826,7 +825,7 @@ internal open class MastodonDataSource(
                 query = query,
                 host = accountKey.host,
             )
-        }.flow.cachedIn(scope)
+        }.flow
 
     fun searchFollowing(
         query: String,

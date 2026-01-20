@@ -143,7 +143,6 @@ internal class GuestMastodonDataSource(
 
     override fun searchUser(
         query: String,
-        scope: CoroutineScope,
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
@@ -155,7 +154,7 @@ internal class GuestMastodonDataSource(
                 accountKey = null,
                 query,
             )
-        }.flow.cachedIn(scope)
+        }.flow
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> {
         // not supported

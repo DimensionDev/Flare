@@ -442,7 +442,6 @@ internal class VVODataSource(
 
     override fun searchUser(
         query: String,
-        scope: CoroutineScope,
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
@@ -453,7 +452,7 @@ internal class VVODataSource(
                 accountKey = accountKey,
                 query = query,
             )
-        }.flow.cachedIn(scope)
+        }.flow
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> {
         TODO("Not yet implemented")

@@ -11,13 +11,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -35,9 +37,8 @@ import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.common.isCompat
-import dev.dimension.flare.ui.common.isNormal
 import dev.dimension.flare.ui.common.items
+import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.SearchBar
@@ -49,6 +50,7 @@ import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
@@ -59,13 +61,8 @@ import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun DiscoverScreen(
-    accountType: AccountType,
-    onUserClick: (MicroBlogKey) -> Unit,
-    onAccountClick: () -> Unit,
-) {
-    val windowInfo = currentWindowAdaptiveInfo()
-    val state by producePresenter("discover_$accountType") { discoverPresenter(accountType) }
+internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
+    val state by producePresenter("discover") { discoverPresenter() }
     val lazyListState = rememberLazyStaggeredGridState()
     RegisterTabCallback(
         lazyListState = lazyListState,
@@ -86,7 +83,6 @@ internal fun DiscoverScreen(
             ) {
                 SearchBar(
                     state = state,
-                    onAccountClick = onAccountClick,
                     onSearch = {
                         state.commitSearch(it)
                     },
@@ -106,11 +102,45 @@ internal fun DiscoverScreen(
                     state = lazyListState,
                     contentPadding = contentPadding,
                 ) {
+                    state.accounts.onSuccess { accounts ->
+                        if (accounts.size > 1) {
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.padding(bottom = 8.dp),
+                                ) {
+                                    items(accounts) { profile ->
+                                        FilterChip(
+                                            selected = state.selectedAccount?.key == profile.key,
+                                            onClick = {
+                                                state.setAccount(profile)
+                                            },
+                                            label = {
+                                                Text(profile.handle)
+                                            },
+                                            leadingIcon = {
+                                                AvatarComponent(
+                                                    data = profile.avatar,
+                                                    size = 18.dp,
+                                                )
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                     if (state.isInSearchMode) {
                         searchContent(
                             searchUsers = state.searchState.users,
                             searchStatus = state.searchState.status,
-                            toUser = onUserClick,
+                            toUser = { key ->
+                                state.searchState.selectedAccount?.let { account ->
+                                    onUserClick(AccountType.Specific(account.key), key)
+                                }
+                            },
                         )
                     } else {
                         if (state.users.isLoading || state.users.isSuccess()) {
@@ -157,7 +187,12 @@ internal fun DiscoverScreen(
                                                 modifier = Modifier.padding(8.dp),
                                                 data = item,
                                                 onUserClick = {
-                                                    onUserClick(item.key)
+                                                    state.selectedAccount?.let { account ->
+                                                        onUserClick(
+                                                            AccountType.Specific(account.key),
+                                                            item.key,
+                                                        )
+                                                    }
                                                 },
                                             )
                                         }
@@ -184,20 +219,9 @@ internal fun DiscoverScreen(
                             item(
                                 span = StaggeredGridItemSpan.FullLine,
                             ) {
-                                val maxItemsInEachRow =
-                                    if (windowInfo.windowSizeClass.isCompat()
-                                    ) {
-                                        2
-                                    } else if (windowInfo.windowSizeClass.isNormal()
-                                    ) {
-                                        4
-                                    } else {
-                                        8
-                                    }
                                 FlowRow(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     verticalArrangement = Arrangement.spacedBy(4.dp),
-                                    maxItemsInEachRow = maxItemsInEachRow,
                                 ) {
                                     repeat(
                                         itemCount,
@@ -206,7 +230,6 @@ internal fun DiscoverScreen(
                                         AdaptiveCard(
                                             modifier =
                                                 Modifier
-                                                    .weight(1f)
                                                     .clickable {
                                                         hashtag?.searchContent?.let { it1 ->
                                                             state.commitSearch(
@@ -285,15 +308,21 @@ internal fun DiscoverScreen(
 }
 
 @Composable
-private fun discoverPresenter(accountType: AccountType) =
+private fun discoverPresenter() =
     run {
         val scope = rememberCoroutineScope()
-        val state = remember(accountType) { DiscoverPresenter(accountType = accountType) }.invoke()
-        val searchBarState = searchBarPresenter(accountType = accountType)
+        val state = remember { DiscoverPresenter() }.invoke()
+        val searchBarState = searchBarPresenter()
         val searchState =
             remember {
-                SearchPresenter(accountType = accountType)
+                SearchPresenter(accountType = state.selectedAccountType)
             }.invoke()
+
+        LaunchedEffect(state.selectedAccount) {
+            state.selectedAccount?.let { profile ->
+                searchState.setAccount(profile)
+            }
+        }
 
         object : DiscoverState by state, SearchBarState by searchBarState {
             val searchState = searchState

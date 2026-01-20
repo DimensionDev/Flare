@@ -50,10 +50,8 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
     }
     entry<Route.Discover> { args ->
         DiscoverScreen(
-            accountType = args.accountType,
-            onUserClick = { navigate(Route.Profile.User(args.accountType, it)) },
-            onAccountClick = {
-                openDrawer.invoke()
+            onUserClick = { accountType, userKey ->
+                navigate(Route.Profile.User(accountType, userKey))
             },
         )
     }
@@ -64,10 +62,9 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
         SearchScreen(
             initialQuery = args.query,
             accountType = args.accountType,
-            onAccountClick = {
-                openDrawer.invoke()
+            onUserClick = { accountType, userKey ->
+                navigate(Route.Profile.User(accountType, userKey))
             },
-            onUserClick = { navigate(Route.Profile.User(args.accountType, it)) },
         )
     }
     entry<Route.TabSettings>(

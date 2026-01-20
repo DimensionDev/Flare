@@ -26,7 +26,7 @@ extension TabItem {
         case .settingsTabItem:
             SettingsScreen()
         case .discoverTabItem(let discoverTabItem):
-            DiscoverScreen(accountType: discoverTabItem.account)
+            DiscoverScreen()
         case .allListTabItem(let allListTabItem):
             AllListScreen(accountType: allListTabItem.account)
         case .feedsTabItem(let feedsTabItem):

@@ -51,7 +51,7 @@ public class EditListMemberPresenter(
                         remember(service, filter) {
                             require(service is ListDataSource)
                             combine(
-                                service.searchUser(query = filter, scope = scope),
+                                service.searchUser(query = filter),
                                 service.listMemberCache(listId),
                             ) { pagingData, cache ->
                                 pagingData.map { user ->

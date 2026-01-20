@@ -4,13 +4,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.LoadState
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
@@ -228,6 +234,10 @@ internal fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
         return PagingState.Empty(this::refresh)
     }
 }
+
+@Composable
+internal fun <T : Any> Flow<PagingData<T>>.cachePagingState(scope: CoroutineScope = rememberCoroutineScope()) =
+    remember(this) { this.cachedIn(scope) }.collectAsLazyPagingItems().toPagingState()
 
 internal fun <T : Any> UiState<PagingState<T>>.flatten(): PagingState<T> =
     when (this) {

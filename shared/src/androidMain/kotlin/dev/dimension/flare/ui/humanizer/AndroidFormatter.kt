@@ -102,7 +102,7 @@ internal class AndroidFormatter(
         val now = Clock.System.now()
         val timeZone = TimeZone.currentSystemDefault()
         val datePattern = getAbsoluteDatePattern(instant, now, timeZone)
-        
+
         val locale = Locale.getDefault()
         val pattern = if (datePattern.isEmpty()) ABSOLUTE_TIME_PATTERN else "$datePattern $ABSOLUTE_TIME_PATTERN"
         val sdf = SimpleDateFormat(pattern, locale)

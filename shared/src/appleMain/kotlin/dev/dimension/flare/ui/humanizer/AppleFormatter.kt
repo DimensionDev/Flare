@@ -41,10 +41,11 @@ internal class AppleFormatter(
         val datePattern = getAbsoluteDatePattern(instant, now, TimeZone.currentSystemDefault())
 
         val date = NSDate.dateWithTimeIntervalSince1970(instant.toEpochMilliseconds() / 1000.0)
-        val formatter = NSDateFormatter().apply {
-            val pattern = if (datePattern.isEmpty()) ABSOLUTE_TIME_PATTERN else "$datePattern $ABSOLUTE_TIME_PATTERN"
-            setDateFormat(pattern)
-        }
+        val formatter =
+            NSDateFormatter().apply {
+                val pattern = if (datePattern.isEmpty()) ABSOLUTE_TIME_PATTERN else "$datePattern $ABSOLUTE_TIME_PATTERN"
+                setDateFormat(pattern)
+            }
         return formatter.stringFromDate(date)
     }
 }

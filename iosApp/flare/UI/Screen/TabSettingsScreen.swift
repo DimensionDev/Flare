@@ -9,6 +9,8 @@ struct TabSettingsScreen: View {
     @State private var tabItems: [TimelineTabItem] = []
     @State private var showAddTabSheet = false
     @State private var editItem: TabItem? = nil
+    @State private var editGroup: MixedTimelineTabItem? = nil
+    @State private var showCreateGroup = false
     var body: some View {
         List {
             if tabItems.count > 1 {
@@ -33,7 +35,11 @@ struct TabSettingsScreen: View {
                         }
                         Spacer()
                         Button {
-                            editItem = item
+                            if let group = item as? MixedTimelineTabItem {
+                                editGroup = group
+                            } else {
+                                editItem = item
+                            }
                         } label: {
                             Image("fa-pen")
                         }
@@ -43,7 +49,11 @@ struct TabSettingsScreen: View {
                     }
                     .swipeActions(edge: .leading) {
                         Button {
-                            editItem = item
+                            if let group = item as? MixedTimelineTabItem {
+                                editGroup = group
+                            } else {
+                                editItem = item
+                            }
                         } label: {
                             Label {
                                 Text("tab_settings_edit")
@@ -81,22 +91,23 @@ struct TabSettingsScreen: View {
                 Button {
                     dismiss()
                 } label: {
-                    Label {
-                        Text("Cancel")
-                    } icon: {
-                        Image("fa-xmark")
-                    }
+                    Image("fa-xmark")
                 }
             }
             ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showAddTabSheet = true
-                } label: {
-                    Label {
-                        Text("Add")
-                    } icon: {
-                        Image("fa-plus")
+                Menu {
+                    Button {
+                        showCreateGroup = true
+                    } label: {
+                        Text("tab_settings_add_group")
                     }
+                    Button {
+                        showAddTabSheet = true
+                    } label: {
+                        Text("tab_settings_add_tab")
+                    }
+                } label: {
+                    Image("fa-plus")
                 }
             }
             ToolbarItem(placement: .confirmationAction) {
@@ -108,11 +119,7 @@ struct TabSettingsScreen: View {
                     }
                     dismiss()
                 } label: {
-                    Label {
-                        Text("Done")
-                    } icon: {
-                        Image("fa-check")
-                    }
+                    Image("fa-check")
                 }
             }
         }
@@ -132,6 +139,17 @@ struct TabSettingsScreen: View {
                         }
                     },
                 )
+            }
+        }
+
+        .sheet(item: $editGroup) { item in
+            NavigationStack {
+                GroupConfigScreen(item: item)
+            }
+        }
+        .sheet(isPresented: $showCreateGroup) {
+            NavigationStack {
+                GroupConfigScreen(item: nil)
             }
         }
         .sheet(item: $editItem) { item in

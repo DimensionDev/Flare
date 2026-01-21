@@ -188,7 +188,7 @@ internal fun GroupConfigScreen(
 
                     OutlinedTextField(
                         state = state.name,
-                        label = { Text("Group Name") },
+                        label = { Text(stringResource(R.string.tab_settings_group_name_placeholder)) },
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -225,7 +225,7 @@ internal fun GroupConfigScreen(
                     item = item,
                     shapes = ListItemDefaults.segmentedShapes2(index, state.tabs.size),
                     deleteTab = { state.deleteTab(item) },
-                    editTab = { }, // Child tabs in group don't support editing currently or maybe they do?
+                    editTab = { }, // Child tabs in a group are intentionally not editable from this screen; only group-level configuration is supported.
                     reorderableLazyColumnState = reorderableLazyColumnState,
                     canSwipeToDelete = true,
                     isEditing = false,

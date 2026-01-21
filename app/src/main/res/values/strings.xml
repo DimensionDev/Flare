@@ -404,4 +404,6 @@
     <string name="tab_settings_add_tab">Add Tab</string>
     <string name="tab_settings_edit_group">Edit Group</string>
     <string name="tab_settings_group_empty">No tabs in this group</string>
+    <string name="tab_settings_group_name_placeholder">Group name</string>
+    <string name="tab_settings_group_default_name">New Group</string>
 </resources>

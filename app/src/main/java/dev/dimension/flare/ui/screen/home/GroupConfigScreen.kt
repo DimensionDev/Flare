@@ -225,7 +225,9 @@ internal fun GroupConfigScreen(
                     item = item,
                     shapes = ListItemDefaults.segmentedShapes2(index, state.tabs.size),
                     deleteTab = { state.deleteTab(item) },
-                    editTab = { }, // Child tabs in a group are intentionally not editable from this screen; only group-level configuration is supported.
+                    // Child tabs in a group are intentionally not editable from this screen;
+                    // only group-level configuration is supported.
+                    editTab = { },
                     reorderableLazyColumnState = reorderableLazyColumnState,
                     canSwipeToDelete = true,
                     isEditing = false,

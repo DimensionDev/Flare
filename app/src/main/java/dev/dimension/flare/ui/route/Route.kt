@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.route
 
 import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
+import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -189,6 +190,11 @@ internal sealed interface Route : NavKey {
 
     @Serializable
     data object TabSettings : Route
+
+    @Serializable
+    data class TabGroupConfig(
+        val item: MixedTimelineTabItem? = null,
+    ) : Route
 
     @Serializable
     data object Discover : Route

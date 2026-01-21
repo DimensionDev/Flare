@@ -65,6 +65,8 @@ enum Route: Hashable, Identifiable {
             AiConfigScreen()
         case .tabSettings:
             TabSettingsScreen()
+        case .tabGroupConfig(let item):
+            GroupConfigScreen(item: item)
         case .rssDetail(let url):
             RssDetailScreen(url: url)
         case .statusVVOStatus(let accountType, let statusKey):
@@ -145,6 +147,7 @@ enum Route: Hashable, Identifiable {
     case reportUser(AccountType?, MicroBlogKey)
     case editUserList(AccountType, MicroBlogKey)
     case userDirectMessages(AccountType, MicroBlogKey)
+    case tabGroupConfig(MixedTimelineTabItem?)
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {

@@ -1905,6 +1905,7 @@
       }
     },
     "Add" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -81613,6 +81614,16 @@
         }
       }
     },
+    "Select Icon" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select Icon"
+          }
+        }
+      }
+    },
     "send_message" : {
       "localizations" : {
         "af" : {
@@ -86407,6 +86418,26 @@
         }
       }
     },
+    "tab_settings_add_group" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Group"
+          }
+        }
+      }
+    },
+    "tab_settings_add_tab" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Tab"
+          }
+        }
+      }
+    },
     "tab_settings_delete" : {
       "localizations" : {
         "af" : {
@@ -86783,6 +86814,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "編輯"
+          }
+        }
+      }
+    },
+    "tab_settings_edit_group" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit Group"
           }
         }
       }
@@ -87635,6 +87676,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "启用混合时间线选项卡"
+          }
+        }
+      }
+    },
+    "tab_settings_group_default_name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Group"
+          }
+        }
+      }
+    },
+    "tab_settings_group_empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No tabs in this group"
+          }
+        }
+      }
+    },
+    "tab_settings_group_name_placeholder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Group Name"
           }
         }
       }

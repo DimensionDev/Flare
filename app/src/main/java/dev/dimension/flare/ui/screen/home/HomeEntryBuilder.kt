@@ -76,7 +76,23 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
             onBack = onBack,
             toAddRssSource = {
                 navigate(Route.Rss.Create)
+            },
+            toGroupConfig = {
+                navigate(Route.TabGroupConfig(it))
             }
+        )
+    }
+    entry<Route.TabGroupConfig>(
+        metadata = ListDetailSceneStrategy.extraPane(
+            "home",
+        )
+    ) { args ->
+        GroupConfigScreen(
+            item = args.item,
+            onBack = onBack,
+            toAddRssSource = {
+                navigate(Route.Rss.Create)
+            },
         )
     }
     entry<Route.AccountSelection>(

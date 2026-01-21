@@ -197,6 +197,7 @@ internal fun TabCustomizeScreen(
                     },
                     reorderableLazyColumnState = reorderableLazyColumnState,
                     canSwipeToDelete = state.canSwipeToDelete,
+                    isEditing = state.selectedEditTab == item,
                 )
             }
         }
@@ -255,6 +256,7 @@ internal fun ListTabItem(
 @Composable
 internal fun LazyItemScope.TabCustomItem(
     item: TabItem,
+    isEditing: Boolean,
     deleteTab: (TabItem) -> Unit,
     editTab: (TabItem) -> Unit,
     reorderableLazyColumnState: ReorderableLazyListState,
@@ -317,7 +319,7 @@ internal fun LazyItemScope.TabCustomItem(
             ) {
                 SegmentedListItem(
                     elevation = ListItemDefaults.elevation(elevation),
-                    selected = isDragging || isSwiping,
+                    selected = isDragging || isSwiping || isEditing,
                     onClick = {},
                     shapes = shapes,
                     content = {

@@ -87,14 +87,16 @@ internal class JVMFormatter : PlatformFormatter {
                     .format(zonedDateTime)
             }
             daysDiff < 7 -> {
-                val day = DateTimeFormatter.ofPattern("EEE", locale).format(zonedDateTime)
-                val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale).format(zonedDateTime)
-                "$day $time"
+                DateTimeFormatter
+                    .ofLocalizedPattern("Ej")
+                    .withLocale(locale)
+                    .format(zonedDateTime)
             }
             nowDate.year == instantDate.year -> {
-                val date = DateTimeFormatter.ofPattern("MMM d", locale).format(zonedDateTime)
-                val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale).format(zonedDateTime)
-                "$date, $time"
+                DateTimeFormatter
+                    .ofLocalizedPattern("MMMd j")
+                    .withLocale(locale)
+                    .format(zonedDateTime)
             }
             else -> {
                 DateTimeFormatter

@@ -48,12 +48,26 @@ internal class AppleFormatter(
 
         val date = NSDate.dateWithTimeIntervalSince1970(instant.toEpochMilliseconds() / 1000.0)
         val formatter = NSDateFormatter()
-        if (daysDiff == 0) {
-            formatter.dateStyle = NSDateFormatterNoStyle
-            formatter.timeStyle = NSDateFormatterShortStyle
-        } else {
-            formatter.dateStyle = NSDateFormatterShortStyle
-            formatter.timeStyle = NSDateFormatterShortStyle
+        when {
+            daysDiff == 0 -> {
+                formatter.dateStyle = NSDateFormatterNoStyle
+                formatter.timeStyle = NSDateFormatterShortStyle
+            }
+            daysDiff < 7 -> {
+                val dayFormatter = NSDateFormatter()
+                dayFormatter.setLocalizedDateFormatFromTemplate("E")
+                val day = dayFormatter.stringFromDate(date)
+
+                formatter.dateStyle = NSDateFormatterNoStyle
+                formatter.timeStyle = NSDateFormatterShortStyle
+                val time = formatter.stringFromDate(date)
+
+                return "$day $time"
+            }
+            else -> {
+                formatter.dateStyle = NSDateFormatterShortStyle
+                formatter.timeStyle = NSDateFormatterShortStyle
+            }
         }
         return formatter.stringFromDate(date)
     }

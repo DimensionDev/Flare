@@ -8,10 +8,9 @@ import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSDateFormatterLongStyle
 import platform.Foundation.NSDateFormatterMediumStyle
 import platform.Foundation.NSDateFormatterNoStyle
-import platform.Foundation.NSLocale
+import platform.Foundation.NSDateFormatterShortStyle
 import platform.Foundation.NSRelativeDateTimeFormatter
 import platform.Foundation.NSRelativeDateTimeFormatterStyleNumeric
-import platform.Foundation.currentLocale
 import platform.Foundation.dateWithTimeIntervalSince1970
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -47,19 +46,15 @@ internal class AppleFormatter(
         val instantDate = instant.toLocalDateTime(timeZone).date
         val daysDiff = instantDate.daysUntil(nowDate)
 
-        val template =
-            when {
-                daysDiff == 0 -> "jm"
-                daysDiff < 7 -> "EEEjm"
-                nowDate.year == instantDate.year -> "MMMdjm"
-                else -> "yyyyMMMdjm"
-            }
-
         val date = NSDate.dateWithTimeIntervalSince1970(instant.toEpochMilliseconds() / 1000.0)
-        val formatter =
-            NSDateFormatter().apply {
-                dateFormat = NSDateFormatter.dateFormatFromTemplate(template, 0u, NSLocale.currentLocale) ?: template
-            }
+        val formatter = NSDateFormatter()
+        if (daysDiff == 0) {
+            formatter.dateStyle = NSDateFormatterNoStyle
+            formatter.timeStyle = NSDateFormatterShortStyle
+        } else {
+            formatter.dateStyle = NSDateFormatterShortStyle
+            formatter.timeStyle = NSDateFormatterShortStyle
+        }
         return formatter.stringFromDate(date)
     }
 }

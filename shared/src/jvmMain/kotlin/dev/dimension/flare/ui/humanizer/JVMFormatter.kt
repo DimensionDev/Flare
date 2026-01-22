@@ -79,31 +79,16 @@ internal class JVMFormatter : PlatformFormatter {
                 .ofEpochMilli(instant.toEpochMilliseconds())
                 .atZone(ZoneId.systemDefault())
 
-        return when {
-            daysDiff == 0 -> {
-                DateTimeFormatter
-                    .ofLocalizedTime(FormatStyle.SHORT)
-                    .withLocale(locale)
-                    .format(zonedDateTime)
-            }
-            daysDiff < 7 -> {
-                DateTimeFormatter
-                    .ofLocalizedPattern("Ej")
-                    .withLocale(locale)
-                    .format(zonedDateTime)
-            }
-            nowDate.year == instantDate.year -> {
-                DateTimeFormatter
-                    .ofLocalizedPattern("MMMd j")
-                    .withLocale(locale)
-                    .format(zonedDateTime)
-            }
-            else -> {
-                DateTimeFormatter
-                    .ofLocalizedDateTime(FormatStyle.SHORT)
-                    .withLocale(locale)
-                    .format(zonedDateTime)
-            }
+        return if (daysDiff == 0) {
+            DateTimeFormatter
+                .ofLocalizedTime(FormatStyle.SHORT)
+                .withLocale(locale)
+                .format(zonedDateTime)
+        } else {
+            DateTimeFormatter
+                .ofLocalizedDateTime(FormatStyle.SHORT)
+                .withLocale(locale)
+                .format(zonedDateTime)
         }
     }
 }

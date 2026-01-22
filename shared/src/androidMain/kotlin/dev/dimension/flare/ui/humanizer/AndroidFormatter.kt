@@ -104,22 +104,18 @@ internal class AndroidFormatter(
         val instantDate = instant.toLocalDateTime(timeZone).date
         val daysDiff = instantDate.daysUntil(nowDate)
 
-        var flags = DateUtils.FORMAT_SHOW_TIME
-        if (daysDiff != 0) {
-            flags = flags or DateUtils.FORMAT_SHOW_DATE
-            when {
-                daysDiff < 7 -> {
-                    flags = flags or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY
-                }
-                nowDate.year == instantDate.year -> {
-                    flags = flags or DateUtils.FORMAT_ABBREV_MONTH
-                }
-                else -> {
-                    flags = flags or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_NUMERIC_DATE
-                }
-            }
+        return if (daysDiff == 0) {
+            DateUtils.formatDateTime(
+                context,
+                instant.toEpochMilliseconds(),
+                DateUtils.FORMAT_SHOW_TIME,
+            )
+        } else {
+            DateUtils.formatDateTime(
+                context,
+                instant.toEpochMilliseconds(),
+                DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_NUMERIC_DATE,
+            )
         }
-
-        return DateUtils.formatDateTime(context, instant.toEpochMilliseconds(), flags)
     }
 }

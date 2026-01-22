@@ -333,4 +333,10 @@
                 <li>Felrättelser och prestandaförbättringar.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Lägg till grupp</string>
+    <string name="tab_settings_add_tab">Lägg till flik</string>
+    <string name="tab_settings_edit_group">Redigera grupp</string>
+    <string name="tab_settings_group_empty">Inga flikar i denna grupp</string>
+    <string name="tab_settings_group_name_placeholder">Gruppens namn</string>
+    <string name="tab_settings_group_default_name">Ny grupp</string>
 </resources>

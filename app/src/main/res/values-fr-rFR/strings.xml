@@ -333,4 +333,10 @@
                 <li>Corrections de bugs et améliorations de performances.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Ajouter un groupe</string>
+    <string name="tab_settings_add_tab">Ajouter un onglet</string>
+    <string name="tab_settings_edit_group">Modifier le groupe</string>
+    <string name="tab_settings_group_empty">Aucun onglet dans ce groupe</string>
+    <string name="tab_settings_group_name_placeholder">Nom du groupe</string>
+    <string name="tab_settings_group_default_name">Nouveau groupe</string>
 </resources>

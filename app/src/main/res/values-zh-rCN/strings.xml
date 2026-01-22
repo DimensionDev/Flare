@@ -328,4 +328,10 @@
     <string name="import_error">导入数据失败</string>
     <string name="import_confirmation_title">确认导入</string>
     <string name="import_confirmation_message">这将从文件中导入数据。将替换匹配ID的现有记录。您确定要继续吗？</string>
+    <string name="tab_settings_add_group">添加群组</string>
+    <string name="tab_settings_add_tab">添加标签</string>
+    <string name="tab_settings_edit_group">编辑组</string>
+    <string name="tab_settings_group_empty">此群组中没有标签</string>
+    <string name="tab_settings_group_name_placeholder">群组名称</string>
+    <string name="tab_settings_group_default_name">新建群组</string>
 </resources>

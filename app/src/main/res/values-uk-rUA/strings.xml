@@ -327,4 +327,10 @@
     <string name="import_error">Не вдалося імпортувати дані</string>
     <string name="import_confirmation_title">Підтвердити імпортування</string>
     <string name="import_confirmation_message">Буде імпортовано дані з файлу. Існуючі записи з відповідних ID будуть замінені. Продовжити?</string>
+    <string name="tab_settings_add_group">Додати групу</string>
+    <string name="tab_settings_add_tab">Додати вкладку</string>
+    <string name="tab_settings_edit_group">Редагувати групу</string>
+    <string name="tab_settings_group_empty">В цій групі немає вкладок</string>
+    <string name="tab_settings_group_name_placeholder">Назва групи</string>
+    <string name="tab_settings_group_default_name">Нова група</string>
 </resources>

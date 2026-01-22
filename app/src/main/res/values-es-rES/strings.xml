@@ -333,4 +333,10 @@
                 <li>Error corrigiendo y mejorando el rendimiento.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Añadir grupo</string>
+    <string name="tab_settings_add_tab">Añadir pestaña</string>
+    <string name="tab_settings_edit_group">Editar grupo</string>
+    <string name="tab_settings_group_empty">No hay pestañas en este grupo</string>
+    <string name="tab_settings_group_name_placeholder">Nombre del grupo</string>
+    <string name="tab_settings_group_default_name">Nuevo grupo</string>
 </resources>

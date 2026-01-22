@@ -333,4 +333,10 @@
                 <li>Bugs fixes en prestatieverbeteringen.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Groep toevoegen</string>
+    <string name="tab_settings_add_tab">Tabblad toevoegen</string>
+    <string name="tab_settings_edit_group">Groep bewerken</string>
+    <string name="tab_settings_group_empty">Geen tabbladen in deze groep</string>
+    <string name="tab_settings_group_name_placeholder">Groep naam</string>
+    <string name="tab_settings_group_default_name">Nieuwe groep</string>
 </resources>

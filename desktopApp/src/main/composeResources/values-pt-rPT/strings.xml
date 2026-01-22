@@ -201,7 +201,7 @@
     <string name="settings_privacy_policy">Política de Privacidade</string>
     <string name="users">Utilizadores</string>
     <string name="hashtags">Palavras-chave</string>
-    <string name="statues">Poste</string>
+    <string name="statues">Postagens</string>
     <string name="compose_title">Compor</string>
     <string name="compose_hint">O que está acontecendo?</string>
     <string name="compose_poll_option_hint">Opção %1$s</string>
@@ -258,6 +258,12 @@
     <string name="dm_to_profile">Exibir perfil</string>
     <string name="tab_settings_mixed_timeline">Adicionar guia de timeline mista</string>
     <string name="tab_settings_mixed_timeline_desc">Linha do tempo mista irá misturar todas as abas que resultam em uma aba</string>
+    <string name="tab_settings_add_group">Adicionar Grupo</string>
+    <string name="tab_settings_add_tab">Adicionar aba</string>
+    <string name="tab_settings_edit_group">Editar Grupo</string>
+    <string name="tab_settings_group_empty">Nenhuma aba neste grupo</string>
+    <string name="tab_settings_group_name_placeholder">Nome do Grupo</string>
+    <string name="tab_settings_group_default_name">grupo</string>
     <string name="edit_tab_title">Editar aba</string>
     <string name="edit_tab_name">Nome:</string>
     <string name="edit_tab_name_placeholder">Tab name</string>

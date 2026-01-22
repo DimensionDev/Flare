@@ -333,4 +333,10 @@
                 <li>Correções de erros e melhorias de desempenho.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Adicionar Grupo</string>
+    <string name="tab_settings_add_tab">Adicionar aba</string>
+    <string name="tab_settings_edit_group">Editar Grupo</string>
+    <string name="tab_settings_group_empty">Nenhuma aba neste grupo</string>
+    <string name="tab_settings_group_name_placeholder">Nome Grupo</string>
+    <string name="tab_settings_group_default_name">Novo Grupo</string>
 </resources>

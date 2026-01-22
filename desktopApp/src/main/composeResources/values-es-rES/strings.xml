@@ -201,7 +201,7 @@
     <string name="settings_privacy_policy">Política de privacidad</string>
     <string name="users">Usuarios</string>
     <string name="hashtags">Etiquetas</string>
-    <string name="statues">Poses</string>
+    <string name="statues">Mensajes</string>
     <string name="compose_title">Redactar</string>
     <string name="compose_hint">¿Qué está pasando?</string>
     <string name="compose_poll_option_hint">Opción %1$s</string>
@@ -258,6 +258,12 @@
     <string name="dm_to_profile">Mostrar perfil</string>
     <string name="tab_settings_mixed_timeline">Añadir pestaña de cronología mixta</string>
     <string name="tab_settings_mixed_timeline_desc">La línea de tiempo mezclada mezclará todas las pestañas que resulten en una pestaña</string>
+    <string name="tab_settings_add_group">Añadir grupo</string>
+    <string name="tab_settings_add_tab">Añadir pestaña</string>
+    <string name="tab_settings_edit_group">Editar grupo</string>
+    <string name="tab_settings_group_empty">No hay pestañas en este grupo</string>
+    <string name="tab_settings_group_name_placeholder">Nombre del grupo</string>
+    <string name="tab_settings_group_default_name">Grupo</string>
     <string name="edit_tab_title">Editar pestaña</string>
     <string name="edit_tab_name">Nombre</string>
     <string name="edit_tab_name_placeholder">Tab name</string>

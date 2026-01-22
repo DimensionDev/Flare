@@ -333,4 +333,10 @@
                 <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Neue Gruppe</string>
+    <string name="tab_settings_add_tab">Tab hinzufügen</string>
+    <string name="tab_settings_edit_group">Gruppe bearbeiten</string>
+    <string name="tab_settings_group_empty">Keine Tabs in dieser Gruppe</string>
+    <string name="tab_settings_group_name_placeholder">Gruppenname</string>
+    <string name="tab_settings_group_default_name">Neue Gruppe</string>
 </resources>

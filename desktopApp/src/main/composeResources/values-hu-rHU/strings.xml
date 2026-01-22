@@ -171,6 +171,7 @@
     <string name="settings_about_localization_description">Segíts nekünk lefordítani a Flare-t</string>
     <string name="settings_privacy_policy">Adatvédelmi irányelvek</string>
     <string name="users">Felhasználók</string>
+    <string name="statues">Bejegyzések</string>
     <string name="compose_title">Írás</string>
     <string name="compose_hint">Mi történik?</string>
     <string name="compose_poll_option_hint">Opció %1$s</string>

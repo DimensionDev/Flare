@@ -333,4 +333,10 @@
                 <li>Correzioni di bug e miglioramenti delle prestazioni.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Aggiungi Gruppo</string>
+    <string name="tab_settings_add_tab">Aggiungi Scheda</string>
+    <string name="tab_settings_edit_group">Modifica Gruppo</string>
+    <string name="tab_settings_group_empty">Nessuna scheda in questo gruppo</string>
+    <string name="tab_settings_group_name_placeholder">Nome del gruppo</string>
+    <string name="tab_settings_group_default_name">Nuovo Gruppo</string>
 </resources>

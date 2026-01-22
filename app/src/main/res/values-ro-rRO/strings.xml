@@ -333,4 +333,10 @@
                 <li>Remedieri ale erorilor şi îmbunătăţiri de performanţă.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Adaugă grup</string>
+    <string name="tab_settings_add_tab">Adaugă filă</string>
+    <string name="tab_settings_edit_group">Editează grup</string>
+    <string name="tab_settings_group_empty">Nicio filă în acest grup</string>
+    <string name="tab_settings_group_name_placeholder">Numele grupului</string>
+    <string name="tab_settings_group_default_name">Grup nou</string>
 </resources>

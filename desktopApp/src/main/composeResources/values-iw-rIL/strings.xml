@@ -170,6 +170,7 @@
     <string name="settings_about_localization_description">עזרו לנו לתרגם את פלייר</string>
     <string name="settings_privacy_policy">מדיניות פרטיות</string>
     <string name="users">משתמשים</string>
+    <string name="statues">פוסטים</string>
     <string name="compose_title">כתיבה</string>
     <string name="compose_hint">מה קורה?</string>
     <string name="compose_poll_option_hint">אפשרות %1$s</string>

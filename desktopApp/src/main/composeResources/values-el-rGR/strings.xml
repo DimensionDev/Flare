@@ -201,7 +201,7 @@
     <string name="settings_privacy_policy">Πολιτική Απορρήτου</string>
     <string name="users">Χρήστες</string>
     <string name="hashtags">Hashtags</string>
-    <string name="statues">Θέσεις</string>
+    <string name="statues">Αναρτήσεις</string>
     <string name="compose_title">Σύνθεση</string>
     <string name="compose_hint">Τι συμβαίνει?</string>
     <string name="compose_poll_option_hint">Επιλογή %1$s</string>
@@ -258,6 +258,12 @@
     <string name="dm_to_profile">Εμφάνιση προφίλ</string>
     <string name="tab_settings_mixed_timeline">Προσθήκη μικτής καρτέλας χρονολογίου</string>
     <string name="tab_settings_mixed_timeline_desc">Μικτή χρονολογική γραμμή θα συνδυάσει όλες τις καρτέλες αποτέλεσμα χρονοδιάγραμμα σε μία καρτέλα</string>
+    <string name="tab_settings_add_group">Προσθήκη Ομάδας</string>
+    <string name="tab_settings_add_tab">Προσθήκη Καρτέλας</string>
+    <string name="tab_settings_edit_group">Επεξεργασία Ομάδας</string>
+    <string name="tab_settings_group_empty">Δεν υπάρχουν καρτέλες σε αυτήν την ομάδα</string>
+    <string name="tab_settings_group_name_placeholder">Όνομα Ομάδας</string>
+    <string name="tab_settings_group_default_name">Ομάδα</string>
     <string name="edit_tab_title">Επεξεργασία καρτέλας</string>
     <string name="edit_tab_name">Όνομα</string>
     <string name="edit_tab_name_placeholder">Tab name</string>

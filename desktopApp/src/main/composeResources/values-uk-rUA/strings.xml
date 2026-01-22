@@ -201,7 +201,7 @@
     <string name="settings_privacy_policy">Політика конфіденційності</string>
     <string name="users">Спільноти</string>
     <string name="hashtags">Хештеґи</string>
-    <string name="statues">Поз</string>
+    <string name="statues">Повідомлення</string>
     <string name="compose_title">Написати лист</string>
     <string name="compose_hint">Що відбувається?</string>
     <string name="compose_poll_option_hint">Опція %1$s</string>
@@ -257,6 +257,12 @@
     <string name="dm_to_profile">Показати профіль</string>
     <string name="tab_settings_mixed_timeline">Додати змішану вкладку часової шкали</string>
     <string name="tab_settings_mixed_timeline_desc">Змішана часова шкала будуть змішувати всі вкладки в результаті однієї вкладки</string>
+    <string name="tab_settings_add_group">Додати групу</string>
+    <string name="tab_settings_add_tab">Додати вкладку</string>
+    <string name="tab_settings_edit_group">Редагувати групу</string>
+    <string name="tab_settings_group_empty">В цій групі немає вкладок</string>
+    <string name="tab_settings_group_name_placeholder">Назва групи</string>
+    <string name="tab_settings_group_default_name">Група</string>
     <string name="edit_tab_title">Редагувати вкладку</string>
     <string name="edit_tab_name">Ім\'я</string>
     <string name="edit_tab_name_placeholder">Tab name</string>

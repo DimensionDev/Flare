@@ -201,7 +201,7 @@
     <string name="settings_privacy_policy">隐私政策</string>
     <string name="users">用户</string>
     <string name="hashtags">话题</string>
-    <string name="statues">头像</string>
+    <string name="statues">帖子</string>
     <string name="compose_title">发帖</string>
     <string name="compose_hint">发生什么事了？</string>
     <string name="compose_poll_option_hint">选项 %1$s</string>
@@ -258,6 +258,12 @@
     <string name="dm_to_profile">显示用户资料</string>
     <string name="tab_settings_mixed_timeline">添加混合时间线</string>
     <string name="tab_settings_mixed_timeline_desc">混合时间线将混合所有标签页的时间线</string>
+    <string name="tab_settings_add_group">添加群组</string>
+    <string name="tab_settings_add_tab">添加标签</string>
+    <string name="tab_settings_edit_group">编辑组</string>
+    <string name="tab_settings_group_empty">此群组中没有标签</string>
+    <string name="tab_settings_group_name_placeholder">群组名称</string>
+    <string name="tab_settings_group_default_name">组别</string>
     <string name="edit_tab_title">编辑选项卡</string>
     <string name="edit_tab_name">名称</string>
     <string name="edit_tab_name_placeholder">选项卡名称</string>

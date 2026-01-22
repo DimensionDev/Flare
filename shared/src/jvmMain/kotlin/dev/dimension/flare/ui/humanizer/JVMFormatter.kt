@@ -42,13 +42,11 @@ internal class JVMFormatter : PlatformFormatter {
                 prettyTime.format(Date(-diff.inWholeMilliseconds))
             }
             else -> {
-                DateTimeFormatter
-                    .ofLocalizedDate(FormatStyle.MEDIUM)
-                    .withLocale(Locale.getDefault())
+                DateTimeFormatter.ISO_DATE
                     .format(
                         java.time.Instant
                             .ofEpochMilli(instant.toEpochMilliseconds())
-                            .atZone(ZoneId.systemDefault())
+                            .atZone(java.time.ZoneId.systemDefault())
                             .toLocalDate(),
                     )
             }
@@ -56,13 +54,11 @@ internal class JVMFormatter : PlatformFormatter {
     }
 
     override fun formatFullInstant(instant: Instant): String =
-        DateTimeFormatter
-            .ofLocalizedDateTime(FormatStyle.MEDIUM)
-            .withLocale(Locale.getDefault())
+        DateTimeFormatter.ISO_DATE
             .format(
                 java.time.Instant
                     .ofEpochMilli(instant.toEpochMilliseconds())
-                    .atZone(ZoneId.systemDefault())
+                    .atZone(java.time.ZoneId.systemDefault())
                     .toLocalDateTime(),
             )
 

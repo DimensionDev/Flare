@@ -54,7 +54,7 @@ internal class JVMFormatter : PlatformFormatter {
     }
 
     override fun formatFullInstant(instant: Instant): String =
-        DateTimeFormatter.ISO_DATE
+        DateTimeFormatter.ISO_DATE_TIME
             .format(
                 java.time.Instant
                     .ofEpochMilli(instant.toEpochMilliseconds())

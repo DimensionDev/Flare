@@ -333,4 +333,10 @@
                 <li>Virhekorjauksia ja suorituskyvyn parannuksia.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Lisää Ryhmä</string>
+    <string name="tab_settings_add_tab">Lisää Välilehti</string>
+    <string name="tab_settings_edit_group">Muokkaa Ryhmää</string>
+    <string name="tab_settings_group_empty">Tässä ryhmässä ei ole välilehtiä</string>
+    <string name="tab_settings_group_name_placeholder">Ryhmän nimi</string>
+    <string name="tab_settings_group_default_name">Uusi Ryhmä</string>
 </resources>

@@ -171,6 +171,7 @@
     <string name="settings_about_localization_description">Flare\'ı çevirmemize yardım edin</string>
     <string name="settings_privacy_policy">Gizlilik Politikası</string>
     <string name="users">Kullanıcılar</string>
+    <string name="statues">Gönderiler</string>
     <string name="compose_title">Kompoze et</string>
     <string name="compose_hint">Ne oluyor?</string>
     <string name="compose_poll_option_hint">Seçenek %1$s</string>

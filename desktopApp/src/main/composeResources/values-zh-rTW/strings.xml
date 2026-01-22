@@ -179,6 +179,7 @@
     <string name="settings_privacy_policy">隱私政策</string>
     <string name="users">用戶</string>
     <string name="hashtags">主題標籤</string>
+    <string name="statues">帖子</string>
     <string name="compose_title">撰寫</string>
     <string name="compose_hint">發生了什麼事？</string>
     <string name="compose_poll_option_hint">選項 %1$s</string>

@@ -333,4 +333,10 @@
                 <li>Исправления ошибок и улучшения производительности.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Добавить группу</string>
+    <string name="tab_settings_add_tab">Добавить вкладку</string>
+    <string name="tab_settings_edit_group">Изменить группу</string>
+    <string name="tab_settings_group_empty">В этой группе нет вкладок</string>
+    <string name="tab_settings_group_name_placeholder">Название группы</string>
+    <string name="tab_settings_group_default_name">Новая группа</string>
 </resources>

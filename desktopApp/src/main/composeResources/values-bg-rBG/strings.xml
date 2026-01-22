@@ -136,6 +136,7 @@
     <string name="settings_privacy_policy">Политика за поверителност</string>
     <string name="users">Потребители</string>
     <string name="hashtags">Хаштагове</string>
+    <string name="statues">Публикации</string>
     <string name="compose_title">Съставяне</string>
     <string name="compose_hint">Какво се случва?</string>
     <string name="compose_poll_option_hint">Опция %1$s</string>

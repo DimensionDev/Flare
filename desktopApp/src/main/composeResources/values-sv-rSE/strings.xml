@@ -201,7 +201,7 @@
     <string name="settings_privacy_policy">Integritetspolicy</string>
     <string name="users">Användare</string>
     <string name="hashtags">Hashtaggar</string>
-    <string name="statues">Poser</string>
+    <string name="statues">Inlägg</string>
     <string name="compose_title">Skriv</string>
     <string name="compose_hint">Vad händer?</string>
     <string name="compose_poll_option_hint">Alternativ %1$s</string>
@@ -258,6 +258,12 @@
     <string name="dm_to_profile">Visa profil</string>
     <string name="tab_settings_mixed_timeline">Lägg till blandad tidslinje</string>
     <string name="tab_settings_mixed_timeline_desc">Blandad tidslinje kommer att blanda alla flikar tidslinje resultat i en flik</string>
+    <string name="tab_settings_add_group">Lägg till grupp</string>
+    <string name="tab_settings_add_tab">Lägg till flik</string>
+    <string name="tab_settings_edit_group">Redigera grupp</string>
+    <string name="tab_settings_group_empty">Inga flikar i denna grupp</string>
+    <string name="tab_settings_group_name_placeholder">Gruppens namn</string>
+    <string name="tab_settings_group_default_name">Grupp</string>
     <string name="edit_tab_title">Redigera flik</string>
     <string name="edit_tab_name">Namn</string>
     <string name="edit_tab_name_placeholder">Tab name</string>

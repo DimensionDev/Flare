@@ -333,4 +333,10 @@
                 <li>Poprawki błędów i ulepszenia wydajności.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Dodaj grupę</string>
+    <string name="tab_settings_add_tab">Dodaj kartę</string>
+    <string name="tab_settings_edit_group">Edytuj grupę</string>
+    <string name="tab_settings_group_empty">Brak kart w tej grupie</string>
+    <string name="tab_settings_group_name_placeholder">Nazwa grupy</string>
+    <string name="tab_settings_group_default_name">Nowa grupa</string>
 </resources>

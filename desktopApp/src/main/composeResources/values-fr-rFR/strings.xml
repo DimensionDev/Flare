@@ -201,7 +201,7 @@
     <string name="settings_privacy_policy">Politique de confidentialité</string>
     <string name="users">Utilisateurs</string>
     <string name="hashtags">Hashtags</string>
-    <string name="statues">Poses</string>
+    <string name="statues">Publications</string>
     <string name="compose_title">Composer</string>
     <string name="compose_hint">Que se passe-t-il ?</string>
     <string name="compose_poll_option_hint">Option %1$s</string>
@@ -258,6 +258,12 @@
     <string name="dm_to_profile">Afficher le profil</string>
     <string name="tab_settings_mixed_timeline">Ajouter un onglet de timeline mixte</string>
     <string name="tab_settings_mixed_timeline_desc">La timeline mixte mélangera le résultat de tous les onglets dans un onglet</string>
+    <string name="tab_settings_add_group">Ajouter un groupe</string>
+    <string name="tab_settings_add_tab">Ajouter un onglet</string>
+    <string name="tab_settings_edit_group">Modifier le groupe</string>
+    <string name="tab_settings_group_empty">Aucun onglet dans ce groupe</string>
+    <string name="tab_settings_group_name_placeholder">Nom du groupe</string>
+    <string name="tab_settings_group_default_name">Groupes</string>
     <string name="edit_tab_title">Modifier l\'onglet</string>
     <string name="edit_tab_name">Nom</string>
     <string name="edit_tab_name_placeholder">Tab name</string>

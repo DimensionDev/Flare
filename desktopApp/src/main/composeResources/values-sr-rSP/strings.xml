@@ -170,6 +170,7 @@
     <string name="settings_about_localization_description">Помозите нам да преведемо Flare</string>
     <string name="settings_privacy_policy">Политика приватности</string>
     <string name="users">Корисници</string>
+    <string name="statues">Објаве</string>
     <string name="compose_title">Саставите</string>
     <string name="compose_hint">Шта се дешава?</string>
     <string name="compose_poll_option_hint">Опција %1$s</string>

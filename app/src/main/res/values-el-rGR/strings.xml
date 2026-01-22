@@ -333,4 +333,10 @@
                 <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Προσθήκη Ομάδας</string>
+    <string name="tab_settings_add_tab">Προσθήκη Καρτέλας</string>
+    <string name="tab_settings_edit_group">Επεξεργασία Ομάδας</string>
+    <string name="tab_settings_group_empty">Δεν υπάρχουν καρτέλες σε αυτήν την ομάδα</string>
+    <string name="tab_settings_group_name_placeholder">Όνομα ομάδας</string>
+    <string name="tab_settings_group_default_name">Νέα Ομάδα</string>
 </resources>

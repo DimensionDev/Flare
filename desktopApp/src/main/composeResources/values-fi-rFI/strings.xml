@@ -201,7 +201,7 @@
     <string name="settings_privacy_policy">Yksityisyyden Suoja</string>
     <string name="users">Käyttäjät</string>
     <string name="hashtags">Hashtagit</string>
-    <string name="statues">Viestit</string>
+    <string name="statues">Julkaisut</string>
     <string name="compose_title">Luo</string>
     <string name="compose_hint">Mitä tapahtuu?</string>
     <string name="compose_poll_option_hint">Vaihtoehto %1$s</string>
@@ -258,6 +258,12 @@
     <string name="dm_to_profile">Näytä profiili</string>
     <string name="tab_settings_mixed_timeline">Lisää sekoitettu aikajana-välilehti</string>
     <string name="tab_settings_mixed_timeline_desc">Sekoitettu aikajana sekoittaa kaikki välilehdet aikajana tulos yhdessä välilehdessä</string>
+    <string name="tab_settings_add_group">Lisää Ryhmä</string>
+    <string name="tab_settings_add_tab">Lisää Välilehti</string>
+    <string name="tab_settings_edit_group">Muokkaa Ryhmää</string>
+    <string name="tab_settings_group_empty">Tässä ryhmässä ei ole välilehtiä</string>
+    <string name="tab_settings_group_name_placeholder">Ryhmän Nimi</string>
+    <string name="tab_settings_group_default_name">Ryhmä</string>
     <string name="edit_tab_title">Muokkaa välilehtiä</string>
     <string name="edit_tab_name">Nimi</string>
     <string name="edit_tab_name_placeholder">Tab name</string>

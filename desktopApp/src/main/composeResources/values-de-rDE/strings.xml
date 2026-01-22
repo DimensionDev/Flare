@@ -201,7 +201,7 @@
     <string name="settings_privacy_policy">Datenschutzerklärung</string>
     <string name="users">Benutzer</string>
     <string name="hashtags">Hashtags</string>
-    <string name="statues">Posen</string>
+    <string name="statues">Beiträge</string>
     <string name="compose_title">Verfassen</string>
     <string name="compose_hint">Was ist los?</string>
     <string name="compose_poll_option_hint">Option %1$s</string>
@@ -258,6 +258,12 @@
     <string name="dm_to_profile">Profil anzeigen</string>
     <string name="tab_settings_mixed_timeline">Tab für gemischte Zeitleiste hinzufügen</string>
     <string name="tab_settings_mixed_timeline_desc">Die gemischte Zeitleiste mischt alle Tabs der Zeitleiste in einen Tab</string>
+    <string name="tab_settings_add_group">Neue Gruppe</string>
+    <string name="tab_settings_add_tab">Tab hinzufügen</string>
+    <string name="tab_settings_edit_group">Gruppe bearbeiten</string>
+    <string name="tab_settings_group_empty">Keine Tabs in dieser Gruppe</string>
+    <string name="tab_settings_group_name_placeholder">Gruppenname</string>
+    <string name="tab_settings_group_default_name">Gruppe</string>
     <string name="edit_tab_title">Tab bearbeiten</string>
     <string name="edit_tab_name">Name</string>
     <string name="edit_tab_name_placeholder">Tab Name</string>

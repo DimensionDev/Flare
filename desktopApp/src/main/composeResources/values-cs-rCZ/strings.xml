@@ -201,7 +201,7 @@
     <string name="settings_privacy_policy">Ochrana osobních údajů</string>
     <string name="users">Uživatelé</string>
     <string name="hashtags">Hashtagy</string>
-    <string name="statues">Pozice</string>
+    <string name="statues">Příspěvky</string>
     <string name="compose_title">Napsat</string>
     <string name="compose_hint">Co se děje?</string>
     <string name="compose_poll_option_hint">Možnost %1$s</string>
@@ -258,6 +258,12 @@
     <string name="dm_to_profile">Zobrazit profil</string>
     <string name="tab_settings_mixed_timeline">Přidat smíšenou časovou osu</string>
     <string name="tab_settings_mixed_timeline_desc">Směsná časová osa promíchá všechny panely s výsledkem jedné záložky</string>
+    <string name="tab_settings_add_group">Přidat skupinu</string>
+    <string name="tab_settings_add_tab">Přidat záložku</string>
+    <string name="tab_settings_edit_group">Upravit skupinu</string>
+    <string name="tab_settings_group_empty">V této skupině nejsou žádné panely</string>
+    <string name="tab_settings_group_name_placeholder">Název skupiny</string>
+    <string name="tab_settings_group_default_name">Skupina</string>
     <string name="edit_tab_title">Upravit kartu</string>
     <string name="edit_tab_name">Název</string>
     <string name="edit_tab_name_placeholder">Tab name</string>

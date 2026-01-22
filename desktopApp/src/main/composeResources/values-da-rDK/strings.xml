@@ -201,7 +201,7 @@
     <string name="settings_privacy_policy">Privat Politik</string>
     <string name="users">Brugere</string>
     <string name="hashtags">Hashtags</string>
-    <string name="statues">Poser</string>
+    <string name="statues">Indlæg</string>
     <string name="compose_title">Skriv</string>
     <string name="compose_hint">Hvad sker der?</string>
     <string name="compose_poll_option_hint">Indstilling %1$s</string>
@@ -258,6 +258,12 @@
     <string name="dm_to_profile">Vis profil</string>
     <string name="tab_settings_mixed_timeline">Tilføj blandet tidslinje fane</string>
     <string name="tab_settings_mixed_timeline_desc">Blandet tidslinje vil blande alle faner tidslinje resultat i en fane</string>
+    <string name="tab_settings_add_group">Tilføj Gruppe</string>
+    <string name="tab_settings_add_tab">Tilføj Faneblad</string>
+    <string name="tab_settings_edit_group">Rediger Gruppe</string>
+    <string name="tab_settings_group_empty">Ingen faneblade i denne gruppe</string>
+    <string name="tab_settings_group_name_placeholder">Gruppens Navn</string>
+    <string name="tab_settings_group_default_name">Gruppe</string>
     <string name="edit_tab_title">Rediger fane</string>
     <string name="edit_tab_name">Navn</string>
     <string name="edit_tab_name_placeholder">Tab name</string>

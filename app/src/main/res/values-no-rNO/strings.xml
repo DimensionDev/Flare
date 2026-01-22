@@ -333,4 +333,10 @@
                 <li>Bug fikser og ytelsesforbedringer.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Legg til gruppe</string>
+    <string name="tab_settings_add_tab">Legg til fane</string>
+    <string name="tab_settings_edit_group">Rediger gruppe</string>
+    <string name="tab_settings_group_empty">Ingen faner i denne gruppen</string>
+    <string name="tab_settings_group_name_placeholder">Gruppe navn</string>
+    <string name="tab_settings_group_default_name">Ny gruppe</string>
 </resources>

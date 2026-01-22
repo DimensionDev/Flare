@@ -333,4 +333,10 @@
                 <li>Fejlrettelser og ydelsesforbedringer.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">Tilføj Gruppe</string>
+    <string name="tab_settings_add_tab">Tilføj Faneblad</string>
+    <string name="tab_settings_edit_group">Rediger Gruppe</string>
+    <string name="tab_settings_group_empty">Ingen faneblade i denne gruppe</string>
+    <string name="tab_settings_group_name_placeholder">Gruppens navn</string>
+    <string name="tab_settings_group_default_name">Ny Gruppe</string>
 </resources>

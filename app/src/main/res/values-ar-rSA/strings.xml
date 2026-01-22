@@ -333,4 +333,10 @@
                 <li>إصلاحات الشوائب وتحسين الأداء.</li>
             </ul>
         ]]></string>
+    <string name="tab_settings_add_group">إضافة مجموعة</string>
+    <string name="tab_settings_add_tab">إضافة علامة تبويب</string>
+    <string name="tab_settings_edit_group">تحرير المجموعة</string>
+    <string name="tab_settings_group_empty">لا توجد علامات تبويب في هذه المجموعة</string>
+    <string name="tab_settings_group_name_placeholder">اسم المجموعة</string>
+    <string name="tab_settings_group_default_name">مجموعة جديدة</string>
 </resources>

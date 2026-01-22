@@ -328,4 +328,10 @@
     <string name="import_error">データのインポートに失敗しました</string>
     <string name="import_confirmation_title">インポートの確認</string>
     <string name="import_confirmation_message">これはファイルからデータをインポートします。一致するIDを持つ既存のレコードは置き換えられます。続行しますか？</string>
+    <string name="tab_settings_add_group">グループを追加</string>
+    <string name="tab_settings_add_tab">タブを追加</string>
+    <string name="tab_settings_edit_group">グループを編集</string>
+    <string name="tab_settings_group_empty">このグループにはタブがありません</string>
+    <string name="tab_settings_group_name_placeholder">グループ名</string>
+    <string name="tab_settings_group_default_name">新しいグループ</string>
 </resources>

@@ -171,6 +171,7 @@
     <string name="settings_about_localization_description">Flare 번역에 도움을 주세요</string>
     <string name="settings_privacy_policy">개인정보 처리방침</string>
     <string name="users">사용자</string>
+    <string name="statues">게시물</string>
     <string name="compose_title">작성하기</string>
     <string name="compose_hint">무슨 일이 일어나고 있나요?</string>
     <string name="compose_poll_option_hint">옵션 %1$s</string>

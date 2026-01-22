@@ -170,6 +170,7 @@
     <string name="settings_about_localization_description">Hãy giúp chúng tôi dịch Flare</string>
     <string name="settings_privacy_policy">Chính sách quyền riêng tư</string>
     <string name="users">Người dùng</string>
+    <string name="statues">Bài viết</string>
     <string name="compose_title">Soạn thảo</string>
     <string name="compose_hint">Có chuyện gì xảy ra?</string>
     <string name="compose_poll_option_hint">Tùy chọn %1$s</string>

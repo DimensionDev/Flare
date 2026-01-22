@@ -170,6 +170,7 @@
     <string name="settings_about_localization_description">Ajuda\'ns a traduir Flare</string>
     <string name="settings_privacy_policy">Política de privadesa</string>
     <string name="users">Usuaris</string>
+    <string name="statues">Publicacions</string>
     <string name="compose_title">Compondre</string>
     <string name="compose_hint">Què està passant?</string>
     <string name="compose_poll_option_hint">Opció %1$s</string>

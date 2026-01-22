@@ -76,6 +76,17 @@ struct AppearanceScreen: View {
                         Text("appearance_fullWidthPost")
                         Text("appearance_fullWidthPost_description")
                     }
+
+                    Toggle(isOn: Binding(get: {
+                        appearance.absoluteTimestamp
+                    }, set: { newValue in
+                        presenter.state.updateAppearanceSettings { settings in
+                            settings.copy(absoluteTimestamp: newValue)
+                        }
+                    })) {
+                        Text("appearance_absolute_timestamp")
+                        Text("appearance_absolute_timestamp_description")
+                    }
                     
                     Picker(selection: Binding(get: {
                         appearance.postActionStyle
@@ -207,6 +218,7 @@ extension AppearanceSettings {
         inAppBrowser: Bool? = nil,
         fullWidthPost: Bool? = nil,
         postActionStyle: PostActionStyle? = nil,
+        absoluteTimestamp: Bool? = nil,
     ) -> AppearanceSettings {
         AppearanceSettings(
             theme: theme ?? self.theme,
@@ -230,6 +242,7 @@ extension AppearanceSettings {
             inAppBrowser: inAppBrowser ?? self.inAppBrowser,
             fullWidthPost: fullWidthPost ?? self.fullWidthPost,
             postActionStyle: postActionStyle ?? self.postActionStyle,
+            absoluteTimestamp: absoluteTimestamp ?? self.absoluteTimestamp,
         )
     }
 }

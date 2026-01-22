@@ -1,10 +1,14 @@
 package dev.dimension.flare.ui.humanizer
 
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.toLocalDateTime
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSDateFormatterLongStyle
 import platform.Foundation.NSDateFormatterMediumStyle
 import platform.Foundation.NSDateFormatterNoStyle
+import platform.Foundation.NSDateFormatterShortStyle
 import platform.Foundation.NSRelativeDateTimeFormatter
 import platform.Foundation.NSRelativeDateTimeFormatterStyleNumeric
 import platform.Foundation.dateWithTimeIntervalSince1970
@@ -34,6 +38,39 @@ internal class AppleFormatter(
     }
 
     override fun formatFullInstant(instant: Instant): String = PlatformDateFormatter.formatAsFullDateTime(instant.toEpochMilliseconds())
+
+    override fun formatAbsoluteInstant(instant: Instant): String {
+        val now = Clock.System.now()
+        val timeZone = TimeZone.currentSystemDefault()
+        val nowDate = now.toLocalDateTime(timeZone).date
+        val instantDate = instant.toLocalDateTime(timeZone).date
+        val daysDiff = instantDate.daysUntil(nowDate)
+
+        val date = NSDate.dateWithTimeIntervalSince1970(instant.toEpochMilliseconds() / 1000.0)
+        val formatter = NSDateFormatter()
+        when {
+            daysDiff == 0 -> {
+                formatter.dateStyle = NSDateFormatterNoStyle
+                formatter.timeStyle = NSDateFormatterShortStyle
+            }
+            daysDiff < 7 -> {
+                val dayFormatter = NSDateFormatter()
+                dayFormatter.setLocalizedDateFormatFromTemplate("E")
+                val day = dayFormatter.stringFromDate(date)
+
+                formatter.dateStyle = NSDateFormatterNoStyle
+                formatter.timeStyle = NSDateFormatterShortStyle
+                val time = formatter.stringFromDate(date)
+
+                return "$day $time"
+            }
+            else -> {
+                formatter.dateStyle = NSDateFormatterShortStyle
+                formatter.timeStyle = NSDateFormatterShortStyle
+            }
+        }
+        return formatter.stringFromDate(date)
+    }
 }
 
 private object PlatformDateFormatter {

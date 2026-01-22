@@ -213,6 +213,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">Left aligned</string>
     <string name="settings_appearance_post_action_style_right_aligned">Right aligned</string>
     <string name="settings_appearance_post_action_style_stretch">Stretch</string>
+    <string name="settings_appearance_absolute_timestamp">Absolute timestamp</string>
+    <string name="settings_appearance_absolute_timestamp_description">Display absolute timestamps on posts</string>
 
     <string name="settings_about_source_code">Source code</string>
     <string name="settings_about_telegram">Telegram</string>

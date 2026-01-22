@@ -46,6 +46,7 @@ public data class AppearanceSettings(
     val inAppBrowser: Boolean = true,
     val fullWidthPost: Boolean = false,
     val postActionStyle: PostActionStyle = PostActionStyle.LeftAligned,
+    val absoluteTimestamp: Boolean = false,
 ) {
     public companion object {
         // for iOS

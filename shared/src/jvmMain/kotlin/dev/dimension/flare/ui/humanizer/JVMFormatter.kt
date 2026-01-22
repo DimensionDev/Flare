@@ -1,9 +1,14 @@
 package dev.dimension.flare.ui.humanizer
 
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.toLocalDateTime
 import org.ocpsoft.prettytime.PrettyTime
 import java.math.RoundingMode
 import java.text.NumberFormat
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Clock
@@ -56,4 +61,46 @@ internal class JVMFormatter : PlatformFormatter {
                     .atZone(java.time.ZoneId.systemDefault())
                     .toLocalDateTime(),
             )
+
+    override fun formatAbsoluteInstant(instant: Instant): String {
+        val now = Clock.System.now()
+        val timeZone = TimeZone.currentSystemDefault()
+        val nowDate = now.toLocalDateTime(timeZone).date
+        val instantDate = instant.toLocalDateTime(timeZone).date
+        val daysDiff = instantDate.daysUntil(nowDate)
+        val locale = Locale.getDefault()
+
+        val zonedDateTime =
+            java.time.Instant
+                .ofEpochMilli(instant.toEpochMilliseconds())
+                .atZone(ZoneId.systemDefault())
+
+        return when {
+            daysDiff == 0 -> {
+                DateTimeFormatter
+                    .ofLocalizedTime(FormatStyle.SHORT)
+                    .withLocale(locale)
+                    .format(zonedDateTime)
+            }
+            daysDiff < 7 -> {
+                val day = 
+                    DateTimeFormatter
+                        .ofPattern("E")
+                        .withLocale(locale)
+                        .format(zonedDateTime)
+                val time = 
+                    DateTimeFormatter
+                        .ofLocalizedTime(FormatStyle.SHORT)
+                        .withLocale(locale)
+                        .format(zonedDateTime)
+                "$day $time"
+            }
+            else -> {
+                DateTimeFormatter
+                    .ofLocalizedDateTime(FormatStyle.SHORT)
+                    .withLocale(locale)
+                    .format(zonedDateTime)
+            }
+        }
+    }
 }

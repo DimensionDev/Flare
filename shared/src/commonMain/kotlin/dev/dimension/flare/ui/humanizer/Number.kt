@@ -18,6 +18,8 @@ internal object Formatter : KoinComponent {
     internal fun Instant.relative(): String = platformFormatter.formatRelativeInstant(this)
 
     internal fun Instant.full(): String = platformFormatter.formatFullInstant(this)
+
+    internal fun Instant.absolute(): String = platformFormatter.formatAbsoluteInstant(this)
 }
 
 internal interface PlatformFormatter {
@@ -26,4 +28,6 @@ internal interface PlatformFormatter {
     fun formatRelativeInstant(instant: Instant): String
 
     fun formatFullInstant(instant: Instant): String
+
+    fun formatAbsoluteInstant(instant: Instant): String
 }

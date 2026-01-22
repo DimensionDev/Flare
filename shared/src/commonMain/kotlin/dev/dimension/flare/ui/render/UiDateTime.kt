@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.render
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.ui.humanizer.Formatter.absolute
 import dev.dimension.flare.ui.humanizer.Formatter.full
 import dev.dimension.flare.ui.humanizer.Formatter.relative
 import kotlin.time.Clock
@@ -19,6 +20,7 @@ public data class UiDateTime internal constructor(
     }
     val relative: String = value.relative()
     val full: String = value.full()
+    val absolute: String = value.absolute()
 
     val shouldShowFull: Boolean by lazy {
         val compareTo = Clock.System.now()

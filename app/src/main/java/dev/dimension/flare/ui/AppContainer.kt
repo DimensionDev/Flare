@@ -91,6 +91,7 @@ fun FlareApp(content: @Composable () -> Unit) {
                         ),
                     fullWidthPost = appearanceSettings.fullWidthPost,
                     postActionStyle = appearanceSettings.postActionStyle,
+                    absoluteTimestamp = appearanceSettings.absoluteTimestamp,
                 )
             },
         content = content,

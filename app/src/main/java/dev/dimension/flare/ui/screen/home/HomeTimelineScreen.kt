@@ -397,7 +397,7 @@ internal fun TimelineItemContent(
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
                             )
-                            Text(text = stringResource(id = R.string.home_timeline_new_toots))
+                            Text(text = pluralStringResource(id = R.plurals.home_timeline_new_toots, state.newPostsCount, state.newPostsCount))
                         }
                     }
                 }

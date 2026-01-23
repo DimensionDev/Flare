@@ -24,6 +24,7 @@ public class TimelineItemPresenterWithLazyListState(
     @Immutable
     public interface State : TimelineItemPresenter.State {
         public val showNewToots: Boolean
+        public val newPostsCount: Int
         public val lazyListState: LazyStaggeredGridState
 
         public fun onNewTootsShown()
@@ -37,6 +38,8 @@ public class TimelineItemPresenterWithLazyListState(
     override fun body(): State {
         val state = tabItemPresenter.body()
         var showNewToots by remember { mutableStateOf(false) }
+        var newPostsCount by remember { mutableStateOf(0) }
+        var previousFirstItemKey by remember { mutableStateOf<String?>(null) }
         state.listState.onSuccess {
             LaunchedEffect(Unit) {
                 snapshotFlow {
@@ -48,7 +51,24 @@ public class TimelineItemPresenterWithLazyListState(
                 }.mapNotNull { it }
                     .distinctUntilChanged()
                     .drop(1)
-                    .collect {
+                    .collect { newFirstItemKey ->
+                        // Find the position of the previous first item
+                        val previousItemKey = previousFirstItemKey
+                        if (previousItemKey != null) {
+                            // Search for where the previous first item is now
+                            var count = 0
+                            for (i in 0 until itemCount) {
+                                val item = peek(i)
+                                if (item?.itemKey == previousItemKey) {
+                                    count = i
+                                    break
+                                }
+                            }
+                            if (count > 0) {
+                                newPostsCount = count
+                            }
+                        }
+                        previousFirstItemKey = newFirstItemKey
                         showNewToots = true
                     }
             }
@@ -67,6 +87,7 @@ public class TimelineItemPresenterWithLazyListState(
         }
         return object : State, TimelineItemPresenter.State by state {
             override val showNewToots = showNewToots
+            override val newPostsCount = newPostsCount
             override val lazyListState = lazyListState
 
             override fun onNewTootsShown() {

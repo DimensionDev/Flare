@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Open links in de in-app browser</string>
     <string name="settings_appearance_full_width_post">Volledige breedte bericht</string>
     <string name="settings_appearance_full_width_post_description">Toon bericht in volledige breedte</string>
+    <string name="settings_appearance_absolute_timestamp">Absolute tijdstempel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Geef absolute tijdsaanduiding weer bij berichten</string>
     <string name="settings_storage_clear_image_cache">Afbeeldingencache legen</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB van afbeeldingen zal worden verwijderd</string>
     <string name="settings_storage_clear_database">Cache database wissen</string>

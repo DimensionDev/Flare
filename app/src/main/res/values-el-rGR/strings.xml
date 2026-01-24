@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Άνοιγμα συνδέσμων στο πρόγραμμα περιήγησης εντός εφαρμογής</string>
     <string name="settings_appearance_full_width_post">Πλήρες πλάτος δημοσίευσης</string>
     <string name="settings_appearance_full_width_post_description">Εμφάνιση της δημοσίευσης σε πλήρες πλάτος</string>
+    <string name="settings_appearance_absolute_timestamp">Απόλυτη χρονοσήμανση</string>
+    <string name="settings_appearance_absolute_timestamp_description">Εμφάνιση απόλυτων χρονικών σημάτων στις δημοσιεύσεις</string>
     <string name="settings_storage_clear_image_cache">Εκκαθάριση προσωρινής μνήμης εικόνας</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB εικόνων θα αφαιρεθούν</string>
     <string name="settings_storage_clear_database">Εκκαθάριση βάσης δεδομένων προσωρινής μνήμης</string>

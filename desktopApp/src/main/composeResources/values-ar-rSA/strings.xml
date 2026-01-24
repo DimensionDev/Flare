@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">محاذاة لليسار</string>
     <string name="settings_appearance_post_action_style_right_aligned">محاذاة لليمين</string>
     <string name="settings_appearance_post_action_style_stretch">تمدد</string>
+    <string name="settings_appearance_absolute_timestamp">الطابع الزمني المطلق</string>
+    <string name="settings_appearance_absolute_timestamp_description">عرض علامات الوقت المطلقة على المشاركات</string>
     <string name="settings_about_source_code">الكود المصدري</string>
     <string name="settings_about_telegram">تيليجرام</string>
     <string name="settings_about_telegram_description">انضم إلى مجموعة تيليجرام</string>

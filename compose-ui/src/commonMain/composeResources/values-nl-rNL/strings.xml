@@ -366,6 +366,8 @@
     <string name="mixed_timeline_title">Gemengd</string>
     <string name="liked_title">Leukgevonden</string>
     <string name="all_rss_feeds_title">Alle RSS feeds</string>
+    <string name="settings_appearance_absolute_timestamp">Absolute tijdstempel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Geef absolute tijdsaanduiding weer bij berichten</string>
     <string name="settings_about_description">De ultieme volgende generatie open-sourced AI stuurde gedecentraliseerde sociale netwerkclient.</string>
     <string name="settings_about_source_code">Bron code</string>
     <string name="settings_about_telegram">Telegram</string>

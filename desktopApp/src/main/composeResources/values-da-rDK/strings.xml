@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">Venstre justeret</string>
     <string name="settings_appearance_post_action_style_right_aligned">Højre justeret</string>
     <string name="settings_appearance_post_action_style_stretch">Stræk</string>
+    <string name="settings_appearance_absolute_timestamp">Absolut tidsstempel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Vis absolutte tidsstempler på indlæg</string>
     <string name="settings_about_source_code">Kilde kode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Tilmeld dig vores Telegram gruppe</string>

@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">左揃え</string>
     <string name="settings_appearance_post_action_style_right_aligned">右揃え</string>
     <string name="settings_appearance_post_action_style_stretch">ストレッチ</string>
+    <string name="settings_appearance_absolute_timestamp">絶対タイムスタンプです</string>
+    <string name="settings_appearance_absolute_timestamp_description">投稿に絶対タイムスタンプを表示する</string>
     <string name="settings_about_source_code">ソースコード</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Telegramグループに参加する</string>

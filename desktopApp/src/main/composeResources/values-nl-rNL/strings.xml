@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">Links uitgelijnd</string>
     <string name="settings_appearance_post_action_style_right_aligned">Rechts uitgelijnd</string>
     <string name="settings_appearance_post_action_style_stretch">Uitrekken</string>
+    <string name="settings_appearance_absolute_timestamp">Absolute tijdstempel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Geef absolute tijdsaanduiding weer bij berichten</string>
     <string name="settings_about_source_code">Bron code</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Deelnemen aan onze Telegram-groep</string>

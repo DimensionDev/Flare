@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Åpne koblinger i nettleser</string>
     <string name="settings_appearance_full_width_post">Full bredde innlegg</string>
     <string name="settings_appearance_full_width_post_description">Vis innholdet i full bredde</string>
+    <string name="settings_appearance_absolute_timestamp">Absolutt tidsstempel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Vis absolutte tidsstempler på innlegg</string>
     <string name="settings_storage_clear_image_cache">Tøm bildebuffer</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder vil bli fjernet</string>
     <string name="settings_storage_clear_database">Slett mellomlagerdatabase</string>

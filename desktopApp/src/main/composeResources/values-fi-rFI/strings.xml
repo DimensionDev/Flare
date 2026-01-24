@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">Vasen tasattu</string>
     <string name="settings_appearance_post_action_style_right_aligned">Oikealle tasattu</string>
     <string name="settings_appearance_post_action_style_stretch">Venytä</string>
+    <string name="settings_appearance_absolute_timestamp">Absoluuttinen aikaleima</string>
+    <string name="settings_appearance_absolute_timestamp_description">Näytä absoluuttiset aikaleimat artikkeleissa</string>
     <string name="settings_about_source_code">Lähdekoodi</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Liity meidän Telegram ryhmään</string>

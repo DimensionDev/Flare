@@ -366,6 +366,8 @@
     <string name="mixed_timeline_title">Ibrida</string>
     <string name="liked_title">Piace</string>
     <string name="all_rss_feeds_title">Tutti I Feed RSS</string>
+    <string name="settings_appearance_absolute_timestamp">Marcatura oraria assoluta</string>
+    <string name="settings_appearance_absolute_timestamp_description">Mostra timestamp assoluti sui post</string>
     <string name="settings_about_description">Il client di social network decentralizzato basato su IA di ultima generazione.</string>
     <string name="settings_about_source_code">Codice sorgente</string>
     <string name="settings_about_telegram">Telegram</string>

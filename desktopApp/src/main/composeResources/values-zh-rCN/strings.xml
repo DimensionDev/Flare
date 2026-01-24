@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">左对齐</string>
     <string name="settings_appearance_post_action_style_right_aligned">右对齐</string>
     <string name="settings_appearance_post_action_style_stretch">拉伸模式</string>
+    <string name="settings_appearance_absolute_timestamp">绝对时间戳</string>
+    <string name="settings_appearance_absolute_timestamp_description">在帖子中显示绝对时间戳</string>
     <string name="settings_about_source_code">源代码</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">加入Telegram 群组</string>

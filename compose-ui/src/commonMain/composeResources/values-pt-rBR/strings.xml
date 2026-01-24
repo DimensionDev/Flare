@@ -366,6 +366,8 @@
     <string name="mixed_timeline_title">Misto</string>
     <string name="liked_title">Curtiu</string>
     <string name="all_rss_feeds_title">Todos RSS Feeds</string>
+    <string name="settings_appearance_absolute_timestamp">Timestamp absoluto</string>
+    <string name="settings_appearance_absolute_timestamp_description">Exibir timestamps absolutos nas postagens</string>
     <string name="settings_about_description">O melhor cliente descentralizado de rede social de código-fonte aberto da próxima geração.</string>
     <string name="settings_about_source_code">Código fonte</string>
     <string name="settings_about_telegram">Telegram</string>

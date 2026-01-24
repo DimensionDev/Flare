@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Apri link nel browser in-app</string>
     <string name="settings_appearance_full_width_post">Post a larghezza intera</string>
     <string name="settings_appearance_full_width_post_description">Mostra post a larghezza intera</string>
+    <string name="settings_appearance_absolute_timestamp">Marcatura oraria assoluta</string>
+    <string name="settings_appearance_absolute_timestamp_description">Mostra timestamp assoluti sui post</string>
     <string name="settings_storage_clear_image_cache">Cancella cache immagini</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB di immagini verranno rimossi</string>
     <string name="settings_storage_clear_database">Cancella cache database</string>

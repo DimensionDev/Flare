@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Открыть ссылки в браузере приложения</string>
     <string name="settings_appearance_full_width_post">Записи в полную ширину</string>
     <string name="settings_appearance_full_width_post_description">Показать записи на всю ширину карточки</string>
+    <string name="settings_appearance_absolute_timestamp">Абсолютная метка времени</string>
+    <string name="settings_appearance_absolute_timestamp_description">Показывать абсолютную метку времени на записях</string>
     <string name="settings_storage_clear_image_cache">Очистить кэш изображений</string>
     <string name="settings_storage_clear_image_cache_description">%1$s МБ изображений будет удалено</string>
     <string name="settings_storage_clear_database">Очистить базу данных кэша</string>

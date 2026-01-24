@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">在应用内浏览器中打开链接</string>
     <string name="settings_appearance_full_width_post">全宽帖子</string>
     <string name="settings_appearance_full_width_post_description">全宽显示帖子</string>
+    <string name="settings_appearance_absolute_timestamp">绝对时间戳</string>
+    <string name="settings_appearance_absolute_timestamp_description">在帖子中显示绝对时间戳</string>
     <string name="settings_storage_clear_image_cache">清除图片缓存</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB的图片将被删除</string>
     <string name="settings_storage_clear_database">清除缓存数据库</string>

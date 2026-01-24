@@ -366,6 +366,8 @@
     <string name="mixed_timeline_title">Gemischt</string>
     <string name="liked_title">Gefällt</string>
     <string name="all_rss_feeds_title">Alle RSS Feeds</string>
+    <string name="settings_appearance_absolute_timestamp">Absoluter Zeitstempel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Zeige absolute Zeitstempel in Beiträgen</string>
     <string name="settings_about_description">Der ultimative Open-Source-Client für dezentrale soziale Netzwerke der nächsten Generation, basierend auf KI.</string>
     <string name="settings_about_source_code">Quellcode</string>
     <string name="settings_about_telegram">Telegram</string>

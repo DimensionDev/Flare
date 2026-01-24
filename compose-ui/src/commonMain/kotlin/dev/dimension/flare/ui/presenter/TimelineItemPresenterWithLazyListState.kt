@@ -68,11 +68,11 @@ public class TimelineItemPresenterWithLazyListState(
                                 }
                             }
                             if (count > 0) {
+                                println("[DEBUG] New posts detected: count=$count, firstVisibleItemIndex=${lazyListState.firstVisibleItemIndex}")
                                 totalNewPostsCount = count
                                 newPostsCount = count
-                                // Reset to track from current position - new posts are at indices 0 to count-1
-                                // so if we're below them, we start counting down from count
                                 minFirstVisibleIndex = maxOf(lazyListState.firstVisibleItemIndex, count)
+                                println("[DEBUG] After init: totalNewPostsCount=$totalNewPostsCount, newPostsCount=$newPostsCount, minFirstVisibleIndex=$minFirstVisibleIndex")
                             }
                         }
                         previousFirstItemKey = newFirstItemKey
@@ -98,10 +98,9 @@ public class TimelineItemPresenterWithLazyListState(
             }.distinctUntilChanged()
                 .collect { firstVisibleIndex ->
                     if (showNewToots && totalNewPostsCount > 0 && minFirstVisibleIndex < Int.MAX_VALUE) {
-                        // Track the smallest index reached while the indicator is shown
                         minFirstVisibleIndex = minOf(minFirstVisibleIndex, firstVisibleIndex)
-                        // Remaining new posts are those above the smallest reached index
                         newPostsCount = minFirstVisibleIndex.coerceAtMost(totalNewPostsCount)
+                        println("[DEBUG] Scroll: firstVisibleIndex=$firstVisibleIndex, minFirstVisibleIndex=$minFirstVisibleIndex, totalNewPostsCount=$totalNewPostsCount, newPostsCount=$newPostsCount")
                     }
                 }
         }

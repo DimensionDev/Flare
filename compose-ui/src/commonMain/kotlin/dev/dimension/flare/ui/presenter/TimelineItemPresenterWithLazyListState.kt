@@ -100,8 +100,7 @@ public class TimelineItemPresenterWithLazyListState(
                         // Track the smallest index reached while the indicator is shown
                         minFirstVisibleIndex = minOf(minFirstVisibleIndex, firstVisibleIndex)
                         // Remaining new posts are those above the smallest reached index
-                        val newCount = minFirstVisibleIndex.coerceAtMost(totalNewPostsCount)
-                        newPostsCount = newCount
+                        newPostsCount = minFirstVisibleIndex.coerceAtMost(totalNewPostsCount)
                     }
                 }
         }

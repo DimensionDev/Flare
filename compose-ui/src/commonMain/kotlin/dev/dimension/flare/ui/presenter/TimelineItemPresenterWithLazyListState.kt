@@ -69,6 +69,7 @@ public class TimelineItemPresenterWithLazyListState(
                             }
                             if (count > 0) {
                                 totalNewPostsCount = count
+                                newPostsCount = count
                                 // Reset to track from current position - new posts are at indices 0 to count-1
                                 // so if we're below them, we start counting down from count
                                 minFirstVisibleIndex = maxOf(lazyListState.firstVisibleItemIndex, count)
@@ -96,7 +97,7 @@ public class TimelineItemPresenterWithLazyListState(
                 lazyListState.firstVisibleItemIndex
             }.distinctUntilChanged()
                 .collect { firstVisibleIndex ->
-                    if (showNewToots && totalNewPostsCount > 0) {
+                    if (showNewToots && totalNewPostsCount > 0 && minFirstVisibleIndex < Int.MAX_VALUE) {
                         // Track the smallest index reached while the indicator is shown
                         minFirstVisibleIndex = minOf(minFirstVisibleIndex, firstVisibleIndex)
                         // Remaining new posts are those above the smallest reached index

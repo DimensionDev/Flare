@@ -40,7 +40,9 @@ public class TimelineItemPresenterWithLazyListState(
         var showNewToots by remember { mutableStateOf(false) }
         var newPostsCount by remember { mutableStateOf(0) }
         var totalNewPostsCount by remember { mutableStateOf(0) }
+        var minFirstVisibleIndex by remember { mutableStateOf(Int.MAX_VALUE) }
         var previousFirstItemKey by remember { mutableStateOf<String?>(null) }
+        val lazyListState = lazyStaggeredGridState ?: rememberLazyStaggeredGridState()
         state.listState.onSuccess {
             LaunchedEffect(Unit) {
                 snapshotFlow {
@@ -68,6 +70,8 @@ public class TimelineItemPresenterWithLazyListState(
                             if (count > 0) {
                                 newPostsCount = count
                                 totalNewPostsCount = count
+                                // Reset the minimum seen index when new posts arrive
+                                minFirstVisibleIndex = lazyListState.firstVisibleItemIndex
                             }
                         }
                         previousFirstItemKey = newFirstItemKey
@@ -75,7 +79,6 @@ public class TimelineItemPresenterWithLazyListState(
                     }
             }
         }
-        val lazyListState = lazyStaggeredGridState ?: rememberLazyStaggeredGridState()
         val isAtTheTop by remember {
             derivedStateOf {
                 lazyListState.firstVisibleItemIndex == 0 &&
@@ -87,19 +90,19 @@ public class TimelineItemPresenterWithLazyListState(
                 showNewToots = false
             }
         }
-        // Decrement newPostsCount as user scrolls past new posts
+        // Decrement newPostsCount monotonically as user scrolls up to see new posts
         LaunchedEffect(Unit) {
             snapshotFlow {
                 lazyListState.firstVisibleItemIndex
             }.distinctUntilChanged()
                 .collect { firstVisibleIndex ->
                     if (showNewToots && totalNewPostsCount > 0) {
-                        // Calculate how many new posts have been scrolled past
-                        val scrolledPastCount = firstVisibleIndex
-                        // Decrement the count based on how many new posts are no longer visible
-                        val newCount = (totalNewPostsCount - scrolledPastCount).coerceAtLeast(0)
+                        // Track the smallest index reached while the indicator is shown
+                        minFirstVisibleIndex = minOf(minFirstVisibleIndex, firstVisibleIndex)
+                        // Remaining new posts are those above the smallest reached index
+                        val newCount = minFirstVisibleIndex.coerceAtMost(totalNewPostsCount)
                         newPostsCount = newCount
-                        // Hide the indicator when all new posts have been scrolled past
+                        // Hide the indicator when all new posts have scrolled into view
                         if (newCount == 0) {
                             showNewToots = false
                         }

@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">Wyrównanie w lewo</string>
     <string name="settings_appearance_post_action_style_right_aligned">Wyrównanie do prawej</string>
     <string name="settings_appearance_post_action_style_stretch">Rozciągnięcie</string>
+    <string name="settings_appearance_absolute_timestamp">Bezwzględny znacznik czasu</string>
+    <string name="settings_appearance_absolute_timestamp_description">Wyświetlaj bezwzględne znaczniki czasu na postach</string>
     <string name="settings_about_source_code">Kod źródłowy</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Dołącz do naszej grupy Telegram</string>

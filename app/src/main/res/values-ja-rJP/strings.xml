@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">アプリ内ブラウザでリンクを開く</string>
     <string name="settings_appearance_full_width_post">横広の投稿</string>
     <string name="settings_appearance_full_width_post_description">投稿を横広く表示する</string>
+    <string name="settings_appearance_absolute_timestamp">絶対タイムスタンプです</string>
+    <string name="settings_appearance_absolute_timestamp_description">投稿に絶対タイムスタンプを表示する</string>
     <string name="settings_storage_clear_image_cache">画像キャッシュをクリア</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MBの画像が削除されます</string>
     <string name="settings_storage_clear_database">キャッシュデータベースをクリア</string>

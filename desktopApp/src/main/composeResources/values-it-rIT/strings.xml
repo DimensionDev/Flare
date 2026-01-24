@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">Allineato a sinistra</string>
     <string name="settings_appearance_post_action_style_right_aligned">Allineato a destra</string>
     <string name="settings_appearance_post_action_style_stretch">Allungamento</string>
+    <string name="settings_appearance_absolute_timestamp">Marcatura oraria assoluta</string>
+    <string name="settings_appearance_absolute_timestamp_description">Mostra timestamp assoluti sui post</string>
     <string name="settings_about_source_code">Codice sorgente</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Unisciti al nostro gruppo Telegram</string>

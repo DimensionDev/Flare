@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">فتح الروابط في المتصفح داخل التطبيق</string>
     <string name="settings_appearance_full_width_post">عرض كامل المنشور</string>
     <string name="settings_appearance_full_width_post_description">إظهار المنشور في العرض الكامل</string>
+    <string name="settings_appearance_absolute_timestamp">الطابع الزمني المطلق</string>
+    <string name="settings_appearance_absolute_timestamp_description">عرض علامات الوقت المطلقة على المشاركات</string>
     <string name="settings_storage_clear_image_cache">مسح ذاكرة التخزين المؤقت للصورة</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB من الصور سيتم إزالتها</string>
     <string name="settings_storage_clear_database">مسح قاعدة بيانات ذاكرة التخزين المؤقت</string>

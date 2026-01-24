@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">Links ausgerichtet</string>
     <string name="settings_appearance_post_action_style_right_aligned">Rechts ausgerichtet</string>
     <string name="settings_appearance_post_action_style_stretch">Dehnen</string>
+    <string name="settings_appearance_absolute_timestamp">Absoluter Zeitstempel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Zeige absolute Zeitstempel in Beiträgen</string>
     <string name="settings_about_source_code">Quellcode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Trete unserer Telegram-Gruppe bei</string>

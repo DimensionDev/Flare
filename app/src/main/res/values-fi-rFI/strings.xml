@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Avaa linkit sovelluksen sisäisessä selaimessa</string>
     <string name="settings_appearance_full_width_post">Koko leveys viesti</string>
     <string name="settings_appearance_full_width_post_description">Näytä viesti täydellä leveydellä</string>
+    <string name="settings_appearance_absolute_timestamp">Absoluuttinen aikaleima</string>
+    <string name="settings_appearance_absolute_timestamp_description">Näytä absoluuttiset aikaleimat artikkeleissa</string>
     <string name="settings_storage_clear_image_cache">Tyhjennä kuvien välimuisti</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB kuvia poistetaan</string>
     <string name="settings_storage_clear_database">Tyhjennä välimuistin tietokanta</string>

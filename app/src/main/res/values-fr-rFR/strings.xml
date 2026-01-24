@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Ouvrir les liens dans le navigateur de l\'application</string>
     <string name="settings_appearance_full_width_post">Poteau en pleine largeur</string>
     <string name="settings_appearance_full_width_post_description">Afficher le message en pleine largeur</string>
+    <string name="settings_appearance_absolute_timestamp">Horodatage absolu</string>
+    <string name="settings_appearance_absolute_timestamp_description">Afficher les horodatages absolus sur les publications</string>
     <string name="settings_storage_clear_image_cache">Vider le cache des images</string>
     <string name="settings_storage_clear_image_cache_description">%1$s Mo d\'images seront supprimés</string>
     <string name="settings_storage_clear_database">Vider la base de données du cache</string>

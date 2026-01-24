@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">Aliniere la stânga</string>
     <string name="settings_appearance_post_action_style_right_aligned">Corect aliniat</string>
     <string name="settings_appearance_post_action_style_stretch">Întindere</string>
+    <string name="settings_appearance_absolute_timestamp">Marcaj temporal absolut</string>
+    <string name="settings_appearance_absolute_timestamp_description">Afişează marcajul de timp absolut pe postări</string>
     <string name="settings_about_source_code">Cod sursă</string>
     <string name="settings_about_telegram">Telegramă</string>
     <string name="settings_about_telegram_description">Alătură-te grupului nostru de telegramă</string>

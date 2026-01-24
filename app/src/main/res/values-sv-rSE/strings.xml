@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Öppna länkar i webbläsaren i appen</string>
     <string name="settings_appearance_full_width_post">Full bredd inlägg</string>
     <string name="settings_appearance_full_width_post_description">Visa inlägget i full bredd</string>
+    <string name="settings_appearance_absolute_timestamp">Absolut tidsstämpel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Visa absoluta tidsstämplar på inlägg</string>
     <string name="settings_storage_clear_image_cache">Rensa bildcache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder kommer att tas bort</string>
     <string name="settings_storage_clear_database">Rensa cache-databas</string>

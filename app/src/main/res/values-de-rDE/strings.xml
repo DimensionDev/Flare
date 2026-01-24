@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Links im In-App-Browser öffnen</string>
     <string name="settings_appearance_full_width_post">Beitrag in voller Breite</string>
     <string name="settings_appearance_full_width_post_description">Beitrag in voller Breite anzeigen</string>
+    <string name="settings_appearance_absolute_timestamp">Absoluter Zeitstempel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Zeige absolute Zeitstempel in Beiträgen</string>
     <string name="settings_storage_clear_image_cache">Bildercache löschen</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB an Bildern werden gelöscht</string>
     <string name="settings_storage_clear_database">Cache-Datenbank löschen</string>

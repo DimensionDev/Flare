@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Otwórz linki w przeglądarce aplikacji</string>
     <string name="settings_appearance_full_width_post">Wiadomość o pełnej szerokości</string>
     <string name="settings_appearance_full_width_post_description">Pokaż post o pełnej szerokości</string>
+    <string name="settings_appearance_absolute_timestamp">Bezwzględny znacznik czasu</string>
+    <string name="settings_appearance_absolute_timestamp_description">Wyświetlaj bezwzględne znaczniki czasu na postach</string>
     <string name="settings_storage_clear_image_cache">Usuń pamięć podręczną obrazów</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB obrazów zostanie usunięte</string>
     <string name="settings_storage_clear_database">Wyczyść bazę pamięci podręcznej</string>

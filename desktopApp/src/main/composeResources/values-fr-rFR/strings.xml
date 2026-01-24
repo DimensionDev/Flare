@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">Alignement à gauche</string>
     <string name="settings_appearance_post_action_style_right_aligned">Alignement droit</string>
     <string name="settings_appearance_post_action_style_stretch">Étirer</string>
+    <string name="settings_appearance_absolute_timestamp">Horodatage absolu</string>
+    <string name="settings_appearance_absolute_timestamp_description">Afficher les horodatages absolus sur les publications</string>
     <string name="settings_about_source_code">Code source</string>
     <string name="settings_about_telegram">Télégramme</string>
     <string name="settings_about_telegram_description">Rejoignez notre groupe Telegram</string>

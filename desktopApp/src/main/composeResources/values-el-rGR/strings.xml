@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">Αριστερά ευθυγραμμίστηκε</string>
     <string name="settings_appearance_post_action_style_right_aligned">Δεξιά ευθυγράμμιση</string>
     <string name="settings_appearance_post_action_style_stretch">Τέντωμα</string>
+    <string name="settings_appearance_absolute_timestamp">Απόλυτη χρονοσήμανση</string>
+    <string name="settings_appearance_absolute_timestamp_description">Εμφάνιση απόλυτων χρονικών σημάτων στις δημοσιεύσεις</string>
     <string name="settings_about_source_code">Πηγαίος κώδικας</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Γίνετε μέλος της ομάδας Telegram</string>

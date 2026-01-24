@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">Izquierda alineada</string>
     <string name="settings_appearance_post_action_style_right_aligned">Derecho alineado</string>
     <string name="settings_appearance_post_action_style_stretch">Escritura</string>
+    <string name="settings_appearance_absolute_timestamp">Marca de tiempo absoluta</string>
+    <string name="settings_appearance_absolute_timestamp_description">Mostrar marcas de tiempo absolutas en publicaciones</string>
     <string name="settings_about_source_code">Código fuente</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Únete a nuestro grupo de Telegram</string>

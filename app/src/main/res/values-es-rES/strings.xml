@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Abrir enlaces en el navegador</string>
     <string name="settings_appearance_full_width_post">Mensaje de ancho completo</string>
     <string name="settings_appearance_full_width_post_description">Mostrar el mensaje en ancho completo</string>
+    <string name="settings_appearance_absolute_timestamp">Marca de tiempo absoluta</string>
+    <string name="settings_appearance_absolute_timestamp_description">Mostrar marcas de tiempo absolutas en publicaciones</string>
     <string name="settings_storage_clear_image_cache">Limpiar caché de imágenes</string>
     <string name="settings_storage_clear_image_cache_description">Se eliminarán %1$s MB de imágenes</string>
     <string name="settings_storage_clear_database">Borrar base de datos de caché</string>

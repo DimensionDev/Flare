@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Відкрити посилання у вбудованому браузері</string>
     <string name="settings_appearance_full_width_post">На всю ширину повідомлення</string>
     <string name="settings_appearance_full_width_post_description">Показувати допис по всій ширині</string>
+    <string name="settings_appearance_absolute_timestamp">Абсолютна часова мітка</string>
+    <string name="settings_appearance_absolute_timestamp_description">Показувати абсолютні позначки часу на повідомленнях</string>
     <string name="settings_storage_clear_image_cache">Очистити кеш зображень</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB із зображень буде видалено</string>
     <string name="settings_storage_clear_database">Очистити базу даних кешу</string>

@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Åbn links i app-browseren</string>
     <string name="settings_appearance_full_width_post">Fuld bredde indlæg</string>
     <string name="settings_appearance_full_width_post_description">Vis indlægget i fuld bredde</string>
+    <string name="settings_appearance_absolute_timestamp">Absolut tidsstempel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Vis absolutte tidsstempler på indlæg</string>
     <string name="settings_storage_clear_image_cache">Ryd billed-cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB billeder vil blive fjernet</string>
     <string name="settings_storage_clear_database">Ryd cache database</string>

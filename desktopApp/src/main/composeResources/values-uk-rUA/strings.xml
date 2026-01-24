@@ -192,6 +192,8 @@
     <string name="settings_appearance_post_action_style_left_aligned">По лівому краю</string>
     <string name="settings_appearance_post_action_style_right_aligned">По правому краю</string>
     <string name="settings_appearance_post_action_style_stretch">Розтягнути</string>
+    <string name="settings_appearance_absolute_timestamp">Абсолютна часова мітка</string>
+    <string name="settings_appearance_absolute_timestamp_description">Показувати абсолютні позначки часу на повідомленнях</string>
     <string name="settings_about_source_code">Початковий код</string>
     <string name="settings_about_telegram">Телеграма</string>
     <string name="settings_about_telegram_description">Приєднатися до нашої групи в Telegram</string>

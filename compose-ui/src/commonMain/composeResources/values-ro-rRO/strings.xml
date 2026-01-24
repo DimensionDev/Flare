@@ -366,6 +366,8 @@
     <string name="mixed_timeline_title">Amestecat</string>
     <string name="liked_title">Apreciat</string>
     <string name="all_rss_feeds_title">Toate feed-urile RSS</string>
+    <string name="settings_appearance_absolute_timestamp">Marcaj temporal absolut</string>
+    <string name="settings_appearance_absolute_timestamp_description">Afişează marcajul de timp absolut pe postări</string>
     <string name="settings_about_description">Cea mai importantă generaţie de AI open-sourced a oferit un client descentralizat al reţelei sociale.</string>
     <string name="settings_about_source_code">Cod sursă</string>
     <string name="settings_about_telegram">Telegramă</string>

@@ -168,6 +168,8 @@
     <string name="settings_appearance_in_app_browser_description">Deschide link-uri în browser-ul in-app</string>
     <string name="settings_appearance_full_width_post">Scriere pe lăţime completă</string>
     <string name="settings_appearance_full_width_post_description">Arată postarea în lăţime completă</string>
+    <string name="settings_appearance_absolute_timestamp">Marcaj temporal absolut</string>
+    <string name="settings_appearance_absolute_timestamp_description">Afişează marcajul de timp absolut pe postări</string>
     <string name="settings_storage_clear_image_cache">Golire cache imagine</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB de imagini vor fi eliminate</string>
     <string name="settings_storage_clear_database">Goliţi baza de date cache</string>

@@ -39,6 +39,7 @@ public class TimelineItemPresenterWithLazyListState(
         val state = tabItemPresenter.body()
         var showNewToots by remember { mutableStateOf(false) }
         var newPostsCount by remember { mutableStateOf(0) }
+        var totalNewPostsCount by remember { mutableStateOf(0) }
         var previousFirstItemKey by remember { mutableStateOf<String?>(null) }
         state.listState.onSuccess {
             LaunchedEffect(Unit) {
@@ -66,6 +67,7 @@ public class TimelineItemPresenterWithLazyListState(
                             }
                             if (count > 0) {
                                 newPostsCount = count
+                                totalNewPostsCount = count
                             }
                         }
                         previousFirstItemKey = newFirstItemKey
@@ -84,6 +86,25 @@ public class TimelineItemPresenterWithLazyListState(
             if (isAtTheTop) {
                 showNewToots = false
             }
+        }
+        // Decrement newPostsCount as user scrolls past new posts
+        LaunchedEffect(Unit) {
+            snapshotFlow {
+                lazyListState.firstVisibleItemIndex
+            }.distinctUntilChanged()
+                .collect { firstVisibleIndex ->
+                    if (showNewToots && totalNewPostsCount > 0) {
+                        // Calculate how many new posts have been scrolled past
+                        val scrolledPastCount = firstVisibleIndex
+                        // Decrement the count based on how many new posts are no longer visible
+                        val newCount = (totalNewPostsCount - scrolledPastCount).coerceAtLeast(0)
+                        newPostsCount = newCount
+                        // Hide the indicator when all new posts have been scrolled past
+                        if (newCount == 0) {
+                            showNewToots = false
+                        }
+                    }
+                }
         }
         return object : State, TimelineItemPresenter.State by state {
             override val showNewToots = showNewToots

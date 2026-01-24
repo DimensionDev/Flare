@@ -102,10 +102,6 @@ public class TimelineItemPresenterWithLazyListState(
                         // Remaining new posts are those above the smallest reached index
                         val newCount = minFirstVisibleIndex.coerceAtMost(totalNewPostsCount)
                         newPostsCount = newCount
-                        // Hide the indicator when all new posts have scrolled into view
-                        if (newCount == 0) {
-                            showNewToots = false
-                        }
                     }
                 }
         }

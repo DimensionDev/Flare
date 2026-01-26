@@ -39,8 +39,9 @@ public class TimelineItemPresenterWithLazyListState(
 
     @Composable
     override fun body(): State {
-        val presenterState = tabItemPresenter.body()
-        val currentPresenterState by rememberUpdatedState(presenterState)
+        val state = tabItemPresenter.body()
+        var showNewToots by remember { mutableStateOf(false) }
+        val currentState by rememberUpdatedState(state)
 
         // Helper to collect keys for the first 'count' items of a PagingState.Success list.
         // Use a star projection because PagingState.Success is generic.
@@ -53,7 +54,6 @@ public class TimelineItemPresenterWithLazyListState(
             return added
         }
 
-        var showNewToots by remember { mutableStateOf(false) }
         var newPostsCount by remember { mutableStateOf(0) }
         var totalNewPostsCount by remember { mutableStateOf(0) }
         // track exact keys of items that were newly prepended
@@ -77,7 +77,7 @@ public class TimelineItemPresenterWithLazyListState(
             snapshotFlow { overrideFirstVisibleIndex ?: lazyListState.firstVisibleItemIndex }
                 .distinctUntilChanged()
                 .collect { index ->
-                    val listState = currentPresenterState.listState
+                    val listState = currentState.listState
                     if (listState is PagingState.Success) {
                         val item = listState.peek(index)
                         previousFirstVisibleItemKey = item?.itemKey ?: previousFirstVisibleItemKey
@@ -88,7 +88,7 @@ public class TimelineItemPresenterWithLazyListState(
         // Detect changes to the timeline list and compute how many items were prepended.
         LaunchedEffect(Unit) {
             snapshotFlow {
-                val listState = currentPresenterState.listState
+                val listState = currentState.listState
                 if (listState is PagingState.Success) {
                     Triple(listState.peek(0)?.itemKey, listState.itemCount, listState)
                 } else null
@@ -161,7 +161,7 @@ public class TimelineItemPresenterWithLazyListState(
         // If the user is at the top, record the current top item's key as the last-read key.
         LaunchedEffect(isAtTheTop) {
             if (isAtTheTop) {
-                val listState = currentPresenterState.listState
+                val listState = currentState.listState
                 if (listState is PagingState.Success) {
                     val top = listState.peek(0)
                     previousFirstVisibleItemKey = top?.itemKey ?: previousFirstVisibleItemKey
@@ -180,7 +180,7 @@ public class TimelineItemPresenterWithLazyListState(
         // Recompute newPostsCount based on current firstVisibleIndex as the user scrolls.
         LaunchedEffect(Unit) {
             snapshotFlow {
-                Pair(overrideFirstVisibleIndex ?: lazyListState.firstVisibleItemIndex, currentPresenterState.listState)
+                Pair(overrideFirstVisibleIndex ?: lazyListState.firstVisibleItemIndex, currentState.listState)
             }.distinctUntilChanged { old, new -> old.first == new.first }
                 .collect { (firstVisibleIndex, listStateAny) ->
                     val listState = listStateAny
@@ -210,7 +210,7 @@ public class TimelineItemPresenterWithLazyListState(
                     }
                 }
         }
-        return object : State, TimelineItemPresenter.State by presenterState {
+        return object : State, TimelineItemPresenter.State by state {
             override val showNewToots = showNewToots
             override val newPostsCount = newPostsCount
             override val lazyListState = lazyListState

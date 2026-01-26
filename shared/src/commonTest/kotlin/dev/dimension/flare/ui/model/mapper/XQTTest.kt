@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.model.mapper
 
+import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.network.xqt.model.Entities
 import dev.dimension.flare.data.network.xqt.model.Hashtag
 import dev.dimension.flare.data.network.xqt.model.NoteTweet
@@ -11,10 +12,11 @@ import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetLegacy
 import dev.dimension.flare.data.network.xqt.model.UserMention
 import dev.dimension.flare.data.network.xqt.model.XqtUrl
-import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -25,7 +27,11 @@ class XQTTest {
     @BeforeTest
     fun setup() {
         startKoin {
-            modules(KoinHelper.modules())
+            modules(
+                module {
+                    single<PlatformFormatter> { TestFormatter() }
+                },
+            )
         }
     }
 
@@ -84,26 +90,7 @@ class XQTTest {
 
     @Test
     fun renderContent_noteTweet_rendersCorrectly() {
-        // Text: "Check out #Flare and @user at https://flare.app! It represents $FLR."
-        // Indices (approx):
-        // 01234567890123456789012345678901234567890123456789012345678901234
-        // Check out #Flare and @user at https://flare.app! It represents $FLR.
-        // #Flare: 10-16
-        // @user: 21-26
-        // https://flare.app: 30-47
-        // $FLR: 63-67 (approx)
-
         val text = "Check out #Flare and @user at https://flare.app! It represents \$FLR. This is Bold and Italic text."
-        // Indices need to be accurate for substring extraction
-        // Check out #Flare: 0..16. #Flare is at 10..16
-        // and @user: 16..26. @user is at 21..26
-        // at https://flare.app: 26..47. url is at 30..47
-        // ! It represents $FLR: 47..67. $FLR is at 63..67
-        // . This is : 67..77
-        // Bold: 77..81
-        // and : 81..86
-        // Italic: 86..92
-        // text.: 92..97
 
         val noteTweet =
             NoteTweet(
@@ -161,24 +148,6 @@ class XQTTest {
 
         val result = tweet.renderContent(accountKey)
         val html = result.html
-
-        // Verify elements
-        // We expect span or body wrapping the content. XQT.kt uses Element("body").
-        // "Check out "
-        // <a href="...">#Flare</a>
-        // " and "
-        // <a href="...">@user</a>
-        // " at "
-        // <a href="...">flare.app</a>
-        // "! It represents "
-        // <a href="...">$FLR</a>
-        // ". This is "
-        // <b>Bold</b>
-        // " and "
-        // <i>Italic</i>
-        // " text."
-
-        // Note: The specific hrefs depend on DeeplinkRoute which we assume produces consistent URIs.
 
         assertTrue(html.contains("Check out "))
         // assert(html.contains("""<a href="flare://search?type=specific&amp;host=example.com&amp;query=%23Flare">#Flare</a>""")) // URL encoding might vary

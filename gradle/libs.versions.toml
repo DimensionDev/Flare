@@ -9,7 +9,7 @@ junique = "1.0.4"
 lifecycleViewmodelComposeVersion = "2.10.0-alpha06"
 minSdk = "23"
 java = "21"
-agp = "8.13.2"
+agp = "9.0.0"
 kotlin = "2.3.0"
 core-ktx = "1.17.0"
 junit = "4.13.2"
@@ -256,7 +256,6 @@ ktor-server = ["ktor-server-core", "ktor-server-resources", "ktor-server-content
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

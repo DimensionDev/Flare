@@ -37,11 +37,21 @@ public class TimelineItemPresenterWithLazyListState(
         internalPresenter ?: TimelineItemPresenter(timelineTabItem)
     }
 
-    @Suppress("UNUSED_VALUE", "RedundantInitializer")
     @Composable
     override fun body(): State {
         val presenterState = tabItemPresenter.body()
         val currentPresenterState by rememberUpdatedState(presenterState)
+
+        // Helper to collect keys for the first 'count' items of a PagingState.Success list.
+        // Use a star projection because PagingState.Success is generic.
+        fun collectFirstKeys(listState: PagingState.Success<*>, count: Int): Set<String> {
+            val added = mutableSetOf<String>()
+            for (i in 0 until minOf(count, listState.itemCount)) {
+                val item = listState.peek(i)
+                if (item is UiTimeline) added.add(item.itemKey)
+            }
+            return added
+        }
 
         var showNewToots by remember { mutableStateOf(false) }
         var newPostsCount by remember { mutableStateOf(0) }
@@ -49,9 +59,6 @@ public class TimelineItemPresenterWithLazyListState(
         // track exact keys of items that were newly prepended
         var newItemKeys by remember { mutableStateOf(setOf<String>()) }
         var previousFirstVisibleItemKey by remember { mutableStateOf<String?>(null) }
-        // Touch the variable to ensure the compiler sees a read (prevents some "assigned but never read" warnings
-        // from flow/collect assignment patterns).
-        previousFirstVisibleItemKey?.let { /* no-op: mark as read */ }
         val lazyListState = lazyStaggeredGridState ?: rememberLazyStaggeredGridState()
         // Keep a remembered baseline item count for detecting prepends (must be at composable scope).
         // Use -1 as sentinel for "not initialized" so we don't need a separate 'initialized' flag.
@@ -115,11 +122,7 @@ public class TimelineItemPresenterWithLazyListState(
                             val inserted = foundIndex
                             if (inserted > 0 && !isAtTheTop) {
                                 // collect keys for new items
-                                val added = mutableSetOf<String>()
-                                for (i in 0 until minOf(inserted, listState.itemCount)) {
-                                    val item = listState.peek(i)
-                                    if (item is UiTimeline) added.add(item.itemKey)
-                                }
+                                val added = collectFirstKeys(listState, inserted)
                                 if (added.isNotEmpty()) newItemKeys = newItemKeys + added
                                 totalNewPostsCount = inserted
                                 newPostsCount = inserted
@@ -137,11 +140,7 @@ public class TimelineItemPresenterWithLazyListState(
                         val diff = itemCount - previousItemCountRef[0]
                         if (diff > 0 && !isAtTheTop) {
                             val inserted = diff
-                            val added = mutableSetOf<String>()
-                            for (i in 0 until minOf(inserted, listState.itemCount)) {
-                                val item = listState.peek(i)
-                                if (item is UiTimeline) added.add(item.itemKey)
-                            }
+                            val added = collectFirstKeys(listState, inserted)
                             if (added.isNotEmpty()) newItemKeys = newItemKeys + added
                             totalNewPostsCount = inserted
                             newPostsCount = inserted

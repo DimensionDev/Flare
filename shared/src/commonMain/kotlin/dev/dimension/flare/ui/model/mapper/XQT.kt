@@ -1232,11 +1232,7 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
                 }.orEmpty()
         return renderRichText(text, legacy?.entities, accountKey)
     } else {
-        val statusKey =
-            MicroBlogKey(
-                id = legacy?.idStr ?: restId,
-                host = accountKey.host,
-            )
+        
         val result = noteTweet.noteTweetResults.result
         val text = result.text
         val entities = result.entitySet

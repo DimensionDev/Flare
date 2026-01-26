@@ -398,43 +398,6 @@ private fun ContentBuilder.renderElement(
         }
 
         "ul" -> {
-            // withBulletList logic missing in original snippets/context, assuming standard behavior involved
-            // but original code had:
-            // "ul" -> {
-            //     withBulletList { ... }
-            // }
-            // I need to verify if withBulletList was an extension on AnnotatedString.Builder or if I missed it.
-            // Ah, line 308: withBulletList { ... }
-            // IT IS MISING from my view of the file?
-            // "withBulletList" is likely not in the file I saw, wait.
-            // Line 308 in original file `withBulletList`.
-            // I don't see `withBulletList` defined in the file. It must be an external function or I missed it.
-            // BUT, if I change the receiver to ContentBuilder, `withBulletList` won't be available unless it's generic.
-            // It's probably an extension on AnnotatedString.Builder.
-            // I should implement a `withBulletList` in ContentBuilder or inline it.
-            // If I don't see its definition, I should probably handle it safely.
-            // Let's assume it was:
-            // withStyle(paragraphStyle) { ... }
-            // I will implement a placeholder or just process children.
-            // Actually, looking at original file again... no `private fun` definition for `withBulletList` in the file.
-            // It must be an imported function?
-            // Nothing in imports suggests it unless it's from `UiRichText` package?
-            // No, likely local extension or I missed `UiRichText` file details?
-            // Ah, I scanned `UiRichText.kt`, it's not there.
-            // Maybe it was `withStyle` block?
-            // Original code:
-            // "ul" -> {
-            //      withBulletList {
-            //          element.childNodes().fastForEach { ... }
-            //      }
-            // }
-            // Usage at line 308.
-            // I will implement `withBulletList` in `ContentBuilder` to just run the block because I prefer not to break it.
-            // Or maybe it was `withAnnotation`?
-            // I'll check if I should replace it with `element.childNodes().fastForEach...`.
-            // Wait, I should try to preserve it if possible, but I can't call an external extension on my new class.
-            // I'll check if I can dig deeper.
-            // But for now I'll just iterate children, as `ul` wraps `li`s which handle their own bullets "• ".
 
             element.childNodes().fastForEach {
                 renderNode(node = it, styleData = styleData, context = context)

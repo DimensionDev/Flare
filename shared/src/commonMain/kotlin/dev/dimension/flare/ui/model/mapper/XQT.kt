@@ -1232,7 +1232,6 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
                 }.orEmpty()
         return renderRichText(text, legacy?.entities, accountKey)
     } else {
-        
         val result = noteTweet.noteTweetResults.result
         val text = result.text
         val entities = result.entitySet
@@ -1241,7 +1240,7 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
         val tokens = mutableListOf<Node>()
         val sortedEntities =
             buildList {
-                entities.hashtags?.forEach {
+                entities.hashtags?.filter { it.indices.size >= 2 }?.forEach {
                     add(
                         Entity(
                             it.indices[0],
@@ -1261,7 +1260,7 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
                         ),
                     )
                 }
-                entities.urls?.forEach {
+                entities.urls?.filter { it.indices.size >= 2 }?.forEach {
                     add(
                         Entity(
                             it.indices[0],
@@ -1277,7 +1276,7 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
                         ),
                     )
                 }
-                entities.userMentions?.forEach {
+                entities.userMentions?.filter { it.indices.size >= 2 }?.forEach {
                     add(
                         Entity(
                             it.indices[0],
@@ -1298,7 +1297,7 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
                         ),
                     )
                 }
-                entities.symbols?.forEach {
+                entities.symbols?.filter { it.indices.size >= 2 }?.forEach {
                     add(
                         Entity(
                             it.indices[0],

@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
+import com.revenuecat.placeholder.placeholder
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
@@ -55,7 +56,6 @@ import dev.dimension.flare.ui.component.ProfileHeaderLoading
 import dev.dimension.flare.ui.component.ProfileMenu
 import dev.dimension.flare.ui.component.ignoreHorizontalParentPadding
 import dev.dimension.flare.ui.component.platform.isBigScreen
-import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder

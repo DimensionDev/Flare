@@ -160,6 +160,7 @@ dependencies {
     implementation(libs.bundles.navigation3)
     implementation(libs.richtext.ui.material3)
     implementation(libs.androidx.browser)
+    implementation(libs.compose.placeholder)
 
     // START Non-FOSS component
     if (project.file("google-services.json").exists()) {

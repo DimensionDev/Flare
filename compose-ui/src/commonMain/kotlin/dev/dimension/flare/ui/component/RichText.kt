@@ -6,6 +6,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -172,7 +173,7 @@ public fun RichText(
                             SubcomposeNetworkImage(
                                 modifier =
                                     Modifier
-                                        .fillMaxSize()
+                                        .fillMaxWidth()
                                         .clip(PlatformTheme.shapes.medium)
                                         .let {
                                             if (content.href.isNullOrEmpty()) {

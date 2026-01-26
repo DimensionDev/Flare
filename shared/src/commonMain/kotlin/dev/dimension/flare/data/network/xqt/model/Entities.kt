@@ -17,7 +17,6 @@ package dev.dimension.flare.data.network.xqt.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonElement
 
 /**
  *
@@ -55,13 +54,13 @@ internal data class Description(
 @Serializable
 internal data class Hashtag(
     @SerialName("text") val text: String? = null,
-    @SerialName("indices") val indices: List<Int> = emptyList()
+    @SerialName("indices") val indices: List<Int> = emptyList(),
 )
 
 @Serializable
 internal data class Symbol(
     @SerialName("text") val text: String? = null,
-    @SerialName("indices") val indices: List<Int> = emptyList()
+    @SerialName("indices") val indices: List<Int> = emptyList(),
 )
 
 @Serializable
@@ -69,5 +68,5 @@ internal data class UserMention(
     @SerialName("screen_name") val screenName: String? = null,
     @SerialName("name") val name: String? = null,
     @SerialName("id_str") val idStr: String? = null,
-    @SerialName("indices") val indices: List<Int> = emptyList()
+    @SerialName("indices") val indices: List<Int> = emptyList(),
 )

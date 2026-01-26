@@ -8,6 +8,9 @@ internal actual object PlatformColorScheme {
     actual val primary: Color
         @Composable
         get() = MaterialTheme.colorScheme.primary
+    actual val retweetColor: Color
+        @Composable
+        get() = Color(0xff00ba7c)
     actual val primaryContainer: Color
         @Composable
         get() = MaterialTheme.colorScheme.primaryContainer

@@ -425,51 +425,7 @@ class XQTTest {
                             NoteTweetResultData(
                                 id = "note_id",
                                 text = text,
-                                entitySet =
-                                    Entities(
-                                        media =
-                                            listOf(
-                                                dev.dimension.flare.data.network.xqt.model.Media(
-                                                    idStr = mediaId,
-                                                    mediaUrlHttps = mediaUrl,
-                                                    type = dev.dimension.flare.data.network.xqt.model.Media.Type.photo,
-                                                    originalInfo =
-                                                        dev.dimension.flare.data.network.xqt.model
-                                                            .MediaOriginalInfo(100, 100),
-                                                    displayUrl = "example.com/image",
-                                                    expandedUrl = mediaUrl,
-                                                    url = mediaUrl,
-                                                    indices = listOf(19, 36),
-                                                    sizes =
-                                                        dev.dimension.flare.data.network.xqt.model.MediaSizes(
-                                                            large =
-                                                                dev.dimension.flare.data.network.xqt.model.MediaSize(
-                                                                    100,
-                                                                    dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
-                                                                    100,
-                                                                ),
-                                                            medium =
-                                                                dev.dimension.flare.data.network.xqt.model.MediaSize(
-                                                                    100,
-                                                                    dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
-                                                                    100,
-                                                                ),
-                                                            small =
-                                                                dev.dimension.flare.data.network.xqt.model.MediaSize(
-                                                                    100,
-                                                                    dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
-                                                                    100,
-                                                                ),
-                                                            thumb =
-                                                                dev.dimension.flare.data.network.xqt.model.MediaSize(
-                                                                    100,
-                                                                    dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
-                                                                    100,
-                                                                ),
-                                                        ),
-                                                ),
-                                            ),
-                                    ),
+                                entitySet = Entities(),
                                 media =
                                     dev.dimension.flare.data.network.xqt.model.NoteTweetResultMedia(
                                         inlineMedia =
@@ -487,6 +443,66 @@ class XQTTest {
             Tweet(
                 restId = "123",
                 noteTweet = noteTweet,
+                legacy =
+                    TweetLegacy(
+                        idStr = "123",
+                        fullText = "Legacy text",
+                        favoriteCount = 0,
+                        favorited = false,
+                        isQuoteStatus = false,
+                        lang = "en",
+                        quoteCount = 0,
+                        replyCount = 0,
+                        retweetCount = 0,
+                        retweeted = false,
+                        displayTextRange = listOf(0, 10),
+                        createdAt = "Wed Oct 10 20:19:24 +0000 2018",
+                        entities =
+                            Entities(
+                                media =
+                                    listOf(
+                                        dev.dimension.flare.data.network.xqt.model.Media(
+                                            idStr = mediaId,
+                                            mediaUrlHttps = mediaUrl,
+                                            type = dev.dimension.flare.data.network.xqt.model.Media.Type.photo,
+                                            originalInfo =
+                                                dev.dimension.flare.data.network.xqt.model
+                                                    .MediaOriginalInfo(100, 100),
+                                            displayUrl = "example.com/image",
+                                            expandedUrl = mediaUrl,
+                                            url = mediaUrl,
+                                            indices = listOf(19, 36),
+                                            sizes =
+                                                dev.dimension.flare.data.network.xqt.model.MediaSizes(
+                                                    large =
+                                                        dev.dimension.flare.data.network.xqt.model.MediaSize(
+                                                            100,
+                                                            dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
+                                                            100,
+                                                        ),
+                                                    medium =
+                                                        dev.dimension.flare.data.network.xqt.model.MediaSize(
+                                                            100,
+                                                            dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
+                                                            100,
+                                                        ),
+                                                    small =
+                                                        dev.dimension.flare.data.network.xqt.model.MediaSize(
+                                                            100,
+                                                            dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
+                                                            100,
+                                                        ),
+                                                    thumb =
+                                                        dev.dimension.flare.data.network.xqt.model.MediaSize(
+                                                            100,
+                                                            dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
+                                                            100,
+                                                        ),
+                                                ),
+                                        ),
+                                    ),
+                            ),
+                    ),
             )
 
         val result = tweet.renderContent(accountKey)

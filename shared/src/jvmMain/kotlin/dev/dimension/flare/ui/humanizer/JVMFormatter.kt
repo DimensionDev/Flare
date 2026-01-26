@@ -83,12 +83,12 @@ internal class JVMFormatter : PlatformFormatter {
                     .format(zonedDateTime)
             }
             daysDiff < 7 -> {
-                val day = 
+                val day =
                     DateTimeFormatter
                         .ofPattern("E")
                         .withLocale(locale)
                         .format(zonedDateTime)
-                val time = 
+                val time =
                     DateTimeFormatter
                         .ofLocalizedTime(FormatStyle.SHORT)
                         .withLocale(locale)

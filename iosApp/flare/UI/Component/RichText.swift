@@ -7,54 +7,119 @@ struct RichText: View {
     let text: UiRichText
     @State private var images: [String: Image] = [:]
     @ScaledMetric(relativeTo: .body) var imageSize = 17
+    @Environment(\.openURL) var openURL
     
+    enum RichTextContent: Identifiable {
+        var id: String {
+            switch self {
+            case .text(let text):
+                return "text-\(text)"
+            case .blockImage(let url, let href):
+                return "img-\(url)-\(href ?? "")"
+            }
+        }
+        case text(Text)
+        case blockImage(url: String, href: String?)
+    }
+
     var body: some View {
-        render(text: text, images: images)
-            .task(id: text.raw) {
-                let urls = text.imageUrls
-                let targetHeight = imageSize
-                await withTaskGroup(of: (String, Image?).self) { group in
-                    for urlString in urls {
-                        group.addTask {
-                            guard let url = URL(string: urlString) else { return (urlString, nil) }
-                            do {
-                                let result = try await KingfisherManager.shared.retrieveImage(with: url)
-                                let uiImage = result.image
-                                if let resized = await uiImage.resize(height: targetHeight) {
-                                    return (urlString, Image(uiImage: resized))
-                                } else {
-                                    return (urlString, Image(uiImage: uiImage))
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(render(text: text, images: images)) { content in
+                switch content {
+                case .text(let text):
+                    text
+                case .blockImage(let url, let href):
+                    if let url = URL(string: url) {
+                        KFImage(url)
+                            .resizable()
+                            .scaledToFit()
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                if let href, let link = URL(string: href) {
+                                    openURL(link)
                                 }
-                            } catch {
-                                return (urlString, nil)
                             }
-                        }
-                    }
-                    
-                    for await (urlString, image) in group {
-                        if let image = image {
-                            images[urlString] = image
-                        }
                     }
                 }
             }
+        }
+        .task(id: text.raw) {
+            let urls = text.imageUrls
+            let targetHeight = imageSize
+            await withTaskGroup(of: (String, Image?).self) { group in
+                for urlString in urls {
+                    group.addTask {
+                        guard let url = URL(string: urlString) else { return (urlString, nil) }
+                        do {
+                            let result = try await KingfisherManager.shared.retrieveImage(with: url)
+                            let uiImage = result.image
+                            if let resized = await uiImage.resize(height: targetHeight) {
+                                return (urlString, Image(uiImage: resized))
+                            } else {
+                                return (urlString, Image(uiImage: uiImage))
+                            }
+                        } catch {
+                            return (urlString, nil)
+                        }
+                    }
+                }
+                
+                for await (urlString, image) in group {
+                    if let image = image {
+                        images[urlString] = image
+                    }
+                }
+            }
+        }
     }
 
-    func render(text: UiRichText, images: [String: Image]) -> Text {
-        var result = Text("")
-        var attributedString = AttributedString()
-        var attributeContainer = AttributeContainer()
+    func render(text: UiRichText, images: [String: Image]) -> [RichTextContent] {
+        var contents: [RichTextContent] = []
         
-        func commitAndReset() {
-            result = result + Text(attributedString)
-            attributedString = AttributedString()
+        // Context to maintain state during traversal
+        class RenderContext {
+            var currentText = Text("")
+            var attributedString = AttributedString()
+            var attributeContainer = AttributeContainer()
+            var isEmpty = true
+            var isBlockState = false
+            
+            func flush(to list: inout [RichTextContent]) {
+                if !isEmpty {
+                    // Combine result+Text(attributedString)
+                    // But `Text` doesn't expose concatenation easily outside of ViewBuilder or `+` operator on Text values
+                    // We must commit attributedString to currentText first
+                    commitAttributedString()
+                    list.append(.text(currentText))
+                    currentText = Text("")
+                    isEmpty = true
+                }
+            }
+            
+            func commitAttributedString() {
+                if attributedString.characters.count > 0 {
+                    currentText = currentText + Text(attributedString)
+                    attributedString = AttributedString()
+                }
+            }
+            
+            func appendText(_ text: Text) {
+                commitAttributedString()
+                currentText = currentText + text
+                isEmpty = false
+            }
         }
+        
+        let context = RenderContext()
         
         func renderNode(_ node: KsoupNode) {
             if let element = node as? KsoupElement {
                 renderElement(element)
             } else if let textNode = node as? KsoupTextNode {
-                attributedString = attributedString + AttributedString(textNode.text(), attributes: attributeContainer)
+                context.attributedString = context.attributedString + AttributedString(textNode.text(), attributes: context.attributeContainer)
+                // Text added implicitly makes it not empty, but we verify emptiness on flush by character count or flag
+                context.isEmpty = false
             }
         }
         
@@ -62,78 +127,93 @@ struct RichText: View {
             switch element.tagName().lowercased() {
             case "a":
                 let href = element.attribute(key: "href")?.value ?? ""
-                let currentAttributes = attributeContainer
-                attributeContainer = AttributeContainer()
-                attributeContainer.link = URL(string: href)
+                let currentAttributes = context.attributeContainer
+                context.attributeContainer = AttributeContainer()
+                context.attributeContainer.link = URL(string: href)
                 element.childNodes().forEach { renderNode($0) }
-                attributeContainer = currentAttributes
+                context.attributeContainer = currentAttributes
             case "strong", "b":
-                let currentAttributes = attributeContainer
-                attributeContainer = AttributeContainer()
-                attributeContainer.font = .system(size: UIFont.systemFontSize, weight: .bold)
+                let currentAttributes = context.attributeContainer
+                context.attributeContainer = AttributeContainer()
+                context.attributeContainer.font = .system(size: UIFont.systemFontSize, weight: .bold)
                 element.childNodes().forEach { renderNode($0) }
-                attributeContainer = currentAttributes
+                context.attributeContainer = currentAttributes
             case "em", "i":
-                let currentAttributes = attributeContainer
-                attributeContainer = AttributeContainer()
-                attributeContainer.font = .system(size: UIFont.systemFontSize, weight: .regular).italic()
+                let currentAttributes = context.attributeContainer
+                context.attributeContainer = AttributeContainer()
+                context.attributeContainer.font = .system(size: UIFont.systemFontSize, weight: .regular).italic()
                 element.childNodes().forEach { renderNode($0) }
-                attributeContainer = currentAttributes
+                context.attributeContainer = currentAttributes
             case "br":
-                attributedString = attributedString + AttributedString("\n", attributes: attributeContainer)
+                context.attributedString = context.attributedString + AttributedString("\n", attributes: context.attributeContainer)
+                context.isEmpty = false
             case "p", "div":
                 element.childNodes().forEach { renderNode($0) }
                 if element.parent()?.childNodes().last != element {
-                    attributedString = attributedString + AttributedString("\n\n", attributes: attributeContainer)
+                    context.attributedString = context.attributedString + AttributedString("\n\n", attributes: context.attributeContainer)
+                    context.isEmpty = false
                 }
             case "span":
                 element.childNodes().forEach { renderNode($0) }
             case "del", "s":
-                let currentAttributes = attributeContainer
-                attributeContainer = AttributeContainer()
-                attributeContainer.strikethroughStyle = .single
+                let currentAttributes = context.attributeContainer
+                context.attributeContainer = AttributeContainer()
+                context.attributeContainer.strikethroughStyle = .single
                 element.childNodes().forEach { renderNode($0) }
-                attributeContainer = currentAttributes
+                context.attributeContainer = currentAttributes
             case "code":
-                commitAndReset()
+                context.commitAttributedString()
                 let codeText = element.text()
-                result = result + Text(codeText)
-                    .font(.system(.body, design: .monospaced))
+                let codeView = Text(codeText).font(.system(.body, design: .monospaced))
+                context.appendText(codeView)
             case "blockquote":
-                commitAndReset()
+                context.commitAttributedString()
                 let blockquoteText = element.text()
-                result = result + Text(blockquoteText)
-                    .foregroundColor(.secondary)
-                    .italic()
+                let quoteView = Text(blockquoteText).foregroundColor(.secondary).italic()
+                context.appendText(quoteView)
             case "u":
-                let currentAttributes = attributeContainer
-                attributeContainer = AttributeContainer()
-                attributeContainer.underlineStyle = .single
+                let currentAttributes = context.attributeContainer
+                context.attributeContainer = AttributeContainer()
+                context.attributeContainer.underlineStyle = .single
                 element.childNodes().forEach { renderNode($0) }
-                attributeContainer = currentAttributes
+                context.attributeContainer = currentAttributes
             case "small":
-                let currentAttributes = attributeContainer
-                attributeContainer = AttributeContainer()
-                attributeContainer.font = .system(size: UIFont.smallSystemFontSize)
+                let currentAttributes = context.attributeContainer
+                context.attributeContainer = AttributeContainer()
+                context.attributeContainer.font = .system(size: UIFont.smallSystemFontSize)
                 element.childNodes().forEach { renderNode($0) }
-                attributeContainer = currentAttributes
+                context.attributeContainer = currentAttributes
             case "emoji":
                 let src = element.attribute(key: "target")?.value ?? ""
                 if let image = images[src] {
-                    commitAndReset()
-                    result = result + Text(image).baselineOffset(-3)
+                    context.commitAttributedString()
+                    context.appendText(Text(image).baselineOffset(-3))
                 } else {
                     let alt = element.attribute(key: "alt")?.value ?? ""
-                    attributedString = attributedString + AttributedString(alt, attributes: attributeContainer)
+                    context.attributedString = context.attributedString + AttributedString(alt, attributes: context.attributeContainer)
+                    context.isEmpty = false
                 }
+            case "figure":
+                context.isBlockState = true
+                element.childNodes().forEach { renderNode($0) }
+                context.isBlockState = false
             case "img":
                 let src = element.attribute(key: "src")?.value ?? ""
-                if let image = images[src] {
-                    commitAndReset()
-                    result = result + Text(image).baselineOffset(-3)
+                if context.isBlockState {
+                    // Block image: Flush text, add image
+                    context.flush(to: &contents)
+                    let href = element.attribute(key: "href")?.value
+                    contents.append(.blockImage(url: src, href: href))
                 } else {
-                    let alt = element.attribute(key: "alt")?.value ?? ""
-                    attributedString = attributedString + AttributedString(alt, attributes: attributeContainer)
+                    // Inline image
+                    if let image = images[src] {
+                        context.commitAttributedString()
+                        context.appendText(Text(image).baselineOffset(-3))
+                    } else {
+                        let alt = element.attribute(key: "alt")?.value ?? ""
+                        context.attributedString = context.attributedString + AttributedString(alt, attributes: context.attributeContainer)
+                        context.isEmpty = false
+                    }
                 }
             default:
                 element.childNodes().forEach { renderNode($0) }
@@ -141,8 +221,8 @@ struct RichText: View {
         }
         
         renderNode(text.data)
-        commitAndReset()
-        return result
+        context.flush(to: &contents)
+        return contents
     }
 }
 extension UIImage {

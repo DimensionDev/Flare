@@ -33,7 +33,8 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<p>Hello</p><p>World</p>")
         val state = RichTextState(ui, defaultStyleData())
 
-        assertEquals("Hello\n\nWorld", state.annotatedString.text)
+        val textContent = state.contents.single() as RichTextContent.Text
+        assertEquals("Hello\n\nWorld", textContent.content.text)
     }
 
     @Test
@@ -42,7 +43,8 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<p><a href=\"$url\">link</a></p>")
         val state = RichTextState(ui, defaultStyleData())
 
-        val annotations = state.annotatedString.getStringAnnotations(0, state.annotatedString.length)
+        val textContent = state.contents.single() as RichTextContent.Text
+        val annotations = textContent.content.getStringAnnotations(0, textContent.content.length)
         val a = annotations.firstOrNull { it.tag == TAG_URL }
         assertNotNull(a)
         assertEquals(url, a.item)
@@ -65,9 +67,9 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<figure><img src=\"$imgUrl\"/></figure>")
         val state = RichTextState(ui, defaultStyleData())
 
-        assertTrue(state.hasBlockImage)
-        val anyBlock = state.inlineContent.values.any { it is BuildContentAnnotatedStringContext.InlineType.BlockImage && it.url == imgUrl }
-        assertTrue(anyBlock, "Expected a BlockImage inline content with the provided URL")
+        val blockContent = state.contents.filterIsInstance<RichTextContent.BlockImage>().firstOrNull()
+        assertNotNull(blockContent)
+        assertEquals(imgUrl, blockContent.url)
     }
 
     @Test
@@ -76,7 +78,8 @@ class RichTextStateTest {
         val ui = htmlToUiRichText(html)
         val state = RichTextState(ui, defaultStyleData())
 
-        assertEquals("hello\nworld", state.annotatedString.text)
+        val textContent = state.contents.single() as RichTextContent.Text
+        assertEquals("hello\nworld", textContent.content.text)
     }
 
     @Test
@@ -84,7 +87,8 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<strong>Bold Text</strong>")
         val state = RichTextState(ui, defaultStyleData())
 
-        val spanStyles = state.annotatedString.spanStyles
+        val textContent = state.contents.single() as RichTextContent.Text
+        val spanStyles = textContent.content.spanStyles
         val boldStyle = spanStyles.firstOrNull { it.item.fontWeight == androidx.compose.ui.text.font.FontWeight.Bold }
         assertNotNull(boldStyle)
         assertEquals(0, boldStyle.start)
@@ -96,7 +100,8 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<em>Italic Text</em>")
         val state = RichTextState(ui, defaultStyleData())
 
-        val spanStyles = state.annotatedString.spanStyles
+        val textContent = state.contents.single() as RichTextContent.Text
+        val spanStyles = textContent.content.spanStyles
         val italicStyle = spanStyles.firstOrNull { it.item.fontStyle == androidx.compose.ui.text.font.FontStyle.Italic }
         assertNotNull(italicStyle)
         assertEquals(0, italicStyle.start)
@@ -108,7 +113,8 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<del>Deleted Text</del>")
         val state = RichTextState(ui, defaultStyleData())
 
-        val spanStyles = state.annotatedString.spanStyles
+        val textContent = state.contents.single() as RichTextContent.Text
+        val spanStyles = textContent.content.spanStyles
         val lineThroughStyle =
             spanStyles.firstOrNull {
                 it.item.textDecoration == androidx.compose.ui.text.style.TextDecoration.LineThrough
@@ -123,7 +129,8 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<u>Underlined Text</u>")
         val state = RichTextState(ui, defaultStyleData())
 
-        val spanStyles = state.annotatedString.spanStyles
+        val textContent = state.contents.single() as RichTextContent.Text
+        val spanStyles = textContent.content.spanStyles
         val underlineStyle = spanStyles.firstOrNull { it.item.textDecoration == androidx.compose.ui.text.style.TextDecoration.Underline }
         assertNotNull(underlineStyle)
         assertEquals(0, underlineStyle.start)
@@ -135,7 +142,8 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<code>Code Text</code>")
         val state = RichTextState(ui, defaultStyleData())
 
-        val spanStyles = state.annotatedString.spanStyles
+        val textContent = state.contents.single() as RichTextContent.Text
+        val spanStyles = textContent.content.spanStyles
         val codeStyle = spanStyles.firstOrNull { it.item.fontFamily == androidx.compose.ui.text.font.FontFamily.Monospace }
         assertNotNull(codeStyle)
         assertEquals(0, codeStyle.start)
@@ -148,7 +156,8 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<ul><li>Item 1</li><li>Item 2</li></ul>")
         val state = RichTextState(ui, defaultStyleData())
 
-        val text = state.annotatedString.text
+        val textContent = state.contents.single() as RichTextContent.Text
+        val text = textContent.content.text
         assertTrue(text.contains("• Item 1"))
         assertTrue(text.contains("• Item 2"))
     }
@@ -158,7 +167,8 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<h1>Header 1</h1><h2>Header 2</h2>")
         val state = RichTextState(ui, defaultStyleData())
 
-        val text = state.annotatedString.text
+        val textContent = state.contents.single() as RichTextContent.Text
+        val text = textContent.content.text
         assertTrue(text.contains("Header 1"))
         assertTrue(text.contains("Header 2"))
 
@@ -170,7 +180,8 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<center>Centered Text</center>")
         val state = RichTextState(ui, defaultStyleData())
 
-        assertEquals("Centered Text", state.annotatedString.text)
+        val textContent = state.contents.single() as RichTextContent.Text
+        assertEquals("Centered Text", textContent.content.text)
     }
 
     @Test
@@ -178,10 +189,11 @@ class RichTextStateTest {
         val ui = htmlToUiRichText("<blockquote>Quote</blockquote>")
         val state = RichTextState(ui, defaultStyleData())
 
-        val paragraphStyles = state.annotatedString.paragraphStyles
+        val textContent = state.contents.single() as RichTextContent.Text
+        val paragraphStyles = textContent.content.paragraphStyles
         assertTrue(paragraphStyles.isNotEmpty())
 
-        val spanStyles = state.annotatedString.spanStyles
+        val spanStyles = textContent.content.spanStyles
         val backgroundStyle = spanStyles.firstOrNull { it.item.background != androidx.compose.ui.graphics.Color.Unspecified }
         assertNotNull(backgroundStyle)
     }

@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
 import com.fleeksoft.ksoup.nodes.Element
+import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 import de.cketti.codepoints.deluxe.codePointSequence
 import dev.dimension.flare.common.decodeJson
@@ -12,6 +13,7 @@ import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.xqt.model.Admin
 import dev.dimension.flare.data.network.xqt.model.AudioSpace
+import dev.dimension.flare.data.network.xqt.model.Entities
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
 import dev.dimension.flare.data.network.xqt.model.InstructionUnion
 import dev.dimension.flare.data.network.xqt.model.Media
@@ -44,6 +46,7 @@ import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.toHtml
+import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
@@ -412,84 +415,47 @@ internal fun Tweet.renderStatus(
             }
         }
     val medias =
-        legacy
-            ?.entities
-            ?.media
-            ?.map { media ->
-                when (media.type) {
-                    Media.Type.photo ->
-                        UiMedia.Image(
-                            url = media.mediaUrlHttps + "?name=orig",
-                            previewUrl = media.mediaUrlHttps,
-                            height = media.originalInfo.height.toFloat(),
-                            width = media.originalInfo.width.toFloat(),
-                            sensitive = legacy.possiblySensitive == true,
-                            description = media.ext_alt_text,
-                        )
+        if (noteTweet
+                ?.noteTweetResults
+                ?.result
+                ?.media
+                ?.inlineMedia
+                .isNullOrEmpty()
+        ) {
+            legacy
+                ?.entities
+                ?.media
+                ?.map { media ->
+                    when (media.type) {
+                        Media.Type.photo ->
+                            UiMedia.Image(
+                                url = media.mediaUrlHttps + "?name=orig",
+                                previewUrl = media.mediaUrlHttps,
+                                height = media.originalInfo.height.toFloat(),
+                                width = media.originalInfo.width.toFloat(),
+                                sensitive = legacy.possiblySensitive == true,
+                                description = media.ext_alt_text,
+                            )
 
-                    Media.Type.video, Media.Type.animatedGif ->
-                        UiMedia.Video(
-                            url =
-                                media.videoInfo
-                                    ?.variants
-                                    ?.maxByOrNull { it.bitrate ?: 0 }
-                                    ?.url ?: "",
-                            thumbnailUrl = media.mediaUrlHttps,
-                            height = media.originalInfo.height.toFloat(),
-                            width = media.originalInfo.width.toFloat(),
-                            description = media.ext_alt_text,
-                        )
-                }
-            }?.toImmutableList() ?: persistentListOf()
-    val text =
-        noteTweet?.noteTweetResults?.result?.text
-            ?: legacy
-                ?.fullText
-                ?.let {
-                    if (legacy.displayTextRange.size == 2) {
-                        it
-                            .codePointSequence()
-                            .drop(legacy.displayTextRange[0])
-                            .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
-                            .flatMap { codePoint ->
-                                codePoint
-                                    .toChars()
-                                    .toList()
-                            }.joinToString("")
-                            .replace("&amp;", "&")
-                            .replace("&lt;", "<")
-                            .replace("&gt;", ">")
-                    } else {
-                        it
+                        Media.Type.video, Media.Type.animatedGif ->
+                            UiMedia.Video(
+                                url =
+                                    media.videoInfo
+                                        ?.variants
+                                        ?.maxByOrNull { it.bitrate ?: 0 }
+                                        ?.url ?: "",
+                                thumbnailUrl = media.mediaUrlHttps,
+                                height = media.originalInfo.height.toFloat(),
+                                width = media.originalInfo.width.toFloat(),
+                                description = media.ext_alt_text,
+                            )
                     }
                 }.orEmpty()
-    val content =
-        twitterParser
-            .parse(text)
-            .map { token ->
-                if (token is UrlToken) {
-                    val actual =
-                        legacy
-                            ?.entities
-                            ?.urls
-                            ?.firstOrNull { it.url == token.value.trim() }
-                            ?.expandedUrl
-                            ?: noteTweet
-                                ?.noteTweetResults
-                                ?.result
-                                ?.entitySet
-                                ?.urls
-                                ?.firstOrNull { it.url == token.value.trim() }
-                                ?.expandedUrl
-                    if (actual != null) {
-                        UrlToken(actual)
-                    } else {
-                        token
-                    }
-                } else {
-                    token
-                }
-            }.toHtml(accountKey)
+                .toImmutableList()
+        } else {
+            persistentListOf()
+        }
+    val content = renderContent(accountKey)
 
     val aboveTextContent =
         legacy?.in_reply_to_screen_name?.let { screenName ->
@@ -524,7 +490,7 @@ internal fun Tweet.renderStatus(
     return UiTimeline.ItemContent.Status(
         statusKey = statusKey,
         user = user,
-        content = content.toUi(),
+        content = content,
         card = uiCard,
         quote = listOfNotNull(quote).toImmutableList(),
         poll = poll,
@@ -1240,3 +1206,251 @@ internal val User.avatarUrl: String
         legacy.profileImageUrlHttps?.replaceWithOriginImageUrl()
             ?: avatar?.imageUrl?.replaceWithOriginImageUrl()
             ?: "https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"
+
+internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
+    if (noteTweet == null) {
+        val text =
+            legacy
+                ?.fullText
+                ?.let {
+                    if (legacy.displayTextRange.size == 2) {
+                        it
+                            .codePointSequence()
+                            .drop(legacy.displayTextRange[0])
+                            .take(legacy.displayTextRange[1] - legacy.displayTextRange[0])
+                            .flatMap { codePoint ->
+                                codePoint
+                                    .toChars()
+                                    .toList()
+                            }.joinToString("")
+                            .replace("&amp;", "&")
+                            .replace("&lt;", "<")
+                            .replace("&gt;", ">")
+                    } else {
+                        it
+                    }
+                }.orEmpty()
+        return renderRichText(text, legacy?.entities, accountKey)
+    } else {
+        val statusKey =
+            MicroBlogKey(
+                id = legacy?.idStr ?: restId,
+                host = accountKey.host,
+            )
+        val result = noteTweet.noteTweetResults.result
+        val text = result.text
+        val entities = result.entitySet
+        val codePoints = text.codePointSequence().toList()
+
+        val tokens = mutableListOf<Node>()
+        val sortedEntities =
+            buildList {
+                entities.hashtags?.forEach {
+                    add(
+                        Entity(
+                            it.indices[0],
+                            it.indices[1],
+                            Element("a").apply {
+                                attributes().put(
+                                    "href",
+                                    DeeplinkRoute
+                                        .Search(
+                                            dev.dimension.flare.model.AccountType
+                                                .Specific(accountKey),
+                                            "#${it.text}",
+                                        ).toUri(),
+                                )
+                                addChildren(TextNode("#${it.text ?: ""}"))
+                            },
+                        ),
+                    )
+                }
+                entities.urls?.forEach {
+                    add(
+                        Entity(
+                            it.indices[0],
+                            it.indices[1],
+                            Element("a").apply {
+                                attributes().put("href", it.expandedUrl ?: it.url)
+                                addChildren(
+                                    TextNode(
+                                        it.displayUrl ?: (it.expandedUrl ?: it.url).trimUrl(),
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                }
+                entities.userMentions?.forEach {
+                    add(
+                        Entity(
+                            it.indices[0],
+                            it.indices[1],
+                            Element("a").apply {
+                                attributes().put(
+                                    "href",
+                                    DeeplinkRoute.Profile
+                                        .UserNameWithHost(
+                                            dev.dimension.flare.model.AccountType
+                                                .Specific(accountKey),
+                                            it.screenName ?: "",
+                                            accountKey.host,
+                                        ).toUri(),
+                                )
+                                addChildren(TextNode("@${it.screenName ?: ""}"))
+                            },
+                        ),
+                    )
+                }
+                entities.symbols?.forEach {
+                    add(
+                        Entity(
+                            it.indices[0],
+                            it.indices[1],
+                            Element("a").apply {
+                                attributes().put(
+                                    "href",
+                                    DeeplinkRoute
+                                        .Search(
+                                            dev.dimension.flare.model.AccountType
+                                                .Specific(accountKey),
+                                            "$${it.text}",
+                                        ).toUri(),
+                                )
+                                addChildren(TextNode("$${it.text ?: ""}"))
+                            },
+                        ),
+                    )
+                }
+                result.richtext?.richtextTags?.forEach { tag ->
+                    val str =
+                        codePoints
+                            .subList(tag.fromIndex, tag.toIndex)
+                            .flatMap { it.toChars().toList() }
+                            .joinToString("")
+                    var node: Node = TextNode(str)
+                    if (tag.richtextTypes.any {
+                            it == dev.dimension.flare.data.network.xqt.model.NoteTweetResultRichTextTag.RichtextTypes.bold
+                        }
+                    ) {
+                        node = Element("b").apply { appendChild(node) }
+                    }
+                    if (tag.richtextTypes.any {
+                            it == dev.dimension.flare.data.network.xqt.model.NoteTweetResultRichTextTag.RichtextTypes.italic
+                        }
+                    ) {
+                        node = Element("i").apply { appendChild(node) }
+                    }
+                    add(Entity(tag.fromIndex, tag.toIndex, node))
+                }
+                result.media?.inlineMedia?.forEachIndexed { index, inlineMedia ->
+                    val media = legacy?.entities?.media?.firstOrNull { it.idStr == inlineMedia.mediaId }
+                    if (media != null) {
+                        val node =
+                            Element("figure").apply {
+                                appendChild(
+                                    Element("img").apply {
+                                        attributes().apply {
+                                            put("src", media.mediaUrlHttps)
+                                            put(
+                                                "href",
+                                                DeeplinkRoute.Media
+                                                    .Image(
+                                                        uri = media.mediaUrlHttps,
+                                                        previewUrl = media.mediaUrlHttps,
+                                                    ).toUri(),
+                                            )
+                                        }
+                                    },
+                                )
+                            }
+                        add(Entity(inlineMedia.index, inlineMedia.index, node))
+                    }
+                }
+            }.sortedBy { it.start }
+
+        var current = 0
+        sortedEntities.forEach { entity ->
+            if (entity.start < current) return@forEach // Skip overlapping entities
+            if (entity.start > current) {
+                val str =
+                    codePoints
+                        .subList(current, entity.start)
+                        .flatMap { it.toChars().toList() }
+                        .joinToString("")
+                str.split("\n").forEachIndexed { index, s ->
+                    tokens.add(TextNode(s))
+                    if (index != str.split("\n").lastIndex) {
+                        tokens.add(Element("br"))
+                    }
+                }
+            }
+            tokens.add(entity.node)
+            current = entity.end
+        }
+
+        if (current < codePoints.size) {
+            val str =
+                codePoints
+                    .subList(current, codePoints.size)
+                    .flatMap { it.toChars().toList() }
+                    .joinToString("")
+            str.split("\n").forEachIndexed { index, s ->
+                tokens.add(TextNode(s))
+                if (index != str.split("\n").lastIndex) {
+                    tokens.add(Element("br"))
+                }
+            }
+        }
+
+        return Element("body")
+            .apply {
+                tokens.forEach { appendChild(it) }
+            }.toUi()
+    }
+}
+
+private data class Entity(
+    val start: Int,
+    val end: Int,
+    val node: Node,
+)
+
+private fun String.trimUrl(): String =
+    this
+        .removePrefix("http://")
+        .removePrefix("https://")
+        .removePrefix("www.")
+        .removeSuffix("/")
+        .let {
+            if (it.length > 30) {
+                it.substring(0, 30) + "..."
+            } else {
+                it
+            }
+        }
+
+private fun renderRichText(
+    text: String,
+    entities: Entities?,
+    accountKey: MicroBlogKey,
+): UiRichText =
+    twitterParser
+        .parse(text)
+        .map { token ->
+            if (token is UrlToken) {
+                val actual =
+                    entities
+                        ?.urls
+                        ?.firstOrNull { it.url == token.value.trim() }
+                        ?.expandedUrl
+                if (actual != null) {
+                    UrlToken(actual)
+                } else {
+                    token
+                }
+            } else {
+                token
+            }
+        }.toHtml(accountKey)
+        .toUi()

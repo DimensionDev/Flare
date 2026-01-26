@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.OutputTransformation
+import androidx.compose.foundation.text.input.TextFieldDecorator
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -386,21 +387,26 @@ public fun CupertinoTextField(
             inputTransformation = inputTransformation,
             outputTransformation = outputTransformation,
             scrollState = scrollState,
-            decorator = {
-                CupertinoTextFieldDefaults.DecorationBox(
-                    modifier = modifier,
-                    valueIsEmpty = state.text.isEmpty(),
-                    innerTextField = it,
-                    enabled = enabled,
-                    interactionSource = interactionSource,
-                    contentAlignment = contentAlignment,
-                    isError = isError,
-                    placeholder = placeholder,
-                    leadingIcon = leadingIcon,
-                    textLayoutResult = layoutResult,
-                    trailingIcon = trailingIcon,
-                )
-            },
+            // https://youtrack.jetbrains.com/projects/CMP/issues/CMP-9456/Reference-to-lambda-in-lambda-in-function-TextField-can-not-be-evaluated
+            decorator =
+                object : TextFieldDecorator {
+                    @Composable
+                    override fun Decoration(innerTextField: @Composable (() -> Unit)) {
+                        CupertinoTextFieldDefaults.DecorationBox(
+                            modifier = modifier,
+                            valueIsEmpty = state.text.isEmpty(),
+                            innerTextField = innerTextField,
+                            enabled = enabled,
+                            interactionSource = interactionSource,
+                            contentAlignment = contentAlignment,
+                            isError = isError,
+                            placeholder = placeholder,
+                            leadingIcon = leadingIcon,
+                            textLayoutResult = layoutResult,
+                            trailingIcon = trailingIcon,
+                        )
+                    }
+                },
         )
     }
 }
@@ -458,21 +464,26 @@ public fun CupertinoSecureTextField(
             onKeyboardAction = onKeyboardAction,
             inputTransformation = inputTransformation,
             scrollState = scrollState,
-            decorator = {
-                CupertinoTextFieldDefaults.DecorationBox(
-                    modifier = modifier,
-                    valueIsEmpty = state.text.isEmpty(),
-                    innerTextField = it,
-                    enabled = enabled,
-                    interactionSource = interactionSource,
-                    contentAlignment = contentAlignment,
-                    isError = isError,
-                    placeholder = placeholder,
-                    leadingIcon = leadingIcon,
-                    textLayoutResult = layoutResult,
-                    trailingIcon = trailingIcon,
-                )
-            },
+            // https://youtrack.jetbrains.com/projects/CMP/issues/CMP-9456/Reference-to-lambda-in-lambda-in-function-TextField-can-not-be-evaluated
+            decorator =
+                object : TextFieldDecorator {
+                    @Composable
+                    override fun Decoration(innerTextField: @Composable (() -> Unit)) {
+                        CupertinoTextFieldDefaults.DecorationBox(
+                            modifier = modifier,
+                            valueIsEmpty = state.text.isEmpty(),
+                            innerTextField = innerTextField,
+                            enabled = enabled,
+                            interactionSource = interactionSource,
+                            contentAlignment = contentAlignment,
+                            isError = isError,
+                            placeholder = placeholder,
+                            leadingIcon = leadingIcon,
+                            textLayoutResult = layoutResult,
+                            trailingIcon = trailingIcon,
+                        )
+                    }
+                },
         )
     }
 }

@@ -66,9 +66,8 @@ public class TimelineItemPresenterWithLazyListState(
 
         val isAtTheTop by remember {
             derivedStateOf {
-                val firstIndex = overrideFirstVisibleIndex ?: lazyListState.firstVisibleItemIndex
-                firstIndex == 0 &&
-                    (overrideFirstVisibleIndex == null && lazyListState.firstVisibleItemScrollOffset == 0)
+                lazyListState.firstVisibleItemIndex == 0 &&
+                    lazyListState.firstVisibleItemScrollOffset == 0
             }
         }
 

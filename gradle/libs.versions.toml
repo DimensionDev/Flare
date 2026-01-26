@@ -61,7 +61,7 @@ navigation3 = "1.0.0"
 zoomable = "0.18.0"
 bouncycastle = "1.83"
 cupertino = "2.3.1"
-robolectric = "4.16"
+robolectric = "4.16.1"
 
 
 [libraries]

@@ -8,6 +8,9 @@ internal expect object PlatformColorScheme {
     val primary: Color
 
     @get:Composable
+    val retweetColor: Color
+
+    @get:Composable
     val primaryContainer: Color
 
     @get:Composable

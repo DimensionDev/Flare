@@ -933,7 +933,7 @@ private fun ActionMenu.Item.Color.toComposeColor(): Color =
     when (this) {
         ActionMenu.Item.Color.Red -> PlatformTheme.colorScheme.error
         ActionMenu.Item.Color.ContentColor -> PlatformContentColor.current
-        ActionMenu.Item.Color.PrimaryColor -> PlatformTheme.colorScheme.primary
+        ActionMenu.Item.Color.PrimaryColor -> PlatformTheme.colorScheme.retweetColor
     }
 
 private fun ActionMenu.Item.Icon.toImageVector(): ImageVector =

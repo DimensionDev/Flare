@@ -71,8 +71,8 @@
     <string name="reaction_remove">Remove reaction</string>
     <string name="reply">Reply</string>
     <string name="report">Report</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Remove retweet</string>
+    <string name="retweet">Repost</string>
+    <string name="retweet_remove">Remove repost</string>
     <string name="status_loadmore_error_retry">Retry</string>
     <string name="status_detail_comment">Comment</string>
     <string name="status_detail_repost">Repost</string>

@@ -8,6 +8,10 @@ internal actual object PlatformColorScheme {
     actual val primary: Color
         @Composable
         get() = FluentTheme.colors.fillAccent.default
+
+    actual val retweetColor: Color
+        @Composable
+        get() = FluentTheme.colors.fillAccent.default
     actual val primaryContainer: Color
         @Composable
         get() = FluentTheme.colors.fillAccent.secondary

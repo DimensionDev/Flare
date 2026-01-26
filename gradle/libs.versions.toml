@@ -189,6 +189,7 @@ compose-webview-multiplatform = { group = "io.github.kevinnzou", name = "compose
 
 compose-placeholder-material3 = { group = "io.github.fornewid", name = "placeholder-material3", version = "2.0.0" }
 compose-placeholder-foundation = { group = "io.github.fornewid", name = "placeholder-foundation", version = "2.0.0" }
+compose-placeholder = { module = "com.revenuecat.purchases:placeholder", version = "1.0.2" }
 
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 

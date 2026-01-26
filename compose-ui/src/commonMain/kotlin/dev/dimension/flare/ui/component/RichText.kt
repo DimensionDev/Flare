@@ -1,10 +1,12 @@
 package dev.dimension.flare.ui.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -14,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
@@ -36,7 +39,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.model.direction
@@ -111,114 +113,84 @@ public fun RichText(
                     )
                 }
 
-            if (state.hasBlockImage) {
-                BoxWithConstraints(
-                    modifier = modifier,
-                ) {
-                    val renderInlineContent =
-                        state.inlineContent
-                            .map { (key, value) ->
-                                key to
-                                    renderInlineContentWithConstraint(
-                                        content = value,
-                                        constraints = constraints,
-                                        density = LocalDensity.current,
-                                        imageHeaders = imageHeaders,
-                                    )
-                            }.toMap()
-                            .toImmutableMap()
-                    PlatformText(
-                        modifier =
-                            Modifier.pointerInput(Unit) {
-                                awaitEachGesture {
-                                    val change = awaitFirstDown()
-                                    val annotation =
-                                        layoutResult?.getOffsetForPosition(change.position)?.let {
-                                            state.annotatedString
-                                                .getStringAnnotations(start = it, end = it)
-                                                .firstOrNull()
-                                        }
-                                    if (annotation != null && annotation.tag == TAG_URL) {
-                                        if (change.pressed != change.previousPressed) change.consume()
-                                        val up =
-                                            waitForUpOrCancellation()?.also {
-                                                if (it.pressed != it.previousPressed) it.consume()
-                                            }
-                                        if (up != null) {
-                                            uriHandler.openUri(annotation.item)
-                                        }
-                                    }
-                                }
-                            },
-                        maxLines = maxLines,
-                        color = color,
-                        fontSize = fontSize,
-                        fontStyle = fontStyle,
-                        fontWeight = fontWeight,
-                        fontFamily = fontFamily,
-                        letterSpacing = letterSpacing,
-                        textDecoration = textDecoration,
-                        textAlign = textAlign,
-                        lineHeight = lineHeight,
-                        overflow = overflow,
-                        softWrap = softWrap,
-                        text = state.annotatedString,
-                        onTextLayout = {
-                            layoutResult = it
-                            onTextLayout.invoke(it)
-                        },
-                        inlineContent = renderInlineContent,
-                    )
-                }
-            } else {
-                val renderInlineContent =
+            androidx.compose.foundation.layout.Column(
+                modifier = modifier,
+                verticalArrangement = Arrangement.spacedBy(with(LocalDensity.current) { PlatformTextStyle.current.lineHeight.toDp() / 2 }),
+            ) {
+                val inlineContentMap =
                     state.inlineContent
-                        .map { (key, value) ->
-                            key to renderInlineContent(value, LocalDensity.current)
-                        }.toMap()
-                        .toImmutableMap()
-                PlatformText(
-                    modifier =
-                        modifier.pointerInput(Unit) {
-                            awaitEachGesture {
-                                val change = awaitFirstDown()
-                                val annotation =
-                                    layoutResult?.getOffsetForPosition(change.position)?.let {
-                                        state.annotatedString
-                                            .getStringAnnotations(start = it, end = it)
-                                            .firstOrNull()
-                                    }
-                                if (annotation != null && annotation.tag == TAG_URL) {
-                                    if (change.pressed != change.previousPressed) change.consume()
-                                    val up =
-                                        waitForUpOrCancellation()?.also {
-                                            if (it.pressed != it.previousPressed) it.consume()
+                        .mapValues { (_, value) ->
+                            renderInlineContent(value, LocalDensity.current)
+                        }.toImmutableMap()
+
+                state.contents.forEach { content ->
+                    when (content) {
+                        is RichTextContent.Text -> {
+                            PlatformText(
+                                modifier =
+                                    Modifier.pointerInput(Unit) {
+                                        awaitEachGesture {
+                                            val change = awaitFirstDown()
+                                            val annotation =
+                                                layoutResult?.getOffsetForPosition(change.position)?.let {
+                                                    content.content
+                                                        .getStringAnnotations(start = it, end = it)
+                                                        .firstOrNull()
+                                                }
+                                            if (annotation != null && annotation.tag == TAG_URL) {
+                                                if (change.pressed != change.previousPressed) change.consume()
+                                                val up =
+                                                    waitForUpOrCancellation()?.also {
+                                                        if (it.pressed != it.previousPressed) it.consume()
+                                                    }
+                                                if (up != null) {
+                                                    uriHandler.openUri(annotation.item)
+                                                }
+                                            }
                                         }
-                                    if (up != null) {
-                                        uriHandler.openUri(annotation.item)
-                                    }
-                                }
-                            }
-                        },
-                    maxLines = maxLines,
-                    color = color,
-                    fontSize = fontSize,
-                    fontStyle = fontStyle,
-                    fontWeight = fontWeight,
-                    fontFamily = fontFamily,
-                    letterSpacing = letterSpacing,
-                    textDecoration = textDecoration,
-                    textAlign = textAlign,
-                    lineHeight = lineHeight,
-                    overflow = overflow,
-                    softWrap = softWrap,
-                    text = state.annotatedString,
-                    onTextLayout = {
-                        layoutResult = it
-                        onTextLayout.invoke(it)
-                    },
-                    inlineContent = renderInlineContent,
-                )
+                                    },
+                                maxLines = maxLines,
+                                color = color,
+                                fontSize = fontSize,
+                                fontStyle = fontStyle,
+                                fontWeight = fontWeight,
+                                fontFamily = fontFamily,
+                                letterSpacing = letterSpacing,
+                                textDecoration = textDecoration,
+                                textAlign = textAlign,
+                                lineHeight = lineHeight,
+                                overflow = overflow,
+                                softWrap = softWrap,
+                                text = content.content,
+                                onTextLayout = {
+                                    layoutResult = it
+                                    onTextLayout.invoke(it)
+                                },
+                                inlineContent = inlineContentMap,
+                            )
+                        }
+                        is RichTextContent.BlockImage -> {
+                            SubcomposeNetworkImage(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .clip(PlatformTheme.shapes.medium)
+                                        .let {
+                                            if (content.href.isNullOrEmpty()) {
+                                                it
+                                            } else {
+                                                it.clickable {
+                                                    uriHandler.openUri(content.href)
+                                                }
+                                            }
+                                        },
+                                model = content.url,
+                                contentDescription = content.url,
+                                customHeaders = imageHeaders,
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -238,105 +210,6 @@ private fun renderInlineContent(
 
     with(density) {
         when (content) {
-            is BuildContentAnnotatedStringContext.InlineType.BlockImage -> {
-                val placeholder =
-                    Placeholder(
-                        width = size?.width?.toSp() ?: 1.em,
-                        height = size?.height?.toSp() ?: 1.em,
-                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
-                    )
-                return InlineTextContent(placeholder) { altText ->
-                    EmojiImage(
-                        uri = altText,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
-            }
-            is BuildContentAnnotatedStringContext.InlineType.Emoji -> {
-                val placeholder =
-                    Placeholder(
-                        width = size?.width?.toSp() ?: 1.em,
-                        height = 1.em,
-                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
-                    )
-                return InlineTextContent(placeholder) { altText ->
-                    Layout(
-                        content = {
-                            EmojiImage(
-                                uri = altText,
-                                modifier = Modifier.fillMaxSize(),
-                            )
-                        },
-                    ) { measurables, constraints ->
-                        val actualConstraints = constraints.copy(minWidth = 0, maxWidth = Constraints.Infinity)
-                        val contentPlaceable =
-                            measurables.singleOrNull()?.measure(actualConstraints)
-                                ?: return@Layout layout(0, 0) {}
-                        if (contentPlaceable.width > (size?.width ?: 0)) {
-                            size = IntSize(contentPlaceable.width, contentPlaceable.height)
-                        }
-                        layout(contentPlaceable.width, contentPlaceable.height) {
-                            contentPlaceable.place(0, 0)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun renderInlineContentWithConstraint(
-    content: BuildContentAnnotatedStringContext.InlineType,
-    constraints: Constraints,
-    density: Density,
-    imageHeaders: ImmutableMap<String, String>?,
-): InlineTextContent {
-    var size by remember {
-        mutableStateOf<IntSize?>(
-            null,
-            structuralEqualityPolicy(),
-        )
-    }
-
-    with(density) {
-        when (content) {
-            is BuildContentAnnotatedStringContext.InlineType.BlockImage -> {
-                val placeholder =
-                    Placeholder(
-                        width = size?.width?.toSp() ?: 0.sp,
-                        height = size?.height?.toSp() ?: 1.sp,
-                        placeholderVerticalAlign = PlaceholderVerticalAlign.Center,
-                    )
-                return InlineTextContent(placeholder) { altText ->
-                    Layout(
-                        content = {
-                            NetworkImage(
-                                modifier = Modifier.fillMaxSize(),
-                                model = altText,
-                                contentDescription = altText,
-                                customHeaders = imageHeaders,
-                            )
-                        },
-                    ) { measurables, _ ->
-                        val contentPlaceable =
-                            measurables.singleOrNull()?.measure(constraints)
-                                ?: return@Layout layout(0, 0) {}
-                        if (contentPlaceable.width > (size?.width ?: 0) ||
-                            contentPlaceable.height > (size?.height ?: 0)
-                        ) {
-                            size =
-                                IntSize(
-                                    maxOf(contentPlaceable.width, size?.width ?: 0),
-                                    maxOf(contentPlaceable.height, size?.height ?: 0),
-                                )
-                        }
-                        layout(contentPlaceable.width, contentPlaceable.height) {
-                            contentPlaceable.place(0, 0)
-                        }
-                    }
-                }
-            }
             is BuildContentAnnotatedStringContext.InlineType.Emoji -> {
                 val placeholder =
                     Placeholder(

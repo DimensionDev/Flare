@@ -5,6 +5,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
 import dev.dimension.flare.RobolectricTest
+import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.memoryDatabaseBuilder
@@ -24,20 +25,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
-import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ImportOPMLPresenterTest : RobolectricTest() {
-    class TestFormatter : PlatformFormatter {
-        override fun formatNumber(number: Long): String = number.toString()
-
-        override fun formatRelativeInstant(instant: Instant): String = instant.toString()
-
-        override fun formatFullInstant(instant: Instant): String = instant.toString()
-
-        override fun formatAbsoluteInstant(instant: Instant): String = instant.toString()
-    }
-
     private lateinit var db: AppDatabase
 
     @BeforeTest

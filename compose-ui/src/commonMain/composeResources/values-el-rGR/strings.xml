@@ -96,8 +96,8 @@
     <string name="reaction_remove">Αφαίρεση αντίδρασης</string>
     <string name="reply">Απάντηση</string>
     <string name="report">Αναφορά</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Αφαίρεση retweet</string>
+    <string name="retweet">Επαναδημοσίευση</string>
+    <string name="retweet_remove">Αφαίρεση αναδημοσίευσης</string>
     <string name="share">Κοινοποίηση</string>
     <string name="fx_share">Κοινοποίηση μέσω FxEmbed</string>
     <string name="comment">Σχόλιο</string>

@@ -80,8 +80,7 @@
     <string name="reaction_remove">반응 제거</string>
     <string name="reply">답글</string>
     <string name="report">신고하기</string>
-    <string name="retweet">리트윗</string>
-    <string name="retweet_remove">리트윗 제거</string>
+    <string name="retweet">다시 게시</string>
     <string name="share">공유</string>
     <string name="comment">댓글</string>
     <string name="user_report">신고하기</string>

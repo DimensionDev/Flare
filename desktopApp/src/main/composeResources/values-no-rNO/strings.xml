@@ -60,8 +60,8 @@
     <string name="reaction_remove">Fjern reaksjon</string>
     <string name="reply">Svar</string>
     <string name="report">Rapporter</string>
-    <string name="retweet">Prøv igjen</string>
-    <string name="retweet_remove">Fjern retweet</string>
+    <string name="retweet">Gjenkjenn</string>
+    <string name="retweet_remove">Fjern innlegg</string>
     <string name="status_loadmore_error_retry">Prøv igjen</string>
     <string name="status_detail_comment">Kommentar</string>
     <string name="status_detail_repost">Gjenkjenn</string>

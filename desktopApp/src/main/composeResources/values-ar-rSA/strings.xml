@@ -60,8 +60,8 @@
     <string name="reaction_remove">إزالة رد الفعل</string>
     <string name="reply">الرد</string>
     <string name="report">تقرير</string>
-    <string name="retweet">تغريدة</string>
-    <string name="retweet_remove">إزالة التغريدة</string>
+    <string name="retweet">إعادة</string>
+    <string name="retweet_remove">إزالة إعادة النشر</string>
     <string name="status_loadmore_error_retry">إعادة المحاولة</string>
     <string name="status_detail_comment">تعليق</string>
     <string name="status_detail_repost">إعادة</string>

@@ -98,8 +98,8 @@
     <string name="reaction_remove">Reactie verwijderen</string>
     <string name="reply">Beantwoorden</string>
     <string name="report">Rapporteren</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Verwijder retweet</string>
+    <string name="retweet">Herpost</string>
+    <string name="retweet_remove">Herpost verwijderen</string>
     <string name="share">Delen</string>
     <string name="fx_share">Delen via FxEmbed</string>
     <string name="comment">Opmerking</string>

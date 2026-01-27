@@ -60,8 +60,8 @@
     <string name="reaction_remove">Видалити реакцію</string>
     <string name="reply">Відповідь</string>
     <string name="report">Доповісти</string>
-    <string name="retweet">Ретвіт</string>
-    <string name="retweet_remove">Видалити ретвіт</string>
+    <string name="retweet">Репост</string>
+    <string name="retweet_remove">Видалити репост</string>
     <string name="status_loadmore_error_retry">Повторити спробу</string>
     <string name="status_detail_comment">Коментар</string>
     <string name="status_detail_repost">Репост</string>

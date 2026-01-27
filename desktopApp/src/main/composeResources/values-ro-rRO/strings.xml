@@ -60,8 +60,8 @@
     <string name="reaction_remove">Eliminați reacția</string>
     <string name="reply">Răspuns</string>
     <string name="report">Raport</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Elimină retweet</string>
+    <string name="retweet">Repostează</string>
+    <string name="retweet_remove">Elimină repostarea</string>
     <string name="status_loadmore_error_retry">Reîncercați</string>
     <string name="status_detail_comment">Comentariu</string>
     <string name="status_detail_repost">Repostează</string>

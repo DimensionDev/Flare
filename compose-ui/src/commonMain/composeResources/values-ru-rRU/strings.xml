@@ -98,8 +98,8 @@
     <string name="reaction_remove">Удалить реакцию</string>
     <string name="reply">Ответ</string>
     <string name="report">Пожаловаться</string>
-    <string name="retweet">Ретвитнуть</string>
-    <string name="retweet_remove">Удалить ретвит</string>
+    <string name="retweet">Репост</string>
+    <string name="retweet_remove">Удалить репост</string>
     <string name="share">Поделиться</string>
     <string name="fx_share">Поделиться через FxEmbed</string>
     <string name="comment">Комментарий</string>

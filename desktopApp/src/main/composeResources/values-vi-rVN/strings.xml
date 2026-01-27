@@ -59,8 +59,7 @@
     <string name="reaction_remove">Xóa phản ứng</string>
     <string name="reply">Trả lời</string>
     <string name="report">Báo cáo</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Bỏ retweet</string>
+    <string name="retweet">Chia sẻ lại</string>
     <string name="status_loadmore_error_retry">Thử lại</string>
     <string name="status_detail_comment">Bình luận</string>
     <string name="status_detail_repost">Chia sẻ lại</string>

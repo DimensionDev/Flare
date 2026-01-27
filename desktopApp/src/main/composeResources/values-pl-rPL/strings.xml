@@ -60,8 +60,8 @@
     <string name="reaction_remove">Usuń reakcję</string>
     <string name="reply">Odpowiedz</string>
     <string name="report">Zgłoszenie</string>
-    <string name="retweet">crwdns74747:0crwdne74747:0</string>
-    <string name="retweet_remove">Usuń retweet</string>
+    <string name="retweet">Udostępnij ponownie</string>
+    <string name="retweet_remove">Usuń repost</string>
     <string name="status_loadmore_error_retry">Ponów próbę</string>
     <string name="status_detail_comment">Komentarz</string>
     <string name="status_detail_repost">Udostępnij ponownie</string>

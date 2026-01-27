@@ -60,7 +60,6 @@
     <string name="reply">תגובה</string>
     <string name="report">דווח</string>
     <string name="retweet">שיתוף מחדש</string>
-    <string name="retweet_remove">הסר שיתוף מחדש</string>
     <string name="status_loadmore_error_retry">ניסיון שוב</string>
     <string name="status_detail_comment">תגובה</string>
     <string name="status_detail_repost">שיתוף מחדש</string>

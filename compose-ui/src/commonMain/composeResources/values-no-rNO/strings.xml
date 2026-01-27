@@ -98,8 +98,8 @@
     <string name="reaction_remove">Fjern reaksjon</string>
     <string name="reply">Svar</string>
     <string name="report">Rapporter</string>
-    <string name="retweet">Prøv igjen</string>
-    <string name="retweet_remove">Fjern retweet</string>
+    <string name="retweet">Gjenkjenn</string>
+    <string name="retweet_remove">Fjern innlegg</string>
     <string name="share">Del</string>
     <string name="fx_share">Del via FxEmbed</string>
     <string name="comment">Kommentar</string>

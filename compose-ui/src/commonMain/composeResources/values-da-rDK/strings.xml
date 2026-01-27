@@ -98,8 +98,8 @@
     <string name="reaction_remove">Fjern reaktion</string>
     <string name="reply">Svar</string>
     <string name="report">Rapport</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Fjern retweet</string>
+    <string name="retweet">Genpost</string>
+    <string name="retweet_remove">Fjern repost</string>
     <string name="share">Del</string>
     <string name="fx_share">Del via FxEmbed</string>
     <string name="comment">Kommentar</string>

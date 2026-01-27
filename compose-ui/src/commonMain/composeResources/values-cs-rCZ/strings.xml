@@ -98,8 +98,8 @@
     <string name="reaction_remove">Odstranit reakci</string>
     <string name="reply">Odpověď</string>
     <string name="report">Nahlásit</string>
-    <string name="retweet">Opakovat</string>
-    <string name="retweet_remove">Odstranit retweet</string>
+    <string name="retweet">Znovu odeslat</string>
+    <string name="retweet_remove">Odstranit repost</string>
     <string name="share">Sdílet</string>
     <string name="fx_share">Sdílet přes FxEmbed</string>
     <string name="comment">Komentář</string>

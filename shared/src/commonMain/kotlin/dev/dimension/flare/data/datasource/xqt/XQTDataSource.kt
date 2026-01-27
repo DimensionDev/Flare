@@ -204,6 +204,13 @@ internal class XQTDataSource(
             accountKey,
         )
 
+    fun deviceFollowTimelineLoader() =
+        DeviceFollowRemoteMediator(
+            service,
+            database,
+            accountKey,
+        )
+
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,

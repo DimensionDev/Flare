@@ -16,6 +16,14 @@ public sealed class DeeplinkRoute {
     public data object Login : DeeplinkRoute()
 
     @Serializable
+    public sealed class Timeline : DeeplinkRoute() {
+        @Serializable
+        public data class XQTDeviceFollow(
+            val accountType: AccountType,
+        ) : Timeline()
+    }
+
+    @Serializable
     public sealed class Status : DeeplinkRoute() {
         @Serializable
         public data class Detail(

@@ -2,6 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 
 struct StatusTopMessageView: View {
+    @Environment(\.openURL) private var openURL
     let topMessage: UiTimeline.TopMessage
     var body: some View {
         HStack {
@@ -12,6 +13,9 @@ struct StatusTopMessageView: View {
             if let text = topMessage.type.localizedText {
                 Text(text)
             }
+        }
+        .onTapGesture {
+            topMessage.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

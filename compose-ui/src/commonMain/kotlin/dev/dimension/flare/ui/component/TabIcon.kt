@@ -55,6 +55,7 @@ import dev.dimension.flare.compose.ui.liked_title
 import dev.dimension.flare.compose.ui.mastodon_tab_local_title
 import dev.dimension.flare.compose.ui.mastodon_tab_public_title
 import dev.dimension.flare.compose.ui.mixed_timeline_title
+import dev.dimension.flare.compose.ui.posts_title
 import dev.dimension.flare.compose.ui.rss_title
 import dev.dimension.flare.compose.ui.settings_title
 import dev.dimension.flare.compose.ui.social_title
@@ -281,6 +282,7 @@ internal val TitleType.Localized.res: StringResource
             TitleType.Localized.LocalizedKey.MixedTimeline -> Res.string.mixed_timeline_title
             TitleType.Localized.LocalizedKey.Liked -> Res.string.liked_title
             TitleType.Localized.LocalizedKey.AllRssFeeds -> Res.string.all_rss_feeds_title
+            TitleType.Localized.LocalizedKey.Posts -> Res.string.posts_title
         }
 
 internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =

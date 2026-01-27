@@ -223,6 +223,45 @@ internal interface V20GetApi {
         @Header("X-Twitter-Client-Language") xTwitterClientLanguage: String = "en",
     ): TopLevel
 
+    @GET("2/notifications/device_follow.json")
+    suspend fun getNotificationsDeviceFollow(
+        @Query("include_profile_interstitial_type") includeProfileInterstitialType: Int = 1,
+        @Query("include_blocking") includeBlocking: Int = 1,
+        @Query("include_blocked_by") includeBlockedBy: Int = 1,
+        @Query("include_followed_by") includeFollowedBy: Int = 1,
+        @Query("include_want_retweets") includeWantRetweets: Int = 1,
+        @Query("include_mute_edge") includeMuteEdge: Int = 1,
+        @Query("include_can_dm") includeCanDm: Int = 1,
+        @Query("include_can_media_tag") includeCanMediaTag: Int = 1,
+        @Query("include_ext_is_blue_verified") includeExtIsBlueVerified: Int = 1,
+        @Query("include_ext_verified_type") includeExtVerifiedType: Int = 1,
+        @Query("include_ext_profile_image_shape") includeExtProfileImageShape: Int = 1,
+        @Query("skip_status") skipStatus: Int = 1,
+        @Query("cards_platform") cardsPlatform: String = "Web-12",
+        @Query("include_cards") includeCards: Int = 1,
+        @Query("include_ext_alt_text") includeExtAltText: Boolean = true,
+        @Query("include_ext_limited_action_results") includeExtLimitedActionResults: Boolean = true,
+        @Query("include_quote_count") includeQuoteCount: Boolean = true,
+        @Query("include_reply_count") includeReplyCount: Int = 1,
+        @Query("tweet_mode") tweetMode: String = "extended",
+        @Query("include_ext_views") includeExtViews: Boolean = true,
+        @Query("include_entities") includeEntities: Boolean = true,
+        @Query("include_user_entities") includeUserEntities: Boolean = true,
+        @Query("include_ext_media_color") includeExtMediaColor: Boolean = true,
+        @Query("include_ext_media_availability") includeExtMediaAvailability: Boolean = true,
+        @Query("include_ext_sensitive_media_warning") includeExtSensitiveMediaWarning: Boolean = true,
+        @Query("include_ext_trusted_friends_metadata") includeExtTrustedFriendsMetadata: Boolean = true,
+        @Query("send_error_codes") sendErrorCodes: Boolean = true,
+        @Query("simple_quoted_tweet") simpleQuotedTweet: Boolean = true,
+        @Query("cursor") cursor: String? = null,
+        @Query("count") count: Int = 20,
+        @Query(
+            "ext",
+        ) ext: String =
+            "mediaStats,highlightedLabel,parodyCommentaryFanLabel,voiceInfo,birdwatchPivot," +
+                "superFollowMetadata,unmentionInfo,editControl,article",
+    ): TopLevel
+
     @GET("2/badge_count/badge_count.json")
     suspend fun getBadgeCount(
         @Query("supports_ntab_urt") supportsNtabUrt: Int = 1,

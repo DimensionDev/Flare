@@ -260,6 +260,11 @@ enum Route: Hashable, Identifiable {
             } else {
                 return .reportUser(nil, data.userKey)
             }
+        case .timeline(let data):
+            switch onEnum(of: data) {
+            case .xQTDeviceFollow(let data):
+                return .timeline(XQT.DeviceFollowTimelineTabItem(account: data.accountType))
+            }
         }
     }
     var alertTitle: LocalizedStringKey? {

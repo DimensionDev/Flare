@@ -98,8 +98,8 @@
     <string name="reaction_remove">Eliminați reacția</string>
     <string name="reply">Răspuns</string>
     <string name="report">Raport</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Elimină retweet</string>
+    <string name="retweet">Repostează</string>
+    <string name="retweet_remove">Elimină repostarea</string>
     <string name="share">Distribuie</string>
     <string name="fx_share">Distribuie prin FxEmbed</string>
     <string name="comment">Comentariu</string>

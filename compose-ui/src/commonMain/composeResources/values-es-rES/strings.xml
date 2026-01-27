@@ -98,8 +98,8 @@
     <string name="reaction_remove">Eliminar reacción</string>
     <string name="reply">Responder</string>
     <string name="report">Reporte</string>
-    <string name="retweet">Retwittear</string>
-    <string name="retweet_remove">Eliminar retweet</string>
+    <string name="retweet">Repostar</string>
+    <string name="retweet_remove">Eliminar repost</string>
     <string name="share">Compartir</string>
     <string name="fx_share">Compartir vía FxEmbed</string>
     <string name="comment">Comentario</string>

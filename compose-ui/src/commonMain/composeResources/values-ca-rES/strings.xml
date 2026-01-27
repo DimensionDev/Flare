@@ -80,8 +80,7 @@
     <string name="reaction_remove">Eliminar reacció</string>
     <string name="reply">Respondre</string>
     <string name="report">Informar</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Eliminar retweet</string>
+    <string name="retweet">Republiqui</string>
     <string name="share">Compartir</string>
     <string name="comment">Comenta</string>
     <string name="user_report">Informar</string>

@@ -80,8 +80,7 @@
     <string name="reaction_remove">Уклоните реакцију</string>
     <string name="reply">Одговори</string>
     <string name="report">Пријави</string>
-    <string name="retweet">Ретвит</string>
-    <string name="retweet_remove">Уклоните ретвит</string>
+    <string name="retweet">Поново</string>
     <string name="share">Делите</string>
     <string name="comment">Коментар</string>
     <string name="user_report">Пријави</string>

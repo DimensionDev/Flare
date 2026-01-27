@@ -80,8 +80,7 @@
     <string name="reaction_remove">Xóa phản ứng</string>
     <string name="reply">Trả lời</string>
     <string name="report">Báo cáo</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Bỏ retweet</string>
+    <string name="retweet">Chia sẻ lại</string>
     <string name="share">Chia sẻ</string>
     <string name="comment">Bình luận</string>
     <string name="user_report">Báo cáo</string>

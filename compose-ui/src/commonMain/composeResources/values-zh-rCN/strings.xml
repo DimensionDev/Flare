@@ -99,7 +99,7 @@
     <string name="reply">回复</string>
     <string name="report">举报</string>
     <string name="retweet">转发</string>
-    <string name="retweet_remove">移除转发</string>
+    <string name="retweet_remove">移除重报</string>
     <string name="share">分享</string>
     <string name="fx_share">通过FxEmbed分享</string>
     <string name="comment">评论</string>

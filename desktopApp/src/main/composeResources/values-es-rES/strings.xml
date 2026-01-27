@@ -60,8 +60,8 @@
     <string name="reaction_remove">Eliminar reacción</string>
     <string name="reply">Responder</string>
     <string name="report">Reporte</string>
-    <string name="retweet">Retwittear</string>
-    <string name="retweet_remove">Eliminar retweet</string>
+    <string name="retweet">Repostar</string>
+    <string name="retweet_remove">Eliminar repost</string>
     <string name="status_loadmore_error_retry">Reintentar</string>
     <string name="status_detail_comment">Comentario</string>
     <string name="status_detail_repost">Repostar</string>

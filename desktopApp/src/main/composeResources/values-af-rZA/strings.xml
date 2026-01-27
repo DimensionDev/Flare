@@ -59,8 +59,7 @@
     <string name="reaction_remove">Verwyder reaksie</string>
     <string name="reply">Antwoord</string>
     <string name="report">Verslag</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Verwyder retweet</string>
+    <string name="retweet">Herpost</string>
     <string name="status_loadmore_error_retry">Probeer weer</string>
     <string name="status_detail_comment">Kommentaar</string>
     <string name="status_detail_repost">Herpost</string>

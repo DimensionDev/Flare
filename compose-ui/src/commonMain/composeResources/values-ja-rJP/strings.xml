@@ -98,8 +98,8 @@
     <string name="reaction_remove">リアクションを削除</string>
     <string name="reply">返信</string>
     <string name="report">レポート</string>
-    <string name="retweet">リツイート</string>
-    <string name="retweet_remove">リツイートを削除</string>
+    <string name="retweet">リポスト</string>
+    <string name="retweet_remove">Repost を削除</string>
     <string name="share">共有</string>
     <string name="fx_share">FxEmbedで共有</string>
     <string name="comment">コメント</string>

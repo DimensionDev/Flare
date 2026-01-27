@@ -60,8 +60,8 @@
     <string name="reaction_remove">Reactie verwijderen</string>
     <string name="reply">Beantwoorden</string>
     <string name="report">Rapporteren</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Verwijder retweet</string>
+    <string name="retweet">Herpost</string>
+    <string name="retweet_remove">Herpost verwijderen</string>
     <string name="status_loadmore_error_retry">Opnieuw</string>
     <string name="status_detail_comment">Opmerking</string>
     <string name="status_detail_repost">Herpost</string>

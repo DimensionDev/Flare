@@ -60,8 +60,8 @@
     <string name="reaction_remove">Αφαίρεση αντίδρασης</string>
     <string name="reply">Απάντηση</string>
     <string name="report">Αναφορά</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Αφαίρεση retweet</string>
+    <string name="retweet">Επαναδημοσίευση</string>
+    <string name="retweet_remove">Αφαίρεση αναδημοσίευσης</string>
     <string name="status_loadmore_error_retry">Επανάληψη</string>
     <string name="status_detail_comment">Σχόλιο</string>
     <string name="status_detail_repost">Επαναδημοσίευση</string>

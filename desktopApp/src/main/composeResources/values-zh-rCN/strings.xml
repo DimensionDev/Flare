@@ -61,7 +61,7 @@
     <string name="reply">回复</string>
     <string name="report">举报</string>
     <string name="retweet">转发</string>
-    <string name="retweet_remove">移除转发</string>
+    <string name="retweet_remove">移除重报</string>
     <string name="status_loadmore_error_retry">重试</string>
     <string name="status_detail_comment">评论</string>
     <string name="status_detail_repost">转发</string>

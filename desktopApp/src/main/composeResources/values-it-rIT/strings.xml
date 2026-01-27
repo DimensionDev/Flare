@@ -60,8 +60,8 @@
     <string name="reaction_remove">Rimuovi reazione</string>
     <string name="reply">Rispondi</string>
     <string name="report">Segnala</string>
-    <string name="retweet">Ritwitta</string>
-    <string name="retweet_remove">Rimuovi retweet</string>
+    <string name="retweet">Repost</string>
+    <string name="retweet_remove">Rimuovere il repost</string>
     <string name="status_loadmore_error_retry">Riprova</string>
     <string name="status_detail_comment">Commento</string>
     <string name="status_detail_repost">Ripubblica</string>

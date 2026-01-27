@@ -59,8 +59,7 @@
     <string name="reaction_remove">Уклоните реакцију</string>
     <string name="reply">Одговори</string>
     <string name="report">Пријави</string>
-    <string name="retweet">Ретвит</string>
-    <string name="retweet_remove">Уклоните ретвит</string>
+    <string name="retweet">Поново</string>
     <string name="status_loadmore_error_retry">Поновите</string>
     <string name="status_detail_comment">Коментар</string>
     <string name="status_detail_repost">Поново</string>

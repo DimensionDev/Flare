@@ -59,8 +59,7 @@
     <string name="reaction_remove">Reakció eltávolítása</string>
     <string name="reply">Válasz</string>
     <string name="report">Jelentés</string>
-    <string name="retweet">Retweetelés</string>
-    <string name="retweet_remove">Retweet eltávolítása</string>
+    <string name="retweet">Újraposztolás</string>
     <string name="status_loadmore_error_retry">Újrapróbálás</string>
     <string name="status_detail_comment">Hozzászólás</string>
     <string name="status_detail_repost">Újraposztolás</string>

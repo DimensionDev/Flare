@@ -73,13 +73,11 @@ internal fun NotificationScreen() {
                                         data = profile.avatar,
                                         size = AvatarComponentDefaults.compatSize,
                                     )
-                                    AnimatedVisibility(state.selectedAccount?.key == profile.key) {
-                                        Text(
-                                            profile.handle,
-                                            maxLines = 1,
-                                            modifier = Modifier.padding(start = 8.dp),
-                                        )
-                                    }
+                                    Text(
+                                        profile.handle,
+                                        maxLines = 1,
+                                        modifier = Modifier.padding(start = 8.dp),
+                                    )
                                     AnimatedVisibility(badge > 0) {
                                         Badge(
                                             status = BadgeStatus.Informational,

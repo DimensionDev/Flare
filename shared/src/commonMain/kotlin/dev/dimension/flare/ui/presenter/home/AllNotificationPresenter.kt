@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +53,7 @@ public class AllNotificationPresenter :
         public val timeline: PagingState<UiTimeline>
         public val selectedFilter: NotificationFilter?
         public val selectedAccount: UiProfile?
+        public val selectedAccountIndex: Int
 
         public fun setAccount(profile: UiProfile)
 
@@ -79,7 +81,12 @@ public class AllNotificationPresenter :
                 }
             }.combineLatestFlowLists()
             .map {
-                it.filterNotNull().toMap().toImmutableMap()
+                it
+                    .filterNotNull()
+                    .sortedByDescending {
+                        it.second
+                    }.toMap()
+                    .toImmutableMap()
             }
     }
 
@@ -90,6 +97,13 @@ public class AllNotificationPresenter :
         val notifications by accountsNotificationFlow.collectAsState(persistentMapOf())
         var selectedAccount by remember {
             mutableStateOf<UiProfile?>(null)
+        }
+        val selectedAccountIndex by remember {
+            derivedStateOf {
+                selectedAccount?.let { profile ->
+                    notifications.keys.indexOf(profile)
+                } ?: 0
+            }
         }
         var selectedNotificationFilter by remember {
             mutableStateOf<NotificationFilter?>(null)
@@ -138,6 +152,7 @@ public class AllNotificationPresenter :
             override val timeline = listState
             override val selectedFilter = selectedNotificationFilter
             override val selectedAccount = selectedAccount
+            override val selectedAccountIndex = selectedAccountIndex
 
             override fun setAccount(profile: UiProfile) {
                 selectedAccount = profile

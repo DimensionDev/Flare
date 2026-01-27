@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.XQT
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.ImmutableMap
@@ -443,6 +444,14 @@ internal sealed interface Route : NavKey {
 
         public fun from(deeplinkRoute: DeeplinkRoute): Route? {
             return when (deeplinkRoute) {
+                is DeeplinkRoute.Timeline.XQTDeviceFollow ->
+                    Route.Timeline(
+                        accountType = deeplinkRoute.accountType,
+                        tabItem =
+                            XQT.DeviceFollowTimelineTabItem(
+                                account = deeplinkRoute.accountType,
+                            ),
+                    )
                 is DeeplinkRoute.OpenLinkDirectly -> null
                 is DeeplinkRoute.DeepLinkAccountPicker ->
                     DeepLinkAccountPicker(

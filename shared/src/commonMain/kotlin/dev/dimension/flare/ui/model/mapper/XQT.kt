@@ -30,6 +30,7 @@ import dev.dimension.flare.data.network.xqt.model.UserResultCore
 import dev.dimension.flare.data.network.xqt.model.UserResults
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
@@ -166,7 +167,16 @@ internal fun TopLevel.renderNotifications(
                                     ),
                             onClicked = {
                                 if (itemContent == null && url != null) {
-                                    launcher.launch(url)
+                                    if (url == "/2/notifications/device_follow.json") {
+                                        launcher.launch(
+                                            DeeplinkRoute.Timeline
+                                                .XQTDeviceFollow(
+                                                    accountType = AccountType.Specific(accountKey),
+                                                ).toUri(),
+                                        )
+                                    } else if (!url.startsWith("/")) {
+                                        launcher.launch(url)
+                                    }
                                 }
                             },
                             statusKey =

@@ -32,6 +32,7 @@ extension TitleType {
             case .mixedTimeline: String(localized: "mixed_timeline_title")
             case .liked: String(localized: "liked_tab_title")
             case .allRssFeeds: String(localized: "all_rss_feeds_title")
+            case .posts: String(localized: "posts_title")
             }
             return text
         case .text(let text):

@@ -91,6 +91,7 @@ public sealed class TitleType {
             Social,
             Liked,
             AllRssFeeds,
+            Posts,
         }
     }
 }
@@ -897,6 +898,25 @@ public object XQT {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.xqt
                 .XQTBookmarkTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Immutable
+    @Serializable
+    public data class DeviceFollowTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData =
+            TabMetaData(
+                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Posts),
+                icon = IconType.Material(IconType.Material.MaterialIcon.List),
+            ),
+    ) : TimelineTabItem() {
+        override val key: String = "device_follow_$account"
+
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.xqt
+                .XQTDeviceFollowTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }

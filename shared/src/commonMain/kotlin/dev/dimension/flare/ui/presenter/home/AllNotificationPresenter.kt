@@ -100,8 +100,9 @@ public class AllNotificationPresenter :
         }
         val selectedAccountIndex by remember {
             derivedStateOf {
+                val maxIndex = (notifications.size - 1).coerceAtLeast(0)
                 selectedAccount?.let { profile ->
-                    notifications.keys.indexOf(profile)
+                    notifications.keys.indexOf(profile).coerceIn(0, maxIndex)
                 } ?: 0
             }
         }

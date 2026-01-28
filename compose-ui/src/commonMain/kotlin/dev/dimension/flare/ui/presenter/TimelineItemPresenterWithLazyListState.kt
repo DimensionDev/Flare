@@ -74,6 +74,12 @@ public class TimelineItemPresenterWithLazyListState(
             }
         }
 
+        LaunchedEffect(isAtTheTop) {
+            if (isAtTheTop) {
+                showNewToots = false
+            }
+        }
+
         // Track the key of the item currently at the top of the viewport so we can locate it after a refresh.
         LaunchedEffect(Unit) {
             snapshotFlow { overrideFirstVisibleIndex ?: lazyListState.firstVisibleItemIndex }
@@ -154,12 +160,6 @@ public class TimelineItemPresenterWithLazyListState(
 
                     previousItemCountRef[0] = itemCount
                 }
-        }
-
-        LaunchedEffect(isAtTheTop) {
-            if (isAtTheTop) {
-                showNewToots = false
-            }
         }
 
         // If the user is at the top, record the current top item's key as the last-read key.

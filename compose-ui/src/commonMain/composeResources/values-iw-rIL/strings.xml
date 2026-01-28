@@ -330,6 +330,7 @@
     <string name="dm_list_title">הודעות ישירות</string>
     <string name="antenna_title">אנטנה</string>
     <string name="mixed_timeline_title">מעורב</string>
+    <string name="posts_title">פוסטים</string>
     <string name="settings_about_description">לקוח הרשתות החברתיות המופעל על ידי אינטליגנציה מלאכותית מבוזרת מהדור הבא.</string>
     <string name="settings_about_source_code">קוד מקור</string>
     <string name="settings_about_telegram">טלגרם</string>

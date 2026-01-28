@@ -339,6 +339,7 @@
     <string name="social_title">社會</string>
     <string name="antenna_title">天線</string>
     <string name="mixed_timeline_title">綜合</string>
+    <string name="posts_title">帖子</string>
     <string name="settings_about_description">終極下一代開源 AI 驅動的去中心化社交網絡客戶端。</string>
     <string name="settings_about_source_code">源碼</string>
     <string name="settings_about_telegram">Telegram</string>

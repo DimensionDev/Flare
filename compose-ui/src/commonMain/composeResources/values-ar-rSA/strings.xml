@@ -366,6 +366,7 @@
     <string name="mixed_timeline_title">مختلطة</string>
     <string name="liked_title">معجب</string>
     <string name="all_rss_feeds_title">كل تغذية Rss</string>
+    <string name="posts_title">المشاركات</string>
     <string name="settings_appearance_absolute_timestamp">الطابع الزمني المطلق</string>
     <string name="settings_appearance_absolute_timestamp_description">عرض علامات الوقت المطلقة على المشاركات</string>
     <string name="settings_about_description">الجيل القادم النهائي مفتوح المصدر من AI زبون الشبكة الاجتماعية اللامركزية.</string>

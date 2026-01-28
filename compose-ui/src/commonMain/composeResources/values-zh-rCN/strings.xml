@@ -366,6 +366,7 @@
     <string name="mixed_timeline_title">混合</string>
     <string name="liked_title">赞的</string>
     <string name="all_rss_feeds_title">所有 RSS 源</string>
+    <string name="posts_title">帖子</string>
     <string name="settings_appearance_absolute_timestamp">绝对时间戳</string>
     <string name="settings_appearance_absolute_timestamp_description">在帖子中显示绝对时间戳</string>
     <string name="settings_about_description">由 AI 驱动的次世代去中心化社交网络开源客户端。</string>

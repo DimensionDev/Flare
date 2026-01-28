@@ -364,6 +364,7 @@
     <string name="mixed_timeline_title">Μεικτό</string>
     <string name="liked_title">Άρεσε</string>
     <string name="all_rss_feeds_title">Όλες Οι Ροές Rss</string>
+    <string name="posts_title">Αναρτήσεις</string>
     <string name="settings_appearance_absolute_timestamp">Απόλυτη χρονοσήμανση</string>
     <string name="settings_appearance_absolute_timestamp_description">Εμφάνιση απόλυτων χρονικών σημάτων στις δημοσιεύσεις</string>
     <string name="settings_about_description">Το απόλυτο αποκεντρωμένο κοινωνικό δίκτυο που τροφοδοτείται από την επόμενη γενιά ανοικτού κώδικα.</string>

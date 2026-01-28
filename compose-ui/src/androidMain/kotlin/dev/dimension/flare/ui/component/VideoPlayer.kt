@@ -217,7 +217,7 @@ public fun VideoPlayer(
             }
             LaunchedEffect(player) {
                 while (true) {
-                    isLoaded = player.isPlaying
+                    isLoaded = player.isPlaying || player.currentPosition > 0L
                     if (remainingTimeContent != null) {
                         remainingTime = player.duration - player.currentPosition
                     }

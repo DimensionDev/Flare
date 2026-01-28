@@ -223,44 +223,27 @@ struct StatusView: View {
     var topEndContent: some View {
         HStack {
             if showPlatformLogo {
-                switch onEnum(of: data.platformType) {
+                switch data.platformType {
                 case .mastodon:
                     Image("fa-mastodon")
-                        .resizable()
-                        .renderingMode(.template)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 12, height: 12)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 case .misskey:
-                    Image("fa-globe")
-                        .resizable()
-                        .renderingMode(.template)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 12, height: 12)
+                    Image("fa-misskey")
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 case .bluesky:
                     Image("fa-bluesky")
-                        .resizable()
-                        .renderingMode(.template)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 12, height: 12)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 case .xQt:
-                    Image("fa-twitter")
-                        .resizable()
-                        .renderingMode(.template)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 12, height: 12)
+                    Image("fa-x-twitter")
+                        .font(.caption)
                         .foregroundStyle(.secondary)
-                case .vVO:
+                case .vvo:
                     Image("fa-weibo")
-                        .resizable()
-                        .renderingMode(.template)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 12, height: 12)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
-                default:
-                    EmptyView()
                 }
             }
             switch onEnum(of: data.topEndContent) {

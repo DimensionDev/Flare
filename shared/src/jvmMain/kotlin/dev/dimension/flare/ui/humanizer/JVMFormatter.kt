@@ -1,5 +1,9 @@
 package dev.dimension.flare.ui.humanizer
 
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.toLocalDateTime
+import org.ocpsoft.prettytime.PrettyTime
 import java.math.RoundingMode
 import java.text.NumberFormat
 import java.time.ZoneId
@@ -11,10 +15,6 @@ import java.util.Date
 import java.util.Locale
 import kotlin.time.Clock
 import kotlin.time.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.daysUntil
-import kotlinx.datetime.toLocalDateTime
-import org.ocpsoft.prettytime.PrettyTime
 
 private val prettyTime = PrettyTime(Date(0))
 

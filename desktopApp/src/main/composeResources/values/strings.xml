@@ -216,6 +216,9 @@
     <string name="settings_appearance_absolute_timestamp">Absolute timestamp</string>
     <string name="settings_appearance_absolute_timestamp_description">Display absolute timestamps on posts</string>
 
+    <string name="settings_appearance_show_platform_logo">Show platform logo</string>
+    <string name="settings_appearance_show_platform_logo_description">Show the source platform logo on post items</string>
+
     <string name="settings_about_source_code">Source code</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Join our Telegram group</string>

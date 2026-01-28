@@ -197,6 +197,9 @@
     <string name="settings_appearance_absolute_timestamp">Absolute timestamp</string>
     <string name="settings_appearance_absolute_timestamp_description">Display absolute timestamps on posts</string>
 
+    <string name="settings_appearance_show_platform_logo">Show platform logo</string>
+    <string name="settings_appearance_show_platform_logo_description">Show the source platform logo on post items</string>
+
     <string name="settings_storage_clear_image_cache">Clear image cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB of images will be removed</string>
 

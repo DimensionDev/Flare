@@ -24,6 +24,7 @@ public data class ComponentAppearance(
     val fullWidthPost: Boolean = false,
     val postActionStyle: PostActionStyle = PostActionStyle.LeftAligned,
     val absoluteTimestamp: Boolean = false,
+    val showPlatformLogo: Boolean = true,
 ) {
     public data class AiConfig(
         val translation: Boolean = false,

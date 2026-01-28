@@ -116,6 +116,8 @@ import dev.dimension.flare.settings_appearance_show_media
 import dev.dimension.flare.settings_appearance_show_media_description
 import dev.dimension.flare.settings_appearance_show_numbers
 import dev.dimension.flare.settings_appearance_show_numbers_description
+import dev.dimension.flare.settings_appearance_show_platform_logo
+import dev.dimension.flare.settings_appearance_show_platform_logo_description
 import dev.dimension.flare.settings_appearance_theme
 import dev.dimension.flare.settings_appearance_theme_auto
 import dev.dimension.flare.settings_appearance_theme_dark
@@ -663,6 +665,26 @@ internal fun SettingsScreen(
                             {
                                 state.appearanceState.updateSettings {
                                     copy(absoluteTimestamp = it)
+                                }
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+                ExpanderItemSeparator()
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_appearance_show_platform_logo))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_show_platform_logo_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = LocalAppearanceSettings.current.showPlatformLogo,
+                            {
+                                state.appearanceState.updateSettings {
+                                    copy(showPlatformLogo = it)
                                 }
                             },
                             textBefore = true,

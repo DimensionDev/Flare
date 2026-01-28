@@ -7,6 +7,7 @@ struct StatusView: View {
     @Environment(\.appearanceSettings.showLinkPreview) private var showLinkPreview
     @Environment(\.appearanceSettings.compatLinkPreview) private var compatLinkPreview
     @Environment(\.appearanceSettings.postActionStyle) private var postActionStyle
+    @Environment(\.appearanceSettings.showPlatformLogo) private var showPlatformLogo
     @Environment(\.openURL) private var openURL
     let data: UiTimeline.ItemContentStatus
     var isDetail: Bool = false
@@ -221,6 +222,30 @@ struct StatusView: View {
     
     var topEndContent: some View {
         HStack {
+            if showPlatformLogo {
+                switch data.platformType {
+                case .mastodon:
+                    Image("fa-mastodon")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                case .misskey:
+                    Image("fa-misskey")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                case .bluesky:
+                    Image("fa-bluesky")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                case .xQt:
+                    Image("fa-x-twitter")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                case .vvo:
+                    Image("fa-weibo")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
             switch onEnum(of: data.topEndContent) {
             case .visibility(let visibility):
                 StatusVisibilityView(data: visibility.visibility)

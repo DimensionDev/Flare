@@ -9,7 +9,7 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import kotlinx.coroutines.launch
 
-public open class TimelineItemPresenter(
+public class TimelineItemPresenter(
     private val timelineTabItem: TimelineTabItem,
 ) : PresenterBase<TimelineItemPresenter.State>() {
     public interface State {

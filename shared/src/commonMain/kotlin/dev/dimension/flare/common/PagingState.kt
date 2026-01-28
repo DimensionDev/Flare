@@ -24,16 +24,16 @@ import kotlin.contracts.contract
 @Immutable
 public sealed class PagingState<T> {
     @Immutable
-    public class Loading<T> public constructor() : PagingState<T>()
+    public class Loading<T> internal constructor() : PagingState<T>()
 
     @Immutable
-    public data class Error<T> public constructor(
+    public data class Error<T> internal constructor(
         val error: Throwable,
         val onRetry: () -> Unit,
     ) : PagingState<T>()
 
     @Immutable
-    public data class Empty<T : Any> public constructor(
+    public data class Empty<T : Any> internal constructor(
         private val onRefresh: () -> Unit,
     ) : PagingState<T>() {
         public fun refresh() {
@@ -60,7 +60,7 @@ public sealed class PagingState<T> {
         public abstract fun itemContentType(contentType: ((item: T) -> Any?)? = null): (index: Int) -> Any?
 
         @Immutable
-        public data class ImmutableSuccess<T : Any>(
+        public data class ImmutableSuccess<T : Any> internal constructor(
             private val data: ImmutableList<T>,
             override val itemCount: Int = data.size,
             override val isRefreshing: Boolean = false,

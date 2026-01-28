@@ -73,8 +73,7 @@ public class TimelineItemPresenterWithLazyListState(
                     lazyListState.firstVisibleItemScrollOffset == 0
             }
         }
-
-        LaunchedEffect(isAtTheTop) {
+        LaunchedEffect(isAtTheTop, showNewToots) {
             if (isAtTheTop) {
                 showNewToots = false
             }

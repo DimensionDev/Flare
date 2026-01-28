@@ -7,6 +7,7 @@ struct StatusView: View {
     @Environment(\.appearanceSettings.showLinkPreview) private var showLinkPreview
     @Environment(\.appearanceSettings.compatLinkPreview) private var compatLinkPreview
     @Environment(\.appearanceSettings.postActionStyle) private var postActionStyle
+    @Environment(\.appearanceSettings.showPlatformLogo) private var showPlatformLogo
     @Environment(\.openURL) private var openURL
     let data: UiTimeline.ItemContentStatus
     var isDetail: Bool = false
@@ -221,6 +222,47 @@ struct StatusView: View {
     
     var topEndContent: some View {
         HStack {
+            if showPlatformLogo {
+                switch onEnum(of: data.platformType) {
+                case .mastodon:
+                    Image("fa-mastodon")
+                        .resizable()
+                        .renderingMode(.template)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 12, height: 12)
+                        .foregroundStyle(.secondary)
+                case .misskey:
+                    Image("fa-globe")
+                        .resizable()
+                        .renderingMode(.template)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 12, height: 12)
+                        .foregroundStyle(.secondary)
+                case .bluesky:
+                    Image("fa-bluesky")
+                        .resizable()
+                        .renderingMode(.template)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 12, height: 12)
+                        .foregroundStyle(.secondary)
+                case .xQt:
+                    Image("fa-twitter")
+                        .resizable()
+                        .renderingMode(.template)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 12, height: 12)
+                        .foregroundStyle(.secondary)
+                case .vVO:
+                    Image("fa-weibo")
+                        .resizable()
+                        .renderingMode(.template)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 12, height: 12)
+                        .foregroundStyle(.secondary)
+                default:
+                    EmptyView()
+                }
+            }
             switch onEnum(of: data.topEndContent) {
             case .visibility(let visibility):
                 StatusVisibilityView(data: visibility.visibility)

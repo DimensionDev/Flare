@@ -56,6 +56,7 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
                         ),
                     fullWidthPost = appearanceSettings.fullWidthPost,
                     postActionStyle = appearanceSettings.postActionStyle,
+                    showPlatformLogo = appearanceSettings.showPlatformLogo,
                 )
             },
         content = content,

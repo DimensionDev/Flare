@@ -25,6 +25,7 @@ import compose.icons.fontawesomeicons.brands.Bluesky
 import compose.icons.fontawesomeicons.brands.Mastodon
 import compose.icons.fontawesomeicons.brands.Twitter
 import compose.icons.fontawesomeicons.brands.Weibo
+import compose.icons.fontawesomeicons.brands.XTwitter
 import compose.icons.fontawesomeicons.solid.Bell
 import compose.icons.fontawesomeicons.solid.BookBookmark
 import compose.icons.fontawesomeicons.solid.CircleUser
@@ -297,7 +298,7 @@ internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =
         IconType.Material.MaterialIcon.Featured -> FontAwesomeIcons.Solid.RectangleList
         IconType.Material.MaterialIcon.Bookmark -> FontAwesomeIcons.Solid.BookBookmark
         IconType.Material.MaterialIcon.Heart -> FontAwesomeIcons.Solid.Heart
-        IconType.Material.MaterialIcon.Twitter -> FontAwesomeIcons.Brands.Twitter
+        IconType.Material.MaterialIcon.Twitter -> FontAwesomeIcons.Brands.XTwitter
         IconType.Material.MaterialIcon.Mastodon -> FontAwesomeIcons.Brands.Mastodon
         IconType.Material.MaterialIcon.Misskey -> FontAwesomeIcons.Brands.Misskey
         IconType.Material.MaterialIcon.Bluesky -> FontAwesomeIcons.Brands.Bluesky

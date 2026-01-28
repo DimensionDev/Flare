@@ -60,7 +60,7 @@ public sealed class PagingState<T> {
         public abstract fun itemContentType(contentType: ((item: T) -> Any?)? = null): (index: Int) -> Any?
 
         @Immutable
-        public data class ImmutableSuccess<T : Any> internal constructor(
+        internal data class ImmutableSuccess<T : Any>(
             private val data: ImmutableList<T>,
             override val itemCount: Int = data.size,
             override val isRefreshing: Boolean = false,

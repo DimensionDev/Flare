@@ -398,14 +398,14 @@ internal fun TimelineItemContent(
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
                             )
-                            val _ctx = LocalContext.current
-                            val _newTootsText =
-                                _ctx.resources.getQuantityString(
+                            val ctx = LocalContext.current
+                            val newTootsText =
+                                ctx.resources.getQuantityString(
                                     R.plurals.home_timeline_new_toots,
                                     state.newPostsCount,
                                     state.newPostsCount,
                                 )
-                            Text(text = _newTootsText)
+                            Text(text = newTootsText)
                         }
                     }
                 }

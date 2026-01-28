@@ -618,6 +618,38 @@
         }
       }
     },
+    "settings_rss_management_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSS Management"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSS 管理"
+          }
+        }
+      }
+    },
+    "settings_rss_management_description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage your RSS sources"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理您的 RSS 源"
+          }
+        }
+      }
+    },
     "0000" : {
       "localizations" : {
         "ar" : {

@@ -69,6 +69,8 @@
     <string name="settings_ai_config_tldr_description">Enable AI summarization for long posts, only available in post that longer than 500 characters</string>
     <string name="settings_language_title">Language</string>
     <string name="settings_language_description">Change the language of the app</string>
+    <string name="settings_rss_management_title">RSS Management</string>
+    <string name="settings_rss_management_description">Manage RSS feeds</string>
 
     <string name="status_loadmore_error_retry">Retry</string>
     <string name="login_expired">Login session expired</string>

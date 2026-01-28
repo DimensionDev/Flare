@@ -98,6 +98,8 @@ enum Route: Hashable, Identifiable {
             EditUserInListScreen(accountType: accountType, userKey: userKey)
         case .userDirectMessages(let accountType, let userKey):
             UserDMConversationScreen(accountType: accountType, userKey: userKey)
+        case .rssManagement:
+            RssScreen()
         default:
             Text("Not done yet for \(self)")
         }
@@ -148,6 +150,7 @@ enum Route: Hashable, Identifiable {
     case editUserList(AccountType, MicroBlogKey)
     case userDirectMessages(AccountType, MicroBlogKey)
     case tabGroupConfig(MixedTimelineTabItem?)
+    case rssManagement
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {

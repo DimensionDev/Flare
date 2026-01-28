@@ -241,14 +241,6 @@ public sealed class TimelineTabItem : TabItem() {
                             icon = IconType.Material(IconType.Material.MaterialIcon.Home),
                         ),
                 ),
-                RssTabItem(
-                    account = AccountType.Guest,
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Rss),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
-                        ),
-                ),
                 DiscoverTabItem(
                     account = AccountType.Guest,
                     metaData =
@@ -271,23 +263,13 @@ public sealed class TimelineTabItem : TabItem() {
 
         public fun defaultSecondary(user: UiAccount): ImmutableList<TabItem> {
             val result =
-                listOf(
-                    RssTabItem(
-                        account = AccountType.Guest,
-                        metaData =
-                            TabMetaData(
-                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Rss),
-                                icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
-                            ),
-                    ),
-                ) +
-                    when (user.platformType) {
-                        PlatformType.Mastodon -> defaultMastodonSecondaryItems(user.accountKey)
-                        PlatformType.Misskey -> defaultMisskeySecondaryItems(user.accountKey)
-                        PlatformType.Bluesky -> defaultBlueskySecondaryItems(user.accountKey)
-                        PlatformType.xQt -> defaultXqtSecondaryItems(user.accountKey)
-                        PlatformType.VVo -> defaultVVOSecondaryItems(user.accountKey)
-                    }
+                when (user.platformType) {
+                    PlatformType.Mastodon -> defaultMastodonSecondaryItems(user.accountKey)
+                    PlatformType.Misskey -> defaultMisskeySecondaryItems(user.accountKey)
+                    PlatformType.Bluesky -> defaultBlueskySecondaryItems(user.accountKey)
+                    PlatformType.xQt -> defaultXqtSecondaryItems(user.accountKey)
+                    PlatformType.VVo -> defaultVVOSecondaryItems(user.accountKey)
+                }
             return result.toImmutableList()
         }
 

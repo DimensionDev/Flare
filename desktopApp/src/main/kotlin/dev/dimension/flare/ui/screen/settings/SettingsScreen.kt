@@ -127,6 +127,8 @@ import dev.dimension.flare.settings_language_title
 import dev.dimension.flare.settings_local_history_description
 import dev.dimension.flare.settings_local_history_title
 import dev.dimension.flare.settings_privacy_policy
+import dev.dimension.flare.settings_rss_management_description
+import dev.dimension.flare.settings_rss_management_title
 import dev.dimension.flare.settings_status_appearance_subtitle
 import dev.dimension.flare.settings_status_appearance_title
 import dev.dimension.flare.settings_storage_app_log
@@ -200,6 +202,7 @@ internal fun SettingsScreen(
     toLogin: () -> Unit,
     toLocalCache: () -> Unit,
     toAppLog: () -> Unit,
+    toRSSManagement: () -> Unit,
 ) {
     val window = LocalComposeWindow.current
     val state by producePresenter {
@@ -803,6 +806,23 @@ internal fun SettingsScreen(
                     icon = null,
                 )
             }
+            CardExpanderItem(
+                onClick = toRSSManagement,
+                heading = {
+                    Text(stringResource(Res.string.settings_rss_management_title))
+                },
+                trailing = {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.AngleRight,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                    )
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_rss_management_description))
+                },
+                icon = null,
+            )
             Expander(
                 expanded = state.storageState.expanded,
                 onExpandedChanged = state.storageState::setExpanded,

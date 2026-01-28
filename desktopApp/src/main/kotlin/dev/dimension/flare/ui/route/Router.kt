@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -493,6 +494,9 @@ internal fun WindowScope.Router(
                         toAppLog = {
                             navigate(Route.AppLogging)
                         },
+                        toRSSManagement = {
+                            navigate(Route.RssList)
+                        },
                     )
                 }
 
@@ -589,7 +593,12 @@ internal fun WindowScope.Router(
                     )
                 }
 
-                entry<Route.RssList> { args ->
+                entry<Route.RssList>(
+                    metadata =
+                        ListDetailSceneStrategy.listPane(
+                            "Rss",
+                        ),
+                ) { args ->
                     RssListScreen(
                         toItem = {
                             navigate(
@@ -609,7 +618,12 @@ internal fun WindowScope.Router(
                     )
                 }
 
-                entry<RssTimeline> { args ->
+                entry<RssTimeline>(
+                    metadata =
+                        ListDetailSceneStrategy.detailPane(
+                            "Rss",
+                        ),
+                ) { args ->
                     TimelineScreen(
                         RssTimelineTabItem(
                             args.data,

@@ -45,7 +45,10 @@ public class TimelineItemPresenterWithLazyListState(
 
         // Helper to collect keys for the first 'count' items of a PagingState.Success list.
         // Use a star projection because PagingState.Success is generic.
-        fun collectFirstKeys(listState: PagingState.Success<*>, count: Int): Set<String> {
+        fun collectFirstKeys(
+            listState: PagingState.Success<*>,
+            count: Int,
+        ): Set<String> {
             val added = mutableSetOf<String>()
             for (i in 0 until minOf(count, listState.itemCount)) {
                 val item = listState.peek(i)
@@ -90,7 +93,9 @@ public class TimelineItemPresenterWithLazyListState(
                 val listState = currentState.listState
                 if (listState is PagingState.Success) {
                     Triple(listState.peek(0)?.itemKey, listState.itemCount, listState)
-                } else null
+                } else {
+                    null
+                }
             }.mapNotNull { it }
                 .collect { (_, itemCount, listState) ->
                     if (previousItemCountRef[0] == -1) {
@@ -149,7 +154,7 @@ public class TimelineItemPresenterWithLazyListState(
 
                     previousItemCountRef[0] = itemCount
                 }
-            }
+        }
 
         LaunchedEffect(isAtTheTop) {
             if (isAtTheTop) {
@@ -193,16 +198,17 @@ public class TimelineItemPresenterWithLazyListState(
                             }
                         }
 
-                        val unseen = if (keysPresent) {
-                            // We may have partial knowledge of new items (some keys missing). Count known keys above
-                            // and conservatively add any missing unknowns that could be above the viewport.
-                            val missing = maxOf(0, totalNewPostsCount - newItemKeys.size)
-                            val maxMissingAbove = maxOf(0, firstVisibleIndex - keysAbove)
-                            keysAbove + minOf(missing, maxMissingAbove)
-                        } else {
-                            // No keys known; conservative estimate using totalNewPostsCount and viewport
-                            minOf(totalNewPostsCount, firstVisibleIndex)
-                        }
+                        val unseen =
+                            if (keysPresent) {
+                                // We may have partial knowledge of new items (some keys missing). Count known keys above
+                                // and conservatively add any missing unknowns that could be above the viewport.
+                                val missing = maxOf(0, totalNewPostsCount - newItemKeys.size)
+                                val maxMissingAbove = maxOf(0, firstVisibleIndex - keysAbove)
+                                keysAbove + minOf(missing, maxMissingAbove)
+                            } else {
+                                // No keys known; conservative estimate using totalNewPostsCount and viewport
+                                minOf(totalNewPostsCount, firstVisibleIndex)
+                            }
 
                         newPostsCount = unseen
                         if (newPostsCount <= 0) showNewToots = false

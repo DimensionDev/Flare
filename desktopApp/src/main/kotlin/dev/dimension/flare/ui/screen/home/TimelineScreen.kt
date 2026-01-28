@@ -44,7 +44,6 @@ import io.github.composefluent.component.Text
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.pluralStringResource
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun TimelineScreen(

@@ -366,6 +366,7 @@
     <string name="mixed_timeline_title">Sekoitettu</string>
     <string name="liked_title">Tykätty</string>
     <string name="all_rss_feeds_title">Kaikki RSS-syötteet</string>
+    <string name="posts_title">Julkaisut</string>
     <string name="settings_appearance_absolute_timestamp">Absoluuttinen aikaleima</string>
     <string name="settings_appearance_absolute_timestamp_description">Näytä absoluuttiset aikaleimat artikkeleissa</string>
     <string name="settings_about_description">Lopullinen seuraavan sukupolven avoimen lähdekoodin tekoälyn voimanlähteenä hajautettu sosiaalinen verkostoasiakas.</string>

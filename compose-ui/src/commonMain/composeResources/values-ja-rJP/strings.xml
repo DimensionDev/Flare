@@ -366,6 +366,7 @@
     <string name="mixed_timeline_title">混在しました</string>
     <string name="liked_title">いいね！</string>
     <string name="all_rss_feeds_title">すべてのRSSフィード</string>
+    <string name="posts_title">投稿</string>
     <string name="settings_appearance_absolute_timestamp">絶対タイムスタンプです</string>
     <string name="settings_appearance_absolute_timestamp_description">投稿に絶対タイムスタンプを表示する</string>
     <string name="settings_about_description">究極で次世代のオープンソースなAIを搭載した分散型ソーシャルネットワーククライアント。</string>

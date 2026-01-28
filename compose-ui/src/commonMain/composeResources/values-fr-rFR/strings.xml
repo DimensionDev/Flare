@@ -366,6 +366,7 @@
     <string name="mixed_timeline_title">Mixte</string>
     <string name="liked_title">Aimé</string>
     <string name="all_rss_feeds_title">Tous les flux RSS</string>
+    <string name="posts_title">Publications</string>
     <string name="settings_appearance_absolute_timestamp">Horodatage absolu</string>
     <string name="settings_appearance_absolute_timestamp_description">Afficher les horodatages absolus sur les publications</string>
     <string name="settings_about_description">Le client décentralisé du réseau social décentralisé de la prochaine génération à source libre a été alimenté par AI .</string>

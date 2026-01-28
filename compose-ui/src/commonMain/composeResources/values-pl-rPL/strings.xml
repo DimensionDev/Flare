@@ -366,6 +366,7 @@
     <string name="mixed_timeline_title">Mieszane</string>
     <string name="liked_title">Polubione</string>
     <string name="all_rss_feeds_title">Wszystkie kanały RSS</string>
+    <string name="posts_title">Posty</string>
     <string name="settings_appearance_absolute_timestamp">Bezwzględny znacznik czasu</string>
     <string name="settings_appearance_absolute_timestamp_description">Wyświetlaj bezwzględne znaczniki czasu na postach</string>
     <string name="settings_about_description">Najnowszy klient nowej generacji oparty na zdecentralizowanej sieci społecznościowej.</string>

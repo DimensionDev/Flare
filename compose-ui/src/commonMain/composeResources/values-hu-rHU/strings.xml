@@ -331,6 +331,7 @@
     <string name="social_title">Szociális</string>
     <string name="antenna_title">Antenna</string>
     <string name="mixed_timeline_title">Keverve</string>
+    <string name="posts_title">Bejegyzések</string>
     <string name="settings_about_description">A végső, következő generációs, nyílt forráskódú, AI által vezérelt decentralizált közösségi hálózati kliens.</string>
     <string name="settings_about_source_code">Forráskód</string>
     <string name="settings_about_telegram">Telegram</string>

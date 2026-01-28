@@ -366,6 +366,7 @@
     <string name="mixed_timeline_title">Змішаний</string>
     <string name="liked_title">Вподобано</string>
     <string name="all_rss_feeds_title">Всі стрічки RSS</string>
+    <string name="posts_title">Повідомлення</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютна часова мітка</string>
     <string name="settings_appearance_absolute_timestamp_description">Показувати абсолютні позначки часу на повідомленнях</string>
     <string name="settings_about_description">На основі децентралізованого клієнта соціальної мережі під час наступного покоління.</string>

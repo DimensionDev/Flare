@@ -366,6 +366,7 @@
     <string name="mixed_timeline_title">Общая</string>
     <string name="liked_title">Понравилось</string>
     <string name="all_rss_feeds_title">Все ленты RSS</string>
+    <string name="posts_title">Записи</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютная метка времени</string>
     <string name="settings_appearance_absolute_timestamp_description">Показывать абсолютную метку времени на записях</string>
     <string name="settings_about_description">Конечное поколение с открытым исходным кодом обеспечило децентрализованный клиент социальных сетей.</string>

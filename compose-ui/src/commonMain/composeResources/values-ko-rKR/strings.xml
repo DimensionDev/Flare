@@ -331,6 +331,7 @@
     <string name="social_title">소셜</string>
     <string name="antenna_title">안테나</string>
     <string name="mixed_timeline_title">혼합</string>
+    <string name="posts_title">게시물</string>
     <string name="settings_about_description">최고의 차세대 오픈 소스 AI 기반 분산형 소셜 네트워크 클라이언트입니다.</string>
     <string name="settings_about_source_code">소스 코드</string>
     <string name="settings_about_telegram">텔레그램</string>

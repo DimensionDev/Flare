@@ -331,6 +331,7 @@
     <string name="social_title">Sosyal</string>
     <string name="antenna_title">Anten</string>
     <string name="mixed_timeline_title">Karışık</string>
+    <string name="posts_title">Gönderiler</string>
     <string name="settings_about_description">Son nesil açık kaynaklı yapay zeka destekli merkeziyetsiz sosyal ağ istemcisi.</string>
     <string name="settings_about_source_code">Kaynak kodu</string>
     <string name="settings_about_telegram">Telegram</string>

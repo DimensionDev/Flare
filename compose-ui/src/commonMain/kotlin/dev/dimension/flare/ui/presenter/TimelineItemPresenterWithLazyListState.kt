@@ -30,16 +30,13 @@ public fun computeNewPostsFromList(
     previousItemCount: Int,
     currentList: List<UiTimeline>,
     isAtTheTop: Boolean,
-    overrideFirstVisibleIndex: Int? = null,
 ): Triple<Boolean, Int, Set<String>> {
-    fun collectFirstKeys(
-        list: List<UiTimeline>,
-        count: Int,
-    ): Set<String> {
-        val added = mutableSetOf<String>()
-        for (i in 0 until minOf(count, list.size)) {
-            val item = list.getOrNull(i)
-            if (item != null) added.add(item.itemKey)
+    // Collect the first 'count' keys from the list (currentList is a list of UiTimeline so no null checks needed).
+    fun collectFirstKeys(list: List<UiTimeline>, count: Int): Set<String> {
+        val limit = minOf(count, list.size)
+        val added = LinkedHashSet<String>(limit)
+        for (i in 0 until limit) {
+            added.add(list[i].itemKey)
         }
         return added
     }
@@ -47,14 +44,7 @@ public fun computeNewPostsFromList(
     val itemCount = currentList.size
 
     if (previousFirstVisibleItemKey != null) {
-        var foundIndex = -1
-        for (i in 0 until itemCount) {
-            val item = currentList.getOrNull(i)
-            if (item != null && item.itemKey == previousFirstVisibleItemKey) {
-                foundIndex = i
-                break
-            }
-        }
+        val foundIndex = currentList.indexOfFirst { it.itemKey == previousFirstVisibleItemKey }
         if (foundIndex >= 0) {
             val inserted = foundIndex
             if (inserted > 0 && !isAtTheTop) {
@@ -77,7 +67,6 @@ public fun computeNewPostsFromList(
 public class TimelineItemPresenterWithLazyListState(
     private val timelineTabItem: TimelineTabItem,
     private val lazyStaggeredGridState: LazyStaggeredGridState? = null,
-    private val overrideFirstVisibleIndex: Int? = null,
     private val internalPresenter: TimelineItemPresenter? = null,
 ) : PresenterBase<TimelineItemPresenterWithLazyListState.State>() {
     @Immutable
@@ -99,24 +88,10 @@ public class TimelineItemPresenterWithLazyListState(
         var showNewToots by remember { mutableStateOf(false) }
         val currentState by rememberUpdatedState(state)
 
-        // Helper to collect keys for the first 'count' items of a PagingState.Success list.
-        // Use a star projection because PagingState.Success is generic.
-        fun collectFirstKeys(
-            listState: PagingState.Success<*>,
-            count: Int,
-        ): Set<String> {
-            val added = mutableSetOf<String>()
-            for (i in 0 until minOf(count, listState.itemCount)) {
-                val item = listState.peek(i)
-                if (item is UiTimeline) added.add(item.itemKey)
-            }
-            return added
-        }
-
         var newPostsCount by remember { mutableStateOf(0) }
         var totalNewPostsCount by remember { mutableStateOf(0) }
-        // track exact keys of items that were newly prepended
-        var newItemKeys by remember { mutableStateOf(setOf<String>()) }
+        // index of the first-visible item at the time the list was last refreshed
+        var lastRefreshIndex by remember { mutableStateOf<Int?>(null) }
         var previousFirstVisibleItemKey by remember { mutableStateOf<String?>(null) }
         val lazyListState = lazyStaggeredGridState ?: rememberLazyStaggeredGridState()
         // Keep a remembered baseline item count for detecting prepends (must be at composable scope).
@@ -137,7 +112,7 @@ public class TimelineItemPresenterWithLazyListState(
 
         // Track the key of the item currently at the top of the viewport so we can locate it after a refresh.
         LaunchedEffect(Unit) {
-            snapshotFlow { overrideFirstVisibleIndex ?: lazyListState.firstVisibleItemIndex }
+            snapshotFlow { lazyListState.firstVisibleItemIndex }
                 .distinctUntilChanged()
                 .collect { index ->
                     val listState = currentState.listState
@@ -162,10 +137,6 @@ public class TimelineItemPresenterWithLazyListState(
                     if (previousItemCountRef[0] == -1) {
                         // first emission: capture baseline item count and optional override first-visible key
                         previousItemCountRef[0] = itemCount
-                        if (overrideFirstVisibleIndex != null && listState.itemCount > overrideFirstVisibleIndex) {
-                            val item = listState.peek(overrideFirstVisibleIndex)
-                            previousFirstVisibleItemKey = item?.itemKey ?: previousFirstVisibleItemKey
-                        }
                         return@collect
                     }
 
@@ -179,33 +150,33 @@ public class TimelineItemPresenterWithLazyListState(
                     }
 
                     // Use the production helper to compute inserted/new keys
-                    val (showIndicator, inserted, addedKeys) =
+                    val (showIndicator, inserted, _) =
                         computeNewPostsFromList(
                             lastReadKey,
                             previousItemCountRef[0],
                             currentList,
                             isAtTheTop,
-                            overrideFirstVisibleIndex,
                         )
 
                     if (showIndicator) {
                         if (inserted > 0 && !isAtTheTop) {
-                            if (addedKeys.isNotEmpty()) newItemKeys = newItemKeys + addedKeys
+                            // Record the number of new items and the index baseline (the UI index before it moved).
                             totalNewPostsCount = inserted
                             newPostsCount = inserted
+                            lastRefreshIndex = lazyListState.firstVisibleItemIndex
                             showNewToots = true
                         } else {
                             // full refresh or at top -> clear
                             totalNewPostsCount = 0
                             newPostsCount = 0
-                            newItemKeys = emptySet()
+                            lastRefreshIndex = null
                             showNewToots = false
                         }
                     } else {
                         // No indicator -> clear preparatory state (mirrors previous behavior)
                         totalNewPostsCount = 0
                         newPostsCount = 0
-                        newItemKeys = emptySet()
+                        lastRefreshIndex = null
                     }
 
                     previousItemCountRef[0] = itemCount
@@ -227,40 +198,31 @@ public class TimelineItemPresenterWithLazyListState(
             if (!showNewToots) {
                 totalNewPostsCount = 0
                 newPostsCount = 0
-                newItemKeys = emptySet()
+                lastRefreshIndex = null
             }
         }
 
-        // Recompute newPostsCount based on current firstVisibleIndex as the user scrolls.
+        // Simplified: recompute newPostsCount from the current firstVisibleIndex and the lastRefreshIndex
         LaunchedEffect(Unit) {
-            snapshotFlow {
-                Pair(overrideFirstVisibleIndex ?: lazyListState.firstVisibleItemIndex, currentState.listState)
-            }.distinctUntilChanged { old, new -> old.first == new.first }
-                .collect { (firstVisibleIndex, listStateAny) ->
-                    val listState = listStateAny
-                    if (showNewToots && totalNewPostsCount > 0 && listState is PagingState.Success) {
-                        val keysPresent = newItemKeys.isNotEmpty()
-                        var keysAbove = 0
-                        if (keysPresent) {
-                            for (i in 0 until minOf(firstVisibleIndex, listState.itemCount)) {
-                                val item = listState.peek(i)
-                                if (item is UiTimeline && newItemKeys.contains(item.itemKey)) keysAbove++
-                            }
+            snapshotFlow { lazyListState.firstVisibleItemIndex }
+                .distinctUntilChanged()
+                .collect { firstVisibleIndex ->
+                    if (!showNewToots) {
+                        newPostsCount = 0
+                        return@collect
+                    }
+
+                    val lr = lastRefreshIndex
+                    if (lr == null) return@collect
+
+                    if (firstVisibleIndex > lr) {
+                        val calc = firstVisibleIndex - lr
+                        // If we already showed a count, only decrease it (never increase). Also don't exceed totalNewPostsCount.
+                        newPostsCount = if (newPostsCount > 0) {
+                            minOf(newPostsCount, minOf(calc, totalNewPostsCount))
+                        } else {
+                            minOf(calc, totalNewPostsCount)
                         }
-
-                        val unseen =
-                            if (keysPresent) {
-                                // We may have partial knowledge of new items (some keys missing). Count known keys above
-                                // and conservatively add any missing unknowns that could be above the viewport.
-                                val missing = maxOf(0, totalNewPostsCount - newItemKeys.size)
-                                val maxMissingAbove = maxOf(0, firstVisibleIndex - keysAbove)
-                                keysAbove + minOf(missing, maxMissingAbove)
-                            } else {
-                                // No keys known; conservative estimate using totalNewPostsCount and viewport
-                                minOf(totalNewPostsCount, firstVisibleIndex)
-                            }
-
-                        newPostsCount = unseen
                         if (newPostsCount <= 0) showNewToots = false
                     }
                 }

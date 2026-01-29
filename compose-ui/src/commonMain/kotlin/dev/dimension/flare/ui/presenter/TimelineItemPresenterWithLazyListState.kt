@@ -98,14 +98,15 @@ public class TimelineItemPresenterWithLazyListState(
     override fun body(): State {
         val state = tabItemPresenter.body()
         var showNewToots by remember { mutableStateOf(false) }
+        val lazyListState = lazyStaggeredGridState ?: rememberLazyStaggeredGridState()
         val currentState by rememberUpdatedState(state)
-
         var newPostsCount by remember { mutableStateOf(0) }
         var totalNewPostsCount by remember { mutableStateOf(0) }
+
         // index of the first-visible item at the time the list was last refreshed
         var lastRefreshIndex by remember { mutableStateOf<Int?>(null) }
         var previousFirstVisibleItemKey by remember { mutableStateOf<String?>(null) }
-        val lazyListState = lazyStaggeredGridState ?: rememberLazyStaggeredGridState()
+
         // Keep a remembered baseline item count for detecting prepends (must be at composable scope).
         // Use -1 as sentinel for "not initialized" so we don't need a separate 'initialized' flag.
         val previousItemCountRef = remember { intArrayOf(-1) }

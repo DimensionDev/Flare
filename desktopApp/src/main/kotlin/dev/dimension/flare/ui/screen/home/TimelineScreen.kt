@@ -43,7 +43,7 @@ import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.Text
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
-import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.pluralStringResource
 
 @Composable
 internal fun TimelineScreen(
@@ -146,7 +146,7 @@ internal fun TimelineContent(
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = stringResource(Res.string.home_timeline_new_toots))
+                Text(text = pluralStringResource(Res.plurals.home_timeline_new_toots, state.newPostsCount, state.newPostsCount))
             }
         }
     }

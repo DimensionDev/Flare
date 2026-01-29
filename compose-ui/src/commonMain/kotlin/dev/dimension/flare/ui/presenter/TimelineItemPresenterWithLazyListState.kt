@@ -98,7 +98,6 @@ public class TimelineItemPresenterWithLazyListState(
     override fun body(): State {
         val state = tabItemPresenter.body()
         var showNewToots by remember { mutableStateOf(false) }
-        val lazyListState = lazyStaggeredGridState ?: rememberLazyStaggeredGridState()
         val currentState by rememberUpdatedState(state)
         var newPostsCount by remember { mutableStateOf(0) }
         var totalNewPostsCount by remember { mutableStateOf(0) }
@@ -111,6 +110,7 @@ public class TimelineItemPresenterWithLazyListState(
         // Use -1 as sentinel for "not initialized" so we don't need a separate 'initialized' flag.
         val previousItemCountRef = remember { intArrayOf(-1) }
 
+        val lazyListState = lazyStaggeredGridState ?: rememberLazyStaggeredGridState()
         val isAtTheTop by remember {
             derivedStateOf {
                 lazyListState.firstVisibleItemIndex == 0 &&

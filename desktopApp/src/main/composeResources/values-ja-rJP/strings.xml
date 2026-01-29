@@ -194,6 +194,8 @@
     <string name="settings_appearance_post_action_style_stretch">ストレッチ</string>
     <string name="settings_appearance_absolute_timestamp">絶対タイムスタンプです</string>
     <string name="settings_appearance_absolute_timestamp_description">投稿に絶対タイムスタンプを表示する</string>
+    <string name="settings_appearance_show_platform_logo">プラットフォームのロゴを表示</string>
+    <string name="settings_appearance_show_platform_logo_description">投稿アイテムにソース・プラットフォームのロゴを表示する</string>
     <string name="settings_about_source_code">ソースコード</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Telegramグループに参加する</string>
@@ -281,6 +283,8 @@
     <string name="settings_storage_clear_database_description">%1$s ユーザー、 %2$s 投稿は削除されます</string>
     <string name="settings_storage_app_log">アプリログを開く</string>
     <string name="settings_storage_app_log_description">アプリのログを表示</string>
+    <string name="settings_rss_management_title">RSS管理</string>
+    <string name="settings_rss_management_description">RSSフィードの管理</string>
     <string name="copied_to_clipboard">クリップボードにコピーしました</string>
     <string name="opml_import">OPMLからインポート</string>
     <string name="opml_export">OPMLにエクスポート</string>

@@ -194,6 +194,8 @@
     <string name="settings_appearance_post_action_style_stretch">Stræk</string>
     <string name="settings_appearance_absolute_timestamp">Absolut tidsstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Vis absolutte tidsstempler på indlæg</string>
+    <string name="settings_appearance_show_platform_logo">Vis platformens logo</string>
+    <string name="settings_appearance_show_platform_logo_description">Vis kildeplatformens logo på indlæg</string>
     <string name="settings_about_source_code">Kilde kode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Tilmeld dig vores Telegram gruppe</string>
@@ -281,6 +283,8 @@
     <string name="settings_storage_clear_database_description">%1$s brugere, %2$s indlæg vil blive fjernet</string>
     <string name="settings_storage_app_log">Åbn app-log</string>
     <string name="settings_storage_app_log_description">Se app-loggen</string>
+    <string name="settings_rss_management_title">RSS Management</string>
+    <string name="settings_rss_management_description">Administrer RSS-feeds</string>
     <string name="copied_to_clipboard">Kopieret til udklipsholder</string>
     <string name="opml_import">Importer fra OPML</string>
     <string name="opml_export">Eksporter til OPML</string>

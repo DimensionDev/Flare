@@ -62,6 +62,8 @@
     <string name="settings_ai_config_tldr_description">Ota käyttöön tekoälyn yhteenveto pitkiä viestejä, saatavilla vain post että yli 500 merkkiä</string>
     <string name="settings_language_title">Kieli</string>
     <string name="settings_language_description">Vaihda sovelluksen kieli</string>
+    <string name="settings_rss_management_title">Rss Hallinta</string>
+    <string name="settings_rss_management_description">Hallitse RSS-syötteitä</string>
     <string name="status_loadmore_error_retry">Yritä Uudelleen</string>
     <string name="login_expired">Kirjautumissessio on vanhentunut</string>
     <string name="login_expired_message">Klikkaa kirjautuaksesi uudelleen</string>
@@ -170,6 +172,8 @@
     <string name="settings_appearance_full_width_post_description">Näytä viesti täydellä leveydellä</string>
     <string name="settings_appearance_absolute_timestamp">Absoluuttinen aikaleima</string>
     <string name="settings_appearance_absolute_timestamp_description">Näytä absoluuttiset aikaleimat artikkeleissa</string>
+    <string name="settings_appearance_show_platform_logo">Näytä alustan logo</string>
+    <string name="settings_appearance_show_platform_logo_description">Näytä lähteen alustan logo artikkeleissa</string>
     <string name="settings_storage_clear_image_cache">Tyhjennä kuvien välimuisti</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB kuvia poistetaan</string>
     <string name="settings_storage_clear_database">Tyhjennä välimuistin tietokanta</string>

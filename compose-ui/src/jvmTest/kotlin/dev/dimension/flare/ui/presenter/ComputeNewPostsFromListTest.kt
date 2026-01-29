@@ -48,7 +48,7 @@ class ComputeNewPostsFromListTest {
     @Test
     fun newPostsCount_decreaseOnScroll() {
         // as the user scrolls up through new posts
-        // the New Posts count will decrease
+        // the New Posts count should decrease
 
         val refreshed = (1..5).map { makeItem("new-$it") } + listOf(makeItem("orig-1"))
         val previousTopKey = refreshed.last().itemKey
@@ -89,7 +89,9 @@ class ComputeNewPostsFromListTest {
         val lastViewedIndex = 0
         val insertedPostCount = 5
         val observedFirstVisibleIndex = lastViewedIndex + insertedPostCount
+
         val derived = deriveLastRefreshIndex(observedFirstVisibleIndex, insertedPostCount)
+
         assertEquals(lastViewedIndex, derived)
     }
 
@@ -101,7 +103,9 @@ class ComputeNewPostsFromListTest {
         // return `observedFirstVisibleIndex` as a conservative, in-bounds baseline.
         val observedFirstVisibleIndex = 5
         val insertedPostCount = 500
+
         val derived = deriveLastRefreshIndex(observedFirstVisibleIndex, insertedPostCount)
+
         assertEquals(observedFirstVisibleIndex, derived)
     }
 }

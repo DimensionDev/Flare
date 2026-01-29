@@ -62,6 +62,8 @@
     <string name="settings_ai_config_tldr_description">Увімкнути підсумок ШІ для довгих постів, доступних тільки в повідомленнях, більше ніж 500 символів</string>
     <string name="settings_language_title">Мова:</string>
     <string name="settings_language_description">Змінити мову програми</string>
+    <string name="settings_rss_management_title">Управління RSS</string>
+    <string name="settings_rss_management_description">Керування RSS-каналами</string>
     <string name="status_loadmore_error_retry">Повторити спробу</string>
     <string name="login_expired">Сесію входу закрито</string>
     <string name="login_expired_message">Нажміть кнопку для входу знову</string>
@@ -170,6 +172,8 @@
     <string name="settings_appearance_full_width_post_description">Показувати допис по всій ширині</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютна часова мітка</string>
     <string name="settings_appearance_absolute_timestamp_description">Показувати абсолютні позначки часу на повідомленнях</string>
+    <string name="settings_appearance_show_platform_logo">Показати логотип платформи</string>
+    <string name="settings_appearance_show_platform_logo_description">Показувати логотип вихідної платформи на матеріалах</string>
     <string name="settings_storage_clear_image_cache">Очистити кеш зображень</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB із зображень буде видалено</string>
     <string name="settings_storage_clear_database">Очистити базу даних кешу</string>

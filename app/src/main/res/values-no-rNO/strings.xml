@@ -62,6 +62,8 @@
     <string name="settings_ai_config_tldr_description">Aktiver oppsummering av AI for lange innlegg, kun tilgjengelig i innlegg som er lengre enn 500 tegn</string>
     <string name="settings_language_title">Språk</string>
     <string name="settings_language_description">Endre språket til appen</string>
+    <string name="settings_rss_management_title">RSS administrasjon</string>
+    <string name="settings_rss_management_description">Administrer RSS-feeder</string>
     <string name="status_loadmore_error_retry">Prøv igjen</string>
     <string name="login_expired">Innloggingsøkten har utløpt</string>
     <string name="login_expired_message">Trykk for å logge inn igjen</string>
@@ -170,6 +172,8 @@
     <string name="settings_appearance_full_width_post_description">Vis innholdet i full bredde</string>
     <string name="settings_appearance_absolute_timestamp">Absolutt tidsstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Vis absolutte tidsstempler på innlegg</string>
+    <string name="settings_appearance_show_platform_logo">Vis plattformlogo</string>
+    <string name="settings_appearance_show_platform_logo_description">Vis logo for kildeplattformplattformen på innlegg</string>
     <string name="settings_storage_clear_image_cache">Tøm bildebuffer</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder vil bli fjernet</string>
     <string name="settings_storage_clear_database">Slett mellomlagerdatabase</string>

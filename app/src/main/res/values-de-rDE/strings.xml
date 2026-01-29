@@ -62,6 +62,8 @@
     <string name="settings_ai_config_tldr_description">KI Zusammenfassung für lange Beiträge aktivieren, nur verfügbar in Beiträgen die länger als 500 Zeichen sind</string>
     <string name="settings_language_title">Sprache</string>
     <string name="settings_language_description">Sprache der App ändern</string>
+    <string name="settings_rss_management_title">RSS-Verwaltung</string>
+    <string name="settings_rss_management_description">RSS-Feeds verwalten</string>
     <string name="status_loadmore_error_retry">Wiederholen</string>
     <string name="login_expired">Die Anmeldesitzung ist abgelaufen</string>
     <string name="login_expired_message">Zum erneuten Anmelden klicken</string>
@@ -170,6 +172,8 @@
     <string name="settings_appearance_full_width_post_description">Beitrag in voller Breite anzeigen</string>
     <string name="settings_appearance_absolute_timestamp">Absoluter Zeitstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Zeige absolute Zeitstempel in Beiträgen</string>
+    <string name="settings_appearance_show_platform_logo">Plattform-Logo anzeigen</string>
+    <string name="settings_appearance_show_platform_logo_description">Zeige das Quell-Plattform-Logo bei Beitragseinträgen</string>
     <string name="settings_storage_clear_image_cache">Bildercache löschen</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB an Bildern werden gelöscht</string>
     <string name="settings_storage_clear_database">Cache-Datenbank löschen</string>

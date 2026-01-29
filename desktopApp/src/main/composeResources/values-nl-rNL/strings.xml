@@ -194,6 +194,8 @@
     <string name="settings_appearance_post_action_style_stretch">Uitrekken</string>
     <string name="settings_appearance_absolute_timestamp">Absolute tijdstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Geef absolute tijdsaanduiding weer bij berichten</string>
+    <string name="settings_appearance_show_platform_logo">Toon platform logo</string>
+    <string name="settings_appearance_show_platform_logo_description">Toon het bronplatformlogo op post</string>
     <string name="settings_about_source_code">Bron code</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Deelnemen aan onze Telegram-groep</string>
@@ -281,6 +283,8 @@
     <string name="settings_storage_clear_database_description">%1$s gebruikers, %2$s berichten zullen worden verwijderd</string>
     <string name="settings_storage_app_log">Open app-logboek</string>
     <string name="settings_storage_app_log_description">Bekijk het app-logboek</string>
+    <string name="settings_rss_management_title">RSS Management</string>
+    <string name="settings_rss_management_description">RSS-feeds beheren</string>
     <string name="copied_to_clipboard">Gekopieerd naar klembord</string>
     <string name="opml_import">Importeren uit OPML</string>
     <string name="opml_export">Exporteren naar OPML</string>

@@ -194,6 +194,8 @@
     <string name="settings_appearance_post_action_style_stretch">Sträck</string>
     <string name="settings_appearance_absolute_timestamp">Absolut tidsstämpel</string>
     <string name="settings_appearance_absolute_timestamp_description">Visa absoluta tidsstämplar på inlägg</string>
+    <string name="settings_appearance_show_platform_logo">Visa plattformens logotyp</string>
+    <string name="settings_appearance_show_platform_logo_description">Visa källplattformens logotyp på postposter</string>
     <string name="settings_about_source_code">Källkod</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Gå med i vår Telegramgrupp</string>
@@ -281,6 +283,8 @@
     <string name="settings_storage_clear_database_description">%1$s användare, %2$s inlägg kommer att tas bort</string>
     <string name="settings_storage_app_log">Öppna applogg</string>
     <string name="settings_storage_app_log_description">Visa apploggen</string>
+    <string name="settings_rss_management_title">RSS-hantering</string>
+    <string name="settings_rss_management_description">Hantera RSS-flöden</string>
     <string name="copied_to_clipboard">Kopierad till urklipp</string>
     <string name="opml_import">Importera från OPML</string>
     <string name="opml_export">Exportera till OPML</string>

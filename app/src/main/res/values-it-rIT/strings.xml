@@ -62,6 +62,8 @@
     <string name="settings_ai_config_tldr_description">Abilita il riepilogo IA per i post lunghi. Disponibile solo per post con più di 500 caratteri</string>
     <string name="settings_language_title">Lingua</string>
     <string name="settings_language_description">Cambia la lingua dell\'app</string>
+    <string name="settings_rss_management_title">Gestione RSS</string>
+    <string name="settings_rss_management_description">Gestisci feed RSS</string>
     <string name="status_loadmore_error_retry">Riprova</string>
     <string name="login_expired">Sessione di accesso scaduta</string>
     <string name="login_expired_message">Clicca di nuovo per effettuare il login</string>
@@ -170,6 +172,8 @@
     <string name="settings_appearance_full_width_post_description">Mostra post a larghezza intera</string>
     <string name="settings_appearance_absolute_timestamp">Marcatura oraria assoluta</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostra timestamp assoluti sui post</string>
+    <string name="settings_appearance_show_platform_logo">Mostra logo piattaforma</string>
+    <string name="settings_appearance_show_platform_logo_description">Mostra il logo della piattaforma sorgente sugli articoli post</string>
     <string name="settings_storage_clear_image_cache">Cancella cache immagini</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB di immagini verranno rimossi</string>
     <string name="settings_storage_clear_database">Cancella cache database</string>

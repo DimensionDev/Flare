@@ -194,6 +194,8 @@
     <string name="settings_appearance_post_action_style_stretch">Allungamento</string>
     <string name="settings_appearance_absolute_timestamp">Marcatura oraria assoluta</string>
     <string name="settings_appearance_absolute_timestamp_description">Mostra timestamp assoluti sui post</string>
+    <string name="settings_appearance_show_platform_logo">Mostra logo piattaforma</string>
+    <string name="settings_appearance_show_platform_logo_description">Mostra il logo della piattaforma sorgente sugli articoli post</string>
     <string name="settings_about_source_code">Codice sorgente</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Unisciti al nostro gruppo Telegram</string>
@@ -281,6 +283,8 @@
     <string name="settings_storage_clear_database_description">%1$s utenti, %2$s messaggi saranno rimossi</string>
     <string name="settings_storage_app_log">Apri registro app</string>
     <string name="settings_storage_app_log_description">Visualizza il registro app</string>
+    <string name="settings_rss_management_title">Gestione RSS</string>
+    <string name="settings_rss_management_description">Gestisci feed RSS</string>
     <string name="copied_to_clipboard">Copiato negli appunti</string>
     <string name="opml_import">Importa da OPML</string>
     <string name="opml_export">Esporta in OPML</string>

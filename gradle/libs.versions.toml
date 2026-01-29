@@ -224,7 +224,7 @@ bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref 
 cupertino = { group = "io.github.schott12521", name = "cupertino", version.ref = "cupertino" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
-navigation3-desktop = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version = "1.0.0-alpha06" }
+navigation3-desktop = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version = "1.1.0-alpha02" }
 
 ### Server ###
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }

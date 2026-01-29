@@ -122,6 +122,14 @@ kotlin {
                 implementation(libs.prettytime)
             }
         }
+        val jvmTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.junit)
+                implementation(libs.robolectric)
+            }
+        }
         val appleMain by getting {
             dependencies {
                 implementation(libs.ktor.client.darwin)

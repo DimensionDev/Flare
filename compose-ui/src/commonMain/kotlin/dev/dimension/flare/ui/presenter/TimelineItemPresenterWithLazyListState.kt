@@ -18,6 +18,62 @@ import dev.dimension.flare.ui.model.UiTimeline
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapNotNull
 
+/**
+ * Public helper extracted from the presenter's logic to compute whether the "new posts"
+ * indicator should show and how many posts were prepended.
+ *
+ * This is a pure function (no Compose runtime) so unit tests can call the exact production
+ * algorithm without duplicating it.
+ */
+public fun computeNewPostsFromList(
+    previousFirstVisibleItemKey: String?,
+    previousItemCount: Int,
+    currentList: List<UiTimeline>,
+    isAtTheTop: Boolean,
+    overrideFirstVisibleIndex: Int? = null,
+): Triple<Boolean, Int, Set<String>> {
+    fun collectFirstKeys(
+        list: List<UiTimeline>,
+        count: Int,
+    ): Set<String> {
+        val added = mutableSetOf<String>()
+        for (i in 0 until minOf(count, list.size)) {
+            val item = list.getOrNull(i)
+            if (item != null) added.add(item.itemKey)
+        }
+        return added
+    }
+
+    val itemCount = currentList.size
+
+    if (previousFirstVisibleItemKey != null) {
+        var foundIndex = -1
+        for (i in 0 until itemCount) {
+            val item = currentList.getOrNull(i)
+            if (item != null && item.itemKey == previousFirstVisibleItemKey) {
+                foundIndex = i
+                break
+            }
+        }
+        if (foundIndex >= 0) {
+            val inserted = foundIndex
+            if (inserted > 0 && !isAtTheTop) {
+                val added = collectFirstKeys(currentList, inserted)
+                return Triple(true, inserted, added)
+            }
+            return Triple(false, 0, emptySet())
+        }
+    }
+
+    val diff = itemCount - previousItemCount
+    if (diff > 0 && !isAtTheTop) {
+        val added = collectFirstKeys(currentList, diff)
+        return Triple(true, diff, added)
+    }
+
+    return Triple(false, 0, emptySet())
+}
+
 public class TimelineItemPresenterWithLazyListState(
     private val timelineTabItem: TimelineTabItem,
     private val lazyStaggeredGridState: LazyStaggeredGridState? = null,
@@ -115,46 +171,41 @@ public class TimelineItemPresenterWithLazyListState(
 
                     val lastReadKey = previousFirstVisibleItemKey
 
-                    if (lastReadKey != null) {
-                        // If the last-read key is in the new page, the number of newly prepended items
-                        // is the number of items before that key (its index).
-                        var foundIndex = -1
-                        for (i in 0 until listState.itemCount) {
-                            val item = listState.peek(i)
-                            if (item is UiTimeline && item.itemKey == lastReadKey) {
-                                foundIndex = i
-                                break
-                            }
-                        }
+                    // Build a concrete list snapshot of UiTimeline items from the paging list to feed the helper
+                    val currentList = mutableListOf<UiTimeline>()
+                    for (i in 0 until listState.itemCount) {
+                        val item = listState.peek(i)
+                        if (item is UiTimeline) currentList.add(item)
+                    }
 
-                        if (foundIndex >= 0) {
-                            val inserted = foundIndex
-                            if (inserted > 0 && !isAtTheTop) {
-                                // collect keys for new items
-                                val added = collectFirstKeys(listState, inserted)
-                                if (added.isNotEmpty()) newItemKeys = newItemKeys + added
-                                totalNewPostsCount = inserted
-                                newPostsCount = inserted
-                                showNewToots = true
-                            } else {
-                                // full refresh or at top -> clear
-                                totalNewPostsCount = 0
-                                newPostsCount = 0
-                                newItemKeys = emptySet()
-                                showNewToots = false
-                            }
-                        }
-                    } else {
-                        // fallback: use item count diff
-                        val diff = itemCount - previousItemCountRef[0]
-                        if (diff > 0 && !isAtTheTop) {
-                            val inserted = diff
-                            val added = collectFirstKeys(listState, inserted)
-                            if (added.isNotEmpty()) newItemKeys = newItemKeys + added
+                    // Use the production helper to compute inserted/new keys
+                    val (showIndicator, inserted, addedKeys) =
+                        computeNewPostsFromList(
+                            lastReadKey,
+                            previousItemCountRef[0],
+                            currentList,
+                            isAtTheTop,
+                            overrideFirstVisibleIndex,
+                        )
+
+                    if (showIndicator) {
+                        if (inserted > 0 && !isAtTheTop) {
+                            if (addedKeys.isNotEmpty()) newItemKeys = newItemKeys + addedKeys
                             totalNewPostsCount = inserted
                             newPostsCount = inserted
                             showNewToots = true
+                        } else {
+                            // full refresh or at top -> clear
+                            totalNewPostsCount = 0
+                            newPostsCount = 0
+                            newItemKeys = emptySet()
+                            showNewToots = false
                         }
+                    } else {
+                        // No indicator -> clear preparatory state (mirrors previous behavior)
+                        totalNewPostsCount = 0
+                        newPostsCount = 0
+                        newItemKeys = emptySet()
                     }
 
                     previousItemCountRef[0] = itemCount

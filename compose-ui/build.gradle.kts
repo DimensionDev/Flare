@@ -87,6 +87,16 @@ kotlin {
                 implementation(libs.androidx.collection)
             }
         }
+        val jvmTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.junit)
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.robolectric)
+                implementation(compose("org.jetbrains.compose.ui:ui-test-junit4"))
+                implementation(project(":shared"))
+            }
+        }
         val iosMain by getting {
             dependencies {
                 api(projects.shared)

@@ -6,12 +6,7 @@
     <string name="home_tab_notifications_title">Сповіщення</string>
     <string name="home_tab_me_title">Ме</string>
     <string name="home_tab_discover_title">Відкрийте для себе</string>
-    <plurals name="home_timeline_new_toots">
-        <item quantity="one">%d Нове повідомлення</item>
-        <item quantity="few">%d Нові повідомлення</item>
-        <item quantity="many">%d Нових повідомлень</item>
-        <item quantity="other">%d Нові повідомлення</item>
-    </plurals>
+    <string name="home_timeline_new_toots">Нові повідомлення</string>
     <string name="notification_tab_all_title">Всі</string>
     <string name="notification_tab_mentions_title">Згадки</string>
     <string name="notification_tab_comments_title">Коментарі</string>

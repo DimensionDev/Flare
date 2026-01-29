@@ -6,9 +6,7 @@
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">自分</string>
     <string name="home_tab_discover_title">見つける</string>
-    <plurals name="home_timeline_new_toots">
-        <item quantity="other">%d 新しい投稿</item>
-    </plurals>
+    <string name="home_timeline_new_toots">新しい投稿</string>
     <string name="notification_tab_all_title">全て</string>
     <string name="notification_tab_mentions_title">メンション</string>
     <string name="notification_tab_comments_title">コメント</string>

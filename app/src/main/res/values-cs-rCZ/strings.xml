@@ -6,9 +6,7 @@
     <string name="home_tab_notifications_title">Oznámení</string>
     <string name="home_tab_me_title">Já</string>
     <string name="home_tab_discover_title">Objevte</string>
-    <plurals name="home_timeline_new_toots">
-        <item quantity="other">%d Nové příspěvky</item>
-    </plurals>
+    <string name="home_timeline_new_toots">Nové příspěvky</string>
     <string name="notification_tab_all_title">Vše</string>
     <string name="notification_tab_mentions_title">Zmiňuje</string>
     <string name="notification_tab_comments_title">Komentáře</string>

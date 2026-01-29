@@ -6,10 +6,7 @@
     <string name="home_tab_notifications_title">Varsler</string>
     <string name="home_tab_me_title">Meg</string>
     <string name="home_tab_discover_title">Oppdag</string>
-    <plurals name="home_timeline_new_toots">
-        <item quantity="one">%d Nytt innlegg</item>
-        <item quantity="other">%d Nye innlegg</item>
-    </plurals>
+    <string name="home_timeline_new_toots">Nye innlegg</string>
     <string name="notification_tab_all_title">Alle</string>
     <string name="notification_tab_mentions_title">Omtalelser</string>
     <string name="notification_tab_comments_title">Kommentarer</string>

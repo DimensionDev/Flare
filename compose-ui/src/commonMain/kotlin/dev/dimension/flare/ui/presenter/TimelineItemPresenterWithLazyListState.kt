@@ -117,13 +117,20 @@ public class TimelineItemPresenterWithLazyListState(
                     lazyListState.firstVisibleItemScrollOffset == 0
             }
         }
-        LaunchedEffect(isAtTheTop, showNewToots) {
+
+        LaunchedEffect(isAtTheTop) {
             if (isAtTheTop) {
                 showNewToots = false
+
+                val listState = currentState.listState
+                if (listState is PagingState.Success) {
+                    val top = listState.peek(0)
+                    previousFirstVisibleItemKey = top?.itemKey ?: previousFirstVisibleItemKey
+                }
             }
         }
 
-        // Track the key of the item currently at the top of the viewport so we can locate it after a refresh.
+        // track key currently at top of viewport while user scrolls
         LaunchedEffect(Unit) {
             snapshotFlow { lazyListState.firstVisibleItemIndex }
                 .distinctUntilChanged()
@@ -150,6 +157,11 @@ public class TimelineItemPresenterWithLazyListState(
                     if (previousItemCountRef[0] == -1) {
                         // first emission: capture baseline item count and optional override first-visible key
                         previousItemCountRef[0] = itemCount
+                        // initialize top-key baseline using current viewport index
+                        // so that later prepend detection has a valid anchor
+                        val currentIndex = lazyListState.firstVisibleItemIndex.takeIf { it >= 0 } ?: 0
+                        val topKey = listState.peek(currentIndex)?.itemKey ?: listState.peek(0)?.itemKey
+                        previousFirstVisibleItemKey = topKey ?: previousFirstVisibleItemKey
                         return@collect
                     }
 
@@ -196,17 +208,6 @@ public class TimelineItemPresenterWithLazyListState(
                 }
         }
 
-        // If the user is at the top, record the current top item's key as the last-read key.
-        LaunchedEffect(isAtTheTop) {
-            if (isAtTheTop) {
-                val listState = currentState.listState
-                if (listState is PagingState.Success) {
-                    val top = listState.peek(0)
-                    previousFirstVisibleItemKey = top?.itemKey ?: previousFirstVisibleItemKey
-                }
-            }
-        }
-
         LaunchedEffect(showNewToots) {
             if (!showNewToots) {
                 totalNewPostsCount = 0
@@ -241,6 +242,7 @@ public class TimelineItemPresenterWithLazyListState(
                     }
                 }
         }
+
         return object : State, TimelineItemPresenter.State by state {
             override val showNewToots = showNewToots
             override val newPostsCount = newPostsCount

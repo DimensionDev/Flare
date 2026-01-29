@@ -62,6 +62,8 @@
     <string name="settings_ai_config_tldr_description">Aktivera AI-sammanfattning för långa inlägg, endast tillgängligt i inlägg som är längre än 500 tecken</string>
     <string name="settings_language_title">Språk</string>
     <string name="settings_language_description">Ändra språket i appen</string>
+    <string name="settings_rss_management_title">RSS-hantering</string>
+    <string name="settings_rss_management_description">Hantera RSS-flöden</string>
     <string name="status_loadmore_error_retry">Försök igen</string>
     <string name="login_expired">Sessionen för inloggning har gått ut</string>
     <string name="login_expired_message">Klicka för att logga in igen</string>
@@ -170,6 +172,8 @@
     <string name="settings_appearance_full_width_post_description">Visa inlägget i full bredd</string>
     <string name="settings_appearance_absolute_timestamp">Absolut tidsstämpel</string>
     <string name="settings_appearance_absolute_timestamp_description">Visa absoluta tidsstämplar på inlägg</string>
+    <string name="settings_appearance_show_platform_logo">Visa plattformens logotyp</string>
+    <string name="settings_appearance_show_platform_logo_description">Visa källplattformens logotyp på postposter</string>
     <string name="settings_storage_clear_image_cache">Rensa bildcache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder kommer att tas bort</string>
     <string name="settings_storage_clear_database">Rensa cache-databas</string>
@@ -332,7 +336,13 @@
     <string name="import_confirmation_message">Detta kommer att importera data från filen. Befintliga poster med matchande ID kommer att ersättas. Vill du fortsätta?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Felrättelser och prestandaförbättringar.</li>
+                <li>Anpassad grupp av blandad tidslinje</li>
+                <li>Dataexport och import</li>
+                <li>Flerkontosökning</li>
+                <li>Absolut datum och tid i inlägg</li>
+                <li>Lägg till plattformsmärke i inlägg</li>
+                <li>RSS-hantering har flyttats till inställningarna</li>
+                <li>Felrättningar och prestandaförbättringar.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Lägg till grupp</string>

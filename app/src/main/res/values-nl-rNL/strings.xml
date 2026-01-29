@@ -62,6 +62,8 @@
     <string name="settings_ai_config_tldr_description">AI samenvatting inschakelen voor lange berichten, alleen beschikbaar in post van meer dan 500 tekens</string>
     <string name="settings_language_title">Taal</string>
     <string name="settings_language_description">De taal van de app wijzigen</string>
+    <string name="settings_rss_management_title">RSS Management</string>
+    <string name="settings_rss_management_description">RSS-feeds beheren</string>
     <string name="status_loadmore_error_retry">Opnieuw</string>
     <string name="login_expired">Inlogsessie verlopen</string>
     <string name="login_expired_message">Klik om opnieuw in te loggen</string>
@@ -170,6 +172,8 @@
     <string name="settings_appearance_full_width_post_description">Toon bericht in volledige breedte</string>
     <string name="settings_appearance_absolute_timestamp">Absolute tijdstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Geef absolute tijdsaanduiding weer bij berichten</string>
+    <string name="settings_appearance_show_platform_logo">Toon platform logo</string>
+    <string name="settings_appearance_show_platform_logo_description">Toon het bronplatformlogo op post</string>
     <string name="settings_storage_clear_image_cache">Afbeeldingencache legen</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB van afbeeldingen zal worden verwijderd</string>
     <string name="settings_storage_clear_database">Cache database wissen</string>
@@ -330,11 +334,6 @@
     <string name="import_error">Gegevens importeren mislukt</string>
     <string name="import_confirmation_title">Import bevestigen</string>
     <string name="import_confirmation_message">Dit zal gegevens uit het bestand importeren. Bestaande records met bijpassende IDs zullen worden vervangen. Wilt u doorgaan?</string>
-    <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
-            <ul>
-                <li>Bugs fixes en prestatieverbeteringen.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">Groep toevoegen</string>
     <string name="tab_settings_add_tab">Tabblad toevoegen</string>
     <string name="tab_settings_edit_group">Groep bewerken</string>

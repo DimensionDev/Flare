@@ -194,6 +194,8 @@
     <string name="settings_appearance_post_action_style_stretch">Розтягнути</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютна часова мітка</string>
     <string name="settings_appearance_absolute_timestamp_description">Показувати абсолютні позначки часу на повідомленнях</string>
+    <string name="settings_appearance_show_platform_logo">Показати логотип платформи</string>
+    <string name="settings_appearance_show_platform_logo_description">Показувати логотип вихідної платформи на матеріалах</string>
     <string name="settings_about_source_code">Початковий код</string>
     <string name="settings_about_telegram">Телеграма</string>
     <string name="settings_about_telegram_description">Приєднатися до нашої групи в Telegram</string>
@@ -280,6 +282,8 @@
     <string name="settings_storage_clear_database_description">%1$s користувачів, повідомлення з %2$s буде видалено</string>
     <string name="settings_storage_app_log">Відкрити журнал додатка</string>
     <string name="settings_storage_app_log_description">Переглянути журнал програми</string>
+    <string name="settings_rss_management_title">Управління RSS</string>
+    <string name="settings_rss_management_description">Керування RSS-каналами</string>
     <string name="copied_to_clipboard">Скопійовано до буферу обміну</string>
     <string name="opml_import">Імпорт з OPML</string>
     <string name="opml_export">Експорт в OPML</string>

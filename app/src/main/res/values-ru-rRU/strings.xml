@@ -62,6 +62,8 @@
     <string name="settings_ai_config_tldr_description">Включить пересказ для длинных текстовых записей - доступно только для постов длиной более 500 символов</string>
     <string name="settings_language_title">Язык</string>
     <string name="settings_language_description">Изменить язык приложения</string>
+    <string name="settings_rss_management_title">Управление RSS</string>
+    <string name="settings_rss_management_description">Управление RSS-каналами</string>
     <string name="status_loadmore_error_retry">Повторить</string>
     <string name="login_expired">Сессия входа истекла</string>
     <string name="login_expired_message">Нажмите, чтобы войти снова</string>
@@ -170,6 +172,8 @@
     <string name="settings_appearance_full_width_post_description">Показать записи на всю ширину карточки</string>
     <string name="settings_appearance_absolute_timestamp">Абсолютная метка времени</string>
     <string name="settings_appearance_absolute_timestamp_description">Показывать абсолютную метку времени на записях</string>
+    <string name="settings_appearance_show_platform_logo">Показать логотип платформы</string>
+    <string name="settings_appearance_show_platform_logo_description">Показывать исходный логотип платформы на позициях</string>
     <string name="settings_storage_clear_image_cache">Очистить кэш изображений</string>
     <string name="settings_storage_clear_image_cache_description">%1$s МБ изображений будет удалено</string>
     <string name="settings_storage_clear_database">Очистить базу данных кэша</string>
@@ -330,11 +334,6 @@
     <string name="import_error">Не удалось импортировать данные</string>
     <string name="import_confirmation_title">Подтвердить импорт</string>
     <string name="import_confirmation_message">Это импортирует данные из файла. Существующие записи с соответствующими идентификаторами будут заменены. Вы хотите продолжить?</string>
-    <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
-            <ul>
-                <li>Исправления ошибок и улучшения производительности.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">Добавить группу</string>
     <string name="tab_settings_add_tab">Добавить вкладку</string>
     <string name="tab_settings_edit_group">Изменить группу</string>

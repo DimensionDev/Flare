@@ -194,6 +194,8 @@
     <string name="settings_appearance_post_action_style_stretch">تمدد</string>
     <string name="settings_appearance_absolute_timestamp">الطابع الزمني المطلق</string>
     <string name="settings_appearance_absolute_timestamp_description">عرض علامات الوقت المطلقة على المشاركات</string>
+    <string name="settings_appearance_show_platform_logo">إظهار شعار المنصة</string>
+    <string name="settings_appearance_show_platform_logo_description">إظهار شعار المنصة المصدر على عناصر النشر</string>
     <string name="settings_about_source_code">الكود المصدري</string>
     <string name="settings_about_telegram">تيليجرام</string>
     <string name="settings_about_telegram_description">انضم إلى مجموعة تيليجرام</string>
@@ -281,6 +283,8 @@
     <string name="settings_storage_clear_database_description">%1$s مستخدمين ، سيتم إزالة مشاركات %2$s</string>
     <string name="settings_storage_app_log">فتح سجل التطبيق</string>
     <string name="settings_storage_app_log_description">عرض سجل التطبيقات</string>
+    <string name="settings_rss_management_title">إدارة RSS</string>
+    <string name="settings_rss_management_description">إدارة تغذية RSS</string>
     <string name="copied_to_clipboard">نسخ إلى الحافظة</string>
     <string name="opml_import">استيراد من OPML</string>
     <string name="opml_export">تصدير إلى OPML</string>

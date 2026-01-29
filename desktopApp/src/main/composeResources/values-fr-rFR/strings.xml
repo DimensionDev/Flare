@@ -194,6 +194,8 @@
     <string name="settings_appearance_post_action_style_stretch">Étirer</string>
     <string name="settings_appearance_absolute_timestamp">Horodatage absolu</string>
     <string name="settings_appearance_absolute_timestamp_description">Afficher les horodatages absolus sur les publications</string>
+    <string name="settings_appearance_show_platform_logo">Afficher le logo de la plateforme</string>
+    <string name="settings_appearance_show_platform_logo_description">Afficher le logo de la plateforme source sur les éléments de publication</string>
     <string name="settings_about_source_code">Code source</string>
     <string name="settings_about_telegram">Télégramme</string>
     <string name="settings_about_telegram_description">Rejoignez notre groupe Telegram</string>
@@ -281,6 +283,8 @@
     <string name="settings_storage_clear_database_description">Les utilisateurs %1$s , les messages %2$s seront supprimés</string>
     <string name="settings_storage_app_log">Ouvrir le journal de l\'application</string>
     <string name="settings_storage_app_log_description">Voir le journal des applications</string>
+    <string name="settings_rss_management_title">Gestion des flux RSS</string>
+    <string name="settings_rss_management_description">Gérer les flux RSS</string>
     <string name="copied_to_clipboard">Copié dans le presse-papiers</string>
     <string name="opml_import">Importer depuis OPML</string>
     <string name="opml_export">Exporter vers OPML</string>

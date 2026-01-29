@@ -62,6 +62,8 @@
     <string name="settings_ai_config_tldr_description">Activează sumarizarea AI pentru postările lungi, disponibile doar în postarea care depășește 500 de caractere</string>
     <string name="settings_language_title">Limba</string>
     <string name="settings_language_description">Schimbă limba aplicației</string>
+    <string name="settings_rss_management_title">Administrare RSS</string>
+    <string name="settings_rss_management_description">Gestionare fluxuri RSS</string>
     <string name="status_loadmore_error_retry">Reîncercați</string>
     <string name="login_expired">Sesiunea de autentificare a expirat</string>
     <string name="login_expired_message">Faceți clic pentru a vă reconecta</string>
@@ -170,6 +172,8 @@
     <string name="settings_appearance_full_width_post_description">Arată postarea în lăţime completă</string>
     <string name="settings_appearance_absolute_timestamp">Marcaj temporal absolut</string>
     <string name="settings_appearance_absolute_timestamp_description">Afişează marcajul de timp absolut pe postări</string>
+    <string name="settings_appearance_show_platform_logo">Arată logo-ul platformei</string>
+    <string name="settings_appearance_show_platform_logo_description">Arată logo-ul platformei sursă la elementele postării</string>
     <string name="settings_storage_clear_image_cache">Golire cache imagine</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB de imagini vor fi eliminate</string>
     <string name="settings_storage_clear_database">Goliţi baza de date cache</string>
@@ -330,11 +334,6 @@
     <string name="import_error">Importarea datelor a eșuat</string>
     <string name="import_confirmation_title">Confirmare import</string>
     <string name="import_confirmation_message">Acest lucru va importa date din fișier. Înregistrările existente cu ID-uri de potrivire vor fi înlocuite. Doriți să continuați?</string>
-    <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
-            <ul>
-                <li>Remedieri ale erorilor şi îmbunătăţiri de performanţă.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">Adaugă grup</string>
     <string name="tab_settings_add_tab">Adaugă filă</string>
     <string name="tab_settings_edit_group">Editează grup</string>

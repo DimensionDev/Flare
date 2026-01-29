@@ -19,11 +19,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapNotNull
 
 /**
- * Public helper extracted from the presenter's logic to compute whether the "new posts"
- * indicator should show and how many posts were prepended.
- *
- * This is a pure function (no Compose runtime) so unit tests can call the exact production
- * algorithm without duplicating it.
+ * public helper to compute whether the "new posts" indicator should show
+ * and how many posts were prepended
  */
 public fun computeNewPostsFromList(
     previousFirstVisibleItemKey: String?,
@@ -32,7 +29,10 @@ public fun computeNewPostsFromList(
     isAtTheTop: Boolean,
 ): Triple<Boolean, Int, Set<String>> {
     // Collect the first 'count' keys from the list (currentList is a list of UiTimeline so no null checks needed).
-    fun collectFirstKeys(list: List<UiTimeline>, count: Int): Set<String> {
+    fun collectFirstKeys(
+        list: List<UiTimeline>,
+        count: Int,
+    ): Set<String> {
         val limit = minOf(count, list.size)
         val added = LinkedHashSet<String>(limit)
         for (i in 0 until limit) {
@@ -45,13 +45,11 @@ public fun computeNewPostsFromList(
 
     if (previousFirstVisibleItemKey != null) {
         val foundIndex = currentList.indexOfFirst { it.itemKey == previousFirstVisibleItemKey }
-        if (foundIndex >= 0) {
-            val inserted = foundIndex
-            if (inserted > 0 && !isAtTheTop) {
-                val added = collectFirstKeys(currentList, inserted)
-                return Triple(true, inserted, added)
-            }
+        if (foundIndex == 0) {
             return Triple(false, 0, emptySet())
+        } else if (foundIndex > 0 && !isAtTheTop) {
+            val added = collectFirstKeys(currentList, foundIndex)
+            return Triple(true, foundIndex, added)
         }
     }
 
@@ -62,6 +60,20 @@ public fun computeNewPostsFromList(
     }
 
     return Triple(false, 0, emptySet())
+}
+
+/**
+ * Determine a "last refresh" index from an observed first-visible index and inserted items count.
+ * If the UI has already jumped to the top (observedFirstVisibleIndex == lastViewedIndex + insertedPostCount),
+ * subtracting `insertedPostCount` recovers the previous last-viewed index.
+ * If that would be negative, fall back to observedFirstVisibleIndex.
+ */
+public fun deriveLastRefreshIndex(
+    observedFirstVisibleIndex: Int,
+    insertedPostCount: Int,
+): Int {
+    val candidate = observedFirstVisibleIndex - insertedPostCount
+    return if (candidate >= 0) candidate else observedFirstVisibleIndex
 }
 
 public class TimelineItemPresenterWithLazyListState(
@@ -149,8 +161,8 @@ public class TimelineItemPresenterWithLazyListState(
                         if (item is UiTimeline) currentList.add(item)
                     }
 
-                    // Use the production helper to compute inserted/new keys
-                    val (showIndicator, inserted, _) =
+                    // compute insertedPostCount/new keys
+                    val (showIndicator, insertedPostCount, _) =
                         computeNewPostsFromList(
                             lastReadKey,
                             previousItemCountRef[0],
@@ -159,11 +171,11 @@ public class TimelineItemPresenterWithLazyListState(
                         )
 
                     if (showIndicator) {
-                        if (inserted > 0 && !isAtTheTop) {
-                            // Record the number of new items and the index baseline (the UI index before it moved).
-                            totalNewPostsCount = inserted
-                            newPostsCount = inserted
-                            lastRefreshIndex = lazyListState.firstVisibleItemIndex
+                        if (insertedPostCount > 0 && !isAtTheTop) {
+                            // Record the number of new items and compute the pre-refresh UI index
+                            totalNewPostsCount = insertedPostCount
+                            newPostsCount = insertedPostCount
+                            lastRefreshIndex = deriveLastRefreshIndex(lazyListState.firstVisibleItemIndex, insertedPostCount)
                             showNewToots = true
                         } else {
                             // full refresh or at top -> clear
@@ -202,7 +214,7 @@ public class TimelineItemPresenterWithLazyListState(
             }
         }
 
-        // Simplified: recompute newPostsCount from the current firstVisibleIndex and the lastRefreshIndex
+        // recompute newPostsCount from the current firstVisibleIndex and the lastRefreshIndex
         LaunchedEffect(Unit) {
             snapshotFlow { lazyListState.firstVisibleItemIndex }
                 .distinctUntilChanged()
@@ -218,11 +230,12 @@ public class TimelineItemPresenterWithLazyListState(
                     if (firstVisibleIndex > lr) {
                         val calc = firstVisibleIndex - lr
                         // If we already showed a count, only decrease it (never increase). Also don't exceed totalNewPostsCount.
-                        newPostsCount = if (newPostsCount > 0) {
-                            minOf(newPostsCount, minOf(calc, totalNewPostsCount))
-                        } else {
-                            minOf(calc, totalNewPostsCount)
-                        }
+                        newPostsCount =
+                            if (newPostsCount > 0) {
+                                minOf(newPostsCount, minOf(calc, totalNewPostsCount))
+                            } else {
+                                minOf(calc, totalNewPostsCount)
+                            }
                         if (newPostsCount <= 0) showNewToots = false
                     }
                 }

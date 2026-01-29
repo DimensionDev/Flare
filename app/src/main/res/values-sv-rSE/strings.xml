@@ -6,7 +6,9 @@
     <string name="home_tab_notifications_title">Aviseringar</string>
     <string name="home_tab_me_title">Jag</string>
     <string name="home_tab_discover_title">Upptäck</string>
-    <string name="home_timeline_new_toots">Nya inlägg</string>
+    <plurals name="home_timeline_new_toots">
+        <item quantity="other">%d Nya inlägg</item>
+    </plurals>
     <string name="notification_tab_all_title">Alla</string>
     <string name="notification_tab_mentions_title">Omnämningar</string>
     <string name="notification_tab_comments_title">Kommentarer</string>

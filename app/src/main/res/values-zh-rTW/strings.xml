@@ -6,7 +6,9 @@
     <string name="home_tab_notifications_title">通知</string>
     <string name="home_tab_me_title">我</string>
     <string name="home_tab_discover_title">探索</string>
-    <string name="home_timeline_new_toots">新貼文</string>
+    <plurals name="home_timeline_new_toots">
+        <item quantity="other">%d 新貼文</item>
+    </plurals>
     <string name="notification_tab_all_title">所有</string>
     <string name="notification_tab_mentions_title">提及</string>
     <string name="notification_tab_comments_title">評論</string>

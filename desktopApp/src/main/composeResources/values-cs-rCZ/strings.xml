@@ -194,6 +194,8 @@
     <string name="settings_appearance_post_action_style_stretch">Roztáhnout</string>
     <string name="settings_appearance_absolute_timestamp">Absolutní časové razítko</string>
     <string name="settings_appearance_absolute_timestamp_description">Zobrazit absolutní časové značky na příspěvcích</string>
+    <string name="settings_appearance_show_platform_logo">Zobrazit logo platformy</string>
+    <string name="settings_appearance_show_platform_logo_description">Zobrazit logo zdrojové platformy u položek příspěvku</string>
     <string name="settings_about_source_code">Zdrojový kód</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Připojte se k naší skupině Telegram</string>
@@ -281,6 +283,8 @@
     <string name="settings_storage_clear_database_description">%1$s uživatelé, %2$s příspěvky budou odstraněny</string>
     <string name="settings_storage_app_log">Otevřít protokol aplikace</string>
     <string name="settings_storage_app_log_description">Zobrazit protokol aplikace</string>
+    <string name="settings_rss_management_title">Správa RSS</string>
+    <string name="settings_rss_management_description">Spravovat RSS kanály</string>
     <string name="copied_to_clipboard">Zkopírováno do schránky</string>
     <string name="opml_import">Importovat z OPML</string>
     <string name="opml_export">Exportovat do OPML</string>

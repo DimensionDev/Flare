@@ -194,6 +194,8 @@
     <string name="settings_appearance_post_action_style_stretch">Întindere</string>
     <string name="settings_appearance_absolute_timestamp">Marcaj temporal absolut</string>
     <string name="settings_appearance_absolute_timestamp_description">Afişează marcajul de timp absolut pe postări</string>
+    <string name="settings_appearance_show_platform_logo">Arată logo-ul platformei</string>
+    <string name="settings_appearance_show_platform_logo_description">Arată logo-ul platformei sursă la elementele postării</string>
     <string name="settings_about_source_code">Cod sursă</string>
     <string name="settings_about_telegram">Telegramă</string>
     <string name="settings_about_telegram_description">Alătură-te grupului nostru de telegramă</string>
@@ -281,6 +283,8 @@
     <string name="settings_storage_clear_database_description">%1$s utilizatori, postările %2$s vor fi eliminate</string>
     <string name="settings_storage_app_log">Deschide jurnalul aplicației</string>
     <string name="settings_storage_app_log_description">Vezi jurnalul aplicațiilor</string>
+    <string name="settings_rss_management_title">Administrare RSS</string>
+    <string name="settings_rss_management_description">Gestionare fluxuri RSS</string>
     <string name="copied_to_clipboard">Copiat în clipboard</string>
     <string name="opml_import">Importă din OPML</string>
     <string name="opml_export">Exportă în OPML</string>

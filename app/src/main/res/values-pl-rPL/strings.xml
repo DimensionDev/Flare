@@ -62,6 +62,8 @@
     <string name="settings_ai_config_tldr_description">Włącz podsumowanie AI dla długich postów, dostępne tylko w postach dłuższych niż 500 znaków</string>
     <string name="settings_language_title">Język</string>
     <string name="settings_language_description">Zmień język aplikacji</string>
+    <string name="settings_rss_management_title">Zarządzanie RSS</string>
+    <string name="settings_rss_management_description">Zarządzaj kanałami RSS</string>
     <string name="status_loadmore_error_retry">Ponów próbę</string>
     <string name="login_expired">Sesja logowania wygasła</string>
     <string name="login_expired_message">Kliknij, aby zalogować się ponownie</string>
@@ -170,6 +172,8 @@
     <string name="settings_appearance_full_width_post_description">Pokaż post o pełnej szerokości</string>
     <string name="settings_appearance_absolute_timestamp">Bezwzględny znacznik czasu</string>
     <string name="settings_appearance_absolute_timestamp_description">Wyświetlaj bezwzględne znaczniki czasu na postach</string>
+    <string name="settings_appearance_show_platform_logo">Pokaż logo platformy</string>
+    <string name="settings_appearance_show_platform_logo_description">Pokaż logo platformy źródłowej na elementach wiadomości</string>
     <string name="settings_storage_clear_image_cache">Usuń pamięć podręczną obrazów</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB obrazów zostanie usunięte</string>
     <string name="settings_storage_clear_database">Wyczyść bazę pamięci podręcznej</string>
@@ -332,6 +336,12 @@
     <string name="import_confirmation_message">Spowoduje to zaimportowanie danych z pliku. Istniejące rekordy z pasującymi identyfikatorami zostaną zastąpione. Czy chcesz kontynuować?</string>
     <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
+                <li>Niestandardowa grupa mieszanych osi czasu</li>
+                <li>Eksport i import danych</li>
+                <li>Wyszukiwanie wielokont</li>
+                <li>Bezwzględna data i czas w postach</li>
+                <li>Dodaj odznakę platformy w postach</li>
+                <li>Zarządzanie RSS zostało przeniesione do ustawień</li>
                 <li>Poprawki błędów i ulepszenia wydajności.</li>
             </ul>
         ]]></string>

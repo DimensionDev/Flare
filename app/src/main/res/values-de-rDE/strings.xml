@@ -62,6 +62,8 @@
     <string name="settings_ai_config_tldr_description">KI Zusammenfassung für lange Beiträge aktivieren, nur verfügbar in Beiträgen die länger als 500 Zeichen sind</string>
     <string name="settings_language_title">Sprache</string>
     <string name="settings_language_description">Sprache der App ändern</string>
+    <string name="settings_rss_management_title">RSS-Verwaltung</string>
+    <string name="settings_rss_management_description">RSS-Feeds verwalten</string>
     <string name="status_loadmore_error_retry">Wiederholen</string>
     <string name="login_expired">Die Anmeldesitzung ist abgelaufen</string>
     <string name="login_expired_message">Zum erneuten Anmelden klicken</string>
@@ -170,6 +172,8 @@
     <string name="settings_appearance_full_width_post_description">Beitrag in voller Breite anzeigen</string>
     <string name="settings_appearance_absolute_timestamp">Absoluter Zeitstempel</string>
     <string name="settings_appearance_absolute_timestamp_description">Zeige absolute Zeitstempel in Beiträgen</string>
+    <string name="settings_appearance_show_platform_logo">Plattform-Logo anzeigen</string>
+    <string name="settings_appearance_show_platform_logo_description">Zeige das Quell-Plattform-Logo bei Beitragseinträgen</string>
     <string name="settings_storage_clear_image_cache">Bildercache löschen</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB an Bildern werden gelöscht</string>
     <string name="settings_storage_clear_database">Cache-Datenbank löschen</string>
@@ -332,7 +336,16 @@
     <string name="import_confirmation_message">Dies wird Daten aus der Datei importieren. Vorhandene Datensätze mit passenden IDs werden ersetzt. Möchten Sie fortfahren?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
+                <li>Benutzerdefinierte Gruppe der gemischten Zeitleiste</li>
+                
+                <li>Datenexport und Import</li>
+                
+                <li>Mehrfachkonten-Suche</li>
+                <li>Absolute Datum und Zeit in Beiträgen</li>
+                <li>Plattform-Abzeichen in Beiträgen</li>
+                
+                <li>RSS-Verwaltung wurde in die Einstellungen</li>
+                <li>Fehlerbehebungen und Leistungsverbesserungen verschoben.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Neue Gruppe</string>

@@ -28,7 +28,7 @@ Flare is an open-source social client that merges your feeds from Mastodon, Miss
 
 ## Roadmap
 Here're some features we're planning to implement in the future.
- - [ ] Grouped Mixed timeline
+ - [x] Grouped Mixed timeline
  - [ ] Showing instance's announcement
  - [ ] Crossposting for repost
  - [ ] Auto thread

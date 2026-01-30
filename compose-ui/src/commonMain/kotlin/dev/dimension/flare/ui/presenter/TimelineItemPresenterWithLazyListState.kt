@@ -165,12 +165,13 @@ public class TimelineItemPresenterWithLazyListState(
                     }
 
                     // compute whether we should show the indicator and how many items were inserted
-                    val (showIndicator, insertedPostCount, _) = computeNewPostsFromList(
-                        previousFirstVisibleItemKey,
-                        previousItemCountRef[0],
-                        currentList,
-                        atTop,
-                    )
+                    val (showIndicator, insertedPostCount, _) =
+                        computeNewPostsFromList(
+                            previousFirstVisibleItemKey,
+                            previousItemCountRef[0],
+                            currentList,
+                            atTop,
+                        )
 
                     if (showIndicator) {
                         if (insertedPostCount > 0 && !atTop) {
@@ -196,11 +197,12 @@ public class TimelineItemPresenterWithLazyListState(
                         val lr = lastRefreshIndex
                         if (lr != null && snapshot.firstVisibleIndex > lr) {
                             val calc = snapshot.firstVisibleIndex - lr
-                            newPostsCount = if (newPostsCount > 0) {
-                                minOf(newPostsCount, minOf(calc, totalNewPostsCount))
-                            } else {
-                                minOf(calc, totalNewPostsCount)
-                            }
+                            newPostsCount =
+                                if (newPostsCount > 0) {
+                                    minOf(newPostsCount, minOf(calc, totalNewPostsCount))
+                                } else {
+                                    minOf(calc, totalNewPostsCount)
+                                }
                             if (newPostsCount <= 0) showNewToots = false
                         }
                     }
@@ -225,6 +227,10 @@ public class TimelineItemPresenterWithLazyListState(
 
             override fun onNewTootsShown() {
                 showNewToots = false
+                // Also clear numeric counts and reset tracking so stale numbers aren't left in state
+                newPostsCount = 0
+                totalNewPostsCount = 0
+                lastRefreshIndex = null
             }
         }
     }

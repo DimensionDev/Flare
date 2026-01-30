@@ -7,9 +7,11 @@ import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.nostr.NostrDataSource
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import kotlinx.serialization.SerialName
@@ -52,21 +54,23 @@ public sealed class UiAccount {
             }
         }
 
-        override val dataSource by lazy {
-            when (forkType) {
-                Credential.ForkType.Mastodon ->
-                    MastodonDataSource(
-                        accountKey = accountKey,
-                        instance = instance,
-                    )
+        override val dataSource: AuthenticatedMicroblogDataSource
+            get() =
+                AccountRepository.dataSourceCache.getOrPut(accountKey) {
+                    when (forkType) {
+                        Credential.ForkType.Mastodon ->
+                            MastodonDataSource(
+                                accountKey = accountKey,
+                                instance = instance,
+                            )
 
-                Credential.ForkType.Pleroma ->
-                    PleromaDataSource(
-                        accountKey = accountKey,
-                        instance = instance,
-                    )
-            }
-        }
+                        Credential.ForkType.Pleroma ->
+                            PleromaDataSource(
+                                accountKey = accountKey,
+                                instance = instance,
+                            )
+                    }
+                }
     }
 
     @Immutable
@@ -88,9 +92,11 @@ public sealed class UiAccount {
             val nodeType: String? = null,
         ) : UiAccount.Credential
 
-        override val dataSource by lazy {
-            MisskeyDataSource(accountKey = accountKey, host = host)
-        }
+        override val dataSource: AuthenticatedMicroblogDataSource
+            get() =
+                AccountRepository.dataSourceCache.getOrPut(accountKey) {
+                    MisskeyDataSource(accountKey = accountKey, host = host)
+                }
     }
 
     @Immutable
@@ -149,9 +155,11 @@ public sealed class UiAccount {
             }
         }
 
-        override val dataSource by lazy {
-            BlueskyDataSource(accountKey = accountKey)
-        }
+        override val dataSource: AuthenticatedMicroblogDataSource
+            get() =
+                AccountRepository.dataSourceCache.getOrPut(accountKey) {
+                    BlueskyDataSource(accountKey = accountKey)
+                }
     }
 
     @Immutable
@@ -168,9 +176,11 @@ public sealed class UiAccount {
             val chocolate: String,
         ) : UiAccount.Credential
 
-        override val dataSource by lazy {
-            XQTDataSource(accountKey = accountKey)
-        }
+        override val dataSource: AuthenticatedMicroblogDataSource
+            get() =
+                AccountRepository.dataSourceCache.getOrPut(accountKey) {
+                    XQTDataSource(accountKey = accountKey)
+                }
     }
 
     @Immutable
@@ -187,9 +197,32 @@ public sealed class UiAccount {
             val chocolate: String,
         ) : UiAccount.Credential
 
-        override val dataSource by lazy {
-            VVODataSource(accountKey = accountKey)
-        }
+        override val dataSource: AuthenticatedMicroblogDataSource
+            get() =
+                AccountRepository.dataSourceCache.getOrPut(accountKey) {
+                    VVODataSource(accountKey = accountKey)
+                }
+    }
+
+    @Immutable
+    internal data class Nostr(
+        override val accountKey: MicroBlogKey,
+    ) : UiAccount() {
+        override val platformType: PlatformType
+            get() = PlatformType.Nostr
+
+        @Immutable
+        @Serializable
+        @SerialName("NostrCredential")
+        data class Credential(
+            val privateKey: String,
+        ) : UiAccount.Credential
+
+        override val dataSource: AuthenticatedMicroblogDataSource
+            get() =
+                AccountRepository.dataSourceCache.getOrPut(accountKey) {
+                    NostrDataSource(accountKey = accountKey)
+                }
     }
 
     internal companion object {
@@ -228,6 +261,12 @@ public sealed class UiAccount {
 
                 PlatformType.VVo -> {
                     VVo(
+                        accountKey = account_key,
+                    )
+                }
+
+                PlatformType.Nostr -> {
+                    Nostr(
                         accountKey = account_key,
                     )
                 }

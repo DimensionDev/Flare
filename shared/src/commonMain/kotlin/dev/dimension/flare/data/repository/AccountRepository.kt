@@ -14,6 +14,7 @@ import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.model.AccountType
@@ -124,6 +125,7 @@ public class AccountRepository internal constructor(
                 AccountType.Specific(accountKey),
             )
             appDatabase.accountDao().delete(accountKey)
+            dataSourceCache.remove(accountKey)
         }
 
     internal fun getFlow(accountKey: MicroBlogKey): Flow<UiState<UiAccount>> =
@@ -143,6 +145,10 @@ public class AccountRepository internal constructor(
             .map {
                 it.credential_json.decodeJson<T>()
             }
+
+    internal companion object {
+        val dataSourceCache = mutableMapOf<MicroBlogKey, AuthenticatedMicroblogDataSource>()
+    }
 }
 
 public data object NoActiveAccountException : Exception("No active account.")

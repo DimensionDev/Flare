@@ -129,6 +129,7 @@ internal fun StatusContent.render(
         )
 
     is StatusContent.Rss -> data.render()
+    is StatusContent.Nostr -> error("Nostr content rendering not yet implemented")
     is StatusContent.Test -> error("Test content cannot be rendered")
 }
 
@@ -146,6 +147,7 @@ internal fun DbUser.render(accountKey: MicroBlogKey) =
         is UserContent.MisskeyLite -> content.data.render(accountKey = accountKey)
         is UserContent.VVO -> content.data.render(accountKey = accountKey)
         is UserContent.XQT -> content.data.render(accountKey = accountKey)
+        is UserContent.Nostr -> error("Nostr user rendering not yet implemented")
         is UserContent.Test -> error("Test content cannot be rendered")
     }
 

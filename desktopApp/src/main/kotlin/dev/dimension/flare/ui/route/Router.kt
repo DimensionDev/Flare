@@ -112,7 +112,7 @@ internal fun WindowScope.Router(
     NavDisplay(
         modifier = modifier,
         sceneStrategy =
-            remember {
+            remember(listDetailStrategy) {
                 FluentDialogSceneStrategy<Route>()
                     .then(WindowSceneStrategy())
                     .then(listDetailStrategy)
@@ -604,6 +604,14 @@ internal fun WindowScope.Router(
                     metadata =
                         ListDetailSceneStrategy.listPane(
                             "Rss",
+                            detailPlaceholder = {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxSize()
+                                            .background(FluentTheme.colors.background.solid.base),
+                                )
+                            },
                         ),
                 ) { args ->
                     RssListScreen(
@@ -653,7 +661,20 @@ internal fun WindowScope.Router(
                     )
                 }
 
-                entry<Route.DmList> { args ->
+                entry<Route.DmList>(
+                    metadata =
+                        ListDetailSceneStrategy.listPane(
+                            "DMs",
+                            detailPlaceholder = {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxSize()
+                                            .background(FluentTheme.colors.background.solid.base),
+                                )
+                            },
+                        ),
+                ) { args ->
                     DmListScreen(
                         accountType = args.accountType,
                         onItemClicked = {
@@ -667,7 +688,12 @@ internal fun WindowScope.Router(
                     )
                 }
 
-                entry<Route.DmConversation> { args ->
+                entry<Route.DmConversation>(
+                    metadata =
+                        ListDetailSceneStrategy.detailPane(
+                            "DMs",
+                        ),
+                ) { args ->
                     DmConversationScreen(
                         accountType = args.accountType,
                         roomKey = args.roomKey,
@@ -683,7 +709,12 @@ internal fun WindowScope.Router(
                     )
                 }
 
-                entry<Route.DmUserConversation> { args ->
+                entry<Route.DmUserConversation>(
+                    metadata =
+                        ListDetailSceneStrategy.detailPane(
+                            "DMs",
+                        ),
+                ) { args ->
                     UserDMConversationScreen(
                         accountType = args.accountType,
                         userKey = args.userKey,

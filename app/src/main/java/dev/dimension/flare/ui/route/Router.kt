@@ -94,7 +94,7 @@ internal fun Router(
     ) {
         NavDisplay<NavKey>(
             sceneStrategy =
-                remember {
+                remember(listDetailStrategy) {
                     DialogSceneStrategy<NavKey>()
                         .then(BottomSheetSceneStrategy())
                         .then(listDetailStrategy)

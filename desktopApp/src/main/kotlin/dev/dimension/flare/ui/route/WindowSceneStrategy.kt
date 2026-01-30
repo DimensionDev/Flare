@@ -99,6 +99,6 @@ public class WindowSceneStrategy<T : Any> : SceneStrategy<T> {
          */
         public fun window(): Map<String, Any> = mapOf(WINDOW_KEY to true)
 
-        internal const val WINDOW_KEY = "compose_window"
+        const val WINDOW_KEY = "compose_window"
     }
 }

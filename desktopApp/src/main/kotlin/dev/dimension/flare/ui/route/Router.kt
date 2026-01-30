@@ -123,13 +123,20 @@ internal fun WindowScope.Router(
                 rememberViewModelStoreNavEntryDecorator(),
                 remember {
                     NavEntryDecorator {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(FluentTheme.colors.background.solid.base),
+                        if (
+                            it.metadata.containsKey(FluentDialogSceneStrategy.DIALOG_KEY) ||
+                            it.metadata.containsKey(WindowSceneStrategy.WINDOW_KEY)
                         ) {
                             it.Content()
+                        } else {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .background(FluentTheme.colors.background.solid.base),
+                            ) {
+                                it.Content()
+                            }
                         }
                     }
                 },

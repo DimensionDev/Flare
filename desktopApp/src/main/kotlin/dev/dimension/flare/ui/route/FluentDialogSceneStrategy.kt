@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.route
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.scene.OverlayScene
@@ -9,7 +10,6 @@ import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
 import dev.dimension.flare.ui.route.FluentDialogSceneStrategy.Companion.dialog
-import io.github.composefluent.component.FluentDialog
 
 /** An [OverlayScene] that renders an [entry] within a [Dialog]. */
 internal class FluentDialogScene<T : Any>(
@@ -23,8 +23,7 @@ internal class FluentDialogScene<T : Any>(
     override val entries: List<NavEntry<T>> = listOf(entry)
 
     override val content: @Composable (() -> Unit) = {
-        FluentDialog(
-            visible = true,
+        Popup(
             properties = popupProperties,
         ) {
             entry.Content()
@@ -86,6 +85,6 @@ public class FluentDialogSceneStrategy<T : Any> : SceneStrategy<T> {
          */
         public fun dialog(popupProperties: PopupProperties = PopupProperties()): Map<String, Any> = mapOf(DIALOG_KEY to popupProperties)
 
-        internal const val DIALOG_KEY = "fluent_dialog"
+        const val DIALOG_KEY = "fluent_dialog"
     }
 }

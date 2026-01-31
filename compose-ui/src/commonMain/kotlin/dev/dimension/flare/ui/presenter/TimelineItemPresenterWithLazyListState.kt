@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.mapNotNull
  * public helper to compute whether the "new posts" indicator should show
  * and how many posts were prepended
  */
-public fun computeNewPostsFromList(
+internal fun computeNewPostsFromList(
     previousFirstVisibleItemKey: String?,
     previousItemCount: Int,
     currentList: List<UiTimeline>,
@@ -32,12 +32,11 @@ public fun computeNewPostsFromList(
         list: List<UiTimeline>,
         count: Int,
     ): Set<String> {
-        val limit = minOf(count, list.size)
-        val added = LinkedHashSet<String>(limit)
-        for (i in 0 until limit) {
-            added.add(list[i].itemKey)
-        }
-        return added
+        // take the first `count` items and collect their keys preserving order
+        return list.asSequence()
+            .take(count.coerceAtMost(list.size))
+            .map { it.itemKey }
+            .toCollection(LinkedHashSet())
     }
 
     val itemCount = currentList.size
@@ -67,7 +66,7 @@ public fun computeNewPostsFromList(
  * subtracting `insertedPostCount` recovers the previous last-viewed index.
  * If that would be negative, fall back to observedFirstVisibleIndex.
  */
-public fun deriveLastRefreshIndex(
+internal fun deriveLastRefreshIndex(
     observedFirstVisibleIndex: Int,
     insertedPostCount: Int,
 ): Int {
@@ -78,7 +77,6 @@ public fun deriveLastRefreshIndex(
 public class TimelineItemPresenterWithLazyListState(
     private val timelineTabItem: TimelineTabItem,
     private val lazyStaggeredGridState: LazyStaggeredGridState? = null,
-    private val internalPresenter: TimelineItemPresenter? = null,
 ) : PresenterBase<TimelineItemPresenterWithLazyListState.State>() {
     @Immutable
     public interface State : TimelineItemPresenter.State {
@@ -90,7 +88,7 @@ public class TimelineItemPresenterWithLazyListState(
     }
 
     private val tabItemPresenter by lazy {
-        internalPresenter ?: TimelineItemPresenter(timelineTabItem)
+        TimelineItemPresenter(timelineTabItem)
     }
 
     @Composable

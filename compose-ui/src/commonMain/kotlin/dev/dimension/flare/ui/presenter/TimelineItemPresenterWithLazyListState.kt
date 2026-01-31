@@ -151,9 +151,9 @@ public class TimelineItemPresenterWithLazyListState(
                         return@collect
                     }
 
-                    // update the top-key anchor based on current viewport
+                    // capture the previous top key BEFORE updating the anchor so compute can compare against it
+                    val prevTopKey = previousFirstVisibleItemKey
                     val currentTopItem = snapshot.listState.peek(snapshot.firstVisibleIndex)
-                    previousFirstVisibleItemKey = currentTopItem?.itemKey ?: previousFirstVisibleItemKey
 
                     // Build a concrete list snapshot of UiTimeline items from the paging list to feed compute helper
                     val currentList = mutableListOf<UiTimeline>()
@@ -165,7 +165,7 @@ public class TimelineItemPresenterWithLazyListState(
                     // compute whether we should show the indicator and how many items were inserted
                     val (showIndicator, insertedPostCount, _) =
                         computeNewPostsFromList(
-                            previousFirstVisibleItemKey,
+                            prevTopKey,
                             previousItemCountRef[0],
                             currentList,
                             atTop,
@@ -212,6 +212,9 @@ public class TimelineItemPresenterWithLazyListState(
                         newPostsCount = 0
                         lastRefreshIndex = null
                         previousFirstVisibleItemKey = snapshot.topKey ?: previousFirstVisibleItemKey
+                    } else {
+                        // update the stored anchor to the current top item for the next emission
+                        previousFirstVisibleItemKey = currentTopItem?.itemKey ?: previousFirstVisibleItemKey
                     }
 
                     previousItemCountRef[0] = snapshot.itemCount

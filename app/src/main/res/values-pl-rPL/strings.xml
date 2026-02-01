@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">Powiadomienia</string>
     <string name="home_tab_me_title">Pr</string>
     <string name="home_tab_discover_title">Odkryj</string>
-    <string name="home_timeline_new_toots">Nowe posty</string>
     <string name="notification_tab_all_title">Wszystkie</string>
     <string name="notification_tab_mentions_title">Wzmianki</string>
     <string name="notification_tab_comments_title">Komentarze</string>

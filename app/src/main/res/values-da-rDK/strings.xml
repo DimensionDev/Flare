@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">Notifikationer</string>
     <string name="home_tab_me_title">Mig</string>
     <string name="home_tab_discover_title">Opdag</string>
-    <string name="home_timeline_new_toots">Nye Indlæg</string>
     <string name="notification_tab_all_title">Alle</string>
     <string name="notification_tab_mentions_title">Omtaler</string>
     <string name="notification_tab_comments_title">Kommentarer</string>

@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">Ειδοποιήσεις</string>
     <string name="home_tab_me_title">Εγώ</string>
     <string name="home_tab_discover_title">Ανακαλύψτε</string>
-    <string name="home_timeline_new_toots">Νέες Δημοσιεύσεις</string>
     <string name="notification_tab_all_title">Όλα</string>
     <string name="notification_tab_mentions_title">Αναφορές</string>
     <string name="notification_tab_comments_title">Σχόλια</string>

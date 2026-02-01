@@ -15,7 +15,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 
 @Immutable
-public data class UiTimeline public constructor(
+public data class UiTimeline internal constructor(
     val topMessage: TopMessage?,
     val content: ItemContent?,
     private val dbKey: String? = null,

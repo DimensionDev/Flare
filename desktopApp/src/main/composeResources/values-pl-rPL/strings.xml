@@ -59,8 +59,8 @@
     <string name="reaction_remove">Usuń reakcję</string>
     <string name="reply">Odpowiedz</string>
     <string name="report">Zgłoszenie</string>
-    <string name="retweet">crwdns74747:0crwdne74747:0</string>
-    <string name="retweet_remove">Usuń retweet</string>
+    <string name="retweet">Udostępnij ponownie</string>
+    <string name="retweet_remove">Usuń repost</string>
     <string name="status_loadmore_error_retry">Ponów próbę</string>
     <string name="status_detail_comment">Komentarz</string>
     <string name="status_detail_repost">Udostępnij ponownie</string>
@@ -191,6 +191,10 @@
     <string name="settings_appearance_post_action_style_left_aligned">Wyrównanie w lewo</string>
     <string name="settings_appearance_post_action_style_right_aligned">Wyrównanie do prawej</string>
     <string name="settings_appearance_post_action_style_stretch">Rozciągnięcie</string>
+    <string name="settings_appearance_absolute_timestamp">Bezwzględny znacznik czasu</string>
+    <string name="settings_appearance_absolute_timestamp_description">Wyświetlaj bezwzględne znaczniki czasu na postach</string>
+    <string name="settings_appearance_show_platform_logo">Pokaż logo platformy</string>
+    <string name="settings_appearance_show_platform_logo_description">Pokaż logo platformy źródłowej na elementach wiadomości</string>
     <string name="settings_about_source_code">Kod źródłowy</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Dołącz do naszej grupy Telegram</string>
@@ -278,6 +282,8 @@
     <string name="settings_storage_clear_database_description">%1$s użytkowników, %2$s posty zostaną usunięte</string>
     <string name="settings_storage_app_log">Otwórz dziennik aplikacji</string>
     <string name="settings_storage_app_log_description">Zobacz dziennik aplikacji</string>
+    <string name="settings_rss_management_title">Zarządzanie RSS</string>
+    <string name="settings_rss_management_description">Zarządzaj kanałami RSS</string>
     <string name="copied_to_clipboard">Skopiowano do schowka</string>
     <string name="opml_import">Importuj z OPML</string>
     <string name="opml_export">Eksportuj do OPML</string>

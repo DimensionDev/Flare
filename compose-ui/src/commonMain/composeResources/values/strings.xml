@@ -114,8 +114,8 @@
     <string name="reaction_remove">Remove reaction</string>
     <string name="reply">Reply</string>
     <string name="report">Report</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Remove retweet</string>
+    <string name="retweet">Repost</string>
+    <string name="retweet_remove">Remove repost</string>
     <string name="share">Share</string>
     <string name="fx_share">Share via FxEmbed</string>
     <string name="comment">Comment</string>
@@ -476,6 +476,7 @@
     <string name="mixed_timeline_title">Mixed</string>
     <string name="liked_title">Liked</string>
     <string name="all_rss_feeds_title">All Rss Feeds</string>
+    <string name="posts_title">Posts</string>
     <string name="settings_appearance_absolute_timestamp">Absolute timestamp</string>
     <string name="settings_appearance_absolute_timestamp_description">Display absolute timestamps on posts</string>
     <string name="settings_about_description">The ultimate next generation open-sourced AI powered decentralized social network client.</string>

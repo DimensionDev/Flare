@@ -80,8 +80,7 @@
     <string name="reaction_remove">Eliminar reacció</string>
     <string name="reply">Respondre</string>
     <string name="report">Informar</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Eliminar retweet</string>
+    <string name="retweet">Republiqui</string>
     <string name="share">Compartir</string>
     <string name="comment">Comenta</string>
     <string name="user_report">Informar</string>
@@ -331,6 +330,7 @@
     <string name="dm_list_title">Missatges directes</string>
     <string name="antenna_title">Antena</string>
     <string name="mixed_timeline_title">Mixt</string>
+    <string name="posts_title">Publicacions</string>
     <string name="settings_about_description">El client de xarxa social descentralitzat de nova generació obert i impulsat per IA.</string>
     <string name="settings_about_source_code">Codi font</string>
     <string name="settings_about_telegram">Telegram</string>

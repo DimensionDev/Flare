@@ -80,8 +80,7 @@
     <string name="reaction_remove">Уклоните реакцију</string>
     <string name="reply">Одговори</string>
     <string name="report">Пријави</string>
-    <string name="retweet">Ретвит</string>
-    <string name="retweet_remove">Уклоните ретвит</string>
+    <string name="retweet">Поново</string>
     <string name="share">Делите</string>
     <string name="comment">Коментар</string>
     <string name="user_report">Пријави</string>
@@ -331,6 +330,7 @@
     <string name="dm_list_title">Директне поруке</string>
     <string name="antenna_title">Антена</string>
     <string name="mixed_timeline_title">Мешано</string>
+    <string name="posts_title">Објаве</string>
     <string name="settings_about_description">Крајње елитни отворени, децентрализовани клијент социјалне мреже покретан вештачком интелигенцијом.</string>
     <string name="settings_about_source_code">Изворни код</string>
     <string name="settings_about_telegram">Телеграм</string>

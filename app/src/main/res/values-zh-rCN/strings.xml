@@ -61,6 +61,8 @@
     <string name="settings_ai_config_tldr_description">对长篇文章启用 AI 摘要，仅在超过 500 个字符的帖子中可用</string>
     <string name="settings_language_title">语言</string>
     <string name="settings_language_description">更改应用程序的语言</string>
+    <string name="settings_rss_management_title">RSS 管理</string>
+    <string name="settings_rss_management_description">管理 RSS 源</string>
     <string name="status_loadmore_error_retry">重试</string>
     <string name="login_expired">登录会话已过期</string>
     <string name="login_expired_message">点击重新登录</string>
@@ -167,6 +169,10 @@
     <string name="settings_appearance_in_app_browser_description">在应用内浏览器中打开链接</string>
     <string name="settings_appearance_full_width_post">全宽帖子</string>
     <string name="settings_appearance_full_width_post_description">全宽显示帖子</string>
+    <string name="settings_appearance_absolute_timestamp">绝对时间戳</string>
+    <string name="settings_appearance_absolute_timestamp_description">在帖子中显示绝对时间戳</string>
+    <string name="settings_appearance_show_platform_logo">显示平台标志</string>
+    <string name="settings_appearance_show_platform_logo_description">在帖子项目上显示源平台标志</string>
     <string name="settings_storage_clear_image_cache">清除图片缓存</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB的图片将被删除</string>
     <string name="settings_storage_clear_database">清除缓存数据库</string>
@@ -327,6 +333,17 @@
     <string name="import_error">导入数据失败</string>
     <string name="import_confirmation_title">确认导入</string>
     <string name="import_confirmation_message">这将从文件中导入数据。将替换匹配ID的现有记录。您确定要继续吗？</string>
+    <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
+            <ul>
+                <li>自定义混合时间线组</li>
+                <li>数据导出和导入</li>
+                <li>多账户搜索</li>
+                <li>帖子中的绝对日期和时间</li>
+                <li>在帖子中添加平台徽标</li>
+                <li>RSS 管理已被移动到设置</li>
+                <li>Bug 修复和性能改进。</li>
+            </ul>
+        ]]></string>
     <string name="tab_settings_add_group">添加群组</string>
     <string name="tab_settings_add_tab">添加标签</string>
     <string name="tab_settings_edit_group">编辑组</string>

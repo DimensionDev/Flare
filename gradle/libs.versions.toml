@@ -16,14 +16,14 @@ junit = "4.13.2"
 androidx-test-ext-junit = "1.3.0"
 espresso-core = "3.7.0"
 lifecycle-runtime-ktx = "2.10.0"
-activity-compose = "1.12.2"
-compose-bom = "2026.01.00"
-ksp = "2.3.4"
+activity-compose = "1.12.3"
+compose-bom = "2026.01.01"
+ksp = "2.3.5"
 openaiClient = "4.0.1"
-paging = "3.4.0-rc01"
+paging = "3.4.0"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-collections-immutable = "0.4.0"
-kotlinx-serialization = "1.9.0"
+kotlinx-serialization = "1.10.0"
 coil3 = "3.3.0"
 ktorfit = "2.7.2"
 ktor = "3.3.3"
@@ -47,7 +47,7 @@ bluesky = "0.3.4-SNAPSHOT"
 kotlinx-coroutines = "1.10.2"
 koin = "4.1.1"
 composeIcons = "1.3.0"
-media3 = "1.9.0"
+media3 = "1.9.1"
 desugar_jdk_libs = "2.1.5"
 firebase-bom = "34.8.0"
 google-services = "4.4.4"
@@ -56,12 +56,12 @@ materialKolor = "4.1.0"
 room = "2.8.3"
 sqlite = "2.6.2"
 compose-multiplatform = "1.10.0"
-logback = "1.5.25"
+logback = "1.5.26"
 navigation3 = "1.0.0"
 zoomable = "0.18.0"
 bouncycastle = "1.83"
 cupertino = "2.3.1"
-robolectric = "4.16"
+robolectric = "4.16.1"
 
 
 [libraries]
@@ -99,7 +99,7 @@ ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha12" }
+material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha13" }
 material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
 material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive" }
@@ -189,6 +189,7 @@ compose-webview-multiplatform = { group = "io.github.kevinnzou", name = "compose
 
 compose-placeholder-material3 = { group = "io.github.fornewid", name = "placeholder-material3", version = "2.0.0" }
 compose-placeholder-foundation = { group = "io.github.fornewid", name = "placeholder-foundation", version = "2.0.0" }
+compose-placeholder = { module = "com.revenuecat.purchases:placeholder", version = "1.0.2" }
 
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
@@ -214,7 +215,7 @@ jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector"
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
-androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version = "1.3.0-alpha06" }
+androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version = "1.3.0-alpha07" }
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version = "2.10.0" }
 
 bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }

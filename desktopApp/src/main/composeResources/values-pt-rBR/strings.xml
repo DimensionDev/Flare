@@ -59,8 +59,8 @@
     <string name="reaction_remove">Remover reação</string>
     <string name="reply">Responder</string>
     <string name="report">Denunciar</string>
-    <string name="retweet">Retweetar</string>
-    <string name="retweet_remove">Remover retweet</string>
+    <string name="retweet">Republicar</string>
+    <string name="retweet_remove">Remover repostagem</string>
     <string name="status_loadmore_error_retry">Repetir</string>
     <string name="status_detail_comment">Comentar</string>
     <string name="status_detail_repost">Republicar</string>
@@ -191,6 +191,10 @@
     <string name="settings_appearance_post_action_style_left_aligned">Esquerda alinhada</string>
     <string name="settings_appearance_post_action_style_right_aligned">Alinhado à direita</string>
     <string name="settings_appearance_post_action_style_stretch">Alongamento</string>
+    <string name="settings_appearance_absolute_timestamp">Timestamp absoluto</string>
+    <string name="settings_appearance_absolute_timestamp_description">Exibir timestamps absolutos nas postagens</string>
+    <string name="settings_appearance_show_platform_logo">Mostrar logotipo da plataforma</string>
+    <string name="settings_appearance_show_platform_logo_description">Mostrar o logotipo da plataforma de origem em postar itens</string>
     <string name="settings_about_source_code">Código fonte</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Junte-se ao nosso grupo do Telegram</string>
@@ -278,6 +282,8 @@
     <string name="settings_storage_clear_database_description">%1$s usuários, %2$s mensagens serão removidas</string>
     <string name="settings_storage_app_log">Abrir log do aplicativo</string>
     <string name="settings_storage_app_log_description">Ver registro do aplicativo</string>
+    <string name="settings_rss_management_title">Gerenciamento de RSS</string>
+    <string name="settings_rss_management_description">Gerenciar feeds RSS</string>
     <string name="copied_to_clipboard">Copiado para o clipboard</string>
     <string name="opml_import">Importar do OPML</string>
     <string name="opml_export">Exportar para OPML</string>

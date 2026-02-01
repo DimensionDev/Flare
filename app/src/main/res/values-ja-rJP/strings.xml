@@ -61,6 +61,8 @@
     <string name="settings_ai_config_tldr_description">長い投稿のAIサマリー化を有効にします。500文字以上の投稿でのみ利用できます</string>
     <string name="settings_language_title">言語</string>
     <string name="settings_language_description">アプリの言語を変更する</string>
+    <string name="settings_rss_management_title">RSS管理</string>
+    <string name="settings_rss_management_description">RSSフィードの管理</string>
     <string name="status_loadmore_error_retry">再試行する</string>
     <string name="login_expired">ログインセッションの有効期限が切れました</string>
     <string name="login_expired_message">クリックして再度ログインする</string>
@@ -167,6 +169,10 @@
     <string name="settings_appearance_in_app_browser_description">アプリ内ブラウザでリンクを開く</string>
     <string name="settings_appearance_full_width_post">横広の投稿</string>
     <string name="settings_appearance_full_width_post_description">投稿を横広く表示する</string>
+    <string name="settings_appearance_absolute_timestamp">絶対タイムスタンプです</string>
+    <string name="settings_appearance_absolute_timestamp_description">投稿に絶対タイムスタンプを表示する</string>
+    <string name="settings_appearance_show_platform_logo">プラットフォームのロゴを表示</string>
+    <string name="settings_appearance_show_platform_logo_description">投稿アイテムにソース・プラットフォームのロゴを表示する</string>
     <string name="settings_storage_clear_image_cache">画像キャッシュをクリア</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MBの画像が削除されます</string>
     <string name="settings_storage_clear_database">キャッシュデータベースをクリア</string>

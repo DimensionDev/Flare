@@ -61,6 +61,8 @@
     <string name="settings_ai_config_tldr_description">Aktiver AI opsummering for lange indlæg, kun tilgængelig i indlæg, der er længere end 500 tegn</string>
     <string name="settings_language_title">Sprog</string>
     <string name="settings_language_description">Skift sproget i app\'en</string>
+    <string name="settings_rss_management_title">RSS Management</string>
+    <string name="settings_rss_management_description">Administrer RSS-feeds</string>
     <string name="status_loadmore_error_retry">Forsøg igen</string>
     <string name="login_expired">Login-sessionen er udløbet</string>
     <string name="login_expired_message">Klik for at logge ind igen</string>
@@ -167,6 +169,10 @@
     <string name="settings_appearance_in_app_browser_description">Åbn links i app-browseren</string>
     <string name="settings_appearance_full_width_post">Fuld bredde indlæg</string>
     <string name="settings_appearance_full_width_post_description">Vis indlægget i fuld bredde</string>
+    <string name="settings_appearance_absolute_timestamp">Absolut tidsstempel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Vis absolutte tidsstempler på indlæg</string>
+    <string name="settings_appearance_show_platform_logo">Vis platformens logo</string>
+    <string name="settings_appearance_show_platform_logo_description">Vis kildeplatformens logo på indlæg</string>
     <string name="settings_storage_clear_image_cache">Ryd billed-cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB billeder vil blive fjernet</string>
     <string name="settings_storage_clear_database">Ryd cache database</string>
@@ -329,7 +335,13 @@
     <string name="import_confirmation_message">Dette vil importere data fra filen. Eksisterende poster med matchende ID\'er vil blive erstattet. Vil du fortsætte?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Fejlrettelser og ydelsesforbedringer.</li>
+                <li>Brugerdefineret gruppe af blandet tidslinje</li>
+                <li>Dataeksport og import</li>
+                <li>Multikonto søgning</li>
+                <li>Absolut dato og tid i indlæg</li>
+                <li>Tilføj platform badge i indlæg</li>
+                <li>RSS management er blevet flyttet til indstillinger</li>
+                <li>Fejlrettelser og forbedringer ydeevne.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Tilføj Gruppe</string>

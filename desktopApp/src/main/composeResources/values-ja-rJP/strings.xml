@@ -59,8 +59,8 @@
     <string name="reaction_remove">リアクションを削除</string>
     <string name="reply">返信</string>
     <string name="report">レポート</string>
-    <string name="retweet">リツイート</string>
-    <string name="retweet_remove">リツイートを削除</string>
+    <string name="retweet">リポスト</string>
+    <string name="retweet_remove">Repost を削除</string>
     <string name="status_loadmore_error_retry">再試行する</string>
     <string name="status_detail_comment">コメント</string>
     <string name="status_detail_repost">リポスト</string>
@@ -191,6 +191,10 @@
     <string name="settings_appearance_post_action_style_left_aligned">左揃え</string>
     <string name="settings_appearance_post_action_style_right_aligned">右揃え</string>
     <string name="settings_appearance_post_action_style_stretch">ストレッチ</string>
+    <string name="settings_appearance_absolute_timestamp">絶対タイムスタンプです</string>
+    <string name="settings_appearance_absolute_timestamp_description">投稿に絶対タイムスタンプを表示する</string>
+    <string name="settings_appearance_show_platform_logo">プラットフォームのロゴを表示</string>
+    <string name="settings_appearance_show_platform_logo_description">投稿アイテムにソース・プラットフォームのロゴを表示する</string>
     <string name="settings_about_source_code">ソースコード</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Telegramグループに参加する</string>
@@ -278,6 +282,8 @@
     <string name="settings_storage_clear_database_description">%1$s ユーザー、 %2$s 投稿は削除されます</string>
     <string name="settings_storage_app_log">アプリログを開く</string>
     <string name="settings_storage_app_log_description">アプリのログを表示</string>
+    <string name="settings_rss_management_title">RSS管理</string>
+    <string name="settings_rss_management_description">RSSフィードの管理</string>
     <string name="copied_to_clipboard">クリップボードにコピーしました</string>
     <string name="opml_import">OPMLからインポート</string>
     <string name="opml_export">OPMLにエクスポート</string>

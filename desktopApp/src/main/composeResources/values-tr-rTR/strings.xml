@@ -59,8 +59,7 @@
     <string name="reaction_remove">Tepki Kaldır</string>
     <string name="reply">Yanıtla</string>
     <string name="report">Şikayet et</string>
-    <string name="retweet">Retweetle</string>
-    <string name="retweet_remove">Retweeti kaldır</string>
+    <string name="retweet">Yeniden paylaş</string>
     <string name="status_loadmore_error_retry">Yeniden dene</string>
     <string name="status_detail_comment">Yorum</string>
     <string name="status_detail_repost">Yeniden paylaş</string>

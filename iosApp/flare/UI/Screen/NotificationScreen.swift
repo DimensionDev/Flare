@@ -110,27 +110,21 @@ struct NotificationAccountsBar: View {
                 ForEach(Array(items.keys), id: \.handle) { key in
                     let value = items[key]?.intValue
                     HStack {
-                        if selectedAccount?.key == key.key {
-                            Label {
-                                Text(key.handle)
-                            } icon: {
-                                AvatarView(data: key.avatar)
-                                    .frame(width: 20, height: 20)
-                            }
-                        } else {
+                        ZStack(alignment: .bottomTrailing) {
                             AvatarView(data: key.avatar)
-                                .frame(width: 20, height: 20)
+                            if let badge = value, badge > 0 {
+                                Text("\(badge)")
+                                    .font(.caption2)
+                                    .padding(2)
+                                    .background(
+                                        Circle()
+                                            .fill(Color.red)
+                                    )
+                                    .foregroundStyle(.white)
+                                    .frame(width: 12, height: 12)
+                            }
                         }
-                        if let badge = value, badge > 0 {
-                            Text("\(badge)")
-                                .font(.caption2)
-                                .padding(4)
-                                .background(
-                                    Circle()
-                                        .fill(Color.accentColor)
-                                )
-                                .foregroundStyle(.white)
-                        }
+                        Text(key.handle)
                     }
                     .onTapGesture {
                         onSelect(key)

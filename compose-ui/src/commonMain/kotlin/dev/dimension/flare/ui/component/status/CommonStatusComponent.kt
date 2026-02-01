@@ -47,9 +47,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import coil3.compose.LocalPlatformContext
+import com.revenuecat.placeholder.placeholder
 import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Regular
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.brands.Bluesky
+import compose.icons.fontawesomeicons.brands.Mastodon
+import compose.icons.fontawesomeicons.brands.Weibo
+import compose.icons.fontawesomeicons.brands.XTwitter
 import compose.icons.fontawesomeicons.regular.Bookmark
 import compose.icons.fontawesomeicons.regular.CommentDots
 import compose.icons.fontawesomeicons.regular.Heart
@@ -117,6 +123,7 @@ import dev.dimension.flare.compose.ui.vote
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.common.PlatformShare
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -137,7 +144,7 @@ import dev.dimension.flare.ui.component.platform.PlatformRadioButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextButton
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
-import dev.dimension.flare.ui.component.platform.placeholder
+import dev.dimension.flare.ui.icons.Misskey
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiMedia
@@ -212,6 +219,29 @@ public fun CommonStatusComponent(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
+                        if (appearanceSettings.showPlatformLogo) {
+                            val icon =
+                                when (item.platformType) {
+                                    PlatformType.Mastodon ->
+                                        FontAwesomeIcons.Brands.Mastodon
+                                    PlatformType.Misskey ->
+                                        FontAwesomeIcons.Brands.Misskey
+                                    PlatformType.Bluesky ->
+                                        FontAwesomeIcons.Brands.Bluesky
+                                    PlatformType.xQt ->
+                                        FontAwesomeIcons.Brands.XTwitter
+                                    PlatformType.VVo ->
+                                        FontAwesomeIcons.Brands.Weibo
+                                }
+                            FAIcon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                modifier =
+                                    Modifier
+                                        .size(PlatformTheme.typography.caption.fontSize.value.dp),
+                                tint = PlatformTheme.colorScheme.caption,
+                            )
+                        }
                         when (val content = item.topEndContent) {
                             is UiTimeline.ItemContent.Status.TopEndContent.Visibility -> {
                                 StatusVisibilityComponent(
@@ -933,7 +963,7 @@ private fun ActionMenu.Item.Color.toComposeColor(): Color =
     when (this) {
         ActionMenu.Item.Color.Red -> PlatformTheme.colorScheme.error
         ActionMenu.Item.Color.ContentColor -> PlatformContentColor.current
-        ActionMenu.Item.Color.PrimaryColor -> PlatformTheme.colorScheme.primary
+        ActionMenu.Item.Color.PrimaryColor -> PlatformTheme.colorScheme.retweetColor
     }
 
 private fun ActionMenu.Item.Icon.toImageVector(): ImageVector =

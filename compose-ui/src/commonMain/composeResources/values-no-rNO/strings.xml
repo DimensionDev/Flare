@@ -98,8 +98,8 @@
     <string name="reaction_remove">Fjern reaksjon</string>
     <string name="reply">Svar</string>
     <string name="report">Rapporter</string>
-    <string name="retweet">Prøv igjen</string>
-    <string name="retweet_remove">Fjern retweet</string>
+    <string name="retweet">Gjenkjenn</string>
+    <string name="retweet_remove">Fjern innlegg</string>
     <string name="share">Del</string>
     <string name="fx_share">Del via FxEmbed</string>
     <string name="comment">Kommentar</string>
@@ -366,6 +366,9 @@
     <string name="mixed_timeline_title">Blandet</string>
     <string name="liked_title">Likte</string>
     <string name="all_rss_feeds_title">Alle RSS matinger</string>
+    <string name="posts_title">Innlegg</string>
+    <string name="settings_appearance_absolute_timestamp">Absolutt tidsstempel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Vis absolutte tidsstempler på innlegg</string>
     <string name="settings_about_description">Den ultimate neste generasjonen med åpen AI drevet desentralisert sosial nettverksklient.</string>
     <string name="settings_about_source_code">Kildekode</string>
     <string name="settings_about_telegram">Telegram</string>

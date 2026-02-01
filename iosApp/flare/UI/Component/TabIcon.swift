@@ -32,6 +32,7 @@ extension TitleType {
             case .mixedTimeline: String(localized: "mixed_timeline_title")
             case .liked: String(localized: "liked_tab_title")
             case .allRssFeeds: String(localized: "all_rss_feeds_title")
+            case .posts: String(localized: "posts_title")
             }
             return text
         case .text(let text):
@@ -127,9 +128,9 @@ extension IconType.MaterialMaterialIcon {
         case .featured:     "fa-rectangle-list"
         case .bookmark:     "fa-book-bookmark"
         case .heart:        "fa-heart"
-        case .twitter:      "fa-twitter"
+        case .twitter:      "fa-x-twitter"
         case .mastodon:     "fa-mastodon"
-        case .misskey:      "fa-globe"
+        case .misskey:      "fa-misskey"
         case .bluesky:      "fa-bluesky"
         case .list:         "fa-list"
         case .feeds:        "fa-square-rss"

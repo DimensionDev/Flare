@@ -72,6 +72,8 @@
     <string name="settings_ai_config_tldr_description">Enable AI summarization for long posts, only available in post that longer than 500 characters</string>
     <string name="settings_language_title">Language</string>
     <string name="settings_language_description">Change the language of the app</string>
+    <string name="settings_rss_management_title">RSS Management</string>
+    <string name="settings_rss_management_description">Manage RSS feeds</string>
 
     <string name="status_loadmore_error_retry">Retry</string>
     <string name="login_expired">Login session expired</string>
@@ -197,6 +199,9 @@
     <string name="settings_appearance_full_width_post_description">Show the post in full width</string>
     <string name="settings_appearance_absolute_timestamp">Absolute timestamp</string>
     <string name="settings_appearance_absolute_timestamp_description">Display absolute timestamps on posts</string>
+
+    <string name="settings_appearance_show_platform_logo">Show platform logo</string>
+    <string name="settings_appearance_show_platform_logo_description">Show the source platform logo on post items</string>
 
     <string name="settings_storage_clear_image_cache">Clear image cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB of images will be removed</string>
@@ -401,6 +406,12 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
+                <li>Custom group of mixed timeline</li>
+                <li>Data export and import</li>
+                <li>Multi-account search</li>
+                <li>Absolute date and time in posts</li>
+                <li>Add platform badge in posts</li>
+                <li>RSS management has been moved to settings</li>
                 <li>Bug fixes and performance improvements.</li>
             </ul>
         ]]>

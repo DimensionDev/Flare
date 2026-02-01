@@ -60,7 +60,6 @@
     <string name="reply">回覆</string>
     <string name="report">報告</string>
     <string name="retweet">轉發</string>
-    <string name="retweet_remove">刪除轉發</string>
     <string name="status_loadmore_error_retry">重試</string>
     <string name="status_detail_comment">評論</string>
     <string name="status_detail_repost">轉發</string>

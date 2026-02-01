@@ -61,6 +61,8 @@
     <string name="settings_ai_config_tldr_description">Activer le résumé de l\'IA pour les publications longues, uniquement disponible pour les publications de plus de 500 caractères</string>
     <string name="settings_language_title">Langue</string>
     <string name="settings_language_description">Changer la langue de l\'application</string>
+    <string name="settings_rss_management_title">Gestion des flux RSS</string>
+    <string name="settings_rss_management_description">Gérer les flux RSS</string>
     <string name="status_loadmore_error_retry">Réessayer</string>
     <string name="login_expired">Session de connexion expirée</string>
     <string name="login_expired_message">Cliquez pour vous connecter à nouveau</string>
@@ -167,6 +169,10 @@
     <string name="settings_appearance_in_app_browser_description">Ouvrir les liens dans le navigateur de l\'application</string>
     <string name="settings_appearance_full_width_post">Poteau en pleine largeur</string>
     <string name="settings_appearance_full_width_post_description">Afficher le message en pleine largeur</string>
+    <string name="settings_appearance_absolute_timestamp">Horodatage absolu</string>
+    <string name="settings_appearance_absolute_timestamp_description">Afficher les horodatages absolus sur les publications</string>
+    <string name="settings_appearance_show_platform_logo">Afficher le logo de la plateforme</string>
+    <string name="settings_appearance_show_platform_logo_description">Afficher le logo de la plateforme source sur les éléments de publication</string>
     <string name="settings_storage_clear_image_cache">Vider le cache des images</string>
     <string name="settings_storage_clear_image_cache_description">%1$s Mo d\'images seront supprimés</string>
     <string name="settings_storage_clear_database">Vider la base de données du cache</string>
@@ -329,6 +335,12 @@
     <string name="import_confirmation_message">Cela va importer des données à partir du fichier. Les enregistrements existants avec des identifiants correspondants seront remplacés. Voulez-vous continuer ?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
+                <li>Groupe personnalisé de fil mixte</li>
+                <li>Export de données et importation</li>
+                <li>Recherche multi-comptes</li>
+                <li>Date et heure absolues dans les posts</li>
+                <li>Ajouter un badge de plateforme dans les posts</li>
+                <li>La gestion RSS a été déplacée dans les paramètres</li>
                 <li>Corrections de bugs et améliorations de performances.</li>
             </ul>
         ]]></string>

@@ -74,8 +74,8 @@
     <string name="reaction_remove">Remove reaction</string>
     <string name="reply">Reply</string>
     <string name="report">Report</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Remove retweet</string>
+    <string name="retweet">Repost</string>
+    <string name="retweet_remove">Remove repost</string>
     <string name="status_loadmore_error_retry">Retry</string>
     <string name="status_detail_comment">Comment</string>
     <string name="status_detail_repost">Repost</string>
@@ -219,6 +219,9 @@
     <string name="settings_appearance_absolute_timestamp">Absolute timestamp</string>
     <string name="settings_appearance_absolute_timestamp_description">Display absolute timestamps on posts</string>
 
+    <string name="settings_appearance_show_platform_logo">Show platform logo</string>
+    <string name="settings_appearance_show_platform_logo_description">Show the source platform logo on post items</string>
+
     <string name="settings_about_source_code">Source code</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Join our Telegram group</string>
@@ -322,6 +325,8 @@
     <string name="settings_storage_clear_database_description">%1$s users, %2$s posts will be removed</string>
     <string name="settings_storage_app_log">Open app log</string>
     <string name="settings_storage_app_log_description">View the app log</string>
+    <string name="settings_rss_management_title">RSS Management</string>
+    <string name="settings_rss_management_description">Manage RSS feeds</string>
 
     <string name="copied_to_clipboard">Copied to clipboard</string>
 

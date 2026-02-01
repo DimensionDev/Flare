@@ -99,7 +99,7 @@
     <string name="reply">回复</string>
     <string name="report">举报</string>
     <string name="retweet">转发</string>
-    <string name="retweet_remove">移除转发</string>
+    <string name="retweet_remove">移除重报</string>
     <string name="share">分享</string>
     <string name="fx_share">通过FxEmbed分享</string>
     <string name="comment">评论</string>
@@ -366,6 +366,9 @@
     <string name="mixed_timeline_title">混合</string>
     <string name="liked_title">赞的</string>
     <string name="all_rss_feeds_title">所有 RSS 源</string>
+    <string name="posts_title">帖子</string>
+    <string name="settings_appearance_absolute_timestamp">绝对时间戳</string>
+    <string name="settings_appearance_absolute_timestamp_description">在帖子中显示绝对时间戳</string>
     <string name="settings_about_description">由 AI 驱动的次世代去中心化社交网络开源客户端。</string>
     <string name="settings_about_source_code">源代码</string>
     <string name="settings_about_telegram">Telegram</string>

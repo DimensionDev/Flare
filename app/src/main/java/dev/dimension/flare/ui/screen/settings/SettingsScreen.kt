@@ -37,6 +37,7 @@ import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.Robot
+import compose.icons.fontawesomeicons.solid.SquareRss
 import compose.icons.fontawesomeicons.solid.TableList
 import dev.dimension.flare.BuildConfig
 import dev.dimension.flare.R
@@ -98,6 +99,7 @@ internal fun SettingsScreen(
     toGuestSettings: () -> Unit,
     toLocalHistory: () -> Unit,
     toAiConfig: () -> Unit,
+    toRSSManagement: () -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -278,9 +280,28 @@ internal fun SettingsScreen(
                     ) {
                         SegmentedListItem(
                             onClick = {
-                                toLocalFilter.invoke()
+                                toRSSManagement.invoke()
                             },
                             shapes = ListItemDefaults.first(),
+                            content = {
+                                Text(text = stringResource(id = R.string.settings_rss_management_title))
+                            },
+                            leadingContent = {
+                                ThemedIcon(
+                                    imageVector = FontAwesomeIcons.Solid.SquareRss,
+                                    contentDescription = stringResource(id = R.string.settings_rss_management_title),
+                                    color = ThemeIconData.Color.ImperialMagenta,
+                                )
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_rss_management_description))
+                            },
+                        )
+                        SegmentedListItem(
+                            onClick = {
+                                toLocalFilter.invoke()
+                            },
+                            shapes = ListItemDefaults.item(),
                             content = {
                                 Text(text = stringResource(id = R.string.settings_local_filter_title))
                             },
@@ -353,25 +374,48 @@ internal fun SettingsScreen(
 //                    },
 //            )
                 }.onError {
-                    SegmentedListItem(
-                        onClick = {
-                            toStorage.invoke()
-                        },
-                        shapes = ListItemDefaults.single(),
-                        content = {
-                            Text(text = stringResource(id = R.string.settings_storage_title))
-                        },
-                        leadingContent = {
-                            ThemedIcon(
-                                imageVector = FontAwesomeIcons.Solid.Database,
-                                contentDescription = stringResource(id = R.string.settings_storage_title),
-                                color = ThemeIconData.Color.DarkAmber,
-                            )
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_storage_subtitle))
-                        },
-                    )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+                    ) {
+                        SegmentedListItem(
+                            onClick = {
+                                toRSSManagement.invoke()
+                            },
+                            shapes = ListItemDefaults.first(),
+                            content = {
+                                Text(text = stringResource(id = R.string.settings_rss_management_title))
+                            },
+                            leadingContent = {
+                                ThemedIcon(
+                                    imageVector = FontAwesomeIcons.Solid.SquareRss,
+                                    contentDescription = stringResource(id = R.string.settings_rss_management_title),
+                                    color = ThemeIconData.Color.ImperialMagenta,
+                                )
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_rss_management_description))
+                            },
+                        )
+                        SegmentedListItem(
+                            onClick = {
+                                toStorage.invoke()
+                            },
+                            shapes = ListItemDefaults.last(),
+                            content = {
+                                Text(text = stringResource(id = R.string.settings_storage_title))
+                            },
+                            leadingContent = {
+                                ThemedIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Database,
+                                    contentDescription = stringResource(id = R.string.settings_storage_title),
+                                    color = ThemeIconData.Color.DarkAmber,
+                                )
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_storage_subtitle))
+                            },
+                        )
+                    }
                 }
             SegmentedListItem(
                 onClick = {

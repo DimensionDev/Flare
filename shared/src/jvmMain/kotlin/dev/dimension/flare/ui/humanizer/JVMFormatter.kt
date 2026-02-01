@@ -7,7 +7,9 @@ import org.ocpsoft.prettytime.PrettyTime
 import java.math.RoundingMode
 import java.text.NumberFormat
 import java.time.ZoneId
+import java.time.chrono.IsoChronology
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
 import java.time.format.FormatStyle
 import java.util.Date
 import java.util.Locale
@@ -53,14 +55,22 @@ internal class JVMFormatter : PlatformFormatter {
         }
     }
 
-    override fun formatFullInstant(instant: Instant): String =
-        DateTimeFormatter.ISO_DATE_TIME
+    override fun formatFullInstant(instant: Instant): String {
+        val pattern =
+            DateTimeFormatterBuilder.getLocalizedDateTimePattern(
+                FormatStyle.MEDIUM,
+                FormatStyle.MEDIUM,
+                IsoChronology.INSTANCE,
+                Locale.getDefault(),
+            )
+        return DateTimeFormatter
+            .ofPattern(pattern)
             .format(
                 java.time.Instant
                     .ofEpochMilli(instant.toEpochMilliseconds())
-                    .atZone(java.time.ZoneId.systemDefault())
-                    .toLocalDateTime(),
+                    .atZone(java.time.ZoneId.systemDefault()),
             )
+    }
 
     override fun formatAbsoluteInstant(instant: Instant): String {
         val now = Clock.System.now()

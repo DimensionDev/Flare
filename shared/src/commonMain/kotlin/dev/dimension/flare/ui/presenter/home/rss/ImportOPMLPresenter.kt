@@ -54,7 +54,7 @@ public class ImportOPMLPresenter(
                 val outlines =
                     opml.body.outlines
                         .flatMap { flattenOutlines(it) }
-                        .filter { it.type == "rss" && !it.xmlUrl.isNullOrBlank() }
+                        .filter { !it.xmlUrl.isNullOrBlank() }
 
                 totalCount = outlines.size
 

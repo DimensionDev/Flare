@@ -17,13 +17,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import com.revenuecat.placeholder.placeholder
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.brands.Bluesky
 import compose.icons.fontawesomeicons.brands.Mastodon
-import compose.icons.fontawesomeicons.brands.Twitter
 import compose.icons.fontawesomeicons.brands.Weibo
+import compose.icons.fontawesomeicons.brands.XTwitter
 import compose.icons.fontawesomeicons.solid.Bell
 import compose.icons.fontawesomeicons.solid.BookBookmark
 import compose.icons.fontawesomeicons.solid.CircleUser
@@ -54,6 +55,7 @@ import dev.dimension.flare.compose.ui.liked_title
 import dev.dimension.flare.compose.ui.mastodon_tab_local_title
 import dev.dimension.flare.compose.ui.mastodon_tab_public_title
 import dev.dimension.flare.compose.ui.mixed_timeline_title
+import dev.dimension.flare.compose.ui.posts_title
 import dev.dimension.flare.compose.ui.rss_title
 import dev.dimension.flare.compose.ui.settings_title
 import dev.dimension.flare.compose.ui.social_title
@@ -63,7 +65,6 @@ import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
-import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.icons.Misskey
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -281,6 +282,7 @@ internal val TitleType.Localized.res: StringResource
             TitleType.Localized.LocalizedKey.MixedTimeline -> Res.string.mixed_timeline_title
             TitleType.Localized.LocalizedKey.Liked -> Res.string.liked_title
             TitleType.Localized.LocalizedKey.AllRssFeeds -> Res.string.all_rss_feeds_title
+            TitleType.Localized.LocalizedKey.Posts -> Res.string.posts_title
         }
 
 internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =
@@ -295,7 +297,7 @@ internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =
         IconType.Material.MaterialIcon.Featured -> FontAwesomeIcons.Solid.RectangleList
         IconType.Material.MaterialIcon.Bookmark -> FontAwesomeIcons.Solid.BookBookmark
         IconType.Material.MaterialIcon.Heart -> FontAwesomeIcons.Solid.Heart
-        IconType.Material.MaterialIcon.Twitter -> FontAwesomeIcons.Brands.Twitter
+        IconType.Material.MaterialIcon.Twitter -> FontAwesomeIcons.Brands.XTwitter
         IconType.Material.MaterialIcon.Mastodon -> FontAwesomeIcons.Brands.Mastodon
         IconType.Material.MaterialIcon.Misskey -> FontAwesomeIcons.Brands.Misskey
         IconType.Material.MaterialIcon.Bluesky -> FontAwesomeIcons.Brands.Bluesky

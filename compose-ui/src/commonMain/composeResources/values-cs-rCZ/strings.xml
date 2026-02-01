@@ -98,8 +98,8 @@
     <string name="reaction_remove">Odstranit reakci</string>
     <string name="reply">Odpověď</string>
     <string name="report">Nahlásit</string>
-    <string name="retweet">Opakovat</string>
-    <string name="retweet_remove">Odstranit retweet</string>
+    <string name="retweet">Znovu odeslat</string>
+    <string name="retweet_remove">Odstranit repost</string>
     <string name="share">Sdílet</string>
     <string name="fx_share">Sdílet přes FxEmbed</string>
     <string name="comment">Komentář</string>
@@ -366,6 +366,9 @@
     <string name="mixed_timeline_title">Smíšená</string>
     <string name="liked_title">Líbí se mi</string>
     <string name="all_rss_feeds_title">Všechny Rss kanály</string>
+    <string name="posts_title">Příspěvky</string>
+    <string name="settings_appearance_absolute_timestamp">Absolutní časové razítko</string>
+    <string name="settings_appearance_absolute_timestamp_description">Zobrazit absolutní časové značky na příspěvcích</string>
     <string name="settings_about_description">Konečná generace AI s otevřeným zdrojem napájí decentralizovaný klient sociální sítě.</string>
     <string name="settings_about_source_code">Zdrojový kód</string>
     <string name="settings_about_telegram">Telegram</string>

@@ -491,7 +491,7 @@ private fun Status.renderStatus(
                             },
                         ),
                     )
-                } else {
+                } else if (accountKey == null) {
                     add(
                         ActionMenu.Item(
                             icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,

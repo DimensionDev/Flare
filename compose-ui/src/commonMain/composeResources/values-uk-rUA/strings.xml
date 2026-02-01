@@ -98,8 +98,8 @@
     <string name="reaction_remove">Видалити реакцію</string>
     <string name="reply">Відповідь</string>
     <string name="report">Доповісти</string>
-    <string name="retweet">Ретвіт</string>
-    <string name="retweet_remove">Видалити ретвіт</string>
+    <string name="retweet">Репост</string>
+    <string name="retweet_remove">Видалити репост</string>
     <string name="share">Поділитись</string>
     <string name="fx_share">Поділитись через FxEmbed</string>
     <string name="comment">Коментар</string>
@@ -366,6 +366,9 @@
     <string name="mixed_timeline_title">Змішаний</string>
     <string name="liked_title">Вподобано</string>
     <string name="all_rss_feeds_title">Всі стрічки RSS</string>
+    <string name="posts_title">Повідомлення</string>
+    <string name="settings_appearance_absolute_timestamp">Абсолютна часова мітка</string>
+    <string name="settings_appearance_absolute_timestamp_description">Показувати абсолютні позначки часу на повідомленнях</string>
     <string name="settings_about_description">На основі децентралізованого клієнта соціальної мережі під час наступного покоління.</string>
     <string name="settings_about_source_code">Початковий код</string>
     <string name="settings_about_telegram">Телеграма</string>

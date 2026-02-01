@@ -61,6 +61,8 @@
     <string name="settings_ai_config_tldr_description">Ενεργοποίηση περιλήψεων τεχνητής νοημοσύνης για μεγάλες δημοσιεύσεις, μόνο διαθέσιμη σε ανάρτηση που υπερβαίνει τους 500 χαρακτήρες</string>
     <string name="settings_language_title">Γλώσσα</string>
     <string name="settings_language_description">Αλλαγή γλώσσας της εφαρμογής</string>
+    <string name="settings_rss_management_title">Διαχείριση RSS</string>
+    <string name="settings_rss_management_description">Διαχείριση ροών RSS</string>
     <string name="status_loadmore_error_retry">Επανάληψη</string>
     <string name="login_expired">Η συνεδρία σύνδεσης έχει λήξει</string>
     <string name="login_expired_message">Κάντε κλικ για να συνδεθείτε ξανά</string>
@@ -167,6 +169,10 @@
     <string name="settings_appearance_in_app_browser_description">Άνοιγμα συνδέσμων στο πρόγραμμα περιήγησης εντός εφαρμογής</string>
     <string name="settings_appearance_full_width_post">Πλήρες πλάτος δημοσίευσης</string>
     <string name="settings_appearance_full_width_post_description">Εμφάνιση της δημοσίευσης σε πλήρες πλάτος</string>
+    <string name="settings_appearance_absolute_timestamp">Απόλυτη χρονοσήμανση</string>
+    <string name="settings_appearance_absolute_timestamp_description">Εμφάνιση απόλυτων χρονικών σημάτων στις δημοσιεύσεις</string>
+    <string name="settings_appearance_show_platform_logo">Εμφάνιση λογότυπου πλατφόρμας</string>
+    <string name="settings_appearance_show_platform_logo_description">Εμφάνιση του λογότυπου της πηγής πλατφόρμας στα άρθρα</string>
     <string name="settings_storage_clear_image_cache">Εκκαθάριση προσωρινής μνήμης εικόνας</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB εικόνων θα αφαιρεθούν</string>
     <string name="settings_storage_clear_database">Εκκαθάριση βάσης δεδομένων προσωρινής μνήμης</string>
@@ -329,6 +335,12 @@
     <string name="import_confirmation_message">Αυτό θα εισάγει δεδομένα από το αρχείο. Οι υπάρχουσες εγγραφές με ταυτότητες που ταιριάζουν θα αντικατασταθούν. Θέλετε να συνεχίσετε?</string>
     <string name="changelog_current"><![CDATA[            <span>Έκδοση %1$s:</span>
             <ul>
+                <li>Προσαρμοσμένη ομάδα μικτού χρονοδιαγράμματος</li>
+                <li>Εξαγωγή δεδομένων και εισαγωγή</li>
+                <li>Αναζήτηση πολλαπλών λογαριασμών</li>
+                <li>Απόλυτη ημερομηνία και ώρα στα άρθρα</li>
+                <li>Προσθήκη εμβλήματος πλατφόρμας στα άρθρα</li>
+                <li>Διαχείριση RSS έχει μεταφερθεί στις ρυθμίσεις</li>
                 <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης.</li>
             </ul>
         ]]></string>

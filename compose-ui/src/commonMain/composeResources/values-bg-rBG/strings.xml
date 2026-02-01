@@ -70,6 +70,7 @@
     <string name="reaction_remove">Премахване на реакцията</string>
     <string name="reply">Отговор</string>
     <string name="report">Докладване</string>
+    <string name="retweet">Препубликуване</string>
     <string name="share">Споделяне</string>
     <string name="fx_share">Споделяне чрез FxEmbed</string>
     <string name="comment">Коментар</string>
@@ -209,6 +210,7 @@
     <string name="social_title">Социални</string>
     <string name="antenna_title">Антена</string>
     <string name="mixed_timeline_title">Обединено</string>
+    <string name="posts_title">Публикации</string>
     <string name="settings_about_description">Следващо поколение децентрализиран клиент за социални мрежи, захранван от ИИ и с отворен код.</string>
     <string name="settings_about_source_code">Програмен код</string>
     <string name="settings_about_telegram">Телеграм</string>

@@ -59,8 +59,8 @@
     <string name="reaction_remove">Удалить реакцию</string>
     <string name="reply">Ответ</string>
     <string name="report">Пожаловаться</string>
-    <string name="retweet">Ретвитнуть</string>
-    <string name="retweet_remove">Удалить ретвит</string>
+    <string name="retweet">Репост</string>
+    <string name="retweet_remove">Удалить репост</string>
     <string name="status_loadmore_error_retry">Повторить</string>
     <string name="status_detail_comment">Комментарий</string>
     <string name="status_detail_repost">Репост</string>
@@ -191,6 +191,10 @@
     <string name="settings_appearance_post_action_style_left_aligned">Выровнять слева</string>
     <string name="settings_appearance_post_action_style_right_aligned">Выровнять вправо</string>
     <string name="settings_appearance_post_action_style_stretch">Растянуть</string>
+    <string name="settings_appearance_absolute_timestamp">Абсолютная метка времени</string>
+    <string name="settings_appearance_absolute_timestamp_description">Показывать абсолютную метку времени на записях</string>
+    <string name="settings_appearance_show_platform_logo">Показать логотип платформы</string>
+    <string name="settings_appearance_show_platform_logo_description">Показывать исходный логотип платформы на позициях</string>
     <string name="settings_about_source_code">Исходный код</string>
     <string name="settings_about_telegram">Телеграмма</string>
     <string name="settings_about_telegram_description">Присоединяйтесь к нашей группе Telegram</string>
@@ -278,6 +282,8 @@
     <string name="settings_storage_clear_database_description">%1$s пользователи, %2$s сообщения будут удалены</string>
     <string name="settings_storage_app_log">Открыть журнал приложений</string>
     <string name="settings_storage_app_log_description">Просмотр журнала приложений</string>
+    <string name="settings_rss_management_title">Управление RSS</string>
+    <string name="settings_rss_management_description">Управление RSS-каналами</string>
     <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
     <string name="opml_import">Импорт из OPML</string>
     <string name="opml_export">Экспорт в OPML</string>

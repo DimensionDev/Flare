@@ -34,7 +34,7 @@ internal data class XqtUrl(
     @Contextual @SerialName(value = "expanded_url")
     val expandedUrl: String? = null,
     @SerialName(value = "indices")
-    val indices: kotlin.collections.List<kotlin.Int>? = null,
+    val indices: kotlin.collections.List<kotlin.Int> = emptyList(),
     @Contextual @SerialName(value = "url")
     val url: String,
 )

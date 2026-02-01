@@ -5,6 +5,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.cash.molecule.RecompositionMode
 import app.cash.molecule.moleculeFlow
 import dev.dimension.flare.RobolectricTest
+import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.memoryDatabaseBuilder
@@ -24,20 +25,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
-import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ImportOPMLPresenterTest : RobolectricTest() {
-    class TestFormatter : PlatformFormatter {
-        override fun formatNumber(number: Long): String = number.toString()
-
-        override fun formatRelativeInstant(instant: Instant): String = instant.toString()
-
-        override fun formatFullInstant(instant: Instant): String = instant.toString()
-
-        override fun formatAbsoluteInstant(instant: Instant): String = instant.toString()
-    }
-
     private lateinit var db: AppDatabase
 
     @BeforeTest
@@ -226,5 +216,63 @@ class ImportOPMLPresenterTest : RobolectricTest() {
             )
             val dbSources = db.rssSourceDao().getAll().first()
             assertEquals(feedCount, dbSources.size, "Database records should match input")
+        }
+
+    @Test
+    fun testNoTypeOPML() =
+        runTest {
+            val sb = StringBuilder()
+            sb.append(
+                """
+                <?xml version='1.0' encoding='UTF-8' ?>
+                <opml version="2.0">
+                  <head>
+                    <title>Fake Data</title>
+                    <dateCreated>Sun Dec 14 12:56:07 GMT+08:00 2025</dateCreated>
+                  </head>
+                  <body>
+                """.trimIndent(),
+            )
+
+            val categories = 5
+            val feedsPerCategory = 10
+            val expectedTotal = categories * feedsPerCategory
+
+            repeat(categories) { c ->
+                sb.append("""<outline isDefault="true" text="Category $c" title="Category $c">""")
+                repeat(feedsPerCategory) { f ->
+                    sb.append(
+                        """<outline isFullContent="false" htmlUrl="https://fake.com/$c/$f" text="Feed $c-$f" title="Feed $c-$f" isNotification="false" isBrowser="false" xmlUrl="https://fake.com/$c/$f/rss" />""",
+                    )
+                }
+                sb.append("</outline>")
+            }
+
+            sb.append("</body></opml>")
+
+            val presenter = ImportOPMLPresenter(sb.toString()) { null }
+
+            val states = mutableListOf<ImportOPMLPresenter.State>()
+            val job =
+                launch {
+                    moleculeFlow(mode = RecompositionMode.Immediate) {
+                        presenter.body()
+                    }.collect {
+                        states.add(it)
+                    }
+                }
+
+            advanceUntilIdle()
+            job.cancel()
+
+            val finalState = states.last()
+
+            assertFalse(finalState.importing)
+            assertNull(finalState.error)
+            assertEquals(expectedTotal, finalState.totalCount)
+            assertEquals(expectedTotal, finalState.importedCount)
+
+            val sources = db.rssSourceDao().getAll().first()
+            assertEquals(expectedTotal, sources.size)
         }
 }

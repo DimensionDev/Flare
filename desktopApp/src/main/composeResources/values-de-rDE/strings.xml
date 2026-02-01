@@ -59,8 +59,8 @@
     <string name="reaction_remove">Reaktion entfernen</string>
     <string name="reply">Antwort</string>
     <string name="report">Bericht</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Retweet entfernen</string>
+    <string name="retweet">Repost</string>
+    <string name="retweet_remove">Repost entfernen</string>
     <string name="status_loadmore_error_retry">Wiederholen</string>
     <string name="status_detail_comment">Kommentar</string>
     <string name="status_detail_repost">Repost</string>
@@ -191,6 +191,10 @@
     <string name="settings_appearance_post_action_style_left_aligned">Links ausgerichtet</string>
     <string name="settings_appearance_post_action_style_right_aligned">Rechts ausgerichtet</string>
     <string name="settings_appearance_post_action_style_stretch">Dehnen</string>
+    <string name="settings_appearance_absolute_timestamp">Absoluter Zeitstempel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Zeige absolute Zeitstempel in Beiträgen</string>
+    <string name="settings_appearance_show_platform_logo">Plattform-Logo anzeigen</string>
+    <string name="settings_appearance_show_platform_logo_description">Zeige das Quell-Plattform-Logo bei Beitragseinträgen</string>
     <string name="settings_about_source_code">Quellcode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Trete unserer Telegram-Gruppe bei</string>
@@ -278,6 +282,8 @@
     <string name="settings_storage_clear_database_description">%1$s Benutzer, %2$s Beiträge werden entfernt</string>
     <string name="settings_storage_app_log">App-Log öffnen</string>
     <string name="settings_storage_app_log_description">App-Log anzeigen</string>
+    <string name="settings_rss_management_title">RSS-Verwaltung</string>
+    <string name="settings_rss_management_description">RSS-Feeds verwalten</string>
     <string name="copied_to_clipboard">In Zwischenablage kopiert</string>
     <string name="opml_import">Von OPML importieren</string>
     <string name="opml_export">Nach OPML exportieren</string>

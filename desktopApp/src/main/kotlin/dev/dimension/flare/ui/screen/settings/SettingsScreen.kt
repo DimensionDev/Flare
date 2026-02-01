@@ -116,6 +116,8 @@ import dev.dimension.flare.settings_appearance_show_media
 import dev.dimension.flare.settings_appearance_show_media_description
 import dev.dimension.flare.settings_appearance_show_numbers
 import dev.dimension.flare.settings_appearance_show_numbers_description
+import dev.dimension.flare.settings_appearance_show_platform_logo
+import dev.dimension.flare.settings_appearance_show_platform_logo_description
 import dev.dimension.flare.settings_appearance_theme
 import dev.dimension.flare.settings_appearance_theme_auto
 import dev.dimension.flare.settings_appearance_theme_dark
@@ -127,6 +129,8 @@ import dev.dimension.flare.settings_language_title
 import dev.dimension.flare.settings_local_history_description
 import dev.dimension.flare.settings_local_history_title
 import dev.dimension.flare.settings_privacy_policy
+import dev.dimension.flare.settings_rss_management_description
+import dev.dimension.flare.settings_rss_management_title
 import dev.dimension.flare.settings_status_appearance_subtitle
 import dev.dimension.flare.settings_status_appearance_title
 import dev.dimension.flare.settings_storage_app_log
@@ -200,6 +204,7 @@ internal fun SettingsScreen(
     toLogin: () -> Unit,
     toLocalCache: () -> Unit,
     toAppLog: () -> Unit,
+    toRSSManagement: () -> Unit,
 ) {
     val window = LocalComposeWindow.current
     val state by producePresenter {
@@ -669,6 +674,26 @@ internal fun SettingsScreen(
                 ExpanderItemSeparator()
                 ExpanderItem(
                     heading = {
+                        Text(stringResource(Res.string.settings_appearance_show_platform_logo))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_show_platform_logo_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = LocalAppearanceSettings.current.showPlatformLogo,
+                            {
+                                state.appearanceState.updateSettings {
+                                    copy(showPlatformLogo = it)
+                                }
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+                ExpanderItemSeparator()
+                ExpanderItem(
+                    heading = {
                         Text(stringResource(Res.string.settings_appearance_show_link_previews))
                     },
                     caption = {
@@ -803,6 +828,23 @@ internal fun SettingsScreen(
                     icon = null,
                 )
             }
+            CardExpanderItem(
+                onClick = toRSSManagement,
+                heading = {
+                    Text(stringResource(Res.string.settings_rss_management_title))
+                },
+                trailing = {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.AngleRight,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                    )
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_rss_management_description))
+                },
+                icon = null,
+            )
             Expander(
                 expanded = state.storageState.expanded,
                 onExpandedChanged = state.storageState::setExpanded,

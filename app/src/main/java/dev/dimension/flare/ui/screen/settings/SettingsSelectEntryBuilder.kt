@@ -51,6 +51,9 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             toColorSpace = {
                 navigate(Route.Settings.ColorSpace)
             },
+            toRSSManagement = {
+                navigate(Route.Rss.Sources)
+            },
             onBack = onBack,
         )
     }

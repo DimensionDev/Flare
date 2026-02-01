@@ -81,6 +81,14 @@ struct SettingsScreen: View {
                         }
                     }
                 }
+                NavigationLink(value: Route.rssManagement) {
+                    Label {
+                        Text("settings_rss_management_title")
+                        Text("settings_rss_management_description")
+                    } icon: {
+                        Image("fa-square-rss")
+                    }
+                }
                 NavigationLink(value: Route.storage) {
                     Label {
                         Text("storage_title")

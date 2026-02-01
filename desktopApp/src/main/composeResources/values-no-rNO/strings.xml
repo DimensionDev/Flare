@@ -59,8 +59,8 @@
     <string name="reaction_remove">Fjern reaksjon</string>
     <string name="reply">Svar</string>
     <string name="report">Rapporter</string>
-    <string name="retweet">Prøv igjen</string>
-    <string name="retweet_remove">Fjern retweet</string>
+    <string name="retweet">Gjenkjenn</string>
+    <string name="retweet_remove">Fjern innlegg</string>
     <string name="status_loadmore_error_retry">Prøv igjen</string>
     <string name="status_detail_comment">Kommentar</string>
     <string name="status_detail_repost">Gjenkjenn</string>
@@ -191,6 +191,10 @@
     <string name="settings_appearance_post_action_style_left_aligned">Venstre justert</string>
     <string name="settings_appearance_post_action_style_right_aligned">Høyre justert</string>
     <string name="settings_appearance_post_action_style_stretch">Strekk</string>
+    <string name="settings_appearance_absolute_timestamp">Absolutt tidsstempel</string>
+    <string name="settings_appearance_absolute_timestamp_description">Vis absolutte tidsstempler på innlegg</string>
+    <string name="settings_appearance_show_platform_logo">Vis plattformlogo</string>
+    <string name="settings_appearance_show_platform_logo_description">Vis logo for kildeplattformplattformen på innlegg</string>
     <string name="settings_about_source_code">Kildekode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Bli med i vår Telegram gruppe</string>
@@ -278,6 +282,8 @@
     <string name="settings_storage_clear_database_description">%1$s brukere, %2$s innlegg vil bli fjernet</string>
     <string name="settings_storage_app_log">Åpne app-logg</string>
     <string name="settings_storage_app_log_description">Se app-loggen</string>
+    <string name="settings_rss_management_title">RSS administrasjon</string>
+    <string name="settings_rss_management_description">Administrer RSS-feeder</string>
     <string name="copied_to_clipboard">Kopiert til utklippstavle</string>
     <string name="opml_import">Importer fra OPML</string>
     <string name="opml_export">Eksporter til OPML</string>

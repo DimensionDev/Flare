@@ -10,6 +10,10 @@ internal actual object PlatformColorScheme {
     actual val primary: Color
         @Composable
         get() = CupertinoTheme.colorScheme.accent
+
+    actual val retweetColor: Color
+        @Composable
+        get() = CupertinoTheme.colorScheme.accent
     actual val primaryContainer: Color
         @Composable
         get() = CupertinoTheme.colorScheme.accent

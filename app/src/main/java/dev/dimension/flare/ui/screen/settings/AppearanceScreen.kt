@@ -491,6 +491,30 @@ internal fun AppearanceScreen(
                 SegmentedListItem(
                     onClick = {
                         state.updateSettings {
+                            copy(showPlatformLogo = !showPlatformLogo)
+                        }
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_appearance_show_platform_logo))
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_show_platform_logo_description))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = appearanceSettings.showPlatformLogo,
+                            onCheckedChange = {
+                                state.updateSettings {
+                                    copy(showPlatformLogo = it)
+                                }
+                            },
+                        )
+                    },
+                )
+                SegmentedListItem(
+                    onClick = {
+                        state.updateSettings {
                             copy(showLinkPreview = !showLinkPreview)
                         }
                     },

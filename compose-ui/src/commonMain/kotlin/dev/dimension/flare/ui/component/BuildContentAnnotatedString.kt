@@ -4,40 +4,42 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withAnnotation
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.util.fastForEach
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.ui.render.UiRichText
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 
+
+internal sealed interface RichTextContent {
+    data class Text(val content: AnnotatedString) : RichTextContent
+    data class BlockImage(val url: String, val href: String?) : RichTextContent
+}
 
 internal class RichTextState(
     val richText: UiRichText,
     val styleData: StyleData,
 ) {
     private val context = BuildContentAnnotatedStringContext()
-    val annotatedString =
+    val contents: ImmutableList<RichTextContent> =
         buildContentAnnotatedString(
             element = richText.data,
             context = context,
             styleData = styleData,
         )
+
     val inlineContent by lazy {
         context.inlineContent.toImmutableMap()
-    }
-    val hasBlockImage: Boolean by lazy {
-        context.inlineContent.values.any {
-            it is BuildContentAnnotatedStringContext.InlineType.BlockImage
-        }
     }
 }
 
@@ -45,21 +47,20 @@ internal fun buildContentAnnotatedString(
     element: Element,
     context: BuildContentAnnotatedStringContext,
     styleData: StyleData,
-): AnnotatedString {
-    return buildAnnotatedString {
-        renderElement(
-            element,
-            styleData = styleData,
-            context = context,
-        )
-    }
+): ImmutableList<RichTextContent> {
+    val builder = ContentBuilder(context)
+    builder.renderElement(
+        element,
+        styleData = styleData,
+        context = context,
+    )
+    return builder.build()
 }
 
 internal class BuildContentAnnotatedStringContext {
     private var isBlockState = false
     sealed interface InlineType {
         data class Emoji(val url: String) : InlineType
-        data class BlockImage(val url: String) : InlineType
     }
     val inlineContent = mutableMapOf<String, InlineType>()
     fun appendInlineContent(
@@ -79,11 +80,7 @@ internal class BuildContentAnnotatedStringContext {
         url: String,
     ): String {
         val id = "inline_${inlineContent.size}"
-        if (isBlockState) {
-            inlineContent[id] = InlineType.BlockImage(url)
-        } else {
-            inlineContent[id] = InlineType.Emoji(url)
-        }
+        inlineContent[id] = InlineType.Emoji(url)
         return id
     }
 }
@@ -111,7 +108,109 @@ internal data class StyleData(
     }
 }
 
-private fun AnnotatedString.Builder.renderNode(
+
+private sealed interface StyleOp {
+    data class Span(val style: SpanStyle) : StyleOp
+    data class Paragraph(val style: ParagraphStyle) : StyleOp
+    data class Annotation(val tag: String, val annotation: String) : StyleOp
+}
+
+private class ContentBuilder(
+    val context: BuildContentAnnotatedStringContext
+) {
+    private val _contents = mutableListOf<RichTextContent>()
+    private var currentBuilder = AnnotatedString.Builder()
+    private val activeStyleOps = mutableListOf<StyleOp>()
+
+    fun append(text: String) {
+        currentBuilder.append(text)
+    }
+
+    fun appendLine() {
+        // Prevent multiple newlines at the start of a block if strict spacing is needed,
+        // but for now mirroring appendLine legacy behavior
+        currentBuilder.append("\n")
+    }
+
+    fun appendInlineContent(id: String, alternateText: String = "[image]") {
+        currentBuilder.appendInlineContent(id, alternateText)
+    }
+
+    fun appendBlockImage(url: String, href: String?) {
+        if (currentBuilder.length > 0) {
+            _contents.add(RichTextContent.Text(currentBuilder.toAnnotatedString()))
+        }
+        _contents.add(RichTextContent.BlockImage(url, href))
+        currentBuilder = AnnotatedString.Builder()
+        restoreStyles()
+    }
+
+    fun pushStyle(style: SpanStyle) {
+        currentBuilder.pushStyle(style)
+        activeStyleOps.add(StyleOp.Span(style))
+    }
+
+    fun pushStyle(style: ParagraphStyle) {
+        currentBuilder.pushStyle(style)
+        activeStyleOps.add(StyleOp.Paragraph(style))
+    }
+
+    fun pushAnnotation(tag: String, annotation: String) {
+        currentBuilder.pushStringAnnotation(tag, annotation)
+        activeStyleOps.add(StyleOp.Annotation(tag, annotation))
+    }
+
+    fun pop() {
+        currentBuilder.pop()
+        activeStyleOps.removeLastOrNull()
+    }
+
+    inline fun withStyle(style: SpanStyle, block: ContentBuilder.() -> Unit) {
+        pushStyle(style)
+        try {
+            block()
+        } finally {
+            pop()
+        }
+    }
+
+    inline fun withStyle(style: ParagraphStyle, block: ContentBuilder.() -> Unit) {
+        pushStyle(style)
+        try {
+            block()
+        } finally {
+            pop()
+        }
+    }
+
+    inline fun withAnnotation(tag: String, annotation: String, block: ContentBuilder.() -> Unit) {
+        pushAnnotation(tag, annotation)
+        try {
+            block()
+        } finally {
+            pop()
+        }
+    }
+
+    private fun restoreStyles() {
+        activeStyleOps.forEach { op ->
+            when(op) {
+                is StyleOp.Span -> currentBuilder.pushStyle(op.style)
+                is StyleOp.Paragraph -> currentBuilder.pushStyle(op.style)
+                is StyleOp.Annotation -> currentBuilder.pushStringAnnotation(op.tag, op.annotation)
+            }
+        }
+    }
+
+    fun build(): ImmutableList<RichTextContent> {
+        if (currentBuilder.length > 0) {
+            _contents.add(RichTextContent.Text(currentBuilder.toAnnotatedString()))
+        }
+        return _contents.toImmutableList()
+    }
+}
+
+private fun ContentBuilder.renderNode(
     node: Node,
     styleData: StyleData,
     context: BuildContentAnnotatedStringContext,
@@ -128,13 +227,13 @@ private fun AnnotatedString.Builder.renderNode(
     }
 }
 
-private fun AnnotatedString.Builder.renderText(
+private fun ContentBuilder.renderText(
     text: String,
 ) {
     append(text)
 }
 
-private fun AnnotatedString.Builder.renderElement(
+private fun ContentBuilder.renderElement(
     element: Element,
     styleData: StyleData,
     context: BuildContentAnnotatedStringContext,
@@ -197,11 +296,6 @@ private fun AnnotatedString.Builder.renderElement(
         }
 
         "p", "div" -> {
-//            withStyle(
-//                styleData.textStyle
-//                    .toParagraphStyle(),
-//            ) {
-//            }
             withStyle(
                 styleData.textStyle.toSpanStyle(),
             ) {
@@ -209,9 +303,7 @@ private fun AnnotatedString.Builder.renderElement(
                     renderNode(node = it, styleData = styleData, context = context)
                 }
             }
-            // https://issuetracker.google.com/issues/342419072
-            // https://issuetracker.google.com/issues/407557822
-            // https://issuetracker.google.com/issues/391393408
+
             if (element.parent()?.childNodes()?.last() != element) {
                 appendLine()
                 appendLine()
@@ -236,17 +328,18 @@ private fun AnnotatedString.Builder.renderElement(
             val src = element.attribute("src")?.value
             if (!src.isNullOrEmpty()) {
                 if (context.isInBlockState()) {
-                    appendLine()
-                }
-                val imageId = context.appendImageInlineContent(src)
-                appendInlineContent(imageId, src)
-                if (context.isInBlockState()) {
-                    appendLine()
+                    val href = element.attribute("href")?.value
+                    // Block image
+                    appendBlockImage(src, href)
+                } else {
+                    // Inline image
+                    val imageId = context.appendImageInlineContent(src)
+                    appendInlineContent(imageId, src)
                 }
             }
         }
 
-        "strong" -> {
+        "strong", "b" -> {
             pushStyle(
                 styleData.textStyle.copy(fontWeight = FontWeight.Bold).toSpanStyle(),
             )
@@ -256,7 +349,7 @@ private fun AnnotatedString.Builder.renderElement(
             pop()
         }
 
-        "em" -> {
+        "em", "i" -> {
             pushStyle(
                 styleData.textStyle.copy(fontStyle = FontStyle.Italic).toSpanStyle(),
             )
@@ -305,10 +398,9 @@ private fun AnnotatedString.Builder.renderElement(
         }
 
         "ul" -> {
-            withBulletList {
-                element.childNodes().fastForEach {
-                    renderNode(node = it, styleData = styleData, context = context)
-                }
+
+            element.childNodes().fastForEach {
+                renderNode(node = it, styleData = styleData, context = context)
             }
         }
 
@@ -435,7 +527,7 @@ private fun AnnotatedString.Builder.renderElement(
     }
 }
 
-private fun AnnotatedString.Builder.renderLink(
+private fun ContentBuilder.renderLink(
     element: Element,
     styleData: StyleData,
     context: BuildContentAnnotatedStringContext,
@@ -446,7 +538,6 @@ private fun AnnotatedString.Builder.renderLink(
             withStyle(
                 styleData.linkStyle.toSpanStyle(),
             ) {
-//        withLink(LinkAnnotation.Url(href)) {
                 element.childNodes().fastForEach {
                     renderNode(
                         node = it,
@@ -454,7 +545,6 @@ private fun AnnotatedString.Builder.renderLink(
                         context = context,
                     )
                 }
-//        }
             }
         }
     }

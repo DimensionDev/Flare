@@ -60,7 +60,7 @@
     <string name="reply">回复</string>
     <string name="report">举报</string>
     <string name="retweet">转发</string>
-    <string name="retweet_remove">移除转发</string>
+    <string name="retweet_remove">移除重报</string>
     <string name="status_loadmore_error_retry">重试</string>
     <string name="status_detail_comment">评论</string>
     <string name="status_detail_repost">转发</string>
@@ -191,6 +191,10 @@
     <string name="settings_appearance_post_action_style_left_aligned">左对齐</string>
     <string name="settings_appearance_post_action_style_right_aligned">右对齐</string>
     <string name="settings_appearance_post_action_style_stretch">拉伸模式</string>
+    <string name="settings_appearance_absolute_timestamp">绝对时间戳</string>
+    <string name="settings_appearance_absolute_timestamp_description">在帖子中显示绝对时间戳</string>
+    <string name="settings_appearance_show_platform_logo">显示平台标志</string>
+    <string name="settings_appearance_show_platform_logo_description">在帖子项目上显示源平台标志</string>
     <string name="settings_about_source_code">源代码</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">加入Telegram 群组</string>
@@ -278,6 +282,8 @@
     <string name="settings_storage_clear_database_description">%1$s 用户， %2$s 帖子将被删除</string>
     <string name="settings_storage_app_log">打开应用日志</string>
     <string name="settings_storage_app_log_description">查看应用日志</string>
+    <string name="settings_rss_management_title">RSS 管理</string>
+    <string name="settings_rss_management_description">管理 RSS 源</string>
     <string name="copied_to_clipboard">复制到剪贴板</string>
     <string name="opml_import">从 OPML 导入</string>
     <string name="opml_export">导出到 OPML</string>

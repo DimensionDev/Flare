@@ -59,8 +59,8 @@
     <string name="reaction_remove">Poista reaktio</string>
     <string name="reply">Vastaa</string>
     <string name="report">Raportoi</string>
-    <string name="retweet">Yritä Uudelleen</string>
-    <string name="retweet_remove">Poista uudelleentwiittaa</string>
+    <string name="retweet">Uudelleenlähetys</string>
+    <string name="retweet_remove">Poista repost</string>
     <string name="status_loadmore_error_retry">Yritä Uudelleen</string>
     <string name="status_detail_comment">Kommentti</string>
     <string name="status_detail_repost">Uudelleenlähetys</string>
@@ -191,6 +191,10 @@
     <string name="settings_appearance_post_action_style_left_aligned">Vasen tasattu</string>
     <string name="settings_appearance_post_action_style_right_aligned">Oikealle tasattu</string>
     <string name="settings_appearance_post_action_style_stretch">Venytä</string>
+    <string name="settings_appearance_absolute_timestamp">Absoluuttinen aikaleima</string>
+    <string name="settings_appearance_absolute_timestamp_description">Näytä absoluuttiset aikaleimat artikkeleissa</string>
+    <string name="settings_appearance_show_platform_logo">Näytä alustan logo</string>
+    <string name="settings_appearance_show_platform_logo_description">Näytä lähteen alustan logo artikkeleissa</string>
     <string name="settings_about_source_code">Lähdekoodi</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Liity meidän Telegram ryhmään</string>
@@ -278,6 +282,8 @@
     <string name="settings_storage_clear_database_description">%1$s käyttäjää, %2$s viestit poistetaan</string>
     <string name="settings_storage_app_log">Avaa sovelluksen loki</string>
     <string name="settings_storage_app_log_description">Näytä sovellusloki</string>
+    <string name="settings_rss_management_title">Rss Hallinta</string>
+    <string name="settings_rss_management_description">Hallitse RSS-syötteitä</string>
     <string name="copied_to_clipboard">Kopioitu leikepöydälle</string>
     <string name="opml_import">Tuo OPML:sta</string>
     <string name="opml_export">Vie OPML:ään</string>

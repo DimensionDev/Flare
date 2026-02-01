@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.route
 
 import androidx.navigation3.runtime.NavKey
 import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.data.model.XQT
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRssSource
@@ -244,6 +245,13 @@ internal sealed interface Route : NavKey {
 
         public fun from(deeplinkRoute: DeeplinkRoute): Route? {
             return when (deeplinkRoute) {
+                is DeeplinkRoute.Timeline.XQTDeviceFollow ->
+                    Route.Timeline(
+                        tabItem =
+                            XQT.DeviceFollowTimelineTabItem(
+                                account = deeplinkRoute.accountType,
+                            ),
+                    )
                 is DeeplinkRoute.OpenLinkDirectly -> null
                 is DeeplinkRoute.DeepLinkAccountPicker ->
                     DeepLinkAccountPicker(

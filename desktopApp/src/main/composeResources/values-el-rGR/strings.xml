@@ -59,8 +59,8 @@
     <string name="reaction_remove">Αφαίρεση αντίδρασης</string>
     <string name="reply">Απάντηση</string>
     <string name="report">Αναφορά</string>
-    <string name="retweet">Retweet</string>
-    <string name="retweet_remove">Αφαίρεση retweet</string>
+    <string name="retweet">Επαναδημοσίευση</string>
+    <string name="retweet_remove">Αφαίρεση αναδημοσίευσης</string>
     <string name="status_loadmore_error_retry">Επανάληψη</string>
     <string name="status_detail_comment">Σχόλιο</string>
     <string name="status_detail_repost">Επαναδημοσίευση</string>
@@ -191,6 +191,10 @@
     <string name="settings_appearance_post_action_style_left_aligned">Αριστερά ευθυγραμμίστηκε</string>
     <string name="settings_appearance_post_action_style_right_aligned">Δεξιά ευθυγράμμιση</string>
     <string name="settings_appearance_post_action_style_stretch">Τέντωμα</string>
+    <string name="settings_appearance_absolute_timestamp">Απόλυτη χρονοσήμανση</string>
+    <string name="settings_appearance_absolute_timestamp_description">Εμφάνιση απόλυτων χρονικών σημάτων στις δημοσιεύσεις</string>
+    <string name="settings_appearance_show_platform_logo">Εμφάνιση λογότυπου πλατφόρμας</string>
+    <string name="settings_appearance_show_platform_logo_description">Εμφάνιση του λογότυπου της πηγής πλατφόρμας στα άρθρα</string>
     <string name="settings_about_source_code">Πηγαίος κώδικας</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Γίνετε μέλος της ομάδας Telegram</string>
@@ -278,6 +282,8 @@
     <string name="settings_storage_clear_database_description">%1$s χρήστες, οι δημοσιεύσεις %2$s θα αφαιρεθούν</string>
     <string name="settings_storage_app_log">Άνοιγμα αρχείου καταγραφής εφαρμογής</string>
     <string name="settings_storage_app_log_description">Δείτε το αρχείο καταγραφής της εφαρμογής</string>
+    <string name="settings_rss_management_title">Διαχείριση RSS</string>
+    <string name="settings_rss_management_description">Διαχείριση ροών RSS</string>
     <string name="copied_to_clipboard">Αντιγράφηκε στο πρόχειρο</string>
     <string name="opml_import">Εισαγωγή από OPML</string>
     <string name="opml_export">Εξαγωγή σε OPML</string>

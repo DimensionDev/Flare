@@ -98,8 +98,8 @@
     <string name="reaction_remove">إزالة رد الفعل</string>
     <string name="reply">الرد</string>
     <string name="report">تقرير</string>
-    <string name="retweet">تغريدة</string>
-    <string name="retweet_remove">إزالة التغريدة</string>
+    <string name="retweet">إعادة</string>
+    <string name="retweet_remove">إزالة إعادة النشر</string>
     <string name="share">مشاركة</string>
     <string name="fx_share">مشاركة عبر FxEmbed</string>
     <string name="comment">تعليق</string>
@@ -366,6 +366,9 @@
     <string name="mixed_timeline_title">مختلطة</string>
     <string name="liked_title">معجب</string>
     <string name="all_rss_feeds_title">كل تغذية Rss</string>
+    <string name="posts_title">المشاركات</string>
+    <string name="settings_appearance_absolute_timestamp">الطابع الزمني المطلق</string>
+    <string name="settings_appearance_absolute_timestamp_description">عرض علامات الوقت المطلقة على المشاركات</string>
     <string name="settings_about_description">الجيل القادم النهائي مفتوح المصدر من AI زبون الشبكة الاجتماعية اللامركزية.</string>
     <string name="settings_about_source_code">الكود المصدري</string>
     <string name="settings_about_telegram">تيليجرام</string>

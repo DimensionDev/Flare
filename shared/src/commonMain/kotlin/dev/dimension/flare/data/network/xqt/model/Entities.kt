@@ -17,7 +17,6 @@ package dev.dimension.flare.data.network.xqt.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonElement
 
 /**
  *
@@ -31,13 +30,13 @@ import kotlinx.serialization.json.JsonElement
 @Serializable
 internal data class Entities(
     @SerialName(value = "hashtags")
-    val hashtags: JsonElement? = null,
+    val hashtags: kotlin.collections.List<Hashtag>? = null,
     @SerialName(value = "symbols")
-    val symbols: JsonElement? = null,
+    val symbols: kotlin.collections.List<Symbol>? = null,
     @SerialName(value = "urls")
     val urls: kotlin.collections.List<XqtUrl>? = null,
     @SerialName(value = "user_mentions")
-    val userMentions: JsonElement? = null,
+    val userMentions: kotlin.collections.List<UserMention>? = null,
     @SerialName(value = "media")
     val media: kotlin.collections.List<Media>? = null,
     @SerialName(value = "description")
@@ -50,4 +49,24 @@ internal data class Entities(
 internal data class Description(
     @SerialName(value = "urls")
     val urls: kotlin.collections.List<XqtUrl>? = null,
+)
+
+@Serializable
+internal data class Hashtag(
+    @SerialName("text") val text: String? = null,
+    @SerialName("indices") val indices: List<Int> = emptyList(),
+)
+
+@Serializable
+internal data class Symbol(
+    @SerialName("text") val text: String? = null,
+    @SerialName("indices") val indices: List<Int> = emptyList(),
+)
+
+@Serializable
+internal data class UserMention(
+    @SerialName("screen_name") val screenName: String? = null,
+    @SerialName("name") val name: String? = null,
+    @SerialName("id_str") val idStr: String? = null,
+    @SerialName("indices") val indices: List<Int> = emptyList(),
 )

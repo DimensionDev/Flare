@@ -49,7 +49,7 @@ kotlin {
                 implementation(libs.coil3.compose)
                 implementation(libs.coil3.ktor3)
                 implementation(libs.coil3.network)
-                implementation(libs.compose.placeholder.foundation)
+                implementation(libs.compose.placeholder)
                 implementation(libs.ksoup)
                 implementation(libs.kotlinx.immutable)
                 implementation(libs.precompose.molecule)
@@ -71,7 +71,6 @@ kotlin {
                 optIn("androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
             }
             dependencies {
-                implementation(libs.compose.placeholder.material3)
                 implementation(libs.material3.adaptive)
                 implementation(libs.material3)
                 implementation(libs.bundles.media3)
@@ -85,16 +84,6 @@ kotlin {
                 implementation(libs.fluent.ui)
                 implementation(libs.koin.compose)
                 implementation(libs.androidx.collection)
-            }
-        }
-        val jvmTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.junit)
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.robolectric)
-                implementation(compose("org.jetbrains.compose.ui:ui-test-junit4"))
-                implementation(project(":shared"))
             }
         }
         val iosMain by getting {

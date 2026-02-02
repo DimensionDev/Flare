@@ -25,6 +25,7 @@ public class TimelineItemPresenterWithLazyListState(
     public interface State : TimelineItemPresenter.State {
         public val showNewToots: Boolean
         public val lazyListState: LazyStaggeredGridState
+        public val newPostsCount: Int
 
         public fun onNewTootsShown()
     }
@@ -35,8 +36,11 @@ public class TimelineItemPresenterWithLazyListState(
 
     @Composable
     override fun body(): State {
+        val lazyListState = lazyStaggeredGridState ?: rememberLazyStaggeredGridState()
         val state = tabItemPresenter.body()
         var showNewToots by remember { mutableStateOf(false) }
+        var lastRefreshIndex by remember { mutableStateOf(0) }
+        var newPostCount by remember { mutableStateOf(0) }
         state.listState.onSuccess {
             LaunchedEffect(Unit) {
                 snapshotFlow {
@@ -50,10 +54,24 @@ public class TimelineItemPresenterWithLazyListState(
                     .drop(1)
                     .collect {
                         showNewToots = true
+                        lastRefreshIndex = lazyListState.firstVisibleItemIndex
                     }
             }
         }
-        val lazyListState = lazyStaggeredGridState ?: rememberLazyStaggeredGridState()
+        LaunchedEffect(Unit) {
+            snapshotFlow { lazyListState.firstVisibleItemIndex }
+                .distinctUntilChanged()
+                .collect {
+                    if (it > lastRefreshIndex && showNewToots) {
+                        newPostCount =
+                            if (newPostCount > 0) {
+                                minOf(newPostCount, it - lastRefreshIndex)
+                            } else {
+                                it - lastRefreshIndex
+                            }
+                    }
+                }
+        }
         val isAtTheTop by remember {
             derivedStateOf {
                 lazyListState.firstVisibleItemIndex == 0 &&
@@ -65,9 +83,15 @@ public class TimelineItemPresenterWithLazyListState(
                 showNewToots = false
             }
         }
+        LaunchedEffect(showNewToots) {
+            if (!showNewToots) {
+                newPostCount = 0
+            }
+        }
         return object : State, TimelineItemPresenter.State by state {
             override val showNewToots = showNewToots
             override val lazyListState = lazyListState
+            override val newPostsCount = newPostCount
 
             override fun onNewTootsShown() {
                 showNewToots = false

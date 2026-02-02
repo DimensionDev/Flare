@@ -45,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -397,7 +398,14 @@ internal fun TimelineItemContent(
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
                             )
-                            Text(text = stringResource(id = R.string.home_timeline_new_toots))
+                            val ctx = LocalContext.current
+                            val newTootsText =
+                                ctx.resources.getQuantityString(
+                                    R.plurals.home_timeline_new_toots,
+                                    state.newPostsCount,
+                                    state.newPostsCount,
+                                )
+                            Text(text = newTootsText)
                         }
                     }
                 }

@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">Ilmoitukset</string>
     <string name="home_tab_me_title">Minä</string>
     <string name="home_tab_discover_title">Löydä</string>
-    <string name="home_timeline_new_toots">Uudet Viestit</string>
     <string name="notification_tab_all_title">Kaikki</string>
     <string name="notification_tab_mentions_title">Maininnat</string>
     <string name="notification_tab_comments_title">Kommentit</string>

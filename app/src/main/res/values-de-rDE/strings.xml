@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">Benachrichtigungen</string>
     <string name="home_tab_me_title">Ich</string>
     <string name="home_tab_discover_title">Entdecken</string>
-    <string name="home_timeline_new_toots">Neue Beiträge</string>
     <string name="notification_tab_all_title">Alle</string>
     <string name="notification_tab_mentions_title">Erwähnungen</string>
     <string name="notification_tab_comments_title">Kommentare</string>

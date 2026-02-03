@@ -38,9 +38,10 @@ internal class TopLevelBackStack<T : NavKey>(
         if (topLevelStacks[key] == null) {
             topLevelStacks[key] = mutableStateListOf(key)
         } else if (key == startKey) {
-            // If it's the start key, reset its stack
+            // If it's the start key, reset the back stack
+            val stack = topLevelStacks[key]
             topLevelStacks.clear()
-            topLevelStacks[key] = mutableStateListOf(key)
+            topLevelStacks[key] = stack ?: mutableStateListOf(key)
         } else {
             // Otherwise just move it to the end of the stacks
             topLevelStacks.apply {

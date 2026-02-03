@@ -20,6 +20,14 @@
     <string name="home_tab_list_title">قائمة</string>
     <string name="home_tab_feeds_title">التحديثات</string>
     <string name="dm_list_title">الرسائل المباشرة</string>
+    <plurals name="home_timeline_new_toots">
+        <item quantity="zero">%d مشاركات جديدة</item>
+        <item quantity="one">%d منشور جديد</item>
+        <item quantity="two">%d مشاركات جديدة</item>
+        <item quantity="few">%d مشاركات جديدة</item>
+        <item quantity="many">%d مشاركات جديدة</item>
+        <item quantity="other">%d مشاركات جديدة</item>
+    </plurals>
     <string name="navigate_back">الرجوع</string>
     <string name="service_select_instance_input_placeholder">رابط مثيل</string>
     <string name="service_select_next_button">التالي</string>

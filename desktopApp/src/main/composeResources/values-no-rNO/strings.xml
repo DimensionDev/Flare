@@ -20,6 +20,10 @@
     <string name="home_tab_list_title">Liste</string>
     <string name="home_tab_feeds_title">Strøm</string>
     <string name="dm_list_title">Direkte meldinger</string>
+    <plurals name="home_timeline_new_toots">
+        <item quantity="one">%d Nytt innlegg</item>
+        <item quantity="other">%d Nye Innlegg</item>
+    </plurals>
     <string name="navigate_back">Tilbake</string>
     <string name="service_select_instance_input_placeholder">Instans URL</string>
     <string name="service_select_next_button">Neste</string>

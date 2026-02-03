@@ -20,6 +20,10 @@
     <string name="home_tab_list_title">Klantenlijst</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Directe Berichten</string>
+    <plurals name="home_timeline_new_toots">
+        <item quantity="one">%d nieuw bericht</item>
+        <item quantity="other">%d Nieuwe Berichten</item>
+    </plurals>
     <string name="navigate_back">Achterzijde</string>
     <string name="service_select_instance_input_placeholder">Aanleg URL</string>
     <string name="service_select_next_button">Volgende</string>

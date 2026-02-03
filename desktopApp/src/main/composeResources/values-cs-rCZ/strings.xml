@@ -20,6 +20,12 @@
     <string name="home_tab_list_title">Seznam</string>
     <string name="home_tab_feeds_title">Zdroje</string>
     <string name="dm_list_title">Přímé zprávy</string>
+    <plurals name="home_timeline_new_toots">
+        <item quantity="one">%d Nový příspěvek</item>
+        <item quantity="few">%d Nové příspěvky</item>
+        <item quantity="many">%d Nové příspěvky</item>
+        <item quantity="other">%d Nové příspěvky</item>
+    </plurals>
     <string name="navigate_back">Zpět</string>
     <string name="service_select_instance_input_placeholder">URL instance</string>
     <string name="service_select_next_button">Další</string>

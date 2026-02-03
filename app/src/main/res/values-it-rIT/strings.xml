@@ -6,6 +6,10 @@
     <string name="home_tab_notifications_title">Notifiche</string>
     <string name="home_tab_me_title">Io</string>
     <string name="home_tab_discover_title">Scopri</string>
+    <plurals name="home_timeline_new_toots">
+        <item quantity="one">Nuovo Post %d</item>
+        <item quantity="other">Nuovi Post %d</item>
+    </plurals>
     <string name="notification_tab_all_title">Tutti</string>
     <string name="notification_tab_mentions_title">Menzioni</string>
     <string name="notification_tab_comments_title">Commenti</string>

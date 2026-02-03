@@ -19,7 +19,7 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
     uriHandler: UriHandler,
 ) {
     entry<Route.Home>(
-        metadata = ListDetailSceneStrategy.listPane(
+        metadata = ListDetailSceneStrategy.detailPane(
             "home",
         )
     ) { args ->

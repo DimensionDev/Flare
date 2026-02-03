@@ -8,7 +8,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.navigation3.runtime.NavKey
 
 internal class TopLevelBackStack<T : NavKey>(
-    startKey: T,
+    private val startKey: T,
 ) {
     // Maintain a stack for each top level route
     private var topLevelStacks: LinkedHashMap<T, SnapshotStateList<T>> =
@@ -36,7 +36,12 @@ internal class TopLevelBackStack<T : NavKey>(
     fun addTopLevel(key: T) {
         // If the top level doesn't exist, add it
         if (topLevelStacks[key] == null) {
-            topLevelStacks.put(key, mutableStateListOf(key))
+            topLevelStacks[key] = mutableStateListOf(key)
+        } else if (key == startKey) {
+            // If it's the start key, reset the back stack
+            val stack = topLevelStacks[key]
+            topLevelStacks.clear()
+            topLevelStacks[key] = stack ?: mutableStateListOf(key)
         } else {
             // Otherwise just move it to the end of the stacks
             topLevelStacks.apply {

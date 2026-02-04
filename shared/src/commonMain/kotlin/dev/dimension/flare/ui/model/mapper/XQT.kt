@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.model.mapper
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
+import de.cketti.codepoints.codePointCount
 import de.cketti.codepoints.deluxe.codePointSequence
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
@@ -1330,7 +1331,7 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
                 result.richtext?.richtextTags?.forEach { tag ->
                     val str =
                         codePoints
-                            .subList(tag.fromIndex, tag.toIndex)
+                            .subList(text.codePointCount(0, tag.fromIndex), text.codePointCount(0, tag.toIndex))
                             .flatMap { it.toChars().toList() }
                             .joinToString("")
                     var node: Node = TextNode(str)
@@ -1346,7 +1347,7 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
                     ) {
                         node = Element("i").apply { appendChild(node) }
                     }
-                    add(Entity(tag.fromIndex, tag.toIndex, node))
+                    add(Entity(text.codePointCount(0, tag.fromIndex), text.codePointCount(0, tag.toIndex), node))
                 }
                 result.media?.inlineMedia?.forEachIndexed { index, inlineMedia ->
                     val media = legacy?.entities?.media?.firstOrNull { it.idStr == inlineMedia.mediaId }
@@ -1369,7 +1370,8 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
                                     },
                                 )
                             }
-                        add(Entity(inlineMedia.index, inlineMedia.index, node))
+                        val mediaIndexCodePoint = text.codePointCount(0, inlineMedia.index)
+                        add(Entity(mediaIndexCodePoint, mediaIndexCodePoint, node))
                     }
                 }
             }.sortedBy { it.start }

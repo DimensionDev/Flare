@@ -484,4 +484,207 @@ class XQTTest {
         assertTrue(html.contains(mediaUrl))
         assertTrue(html.contains("Text after media."))
     }
+
+    @Test
+    fun renderContent_complexEntities_rendersCorrectly() {
+        // Text: "Start 🫠 @user End"
+        // Indices (UTF-16):
+        // "Start " -> 0..5 (6 chars)
+        // "🫠" -> 6..7 (2 chars, 1 code point)
+        // " " -> 8 (1 char)
+        // "@user" -> 9..13 (5 chars)
+        // " " -> 14 (1 char)
+        // "End" -> 15..17 (3 chars)
+        val text = "Start 🫠 @user End"
+
+        val mediaId = "media_123"
+        val mediaUrl = "https://example.com/image.jpg"
+
+        val noteTweet =
+            NoteTweet(
+                isExpandable = true,
+                noteTweetResults =
+                    NoteTweetResult(
+                        result =
+                            NoteTweetResultData(
+                                id = "note_id",
+                                text = text,
+                                entitySet =
+                                    Entities(
+                                        userMentions =
+                                            listOf(
+                                                UserMention(
+                                                    screenName = "user",
+                                                    name = "User",
+                                                    indices = listOf(8, 13),
+                                                ),
+                                            ),
+                                        media =
+                                            listOf(
+                                                dev.dimension.flare.data.network.xqt.model.Media(
+                                                    idStr = mediaId,
+                                                    mediaUrlHttps = mediaUrl,
+                                                    type = dev.dimension.flare.data.network.xqt.model.Media.Type.photo,
+                                                    originalInfo =
+                                                        dev.dimension.flare.data.network.xqt.model
+                                                            .MediaOriginalInfo(100, 100),
+                                                    displayUrl = "example.com/image",
+                                                    expandedUrl = mediaUrl,
+                                                    url = mediaUrl,
+                                                    indices = listOf(0, 5), // dummy
+                                                    sizes =
+                                                        dev.dimension.flare.data.network.xqt.model.MediaSizes(
+                                                            large =
+                                                                dev.dimension.flare.data.network.xqt.model.MediaSize(
+                                                                    100,
+                                                                    dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
+                                                                    100,
+                                                                ),
+                                                            medium =
+                                                                dev.dimension.flare.data.network.xqt.model.MediaSize(
+                                                                    100,
+                                                                    dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
+                                                                    100,
+                                                                ),
+                                                            small =
+                                                                dev.dimension.flare.data.network.xqt.model.MediaSize(
+                                                                    100,
+                                                                    dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
+                                                                    100,
+                                                                ),
+                                                            thumb =
+                                                                dev.dimension.flare.data.network.xqt.model.MediaSize(
+                                                                    100,
+                                                                    dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
+                                                                    100,
+                                                                ),
+                                                        ),
+                                                ),
+                                            ),
+                                    ),
+                                media =
+                                    dev.dimension.flare.data.network.xqt.model.NoteTweetResultMedia(
+                                        inlineMedia =
+                                            listOf(
+                                                dev.dimension.flare.data.network.xqt.model.NoteTweetResultMediaInlineMedia(
+                                                    index = 14, // UTF-16 index before " " (Space before End)
+                                                    mediaId = mediaId,
+                                                ),
+                                            ),
+                                    ),
+                                richtext =
+                                    NoteTweetResultRichText(
+                                        richtextTags =
+                                            listOf(
+                                                NoteTweetResultRichTextTag(
+                                                    fromIndex = 0,
+                                                    toIndex = 5,
+                                                    richtextTypes = listOf(NoteTweetResultRichTextTag.RichtextTypes.bold),
+                                                ),
+                                                NoteTweetResultRichTextTag(
+                                                    fromIndex = 15,
+                                                    toIndex = 18,
+                                                    richtextTypes = listOf(NoteTweetResultRichTextTag.RichtextTypes.italic),
+                                                ),
+                                            ),
+                                    ),
+                            ),
+                    ),
+            )
+        // Legacy needed for resolving media URL in inline media processing
+        val legacy =
+            TweetLegacy(
+                idStr = "123",
+                fullText = "Legacy text",
+                displayTextRange = listOf(0, 10),
+                createdAt = "Wed Oct 10 20:19:24 +0000 2018",
+                favoriteCount = 0,
+                favorited = false,
+                isQuoteStatus = false,
+                lang = "en",
+                quoteCount = 0,
+                replyCount = 0,
+                retweetCount = 0,
+                retweeted = false,
+                entities =
+                    Entities(
+                        media =
+                            listOf(
+                                dev.dimension.flare.data.network.xqt.model.Media(
+                                    idStr = mediaId,
+                                    mediaUrlHttps = mediaUrl,
+                                    type = dev.dimension.flare.data.network.xqt.model.Media.Type.photo,
+                                    originalInfo =
+                                        dev.dimension.flare.data.network.xqt.model
+                                            .MediaOriginalInfo(100, 100),
+                                    displayUrl = "example.com/image",
+                                    expandedUrl = mediaUrl,
+                                    url = mediaUrl,
+                                    indices = listOf(0, 5),
+                                    sizes =
+                                        dev.dimension.flare.data.network.xqt.model.MediaSizes(
+                                            large =
+                                                dev.dimension.flare.data.network.xqt.model.MediaSize(
+                                                    100,
+                                                    dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
+                                                    100,
+                                                ),
+                                            medium =
+                                                dev.dimension.flare.data.network.xqt.model.MediaSize(
+                                                    100,
+                                                    dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
+                                                    100,
+                                                ),
+                                            small =
+                                                dev.dimension.flare.data.network.xqt.model.MediaSize(
+                                                    100,
+                                                    dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
+                                                    100,
+                                                ),
+                                            thumb =
+                                                dev.dimension.flare.data.network.xqt.model.MediaSize(
+                                                    100,
+                                                    dev.dimension.flare.data.network.xqt.model.MediaSize.Resize.crop,
+                                                    100,
+                                                ),
+                                        ),
+                                ),
+                            ),
+                    ),
+            )
+
+        val tweet =
+            Tweet(
+                restId = "123",
+                noteTweet = noteTweet,
+                legacy = legacy,
+            )
+
+        val result = tweet.renderContent(accountKey)
+        val html = result.html
+
+        // Expected Structure: "Start 🫠 <a ...>@user</a> <figure>...</figure>End"
+
+        // Expected Structure: "<b>Start</b> 🫠 <a ...>@user</a> <figure>...</figure><i>End</i>"
+
+        assertTrue(html.contains("<b>Start</b>"), "Start should be bold")
+        assertTrue(html.contains("🫠"), "Emoji preserved")
+        assertTrue(html.contains(">@user</a>"), "User mention linked")
+        assertTrue(html.contains("<figure>"), "Media figure present")
+        assertTrue(html.contains("src=\"$mediaUrl\""), "Media source correct")
+        assertTrue(html.contains("<i>End</i>"), "End should be italic")
+
+        // order check
+        val indexUser = html.indexOf(">@user</a>")
+        val indexMedia = html.indexOf("<figure>")
+        val indexEnd = html.indexOf("End")
+
+        assertTrue(indexUser != -1)
+        assertTrue(indexMedia != -1)
+        assertTrue(indexEnd != -1)
+
+        assertTrue(indexUser < indexMedia, "User mention should be before media")
+        assertTrue(indexUser < indexMedia, "User mention should be before media")
+        assertTrue(indexMedia < indexEnd, "Media should be before 'End'")
+    }
 }

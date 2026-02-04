@@ -58,6 +58,7 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.ThemeIconData
 import dev.dimension.flare.ui.component.ThemedIcon
+import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.isError
@@ -68,7 +69,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.segmentedShapes2
-import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.delay
 import moe.tlaster.precompose.molecule.producePresenter
 

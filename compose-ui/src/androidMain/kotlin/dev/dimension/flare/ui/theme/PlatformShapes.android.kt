@@ -7,6 +7,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
@@ -14,41 +15,51 @@ import androidx.compose.ui.unit.dp
 internal actual object PlatformShapes {
     actual val extraSmall: Shape
         @Composable
+        @ReadOnlyComposable
         get() = MaterialTheme.shapes.extraSmall
     actual val small: Shape
         @Composable
+        @ReadOnlyComposable
         get() = MaterialTheme.shapes.small
     actual val medium: Shape
         @Composable
+        @ReadOnlyComposable
         get() = MaterialTheme.shapes.medium
     actual val large: Shape
         @Composable
+        @ReadOnlyComposable
         get() = MaterialTheme.shapes.large
 
     actual val topCardShape: Shape
         @Composable
+        @ReadOnlyComposable
         get() = ListItemDefaults.first().shape
 
     actual val bottomCardShape: Shape
         @Composable
+        @ReadOnlyComposable
         get() = ListItemDefaults.last().shape
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     actual val listCardContainerShape: CornerBasedShape
         @Composable
+        @ReadOnlyComposable
         get() = ListItemDefaults.single().shape as? CornerBasedShape ?: MaterialTheme.shapes.large
 
     actual val listCardItemShape: CornerBasedShape
         @Composable
+        @ReadOnlyComposable
         get() = ListItemDefaults.item().shape as? CornerBasedShape ?: MaterialTheme.shapes.extraSmall
     actual val dmShapeFromMe: CornerBasedShape
         @Composable
+        @ReadOnlyComposable
         get() =
             MaterialTheme.shapes.largeIncreased.copy(
                 bottomEnd = CornerSize(0.dp),
             )
     actual val dmShapeFromOther: CornerBasedShape
         @Composable
+        @ReadOnlyComposable
         get() =
             MaterialTheme.shapes.largeIncreased.copy(
                 bottomStart = CornerSize(0.dp),

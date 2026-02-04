@@ -64,6 +64,7 @@ import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.listCard
+import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -71,7 +72,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.ListEditPresenter
 import dev.dimension.flare.ui.screen.settings.AccountItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 

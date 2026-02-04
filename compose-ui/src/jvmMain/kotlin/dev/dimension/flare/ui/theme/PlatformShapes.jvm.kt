@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.theme
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import io.github.composefluent.FluentTheme
@@ -10,18 +11,23 @@ import io.github.composefluent.FluentTheme
 internal actual object PlatformShapes {
     actual val extraSmall: Shape
         @Composable
+        @ReadOnlyComposable
         get() = FluentTheme.shapes.intersectionEdge
     actual val small: Shape
         @Composable
+        @ReadOnlyComposable
         get() = FluentTheme.shapes.intersectionEdge
     actual val medium: Shape
         @Composable
+        @ReadOnlyComposable
         get() = FluentTheme.shapes.control
     actual val large: Shape
         @Composable
+        @ReadOnlyComposable
         get() = FluentTheme.shapes.overlay
     actual val topCardShape: Shape
         @Composable
+        @ReadOnlyComposable
         get() =
             RoundedCornerShape(
                 topStart = FluentTheme.cornerRadius.overlay,
@@ -31,6 +37,7 @@ internal actual object PlatformShapes {
             )
     actual val bottomCardShape: Shape
         @Composable
+        @ReadOnlyComposable
         get() =
             RoundedCornerShape(
                 topStart = FluentTheme.cornerRadius.control,
@@ -40,12 +47,15 @@ internal actual object PlatformShapes {
             )
     actual val listCardContainerShape: CornerBasedShape
         @Composable
+        @ReadOnlyComposable
         get() = RoundedCornerShape(FluentTheme.cornerRadius.overlay)
     actual val listCardItemShape: CornerBasedShape
         @Composable
+        @ReadOnlyComposable
         get() = RoundedCornerShape(FluentTheme.cornerRadius.control)
     actual val dmShapeFromMe: CornerBasedShape
         @Composable
+        @ReadOnlyComposable
         get() =
             RoundedCornerShape(
                 topStart = FluentTheme.cornerRadius.overlay,
@@ -55,6 +65,7 @@ internal actual object PlatformShapes {
             )
     actual val dmShapeFromOther: CornerBasedShape
         @Composable
+        @ReadOnlyComposable
         get() =
             RoundedCornerShape(
                 topStart = FluentTheme.cornerRadius.overlay,

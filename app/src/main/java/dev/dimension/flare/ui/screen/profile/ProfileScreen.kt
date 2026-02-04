@@ -74,6 +74,7 @@ import dev.dimension.flare.ui.component.ProfileMenu
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TabRowIndicator
+import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -94,7 +95,6 @@ import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresen
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.screen.home.RegisterTabCallback
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.launch

@@ -28,7 +28,6 @@ internal actual object PlatformShapes {
 
     actual val topCardShape: Shape
         @Composable
-        @ReadOnlyComposable
         get() =
             listCardItemShape.copy(
                 topStart = listCardContainerShape.topStart,
@@ -37,7 +36,6 @@ internal actual object PlatformShapes {
 
     actual val bottomCardShape: Shape
         @Composable
-        @ReadOnlyComposable
         get() =
             listCardItemShape.copy(
                 bottomStart = listCardContainerShape.bottomStart,
@@ -46,12 +44,10 @@ internal actual object PlatformShapes {
 
     actual val listCardContainerShape: CornerBasedShape
         @Composable
-        @ReadOnlyComposable
         get() = CupertinoTheme.shapes.extraLarge
 
     actual val listCardItemShape: CornerBasedShape
         @Composable
-        @ReadOnlyComposable
         get() = CupertinoTheme.shapes.extraSmall
     actual val dmShapeFromMe: CornerBasedShape
         @Composable

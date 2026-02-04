@@ -32,23 +32,19 @@ internal actual object PlatformShapes {
 
     actual val topCardShape: Shape
         @Composable
-        @ReadOnlyComposable
         get() = ListItemDefaults.first().shape
 
     actual val bottomCardShape: Shape
         @Composable
-        @ReadOnlyComposable
         get() = ListItemDefaults.last().shape
 
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     actual val listCardContainerShape: CornerBasedShape
         @Composable
-        @ReadOnlyComposable
         get() = ListItemDefaults.single().shape as? CornerBasedShape ?: MaterialTheme.shapes.large
 
     actual val listCardItemShape: CornerBasedShape
         @Composable
-        @ReadOnlyComposable
         get() = ListItemDefaults.item().shape as? CornerBasedShape ?: MaterialTheme.shapes.extraSmall
     actual val dmShapeFromMe: CornerBasedShape
         @Composable

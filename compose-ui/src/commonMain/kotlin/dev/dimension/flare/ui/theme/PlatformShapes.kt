@@ -22,19 +22,15 @@ internal expect object PlatformShapes {
     val large: Shape
 
     @get:Composable
-    @get:ReadOnlyComposable
     val topCardShape: Shape
 
     @get:Composable
-    @get:ReadOnlyComposable
     val bottomCardShape: Shape
 
     @get:Composable
-    @get:ReadOnlyComposable
     val listCardContainerShape: CornerBasedShape
 
     @get:Composable
-    @get:ReadOnlyComposable
     val listCardItemShape: CornerBasedShape
 
     @get:Composable

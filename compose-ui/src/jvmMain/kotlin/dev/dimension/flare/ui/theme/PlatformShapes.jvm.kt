@@ -27,7 +27,6 @@ internal actual object PlatformShapes {
         get() = FluentTheme.shapes.overlay
     actual val topCardShape: Shape
         @Composable
-        @ReadOnlyComposable
         get() =
             RoundedCornerShape(
                 topStart = FluentTheme.cornerRadius.overlay,
@@ -37,7 +36,6 @@ internal actual object PlatformShapes {
             )
     actual val bottomCardShape: Shape
         @Composable
-        @ReadOnlyComposable
         get() =
             RoundedCornerShape(
                 topStart = FluentTheme.cornerRadius.control,
@@ -47,11 +45,9 @@ internal actual object PlatformShapes {
             )
     actual val listCardContainerShape: CornerBasedShape
         @Composable
-        @ReadOnlyComposable
         get() = RoundedCornerShape(FluentTheme.cornerRadius.overlay)
     actual val listCardItemShape: CornerBasedShape
         @Composable
-        @ReadOnlyComposable
         get() = RoundedCornerShape(FluentTheme.cornerRadius.control)
     actual val dmShapeFromMe: CornerBasedShape
         @Composable

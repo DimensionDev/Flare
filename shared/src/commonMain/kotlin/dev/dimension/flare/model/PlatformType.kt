@@ -1,8 +1,8 @@
 package dev.dimension.flare.model
 
 import androidx.compose.runtime.Immutable
-import io.ktor.util.decodeBase64String
 import kotlinx.serialization.Serializable
+import kotlin.io.encoding.Base64
 
 @Immutable
 @Serializable
@@ -35,10 +35,10 @@ public val PlatformType.logoUrl: String
 
 public val xqtOldHost: String =
     buildString {
-        append("dHc=".decodeBase64String())
-        append("aXR0".decodeBase64String())
-        append("ZXI=".decodeBase64String())
-        append("LmNvbQ==".decodeBase64String())
+        append(Base64.decode("dHc=").decodeToString())
+        append(Base64.decode("aXR0").decodeToString())
+        append(Base64.decode("ZXI=").decodeToString())
+        append(Base64.decode("LmNvbQ==").decodeToString())
     }
 
 public val xqtHost: String =
@@ -49,25 +49,25 @@ public val xqtHost: String =
 
 public val vvo: String =
     buildString {
-        append("d2Vp".decodeBase64String())
-        append("Ym8=".decodeBase64String())
+        append(Base64.decode("d2Vp").decodeToString())
+        append(Base64.decode("Ym8=").decodeToString())
     }
 
 public val vvoHost: String =
     buildString {
-        append("bS53".decodeBase64String())
-        append("ZWli".decodeBase64String())
-        append("by5jbg==".decodeBase64String())
+        append(Base64.decode("bS53").decodeToString())
+        append(Base64.decode("ZWli").decodeToString())
+        append(Base64.decode("by5jbg==").decodeToString())
     }
 
 public val vvoHostShort: String =
     buildString {
         append(vvo)
-        append("LmNu".decodeBase64String())
+        append(Base64.decode("LmNu").decodeToString())
     }
 
 public val vvoHostLong: String =
     buildString {
-        append("d2Vp".decodeBase64String())
-        append("Ym8uY29t".decodeBase64String())
+        append(Base64.decode("d2Vp").decodeToString())
+        append(Base64.decode("Ym8uY29t").decodeToString())
     }

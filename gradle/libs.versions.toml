@@ -187,9 +187,7 @@ mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.2.2"
 compose-webview = { group = "io.github.kevinnzou", name = "compose-webview", version = "0.33.6" }
 compose-webview-multiplatform = { group = "io.github.kevinnzou", name = "compose-webview-multiplatform", version = "2.0.3" }
 
-compose-placeholder-material3 = { group = "io.github.fornewid", name = "placeholder-material3", version = "2.0.0" }
-compose-placeholder-foundation = { group = "io.github.fornewid", name = "placeholder-foundation", version = "2.0.0" }
-compose-placeholder = { module = "com.revenuecat.purchases:placeholder", version = "1.0.2" }
+compose-placeholder = { module = "com.eygraber:compose-placeholder", version = "1.0.12" }
 
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 

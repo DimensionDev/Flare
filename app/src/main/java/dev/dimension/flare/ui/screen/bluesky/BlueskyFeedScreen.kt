@@ -43,6 +43,7 @@ import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
+import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.ListComponent
 import dev.dimension.flare.ui.component.status.StatusActionButton
@@ -53,7 +54,6 @@ import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedPresenter
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 

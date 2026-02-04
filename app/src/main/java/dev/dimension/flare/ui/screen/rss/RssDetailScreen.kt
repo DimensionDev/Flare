@@ -56,6 +56,7 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.RssRichText
 import dev.dimension.flare.ui.component.listCard
+import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.onError
@@ -65,7 +66,6 @@ import dev.dimension.flare.ui.presenter.home.rss.RssDetailPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.server.AiTLDRPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import io.github.fornewid.placeholder.material3.placeholder
 import io.ktor.http.Url
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.flow.map

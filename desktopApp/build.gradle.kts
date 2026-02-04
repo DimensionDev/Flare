@@ -43,7 +43,6 @@ dependencies {
     implementation(libs.platformtools.darkmodedetector)
     implementation(libs.jna)
     implementation(libs.junique)
-    implementation(libs.compose.placeholder)
 }
 
 compose.desktop {

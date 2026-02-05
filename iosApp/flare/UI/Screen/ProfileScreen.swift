@@ -94,15 +94,21 @@ struct ProfileScreen: View {
             .frame(width: 400)
             StateView(state: presenter.state.tabs) { tabsArray in
                 let tabs = tabsArray.cast(ProfileState.Tab.self)
-                let selectedTabItem = tabs[selectedTab]
-                switch onEnum(of: selectedTabItem) {
-                case .timeline(let timeline):
-                    ProfileTimelineWaterFallView(presenter: timeline.presenter)
-                        .id(timeline.type.name)
-                case .media(let media):
-                    ProfileTimelineWaterFallView(presenter: media.presenter.getMediaTimelinePresenter())
-                        .id("media")
+                TabView(selection: $selectedTab) {
+                    ForEach(0..<tabs.count, id: \.self) { index in
+                        let selectedTabItem = tabs[index]
+                        Group {
+                            switch onEnum(of: selectedTabItem) {
+                            case .timeline(let timeline):
+                                ProfileTimelineWaterFallView(presenter: timeline.presenter)
+                            case .media(let media):
+                                ProfileTimelineWaterFallView(presenter: media.presenter.getMediaTimelinePresenter())
+                            }
+                        }
+                        .tag(index)
+                    }
                 }
+                .tabViewStyle(.page(indexDisplayMode: .never))
             }
         }
     }
@@ -147,15 +153,22 @@ struct ProfileScreen: View {
                 .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                 .padding()
                 .listRowBackground(Color.clear)
-                let selectedTabItem = tabs[selectedTab]
-                switch onEnum(of: selectedTabItem) {
-                case .timeline(let timeline):
-                    ProfileTimelineView(presenter: timeline.presenter)
-                        .id(timeline.type.name)
-                case .media(let media):
-                    ProfileTimelineView(presenter: media.presenter.getMediaTimelinePresenter())
-                        .id("media")
+                TabView(selection: $selectedTab) {
+                    ForEach(0..<tabs.count, id: \.self) { index in
+                        let selectedTabItem = tabs[index]
+                        Group {
+                            switch onEnum(of: selectedTabItem) {
+                            case .timeline(let timeline):
+                                ProfileTimelineView(presenter: timeline.presenter)
+                            case .media(let media):
+                                ProfileTimelineView(presenter: media.presenter.getMediaTimelinePresenter())
+                            }
+                        }
+                        .tag(index)
+                    }
                 }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .frame(minHeight: 600) // Ensure TabView has height inside List
             }
         }
         .detectScrolling()

@@ -23,11 +23,13 @@ struct HomeTimelineScreen: View {
         GeometryReader { proxy in
             StateView(state: presenter.state.tabState) { state in
                 let tabs: [TimelineTabItem] = state.cast(TimelineTabItem.self)
-                let tab = tabs[min(max(selectedTabIndex, 0), tabs.count - 1)]
-                ZStack {
-                    TimelineScreen(tabItem: tab)
-                        .id(tab.key)
+                TabView(selection: $selectedTabIndex) {
+                    ForEach(0..<tabs.count, id: \.self) { index in
+                        TimelineScreen(tabItem: tabs[index])
+                            .tag(index)
+                    }
                 }
+                .tabViewStyle(.page(indexDisplayMode: .never))
                 .onChange(of: state.count, { oldValue, newValue in
                     if !(tabs.indices.contains(selectedTabIndex)) {
                         selectedTabIndex = 0

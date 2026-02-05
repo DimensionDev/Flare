@@ -45,15 +45,15 @@ public class InstanceMetadataPresenter(
                         PlatformType.VVo -> throw UnsupportedOperationException(
                             "VVo is not supported yet",
                         )
-                    }
-                }.fold(
-                    onSuccess = {
+                        PlatformType.Nostr -> throw UnsupportedOperationException(
+                            "Nostr is not supported yet",
+                        )
+                    }.let {
                         emit(UiState.Success<UiInstanceMetadata>(it))
-                    },
-                    onFailure = {
-                        emit(UiState.Error<UiInstanceMetadata>(it))
-                    },
-                )
+                    }
+                }.onFailure {
+                    emit(UiState.Error<UiInstanceMetadata>(it))
+                }
             }
         }.collectAsState(UiState.Loading())
         return object : State {

@@ -490,4 +490,6 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Help us translate Flare</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_appearance_hide_reposts">Hide reposts</string>
+    <string name="settings_appearance_hide_reposts_description">Remove reposts from timelines (keeps quoted posts and search results)</string>
 </resources>

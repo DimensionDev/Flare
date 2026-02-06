@@ -34,11 +34,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.koin.core.qualifier.named
 
 @OptIn(ExperimentalPagingApi::class)
 public abstract class TimelinePresenter :
@@ -49,6 +52,16 @@ public abstract class TimelinePresenter :
     private val accountRepository: AccountRepository by inject()
 
     private val localFilterRepository: LocalFilterRepository by inject()
+
+    // Try to inject a named Flow<Boolean> binding 'hideRepostsFlow' provided by platform modules.
+    // If inject fails (no binding), fall back to a constant false flow.
+    protected open val hideRepostsFlow: Flow<Boolean> by lazy {
+        try {
+            inject<Flow<Boolean>>(named("hideRepostsFlow")).value
+        } catch (_: Throwable) {
+            flowOf(false)
+        }
+    }
 
     private val filterFlow by lazy {
         localFilterRepository.getFlow(forTimeline = true)
@@ -78,11 +91,21 @@ public abstract class TimelinePresenter :
 
                     BaseTimelineLoader.NotSupported -> PagingData.emptyFlow(isError = true)
                 }.flatMapLatest { pager ->
-                    filterFlow.map { filterList ->
-                        pager.filter {
-                            !it.contains(filterList)
+                    filterFlow
+                        .combine(hideRepostsFlow) { filterList, hideReposts ->
+                            filterList to hideReposts
+                        }.map { (filterList, hideReposts) ->
+                            pager.filter {
+                                val passesFilter = !it.contains(filterList)
+                                val passesRepostFilter =
+                                    if (hideReposts) {
+                                        !isRepost(it)
+                                    } else {
+                                        true
+                                    }
+                                passesFilter && passesRepostFilter
+                            }
                         }
-                    }
                 }
             }
 
@@ -158,6 +181,9 @@ public abstract class TimelinePresenter :
 
     internal abstract val loader: Flow<BaseTimelineLoader>
     protected open val useDbKeyInItemKey: Boolean = false
+
+    private fun isRepost(item: UiTimeline): Boolean =
+        item.topMessage?.icon == dev.dimension.flare.ui.model.UiTimeline.TopMessage.Icon.Retweet
 }
 
 @Immutable

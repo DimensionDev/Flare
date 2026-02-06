@@ -199,6 +199,7 @@ internal fun Status.render(
     requireNotNull(account) { "account is null" }
     val user = account.render(accountKey, host)
     val currentStatus = this.renderStatus(host, accountKey, event)
+    // REPOST-ANNOTATION: Mastodon — this `actualStatus` selection and topMessage show posts reblogged by OTHER USERS; detect using `reblog != null` or `references[ReferenceType.Retweet]`.
     val actualStatus =
         (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.Mastodon)?.data ?: this
     val topMessage =

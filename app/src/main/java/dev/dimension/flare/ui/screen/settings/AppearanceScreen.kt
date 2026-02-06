@@ -536,32 +536,30 @@ internal fun AppearanceScreen(
                         )
                     },
                 )
-                AnimatedVisibility(visible = appearanceSettings.showLinkPreview) {
-                    SegmentedListItem(
-                        onClick = {
-                            state.updateSettings {
-                                copy(compatLinkPreview = !compatLinkPreview)
-                            }
-                        },
-                        shapes = ListItemDefaults.item(),
-                        content = {
-                            Text(text = stringResource(id = R.string.settings_appearance_compat_link_previews))
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_appearance_compat_link_previews_description))
-                        },
-                        trailingContent = {
-                            Switch(
-                                checked = appearanceSettings.compatLinkPreview,
-                                onCheckedChange = {
-                                    state.updateSettings {
-                                        copy(compatLinkPreview = it)
-                                    }
-                                },
-                            )
-                        },
-                    )
-                }
+                SegmentedListItem(
+                    onClick = {
+                        state.updateSettings {
+                            copy(hideReposts = !hideReposts)
+                        }
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_appearance_hide_reposts))
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_hide_reposts_description))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = appearanceSettings.hideReposts,
+                            onCheckedChange = {
+                                state.updateSettings {
+                                    copy(hideReposts = it)
+                                }
+                            },
+                        )
+                    },
+                )
                 SegmentedListItem(
                     onClick = {
                         state.updateSettings {

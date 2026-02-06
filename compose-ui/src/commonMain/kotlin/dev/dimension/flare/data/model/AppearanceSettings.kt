@@ -34,6 +34,8 @@ public data class AppearanceSettings(
     val showNumbers: Boolean = true,
     val showLinkPreview: Boolean = true,
     val showMedia: Boolean = true,
+    // Hide reposts toggle: when true, client-side filters should remove reposts from timelines (not search).
+    val hideReposts: Boolean = false,
     val showSensitiveContent: Boolean = false,
     val videoAutoplay: VideoAutoplay = VideoAutoplay.WIFI,
     val expandMediaSize: Boolean = true,
@@ -100,7 +102,15 @@ public object AccountPreferencesSerializer : OkioSerializer<AppearanceSettings> 
 
     override suspend fun readFrom(source: BufferedSource): AppearanceSettings =
         withContext(Dispatchers.IO) {
-            ProtoBuf.decodeFromByteArray(source.readByteArray())
+            // Be tolerant of corrupted or legacy protobuf data.
+            // If decoding fails (for example an unexpected value in the stored bytes),
+            // return the default AppearanceSettings instead of throwing and crashing the app.
+            runCatching {
+                ProtoBuf.decodeFromByteArray<AppearanceSettings>(source.readByteArray())
+            }.getOrElse { _ ->
+                // Returning default will allow the app to start with sane settings.
+                AppearanceSettings()
+            }
         }
 
     override suspend fun writeTo(

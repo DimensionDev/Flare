@@ -328,6 +328,7 @@ internal fun FeedViewPostReasonUnion.render(
             }
 
             is FeedViewPostReasonUnion.ReasonRepost -> {
+                // REPOST-ANNOTATION: Bluesky — this TopMessage/branch displays a post that was reposted by another user; detect using FeedViewPostReasonUnion.ReasonRepost or referenced `ReferenceType.Retweet`.
                 val user = value.by.render(accountKey)
                 UiTimeline.TopMessage(
                     user = user,
@@ -459,6 +460,7 @@ private val ListNotificationsNotificationReason.icon: UiTimeline.TopMessage.Icon
             ListNotificationsNotificationReason.LikeViaRepost -> UiTimeline.TopMessage.Icon.Favourite
             ListNotificationsNotificationReason.RepostViaRepost -> UiTimeline.TopMessage.Icon.Retweet
             ListNotificationsNotificationReason.SubscribedPost -> UiTimeline.TopMessage.Icon.Info
+            ListNotificationsNotificationReason.ContactMatch -> UiTimeline.TopMessage.Icon.Info
         }
 
 private val ListNotificationsNotificationReason.type: UiTimeline.TopMessage.MessageType
@@ -477,6 +479,7 @@ private val ListNotificationsNotificationReason.type: UiTimeline.TopMessage.Mess
             ListNotificationsNotificationReason.LikeViaRepost -> UiTimeline.TopMessage.MessageType.Bluesky.Like
             ListNotificationsNotificationReason.RepostViaRepost -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
             ListNotificationsNotificationReason.SubscribedPost -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
+            ListNotificationsNotificationReason.ContactMatch -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
         }
 
 internal fun PostView.render(

@@ -291,6 +291,7 @@ internal fun Note.render(
     val renote = (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.Misskey)?.data
     val currentStatus = this.renderStatus(accountKey, event)
     val actualStatus = renote ?: this
+    // REPOST-ANNOTATION: Misskey — this TopMessage/branch displays a note that was renoted by ANOTHER user; detect using `references[ReferenceType.Retweet]`/`renote`.
     val topMessage =
         if (pinned) {
             UiTimeline.TopMessage(

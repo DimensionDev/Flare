@@ -62,17 +62,13 @@ internal object Bluesky {
     }
 
     suspend fun saveMessage(
-        accountKey: MicroBlogKey,
+        @Suppress("UNUSED_PARAMETER") accountKey: MicroBlogKey,
         roomKey: MicroBlogKey,
         database: CacheDatabase,
         data: List<MessageView>,
     ) {
-//        val room =
-//            DbMessageRoom(
-//                roomKey = roomKey,
-//                platformType = PlatformType.Bluesky,
-//                messageKey = null,
-//            )
+        // Reference accountKey to avoid unused-parameter warnings under -Werror in some build configs.
+        val _host = accountKey.host
         val messages = data.map { it.toDbMessageItem(roomKey) }
         database.messageDao().insertMessages(messages)
 //        database.messageDao().insert(room)
@@ -106,31 +102,36 @@ internal object Bluesky {
                     .findByKeys(allUsers.map { it.userKey })
                     .firstOrNull()
                     .orEmpty()
-                    .filter {
-                        it.content is UserContent.Bluesky
-                    }.map {
-                        val content = it.content as UserContent.Bluesky
-                        val user =
-                            allUsers.find { user ->
-                                user.userKey == it.userKey
+                    .map {
+                        // Use smart-cast via `when` instead of an explicit `as` cast
+                        when (val content = it.content) {
+                            is UserContent.Bluesky -> {
+                                val user =
+                                    allUsers.find { user ->
+                                        user.userKey == it.userKey
+                                    }
+
+                                if (user != null && user.content is UserContent.BlueskyLite) {
+                                    it.copy(
+                                        content =
+                                            content.copy(
+                                                data =
+                                                    content.data.copy(
+                                                        handle = user.content.data.handle,
+                                                        displayName = user.content.data.displayName,
+                                                        avatar = user.content.data.avatar,
+                                                    ),
+                                            ),
+                                    )
+                                } else {
+                                    it
+                                }
                             }
 
-                        if (user != null && user.content is UserContent.BlueskyLite) {
-                            it.copy(
-                                content =
-                                    content.copy(
-                                        data =
-                                            content.data.copy(
-                                                handle = user.content.data.handle,
-                                                displayName = user.content.data.displayName,
-                                                avatar = user.content.data.avatar,
-                                            ),
-                                    ),
-                            )
-                        } else {
-                            it
+                            else -> it
                         }
                     }
+                    .filter { it.content is UserContent.Bluesky }
 
             val result = (exsitingUsers + allUsers).distinctBy { it.userKey }
             database.userDao().insertAll(result)
@@ -210,29 +211,26 @@ internal fun List<ListNotificationsNotification>.toDb(
                 }
 
             ListNotificationsNotificationReason.Repost, ListNotificationsNotificationReason.Like -> {
-                val post =
-                    items
-                        .first()
-                        .record
-                        .let {
-                            when (reason) {
-                                ListNotificationsNotificationReason.Repost -> it.decodeAs<Repost>().subject
-                                ListNotificationsNotificationReason.Like -> it.decodeAs<Like>().subject
-                            }
-                        }.uri
-                        .let {
-                            references[it]
-                        }
+                val firstRecord = items.first().record
+                // both Repost and Like records expose a subject with a uri; extract that uri directly
+                val postUri = when (reason) {
+                    ListNotificationsNotificationReason.Repost -> firstRecord.decodeAs<Repost>().subject.uri
+                    ListNotificationsNotificationReason.Like -> firstRecord.decodeAs<Like>().subject.uri
+                    // no else needed: this branch is only reachable when reason is Repost or Like
+                }
+                // resolve the full PostView from provided references map
+                val postRef = postUri.let { references[it] }
+
                 val content =
                     UserList(
                         data = items,
-                        post = post,
+                        post = postRef,
                     )
-                val idSuffix =
-                    when (reason) {
-                        ListNotificationsNotificationReason.Repost -> "_repost"
-                        ListNotificationsNotificationReason.Like -> "_like"
-                    }
+                val idSuffix = when (reason) {
+                    ListNotificationsNotificationReason.Repost -> "_repost"
+                    ListNotificationsNotificationReason.Like -> "_like"
+                    // exhaustive: no else required
+                }
                 val data =
                     DbStatusWithUser(
                         user = null,
@@ -250,6 +248,14 @@ internal fun List<ListNotificationsNotification>.toDb(
                                 createdAt = items.first().indexedAt,
                             ),
                     )
+                // Build references map explicitly to avoid type-inference problems
+                val notificationReferences: Map<ReferenceType, List<DbStatusWithUser>> =
+                    postRef?.let { resolvedPost ->
+                        listOfNotNull(resolvedPost.toDbStatusWithUser(accountKey)).let { list ->
+                            if (list.isNotEmpty()) mapOf(ReferenceType.Notification to list) else mapOf()
+                        }
+                    } ?: mapOf()
+
                 listOf(
                     createDbPagingTimelineWithStatus(
                         accountKey = accountKey,
@@ -260,17 +266,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                 .indexedAt
                                 .toEpochMilliseconds(),
                         status = data,
-                        references =
-                            listOfNotNull(
-                                post,
-                            ).associate {
-                                ReferenceType.Notification to
-                                    listOfNotNull(
-                                        it.toDbStatusWithUser(
-                                            accountKey = accountKey,
-                                        ),
-                                    )
-                            },
+                        references = notificationReferences,
                     ),
                 )
             }
@@ -469,6 +465,17 @@ internal fun List<ListNotificationsNotification>.toDb(
                     )
                 }
             }
+
+            else ->
+                items.map {
+                    createDbPagingTimelineWithStatus(
+                        accountKey = accountKey,
+                        pagingKey = pagingKey,
+                        sortId = it.indexedAt.toEpochMilliseconds(),
+                        status = it.toDbStatusWithUser(accountKey),
+                        references = mapOf(),
+                    )
+                }
         }
     }
 }
@@ -510,7 +517,7 @@ internal suspend fun List<FeedViewPost>.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: suspend (FeedViewPost) -> Long = {
-        when (val reason = it.reason) {
+        when (it.reason) {
 //            is FeedViewPostReasonUnion.ReasonRepost -> {
 //                reason.value.indexedAt
 //

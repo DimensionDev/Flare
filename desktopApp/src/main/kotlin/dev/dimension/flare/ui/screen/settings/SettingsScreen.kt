@@ -804,6 +804,27 @@ internal fun SettingsScreen(
                         ExpanderItemSeparator()
                     }
                 }
+                // Hide reposts toggle: remove reposts from timelines (keeps quoted posts and search results)
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_appearance_hide_reposts))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_hide_reposts_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = LocalAppearanceSettings.current.hideReposts,
+                            {
+                                state.appearanceState.updateSettings {
+                                    copy(hideReposts = it)
+                                }
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+                ExpanderItemSeparator()
             }
 
             Header(stringResource(Res.string.settings_storage_title))

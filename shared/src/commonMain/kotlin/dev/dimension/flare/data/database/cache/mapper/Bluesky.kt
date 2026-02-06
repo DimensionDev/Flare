@@ -67,8 +67,6 @@ internal object Bluesky {
         database: CacheDatabase,
         data: List<MessageView>,
     ) {
-        // Reference accountKey to avoid unused-parameter warnings under -Werror in some build configs.
-        val _host = accountKey.host
         val messages = data.map { it.toDbMessageItem(roomKey) }
         database.messageDao().insertMessages(messages)
 //        database.messageDao().insert(room)
@@ -130,8 +128,7 @@ internal object Bluesky {
 
                             else -> it
                         }
-                    }
-                    .filter { it.content is UserContent.Bluesky }
+                    }.filter { it.content is UserContent.Bluesky }
 
             val result = (exsitingUsers + allUsers).distinctBy { it.userKey }
             database.userDao().insertAll(result)
@@ -213,11 +210,12 @@ internal fun List<ListNotificationsNotification>.toDb(
             ListNotificationsNotificationReason.Repost, ListNotificationsNotificationReason.Like -> {
                 val firstRecord = items.first().record
                 // both Repost and Like records expose a subject with a uri; extract that uri directly
-                val postUri = when (reason) {
-                    ListNotificationsNotificationReason.Repost -> firstRecord.decodeAs<Repost>().subject.uri
-                    ListNotificationsNotificationReason.Like -> firstRecord.decodeAs<Like>().subject.uri
-                    // no else needed: this branch is only reachable when reason is Repost or Like
-                }
+                val postUri =
+                    when (reason) {
+                        ListNotificationsNotificationReason.Repost -> firstRecord.decodeAs<Repost>().subject.uri
+                        ListNotificationsNotificationReason.Like -> firstRecord.decodeAs<Like>().subject.uri
+                        // no else needed: this branch is only reachable when reason is Repost or Like
+                    }
                 // resolve the full PostView from provided references map
                 val postRef = postUri.let { references[it] }
 
@@ -226,11 +224,12 @@ internal fun List<ListNotificationsNotification>.toDb(
                         data = items,
                         post = postRef,
                     )
-                val idSuffix = when (reason) {
-                    ListNotificationsNotificationReason.Repost -> "_repost"
-                    ListNotificationsNotificationReason.Like -> "_like"
-                    // exhaustive: no else required
-                }
+                val idSuffix =
+                    when (reason) {
+                        ListNotificationsNotificationReason.Repost -> "_repost"
+                        ListNotificationsNotificationReason.Like -> "_like"
+                        // exhaustive: no else required
+                    }
                 val data =
                     DbStatusWithUser(
                         user = null,

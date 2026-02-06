@@ -27,6 +27,7 @@ public class SettingsRepository internal constructor(
             serializer = AccountPreferencesSerializer,
         )
     }
+
     // Defensive: if the serializer throws (corrupt/legacy bytes), emit default and don't crash the app.
     public val appearanceSettings: Flow<AppearanceSettings> by lazy {
         appearanceSettingsStore.data.catch { e ->

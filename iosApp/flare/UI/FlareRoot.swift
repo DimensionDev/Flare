@@ -2,6 +2,26 @@ import SwiftUI
 import KotlinSharedUI
 import SwiftUIBackports
 
+private struct TabKeyKey: EnvironmentKey {
+    static let defaultValue: String? = nil
+}
+
+private struct IsActiveKey: EnvironmentKey {
+    static let defaultValue: Bool = true
+}
+
+extension EnvironmentValues {
+    var tabKey: String? {
+        get { self[TabKeyKey.self] }
+        set { self[TabKeyKey.self] = newValue }
+    }
+    
+    var isActive: Bool {
+        get { self[IsActiveKey.self] }
+        set { self[IsActiveKey.self] = newValue }
+    }
+}
+
 @available(iOS 18.0, *)
 struct FlareRoot: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -11,9 +31,18 @@ struct FlareRoot: View {
     @State var selectedTab: String?
     
     var body: some View {
+        let tabBinding = Binding<String?>(
+            get: { selectedTab },
+            set: { newValue in
+                if newValue == selectedTab {
+                    NotificationCenter.default.post(name: .scrollToTop, object: nil, userInfo: ["tab": newValue ?? ""])
+                }
+                selectedTab = newValue
+            }
+        )
         if !activeAccountPresenter.state.user.isLoading {
             StateView(state: homeTabsPresenter.state.tabs) { tabs in
-                TabView(selection: $selectedTab) {
+                TabView(selection: tabBinding) {
                     if horizontalSizeClass == .regular {
                         ForEach(tabs.primary, id: \.key) { data in
                             let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
@@ -25,6 +54,7 @@ struct FlareRoot: View {
                                 Router { onNavigate in
                                     data.view(onNavigate: onNavigate)
                                 }
+                                .environment(\.tabKey, data.key)
                             } label: {
                                 Label {
                                     TabTitle(title: data.metaData.title)
@@ -39,6 +69,7 @@ struct FlareRoot: View {
                                 Router { onNavigate in
                                     data.view(onNavigate: onNavigate)
                                 }
+                                .environment(\.tabKey, data.key)
                             } label: {
                                 Label {
                                     TabTitle(title: data.metaData.title)
@@ -53,6 +84,7 @@ struct FlareRoot: View {
                                 Router { onNavigate in
                                     profileRoute.view(onNavigate: onNavigate)
                                 }
+                                .environment(\.tabKey, profileRoute.key)
                             } label: {
                                 Label {
                                     TabTitle(title: profileRoute.metaData.title)
@@ -67,6 +99,7 @@ struct FlareRoot: View {
                             Router { _ in
                                 SettingsScreen()
                             }
+                            .environment(\.tabKey, "settings")
                         } label: {
                             Label {
                                 Text("settings_title")
@@ -86,6 +119,7 @@ struct FlareRoot: View {
                                 Router { onNavigate in
                                     data.view(onNavigate: onNavigate)
                                 }
+                                .environment(\.tabKey, data.key)
                             } label: {
                                 Label {
                                     TabTitle(title: data.metaData.title)
@@ -99,6 +133,7 @@ struct FlareRoot: View {
                     if case .success = onEnum(of: activeAccountPresenter.state.user) {
                         Tab(value: "more", role: .search) {
                             SecondaryTabsScreen(tabs: tabs.secondary)
+                                .environment(\.tabKey, "more")
                         } label: {
                             Label {
                                 Text("More")
@@ -137,9 +172,18 @@ struct BackportFlareRoot: View {
     @State var selectedTab: String?
     
     var body: some View {
+        let tabBinding = Binding<String?>(
+            get: { selectedTab },
+            set: { newValue in
+                if newValue == selectedTab {
+                    NotificationCenter.default.post(name: .scrollToTop, object: nil, userInfo: ["tab": newValue ?? ""])
+                }
+                selectedTab = newValue
+            }
+        )
         if !activeAccountPresenter.state.user.isLoading {
             StateView(state: homeTabsPresenter.state.tabs) { tabs in
-                TabView(selection: $selectedTab) {
+                TabView(selection: tabBinding) {
                     if horizontalSizeClass == .regular {
                         ForEach(tabs.primary, id: \.key) { data in
                             let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
@@ -150,6 +194,7 @@ struct BackportFlareRoot: View {
                             Router { onNavigate in
                                 data.view(onNavigate: onNavigate)
                             }
+                            .environment(\.tabKey, data.key)
                             .tabItem {
                                 Label {
                                     TabTitle(title: data.metaData.title)
@@ -164,6 +209,7 @@ struct BackportFlareRoot: View {
                             Router { onNavigate in
                                 data.view(onNavigate: onNavigate)
                             }
+                            .environment(\.tabKey, data.key)
                             .tabItem {
                                 Label {
                                     TabTitle(title: data.metaData.title)
@@ -177,6 +223,7 @@ struct BackportFlareRoot: View {
                             Router { onNavigate in
                                 profileRoute.view(onNavigate: onNavigate)
                             }
+                            .environment(\.tabKey, profileRoute.key)
                             .tabItem {
                                 Label {
                                     TabTitle(title: profileRoute.metaData.title)
@@ -189,6 +236,7 @@ struct BackportFlareRoot: View {
                         Router { _ in
                             SettingsScreen()
                         }
+                        .environment(\.tabKey, "settings")
                         .tabItem {
                             Label {
                                 Text("settings_title")
@@ -207,6 +255,7 @@ struct BackportFlareRoot: View {
                             Router { onNavigate in
                                 data.view(onNavigate: onNavigate)
                             }
+                            .environment(\.tabKey, data.key)
                             .tabItem {
                                 Label {
                                     TabTitle(title: data.metaData.title)
@@ -220,6 +269,7 @@ struct BackportFlareRoot: View {
                     }
                     if case .success = onEnum(of: activeAccountPresenter.state.user) {
                         SecondaryTabsScreen(tabs: tabs.secondary)
+                            .environment(\.tabKey, "more")
                             .tabItem {
                                 Label {
                                     Text("More")

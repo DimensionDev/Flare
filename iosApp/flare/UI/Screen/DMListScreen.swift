@@ -3,71 +3,84 @@ import SwiftUIBackports
 @preconcurrency import KotlinSharedUI
 
 struct DMListScreen: View {
+    @Environment(\.tabKey) private var tabKeyEnv
+    @Environment(\.isActive) private var isActive
     let accountType: AccountType
     @StateObject private var presenter: KotlinPresenter<DMListState>
     var body: some View {
-        List {
-            PagingView(data: presenter.state.items) { item in
-                NavigationLink(value: Route.dmConversation(accountType, item.key, item.users.count == 1 ? item.users.first?.name.innerText ?? String(localized: "direct_messages_title") : String(localized: "direct_messages_title"))) {
-                    HStack {
-                        if item.hasUser, let image = item.users.first?.avatar {
-                            AvatarView(data: image)
-                                .frame(width: 48, height: 48)
-                        } else {
-                            Image("fa-list")
-                        }
-                        VStack(
-                            alignment: .leading,
-                            spacing: 8
-                        ) {
-                            HStack {
-                                if item.hasUser {
-                                    ForEach(item.users, id: \.key) { user in
-                                        RichText(text: user.name)
-                                            .lineLimit(1)
-                                        if (item.users.count == 1) {
-                                            Text(user.handle)
+        ScrollViewReader { proxy in
+            List {
+                PagingView(data: presenter.state.items) { item in
+                    NavigationLink(value: Route.dmConversation(accountType, item.key, item.users.count == 1 ? item.users.first?.name.innerText ?? String(localized: "direct_messages_title") : String(localized: "direct_messages_title"))) {
+                        HStack {
+                            if item.hasUser, let image = item.users.first?.avatar {
+                                AvatarView(data: image)
+                                    .frame(width: 48, height: 48)
+                            } else {
+                                Image("fa-list")
+                            }
+                            VStack(
+                                alignment: .leading,
+                                spacing: 8
+                            ) {
+                                HStack {
+                                    if item.hasUser {
+                                        ForEach(item.users, id: \.key) { user in
+                                            RichText(text: user.name)
                                                 .lineLimit(1)
-                                                .font(.caption)
-                                                .foregroundStyle(.secondary)
+                                            if (item.users.count == 1) {
+                                                Text(user.handle)
+                                                    .lineLimit(1)
+                                                    .font(.caption)
+                                                    .foregroundStyle(.secondary)
+                                            }
                                         }
                                     }
+                                    Spacer()
+                                    if let lasMessage = item.lastMessage {
+                                        DateTimeText(data: lasMessage.timestamp)
+                                            .lineLimit(1)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
                                 }
-                                Spacer()
-                                if let lasMessage = item.lastMessage {
-                                    DateTimeText(data: lasMessage.timestamp)
-                                        .lineLimit(1)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
+                                Text(item.lastMessageText)
+                                    .lineLimit(2)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
-                            Text(item.lastMessageText)
-                                .lineLimit(2)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        if item.unreadCount > 0 {
-                            Spacer()
-                            Text("\(item.unreadCount)")
-                                .lineLimit(1)
-                                .font(.caption)
-                                .padding(6)
-                                .background(
-                                    Circle()
-                                        .fill(Color.accentColor)
-                                )
-                                .foregroundStyle(.white)
+                            if item.unreadCount > 0 {
+                                Spacer()
+                                Text("\(item.unreadCount)")
+                                    .lineLimit(1)
+                                    .font(.caption)
+                                    .padding(6)
+                                    .background(
+                                        Circle()
+                                            .fill(Color.accentColor)
+                                    )
+                                    .foregroundStyle(.white)
+                            }
                         }
                     }
+                } loadingContent: {
+                    UiListPlaceholder()
                 }
-            } loadingContent: {
-                UiListPlaceholder()
+                .id("top")
             }
+            .onReceive(NotificationCenter.default.publisher(for: .scrollToTop)) { notification in
+                let targetTab = notification.userInfo?["tab"] as? String
+                if isActive && (targetTab == nil || targetTab == tabKeyEnv) {
+                    withAnimation {
+                        proxy.scrollTo("top", anchor: .top)
+                    }
+                }
+            }
+            .refreshable {
+                try? await presenter.state.refreshSuspend()
+            }
+            .navigationTitle("dm_list_title")
         }
-        .refreshable {
-            try? await presenter.state.refreshSuspend()
-        }
-        .navigationTitle("dm_list_title")
     }
 }
 

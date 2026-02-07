@@ -43,6 +43,7 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.SearchBar
 import dev.dimension.flare.ui.component.SearchBarState
+import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.searchBarPresenter
 import dev.dimension.flare.ui.component.searchContent
 import dev.dimension.flare.ui.component.status.AdaptiveCard
@@ -55,7 +56,6 @@ import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.invoke
-import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 

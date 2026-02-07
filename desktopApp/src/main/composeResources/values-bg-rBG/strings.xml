@@ -18,7 +18,6 @@
     <string name="home_tab_list_title">Списък</string>
     <string name="home_tab_feeds_title">Емисии</string>
     <string name="dm_list_title">Лични съобщения</string>
-    <string name="home_timeline_new_toots">Нови публикации</string>
     <string name="service_select_instance_input_placeholder">URL адрес на инстанция</string>
     <string name="service_select_next_button">Напред</string>
     <string name="service_select_empty_message">Не са намерени инстанции</string>

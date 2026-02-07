@@ -20,7 +20,10 @@
     <string name="home_tab_list_title">Lista</string>
     <string name="home_tab_feeds_title">Feed</string>
     <string name="dm_list_title">Messaggi privati</string>
-    <string name="home_timeline_new_toots">Nuovi Post</string>
+    <plurals name="home_timeline_new_toots">
+        <item quantity="one">Nuovo Post %d</item>
+        <item quantity="other">Nuovi Post %d</item>
+    </plurals>
     <string name="navigate_back">Indietro</string>
     <string name="service_select_instance_input_placeholder">URL istanza</string>
     <string name="service_select_next_button">Successivo</string>

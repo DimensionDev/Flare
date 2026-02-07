@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">Notifications</string>
     <string name="home_tab_me_title">Moi</string>
     <string name="home_tab_discover_title">Découvrir</string>
-    <string name="home_timeline_new_toots">Nouveaux messages</string>
     <string name="notification_tab_all_title">Tous</string>
     <string name="notification_tab_mentions_title">Mentions</string>
     <string name="notification_tab_comments_title">Commentaires</string>

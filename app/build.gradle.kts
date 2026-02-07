@@ -141,7 +141,6 @@ dependencies {
     implementation(libs.datastore)
     implementation(libs.kotlinx.serialization.protobuf)
     implementation(libs.bundles.media3)
-    implementation(libs.compose.placeholder.material3)
     implementation(libs.swiper)
     implementation(libs.reorderable)
     implementation(libs.androidx.window)
@@ -155,12 +154,10 @@ dependencies {
     implementation(libs.material.motion.compose)
     implementation(libs.nestedScrollView)
     implementation(libs.precompose.molecule)
-    implementation(libs.compose.placeholder.material3)
     implementation(libs.webkit)
     implementation(libs.bundles.navigation3)
     implementation(libs.richtext.ui.material3)
     implementation(libs.androidx.browser)
-    implementation(libs.compose.placeholder)
 
     // START Non-FOSS component
     if (project.file("google-services.json").exists()) {

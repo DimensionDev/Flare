@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.revenuecat.placeholder.placeholder
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleExclamation
@@ -28,6 +27,7 @@ import dev.dimension.flare.compose.ui.feeds_discover_feeds_created_by
 import dev.dimension.flare.compose.ui.list_empty
 import dev.dimension.flare.compose.ui.list_error
 import dev.dimension.flare.ui.common.itemsIndexed
+import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformListItem
 import dev.dimension.flare.ui.component.platform.PlatformSegmentedListItem
 import dev.dimension.flare.ui.component.platform.PlatformText

@@ -7,12 +7,12 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.render.toUi
 import io.ktor.http.Url
-import io.ktor.util.encodeBase64
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
 import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.toInstant
+import kotlin.io.encoding.Base64
 import kotlin.time.Instant
 
 internal fun StatusContent.Rss.RssContent.render(): UiTimeline =
@@ -132,7 +132,7 @@ internal fun StatusContent.Rss.RssContent.RDF.render(): UiTimeline =
 
 internal fun MicroBlogKey.Companion.fromRss(url: String) =
     MicroBlogKey(
-        id = url.encodeBase64(),
+        id = Base64.encode(url.encodeToByteArray()),
         host = "RSS",
     )
 

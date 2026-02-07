@@ -32,6 +32,7 @@ import dev.dimension.flare.data.database.cache.model.StatusContent.BlueskyNotifi
 import dev.dimension.flare.data.database.cache.model.StatusContent.BlueskyNotification.UserList
 import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.AccountType.Specific
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
@@ -246,7 +247,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                         id = items.joinToString("_") { it.uri.atUri } + idSuffix,
                                         host = accountKey.host,
                                     ),
-                                accountType = AccountType.Specific(accountKey),
+                                accountType = Specific(accountKey),
                                 userKey = null,
                                 content = content,
                                 text = null,
@@ -288,7 +289,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                         id = items.joinToString("_") { it.uri.atUri } + "_follow",
                                         host = accountKey.host,
                                     ),
-                                accountType = AccountType.Specific(accountKey),
+                                accountType = Specific(accountKey),
                                 userKey = null,
                                 content = content,
                                 text = null,
@@ -328,7 +329,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                             id = it.uri.atUri,
                                             host = accountKey.host,
                                         ),
-                                    accountType = AccountType.Specific(accountKey),
+                                    accountType = Specific(accountKey),
                                     userKey = user.userKey,
                                     content = content,
                                     text = null,
@@ -368,7 +369,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                             id = it.uri.atUri,
                                             host = accountKey.host,
                                         ),
-                                    accountType = AccountType.Specific(accountKey),
+                                    accountType = Specific(accountKey),
                                     userKey = user.userKey,
                                     content = content,
                                     text = null,
@@ -407,7 +408,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                             id = it.uri.atUri,
                                             host = accountKey.host,
                                         ),
-                                    accountType = AccountType.Specific(accountKey),
+                                    accountType = Specific(accountKey),
                                     userKey = user.userKey,
                                     content = content,
                                     text = null,
@@ -446,7 +447,47 @@ internal fun List<ListNotificationsNotification>.toDb(
                                             id = it.uri.atUri,
                                             host = accountKey.host,
                                         ),
-                                    accountType = AccountType.Specific(accountKey),
+                                    accountType = Specific(accountKey),
+                                    userKey = user.userKey,
+                                    content = content,
+                                    text = null,
+                                    createdAt = it.indexedAt,
+                                ),
+                        )
+                    createDbPagingTimelineWithStatus(
+                        accountKey = accountKey,
+                        pagingKey = pagingKey,
+                        sortId = it.indexedAt.toEpochMilliseconds(),
+                        status = data,
+                        references =
+                            mapOf(
+                                ReferenceType.Notification to
+                                    listOfNotNull(
+                                        post.toDbStatusWithUser(
+                                            accountKey,
+                                        ),
+                                    ),
+                            ),
+                    )
+                }
+            }
+
+            ListNotificationsNotificationReason.ContactMatch -> {
+                items.mapNotNull {
+                    val post = references[it.uri] ?: return@mapNotNull null
+                    val content = Post(post = post)
+                    val user = post.author.toDbUser(accountKey.host)
+                    val data =
+                        DbStatusWithUser(
+                            user = user,
+                            data =
+                                DbStatus(
+                                    statusKey =
+                                        MicroBlogKey(
+                                            id = it.uri.atUri,
+                                            host = accountKey.host,
+                                        ),
+                                    accountType = Specific(accountKey),
                                     userKey = user.userKey,
                                     content = content,
                                     text = null,

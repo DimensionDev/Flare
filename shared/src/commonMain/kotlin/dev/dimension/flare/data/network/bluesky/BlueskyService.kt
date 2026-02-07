@@ -11,7 +11,6 @@ import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.request.HttpRequestPipeline
 import io.ktor.http.Url
 import io.ktor.util.AttributeKey
-import io.ktor.util.encodeBase64
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
@@ -20,6 +19,7 @@ import sh.christian.ozone.BlueskyApi
 import sh.christian.ozone.XrpcBlueskyApi
 import sh.christian.ozone.oauth.OAuthApi
 import sh.christian.ozone.oauth.OAuthCodeChallengeMethod
+import kotlin.io.encoding.Base64
 
 // compatibility support for darwin (iOS, macOS) since Ktor's SHA-256 implementation is not available there
 // see: https://github.com/ktorio/ktor/blob/477d76409fec6c2d71683817c6060f1b2afdcbb2/ktor-utils/posix/src/io/ktor/util/CryptoNative.kt#L25C57-L25C92
@@ -35,7 +35,12 @@ internal data object OAuthCodeChallengeMethodS256 : OAuthCodeChallengeMethod("S2
         return base64UrlSafe
     }
 
-    private fun ByteArray.encodeBase64Url(): String = encodeBase64().trimEnd('=').replace('+', '-').replace('/', '_')
+    private fun ByteArray.encodeBase64Url(): String =
+        Base64
+            .encode(this)
+            .trimEnd('=')
+            .replace('+', '-')
+            .replace('/', '_')
 }
 
 internal data class BlueskyService private constructor(

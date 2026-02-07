@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.revenuecat.placeholder.placeholder
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FaceSadTear
@@ -16,6 +15,7 @@ import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.login_expired
 import dev.dimension.flare.login_expired_relogin
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.onError

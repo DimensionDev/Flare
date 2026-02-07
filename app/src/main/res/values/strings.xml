@@ -9,7 +9,10 @@
     <string name="home_tab_me_title">Me</string>
     <string name="home_tab_discover_title">Discover</string>
 
-    <string name="home_timeline_new_toots">New Posts</string>
+    <plurals name="home_timeline_new_toots">
+        <item quantity="one">%d New Post</item>
+        <item quantity="other">%d New Posts</item>
+    </plurals>
 
     <string name="notification_tab_all_title">All</string>
     <string name="notification_tab_mentions_title">Mentions</string>

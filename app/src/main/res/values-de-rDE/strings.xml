@@ -6,7 +6,10 @@
     <string name="home_tab_notifications_title">Benachrichtigungen</string>
     <string name="home_tab_me_title">Ich</string>
     <string name="home_tab_discover_title">Entdecken</string>
-    <string name="home_timeline_new_toots">Neue Beiträge</string>
+    <plurals name="home_timeline_new_toots">
+        <item quantity="one">%d Neuer Beitrag</item>
+        <item quantity="other">%d neue Beiträge</item>
+    </plurals>
     <string name="notification_tab_all_title">Alle</string>
     <string name="notification_tab_mentions_title">Erwähnungen</string>
     <string name="notification_tab_comments_title">Kommentare</string>

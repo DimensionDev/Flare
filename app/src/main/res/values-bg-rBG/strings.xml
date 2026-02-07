@@ -6,7 +6,6 @@
     <string name="home_tab_notifications_title">Известия</string>
     <string name="home_tab_me_title">Аз</string>
     <string name="home_tab_discover_title">Откриване</string>
-    <string name="home_timeline_new_toots">Нови публикации</string>
     <string name="notification_tab_all_title">Всички</string>
     <string name="notification_tab_mentions_title">Споменавания</string>
     <string name="notification_tab_comments_title">Коментари</string>

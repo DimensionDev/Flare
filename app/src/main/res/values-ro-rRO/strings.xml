@@ -6,7 +6,11 @@
     <string name="home_tab_notifications_title">Notificări</string>
     <string name="home_tab_me_title">Eu</string>
     <string name="home_tab_discover_title">Descoperă</string>
-    <string name="home_timeline_new_toots">Postări noi</string>
+    <plurals name="home_timeline_new_toots">
+        <item quantity="one">Postare nouă %d</item>
+        <item quantity="few">%d Postări noi</item>
+        <item quantity="other">%d Postări noi</item>
+    </plurals>
     <string name="notification_tab_all_title">Toate</string>
     <string name="notification_tab_mentions_title">Menționează</string>
     <string name="notification_tab_comments_title">Comentarii</string>

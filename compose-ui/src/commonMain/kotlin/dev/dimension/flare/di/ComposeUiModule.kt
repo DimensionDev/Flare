@@ -14,4 +14,8 @@ public val composeUiModule: Module =
             val repo: SettingsRepository = get()
             repo.appearanceSettings.map { it.hideReposts }
         }
+        single(named("hideRepliesFlow")) {
+            val repo: SettingsRepository = get()
+            repo.appearanceSettings.map { it.hideReplies }
+        }
     }

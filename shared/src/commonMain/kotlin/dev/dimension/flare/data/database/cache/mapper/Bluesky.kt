@@ -62,11 +62,17 @@ internal object Bluesky {
     }
 
     suspend fun saveMessage(
-        @Suppress("UNUSED_PARAMETER") accountKey: MicroBlogKey,
+        accountKey: MicroBlogKey,
         roomKey: MicroBlogKey,
         database: CacheDatabase,
         data: List<MessageView>,
     ) {
+//        val room =
+//            DbMessageRoom(
+//                roomKey = roomKey,
+//                platformType = PlatformType.Bluesky,
+//                messageKey = null,
+//            )
         val messages = data.map { it.toDbMessageItem(roomKey) }
         database.messageDao().insertMessages(messages)
 //        database.messageDao().insert(room)

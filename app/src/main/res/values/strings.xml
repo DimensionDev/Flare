@@ -175,6 +175,8 @@
     <string name="settings_appearance_compat_link_previews_description">Show link previews in simplify mode in the post</string>
     <string name="settings_appearance_hide_reposts">Hide reposts</string>
     <string name="settings_appearance_hide_reposts_description">When enabled, reposts (retweets/renotes) are removed from timelines</string>
+    <string name="settings_appearance_hide_replies">Hide replies</string>
+    <string name="settings_appearance_hide_replies_description">When enabled, replies by others are removed from timelines (keeps your own replies)</string>
     <string name="settings_appearance_theme_color">Theme color</string>
     <string name="settings_appearance_theme_color_description">Change the theme color of the app</string>
     <string name="settings_appearance_theme_pure_color">High contrast Mode</string>

@@ -163,7 +163,6 @@ internal fun Status.renderStatus(
         statusKey = statusKey,
         content = element.toUi(),
         user = displayUser,
-        // REPOST-ANNOTATION: VVo — this `retweetedStatus?.renderStatus(...)` inclusion indicates the feed shows a reposted/retweeted item; detect via `retweetedStatus` being present.
         quote =
             listOfNotNull(
                 retweetedStatus?.renderStatus(

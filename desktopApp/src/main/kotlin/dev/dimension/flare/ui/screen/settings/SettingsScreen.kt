@@ -825,6 +825,27 @@ internal fun SettingsScreen(
                     },
                 )
                 ExpanderItemSeparator()
+                // Hide replies toggle: remove replies to others from timelines (keeps your own replies)
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_appearance_hide_replies))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_appearance_hide_replies_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = LocalAppearanceSettings.current.hideReplies,
+                            {
+                                state.appearanceState.updateSettings {
+                                    copy(hideReplies = it)
+                                }
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+                ExpanderItemSeparator()
             }
 
             Header(stringResource(Res.string.settings_storage_title))

@@ -99,4 +99,3 @@ internal data class TweetLegacy(
     @SerialName("user")
     val user: InboxUser? = null,
 )
-// REPOST-ANNOTATION: XQT retweeted/retweet_count fields indicate viewer retweet state and retweet counts (used to detect X/Twitter reposts)

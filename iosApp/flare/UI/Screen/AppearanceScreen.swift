@@ -152,6 +152,28 @@ struct AppearanceScreen: View {
                     }
                     
                     Toggle(isOn: Binding(get: {
+                        appearance.hideReposts
+                    }, set: { newValue in
+                        presenter.state.updateAppearanceSettings { settings in
+                            settings.copy(hideReposts: newValue)
+                        }
+                    })) {
+                        Text("appearance_hide_reposts")
+                        Text("appearance_hide_reposts_description")
+                    }
+
+                    Toggle(isOn: Binding(get: {
+                        appearance.hideReplies
+                    }, set: { newValue in
+                        presenter.state.updateAppearanceSettings { settings in
+                            settings.copy(hideReplies: newValue)
+                        }
+                    })) {
+                        Text("appearance_hide_replies")
+                        Text("appearance_hide_replies_description")
+                    }
+
+                    Toggle(isOn: Binding(get: {
                         appearance.showMedia
                     }, set: { newValue in
                         presenter.state.updateAppearanceSettings { settings in
@@ -217,6 +239,8 @@ extension AppearanceSettings {
         showNumbers: Bool? = nil,
         showLinkPreview: Bool? = nil,
         showMedia: Bool? = nil,
+        hideReposts: Bool? = nil,
+        hideReplies: Bool? = nil,
         showSensitiveContent: Bool? = nil,
         videoAutoplay: VideoAutoplay? = nil,
         expandMediaSize: Bool? = nil,
@@ -242,6 +266,8 @@ extension AppearanceSettings {
             showNumbers: showNumbers ?? self.showNumbers,
             showLinkPreview: showLinkPreview ?? self.showLinkPreview,
             showMedia: showMedia ?? self.showMedia,
+            hideReposts: hideReposts ?? self.hideReposts,
+            hideReplies: hideReplies ?? self.hideReplies,
             showSensitiveContent: showSensitiveContent ?? self.showSensitiveContent,
             videoAutoplay: videoAutoplay ?? self.videoAutoplay,
             expandMediaSize: expandMediaSize ?? self.expandMediaSize,

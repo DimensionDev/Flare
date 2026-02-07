@@ -540,10 +540,20 @@ internal fun PostView.renderStatus(
         poll = null,
         quote = listOfNotNull(findQuote(accountKey, this, event)).toImmutableList(),
         contentWarning = null,
+        // REPLY-ANNOTATION: Bluesky — this `parents` list is populated when the post is a reply; the `parent` object comes from `references[ReferenceType.Reply]`.
         parents =
             listOfNotNull(
                 parent?.renderStatus(accountKey, event),
             ).toPersistentList(),
+        aboveTextContent =
+            parent
+                ?.author
+                ?.handle
+                ?.takeIf { it.isNotBlank() }
+                ?.let {
+                    UiTimeline.ItemContent.Status.AboveTextContent
+                        .ReplyTo(handle = "@$it")
+                },
         actions =
             listOfNotNull(
                 ActionMenu.Item(

@@ -63,6 +63,16 @@ public abstract class TimelinePresenter :
         }
     }
 
+    // Try to inject a named Flow<Boolean> binding 'hideRepliesFlow' provided by platform modules.
+    // If inject fails (no binding), fall back to a constant false flow.
+    protected open val hideRepliesFlow: Flow<Boolean> by lazy {
+        try {
+            inject<Flow<Boolean>>(named("hideRepliesFlow")).value
+        } catch (_: Throwable) {
+            flowOf(false)
+        }
+    }
+
     private val filterFlow by lazy {
         localFilterRepository.getFlow(forTimeline = true)
     }
@@ -94,7 +104,9 @@ public abstract class TimelinePresenter :
                     filterFlow
                         .combine(hideRepostsFlow) { filterList, hideReposts ->
                             filterList to hideReposts
-                        }.map { (filterList, hideReposts) ->
+                        }.combine(hideRepliesFlow) { (filterList, hideReposts), hideReplies ->
+                            Triple(filterList, hideReposts, hideReplies)
+                        }.map { (filterList, hideReposts, hideReplies) ->
                             pager.filter {
                                 val passesFilter = !it.contains(filterList)
                                 val passesRepostFilter =
@@ -103,7 +115,13 @@ public abstract class TimelinePresenter :
                                     } else {
                                         true
                                     }
-                                passesFilter && passesRepostFilter
+                                val passesReplyFilter =
+                                    if (hideReplies) {
+                                        !isReply(it)
+                                    } else {
+                                        true
+                                    }
+                                passesFilter && passesRepostFilter && passesReplyFilter
                             }
                         }
                 }
@@ -184,6 +202,34 @@ public abstract class TimelinePresenter :
 
     private fun isRepost(item: UiTimeline): Boolean =
         item.topMessage?.icon == dev.dimension.flare.ui.model.UiTimeline.TopMessage.Icon.Retweet
+
+    // REPLY-ANNOTATION: Check if item is a reply to another user (not self-reply).
+    // A post is considered a reply if it has ReplyTo aboveTextContent AND the reply target is not the author.
+    private fun isReply(item: UiTimeline): Boolean {
+        val content = item.content as? dev.dimension.flare.ui.model.UiTimeline.ItemContent.Status ?: return false
+        val replyTo =
+            content.aboveTextContent as?
+                dev.dimension.flare.ui.model.UiTimeline.ItemContent.Status.AboveTextContent.ReplyTo
+                ?: return false
+        val authorHandle = content.user?.handle ?: return true
+        // Both handles may be in format "@user" or "@user@host", normalize to just the username
+        return !sameUserHandle(authorHandle, replyTo.handle)
+    }
+
+    private fun sameUserHandle(
+        left: String,
+        right: String,
+    ): Boolean {
+        val leftNormalized = normalizeHandle(left)
+        val rightNormalized = normalizeHandle(right)
+        return leftNormalized == rightNormalized
+    }
+
+    private fun normalizeHandle(handle: String): String =
+        handle
+            .removePrefix("@")
+            .substringBefore("@")
+            .lowercase()
 }
 
 @Immutable

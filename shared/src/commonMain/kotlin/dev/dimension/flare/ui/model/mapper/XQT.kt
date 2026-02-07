@@ -259,7 +259,6 @@ internal fun Tweet.render(
     event: StatusEvent.XQT,
     references: Map<ReferenceType, List<StatusContent>> = emptyMap(),
 ): UiTimeline {
-    // REPOST-ANNOTATION: X/Twitter — this is where reposts by OTHER USERS are displayed in the feed; detect via a referenced status under `ReferenceType.Retweet` (Retweet payload/RetweetLegacy).
     val retweet =
         (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.XQT)
             ?.data

@@ -563,6 +563,30 @@ internal fun AppearanceScreen(
                 SegmentedListItem(
                     onClick = {
                         state.updateSettings {
+                            copy(hideReplies = !hideReplies)
+                        }
+                    },
+                    shapes = ListItemDefaults.item(),
+                    content = {
+                        Text(text = stringResource(id = R.string.settings_appearance_hide_replies))
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_appearance_hide_replies_description))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = appearanceSettings.hideReplies,
+                            onCheckedChange = {
+                                state.updateSettings {
+                                    copy(hideReplies = it)
+                                }
+                            },
+                        )
+                    },
+                )
+                SegmentedListItem(
+                    onClick = {
+                        state.updateSettings {
                             copy(showMedia = !showMedia)
                         }
                     },

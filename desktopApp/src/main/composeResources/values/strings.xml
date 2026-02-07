@@ -198,6 +198,10 @@
     <string name="settings_appearance_theme_auto">Auto</string>
     <string name="settings_appearance_dynamic_theme">Dynamic theme</string>
     <string name="settings_appearance_dynamic_theme_description">Change the theme of the app based on the device\'s wallpaper</string>
+    <string name="settings_appearance_hide_reposts">Hide reposts</string>
+    <string name="settings_appearance_hide_reposts_description">When enabled, reposts (retweets/reblogs) are removed from timelines</string>
+    <string name="settings_appearance_hide_replies">Hide replies</string>
+    <string name="settings_appearance_hide_replies_description">When enabled, replies by others to anyone other than themselves are removed from timelines</string>
     <string name="settings_appearance_show_link_previews">Show link previews</string>
     <string name="settings_appearance_show_link_previews_description">Show link previews in the post</string>
     <string name="settings_appearance_compat_link_previews">Simplify link previews</string>
@@ -262,7 +266,6 @@
     <string name="misskey_visibility_home_description">Only users on this instance can see this post</string>
     <string name="misskey_visibility_followers_description">Only followers can see this post</string>
     <string name="misskey_visibility_specified_description">Only mentioned users can see this post</string>
-
 
     <string name="rss_sources_title">Rss Sources</string>
     <string name="add_rss_source">Add Rss Source</string>

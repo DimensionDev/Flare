@@ -100,6 +100,10 @@ import dev.dimension.flare.settings_appearance_expand_media
 import dev.dimension.flare.settings_appearance_expand_media_description
 import dev.dimension.flare.settings_appearance_full_width_post
 import dev.dimension.flare.settings_appearance_full_width_post_description
+import dev.dimension.flare.settings_appearance_hide_reposts
+import dev.dimension.flare.settings_appearance_hide_reposts_description
+import dev.dimension.flare.settings_appearance_hide_replies
+import dev.dimension.flare.settings_appearance_hide_replies_description
 import dev.dimension.flare.settings_appearance_post_action_style
 import dev.dimension.flare.settings_appearance_post_action_style_description
 import dev.dimension.flare.settings_appearance_post_action_style_hidden
@@ -825,7 +829,7 @@ internal fun SettingsScreen(
                     },
                 )
                 ExpanderItemSeparator()
-                // Hide replies toggle: remove replies to others from timelines (keeps your own replies)
+                // Hide replies toggle: remove replies by others from timelines
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_appearance_hide_replies))

@@ -511,17 +511,6 @@ internal fun List<ListNotificationsNotification>.toDb(
                     )
                 }
             }
-
-            else ->
-                items.map {
-                    createDbPagingTimelineWithStatus(
-                        accountKey = accountKey,
-                        pagingKey = pagingKey,
-                        sortId = it.indexedAt.toEpochMilliseconds(),
-                        status = it.toDbStatusWithUser(accountKey),
-                        references = mapOf(),
-                    )
-                }
         }
     }
 }

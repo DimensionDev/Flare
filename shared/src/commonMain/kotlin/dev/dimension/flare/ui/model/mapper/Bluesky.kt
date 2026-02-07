@@ -328,7 +328,6 @@ internal fun FeedViewPostReasonUnion.render(
             }
 
             is FeedViewPostReasonUnion.ReasonRepost -> {
-                // REPOST-ANNOTATION: Bluesky — this TopMessage/branch displays a post that was reposted by another user; detect using FeedViewPostReasonUnion.ReasonRepost or referenced `ReferenceType.Retweet`.
                 val user = value.by.render(accountKey)
                 UiTimeline.TopMessage(
                     user = user,
@@ -540,7 +539,6 @@ internal fun PostView.renderStatus(
         poll = null,
         quote = listOfNotNull(findQuote(accountKey, this, event)).toImmutableList(),
         contentWarning = null,
-        // REPLY-ANNOTATION: Bluesky — this `parents` list is populated when the post is a reply; the `parent` object comes from `references[ReferenceType.Reply]`.
         parents =
             listOfNotNull(
                 parent?.renderStatus(accountKey, event),

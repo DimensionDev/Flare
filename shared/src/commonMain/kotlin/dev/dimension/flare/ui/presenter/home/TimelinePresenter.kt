@@ -203,7 +203,7 @@ public abstract class TimelinePresenter :
     private fun isRepost(item: UiTimeline): Boolean =
         item.topMessage?.icon == dev.dimension.flare.ui.model.UiTimeline.TopMessage.Icon.Retweet
 
-    // REPLY-ANNOTATION: Check if item is a reply to another user (not self-reply).
+    // Check if item is a reply to another user (not self-reply).
     // A post is considered a reply if it has ReplyTo aboveTextContent AND the reply target is not the author.
     private fun isReply(item: UiTimeline): Boolean {
         val content = item.content as? dev.dimension.flare.ui.model.UiTimeline.ItemContent.Status ?: return false

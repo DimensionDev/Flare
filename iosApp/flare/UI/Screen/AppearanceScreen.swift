@@ -266,8 +266,6 @@ extension AppearanceSettings {
             showNumbers: showNumbers ?? self.showNumbers,
             showLinkPreview: showLinkPreview ?? self.showLinkPreview,
             showMedia: showMedia ?? self.showMedia,
-            hideReposts: hideReposts ?? self.hideReposts,
-            hideReplies: hideReplies ?? self.hideReplies,
             showSensitiveContent: showSensitiveContent ?? self.showSensitiveContent,
             videoAutoplay: videoAutoplay ?? self.videoAutoplay,
             expandMediaSize: expandMediaSize ?? self.expandMediaSize,
@@ -281,7 +279,9 @@ extension AppearanceSettings {
             fullWidthPost: fullWidthPost ?? self.fullWidthPost,
             postActionStyle: postActionStyle ?? self.postActionStyle,
             absoluteTimestamp: absoluteTimestamp ?? self.absoluteTimestamp,
-            showPlatformLogo: showPlatformLogo ?? self.showPlatformLogo
+            showPlatformLogo: showPlatformLogo ?? self.showPlatformLogo,
+            hideReposts: hideReposts ?? self.hideReposts,
+            hideReplies: hideReplies ?? self.hideReplies
         )
     }
 }

@@ -348,7 +348,7 @@ public fun CommonStatusComponent(
                 )
             }
 
-            if (isDetail && !item.content.isEmpty) {
+            if (isDetail && !item.content.isEmpty && appearanceSettings.showTranslateButton) {
                 TranslationComponent(
                     statusKey = item.statusKey,
                     contentWarning = item.contentWarning,

@@ -552,7 +552,16 @@ private fun Note.renderStatus(
                                 ActionMenu.Item(
                                     icon = ActionMenu.Item.Icon.Share,
                                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                    shareContent = postUrl,
+                                    onClicked = {
+                                        launcher.launch(
+                                            DeeplinkRoute.Status
+                                                .ShareSheet(
+                                                    statusKey = statusKey,
+                                                    accountType = AccountType.Specific(accountKey),
+                                                    shareUrl = postUrl,
+                                                ).toUri(),
+                                        )
+                                    },
                                 ),
                             )
                             if (isFromMe) {

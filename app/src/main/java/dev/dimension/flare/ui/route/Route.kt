@@ -83,6 +83,16 @@ internal sealed interface Route : NavKey {
             override val accountType: AccountType,
         ) : Status,
             WithAccountType
+
+        @Serializable
+        data class ShareSheet(
+            val statusKey: MicroBlogKey,
+            override val accountType: AccountType,
+            val shareUrl: String,
+            val fxShareUrl: String? = null,
+            val fixvxShareUrl: String? = null,
+        ) : Status,
+            WithAccountType
     }
 
     @Serializable
@@ -573,6 +583,15 @@ internal sealed interface Route : NavKey {
                         userKey = deeplinkRoute.userKey,
                         statusKey = deeplinkRoute.statusKey,
                         accountType = deeplinkRoute.accountType,
+                    )
+
+                is DeeplinkRoute.Status.ShareSheet ->
+                    Status.ShareSheet(
+                        statusKey = deeplinkRoute.statusKey,
+                        accountType = deeplinkRoute.accountType,
+                        shareUrl = deeplinkRoute.shareUrl,
+                        fxShareUrl = deeplinkRoute.fxShareUrl,
+                        fixvxShareUrl = deeplinkRoute.fixvxShareUrl,
                     )
 
                 is DeeplinkRoute.Status.VVOComment ->

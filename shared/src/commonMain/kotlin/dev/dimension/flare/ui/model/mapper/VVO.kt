@@ -247,7 +247,16 @@ internal fun Status.renderStatus(
                             ActionMenu.Item(
                                 icon = ActionMenu.Item.Icon.Share,
                                 text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                shareContent = url,
+                                onClicked = {
+                                    launcher.launch(
+                                        DeeplinkRoute.Status
+                                            .ShareSheet(
+                                                statusKey = statusKey,
+                                                accountType = AccountType.Specific(accountKey),
+                                                shareUrl = url,
+                                            ).toUri(),
+                                    )
+                                },
                             ),
                             if (isFromMe) {
                                 ActionMenu.Item(
@@ -512,7 +521,16 @@ internal fun Comment.renderStatus(
                             ActionMenu.Item(
                                 icon = ActionMenu.Item.Icon.Share,
                                 text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                shareContent = url,
+                                onClicked = {
+                                    launcher.launch(
+                                        DeeplinkRoute.Status
+                                            .ShareSheet(
+                                                statusKey = statusKey,
+                                                accountType = AccountType.Specific(accountKey),
+                                                shareUrl = url,
+                                            ).toUri(),
+                                    )
+                                },
                             ),
                             if (isFromMe) {
                                 ActionMenu.Item(

@@ -12,8 +12,6 @@ import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TabSettingsSerializer
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.serialization.SerializationException
 import okio.FileSystem
 import okio.SYSTEM
 
@@ -28,15 +26,8 @@ public class SettingsRepository internal constructor(
         )
     }
 
-    // Defensive: if the serializer throws (corrupt/legacy bytes), emit default and don't crash the app.
     public val appearanceSettings: Flow<AppearanceSettings> by lazy {
-        appearanceSettingsStore.data.catch { e ->
-            if (e is SerializationException) {
-                emit(AccountPreferencesSerializer.defaultValue)
-            } else {
-                throw e
-            }
-        }
+        appearanceSettingsStore.data
     }
     private val appSettingsStore by lazy {
         createDataStore(
@@ -45,13 +36,7 @@ public class SettingsRepository internal constructor(
         )
     }
     public val appSettings: Flow<AppSettings> by lazy {
-        appSettingsStore.data.catch { e ->
-            if (e is SerializationException) {
-                emit(AppSettingsSerializer.defaultValue)
-            } else {
-                throw e
-            }
-        }
+        appSettingsStore.data
     }
 
     public suspend fun updateAppearanceSettings(block: AppearanceSettings.() -> AppearanceSettings) {
@@ -66,13 +51,7 @@ public class SettingsRepository internal constructor(
     }
 
     public val tabSettings: Flow<TabSettings> by lazy {
-        tabSettingsStore.data.catch { e ->
-            if (e is SerializationException) {
-                emit(TabSettingsSerializer.defaultValue)
-            } else {
-                throw e
-            }
-        }
+        tabSettingsStore.data
     }
 
     public suspend fun updateTabSettings(block: TabSettings.() -> TabSettings) {

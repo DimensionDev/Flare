@@ -104,15 +104,7 @@ public object AccountPreferencesSerializer : OkioSerializer<AppearanceSettings> 
 
     override suspend fun readFrom(source: BufferedSource): AppearanceSettings =
         withContext(Dispatchers.IO) {
-            // Be tolerant of corrupted or legacy protobuf data.
-            // If decoding fails (for example an unexpected value in the stored bytes),
-            // return the default AppearanceSettings instead of throwing and crashing the app.
-            runCatching {
-                ProtoBuf.decodeFromByteArray<AppearanceSettings>(source.readByteArray())
-            }.getOrElse { _ ->
-                // Returning default will allow the app to start with sane settings.
-                AppearanceSettings()
-            }
+            ProtoBuf.decodeFromByteArray(source.readByteArray())
         }
 
     override suspend fun writeTo(

@@ -179,6 +179,8 @@ struct VideoControlView: View {
     @Binding var isPlaying: Bool
     @Binding var currentTime: CMTime
     let videoState: VideoState
+    @State private var sliderValue: Double = 0
+    @State private var isSeeking = false
     
     var duration: Double {
         switch videoState {
@@ -199,19 +201,33 @@ struct VideoControlView: View {
                 }
                 .buttonStyle(.plain)
                 
-                Text(formatTime(currentTime.seconds))
+                Text(formatTime(isSeeking ? sliderValue : currentTime.seconds))
                     .font(.caption)
                     .monospacedDigit()
                 
-                Slider(value: Binding(get: {
-                    currentTime.seconds
-                }, set: { newValue in
-                    currentTime = CMTime(seconds: newValue, preferredTimescale: 600)
-                }), in: 0...max(duration, 0.1))
+                Slider(value: $sliderValue, in: 0...max(duration, 0.1)) { editing in
+                    isSeeking = editing
+                    if !editing {
+                        currentTime = CMTime(seconds: sliderValue, preferredTimescale: 600)
+                    }
+                }
                 
                 Text(formatTime(duration))
                     .font(.caption)
                     .monospacedDigit()
+            }
+        }
+        .onAppear {
+            sliderValue = currentTime.seconds
+        }
+        .onChange(of: currentTime.seconds) { _, newValue in
+            if !isSeeking {
+                sliderValue = newValue
+            }
+        }
+        .onChange(of: duration) { _, newValue in
+            if sliderValue > newValue {
+                sliderValue = newValue
             }
         }
     }

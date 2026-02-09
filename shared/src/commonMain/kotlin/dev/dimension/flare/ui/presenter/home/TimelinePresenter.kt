@@ -110,13 +110,13 @@ public abstract class TimelinePresenter :
                             pager.filter {
                                 val passesFilter = !it.contains(filterList)
                                 val passesRepostFilter =
-                                    if (hideReposts) {
+                                    if (!skipFiltering && hideReposts) {
                                         !isRepost(it)
                                     } else {
                                         true
                                     }
                                 val passesReplyFilter =
-                                    if (hideReplies) {
+                                    if (!skipFiltering && hideReplies) {
                                         !isReply(it)
                                     } else {
                                         true
@@ -199,6 +199,7 @@ public abstract class TimelinePresenter :
 
     internal abstract val loader: Flow<BaseTimelineLoader>
     protected open val useDbKeyInItemKey: Boolean = false
+    protected open val skipFiltering: Boolean = false
 
     private fun isRepost(item: UiTimeline): Boolean =
         item.topMessage?.icon == dev.dimension.flare.ui.model.UiTimeline.TopMessage.Icon.Retweet

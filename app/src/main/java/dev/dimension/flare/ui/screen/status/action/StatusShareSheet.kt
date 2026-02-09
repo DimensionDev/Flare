@@ -38,10 +38,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.rememberGraphicsLayer
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import compose.icons.FontAwesomeIcons
@@ -55,13 +53,13 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.ViewBox
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.screen.media.saveByteArrayToDownloads
 import dev.dimension.flare.ui.theme.FlareTheme
-import dev.dimension.flare.ui.theme.item
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.single
 import kotlinx.coroutines.launch
@@ -69,7 +67,6 @@ import moe.tlaster.precompose.molecule.producePresenter
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import kotlin.math.min
 
 private enum class SharePreviewTheme {
     Light,
@@ -122,10 +119,10 @@ internal fun StatusShareSheet(
                     Box {
                         CompositionLocalProvider(
                             LocalComponentAppearance provides
-                                    LocalComponentAppearance.current.copy(
-                                        showTranslateButton = false,
-                                        videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
-                                    ),
+                                LocalComponentAppearance.current.copy(
+                                    showTranslateButton = false,
+                                    videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
+                                ),
                         ) {
                             StatusItem(
                                 item = state.status.takeSuccess(),
@@ -162,7 +159,7 @@ internal fun StatusShareSheet(
             ) {
                 FAIcon(
                     FontAwesomeIcons.Solid.Link,
-                    contentDescription = stringResource(id = R.string.rss_detail_share)
+                    contentDescription = stringResource(id = R.string.rss_detail_share),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(text = stringResource(id = R.string.rss_detail_share))
@@ -173,21 +170,22 @@ internal fun StatusShareSheet(
                     scope.launch {
                         val bitmap = captureShareBitmap(previewGraphicsLayer)
                         if (bitmap == null) {
-                            Toast.makeText(context, R.string.media_save_fail, Toast.LENGTH_SHORT)
+                            Toast
+                                .makeText(context, R.string.media_save_fail, Toast.LENGTH_SHORT)
                                 .show()
                             return@launch
                         }
                         saveBitmapToDownloads(
                             context = context,
                             bitmap = bitmap,
-                            statusKey = statusKey.toString()
+                            statusKey = statusKey.toString(),
                         )
                     }
                 },
             ) {
                 FAIcon(
                     FontAwesomeIcons.Solid.Download,
-                    contentDescription = stringResource(id = R.string.media_menu_save)
+                    contentDescription = stringResource(id = R.string.media_menu_save),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(text = stringResource(id = R.string.media_menu_save))
@@ -197,17 +195,20 @@ internal fun StatusShareSheet(
                     scope.launch {
                         val bitmap = captureShareBitmap(previewGraphicsLayer)
                         if (bitmap == null) {
-                            Toast.makeText(context, R.string.media_save_fail, Toast.LENGTH_SHORT)
+                            Toast
+                                .makeText(context, R.string.media_save_fail, Toast.LENGTH_SHORT)
                                 .show()
                             return@launch
                         }
-                        val imageFile = shareBitmapAsImage(
-                            context = context,
-                            bitmap = bitmap,
-                            statusKey = statusKey.toString()
-                        )
+                        val imageFile =
+                            shareBitmapAsImage(
+                                context = context,
+                                bitmap = bitmap,
+                                statusKey = statusKey.toString(),
+                            )
                         if (imageFile == null) {
-                            Toast.makeText(context, R.string.media_save_fail, Toast.LENGTH_SHORT)
+                            Toast
+                                .makeText(context, R.string.media_save_fail, Toast.LENGTH_SHORT)
                                 .show()
                             return@launch
                         }
@@ -236,7 +237,7 @@ internal fun StatusShareSheet(
             ) {
                 FAIcon(
                     FontAwesomeIcons.Solid.Image,
-                    contentDescription = stringResource(id = R.string.media_menu_save)
+                    contentDescription = stringResource(id = R.string.media_menu_save),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(text = stringResource(id = R.string.media_menu_share_image))
@@ -340,7 +341,8 @@ private fun saveBitmapToDownloads(
         fileName = fileName,
         mimeType = "image/png",
     )
-    Toast.makeText(context, context.getString(R.string.media_save_success), Toast.LENGTH_SHORT)
+    Toast
+        .makeText(context, context.getString(R.string.media_save_success), Toast.LENGTH_SHORT)
         .show()
 }
 
@@ -357,47 +359,4 @@ private fun shareBitmapAsImage(
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
     }
     return file
-}
-
-@Composable
-private fun ViewBox(
-    modifier: Modifier = Modifier,
-    stretch: Boolean = true,
-    content: @Composable () -> Unit,
-) {
-    Layout(
-        content = content,
-        modifier = modifier,
-    ) { measurables, constraints ->
-        val measurable =
-            measurables.firstOrNull()
-                ?: return@Layout layout(
-                    constraints.minWidth,
-                    constraints.minHeight,
-                ) {}
-
-        val placeable = measurable.measure(Constraints(maxWidth = 360.dp.roundToPx()))
-        val constraintWidth =
-            if (constraints.hasBoundedWidth) constraints.maxWidth else placeable.width
-        val constraintHeight =
-            if (constraints.hasBoundedHeight) constraints.maxHeight else placeable.height
-        val scaleX = constraintWidth.toFloat() / placeable.width
-        val scaleY = constraintHeight.toFloat() / placeable.height
-        var scale = min(scaleX, scaleY)
-        if (!stretch && scale > 1f) {
-            scale = 1f
-        }
-        val targetWidth = (placeable.width * scale).toInt()
-        val targetHeight = (placeable.height * scale).toInt()
-
-        layout(targetWidth, targetHeight) {
-            placeable.placeWithLayer(
-                x = (targetWidth - placeable.width) / 2,
-                y = (targetHeight - placeable.height) / 2,
-            ) {
-                this.scaleX = scale
-                this.scaleY = scale
-            }
-        }
-    }
 }

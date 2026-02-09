@@ -59,7 +59,7 @@ public fun RichText(
     modifier: Modifier = Modifier,
     layoutDirection: LayoutDirection = text.direction,
     maxLines: Int = Int.MAX_VALUE,
-    color: Color = Color.Unspecified,
+    color: Color = PlatformContentColor.current,
     fontSize: TextUnit = TextUnit.Unspecified,
     fontStyle: FontStyle? = null,
     fontWeight: FontWeight? = null,
@@ -85,7 +85,6 @@ public fun RichText(
     val h4 = PlatformTheme.typography.h4
     val h5 = PlatformTheme.typography.h5
     val h6 = PlatformTheme.typography.h6
-    val contentColor = PlatformContentColor.current
     val uriHandler = LocalUriHandler.current
     var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     CompositionLocalProvider(
@@ -95,7 +94,7 @@ public fun RichText(
             PlatformTextStyle provides PlatformTextStyle.current.merge(textStyle),
         ) {
             val state =
-                remember(text, textStyle, linkStyle, contentColor) {
+                remember(text, textStyle, linkStyle, color) {
                     RichTextState(
                         richText = text,
                         styleData =
@@ -108,7 +107,7 @@ public fun RichText(
                                 h4 = h4,
                                 h5 = h5,
                                 h6 = h6,
-                                contentColor = contentColor,
+                                contentColor = color,
                             ),
                     )
                 }

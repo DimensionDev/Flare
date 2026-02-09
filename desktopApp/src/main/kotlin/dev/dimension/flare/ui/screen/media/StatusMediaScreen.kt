@@ -33,7 +33,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPlacement
-import androidx.compose.ui.window.WindowScope
 import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
@@ -79,7 +78,7 @@ import org.jetbrains.compose.resources.stringResource
 import java.awt.FileDialog
 
 @Composable
-internal fun WindowScope.StatusMediaScreen(
+internal fun StatusMediaScreen(
     accountType: AccountType,
     statusKey: MicroBlogKey,
     index: Int,

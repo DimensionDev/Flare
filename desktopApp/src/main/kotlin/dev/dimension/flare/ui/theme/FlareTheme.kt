@@ -9,7 +9,6 @@ import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -56,7 +55,7 @@ internal val LocalComposeWindow =
 
 @OptIn(ExperimentalFluentApi::class)
 @Composable
-internal fun WindowScope.FlareTheme(
+internal fun FlareTheme(
     isDarkTheme: Boolean = isDarkTheme(),
     content: @Composable () -> Unit,
 ) {
@@ -69,53 +68,59 @@ internal fun WindowScope.FlareTheme(
                 lightColors()
             },
     ) {
-        if (SystemUtils.IS_OS_MAC) {
-            LaunchedEffect(window) {
-                window
-                    .let {
-                        it as? javax.swing.RootPaneContainer
-                    }?.let {
-                        it.rootPane.putClientProperty("apple.awt.fullWindowContent", true)
-                        it.rootPane.putClientProperty("apple.awt.transparentTitleBar", true)
-                        it.rootPane.putClientProperty("apple.awt.windowTitleVisible", false)
-                    }
-            }
-        }
-        val composeWindow =
-            if (this is FrameWindowScope) {
-                window
-            } else {
-                null
-            }
-
         CompositionLocalProvider(
             LocalIndication provides
                 FluentIndication(
                     hover = Color.Transparent,
                     pressed = Color.Transparent,
                 ),
-            LocalWindowPadding provides
-                if (SystemUtils.IS_OS_MAC) {
-                    PaddingValues(
-                        start = 0.dp,
-                        top = 24.dp + 8.dp,
-                        end = 0.dp,
-                        bottom = 8.dp,
-                    )
-                } else {
-                    PaddingValues(vertical = 8.dp)
-                },
-            LocalComposeWindow provides composeWindow,
         ) {
             Box(
                 modifier =
                     Modifier
-                        .fillMaxSize()
                         .background(FluentTheme.colors.background.mica.base),
             ) {
                 content.invoke()
             }
         }
+    }
+}
+
+@Composable
+internal fun WindowScope.ProvideComposeWindow(content: @Composable () -> Unit) {
+    if (SystemUtils.IS_OS_MAC) {
+        LaunchedEffect(window) {
+            window
+                .let {
+                    it as? javax.swing.RootPaneContainer
+                }?.let {
+                    it.rootPane.putClientProperty("apple.awt.fullWindowContent", true)
+                    it.rootPane.putClientProperty("apple.awt.transparentTitleBar", true)
+                    it.rootPane.putClientProperty("apple.awt.windowTitleVisible", false)
+                }
+        }
+    }
+    val composeWindow =
+        if (this is FrameWindowScope) {
+            window
+        } else {
+            null
+        }
+    CompositionLocalProvider(
+        LocalComposeWindow provides composeWindow,
+        LocalWindowPadding provides
+            if (SystemUtils.IS_OS_MAC) {
+                PaddingValues(
+                    start = 0.dp,
+                    top = 24.dp + 8.dp,
+                    end = 0.dp,
+                    bottom = 8.dp,
+                )
+            } else {
+                PaddingValues(vertical = 8.dp)
+            },
+    ) {
+        content.invoke()
     }
 }
 

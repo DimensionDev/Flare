@@ -14,6 +14,7 @@ import dev.dimension.flare.app_name
 import dev.dimension.flare.flare_logo
 import dev.dimension.flare.ui.route.WindowSceneStrategy.Companion.window
 import dev.dimension.flare.ui.theme.FlareTheme
+import dev.dimension.flare.ui.theme.ProvideComposeWindow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -42,7 +43,9 @@ internal class WindowScene<T : Any>(
             },
         ) {
             FlareTheme {
-                entry.Content()
+                ProvideComposeWindow {
+                    entry.Content()
+                }
             }
         }
     }

@@ -71,6 +71,8 @@ enum Route: Hashable, Identifiable {
             RssDetailScreen(url: url)
         case .statusVVOStatus(let accountType, let statusKey):
             VVOStatusScreen(accountType: accountType, statusKey: statusKey)
+        case .statusShareSheet(let accountType, let statusKey, let shareUrl, let fxShareUrl, let fixvxShareUrl):
+            StatusShareSheet(statusKey: statusKey, accountType: accountType, shareUrl: shareUrl, fxShareUrl: fxShareUrl, fixvxShareUrl: fixvxShareUrl)
         case .statusVVOComment(let accountType, let statusKey):
             VVOCommentScreen(accountType: accountType, statusKey: statusKey)
         case .statusBlueskyReport(let accountType, let statusKey):
@@ -127,6 +129,7 @@ enum Route: Hashable, Identifiable {
     case statusMisskeyReport(AccountType, MicroBlogKey, MicroBlogKey?)
     case statusVVOComment(AccountType, MicroBlogKey)
     case statusVVOStatus(AccountType, MicroBlogKey)
+    case statusShareSheet(AccountType, MicroBlogKey, String, String?, String?)
     case serviceSelect
     case accountManagement
     case localFilter
@@ -205,6 +208,8 @@ enum Route: Hashable, Identifiable {
             return Route.statusVVOComment(data.accountType, data.commentKey)
         case .vVOStatus(let data):
             return Route.statusVVOStatus(data.accountType, data.statusKey)
+        case .shareSheet(let data):
+            return Route.statusShareSheet(data.accountType, data.statusKey, data.shareUrl, data.fxShareUrl, data.fixvxShareUrl)
         }
     }
     

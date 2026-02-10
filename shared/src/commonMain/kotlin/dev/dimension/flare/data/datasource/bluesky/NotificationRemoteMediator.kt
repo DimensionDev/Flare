@@ -99,7 +99,7 @@ internal class NotificationRemoteMediator(
                         ListNotificationsNotificationReason.LikeViaRepost -> it.uri
                         ListNotificationsNotificationReason.RepostViaRepost -> it.uri
                         ListNotificationsNotificationReason.SubscribedPost -> it.uri
-                        else -> null
+                        ListNotificationsNotificationReason.ContactMatch -> it.uri
                     }
                 }.distinct()
                 .toImmutableList()

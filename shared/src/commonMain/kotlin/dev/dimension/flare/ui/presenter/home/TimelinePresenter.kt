@@ -24,7 +24,6 @@ import dev.dimension.flare.data.datasource.microblog.contains
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
-import dev.dimension.flare.data.repository.TimelineFilterRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
@@ -35,9 +34,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
@@ -53,24 +50,6 @@ public abstract class TimelinePresenter :
 
     private val localFilterRepository: LocalFilterRepository by inject()
 
-    protected open val hideRepostsFlow: Flow<Boolean> by lazy {
-        try {
-            val timelineFilterRepository: TimelineFilterRepository by inject()
-            timelineFilterRepository.hideRepostsFlow
-        } catch (_: Throwable) {
-            flowOf(false)
-        }
-    }
-
-    protected open val hideRepliesFlow: Flow<Boolean> by lazy {
-        try {
-            val timelineFilterRepository: TimelineFilterRepository by inject()
-            timelineFilterRepository.hideRepliesFlow
-        } catch (_: Throwable) {
-            flowOf(false)
-        }
-    }
-
     private val filterFlow by lazy {
         localFilterRepository.getFlow(forTimeline = true)
     }
@@ -80,7 +59,7 @@ public abstract class TimelinePresenter :
 //    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    internal fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimeline>> =
+    internal open fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimeline>> =
         loader
             .catch {
                 emit(BaseTimelineLoader.NotSupported)
@@ -99,29 +78,11 @@ public abstract class TimelinePresenter :
 
                     BaseTimelineLoader.NotSupported -> PagingData.emptyFlow(isError = true)
                 }.flatMapLatest { pager ->
-                    filterFlow
-                        .combine(hideRepostsFlow) { filterList, hideReposts ->
-                            filterList to hideReposts
-                        }.combine(hideRepliesFlow) { (filterList, hideReposts), hideReplies ->
-                            Triple(filterList, hideReposts, hideReplies)
-                        }.map { (filterList, hideReposts, hideReplies) ->
-                            pager.filter {
-                                val passesFilter = !it.contains(filterList)
-                                val passesRepostFilter =
-                                    if (!skipFiltering && hideReposts) {
-                                        !isRepost(it)
-                                    } else {
-                                        true
-                                    }
-                                val passesReplyFilter =
-                                    if (!skipFiltering && hideReplies) {
-                                        !isReply(it)
-                                    } else {
-                                        true
-                                    }
-                                passesFilter && passesRepostFilter && passesReplyFilter
-                            }
+                    filterFlow.map { filterList ->
+                        pager.filter {
+                            !it.contains(filterList)
                         }
+                    }
                 }
             }
 
@@ -197,31 +158,6 @@ public abstract class TimelinePresenter :
 
     internal abstract val loader: Flow<BaseTimelineLoader>
     protected open val useDbKeyInItemKey: Boolean = false
-    protected open val skipFiltering: Boolean = false
-
-    private fun isRepost(item: UiTimeline): Boolean =
-        item.topMessage?.icon == dev.dimension.flare.ui.model.UiTimeline.TopMessage.Icon.Retweet
-
-    // Check if item is a reply to another user (not self-reply).
-    // A post is considered a reply if it has ReplyTo aboveTextContent AND the reply target is not the author.
-    private fun isReply(item: UiTimeline): Boolean {
-        val content = item.content as? dev.dimension.flare.ui.model.UiTimeline.ItemContent.Status ?: return false
-        val replyTo =
-            content.aboveTextContent as?
-                dev.dimension.flare.ui.model.UiTimeline.ItemContent.Status.AboveTextContent.ReplyTo
-                ?: return false
-        val user = content.user as? dev.dimension.flare.ui.model.UiProfile ?: return true
-
-        // Use UiProfile.handleWithoutAtAndHost for normalization (UiProfile is the only UiUserV2 implementation)
-        val authorNormalized = user.handleWithoutAtAndHost.lowercase()
-        val replyToNormalized =
-            replyTo.handle
-                .removePrefix("@")
-                .substringBefore("@")
-                .lowercase()
-
-        return authorNormalized != replyToNormalized
-    }
 }
 
 @Immutable

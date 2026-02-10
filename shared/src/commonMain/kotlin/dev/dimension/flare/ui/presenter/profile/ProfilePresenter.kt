@@ -157,7 +157,6 @@ public class ProfilePresenter(
                                     object : TimelinePresenter() {
                                         override val loader: Flow<BaseTimelineLoader>
                                             get() = flowOf(it.loader)
-                                        override val skipFiltering: Boolean = true
                                     },
                             )
                         }

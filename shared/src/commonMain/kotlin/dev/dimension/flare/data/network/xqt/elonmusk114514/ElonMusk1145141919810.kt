@@ -6,9 +6,10 @@ import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.SHA256
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import io.ktor.util.decodeBase64Bytes
+import io.ktor.util.encodeBase64
 import kotlinx.serialization.Serializable
 import kotlin.experimental.xor
-import kotlin.io.encoding.Base64
 import kotlin.random.Random
 import kotlin.time.Clock
 
@@ -28,9 +29,9 @@ internal object ElonMusk1145141919810 {
             .hasher()
             .hash(data.encodeToByteArray())
 
-    fun encodeBase64(data: ByteArray): String = Base64.encode(data)
+    fun encodeBase64(data: ByteArray): String = data.encodeBase64()
 
-    fun decodeBase64(data: String): ByteArray = Base64.decode(data)
+    fun decodeBase64(data: String): ByteArray = data.decodeBase64Bytes()
 
     suspend fun senpaiSukissu(
         method: String,

@@ -24,6 +24,7 @@ import dev.dimension.flare.data.datasource.microblog.contains
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.TimelineFilterRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
@@ -41,7 +42,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.koin.core.qualifier.named
 
 @OptIn(ExperimentalPagingApi::class)
 public abstract class TimelinePresenter :
@@ -53,21 +53,19 @@ public abstract class TimelinePresenter :
 
     private val localFilterRepository: LocalFilterRepository by inject()
 
-    // Try to inject a named Flow<Boolean> binding 'hideRepostsFlow' provided by platform modules.
-    // If inject fails (no binding), fall back to a constant false flow.
     protected open val hideRepostsFlow: Flow<Boolean> by lazy {
         try {
-            inject<Flow<Boolean>>(named("hideRepostsFlow")).value
+            val timelineFilterRepository: TimelineFilterRepository by inject()
+            timelineFilterRepository.hideRepostsFlow
         } catch (_: Throwable) {
             flowOf(false)
         }
     }
 
-    // Try to inject a named Flow<Boolean> binding 'hideRepliesFlow' provided by platform modules.
-    // If inject fails (no binding), fall back to a constant false flow.
     protected open val hideRepliesFlow: Flow<Boolean> by lazy {
         try {
-            inject<Flow<Boolean>>(named("hideRepliesFlow")).value
+            val timelineFilterRepository: TimelineFilterRepository by inject()
+            timelineFilterRepository.hideRepliesFlow
         } catch (_: Throwable) {
             flowOf(false)
         }
@@ -212,25 +210,18 @@ public abstract class TimelinePresenter :
             content.aboveTextContent as?
                 dev.dimension.flare.ui.model.UiTimeline.ItemContent.Status.AboveTextContent.ReplyTo
                 ?: return false
-        val authorHandle = content.user?.handle ?: return true
-        // Both handles may be in format "@user" or "@user@host", normalize to just the username
-        return !sameUserHandle(authorHandle, replyTo.handle)
-    }
+        val user = content.user as? dev.dimension.flare.ui.model.UiProfile ?: return true
 
-    private fun sameUserHandle(
-        left: String,
-        right: String,
-    ): Boolean {
-        val leftNormalized = normalizeHandle(left)
-        val rightNormalized = normalizeHandle(right)
-        return leftNormalized == rightNormalized
-    }
+        // Use UiProfile.handleWithoutAtAndHost for normalization (UiProfile is the only UiUserV2 implementation)
+        val authorNormalized = user.handleWithoutAtAndHost.lowercase()
+        val replyToNormalized =
+            replyTo.handle
+                .removePrefix("@")
+                .substringBefore("@")
+                .lowercase()
 
-    private fun normalizeHandle(handle: String): String =
-        handle
-            .removePrefix("@")
-            .substringBefore("@")
-            .lowercase()
+        return authorNormalized != replyToNormalized
+    }
 }
 
 @Immutable

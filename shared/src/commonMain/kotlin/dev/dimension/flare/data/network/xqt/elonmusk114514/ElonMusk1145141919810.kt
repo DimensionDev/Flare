@@ -6,11 +6,11 @@ import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.SHA256
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import kotlinx.serialization.Serializable
 import kotlin.experimental.xor
 import kotlin.io.encoding.Base64
 import kotlin.random.Random
 import kotlin.time.Clock
-import kotlinx.serialization.Serializable
 
 internal object ElonMusk1145141919810 {
     @Serializable

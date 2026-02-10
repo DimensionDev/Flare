@@ -46,7 +46,6 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
-import coil3.compose.LocalPlatformContext
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Regular
@@ -123,7 +122,6 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.common.PlatformShare
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.DateTimeText
@@ -219,6 +217,19 @@ public fun CommonStatusComponent(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
+                        when (val content = item.topEndContent) {
+                            is UiTimeline.ItemContent.Status.TopEndContent.Visibility -> {
+                                StatusVisibilityComponent(
+                                    visibility = content.visibility,
+                                    modifier =
+                                        Modifier
+                                            .size(PlatformTheme.typography.caption.fontSize.value.dp),
+                                    tint = PlatformTheme.colorScheme.caption,
+                                )
+                            }
+
+                            null -> Unit
+                        }
                         if (appearanceSettings.showPlatformLogo) {
                             val icon =
                                 when (item.platformType) {
@@ -241,19 +252,6 @@ public fun CommonStatusComponent(
                                         .size(PlatformTheme.typography.caption.fontSize.value.dp),
                                 tint = PlatformTheme.colorScheme.caption,
                             )
-                        }
-                        when (val content = item.topEndContent) {
-                            is UiTimeline.ItemContent.Status.TopEndContent.Visibility -> {
-                                StatusVisibilityComponent(
-                                    visibility = content.visibility,
-                                    modifier =
-                                        Modifier
-                                            .size(PlatformTheme.typography.caption.fontSize.value.dp),
-                                    tint = PlatformTheme.colorScheme.caption,
-                                )
-                            }
-
-                            null -> Unit
                         }
                         if (!isDetail) {
                             DateTimeText(
@@ -348,7 +346,7 @@ public fun CommonStatusComponent(
                 )
             }
 
-            if (isDetail && !item.content.isEmpty) {
+            if (isDetail && !item.content.isEmpty && appearanceSettings.showTranslateButton) {
                 TranslationComponent(
                     statusKey = item.statusKey,
                     contentWarning = item.contentWarning,
@@ -883,7 +881,6 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
     closeMenu: () -> Unit,
     launcher: UriHandler,
 ) {
-    val context = LocalPlatformContext.current
     val color = subActions.color?.toComposeColor() ?: PlatformContentColor.current
     PlatformDropdownMenuItem(
         leadingIcon = {
@@ -912,12 +909,6 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
                     },
                 ),
             )
-            subActions.shareContent?.let {
-                PlatformShare.shareText(
-                    context = context,
-                    text = it,
-                )
-            }
         },
     )
 }

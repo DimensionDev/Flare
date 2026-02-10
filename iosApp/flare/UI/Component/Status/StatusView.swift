@@ -17,6 +17,7 @@ struct StatusView: View {
     var maxLine: Int = 5
     var showExpandTextButton: Bool = true
     var forceHideActions: Bool = false
+    var showTranslate: Bool = true
     @State private var expand = false
     private var showAsFullWidth: Bool {
         (!fullWidthPost || withLeadingPadding) && !isQuote && !isDetail
@@ -147,7 +148,7 @@ struct StatusView: View {
                             }
                         }
                         
-                        if isDetail {
+                        if isDetail, showTranslate {
                             StatusTranslateView(content: data.content, contentWarning: data.contentWarning)
                         }
                         
@@ -205,6 +206,9 @@ struct StatusView: View {
                                 .padding(.top, 4)
                         }
                     }
+                }
+                .contextMenu {
+                    StatusActionsView(data: data.actions, useText: true, allowSpacer: false)
                 }
 //                .if(!isDetail) { view in
 //                    view

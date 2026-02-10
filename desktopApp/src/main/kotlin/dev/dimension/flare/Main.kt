@@ -21,6 +21,7 @@ import dev.dimension.flare.di.composeUiModule
 import dev.dimension.flare.di.desktopModule
 import dev.dimension.flare.ui.route.APPSCHEMA
 import dev.dimension.flare.ui.theme.FlareTheme
+import dev.dimension.flare.ui.theme.ProvideComposeWindow
 import dev.dimension.flare.ui.theme.ProvideThemeSettings
 import io.github.kdroidfilter.platformtools.darkmodedetector.windows.setWindowsAdaptiveTitleBar
 import it.sauronsoftware.junique.AlreadyLockedException
@@ -104,7 +105,9 @@ fun main(args: Array<String>) {
                     window.setWindowsAdaptiveTitleBar()
                 }
                 FlareTheme {
-                    FlareApp()
+                    ProvideComposeWindow {
+                        FlareApp()
+                    }
                 }
             }
         }

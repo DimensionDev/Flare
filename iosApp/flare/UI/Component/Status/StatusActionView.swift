@@ -9,26 +9,34 @@ struct StatusActionsView: View {
     var allowSpacer: Bool = true
 
     var body: some View {
-        HStack {
+        if useText {
             ForEach(0..<data.count, id: \.self) { index in
                 let item = data[index]
-                if (index == data.count - 1 && postActionStyle == .leftAligned) ||
-                    (postActionStyle == .rightAligned && index == 0) ||
-                    (postActionStyle == .stretch && index != 0) {
-                    if allowSpacer {
-                        Spacer()
-                    }
-                }
-                StatusActionView(data: item, useText: useText, isFixedWidth: index != data.count - 1)
+                StatusActionView(data: item, useText: true, isFixedWidth: false)
             }
+        } else {
+            HStack {
+                ForEach(0..<data.count, id: \.self) { index in
+                    let item = data[index]
+                    if (index == data.count - 1 && postActionStyle == .leftAligned) ||
+                        (postActionStyle == .rightAligned && index == 0) ||
+                        (postActionStyle == .stretch && index != 0) {
+                        if allowSpacer {
+                            Spacer()
+                        }
+                    }
+                    StatusActionView(data: item, useText: useText, isFixedWidth: index != data.count - 1)
+                }
+            }
+            .backport
+            .labelIconToTitleSpacing(4)
         }
-        .backport
-        .labelIconToTitleSpacing(4)
     }
 }
 
 struct StatusActionView: View {
     @Environment(\.appearanceSettings.showNumbers) private var showNumbers
+    @ScaledMetric(relativeTo: .footnote) var fontSize = 13
     let data: ActionMenu
     let useText: Bool
     let isFixedWidth: Bool
@@ -51,46 +59,40 @@ struct StatusActionView: View {
                         StatusActionView(data: item, useText: true, isFixedWidth: false)
                     }
                 } label: {
-                    ZStack {
-                        Text("0")
-                            .hidden()
-                        if !isFixedWidth && group.displayItem.count == nil {
+                    if let text = group.displayItem.count?.humanized, showNumbers {
+                        Label {
+                            if let color = group.displayItem.color?.swiftColor {
+                                Text(text)
+                                    .foregroundStyle(color)
+                                    .lineLimit(1)
+                                    .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
+                            } else {
+                                Text(text)
+                                    .lineLimit(1)
+                                    .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
+                            }
+                        } icon: {
                             if let color = group.displayItem.color?.swiftColor {
                                 StatusActionIcon(icon: group.displayItem.icon)
                                     .foregroundStyle(color)
                             } else {
                                 StatusActionIcon(icon: group.displayItem.icon)
                             }
+                        }
+                    } else {
+                        if let color = group.displayItem.color?.swiftColor {
+                            StatusActionIcon(icon: group.displayItem.icon)
+                                .foregroundStyle(color)
+                                .frame(minWidth: fontSize * 1.5, minHeight: fontSize * 1.5)
+                                .contentShape(Rectangle())
                         } else {
-                            Label {
-                                ZStack(
-                                    alignment: .leading
-                                ) {
-                                    if isFixedWidth, !useText {
-                                        Text("0000")
-                                            .hidden()
-                                    }
-                                    if let text = group.displayItem.count?.humanized, showNumbers {
-                                        if let color = group.displayItem.color?.swiftColor {
-                                            Text(text)
-                                                .foregroundStyle(color)
-                                        } else {
-                                            Text(text)
-                                        }
-                                    }
-                                }
-                                .lineLimit(1)
-                            } icon: {
-                                if let color = group.displayItem.color?.swiftColor {
-                                    StatusActionIcon(icon: group.displayItem.icon)
-                                        .foregroundStyle(color)
-                                } else {
-                                    StatusActionIcon(icon: group.displayItem.icon)
-                                }
-                            }
+                            StatusActionIcon(icon: group.displayItem.icon)
+                                .frame(minWidth: fontSize * 1.5, minHeight: fontSize * 1.5)
+                                .contentShape(Rectangle())
                         }
                     }
                 }
+                .buttonStyle(.plain)
             }
         case .asyncActionMenuItem(let asyncItem):
             EmptyView()
@@ -118,45 +120,28 @@ struct AsyncStatusActionView: View {
 struct StatusActionItemView: View {
     @Environment(\.appearanceSettings.showNumbers) private var showNumbers
     @Environment(\.openURL) private var openURL
+    @ScaledMetric(relativeTo: .footnote) var fontSize = 13
     let data: ActionMenuItem
     let useText: Bool
     let isFixedWidth: Bool
     var body: some View {
-        if let shareContent = data.shareContent, let title = data.text?.resolvedString {
-            ShareLink(title, item: .init(string: shareContent)!)
-        } else {
-            Button(
-                role: data.color?.role
-            ) {
-                if let onClicked = data.onClicked {
-                    onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-                }
-            } label: {
+        Button(
+            role: data.color?.role
+        ) {
+            if let onClicked = data.onClicked {
+                onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
+            }
+        } label: {
+            if useText, let text = data.text?.resolvedString {
                 Label {
-                    ZStack(
-                        alignment: .leading
-                    ) {
-                        if isFixedWidth, !useText {
-                            Text("0000")
-                                .hidden()
-                        }
-                        if useText, let text = data.text?.resolvedString {
-                            if let color = data.color?.swiftColor {
-                                Text(text)
-                                    .foregroundStyle(color)
-                            } else {
-                                Text(text)
-                            }
-                        } else if let text = data.count?.humanized, showNumbers {
-                            if let color = data.color?.swiftColor {
-                                Text(text)
-                                    .foregroundStyle(color)
-                            } else {
-                                Text(text)
-                            }
-                        }
+                    if let color = data.color?.swiftColor {
+                        Text(text)
+                            .foregroundStyle(color)
+                            .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
+                    } else {
+                        Text(text)
+                            .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
                     }
-                    .lineLimit(1)
                 } icon: {
                     if let color = data.color?.swiftColor {
                         StatusActionIcon(icon: data.icon)
@@ -165,10 +150,35 @@ struct StatusActionItemView: View {
                         StatusActionIcon(icon: data.icon)
                     }
                 }
+            } else if let text = data.count?.humanized, showNumbers {
+                Label {
+                    if let color = data.color?.swiftColor {
+                        Text(text)
+                            .foregroundStyle(color)
+                            .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
+                    } else {
+                        Text(text)
+                            .frame(minWidth: isFixedWidth ? fontSize * 2.5 : nil, alignment: .leading)
+                    }
+                } icon: {
+                    if let color = data.color?.swiftColor {
+                        StatusActionIcon(icon: data.icon)
+                            .foregroundStyle(color)
+                    } else {
+                        StatusActionIcon(icon: data.icon)
+                    }
+                }
+            } else {
+                if let color = data.color?.swiftColor {
+                    StatusActionIcon(icon: data.icon)
+                        .foregroundStyle(color)
+                } else {
+                    StatusActionIcon(icon: data.icon)
+                }
             }
-            .sensoryFeedback(.success, trigger: data.color?.swiftColor)
-            .buttonStyle(.plain)
         }
+        .sensoryFeedback(.success, trigger: data.color?.swiftColor)
+        .buttonStyle(.plain)
     }
 }
 

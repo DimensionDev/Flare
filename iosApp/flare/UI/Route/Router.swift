@@ -102,6 +102,7 @@ struct Router<Root: View>: View {
                 .statusBlueskyReport,
                 .statusMisskeyReport,
                 .editUserList,
+                .statusShareSheet,
                 .statusAddReaction:
             return true
         default:

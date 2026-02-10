@@ -43,7 +43,7 @@ internal class RichTextState(
     }
 }
 
-internal fun buildContentAnnotatedString(
+private fun buildContentAnnotatedString(
     element: Element,
     context: BuildContentAnnotatedStringContext,
     styleData: StyleData,

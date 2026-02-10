@@ -497,6 +497,13 @@ internal fun Tweet.renderStatus(
             append("/status/")
             append(legacy?.idStr ?: restId)
         }
+    val fixvxUrl =
+        buildString {
+            append("https://fixvx.com/")
+            append(user?.handleWithoutAtAndHost)
+            append("/status/")
+            append(legacy?.idStr ?: restId)
+        }
 
     return UiTimeline.ItemContent.Status(
         statusKey = statusKey,
@@ -635,14 +642,18 @@ internal fun Tweet.renderStatus(
                                 ActionMenu.Item(
                                     icon = ActionMenu.Item.Icon.Share,
                                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                    shareContent = url,
-                                ),
-                            )
-                            add(
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Share,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.FxShare),
-                                    shareContent = fxUrl,
+                                    onClicked = {
+                                        launcher.launch(
+                                            DeeplinkRoute.Status
+                                                .ShareSheet(
+                                                    statusKey = statusKey,
+                                                    accountType = AccountType.Specific(accountKey),
+                                                    shareUrl = url,
+                                                    fxShareUrl = fxUrl,
+                                                    fixvxShareUrl = fixvxUrl,
+                                                ).toUri(),
+                                        )
+                                    },
                                 ),
                             )
 

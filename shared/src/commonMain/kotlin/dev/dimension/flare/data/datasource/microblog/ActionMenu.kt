@@ -32,7 +32,6 @@ public sealed interface ActionMenu {
         val text: Text? = null,
         val count: UiNumber? = null,
         val onClicked: (ClickContext.() -> Unit)? = null,
-        val shareContent: String? = null,
         val color: Color? = null,
     ) : ActionMenu {
         init {

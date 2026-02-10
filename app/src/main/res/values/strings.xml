@@ -219,8 +219,10 @@
 
     <string name="settings_accounts_remove">Remove</string>
 
-    <string name="media_menu_save">Save</string>
-    <string name="media_menu_share_image">Share image</string>
+    <string name="media_menu_save">Save screenshot</string>
+    <string name="media_menu_share_image">Share screenshot</string>
+    <string name="status_menu_share_via_fxembed">Share via FxEmbed</string>
+    <string name="status_menu_share_via_fixvx">Share via Fixvx</string>
     <string name="media_save_success">Saved to Downloads</string>
     <string name="media_save_fail">Failed to save</string>
     <string name="media_alt_text">Alt text</string>
@@ -351,7 +353,7 @@
     <string name="rss_sources_open_in_app">Open in app</string>
 
     <string name="rss_detail_open_in_browser">Open in browser</string>
-    <string name="rss_detail_share">Share</string>
+    <string name="rss_detail_share">Share link</string>
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_title">Summary</string>
     <string name="rss_detail_tldr_error">Failed to summarize</string>
@@ -422,4 +424,5 @@
     <string name="tab_settings_group_empty">No tabs in this group</string>
     <string name="tab_settings_group_name_placeholder">Group name</string>
     <string name="tab_settings_group_default_name">New Group</string>
+    <string name="status_share_sheet_theme_title">Theme</string>
 </resources>

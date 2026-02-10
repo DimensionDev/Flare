@@ -85,6 +85,7 @@ import dev.dimension.flare.ui.screen.status.action.BlueskyReportStatusDialog
 import dev.dimension.flare.ui.screen.status.action.DeleteStatusConfirmDialog
 import dev.dimension.flare.ui.screen.status.action.MastodonReportDialog
 import dev.dimension.flare.ui.screen.status.action.MisskeyReportDialog
+import dev.dimension.flare.ui.screen.status.action.StatusShareSheet
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.Flyout
@@ -278,6 +279,19 @@ internal fun WindowScope.Router(
                             modifier = Modifier.padding(16.dp),
                         )
                     }
+                }
+
+                entry<Route.StatusShareSheet>(
+                    metadata = dialog(),
+                ) { args ->
+                    StatusShareSheet(
+                        accountType = args.accountType,
+                        statusKey = args.statusKey,
+                        shareUrl = args.shareUrl,
+                        fxShareUrl = args.fxShareUrl,
+                        fixvxShareUrl = args.fixvxShareUrl,
+                        onBack = onBack,
+                    )
                 }
 
                 entry<Route.CreateRssSource>(

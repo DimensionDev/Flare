@@ -696,14 +696,17 @@ internal fun PostView.renderStatus(
                                 ActionMenu.Item(
                                     icon = ActionMenu.Item.Icon.Share,
                                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                    shareContent = url,
-                                ),
-                            )
-                            add(
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Share,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.FxShare),
-                                    shareContent = fxUrl,
+                                    onClicked = {
+                                        launcher.launch(
+                                            DeeplinkRoute.Status
+                                                .ShareSheet(
+                                                    statusKey = statusKey,
+                                                    accountType = AccountType.Specific(accountKey),
+                                                    shareUrl = url,
+                                                    fxShareUrl = fxUrl,
+                                                ).toUri(),
+                                        )
+                                    },
                                 ),
                             )
 
@@ -1273,12 +1276,17 @@ private fun render(
                                     ActionMenu.Item(
                                         icon = ActionMenu.Item.Icon.Share,
                                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                        shareContent = url,
-                                    ),
-                                    ActionMenu.Item(
-                                        icon = ActionMenu.Item.Icon.Share,
-                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.FxShare),
-                                        shareContent = fxUrl,
+                                        onClicked = {
+                                            launcher.launch(
+                                                DeeplinkRoute.Status
+                                                    .ShareSheet(
+                                                        statusKey = statusKey,
+                                                        accountType = AccountType.Specific(accountKey),
+                                                        shareUrl = url,
+                                                        fxShareUrl = fxUrl,
+                                                    ).toUri(),
+                                            )
+                                        },
                                     ),
                                     if (isFromMe) {
                                         ActionMenu.Item(

@@ -394,10 +394,12 @@ internal class XQTDataSource(
             },
             cacheSource = {
                 database
-                    .statusDao()
-                    .get(statusKey, accountType = AccountType.Specific(accountKey))
+                    .pagingTimelineDao()
+                    .get(pagingKey, accountType = AccountType.Specific(accountKey))
                     .distinctUntilChanged()
-                    .mapNotNull { it?.content?.render(this) }
+                    .mapNotNull {
+                        it?.render(this)
+                    }
             },
         )
     }

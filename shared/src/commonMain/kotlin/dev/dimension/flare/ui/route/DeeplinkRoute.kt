@@ -79,6 +79,15 @@ public sealed class DeeplinkRoute {
             val statusKey: MicroBlogKey?,
             val accountType: AccountType,
         ) : Status()
+
+        @Serializable
+        public data class ShareSheet(
+            val statusKey: MicroBlogKey,
+            val accountType: AccountType,
+            val shareUrl: String,
+            val fxShareUrl: String? = null,
+            val fixvxShareUrl: String? = null,
+        ) : Status()
     }
 
     @Serializable

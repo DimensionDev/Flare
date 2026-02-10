@@ -115,6 +115,14 @@ internal sealed interface Route : NavKey {
         val text: String,
     ) : FloatingRoute
 
+    data class StatusShareSheet(
+        val accountType: AccountType,
+        val statusKey: MicroBlogKey,
+        val shareUrl: String,
+        val fxShareUrl: String? = null,
+        val fixvxShareUrl: String? = null,
+    ) : FloatingRoute
+
     data class Search(
         val accountType: AccountType,
         val keyword: String,
@@ -352,6 +360,15 @@ internal sealed interface Route : NavKey {
                         accountType = deeplinkRoute.accountType,
                         statusKey = deeplinkRoute.statusKey ?: return null,
                         userKey = deeplinkRoute.userKey,
+                    )
+
+                is DeeplinkRoute.Status.ShareSheet ->
+                    StatusShareSheet(
+                        accountType = deeplinkRoute.accountType,
+                        statusKey = deeplinkRoute.statusKey,
+                        shareUrl = deeplinkRoute.shareUrl,
+                        fxShareUrl = deeplinkRoute.fxShareUrl,
+                        fixvxShareUrl = deeplinkRoute.fixvxShareUrl,
                     )
 
                 is DeeplinkRoute.Status.VVOComment ->

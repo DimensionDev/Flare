@@ -4,6 +4,7 @@ import KotlinSharedUI
 struct TimelineView: View {
     let data: UiTimeline
     let detailStatusKey: MicroBlogKey?
+    var showTranslate: Bool = true
     @Environment(\.openURL) private var openURL
     @Environment(\.appearanceSettings.fullWidthPost) private var fullWidthPost
     @ScaledMetric(relativeTo: .caption) var iconSize: CGFloat = 15
@@ -30,7 +31,7 @@ struct TimelineView: View {
                 case .feed(let feed):
                     FeedView(data: feed)
                 case .status(let status):
-                    StatusView(data: status, isDetail: detailStatusKey == status.statusKey)
+                    StatusView(data: status, isDetail: detailStatusKey == status.statusKey, showTranslate: showTranslate)
                 case .user(let user):
                     TimelineUserView(data: user)
                 case .userList(let userList):

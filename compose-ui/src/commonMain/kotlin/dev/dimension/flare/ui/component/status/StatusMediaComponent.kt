@@ -68,10 +68,7 @@ internal fun StatusMediaComponent(
     var hideSensitive by remember(appearanceSettings.showSensitiveContent) {
         mutableStateOf(sensitive && !appearanceSettings.showSensitiveContent)
     }
-    val showSensitiveButton =
-        remember(sensitive) {
-            sensitive
-        }
+    val showSensitiveButton = sensitive && !appearanceSettings.showSensitiveContent
     Box(
         modifier =
             modifier

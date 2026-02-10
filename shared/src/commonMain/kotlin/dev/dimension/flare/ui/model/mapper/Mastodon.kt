@@ -590,7 +590,21 @@ private fun Status.renderStatus(
                                     ActionMenu.Item(
                                         icon = ActionMenu.Item.Icon.Share,
                                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                        shareContent = postUrl,
+                                        onClicked = {
+                                            launcher.launch(
+                                                DeeplinkRoute.Status
+                                                    .ShareSheet(
+                                                        statusKey = statusKey,
+                                                        accountType =
+                                                            if (accountKey != null) {
+                                                                AccountType.Specific(accountKey)
+                                                            } else {
+                                                                AccountType.Guest
+                                                            },
+                                                        shareUrl = postUrl,
+                                                    ).toUri(),
+                                            )
+                                        },
                                     ),
                                 )
 

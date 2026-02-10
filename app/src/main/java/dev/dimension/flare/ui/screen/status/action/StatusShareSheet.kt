@@ -72,11 +72,11 @@ import dev.dimension.flare.ui.screen.media.saveByteArrayToDownloads
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.single
+import kotlinx.coroutines.launch
+import moe.tlaster.precompose.molecule.producePresenter
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import kotlinx.coroutines.launch
-import moe.tlaster.precompose.molecule.producePresenter
 
 private enum class SharePreviewTheme {
     Light,

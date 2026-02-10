@@ -110,7 +110,7 @@ struct StatusShareSheet: View {
     @ViewBuilder
     private func previewView(data: UiTimeline) -> some View {
         TimelineView(data: data, detailStatusKey: statusKey, showTranslate: false)
-            .frame(width: 400)
+            .frame(width: 360)
             .padding()
             .background(Color(.secondarySystemGroupedBackground))
             .clipShape(.rect(cornerRadius: 16))

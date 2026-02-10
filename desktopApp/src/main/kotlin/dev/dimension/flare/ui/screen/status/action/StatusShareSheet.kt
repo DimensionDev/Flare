@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -34,13 +34,13 @@ import compose.icons.fontawesomeicons.solid.Link
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
 import dev.dimension.flare.copied_to_clipboard
-import dev.dimension.flare.media_save
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.settings_appearance_theme_dark
 import dev.dimension.flare.settings_appearance_theme_light
 import dev.dimension.flare.status_share
 import dev.dimension.flare.status_share_image
+import dev.dimension.flare.status_share_save_screenshot
 import dev.dimension.flare.status_share_via_fixvx
 import dev.dimension.flare.status_share_via_fxembed
 import dev.dimension.flare.ui.component.ComponentAppearance
@@ -64,6 +64,7 @@ import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.LiteFilter
 import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.Text
+import io.github.composefluent.surface.Card
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
@@ -132,9 +133,7 @@ internal fun StatusShareSheet(
             FlareTheme(
                 isDarkTheme = previewTheme == SharePreviewTheme.Dark,
             ) {
-                ViewBox(
-                    modifier = Modifier.sizeIn(maxHeight = 360.dp),
-                ) {
+                ViewBox {
                     Box(
                         modifier =
                             Modifier.drawWithContent {
@@ -144,33 +143,41 @@ internal fun StatusShareSheet(
                                 drawContent()
                             },
                     ) {
-                        CompositionLocalProvider(
-                            LocalComponentAppearance provides
-                                LocalComponentAppearance.current.copy(
-                                    showTranslateButton = false,
-                                    videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
-                                ),
-                            LocalContentColor provides FluentTheme.colors.text.text.primary,
-                            LocalTextStyle provides LocalTextStyle.current.copy(Color.Unspecified),
+                        Box(
+                            modifier = Modifier.background(FluentTheme.colors.background.mica.base),
                         ) {
-                            Box(
-                                modifier = Modifier.background(FluentTheme.colors.background.mica.base),
+                            Card(
+                                onClick = {},
+                                modifier =
+                                    Modifier
+                                        .padding(64.dp)
+                                        .width(360.dp),
                             ) {
-                                StatusItem(
-                                    item = state.status.takeSuccess(),
-                                    detailStatusKey = statusKey,
-                                )
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .matchParentSize()
-                                            .clickable(
-                                                interactionSource = remember { MutableInteractionSource() },
-                                                indication = null,
-                                                onClick = {},
-                                            ),
-                                )
+                                CompositionLocalProvider(
+                                    LocalComponentAppearance provides
+                                        LocalComponentAppearance.current.copy(
+                                            showTranslateButton = false,
+                                            videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
+                                        ),
+                                    LocalContentColor provides FluentTheme.colors.text.text.primary,
+                                    LocalTextStyle provides LocalTextStyle.current.copy(Color.Unspecified),
+                                ) {
+                                    StatusItem(
+                                        item = state.status.takeSuccess(),
+                                        detailStatusKey = statusKey,
+                                    )
+                                }
                             }
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .matchParentSize()
+                                        .clickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            indication = null,
+                                            onClick = {},
+                                        ),
+                            )
                         }
                     }
                 }
@@ -201,9 +208,9 @@ internal fun StatusShareSheet(
                 ) {
                     FAIcon(
                         FontAwesomeIcons.Solid.Download,
-                        contentDescription = stringResource(Res.string.media_save),
+                        contentDescription = stringResource(Res.string.status_share_save_screenshot),
                     )
-                    Text(stringResource(Res.string.media_save))
+                    Text(stringResource(Res.string.status_share_save_screenshot))
                 }
                 Button(
                     onClick = {

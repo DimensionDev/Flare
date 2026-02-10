@@ -219,8 +219,8 @@
 
     <string name="settings_accounts_remove">Remove</string>
 
-    <string name="media_menu_save">Save</string>
-    <string name="media_menu_share_image">Share image</string>
+    <string name="media_menu_save">Save screenshot</string>
+    <string name="media_menu_share_image">Share screenshot</string>
     <string name="status_menu_share_via_fxembed">Share via FxEmbed</string>
     <string name="status_menu_share_via_fixvx">Share via Fixvx</string>
     <string name="media_save_success">Saved to Downloads</string>

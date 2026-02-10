@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.dp
 import kotlin.math.min
 
 @Composable
@@ -24,7 +23,7 @@ public fun ViewBox(
                     constraints.minHeight,
                 ) {}
 
-        val placeable = measurable.measure(Constraints(maxWidth = 360.dp.roundToPx()))
+        val placeable = measurable.measure(Constraints())
         val constraintWidth =
             if (constraints.hasBoundedWidth) constraints.maxWidth else placeable.width
         val constraintHeight =

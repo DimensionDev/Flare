@@ -87,7 +87,8 @@
     <string name="media_save">Save</string>
     <string name="media_fullscreen">Fullscreen</string>
     <string name="status_share">Share link</string>
-    <string name="status_share_image">Share image</string>
+    <string name="status_share_save_screenshot">Save screenshot</string>
+    <string name="status_share_image">Share screenshot</string>
     <string name="status_share_via_fxembed">Share via FxEmbed</string>
     <string name="status_share_via_fixvx">Share via Fixvx</string>
 

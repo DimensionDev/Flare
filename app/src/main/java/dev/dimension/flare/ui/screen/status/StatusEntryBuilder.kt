@@ -105,7 +105,9 @@ internal fun EntryProviderScope<NavKey>.statusEntryBuilder(
     }
 
     entry<Route.Status.ShareSheet>(
-        metadata = BottomSheetSceneStrategy.bottomSheet()
+        metadata = BottomSheetSceneStrategy.bottomSheet(
+            expandFully = true,
+        )
     ) { args ->
         StatusShareSheet(
             statusKey = args.statusKey,

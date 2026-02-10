@@ -2,16 +2,14 @@ package dev.dimension.flare.ui.screen.status.action
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -35,6 +33,7 @@ import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Link
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
+import dev.dimension.flare.copied_to_clipboard
 import dev.dimension.flare.media_save
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -44,8 +43,8 @@ import dev.dimension.flare.status_share
 import dev.dimension.flare.status_share_image
 import dev.dimension.flare.status_share_via_fixvx
 import dev.dimension.flare.status_share_via_fxembed
-import dev.dimension.flare.ui.common.DesktopShare
 import dev.dimension.flare.ui.component.ComponentAppearance
+import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.ViewBox
@@ -92,7 +91,7 @@ internal fun StatusShareSheet(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val desktopShare = koinInject<DesktopShare>()
+    val inAppNotification: ComposeInAppNotification = koinInject()
     val window = LocalComposeWindow.current
     val scope = rememberCoroutineScope()
     val previewGraphicsLayer = rememberGraphicsLayer()
@@ -177,11 +176,15 @@ internal fun StatusShareSheet(
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                AccentButton(onClick = { desktopShare.shareText(shareUrl) }) {
+                AccentButton(onClick = {
+                    shareText(shareUrl)
+                    inAppNotification.message(Res.string.copied_to_clipboard)
+                }) {
                     FAIcon(
                         FontAwesomeIcons.Solid.Link,
                         contentDescription = stringResource(Res.string.status_share),
@@ -207,6 +210,7 @@ internal fun StatusShareSheet(
                         scope.launch {
                             val image = capturePreviewImage(previewGraphicsLayer) ?: return@launch
                             shareImageToClipboard(image)
+                            inAppNotification.message(Res.string.copied_to_clipboard)
                         }
                     },
                 ) {
@@ -217,12 +221,18 @@ internal fun StatusShareSheet(
                     Text(stringResource(Res.string.status_share_image))
                 }
                 if (fxShareUrl != null) {
-                    Button(onClick = { desktopShare.shareText(fxShareUrl) }) {
+                    Button(onClick = {
+                        shareText(fxShareUrl)
+                        inAppNotification.message(Res.string.copied_to_clipboard)
+                    }) {
                         Text(stringResource(Res.string.status_share_via_fxembed))
                     }
                 }
                 if (fixvxShareUrl != null) {
-                    Button(onClick = { desktopShare.shareText(fixvxShareUrl) }) {
+                    Button(onClick = {
+                        shareText(fixvxShareUrl)
+                        inAppNotification.message(Res.string.copied_to_clipboard)
+                    }) {
                         Text(stringResource(Res.string.status_share_via_fixvx))
                     }
                 }
@@ -277,9 +287,17 @@ private fun shareImageToClipboard(image: ImageBitmap) {
     Toolkit.getDefaultToolkit().systemClipboard.setContents(selection, null)
 }
 
+private fun shareText(text: String) {
+    Toolkit.getDefaultToolkit().systemClipboard.setContents(
+        java.awt.datatransfer.StringSelection(text),
+        null,
+    )
+}
+
 private fun ImageBitmap.toBufferedImage(): BufferedImage {
     val awt = this.toAwtImage()
-    val buffered = BufferedImage(awt.getWidth(null), awt.getHeight(null), BufferedImage.TYPE_INT_ARGB)
+    val buffered =
+        BufferedImage(awt.getWidth(null), awt.getHeight(null), BufferedImage.TYPE_INT_ARGB)
     val graphics = buffered.createGraphics()
     graphics.drawImage(awt, 0, 0, null)
     graphics.dispose()

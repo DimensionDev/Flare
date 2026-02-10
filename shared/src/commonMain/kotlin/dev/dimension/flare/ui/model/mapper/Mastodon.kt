@@ -591,18 +591,20 @@ private fun Status.renderStatus(
                                         icon = ActionMenu.Item.Icon.Share,
                                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
                                         onClicked = {
-                                            accountKey?.let {
-                                                launcher.launch(
-                                                    DeeplinkRoute.Status
-                                                        .ShareSheet(
-                                                            statusKey = statusKey,
-                                                            accountType = AccountType.Specific(it),
-                                                            shareUrl = postUrl,
-                                                        ).toUri(),
-                                                )
-                                            }
+                                            launcher.launch(
+                                                DeeplinkRoute.Status
+                                                    .ShareSheet(
+                                                        statusKey = statusKey,
+                                                        accountType =
+                                                            if (accountKey != null) {
+                                                                AccountType.Specific(accountKey)
+                                                            } else {
+                                                                AccountType.Guest
+                                                            },
+                                                        shareUrl = postUrl,
+                                                    ).toUri(),
+                                            )
                                         },
-                                        shareContent = if (accountKey == null) postUrl else null,
                                     ),
                                 )
 

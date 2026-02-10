@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.status.action
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -94,6 +96,7 @@ internal fun StatusShareSheet(
     Column(
         modifier =
             modifier
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = screenHorizontalPadding)
                 .padding(bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -228,6 +231,7 @@ internal fun StatusShareSheet(
                         context.startActivity(
                             Intent.createChooser(
                                 intent,
+                                @SuppressLint("LocalContextGetResourceValueCall")
                                 context.getString(R.string.media_menu_share_image),
                             ),
                         )

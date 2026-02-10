@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.component
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetProperties
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.scene.OverlayScene
@@ -10,13 +11,13 @@ import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
 
-internal class BottomSheetScene<T : Any>
+private class BottomSheetScene<T : Any>
     @OptIn(ExperimentalMaterial3Api::class)
     constructor(
         override val key: Any,
         override val previousEntries: List<NavEntry<T>>,
         override val overlaidEntries: List<NavEntry<T>>,
-        private val properties: ModalBottomSheetProperties,
+        private val properties: BottomSheetProperties,
         private val entry: NavEntry<T>,
         private val onBack: () -> Unit,
     ) : OverlayScene<T> {
@@ -26,7 +27,8 @@ internal class BottomSheetScene<T : Any>
         override val content: @Composable (() -> Unit) = {
             ModalBottomSheet(
                 onDismissRequest = { onBack() },
-                properties = properties,
+                properties = properties.properties,
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = properties.expandFully),
             ) {
                 entry.Content()
             }
@@ -37,7 +39,7 @@ internal class BottomSheetScene<T : Any>
 internal class BottomSheetSceneStrategy<T : Any> : SceneStrategy<T> {
     override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T>? {
         val lastEntry = entries.lastOrNull()
-        val properties = lastEntry?.metadata?.get(BOTTOMSHEET_KEY) as? ModalBottomSheetProperties
+        val properties = lastEntry?.metadata?.get(BOTTOMSHEET_KEY) as? BottomSheetProperties
         return properties?.let { properties ->
             BottomSheetScene(
                 key = lastEntry.contentKey,
@@ -53,7 +55,22 @@ internal class BottomSheetSceneStrategy<T : Any> : SceneStrategy<T> {
     companion object {
         private const val BOTTOMSHEET_KEY = "bottom_sheet"
 
-        fun bottomSheet(properties: ModalBottomSheetProperties = ModalBottomSheetProperties()): Map<String, Any> =
-            mapOf(BOTTOMSHEET_KEY to properties)
+        fun bottomSheet(
+            properties: ModalBottomSheetProperties = ModalBottomSheetProperties(),
+            expandFully: Boolean = false,
+        ): Map<String, Any> =
+            mapOf(
+                BOTTOMSHEET_KEY to
+                    BottomSheetProperties(
+                        properties = properties,
+                        expandFully = expandFully,
+                    ),
+            )
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+private data class BottomSheetProperties(
+    val properties: ModalBottomSheetProperties,
+    val expandFully: Boolean,
+)

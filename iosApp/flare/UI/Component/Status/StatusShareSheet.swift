@@ -105,6 +105,13 @@ struct StatusShareSheet: View {
                 image = await renderImage(data: data)
             }
         }
+        .onChange(of: theme) { oldValue, newValue in
+            if case .success(let data) = onEnum(of: presenter.state.status) {
+                Task {
+                    image = await renderImage(data: data.data)
+                }
+            }
+        }
     }
     
     @ViewBuilder
@@ -131,16 +138,6 @@ struct StatusShareSheet: View {
         guard let image = image else { return }
         UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
         dismiss()
-    }
-    
-    private func shareImage(data: UiTimeline) {
-//        guard let image = renderImage(data: data) else { return }
-//        let activityVC = UIActivityViewController(activityItems: [image], applicationActivities: nil)
-//        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-//           let rootVC = windowScene.windows.first?.rootViewController {
-//            rootVC.present(activityVC, animated: true, completion: nil)
-//        }
-//        dismiss()
     }
 }
 

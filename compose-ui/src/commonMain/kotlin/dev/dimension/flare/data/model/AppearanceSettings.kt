@@ -48,9 +48,9 @@ public data class AppearanceSettings(
     val postActionStyle: PostActionStyle = PostActionStyle.LeftAligned,
     val absoluteTimestamp: Boolean = false,
     val showPlatformLogo: Boolean = true,
-    // Hide reposts toggle: when true, client-side filters should remove reposts from timelines (not search).
+    // Hide reposts toggle: when true, client-side filters should remove reposts from home timeline
     val hideReposts: Boolean = false,
-    // Hide replies toggle: when true, client-side filters should remove replies to others from timelines (excludes self-replies).
+    // Hide replies toggle: when true, client-side filters should remove replies to others from home timeline (excludes self-replies).
     val hideReplies: Boolean = false,
 ) {
     public companion object {

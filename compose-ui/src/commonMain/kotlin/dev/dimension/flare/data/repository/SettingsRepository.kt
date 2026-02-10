@@ -25,7 +25,6 @@ public class SettingsRepository internal constructor(
             serializer = AccountPreferencesSerializer,
         )
     }
-
     public val appearanceSettings: Flow<AppearanceSettings> by lazy {
         appearanceSettingsStore.data
     }

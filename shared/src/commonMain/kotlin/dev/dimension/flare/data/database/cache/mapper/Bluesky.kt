@@ -221,7 +221,6 @@ internal fun List<ListNotificationsNotification>.toDb(
                     when (reason) {
                         ListNotificationsNotificationReason.Repost -> firstRecord.decodeAs<Repost>().subject.uri
                         ListNotificationsNotificationReason.Like -> firstRecord.decodeAs<Like>().subject.uri
-                        // no else needed: this branch is only reachable when reason is Repost or Like
                     }
                 // resolve the full PostView from provided references map
                 val postRef = postUri.let { references[it] }
@@ -235,7 +234,6 @@ internal fun List<ListNotificationsNotification>.toDb(
                     when (reason) {
                         ListNotificationsNotificationReason.Repost -> "_repost"
                         ListNotificationsNotificationReason.Like -> "_like"
-                        // exhaustive: no else required
                     }
                 val data =
                     DbStatusWithUser(

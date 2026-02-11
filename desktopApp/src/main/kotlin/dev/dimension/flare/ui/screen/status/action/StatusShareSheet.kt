@@ -202,20 +202,6 @@ internal fun StatusShareSheet(
                     onClick = {
                         scope.launch {
                             val image = capturePreviewImage(previewGraphicsLayer) ?: return@launch
-                            saveImageWithDialog(window, image, "status_$statusKey.png")
-                        }
-                    },
-                ) {
-                    FAIcon(
-                        FontAwesomeIcons.Solid.Download,
-                        contentDescription = stringResource(Res.string.status_share_save_screenshot),
-                    )
-                    Text(stringResource(Res.string.status_share_save_screenshot))
-                }
-                Button(
-                    onClick = {
-                        scope.launch {
-                            val image = capturePreviewImage(previewGraphicsLayer) ?: return@launch
                             shareImageToClipboard(image)
                             inAppNotification.message(Res.string.copied_to_clipboard)
                         }
@@ -226,6 +212,20 @@ internal fun StatusShareSheet(
                         contentDescription = stringResource(Res.string.status_share_image),
                     )
                     Text(stringResource(Res.string.status_share_image))
+                }
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val image = capturePreviewImage(previewGraphicsLayer) ?: return@launch
+                            saveImageWithDialog(window, image, "status_$statusKey.png")
+                        }
+                    },
+                ) {
+                    FAIcon(
+                        FontAwesomeIcons.Solid.Download,
+                        contentDescription = stringResource(Res.string.status_share_save_screenshot),
+                    )
+                    Text(stringResource(Res.string.status_share_save_screenshot))
                 }
                 if (fxShareUrl != null) {
                     Button(onClick = {

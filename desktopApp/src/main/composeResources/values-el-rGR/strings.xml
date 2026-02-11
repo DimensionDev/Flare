@@ -74,6 +74,11 @@
     <string name="media_hide_thumbnail_list">Απόκρυψη λίστας μικρογραφιών</string>
     <string name="media_save">Αποθήκευση</string>
     <string name="media_fullscreen">Πλήρης Οθόνη</string>
+    <string name="status_share">Κοινοποίηση συνδέσμου</string>
+    <string name="status_share_save_screenshot">Αποθήκευση στιγμιότυπου</string>
+    <string name="status_share_image">Κοινοποίηση στιγμιότυπου οθόνης</string>
+    <string name="status_share_via_fxembed">Κοινοποίηση μέσω FxEmbed</string>
+    <string name="status_share_via_fixvx">Κοινή χρήση μέσω Fixvx</string>
     <string name="list_add">Προσθήκη λίστας</string>
     <string name="list_edit">Επεξεργασία λίστας</string>
     <string name="list_delete">Διαγραφή λίστας</string>

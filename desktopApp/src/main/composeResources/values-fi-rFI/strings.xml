@@ -74,6 +74,11 @@
     <string name="media_hide_thumbnail_list">Piilota pikkukuvien lista</string>
     <string name="media_save">Tallenna</string>
     <string name="media_fullscreen">Kokoruutu</string>
+    <string name="status_share">Jaa linkki</string>
+    <string name="status_share_save_screenshot">Tallenna kuvakaappaus</string>
+    <string name="status_share_image">Jaa kuvakaappaus</string>
+    <string name="status_share_via_fxembed">Jaa FxEmbedin kautta</string>
+    <string name="status_share_via_fixvx">Jaa Fixvx:n kautta</string>
     <string name="list_add">Lisää lista</string>
     <string name="list_edit">Muokkaa listaa</string>
     <string name="list_delete">Poista lista</string>

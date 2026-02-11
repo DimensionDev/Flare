@@ -75,6 +75,11 @@
     <string name="media_hide_thumbnail_list">Ascunde lista de miniaturi</string>
     <string name="media_save">Salvează</string>
     <string name="media_fullscreen">Ecran complet</string>
+    <string name="status_share">Distribuie link-ul</string>
+    <string name="status_share_save_screenshot">Salvare captură ecran</string>
+    <string name="status_share_image">Distribuie captură ecran</string>
+    <string name="status_share_via_fxembed">Distribuie prin FxEmbed</string>
+    <string name="status_share_via_fixvx">Distribuie prin Fixvx</string>
     <string name="list_add">Adaugă listă</string>
     <string name="list_edit">Editare listă</string>
     <string name="list_delete">Șterge lista</string>

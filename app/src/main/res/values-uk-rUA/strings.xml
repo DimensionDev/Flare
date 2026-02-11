@@ -184,8 +184,10 @@
     <string name="service_select_empty_message">Екземплярів не знайдено</string>
     <string name="media_viewer_title">Переглядач мультимедіа</string>
     <string name="settings_accounts_remove">Видалити</string>
-    <string name="media_menu_save">Зберегти</string>
-    <string name="media_menu_share_image">Поділитись зображенням</string>
+    <string name="media_menu_save">Зберегти знімок екрану</string>
+    <string name="media_menu_share_image">Поділитися скріншотом</string>
+    <string name="status_menu_share_via_fxembed">Поділитись через FxEmbed</string>
+    <string name="status_menu_share_via_fixvx">Поділися через Fixvx</string>
     <string name="media_save_success">Збережено на завантаження</string>
     <string name="media_save_fail">Не вдалося зберегти</string>
     <string name="media_alt_text">Alt-текст</string>
@@ -291,7 +293,7 @@
     <string name="rss_sources_open_in_browser">Відкрити у браузері</string>
     <string name="rss_sources_open_in_app">Відкрити у додатку</string>
     <string name="rss_detail_open_in_browser">Відкрити у браузері</string>
-    <string name="rss_detail_share">Поділитись</string>
+    <string name="rss_detail_share">Поділитися посиланням</string>
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_title">Summary</string>
     <string name="rss_detail_tldr_error">Не вдалося узагальнити</string>
@@ -338,4 +340,5 @@
     <string name="tab_settings_group_empty">В цій групі немає вкладок</string>
     <string name="tab_settings_group_name_placeholder">Назва групи</string>
     <string name="tab_settings_group_default_name">Нова група</string>
+    <string name="status_share_sheet_theme_title">Тема</string>
 </resources>

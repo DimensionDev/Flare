@@ -74,6 +74,11 @@
     <string name="media_hide_thumbnail_list">Dölj miniatyrlista</string>
     <string name="media_save">Spara</string>
     <string name="media_fullscreen">Helskärm</string>
+    <string name="status_share">Dela länk</string>
+    <string name="status_share_save_screenshot">Spara skärmdump</string>
+    <string name="status_share_image">Dela skärmdump</string>
+    <string name="status_share_via_fxembed">Dela via FxEmbed</string>
+    <string name="status_share_via_fixvx">Dela via Fixvx</string>
     <string name="list_add">Lägg till lista</string>
     <string name="list_edit">Redigera lista</string>
     <string name="list_delete">Ta bort lista</string>

@@ -188,8 +188,10 @@
     <string name="service_select_empty_message">No se encontraron instancias</string>
     <string name="media_viewer_title">Visor de medios</string>
     <string name="settings_accounts_remove">Eliminar</string>
-    <string name="media_menu_save">Guardar</string>
-    <string name="media_menu_share_image">Compartir imagen</string>
+    <string name="media_menu_save">Guardar captura de pantalla</string>
+    <string name="media_menu_share_image">Compartir captura de pantalla</string>
+    <string name="status_menu_share_via_fxembed">Compartir vía FxEmbed</string>
+    <string name="status_menu_share_via_fixvx">Compartir vía Fixvx</string>
     <string name="media_save_success">Guardado en descargas</string>
     <string name="media_save_fail">Error al guardar</string>
     <string name="media_alt_text">Texto Alt</string>
@@ -296,7 +298,7 @@
     <string name="rss_sources_open_in_browser">Abrir en el navegador</string>
     <string name="rss_sources_open_in_app">Abrir en aplicación</string>
     <string name="rss_detail_open_in_browser">Abrir en el navegador</string>
-    <string name="rss_detail_share">Compartir</string>
+    <string name="rss_detail_share">Compartir enlace</string>
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_title">Summary</string>
     <string name="rss_detail_tldr_error">Error al resumir</string>
@@ -355,4 +357,5 @@
     <string name="tab_settings_group_empty">No hay pestañas en este grupo</string>
     <string name="tab_settings_group_name_placeholder">Nombre del grupo</string>
     <string name="tab_settings_group_default_name">Nuevo grupo</string>
+    <string name="status_share_sheet_theme_title">Tema</string>
 </resources>

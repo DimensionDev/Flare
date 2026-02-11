@@ -132,7 +132,6 @@
     <string name="service_select_empty_message">לא נמצאו מופעים</string>
     <string name="media_viewer_title">צופה מדיה</string>
     <string name="settings_accounts_remove">הסר</string>
-    <string name="media_menu_save">שמור</string>
     <string name="media_save_success">נשמר להורדות</string>
     <string name="media_save_fail">ניסיון לשמור נכשל</string>
     <string name="media_alt_text">טקסט חלופי</string>
@@ -222,7 +221,6 @@
     <string name="rss_sources_url_label">כתובת URL</string>
     <string name="rss_sources_open_in_browser">פתח בדפדפן</string>
     <string name="rss_detail_open_in_browser">פתח בדפדפן</string>
-    <string name="rss_detail_share">שתף</string>
     <string name="rss_detail_tldr">סכם</string>
     <string name="rss_detail_tldr_title">סיכום</string>
     <string name="rss_detail_tldr_error">ניסיון לסכם נכשל</string>
@@ -244,4 +242,5 @@
     <string name="tab_settings_mixed_timeline">הוסף טאב טיימליין מעורב</string>
     <string name="tab_settings_mixed_timeline_desc">טיימליין מעורב יערבב את התוצאות של כל הטאבים בטאב אחד</string>
     <string name="deeplink_account_selection_browser">פתח בדפדפן</string>
+    <string name="status_share_sheet_theme_title">נושא</string>
 </resources>

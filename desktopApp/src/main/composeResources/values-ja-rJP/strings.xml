@@ -73,6 +73,11 @@
     <string name="media_hide_thumbnail_list">サムネイル一覧を非表示</string>
     <string name="media_save">保存</string>
     <string name="media_fullscreen">全画面</string>
+    <string name="status_share">リンクを共有</string>
+    <string name="status_share_save_screenshot">スクリーンショットを保存</string>
+    <string name="status_share_image">スクリーンショットを共有</string>
+    <string name="status_share_via_fxembed">FxEmbedで共有</string>
+    <string name="status_share_via_fixvx">Fixvxでシェア</string>
     <string name="list_add">リストを追加</string>
     <string name="list_edit">リストを編集</string>
     <string name="list_delete">リストを削除</string>

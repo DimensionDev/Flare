@@ -70,6 +70,11 @@
     <string name="media_hide_thumbnail_list">Приховати список ескізів</string>
     <string name="media_save">Зберегти</string>
     <string name="media_fullscreen">Повноекранний</string>
+    <string name="status_share">Поділитися посиланням</string>
+    <string name="status_share_save_screenshot">Зберегти знімок екрану</string>
+    <string name="status_share_image">Поділитися скріншотом</string>
+    <string name="status_share_via_fxembed">Поділитись через FxEmbed</string>
+    <string name="status_share_via_fixvx">Поділися через Fixvx</string>
     <string name="list_add">Додати список</string>
     <string name="list_edit">Редагувати список</string>
     <string name="list_delete">Видалити список</string>

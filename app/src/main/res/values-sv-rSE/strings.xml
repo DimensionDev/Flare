@@ -188,8 +188,10 @@
     <string name="service_select_empty_message">Inga instanser hittades</string>
     <string name="media_viewer_title">Media visare</string>
     <string name="settings_accounts_remove">Radera</string>
-    <string name="media_menu_save">Spara</string>
-    <string name="media_menu_share_image">Dela bild</string>
+    <string name="media_menu_save">Spara skärmdump</string>
+    <string name="media_menu_share_image">Dela skärmdump</string>
+    <string name="status_menu_share_via_fxembed">Dela via FxEmbed</string>
+    <string name="status_menu_share_via_fixvx">Dela via Fixvx</string>
     <string name="media_save_success">Sparad i hämtningar</string>
     <string name="media_save_fail">Det gick inte att spara</string>
     <string name="media_alt_text">Alt text</string>
@@ -296,7 +298,7 @@
     <string name="rss_sources_open_in_browser">Öppna i webbläsare</string>
     <string name="rss_sources_open_in_app">Öppna i app</string>
     <string name="rss_detail_open_in_browser">Öppna i webbläsare</string>
-    <string name="rss_detail_share">Dela</string>
+    <string name="rss_detail_share">Dela länk</string>
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_title">Summary</string>
     <string name="rss_detail_tldr_error">Det gick inte att sammanfatta</string>
@@ -354,4 +356,5 @@
     <string name="tab_settings_group_empty">Inga flikar i denna grupp</string>
     <string name="tab_settings_group_name_placeholder">Gruppens namn</string>
     <string name="tab_settings_group_default_name">Ny grupp</string>
+    <string name="status_share_sheet_theme_title">Tema</string>
 </resources>

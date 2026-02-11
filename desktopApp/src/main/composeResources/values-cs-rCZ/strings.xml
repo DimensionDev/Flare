@@ -76,6 +76,11 @@
     <string name="media_hide_thumbnail_list">Skrýt seznam náhledů</string>
     <string name="media_save">Uložit</string>
     <string name="media_fullscreen">Celá obrazovka</string>
+    <string name="status_share">Sdílet odkaz</string>
+    <string name="status_share_save_screenshot">Uložit snímek obrazovky</string>
+    <string name="status_share_image">Sdílet snímek obrazovky</string>
+    <string name="status_share_via_fxembed">Sdílet přes FxEmbed</string>
+    <string name="status_share_via_fixvx">Sdílet přes Fixvx</string>
     <string name="list_add">Přidat seznam</string>
     <string name="list_edit">Upravit seznam</string>
     <string name="list_delete">Odstranit seznam</string>

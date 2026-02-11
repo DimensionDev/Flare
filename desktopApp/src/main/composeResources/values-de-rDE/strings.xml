@@ -74,6 +74,11 @@
     <string name="media_hide_thumbnail_list">Vorschauliste ausblenden</string>
     <string name="media_save">Speichern</string>
     <string name="media_fullscreen">Vollbild</string>
+    <string name="status_share">Link teilen</string>
+    <string name="status_share_save_screenshot">Screenshot speichern</string>
+    <string name="status_share_image">Screenshot teilen</string>
+    <string name="status_share_via_fxembed">Über FxEmbed teilen</string>
+    <string name="status_share_via_fixvx">Über Fixvx teilen</string>
     <string name="list_add">Liste hinzufügen</string>
     <string name="list_edit">Liste bearbeiten</string>
     <string name="list_delete">Liste löschen</string>

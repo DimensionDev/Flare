@@ -192,8 +192,10 @@
     <string name="service_select_empty_message">لا يوجد مثيلات</string>
     <string name="media_viewer_title">مشاهدة الوسائط</string>
     <string name="settings_accounts_remove">إزالة</string>
-    <string name="media_menu_save">حفظ</string>
-    <string name="media_menu_share_image">مشاركة الصورة</string>
+    <string name="media_menu_save">حفظ لقطة الشاشة</string>
+    <string name="media_menu_share_image">مشاركة لقطة الشاشة</string>
+    <string name="status_menu_share_via_fxembed">مشاركة عبر FxEmbed</string>
+    <string name="status_menu_share_via_fixvx">شارك عبر Fixvx</string>
     <string name="media_save_success">حفظ في التنزيلات</string>
     <string name="media_save_fail">فشل في الحفظ</string>
     <string name="media_alt_text">نص بديل</string>
@@ -300,7 +302,7 @@
     <string name="rss_sources_open_in_browser">فتح في المتصفح</string>
     <string name="rss_sources_open_in_app">فتح في التطبيق</string>
     <string name="rss_detail_open_in_browser">فتح في المتصفح</string>
-    <string name="rss_detail_share">مشاركة</string>
+    <string name="rss_detail_share">مشاركة الرابط</string>
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_title">Summary</string>
     <string name="rss_detail_tldr_error">فشل في تلخيص</string>
@@ -360,4 +362,5 @@
     <string name="tab_settings_group_empty">لا توجد علامات تبويب في هذه المجموعة</string>
     <string name="tab_settings_group_name_placeholder">اسم المجموعة</string>
     <string name="tab_settings_group_default_name">مجموعة جديدة</string>
+    <string name="status_share_sheet_theme_title">السمة</string>
 </resources>

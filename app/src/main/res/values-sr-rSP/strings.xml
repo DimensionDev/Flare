@@ -132,7 +132,6 @@
     <string name="service_select_empty_message">Нема пронађених инстанци</string>
     <string name="media_viewer_title">Прегледач медија</string>
     <string name="settings_accounts_remove">Уклони</string>
-    <string name="media_menu_save">Сачувај</string>
     <string name="media_save_success">Сачувано у преузимањима</string>
     <string name="media_save_fail">Неуспех чувања</string>
     <string name="media_alt_text">Алт текст</string>
@@ -222,7 +221,6 @@
     <string name="rss_sources_url_label">Урл</string>
     <string name="rss_sources_open_in_browser">Отворите у прегледаћу</string>
     <string name="rss_detail_open_in_browser">Отворите у прегледаћу</string>
-    <string name="rss_detail_share">Делите</string>
     <string name="rss_detail_tldr">Сажмите</string>
     <string name="rss_detail_tldr_title">Сажетак</string>
     <string name="rss_detail_tldr_error">Неуспех сажимања</string>
@@ -244,4 +242,5 @@
     <string name="tab_settings_mixed_timeline">Додајте таб раста</string>
     <string name="tab_settings_mixed_timeline_desc">Мешана временска линија ће комбиновати све резултате таба у један таб</string>
     <string name="deeplink_account_selection_browser">Отворите у прегледаћу</string>
+    <string name="status_share_sheet_theme_title">Тема</string>
 </resources>

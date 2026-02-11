@@ -189,8 +189,10 @@
     <string name="service_select_empty_message">Nu s-au găsit instanțe</string>
     <string name="media_viewer_title">Vizualizare media</string>
     <string name="settings_accounts_remove">Elimină</string>
-    <string name="media_menu_save">Salvează</string>
-    <string name="media_menu_share_image">Distribuie imaginea</string>
+    <string name="media_menu_save">Salvare captură ecran</string>
+    <string name="media_menu_share_image">Distribuie captură ecran</string>
+    <string name="status_menu_share_via_fxembed">Distribuie prin FxEmbed</string>
+    <string name="status_menu_share_via_fixvx">Distribuie prin Fixvx</string>
     <string name="media_save_success">Salvat în Descărcări</string>
     <string name="media_save_fail">Salvarea nu a reușit</string>
     <string name="media_alt_text">Text alternativ</string>
@@ -297,7 +299,7 @@
     <string name="rss_sources_open_in_browser">Deschide în browser</string>
     <string name="rss_sources_open_in_app">Deschide în aplicație</string>
     <string name="rss_detail_open_in_browser">Deschide în browser</string>
-    <string name="rss_detail_share">Distribuie</string>
+    <string name="rss_detail_share">Distribuie link-ul</string>
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_title">Summary</string>
     <string name="rss_detail_tldr_error">Sumar eșuat</string>
@@ -344,4 +346,5 @@
     <string name="tab_settings_group_empty">Nicio filă în acest grup</string>
     <string name="tab_settings_group_name_placeholder">Numele grupului</string>
     <string name="tab_settings_group_default_name">Grup nou</string>
+    <string name="status_share_sheet_theme_title">Tema</string>
 </resources>

@@ -188,8 +188,10 @@
     <string name="service_select_empty_message">Geen instanties gevonden</string>
     <string name="media_viewer_title">Media viewer</string>
     <string name="settings_accounts_remove">Verwijderen</string>
-    <string name="media_menu_save">Opslaan</string>
-    <string name="media_menu_share_image">Deel afbeelding</string>
+    <string name="media_menu_save">Schermafdruk opslaan</string>
+    <string name="media_menu_share_image">Schermafdruk delen</string>
+    <string name="status_menu_share_via_fxembed">Delen via FxEmbed</string>
+    <string name="status_menu_share_via_fixvx">Delen via Fixvx</string>
     <string name="media_save_success">Opgeslagen in Downloads</string>
     <string name="media_save_fail">Opslaan mislukt</string>
     <string name="media_alt_text">Alternatieve tekst</string>
@@ -296,7 +298,7 @@
     <string name="rss_sources_open_in_browser">Openen in browser</string>
     <string name="rss_sources_open_in_app">Openen in app</string>
     <string name="rss_detail_open_in_browser">Openen in browser</string>
-    <string name="rss_detail_share">Delen</string>
+    <string name="rss_detail_share">Link delen</string>
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_title">Summary</string>
     <string name="rss_detail_tldr_error">Samenvatten mislukt</string>
@@ -343,4 +345,5 @@
     <string name="tab_settings_group_empty">Geen tabbladen in deze groep</string>
     <string name="tab_settings_group_name_placeholder">Groep naam</string>
     <string name="tab_settings_group_default_name">Nieuwe groep</string>
+    <string name="status_share_sheet_theme_title">Thema</string>
 </resources>

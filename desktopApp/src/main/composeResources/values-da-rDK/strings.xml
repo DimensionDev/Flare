@@ -74,6 +74,11 @@
     <string name="media_hide_thumbnail_list">Skjul miniatureliste</string>
     <string name="media_save">Gem</string>
     <string name="media_fullscreen">Fuldskærm</string>
+    <string name="status_share">Del link</string>
+    <string name="status_share_save_screenshot">Gem skærmbillede</string>
+    <string name="status_share_image">Del skærmbillede</string>
+    <string name="status_share_via_fxembed">Del via FxEmbed</string>
+    <string name="status_share_via_fixvx">Del via Fixvx</string>
     <string name="list_add">Tilføj liste</string>
     <string name="list_edit">Rediger liste</string>
     <string name="list_delete">Slet liste</string>

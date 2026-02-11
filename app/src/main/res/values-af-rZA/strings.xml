@@ -132,7 +132,6 @@
     <string name="service_select_empty_message">Geen instansies gevind nie</string>
     <string name="media_viewer_title">Media kyker</string>
     <string name="settings_accounts_remove">Verwyder</string>
-    <string name="media_menu_save">Bly</string>
     <string name="media_save_success">Gelaat by Aflaai</string>
     <string name="media_save_fail">Kon nie stoor nie</string>
     <string name="media_alt_text">Alt teks</string>
@@ -222,7 +221,6 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_sources_open_in_browser">Open in blaai</string>
     <string name="rss_detail_open_in_browser">Open in blaai</string>
-    <string name="rss_detail_share">Deel</string>
     <string name="rss_detail_tldr">Som op</string>
     <string name="rss_detail_tldr_title">Samevatting</string>
     <string name="rss_detail_tldr_error">Kon nie opsom nie</string>
@@ -244,4 +242,5 @@
     <string name="tab_settings_mixed_timeline">Voeg gemengde tydlyn tab by</string>
     <string name="tab_settings_mixed_timeline_desc">Gemengde tydlyn sal al die tab tydlyn resultate in \'n tab meng</string>
     <string name="deeplink_account_selection_browser">Open in blaai</string>
+    <string name="status_share_sheet_theme_title">Tema</string>
 </resources>

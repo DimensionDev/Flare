@@ -13,9 +13,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 internal interface ListDataSource {
-    fun myList(scope: CoroutineScope): Flow<PagingData<UiList>>
+    fun myList(scope: CoroutineScope): Flow<PagingData<UiList.List>>
 
-    fun listInfo(listId: String): CacheData<UiList>
+    fun listInfo(listId: String): CacheData<UiList.List>
 
     fun listMembers(
         listId: String,
@@ -48,7 +48,7 @@ internal interface ListDataSource {
 
     fun listMemberCache(listId: String): Flow<ImmutableList<UiUserV2>>
 
-    fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList>>
+    fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList.List>>
 }
 
 public data class ListMetaData(

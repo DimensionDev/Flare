@@ -702,9 +702,8 @@ private fun replaceMentionAndHashtag(
     }
 }
 
-internal fun MastodonList.render(): UiList =
-    UiList(
+internal fun MastodonList.render(): UiList.List =
+    UiList.List(
         id = id.orEmpty(),
         title = title.orEmpty(),
-        platformType = PlatformType.Mastodon,
     )

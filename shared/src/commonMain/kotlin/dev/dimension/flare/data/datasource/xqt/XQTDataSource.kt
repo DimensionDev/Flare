@@ -1204,18 +1204,18 @@ internal class XQTDataSource(
     private val listKey: String
         get() = "allLists_$accountKey"
 
-    override fun myList(scope: CoroutineScope): Flow<PagingData<UiList>> =
+    override fun myList(scope: CoroutineScope): Flow<PagingData<UiList.List>> =
         memoryPager(
             pageSize = 20,
             pagingKey = listKey,
             scope = scope,
             mediator =
-                object : BaseRemoteMediator<Int, UiList>() {
+                object : BaseRemoteMediator<Int, UiList.List>() {
                     var cursor: String? = null
 
                     override suspend fun doLoad(
                         loadType: LoadType,
-                        state: PagingState<Int, UiList>,
+                        state: PagingState<Int, UiList.List>,
                     ): MediatorResult {
                         if (loadType == LoadType.PREPEND) {
                             return MediatorResult.Success(endOfPaginationReached = true)
@@ -1250,12 +1250,12 @@ internal class XQTDataSource(
                                 .toImmutableList()
 
                         if (loadType == LoadType.REFRESH) {
-                            MemoryPagingSource.update<UiList>(
+                            MemoryPagingSource.update<UiList.List>(
                                 key = listKey,
                                 value = result,
                             )
                         } else if (loadType == LoadType.APPEND) {
-                            MemoryPagingSource.append<UiList>(
+                            MemoryPagingSource.append<UiList.List>(
                                 key = listKey,
                                 value = result,
                             )
@@ -1284,16 +1284,15 @@ internal class XQTDataSource(
         }.onSuccess { response ->
             val data = response.body()?.data?.list
             if (data?.idStr != null) {
-                MemoryPagingSource.updateWith<UiList>(
+                MemoryPagingSource.updateWith<UiList.List>(
                     key = listKey,
                 ) {
                     it
                         .plus(
-                            UiList(
+                            UiList.List(
                                 id = data.idStr,
                                 title = metaData.title,
                                 description = metaData.description,
-                                platformType = PlatformType.Mastodon,
                             ),
                         ).toImmutableList()
                 }
@@ -1313,7 +1312,7 @@ internal class XQTDataSource(
                     ),
             )
         }.onSuccess {
-            MemoryPagingSource.updateWith<UiList>(
+            MemoryPagingSource.updateWith<UiList.List>(
                 key = listKey,
             ) {
                 it
@@ -1341,7 +1340,7 @@ internal class XQTDataSource(
                     ),
             )
         }.onSuccess {
-            MemoryPagingSource.updateWith<UiList>(
+            MemoryPagingSource.updateWith<UiList.List>(
                 key = listKey,
             ) {
                 it
@@ -1359,7 +1358,7 @@ internal class XQTDataSource(
         }
     }
 
-    override fun listInfo(listId: String): CacheData<UiList> =
+    override fun listInfo(listId: String): CacheData<UiList.List> =
         MemCacheable(
             key = "listInfo_$listId",
             fetchSource = {
@@ -1487,7 +1486,7 @@ internal class XQTDataSource(
             }
             val list = getListInfo(listId)
             if (list?.id != null) {
-                MemCacheable.updateWith<ImmutableList<UiList>>(
+                MemCacheable.updateWith<ImmutableList<UiList.List>>(
                     key = userListsKey(userKey),
                 ) {
                     it
@@ -1520,7 +1519,7 @@ internal class XQTDataSource(
                     .filter { user -> user.key.id != userKey.id }
                     .toImmutableList()
             }
-            MemCacheable.updateWith<ImmutableList<UiList>>(
+            MemCacheable.updateWith<ImmutableList<UiList.List>>(
                 key = userListsKey(userKey),
             ) {
                 it
@@ -1533,7 +1532,7 @@ internal class XQTDataSource(
     override fun listMemberCache(listId: String): Flow<ImmutableList<UiUserV2>> =
         MemoryPagingSource.getFlow<UiUserV2>(listMemberKey(listId))
 
-    override fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList>> =
+    override fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList.List>> =
         MemCacheable(
             key = userListsKey(userKey),
         ) {

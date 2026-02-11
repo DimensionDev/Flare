@@ -1,36 +1,18 @@
 package dev.dimension.flare.ui.model
 
-import dev.dimension.flare.data.model.Bluesky.FeedTabItem
+import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.IconType.Mixed
 import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.Misskey
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.AccountType.Specific
 import dev.dimension.flare.model.MicroBlogKey
 
 public fun UiList.toTabItem(accountKey: MicroBlogKey): TabItem =
-    when (type) {
-        UiList.Type.Feed -> {
-            FeedTabItem(
-                account = Specific(accountKey),
-                uri = id,
-                metaData =
-                    TabMetaData(
-                        title = TitleType.Text(title),
-                        icon =
-                            Mixed(
-                                icon = IconType.Material.MaterialIcon.List,
-                                userKey = accountKey,
-                            ),
-                    ),
-            )
-        }
-
-        UiList.Type.List ->
+    when (this) {
+        is UiList.List ->
             ListTimelineTabItem(
                 account = AccountType.Specific(accountKey),
                 listId = id,
@@ -38,25 +20,46 @@ public fun UiList.toTabItem(accountKey: MicroBlogKey): TabItem =
                     TabMetaData(
                         title = TitleType.Text(title),
                         icon =
-                            IconType.Mixed(
-                                icon = IconType.Material.MaterialIcon.List,
-                                userKey = accountKey,
-                            ),
+                            avatar?.let {
+                                IconType.Url(it)
+                            } ?: IconType.Material(IconType.Material.MaterialIcon.List),
                     ),
             )
 
-        UiList.Type.Antenna ->
+        is UiList.Feed ->
+            Bluesky.FeedTabItem(
+                account = AccountType.Specific(accountKey),
+                uri = id,
+                metaData =
+                    TabMetaData(
+                        title = TitleType.Text(title),
+                        icon =
+                            avatar?.let {
+                                IconType.Url(it)
+                            } ?: IconType.Material(IconType.Material.MaterialIcon.Feeds),
+                    ),
+            )
+
+        is UiList.Antenna ->
             Misskey.AntennasTimelineTabItem(
                 account = AccountType.Specific(accountKey),
                 antennasId = id,
                 metaData =
                     TabMetaData(
                         title = TitleType.Text(title),
-                        icon =
-                            IconType.Mixed(
-                                icon = IconType.Material.MaterialIcon.Rss,
-                                userKey = accountKey,
-                            ),
+                        icon = IconType.Material(IconType.Material.MaterialIcon.List),
                     ),
             )
+
+        is UiList.Channel ->
+            TODO()
+//            Misskey.ChannelTimelineTabItem(
+//                account = AccountType.Specific(accountKey),
+//                channelId = id,
+//                metaData =
+//                    TabMetaData(
+//                        title = TitleType.Text(title),
+//                        icon = IconType.Material(IconType.Material.MaterialIcon.List),
+//                    ),
+//            )
     }

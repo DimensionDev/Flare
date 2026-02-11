@@ -1,9 +1,11 @@
 package dev.dimension.flare.data.network.misskey.api
 
 import de.jensklingenberg.ktorfit.http.Body
+import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.Channel
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsCreateRequest
+import dev.dimension.flare.data.network.misskey.api.model.ChannelsFeaturedRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFollowRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFollowedRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsSearchRequest
@@ -58,11 +60,12 @@ internal interface ChannelsApi {
      *  - 418: I'm Ai
      *  - 500: Internal server error
      *
-     * @param body * @return [kotlin.collections.List<Channel>]
+     * @param request * @return [kotlin.collections.List<Channel>]
      */
     @POST("channels/featured")
     suspend fun channelsFeatured(
-        @Body body: kotlin.Any,
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
+        @Body request: ChannelsFeaturedRequest,
     ): kotlin.collections.List<Channel>
 
     /**

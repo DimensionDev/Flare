@@ -1095,7 +1095,7 @@ internal class BlueskyDataSource(
 
     private val myFeedsKey = "my_feeds_$accountKey"
 
-    val myFeeds: CacheData<ImmutableList<UiList>> by lazy {
+    val myFeeds: CacheData<ImmutableList<UiList.Feed>> by lazy {
         MemCacheable(
             key = myFeedsKey,
         ) {
@@ -1134,14 +1134,14 @@ internal class BlueskyDataSource(
     fun popularFeeds(
         query: String?,
         scope: CoroutineScope,
-    ): Flow<PagingData<Pair<UiList, Boolean>>> =
+    ): Flow<PagingData<Pair<UiList.Feed, Boolean>>> =
         Pager(
             config = pagingConfig,
         ) {
-            object : BasePagingSource<String, UiList>() {
-                override fun getRefreshKey(state: PagingState<String, UiList>): String? = null
+            object : BasePagingSource<String, UiList.Feed>() {
+                override fun getRefreshKey(state: PagingState<String, UiList.Feed>): String? = null
 
-                override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiList> {
+                override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiList.Feed> {
                     val result =
                         service
                             .getPopularFeedGeneratorsUnspecced(
@@ -1168,7 +1168,7 @@ internal class BlueskyDataSource(
             .let { feeds ->
                 combine(
                     feeds,
-                    MemCacheable.subscribe<ImmutableList<UiList>>(myFeedsKey),
+                    MemCacheable.subscribe<ImmutableList<UiList.Feed>>(myFeedsKey),
                 ) { popular, my ->
                     popular.map { item ->
                         item to my.any { it.id == item.id }
@@ -1178,7 +1178,7 @@ internal class BlueskyDataSource(
 
     private fun feedInfoKey(uri: String) = "feed_info_$uri"
 
-    fun feedInfo(uri: String): MemCacheable<UiList> =
+    fun feedInfo(uri: String): MemCacheable<UiList.Feed> =
         MemCacheable(
             key = feedInfoKey(uri),
         ) {
@@ -1214,8 +1214,8 @@ internal class BlueskyDataSource(
             uri = uri,
         )
 
-    suspend fun subscribeFeed(data: UiList) {
-        MemCacheable.updateWith<ImmutableList<UiList>>(
+    suspend fun subscribeFeed(data: UiList.Feed) {
+        MemCacheable.updateWith<ImmutableList<UiList.Feed>>(
             key = myFeedsKey,
         ) {
             (it + data).toImmutableList()
@@ -1265,7 +1265,7 @@ internal class BlueskyDataSource(
             )
             myFeeds.refresh()
         }.onFailure {
-            MemCacheable.updateWith<ImmutableList<UiList>>(
+            MemCacheable.updateWith<ImmutableList<UiList.Feed>>(
                 key = myFeedsKey,
             ) {
                 it.filterNot { item -> item.id == data.id }.toImmutableList()
@@ -1273,8 +1273,8 @@ internal class BlueskyDataSource(
         }
     }
 
-    suspend fun unsubscribeFeed(data: UiList) {
-        MemCacheable.updateWith<ImmutableList<UiList>>(
+    suspend fun unsubscribeFeed(data: UiList.Feed) {
+        MemCacheable.updateWith<ImmutableList<UiList.Feed>>(
             key = myFeedsKey,
         ) {
             it.filterNot { item -> item.id == data.id }.toImmutableList()
@@ -1323,7 +1323,7 @@ internal class BlueskyDataSource(
             )
             myFeeds.refresh()
         }.onFailure {
-            MemCacheable.updateWith<ImmutableList<UiList>>(
+            MemCacheable.updateWith<ImmutableList<UiList.Feed>>(
                 key = myFeedsKey,
             ) {
                 (it + data).toImmutableList()
@@ -1331,7 +1331,7 @@ internal class BlueskyDataSource(
         }
     }
 
-    suspend fun favouriteFeed(data: UiList) {
+    suspend fun favouriteFeed(data: UiList.Feed) {
         MemCacheable.update(
             key = feedInfoKey(data.id),
             value =
@@ -1367,18 +1367,18 @@ internal class BlueskyDataSource(
 
     private val myListKey = "my_list_$accountKey"
 
-    override fun myList(scope: CoroutineScope): Flow<PagingData<UiList>> =
+    override fun myList(scope: CoroutineScope): Flow<PagingData<UiList.List>> =
         memoryPager(
             pageSize = 20,
             pagingKey = myListKey,
             scope = scope,
             mediator =
-                object : BaseRemoteMediator<Int, UiList>() {
+                object : BaseRemoteMediator<Int, UiList.List>() {
                     var cursor: String? = null
 
                     override suspend fun doLoad(
                         loadType: LoadType,
-                        state: PagingState<Int, UiList>,
+                        state: PagingState<Int, UiList.List>,
                     ): MediatorResult {
                         val result =
                             service
@@ -1396,7 +1396,7 @@ internal class BlueskyDataSource(
                                     it.render(accountKey)
                                 }.toImmutableList()
                         cursor = result.cursor
-                        MemoryPagingSource.update<UiList>(
+                        MemoryPagingSource.update<UiList.List>(
                             key = myListKey,
                             value = items,
                         )
@@ -1409,7 +1409,7 @@ internal class BlueskyDataSource(
 
     private fun listInfoKey(uri: String) = "list_info_$uri"
 
-    override fun listInfo(listId: String): MemCacheable<UiList> =
+    override fun listInfo(listId: String): CacheData<UiList.List> =
         MemCacheable(
             key = listInfoKey(listId),
         ) {
@@ -1471,7 +1471,7 @@ internal class BlueskyDataSource(
                 .list
                 .render(accountKey)
                 .let { list ->
-                    MemoryPagingSource.updateWith<UiList>(
+                    MemoryPagingSource.updateWith<UiList.List>(
                         key = myListKey,
                     ) {
                         (listOf(list) + it).toImmutableList()
@@ -1500,7 +1500,7 @@ internal class BlueskyDataSource(
                     ),
             )
         }.onSuccess {
-            MemoryPagingSource.updateWith<UiList>(
+            MemoryPagingSource.updateWith<UiList.List>(
                 key = myListKey,
             ) {
                 it.filterNot { item -> item.id == listId }.toImmutableList()
@@ -1556,7 +1556,7 @@ internal class BlueskyDataSource(
                     ),
             )
         }.onSuccess {
-            MemoryPagingSource.updateWith<UiList>(
+            MemoryPagingSource.updateWith<UiList.List>(
                 key = myListKey,
             ) {
                 it
@@ -1665,7 +1665,7 @@ internal class BlueskyDataSource(
                     ).requireResponse()
                     .list
                     .render(accountKey)
-            MemCacheable.updateWith<ImmutableList<UiList>>(userListsKey(userKey)) {
+            MemCacheable.updateWith<ImmutableList<UiList.List>>(userListsKey(userKey)) {
                 (it + list).toImmutableList()
             }
             service.createRecord(
@@ -1696,7 +1696,7 @@ internal class BlueskyDataSource(
                     .filter { user -> user.key.id != userKey.id }
                     .toImmutableList()
             }
-            MemCacheable.updateWith<ImmutableList<UiList>>(userListsKey(userKey)) {
+            MemCacheable.updateWith<ImmutableList<UiList.List>>(userListsKey(userKey)) {
                 it
                     .filter { list -> list.id != listId }
                     .toImmutableList()
@@ -1771,12 +1771,12 @@ internal class BlueskyDataSource(
 
     private fun userListsKey(userKey: MicroBlogKey) = "userLists_${userKey.id}"
 
-    override fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList>> =
+    override fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList.List>> =
         MemCacheable(
             key = userListsKey(userKey),
         ) {
             var cursor: String? = null
-            val lists = mutableListOf<UiList>()
+            val lists = mutableListOf<UiList.List>()
             val allLists =
                 service
                     .getLists(

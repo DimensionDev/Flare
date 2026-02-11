@@ -27,7 +27,6 @@ import dev.dimension.flare.compose.ui.feeds_discover_feeds_created_by
 import dev.dimension.flare.compose.ui.list_empty
 import dev.dimension.flare.compose.ui.list_error
 import dev.dimension.flare.ui.common.itemsIndexed
-import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformListItem
 import dev.dimension.flare.ui.component.platform.PlatformSegmentedListItem
 import dev.dimension.flare.ui.component.platform.PlatformText
@@ -36,10 +35,10 @@ import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
 
-public fun LazyListScope.uiListItemComponent(
-    items: PagingState<UiList>,
-    onClicked: ((UiList) -> Unit)? = null,
-    trailingContent: @Composable RowScope.(UiList) -> Unit = {},
+public fun <T : UiList> LazyListScope.uiListItemComponent(
+    items: PagingState<T>,
+    onClicked: ((T) -> Unit)? = null,
+    trailingContent: @Composable RowScope.(T) -> Unit = {},
 ) {
     itemsIndexed(
         items,
@@ -94,7 +93,12 @@ public fun LazyListScope.uiListItemComponent(
         },
     ) { index, itemCount, item ->
         UiListItem(
-            onClicked = onClicked,
+            onClicked =
+                onClicked?.let {
+                    {
+                        it.invoke(item)
+                    }
+                },
             item = item,
             trailingContent = trailingContent,
             index = index,
@@ -104,15 +108,73 @@ public fun LazyListScope.uiListItemComponent(
 }
 
 @Composable
-public fun UiListItem(
-    onClicked: ((UiList) -> Unit)?,
-    item: UiList,
-    trailingContent: @Composable (RowScope.(UiList) -> Unit),
+public fun <T : UiList> UiListItem(
+    onClicked: (() -> Unit)?,
+    item: T,
+    trailingContent: @Composable (RowScope.(T) -> Unit),
     index: Int,
     totalCount: Int,
     modifier: Modifier = Modifier,
 ) {
-    if (item.description?.takeIf { it.isNotEmpty() } != null) {
+    when (item) {
+        is UiList.List ->
+            UiListCard(
+                item = item,
+                onClicked = onClicked,
+                trailingContent = {
+                    trailingContent.invoke(this, item)
+                },
+                index = index,
+                totalCount = totalCount,
+                modifier = modifier,
+            )
+        is UiList.Feed ->
+            UiFeedCard(
+                item = item,
+                onClicked = onClicked,
+                trailingContent = {
+                    trailingContent.invoke(this, item)
+                },
+                index = index,
+                totalCount = totalCount,
+                modifier = modifier,
+            )
+        is UiList.Antenna ->
+            UiAntennaCard(
+                item = item,
+                onClicked = onClicked,
+                trailingContent = {
+                    trailingContent.invoke(this, item)
+                },
+                index = index,
+                totalCount = totalCount,
+                modifier = modifier,
+            )
+        is UiList.Channel ->
+            UiChannelCard(
+                item = item,
+                onClicked = onClicked,
+                trailingContent = {
+                    trailingContent.invoke(this, item)
+                },
+                index = index,
+                totalCount = totalCount,
+                modifier = modifier,
+            )
+    }
+}
+
+@Composable
+private fun UiListCard(
+    item: UiList.List,
+    onClicked: (() -> Unit)?,
+    trailingContent: @Composable (RowScope.() -> Unit),
+    index: Int,
+    totalCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    val description = item.description
+    if (!description.isNullOrEmpty()) {
         Column(
             modifier =
                 modifier
@@ -124,17 +186,148 @@ public fun UiListItem(
                         if (onClicked == null) {
                             it
                         } else {
-                            it
-                                .clickable {
-                                    onClicked(item)
-                                }
+                            it.clickable { onClicked() }
                         }
                     },
         ) {
             PlatformListItem(
-                headlineContent = {
-                    PlatformText(text = item.title)
+                headlineContent = { PlatformText(text = item.title) },
+                leadingContent = {
+                    if (item.avatar != null) {
+                        NetworkImage(
+                            model = item.avatar,
+                            contentDescription = item.title,
+                            modifier =
+                                Modifier
+                                    .size(AvatarComponentDefaults.size)
+                                    .clip(PlatformTheme.shapes.medium),
+                        )
+                    } else {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.List,
+                            contentDescription = null,
+                            modifier =
+                                Modifier
+                                    .size(AvatarComponentDefaults.size)
+                                    .background(
+                                        color = PlatformTheme.colorScheme.primaryContainer,
+                                        shape = PlatformTheme.shapes.medium,
+                                    ).padding(8.dp),
+                            tint = PlatformTheme.colorScheme.onPrimaryContainer,
+                        )
+                    }
                 },
+                supportingContent = {
+                    if (item.creator != null) {
+                        PlatformText(
+                            text =
+                                stringResource(
+                                    Res.string.feeds_discover_feeds_created_by,
+                                    item.creator?.handle ?: "Unknown",
+                                ),
+                            style = PlatformTheme.typography.caption,
+                            color = PlatformTheme.colorScheme.caption,
+                        )
+                    }
+                },
+                trailingContent = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        trailingContent.invoke(this)
+                    }
+                },
+            )
+            PlatformText(
+                text = description,
+                modifier =
+                    Modifier
+                        .background(PlatformTheme.colorScheme.card)
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                        .padding(horizontal = screenHorizontalPadding),
+            )
+        }
+    } else {
+        PlatformSegmentedListItem(
+            modifier = modifier,
+            index = index,
+            totalCount = totalCount,
+            onClick = { onClicked?.invoke() },
+            headlineContent = { PlatformText(text = item.title) },
+            leadingContent = {
+                if (item.avatar != null) {
+                    NetworkImage(
+                        model = item.avatar,
+                        contentDescription = item.title,
+                        modifier =
+                            Modifier
+                                .size(AvatarComponentDefaults.size)
+                                .clip(PlatformTheme.shapes.medium),
+                    )
+                } else {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.List,
+                        contentDescription = null,
+                        modifier =
+                            Modifier
+                                .size(AvatarComponentDefaults.size)
+                                .background(
+                                    color = PlatformTheme.colorScheme.primaryContainer,
+                                    shape = PlatformTheme.shapes.medium,
+                                ).padding(8.dp),
+                        tint = PlatformTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
+            },
+            supportingContent = {
+                if (item.creator != null) {
+                    PlatformText(
+                        text =
+                            stringResource(
+                                Res.string.feeds_discover_feeds_created_by,
+                                item.creator?.handle ?: "Unknown",
+                            ),
+                        style = PlatformTheme.typography.caption,
+                        color = PlatformTheme.colorScheme.caption,
+                    )
+                }
+            },
+            trailingContent = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    trailingContent.invoke(this)
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun UiFeedCard(
+    item: UiList.Feed,
+    onClicked: (() -> Unit)?,
+    trailingContent: @Composable (RowScope.() -> Unit),
+    index: Int,
+    totalCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    val description = item.description
+    if (!description.isNullOrEmpty()) {
+        Column(
+            modifier =
+                modifier
+                    .listCard(
+                        index = index,
+                        totalCount = totalCount,
+                    ).background(PlatformTheme.colorScheme.card)
+                    .let {
+                        if (onClicked == null) {
+                            it
+                        } else {
+                            it.clickable { onClicked() }
+                        }
+                    },
+        ) {
+            PlatformListItem(
+                headlineContent = { PlatformText(text = item.title) },
                 leadingContent = {
                     if (item.avatar != null) {
                         NetworkImage(
@@ -174,36 +367,28 @@ public fun UiListItem(
                     }
                 },
                 trailingContent = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        trailingContent.invoke(this, item)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        trailingContent.invoke(this)
                     }
                 },
             )
-            item.description?.takeIf { it.isNotEmpty() }?.let {
-                PlatformText(
-                    text = it,
-                    modifier =
-                        Modifier
-                            .background(PlatformTheme.colorScheme.card)
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
-                            .padding(horizontal = screenHorizontalPadding),
-                )
-            }
+            PlatformText(
+                text = description,
+                modifier =
+                    Modifier
+                        .background(PlatformTheme.colorScheme.card)
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                        .padding(horizontal = screenHorizontalPadding),
+            )
         }
     } else {
         PlatformSegmentedListItem(
             modifier = modifier,
             index = index,
             totalCount = totalCount,
-            onClick = {
-                onClicked?.invoke(item)
-            },
-            headlineContent = {
-                PlatformText(text = item.title)
-            },
+            onClick = { onClicked?.invoke() },
+            headlineContent = { PlatformText(text = item.title) },
             leadingContent = {
                 if (item.avatar != null) {
                     NetworkImage(
@@ -243,10 +428,155 @@ public fun UiListItem(
                 }
             },
             trailingContent = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    trailingContent.invoke(this, item)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    trailingContent.invoke(this)
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun UiAntennaCard(
+    item: UiList.Antenna,
+    onClicked: (() -> Unit)?,
+    trailingContent: @Composable (RowScope.() -> Unit),
+    index: Int,
+    totalCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    PlatformSegmentedListItem(
+        modifier = modifier,
+        index = index,
+        totalCount = totalCount,
+        onClick = { onClicked?.invoke() },
+        headlineContent = { PlatformText(text = item.title) },
+        leadingContent = {
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Rss,
+                contentDescription = null,
+                modifier =
+                    Modifier
+                        .size(AvatarComponentDefaults.size)
+                        .background(
+                            color = PlatformTheme.colorScheme.primaryContainer,
+                            shape = PlatformTheme.shapes.medium,
+                        ).padding(8.dp),
+                tint = PlatformTheme.colorScheme.onPrimaryContainer,
+            )
+        },
+        trailingContent = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                trailingContent.invoke(this)
+            }
+        },
+    )
+}
+
+@Composable
+private fun UiChannelCard(
+    item: UiList.Channel,
+    onClicked: (() -> Unit)?,
+    trailingContent: @Composable (RowScope.() -> Unit),
+    index: Int,
+    totalCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    val description = item.description
+    if (!description.isNullOrEmpty()) {
+        Column(
+            modifier =
+                modifier
+                    .listCard(
+                        index = index,
+                        totalCount = totalCount,
+                    ).background(PlatformTheme.colorScheme.card)
+                    .let {
+                        if (onClicked == null) {
+                            it
+                        } else {
+                            it.clickable { onClicked() }
+                        }
+                    },
+        ) {
+            PlatformListItem(
+                headlineContent = { PlatformText(text = item.title) },
+                leadingContent = {
+                    if (item.banner != null) {
+                        NetworkImage(
+                            model = item.banner,
+                            contentDescription = item.title,
+                            modifier =
+                                Modifier
+                                    .size(AvatarComponentDefaults.size)
+                                    .clip(PlatformTheme.shapes.medium),
+                        )
+                    } else {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.List,
+                            contentDescription = null,
+                            modifier =
+                                Modifier
+                                    .size(AvatarComponentDefaults.size)
+                                    .background(
+                                        color = PlatformTheme.colorScheme.primaryContainer,
+                                        shape = PlatformTheme.shapes.medium,
+                                    ).padding(8.dp),
+                            tint = PlatformTheme.colorScheme.onPrimaryContainer,
+                        )
+                    }
+                },
+                trailingContent = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        trailingContent.invoke(this)
+                    }
+                },
+            )
+            PlatformText(
+                text = description,
+                modifier =
+                    Modifier
+                        .background(PlatformTheme.colorScheme.card)
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                        .padding(horizontal = screenHorizontalPadding),
+            )
+        }
+    } else {
+        PlatformSegmentedListItem(
+            modifier = modifier,
+            index = index,
+            totalCount = totalCount,
+            onClick = { onClicked?.invoke() },
+            headlineContent = { PlatformText(text = item.title) },
+            leadingContent = {
+                if (item.banner != null) {
+                    NetworkImage(
+                        model = item.banner,
+                        contentDescription = item.title,
+                        modifier =
+                            Modifier
+                                .size(AvatarComponentDefaults.size)
+                                .clip(PlatformTheme.shapes.medium),
+                    )
+                } else {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.List,
+                        contentDescription = null,
+                        modifier =
+                            Modifier
+                                .size(AvatarComponentDefaults.size)
+                                .background(
+                                    color = PlatformTheme.colorScheme.primaryContainer,
+                                    shape = PlatformTheme.shapes.medium,
+                                ).padding(8.dp),
+                        tint = PlatformTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
+            },
+            trailingContent = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    trailingContent.invoke(this)
                 }
             },
         )

@@ -19,12 +19,12 @@ public class AllListWithTabsPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<AllListWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
-        object : PinTabsPresenter<UiList>() {
+        object : PinTabsPresenter<UiList.List>() {
             override fun List<TimelineTabItem>.filterPinned(): List<String> =
                 filterIsInstance<ListTimelineTabItem>()
                     .map { it.listId }
 
-            override fun getTimelineTabItem(item: UiList): TimelineTabItem =
+            override fun getTimelineTabItem(item: UiList.List): TimelineTabItem =
                 ListTimelineTabItem(
                     account = accountType,
                     listId = item.id,
@@ -38,7 +38,7 @@ public class AllListWithTabsPresenter(
                         ),
                 )
 
-            override fun List<TimelineTabItem>.filter(item: UiList): List<TimelineTabItem> =
+            override fun List<TimelineTabItem>.filter(item: UiList.List): List<TimelineTabItem> =
                 filter {
                     if (it is ListTimelineTabItem) {
                         it.listId != item.id
@@ -61,11 +61,11 @@ public class AllListWithTabsPresenter(
         return object :
             State,
             AllListState by state,
-            PinTabsPresenter.State<UiList> by pinState {
+            PinTabsPresenter.State<UiList.List> by pinState {
         }
     }
 
     public interface State :
         AllListState,
-        PinTabsPresenter.State<UiList>
+        PinTabsPresenter.State<UiList.List>
 }

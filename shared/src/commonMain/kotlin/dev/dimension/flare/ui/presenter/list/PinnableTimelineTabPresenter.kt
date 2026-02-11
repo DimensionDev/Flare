@@ -36,18 +36,18 @@ public class PinnableTimelineTabPresenter(
     @Immutable
     public interface State {
         public sealed interface Tab {
-            public val data: PagingState<UiList>
+            public val data: PagingState<out UiList>
 
             public data class List(
-                override val data: PagingState<UiList>,
+                override val data: PagingState<UiList.List>,
             ) : Tab
 
             public data class Feed(
-                override val data: PagingState<UiList>,
+                override val data: PagingState<UiList.Feed>,
             ) : Tab
 
             public data class Antenna(
-                override val data: PagingState<UiList>,
+                override val data: PagingState<UiList.Antenna>,
             ) : Tab
         }
 

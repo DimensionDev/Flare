@@ -1019,16 +1019,16 @@ internal class MisskeyDataSource(
     private val listKey: String
         get() = "allLists_$accountKey"
 
-    override fun myList(scope: CoroutineScope): Flow<PagingData<UiList>> =
+    override fun myList(scope: CoroutineScope): Flow<PagingData<UiList.List>> =
         memoryPager(
             pageSize = 20,
             pagingKey = listKey,
             scope = scope,
             mediator =
-                object : BaseRemoteMediator<Int, UiList>() {
+                object : BaseRemoteMediator<Int, UiList.List>() {
                     override suspend fun doLoad(
                         loadType: LoadType,
-                        state: PagingState<Int, UiList>,
+                        state: PagingState<Int, UiList.List>,
                     ): MediatorResult {
                         if (loadType == LoadType.PREPEND) {
                             return MediatorResult.Success(endOfPaginationReached = true)
@@ -1042,7 +1042,7 @@ internal class MisskeyDataSource(
                                     it.render()
                                 }.toImmutableList()
 
-                        MemoryPagingSource.update<UiList>(
+                        MemoryPagingSource.update<UiList.List>(
                             key = listKey,
                             value = result.toImmutableList(),
                         )
@@ -1063,15 +1063,14 @@ internal class MisskeyDataSource(
                     ),
                 )
         }.onSuccess { response ->
-            MemoryPagingSource.updateWith<UiList>(
+            MemoryPagingSource.updateWith<UiList.List>(
                 key = listKey,
             ) {
                 it
                     .plus(
-                        UiList(
+                        UiList.List(
                             id = response.id,
                             title = metaData.title,
-                            platformType = PlatformType.Mastodon,
                         ),
                     ).toImmutableList()
             }
@@ -1084,7 +1083,7 @@ internal class MisskeyDataSource(
                 UsersListsDeleteRequest(listId = listId),
             )
         }.onSuccess {
-            MemoryPagingSource.updateWith<UiList>(
+            MemoryPagingSource.updateWith<UiList.List>(
                 key = listKey,
             ) {
                 it
@@ -1106,7 +1105,7 @@ internal class MisskeyDataSource(
                 ),
             )
         }.onSuccess {
-            MemoryPagingSource.updateWith<UiList>(
+            MemoryPagingSource.updateWith<UiList.List>(
                 key = listKey,
             ) {
                 it
@@ -1121,7 +1120,7 @@ internal class MisskeyDataSource(
         }
     }
 
-    override fun listInfo(listId: String): CacheData<UiList> =
+    override fun listInfo(listId: String): CacheData<UiList.List> =
         MemCacheable(
             key = "listInfo_$listId",
             fetchSource = {
@@ -1232,7 +1231,7 @@ internal class MisskeyDataSource(
                             listId = listId,
                         ),
                     )
-            MemCacheable.updateWith<ImmutableList<UiList>>(
+            MemCacheable.updateWith<ImmutableList<UiList.List>>(
                 key = userListsKey(userKey),
             ) {
                 it
@@ -1260,7 +1259,7 @@ internal class MisskeyDataSource(
                     .filter { user -> user.key.id != userKey.id }
                     .toImmutableList()
             }
-            MemCacheable.updateWith<ImmutableList<UiList>>(
+            MemCacheable.updateWith<ImmutableList<UiList.List>>(
                 key = userListsKey(userKey),
             ) {
                 it
@@ -1281,7 +1280,7 @@ internal class MisskeyDataSource(
     override fun listMemberCache(listId: String): Flow<ImmutableList<UiUserV2>> =
         MemoryPagingSource.getFlow<UiUserV2>(listMemberKey(listId))
 
-    override fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList>> =
+    override fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList.List>> =
         MemCacheable(
             key = userListsKey(userKey),
         ) {
@@ -1378,7 +1377,7 @@ internal class MisskeyDataSource(
     fun antennasList(
         scope: CoroutineScope,
         pageSize: Int = 20,
-    ): Flow<PagingData<UiList>> =
+    ): Flow<PagingData<UiList.Antenna>> =
         Pager(
             config = pagingConfig,
         ) {

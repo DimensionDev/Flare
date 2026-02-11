@@ -62,7 +62,7 @@ public class AllListPresenter(
 
 @Immutable
 public interface AllListState {
-    public val items: PagingState<UiList>
+    public val items: PagingState<UiList.List>
     public val isRefreshing: Boolean
 
     public fun refresh()

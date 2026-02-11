@@ -92,12 +92,12 @@ public interface EditAccountListState {
     /**
      * All lists.
      */
-    public val lists: PagingState<UiList>
+    public val lists: PagingState<UiList.List>
 
     /**
      * Lists that the user is a member of.
      */
-    public val userLists: UiState<ImmutableList<UiList>>
+    public val userLists: UiState<ImmutableList<UiList.List>>
 
     public fun addList(list: UiList)
 

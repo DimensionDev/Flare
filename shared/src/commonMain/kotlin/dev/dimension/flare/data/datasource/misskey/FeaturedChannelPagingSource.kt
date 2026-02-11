@@ -3,18 +3,22 @@ package dev.dimension.flare.data.datasource.misskey
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.data.network.misskey.MisskeyService
+import dev.dimension.flare.data.network.misskey.api.model.ChannelsFeaturedRequest
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.mapper.render
 
-internal class AntennasListPagingSource(
+internal class FeaturedChannelPagingSource(
     private val service: MisskeyService,
-) : BasePagingSource<Int, UiList.Antenna>() {
-    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiList.Antenna> =
+) : BasePagingSource<Int, UiList>() {
+    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiList> =
         tryRun {
-            service.antennasList().map {
-                it.render()
-            }
+            service
+                .channelsFeatured(
+                    request = ChannelsFeaturedRequest(),
+                ).map {
+                    it.render()
+                }
         }.fold(
             onSuccess = { antennas ->
                 LoadResult.Page(
@@ -28,5 +32,5 @@ internal class AntennasListPagingSource(
             },
         )
 
-    override fun getRefreshKey(state: PagingState<Int, UiList.Antenna>): Int? = null
+    override fun getRefreshKey(state: PagingState<Int, UiList>): Int? = null
 }

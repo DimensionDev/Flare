@@ -26,7 +26,7 @@ public class AntennasListPresenter(
 
     @androidx.compose.runtime.Immutable
     public interface State {
-        public val data: PagingState<UiList>
+        public val data: PagingState<UiList.Antenna>
 
         public fun refresh()
 
@@ -46,7 +46,7 @@ public class AntennasListPresenter(
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
         return object : State {
-            override val data: PagingState<UiList> = data
+            override val data: PagingState<UiList.Antenna> = data
 
             override fun refresh() {
                 scope.launch {

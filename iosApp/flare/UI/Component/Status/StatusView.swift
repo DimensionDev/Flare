@@ -226,6 +226,14 @@ struct StatusView: View {
     
     var topEndContent: some View {
         HStack {
+            switch onEnum(of: data.topEndContent) {
+            case .visibility(let visibility):
+                StatusVisibilityView(data: visibility.visibility)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            case .none:
+                EmptyView()
+            }
             if showPlatformLogo {
                 switch data.platformType {
                 case .mastodon:
@@ -249,14 +257,6 @@ struct StatusView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-            }
-            switch onEnum(of: data.topEndContent) {
-            case .visibility(let visibility):
-                StatusVisibilityView(data: visibility.visibility)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            case .none:
-                EmptyView()
             }
             if !isDetail {
                 DateTimeText(data: data.createdAt)

@@ -49,17 +49,19 @@ struct StatusShareSheet: View {
                     ShareLink(item: .init(string: shareUrl)!) {
                         Label("share_link", systemImage: "link")
                     }
+                    
+                    if let image {
+                        ShareLink(item: Image(uiImage: image), preview: SharePreview("share_screenshot", image: Image(uiImage: image))) {
+                            Label("share_screenshot", systemImage: "photo")
+                        }
+                    }
+
                     Button {
                         Task {
                             await saveImage(data: data)
                         }
                     } label: {
                         Label("save_screenshot", systemImage: "arrow.down.circle")
-                    }
-                    if let image {
-                        ShareLink(item: Image(uiImage: image), preview: SharePreview("share_screenshot", image: Image(uiImage: image))) {
-                            Label("share_screenshot", systemImage: "photo")
-                        }
                     }
                     
                     if let fxShareUrl = fxShareUrl {

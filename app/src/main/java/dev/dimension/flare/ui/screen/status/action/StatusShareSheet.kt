@@ -19,15 +19,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonGroupDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
@@ -131,12 +132,13 @@ internal fun StatusShareSheet(
                     Box(
                         modifier = Modifier.background(MaterialTheme.colorScheme.background),
                     ) {
-                        Card(
+                        Surface(
                             modifier =
                                 Modifier
                                     .padding(64.dp)
                                     .width(360.dp)
                                     .captureableShadow(cornerRadius = 12.dp, shadowRadius = 16.dp),
+                            shape = RoundedCornerShape(16.dp),
                         ) {
                             Box {
                                 CompositionLocalProvider(
@@ -187,32 +189,6 @@ internal fun StatusShareSheet(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(text = stringResource(id = R.string.rss_detail_share))
-            }
-
-            FilledTonalButton(
-                onClick = {
-                    scope.launch {
-                        val bitmap = captureShareBitmap(previewGraphicsLayer)
-                        if (bitmap == null) {
-                            Toast
-                                .makeText(context, R.string.media_save_fail, Toast.LENGTH_SHORT)
-                                .show()
-                            return@launch
-                        }
-                        saveBitmapToDownloads(
-                            context = context,
-                            bitmap = bitmap,
-                            statusKey = statusKey.toString(),
-                        )
-                    }
-                },
-            ) {
-                FAIcon(
-                    FontAwesomeIcons.Solid.Download,
-                    contentDescription = stringResource(id = R.string.media_menu_save),
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = stringResource(id = R.string.media_menu_save))
             }
             FilledTonalButton(
                 onClick = {
@@ -266,6 +242,32 @@ internal fun StatusShareSheet(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(text = stringResource(id = R.string.media_menu_share_image))
+            }
+
+            FilledTonalButton(
+                onClick = {
+                    scope.launch {
+                        val bitmap = captureShareBitmap(previewGraphicsLayer)
+                        if (bitmap == null) {
+                            Toast
+                                .makeText(context, R.string.media_save_fail, Toast.LENGTH_SHORT)
+                                .show()
+                            return@launch
+                        }
+                        saveBitmapToDownloads(
+                            context = context,
+                            bitmap = bitmap,
+                            statusKey = statusKey.toString(),
+                        )
+                    }
+                },
+            ) {
+                FAIcon(
+                    FontAwesomeIcons.Solid.Download,
+                    contentDescription = stringResource(id = R.string.media_menu_save),
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = stringResource(id = R.string.media_menu_save))
             }
 
             if (fxShareUrl != null) {

@@ -24,6 +24,7 @@ import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.mapper.users
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
+import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
@@ -111,6 +112,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -366,6 +368,24 @@ internal class XQTDataSource(
         val pagingKey = "status_only_$statusKey"
         return Cacheable(
             fetchSource = {
+                if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
+                    database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
+                        database.connect {
+                            database
+                                .pagingTimelineDao()
+                                .insertAll(
+                                    listOf(
+                                        DbPagingTimeline(
+                                            accountType = AccountType.Specific(accountKey),
+                                            statusKey = statusKey,
+                                            pagingKey = pagingKey,
+                                            sortId = 0,
+                                        ),
+                                    ),
+                                )
+                        }
+                    }
+                }
                 val response =
                     service
                         .getTweetDetail(

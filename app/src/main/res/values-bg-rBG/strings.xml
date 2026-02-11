@@ -118,8 +118,7 @@
     <string name="service_select_next_button">Напред</string>
     <string name="service_select_empty_message">Не са намерени инстанции</string>
     <string name="settings_accounts_remove">Премахване</string>
-    <string name="media_menu_save">Запазване</string>
-    <string name="media_menu_share_image">Споделяне на изображение</string>
+    <string name="status_menu_share_via_fxembed">Споделяне чрез FxEmbed</string>
     <string name="media_save_fail">Неуспешно запазване</string>
     <string name="media_alt_text">Алтернативен текст</string>
     <string name="tab_settings_add">Добавяне</string>
@@ -213,7 +212,6 @@
     <string name="rss_sources_open_in_browser">Отваряне в браузър</string>
     <string name="rss_sources_open_in_app">Отваряне в приложение</string>
     <string name="rss_detail_open_in_browser">Отваряне в браузър</string>
-    <string name="rss_detail_share">Споделяне</string>
     <string name="rss_detail_tldr">Обобщаване</string>
     <string name="rss_detail_tldr_title">Обобщение</string>
     <string name="rss_detail_tldr_error">Неуспешно обобщаване</string>
@@ -233,4 +231,5 @@
     <string name="tab_settings_mixed_timeline">Добавяне на раздел с обединена хронология</string>
     <string name="home_tab_social_timeline_title">Социални</string>
     <string name="deeplink_account_selection_browser">Отваряне в браузър</string>
+    <string name="status_share_sheet_theme_title">Тема</string>
 </resources>

@@ -132,7 +132,6 @@
     <string name="service_select_empty_message">인스턴스가 없습니다</string>
     <string name="media_viewer_title">미디어 뷰어</string>
     <string name="settings_accounts_remove">제거</string>
-    <string name="media_menu_save">저장</string>
     <string name="media_save_success">다운로드에 저장됨</string>
     <string name="media_save_fail">저장 실패</string>
     <string name="media_alt_text">대체 텍스트</string>
@@ -223,7 +222,6 @@
     <string name="rss_sources_pinned_in_tabs">홈 탭에 고정</string>
     <string name="rss_sources_open_in_browser">브라우저에서 열기</string>
     <string name="rss_detail_open_in_browser">브라우저에서 열기</string>
-    <string name="rss_detail_share">공유</string>
     <string name="rss_detail_tldr">요약하기</string>
     <string name="rss_detail_tldr_title">요약</string>
     <string name="rss_detail_tldr_error">요약하기 실패</string>
@@ -246,4 +244,5 @@
     <string name="tab_settings_mixed_timeline_desc">혼합된 타임라인은 모든 탭의 타임라인 결과를 하나의 탭으로 혼합합니다</string>
     <string name="home_tab_social_timeline_title">소셜</string>
     <string name="deeplink_account_selection_browser">브라우저에서 열기</string>
+    <string name="status_share_sheet_theme_title">테마</string>
 </resources>

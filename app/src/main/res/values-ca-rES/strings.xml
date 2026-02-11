@@ -132,7 +132,6 @@
     <string name="service_select_empty_message">No s\'han trobat instàncies</string>
     <string name="media_viewer_title">Visor de mitjans</string>
     <string name="settings_accounts_remove">Eliminar</string>
-    <string name="media_menu_save">Desar</string>
     <string name="media_save_success">Desat a Descàrregues</string>
     <string name="media_save_fail">No s\'ha pogut desar</string>
     <string name="media_alt_text">Text alternatiu</string>
@@ -222,7 +221,6 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_sources_open_in_browser">Obre al navegador</string>
     <string name="rss_detail_open_in_browser">Obre al navegador</string>
-    <string name="rss_detail_share">Compartir</string>
     <string name="rss_detail_tldr">Resumir</string>
     <string name="rss_detail_tldr_title">Resum</string>
     <string name="rss_detail_tldr_error">No s\'ha pogut resumir</string>
@@ -244,4 +242,5 @@
     <string name="tab_settings_mixed_timeline">Afegir fitxa de línia de temps mixta</string>
     <string name="tab_settings_mixed_timeline_desc">La línia de temps mixta combinarà el resultat de totes les línies de temps en una fitxa</string>
     <string name="deeplink_account_selection_browser">Obre al navegador</string>
+    <string name="status_share_sheet_theme_title">Tema</string>
 </resources>

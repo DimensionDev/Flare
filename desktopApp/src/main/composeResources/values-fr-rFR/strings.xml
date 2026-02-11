@@ -70,6 +70,11 @@
     <string name="media_hide_thumbnail_list">Masquer la liste des vignettes</string>
     <string name="media_save">Enregistrer</string>
     <string name="media_fullscreen">Plein écran</string>
+    <string name="status_share">Partager le lien</string>
+    <string name="status_share_save_screenshot">Enregistrer la capture d\'écran</string>
+    <string name="status_share_image">Partager la capture d\'écran</string>
+    <string name="status_share_via_fxembed">Partager via FxEmbed</string>
+    <string name="status_share_via_fixvx">Partager via Fixvx</string>
     <string name="list_add">Ajouter une liste</string>
     <string name="list_edit">Editer la liste</string>
     <string name="list_delete">Supprimer la liste</string>

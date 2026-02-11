@@ -78,6 +78,11 @@
     <string name="media_hide_thumbnail_list">إخفاء قائمة الصور المصغرة</string>
     <string name="media_save">حفظ</string>
     <string name="media_fullscreen">ملء الشاشة</string>
+    <string name="status_share">مشاركة الرابط</string>
+    <string name="status_share_save_screenshot">حفظ لقطة الشاشة</string>
+    <string name="status_share_image">مشاركة لقطة الشاشة</string>
+    <string name="status_share_via_fxembed">مشاركة عبر FxEmbed</string>
+    <string name="status_share_via_fixvx">شارك عبر Fixvx</string>
     <string name="list_add">إضافة قائمة</string>
     <string name="list_edit">تحرير القائمة</string>
     <string name="list_delete">حذف القائمة</string>

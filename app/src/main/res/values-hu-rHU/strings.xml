@@ -132,7 +132,6 @@
     <string name="service_select_empty_message">Nincs példány</string>
     <string name="media_viewer_title">Médiamegtekintő</string>
     <string name="settings_accounts_remove">Eltávolítás</string>
-    <string name="media_menu_save">Mentés</string>
     <string name="media_save_success">Mentve a Letöltések mappába</string>
     <string name="media_save_fail">Sikertelen mentés</string>
     <string name="media_alt_text">Alt szöveg</string>
@@ -223,7 +222,6 @@
     <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
     <string name="rss_sources_open_in_browser">Megnyitás a böngészőben</string>
     <string name="rss_detail_open_in_browser">Megnyitás a böngészőben</string>
-    <string name="rss_detail_share">Megosztás</string>
     <string name="rss_detail_tldr">Összefoglalás</string>
     <string name="rss_detail_tldr_title">Összefoglalás</string>
     <string name="rss_detail_tldr_error">Összefoglalás sikertelensége</string>
@@ -246,4 +244,5 @@
     <string name="tab_settings_mixed_timeline_desc">A kevert idővonal minden tab idővonalát egy tabba keveri</string>
     <string name="home_tab_social_timeline_title">Szociális</string>
     <string name="deeplink_account_selection_browser">Megnyitás a böngészőben</string>
+    <string name="status_share_sheet_theme_title">Téma</string>
 </resources>

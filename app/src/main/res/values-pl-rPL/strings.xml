@@ -190,8 +190,10 @@
     <string name="service_select_empty_message">Nie znaleziono instancji</string>
     <string name="media_viewer_title">Przeglądarka mediów</string>
     <string name="settings_accounts_remove">Usuń</string>
-    <string name="media_menu_save">Zapisz</string>
-    <string name="media_menu_share_image">Udostępnij obraz</string>
+    <string name="media_menu_save">Zapisz zrzut ekranu</string>
+    <string name="media_menu_share_image">Udostępnij zrzut ekranu</string>
+    <string name="status_menu_share_via_fxembed">Udostępnij przez FxEmbed</string>
+    <string name="status_menu_share_via_fixvx">Udostępnij przez Fixvx</string>
     <string name="media_save_success">Zapisano do pobrania</string>
     <string name="media_save_fail">Nie udało się zapisać</string>
     <string name="media_alt_text">Tekst alternatywny</string>
@@ -298,7 +300,7 @@
     <string name="rss_sources_open_in_browser">Otwórz w przeglądarce</string>
     <string name="rss_sources_open_in_app">Otwórz w aplikacji</string>
     <string name="rss_detail_open_in_browser">Otwórz w przeglądarce</string>
-    <string name="rss_detail_share">Udostępnij</string>
+    <string name="rss_detail_share">Udostępnij link</string>
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_title">Summary</string>
     <string name="rss_detail_tldr_error">Nie udało się podsumować</string>
@@ -356,4 +358,5 @@
     <string name="tab_settings_group_empty">Brak kart w tej grupie</string>
     <string name="tab_settings_group_name_placeholder">Nazwa grupy</string>
     <string name="tab_settings_group_default_name">Nowa grupa</string>
+    <string name="status_share_sheet_theme_title">Motyw</string>
 </resources>

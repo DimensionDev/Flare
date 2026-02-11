@@ -74,6 +74,11 @@
     <string name="media_hide_thumbnail_list">Ocultar lista de miniaturas</string>
     <string name="media_save">Guardar</string>
     <string name="media_fullscreen">Pantalla completa</string>
+    <string name="status_share">Compartir enlace</string>
+    <string name="status_share_save_screenshot">Guardar captura de pantalla</string>
+    <string name="status_share_image">Compartir captura de pantalla</string>
+    <string name="status_share_via_fxembed">Compartir vía FxEmbed</string>
+    <string name="status_share_via_fixvx">Compartir vía Fixvx</string>
     <string name="list_add">Añadir lista</string>
     <string name="list_edit">Editar lista</string>
     <string name="list_delete">Borrar lista</string>

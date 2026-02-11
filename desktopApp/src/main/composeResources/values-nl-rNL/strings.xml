@@ -74,6 +74,11 @@
     <string name="media_hide_thumbnail_list">Verberg thumbnail lijst</string>
     <string name="media_save">Opslaan</string>
     <string name="media_fullscreen">Volledig scherm</string>
+    <string name="status_share">Link delen</string>
+    <string name="status_share_save_screenshot">Schermafdruk opslaan</string>
+    <string name="status_share_image">Schermafdruk delen</string>
+    <string name="status_share_via_fxembed">Delen via FxEmbed</string>
+    <string name="status_share_via_fixvx">Delen via Fixvx</string>
     <string name="list_add">Lijst toevoegen</string>
     <string name="list_edit">Lijst bewerken</string>
     <string name="list_delete">Lijst verwijderen</string>

@@ -76,6 +76,11 @@
     <string name="media_hide_thumbnail_list">Скрыть список миниатюр</string>
     <string name="media_save">Сохранить</string>
     <string name="media_fullscreen">Полноэкранный</string>
+    <string name="status_share">Поделиться ссылкой</string>
+    <string name="status_share_save_screenshot">Сохранить скриншот</string>
+    <string name="status_share_image">Поделиться скриншотом</string>
+    <string name="status_share_via_fxembed">Поделиться через FxEmbed</string>
+    <string name="status_share_via_fixvx">Поделиться через Fixvx</string>
     <string name="list_add">Добавить список</string>
     <string name="list_edit">Изменить список</string>
     <string name="list_delete">Удалить список</string>

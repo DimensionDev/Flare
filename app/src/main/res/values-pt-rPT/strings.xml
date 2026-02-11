@@ -188,8 +188,10 @@
     <string name="service_select_empty_message">Nenhuma instância encontrada</string>
     <string name="media_viewer_title">Visualizador de mídia</string>
     <string name="settings_accounts_remove">Excluir</string>
-    <string name="media_menu_save">Guardar</string>
+    <string name="media_menu_save">Salvar imagem</string>
     <string name="media_menu_share_image">Compartilhar imagem</string>
+    <string name="status_menu_share_via_fxembed">Compartilhar via FxEmbed</string>
+    <string name="status_menu_share_via_fixvx">Compartilhar via Fixvx</string>
     <string name="media_save_success">Salvo nos Downloads</string>
     <string name="media_save_fail">Falha ao salvar</string>
     <string name="media_alt_text">Texto alternativo</string>
@@ -296,7 +298,7 @@
     <string name="rss_sources_open_in_browser">Abrir no navegador</string>
     <string name="rss_sources_open_in_app">Abrir no aplicativo</string>
     <string name="rss_detail_open_in_browser">Abrir no navegador</string>
-    <string name="rss_detail_share">Compartilhar</string>
+    <string name="rss_detail_share">Compartilhar link</string>
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_title">Summary</string>
     <string name="rss_detail_tldr_error">Falha ao resumir</string>
@@ -343,4 +345,5 @@
     <string name="tab_settings_group_empty">Nenhuma aba neste grupo</string>
     <string name="tab_settings_group_name_placeholder">Nome Grupo</string>
     <string name="tab_settings_group_default_name">Novo Grupo</string>
+    <string name="status_share_sheet_theme_title">Tema</string>
 </resources>

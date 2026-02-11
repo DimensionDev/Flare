@@ -149,8 +149,6 @@
     <string name="service_select_empty_message">未找到任何實例</string>
     <string name="media_viewer_title">媒體查看器</string>
     <string name="settings_accounts_remove">移除</string>
-    <string name="media_menu_save">保存</string>
-    <string name="media_menu_share_image">分享圖片</string>
     <string name="media_save_success">已保存到下載</string>
     <string name="media_save_fail">保存失敗</string>
     <string name="media_alt_text">替代文字</string>
@@ -243,7 +241,6 @@
     <string name="rss_sources_open_in_browser">在瀏覽器中打開</string>
     <string name="rss_sources_open_in_app">APP 內開啟</string>
     <string name="rss_detail_open_in_browser">在瀏覽器中打開</string>
-    <string name="rss_detail_share">分享</string>
     <string name="rss_detail_tldr">總結</string>
     <string name="rss_detail_tldr_title">摘要</string>
     <string name="rss_detail_tldr_error">總結失敗</string>
@@ -266,4 +263,5 @@
     <string name="tab_settings_mixed_timeline_desc">綜合時間線將所有標籤的時間線結果混合成一個標籤</string>
     <string name="home_tab_social_timeline_title">社會</string>
     <string name="deeplink_account_selection_browser">在瀏覽器中打開</string>
+    <string name="status_share_sheet_theme_title">主題</string>
 </resources>

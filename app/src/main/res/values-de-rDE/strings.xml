@@ -188,8 +188,10 @@
     <string name="service_select_empty_message">Keine Instanzen gefunden</string>
     <string name="media_viewer_title">Medienbetrachter</string>
     <string name="settings_accounts_remove">Entfernen</string>
-    <string name="media_menu_save">Speichern</string>
-    <string name="media_menu_share_image">Bild teilen</string>
+    <string name="media_menu_save">Screenshot speichern</string>
+    <string name="media_menu_share_image">Screenshot teilen</string>
+    <string name="status_menu_share_via_fxembed">Über FxEmbed teilen</string>
+    <string name="status_menu_share_via_fixvx">Über Fixvx teilen</string>
     <string name="media_save_success">In Downloads gespeichert</string>
     <string name="media_save_fail">Speichern fehlgeschlagen</string>
     <string name="media_alt_text">Alt Text</string>
@@ -296,7 +298,7 @@
     <string name="rss_sources_open_in_browser">Im Browser öffnen</string>
     <string name="rss_sources_open_in_app">In App öffnen</string>
     <string name="rss_detail_open_in_browser">Im Browser öffnen</string>
-    <string name="rss_detail_share">Teilen</string>
+    <string name="rss_detail_share">Link teilen</string>
     <string name="rss_detail_tldr">Zusammenfassen</string>
     <string name="rss_detail_tldr_title">Zusammenfassung</string>
     <string name="rss_detail_tldr_error">Zusammenfassung fehlgeschlagen</string>
@@ -357,4 +359,5 @@
     <string name="tab_settings_group_empty">Keine Tabs in dieser Gruppe</string>
     <string name="tab_settings_group_name_placeholder">Gruppenname</string>
     <string name="tab_settings_group_default_name">Neue Gruppe</string>
+    <string name="status_share_sheet_theme_title">Theme</string>
 </resources>

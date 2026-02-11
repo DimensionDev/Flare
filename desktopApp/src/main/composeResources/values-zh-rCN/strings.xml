@@ -73,6 +73,11 @@
     <string name="media_hide_thumbnail_list">隐藏缩略图列表</string>
     <string name="media_save">保存</string>
     <string name="media_fullscreen">全屏</string>
+    <string name="status_share">分享链接</string>
+    <string name="status_share_save_screenshot">保存截图</string>
+    <string name="status_share_image">共享屏幕截图</string>
+    <string name="status_share_via_fxembed">通过FxEmbed分享</string>
+    <string name="status_share_via_fixvx">通过 Fixvx 分享</string>
     <string name="list_add">新建列表</string>
     <string name="list_edit">编辑列表</string>
     <string name="list_delete">删除列表</string>

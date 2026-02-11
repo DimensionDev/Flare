@@ -132,7 +132,6 @@
     <string name="service_select_empty_message">Hiçbir örnek bulunamadı</string>
     <string name="media_viewer_title">Medya görüntüleyici</string>
     <string name="settings_accounts_remove">Kaldır</string>
-    <string name="media_menu_save">Kaydet</string>
     <string name="media_save_success">İndirilenlere kaydedildi</string>
     <string name="media_save_fail">Kaydetmede başarısız</string>
     <string name="media_alt_text">Alternatif metin</string>
@@ -223,7 +222,6 @@
     <string name="rss_sources_pinned_in_tabs">Ana sekmelere sabitleyin</string>
     <string name="rss_sources_open_in_browser">Tarayıcıda aç</string>
     <string name="rss_detail_open_in_browser">Tarayıcıda aç</string>
-    <string name="rss_detail_share">Paylaş</string>
     <string name="rss_detail_tldr">Özetle</string>
     <string name="rss_detail_tldr_title">Özet</string>
     <string name="rss_detail_tldr_error">Özetlemekte başarısız</string>
@@ -246,4 +244,5 @@
     <string name="tab_settings_mixed_timeline_desc">Karışık zaman çizelgesi, tüm sekme zaman çizelgesi sonuçlarını tek bir sekmede karıştırır</string>
     <string name="home_tab_social_timeline_title">Sosyal</string>
     <string name="deeplink_account_selection_browser">Tarayıcıda aç</string>
+    <string name="status_share_sheet_theme_title">Tema</string>
 </resources>

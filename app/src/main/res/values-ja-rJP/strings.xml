@@ -187,8 +187,10 @@
     <string name="service_select_empty_message">インスタンスが見つかりません</string>
     <string name="media_viewer_title">メディアビューアー</string>
     <string name="settings_accounts_remove">削除</string>
-    <string name="media_menu_save">保存</string>
-    <string name="media_menu_share_image">画像を共有</string>
+    <string name="media_menu_save">スクリーンショットを保存</string>
+    <string name="media_menu_share_image">スクリーンショットを共有</string>
+    <string name="status_menu_share_via_fxembed">FxEmbedで共有</string>
+    <string name="status_menu_share_via_fixvx">Fixvxでシェア</string>
     <string name="media_save_success">ダウンロードに保存しました</string>
     <string name="media_save_fail">保存に失敗しました</string>
     <string name="media_alt_text">Altテキスト</string>
@@ -295,7 +297,7 @@
     <string name="rss_sources_open_in_browser">ブラウザで開く</string>
     <string name="rss_sources_open_in_app">アプリで開く</string>
     <string name="rss_detail_open_in_browser">ブラウザで開く</string>
-    <string name="rss_detail_share">共有</string>
+    <string name="rss_detail_share">リンクを共有</string>
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_title">Summary</string>
     <string name="rss_detail_tldr_error">要約に失敗しました</string>
@@ -342,4 +344,5 @@
     <string name="tab_settings_group_empty">このグループにはタブがありません</string>
     <string name="tab_settings_group_name_placeholder">グループ名</string>
     <string name="tab_settings_group_default_name">新しいグループ</string>
+    <string name="status_share_sheet_theme_title">テーマ</string>
 </resources>

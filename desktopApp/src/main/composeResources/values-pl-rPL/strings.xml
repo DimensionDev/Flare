@@ -76,6 +76,11 @@
     <string name="media_hide_thumbnail_list">Ukryj listę miniatur</string>
     <string name="media_save">Zapisz</string>
     <string name="media_fullscreen">Pełny ekran</string>
+    <string name="status_share">Udostępnij link</string>
+    <string name="status_share_save_screenshot">Zapisz zrzut ekranu</string>
+    <string name="status_share_image">Udostępnij zrzut ekranu</string>
+    <string name="status_share_via_fxembed">Udostępnij przez FxEmbed</string>
+    <string name="status_share_via_fixvx">Udostępnij przez Fixvx</string>
     <string name="list_add">Dodaj listę</string>
     <string name="list_edit">Edytuj listę</string>
     <string name="list_delete">Usuń listę</string>

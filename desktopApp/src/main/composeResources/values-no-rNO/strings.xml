@@ -74,6 +74,11 @@
     <string name="media_hide_thumbnail_list">Skjul miniatyrbilde liste</string>
     <string name="media_save">Lagre</string>
     <string name="media_fullscreen">Fullskjerm</string>
+    <string name="status_share">Del kobling</string>
+    <string name="status_share_save_screenshot">Lagre skjermbilde</string>
+    <string name="status_share_image">Del skjermbilde</string>
+    <string name="status_share_via_fxembed">Del via FxEmbed</string>
+    <string name="status_share_via_fixvx">Del via Fixvx</string>
     <string name="list_add">Legge til listen</string>
     <string name="list_edit">Rediger liste</string>
     <string name="list_delete">Slett liste</string>

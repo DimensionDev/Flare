@@ -47,6 +47,7 @@
     <string name="status_detail_repost">Препубликуване</string>
     <string name="emoji_picker_search">Търсене</string>
     <string name="media_save">Запазване</string>
+    <string name="status_share_via_fxembed">Споделяне чрез FxEmbed</string>
     <string name="list_add">Добавяне на списък</string>
     <string name="list_edit">Редактиране на списъка</string>
     <string name="list_delete">Изтриване на списъка</string>

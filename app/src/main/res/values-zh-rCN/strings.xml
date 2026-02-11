@@ -187,8 +187,10 @@
     <string name="service_select_empty_message">没有找到实例</string>
     <string name="media_viewer_title">媒体查看器</string>
     <string name="settings_accounts_remove">删除账户</string>
-    <string name="media_menu_save">保存</string>
-    <string name="media_menu_share_image">分享图像</string>
+    <string name="media_menu_save">保存截图</string>
+    <string name="media_menu_share_image">共享屏幕截图</string>
+    <string name="status_menu_share_via_fxembed">通过FxEmbed分享</string>
+    <string name="status_menu_share_via_fixvx">通过 Fixvx 分享</string>
     <string name="media_save_success">已保存到下载文件夹</string>
     <string name="media_save_fail">保存失败</string>
     <string name="media_alt_text">图片描述</string>
@@ -295,7 +297,7 @@
     <string name="rss_sources_open_in_browser">在浏览器中打开</string>
     <string name="rss_sources_open_in_app">在应用程序中打开</string>
     <string name="rss_detail_open_in_browser">在浏览器中打开</string>
-    <string name="rss_detail_share">分享</string>
+    <string name="rss_detail_share">分享链接</string>
     <string name="rss_detail_tldr">总结摘要</string>
     <string name="rss_detail_tldr_title">摘要</string>
     <string name="rss_detail_tldr_error">摘要失败</string>
@@ -353,4 +355,5 @@
     <string name="tab_settings_group_empty">此群组中没有标签</string>
     <string name="tab_settings_group_name_placeholder">群组名称</string>
     <string name="tab_settings_group_default_name">新建群组</string>
+    <string name="status_share_sheet_theme_title">主题</string>
 </resources>

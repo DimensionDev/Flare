@@ -21,10 +21,10 @@
     <string name="home_tab_feeds_title">Ленты</string>
     <string name="dm_list_title">Личные сообщения</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">%d новый пост</item>
-        <item quantity="few">%d новых сообщений</item>
-        <item quantity="many">%d новых сообщений</item>
-        <item quantity="other">%d новых сообщений</item>
+        <item quantity="one">%1$d новый пост</item>
+        <item quantity="few">%1$d новых сообщений</item>
+        <item quantity="many">%1$d новых сообщений</item>
+        <item quantity="other">%1$d новых сообщений</item>
     </plurals>
     <string name="navigate_back">Назад</string>
     <string name="service_select_instance_input_placeholder">URL экземпляра</string>

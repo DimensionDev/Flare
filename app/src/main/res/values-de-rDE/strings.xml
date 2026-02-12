@@ -7,8 +7,8 @@
     <string name="home_tab_me_title">Ich</string>
     <string name="home_tab_discover_title">Entdecken</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">%d Neuer Beitrag</item>
-        <item quantity="other">%d neue Beiträge</item>
+        <item quantity="one">%1$d Neuer Beitrag</item>
+        <item quantity="other">%1$d neue Beiträge</item>
     </plurals>
     <string name="notification_tab_all_title">Alle</string>
     <string name="notification_tab_mentions_title">Erwähnungen</string>

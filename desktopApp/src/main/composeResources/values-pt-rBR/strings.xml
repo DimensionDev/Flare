@@ -22,7 +22,7 @@
     <string name="dm_list_title">Mensagens Diretas</string>
     <plurals name="home_timeline_new_toots">
         <item quantity="one">Nova publicação %d</item>
-        <item quantity="other">%d Novas Publicações</item>
+        <item quantity="other">%1$d Novas Publicações</item>
     </plurals>
     <string name="navigate_back">Anterior</string>
     <string name="service_select_instance_input_placeholder">URL da instância</string>

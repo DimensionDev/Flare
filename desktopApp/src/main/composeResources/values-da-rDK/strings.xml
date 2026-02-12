@@ -21,8 +21,8 @@
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Direkte Beskeder</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">%d Nyt Indlæg</item>
-        <item quantity="other">%d Nye Indlæg</item>
+        <item quantity="one">%1$d Nyt Indlæg</item>
+        <item quantity="other">%1$d Nye Indlæg</item>
     </plurals>
     <string name="navigate_back">Tilbage</string>
     <string name="service_select_instance_input_placeholder">Instance URL</string>

@@ -408,12 +408,6 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Custom group of mixed timeline</li>
-                <li>Data export and import</li>
-                <li>Multi-account search</li>
-                <li>Absolute date and time in posts</li>
-                <li>Add platform badge in posts</li>
-                <li>RSS management has been moved to settings</li>
                 <li>Bug fixes and performance improvements.</li>
             </ul>
         ]]>

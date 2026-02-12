@@ -21,8 +21,8 @@
     <string name="home_tab_feeds_title">Strøm</string>
     <string name="dm_list_title">Direkte meldinger</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">%d Nytt innlegg</item>
-        <item quantity="other">%d Nye Innlegg</item>
+        <item quantity="one">%1$d Nytt innlegg</item>
+        <item quantity="other">%1$d Nye Innlegg</item>
     </plurals>
     <string name="navigate_back">Tilbake</string>
     <string name="service_select_instance_input_placeholder">Instans URL</string>

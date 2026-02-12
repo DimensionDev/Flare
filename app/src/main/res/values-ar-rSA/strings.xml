@@ -7,12 +7,12 @@
     <string name="home_tab_me_title">أنا</string>
     <string name="home_tab_discover_title">اكتشف</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="zero">%d مشاركات جديدة</item>
-        <item quantity="one">%d منشور جديد</item>
-        <item quantity="two">%d مشاركات جديدة</item>
-        <item quantity="few">%d مشاركات جديدة</item>
-        <item quantity="many">%d مشاركات جديدة</item>
-        <item quantity="other">%d مشاركات جديدة</item>
+        <item quantity="zero">%1$d مشاركات جديدة</item>
+        <item quantity="one">%1$d منشور جديد</item>
+        <item quantity="two">%1$d مشاركات جديدة</item>
+        <item quantity="few">%1$d مشاركات جديدة</item>
+        <item quantity="many">%1$d مشاركات جديدة</item>
+        <item quantity="other">%1$d مشاركات جديدة</item>
     </plurals>
     <string name="notification_tab_all_title">الكل</string>
     <string name="notification_tab_mentions_title">الإشارات</string>

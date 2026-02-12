@@ -8,7 +8,7 @@
     <string name="home_tab_discover_title">Pesquisar</string>
     <plurals name="home_timeline_new_toots">
         <item quantity="one">Nova publicação %d</item>
-        <item quantity="other">%d Novas Publicações</item>
+        <item quantity="other">%1$d Novas Publicações</item>
     </plurals>
     <string name="notification_tab_all_title">Todos</string>
     <string name="notification_tab_mentions_title">Menções</string>

@@ -10,8 +10,8 @@
     <string name="home_tab_discover_title">Discover</string>
 
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">%d New Post</item>
-        <item quantity="other">%d New Posts</item>
+        <item quantity="one">%1$d New Post</item>
+        <item quantity="other">%1$d New Posts</item>
     </plurals>
 
     <string name="notification_tab_all_title">All</string>

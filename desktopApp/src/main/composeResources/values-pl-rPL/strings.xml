@@ -21,10 +21,10 @@
     <string name="home_tab_feeds_title">Kanały</string>
     <string name="dm_list_title">Wiadomości bezpośrednie</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">%d Nowy post</item>
-        <item quantity="few">%d nowe posty</item>
-        <item quantity="many">%d nowe posty</item>
-        <item quantity="other">%d nowe posty</item>
+        <item quantity="one">%1$d Nowy post</item>
+        <item quantity="few">%1$d nowe posty</item>
+        <item quantity="many">%1$d nowe posty</item>
+        <item quantity="other">%1$d nowe posty</item>
     </plurals>
     <string name="navigate_back">Powrót</string>
     <string name="service_select_instance_input_placeholder">Adres URL instancji</string>

@@ -7,8 +7,8 @@
     <string name="home_tab_me_title">Meg</string>
     <string name="home_tab_discover_title">Oppdag</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">%d Nytt innlegg</item>
-        <item quantity="other">%d Nye Innlegg</item>
+        <item quantity="one">%1$d Nytt innlegg</item>
+        <item quantity="other">%1$d Nye Innlegg</item>
     </plurals>
     <string name="notification_tab_all_title">Alle</string>
     <string name="notification_tab_mentions_title">Omtalelser</string>

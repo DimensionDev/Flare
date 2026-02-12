@@ -21,8 +21,8 @@
     <string name="home_tab_feeds_title">Alimentos</string>
     <string name="dm_list_title">Mensajes directos</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">%d nueva publicación</item>
-        <item quantity="other">%d nuevos mensajes</item>
+        <item quantity="one">%1$d nueva publicación</item>
+        <item quantity="other">%1$d nuevos mensajes</item>
     </plurals>
     <string name="navigate_back">Atrás</string>
     <string name="service_select_instance_input_placeholder">URL de instancia</string>

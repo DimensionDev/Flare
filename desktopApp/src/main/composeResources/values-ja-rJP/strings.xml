@@ -21,7 +21,7 @@
     <string name="home_tab_feeds_title">フィード</string>
     <string name="dm_list_title">ダイレクトメッセージ</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="other">%d 新しい投稿</item>
+        <item quantity="other">%1$d 新しい投稿</item>
     </plurals>
     <string name="navigate_back">戻る</string>
     <string name="service_select_instance_input_placeholder">インスタンス URL</string>

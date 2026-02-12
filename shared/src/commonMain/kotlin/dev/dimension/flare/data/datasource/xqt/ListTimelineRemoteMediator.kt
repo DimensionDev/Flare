@@ -1,13 +1,13 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
-import dev.dimension.flare.common.BaseTimelineRemoteMediator.Request
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator.Request
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.SerialName
@@ -38,7 +38,7 @@ internal class ListTimelineRemoteMediator(
     ): Result {
         val response =
             when (request) {
-                BaseTimelineRemoteMediator.Request.Refresh -> {
+                BaseTimelineRemoteMediator.PagingRequest.Refresh -> {
                     service
                         .getListLatestTweetsTimeline(
                             variables =
@@ -49,13 +49,13 @@ internal class ListTimelineRemoteMediator(
                         )
                 }
 
-                is Request.Prepend -> {
-                    return Result(
+                is PagingRequest.Prepend -> {
+                    return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
 
-                is Request.Append -> {
+                is PagingRequest.Append -> {
                     service.getListLatestTweetsTimeline(
                         variables =
                             Request(
@@ -70,7 +70,7 @@ internal class ListTimelineRemoteMediator(
 
         val data = result.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
 
-        return Result(
+        return PagingResult(
             endOfPaginationReached = response.isEmpty(),
             data = data,
             nextKey = response.cursor(),

@@ -1,9 +1,12 @@
 package dev.dimension.flare.data.datasource.vvo
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -31,8 +34,8 @@ internal class SearchStatusRemoteMediator(
 
     override suspend fun timeline(
         pageSize: Int,
-        request: Request,
-    ): Result {
+        request: PagingRequest,
+    ): PagingResult<DbPagingTimelineWithStatus> {
         val config = service.config()
         if (config.data?.login != true) {
             throw LoginExpiredException(
@@ -43,14 +46,14 @@ internal class SearchStatusRemoteMediator(
 
         val page =
             when (request) {
-                is Request.Append -> request.nextKey.toIntOrNull() ?: 1
-                is Request.Prepend -> 1
-                Request.Refresh -> 1
+                is PagingRequest.Append -> request.nextKey.toIntOrNull() ?: 1
+                is PagingRequest.Prepend -> 1
+                PagingRequest.Refresh -> 1
             }
 
         val response =
             when (request) {
-                Request.Refresh -> {
+                PagingRequest.Refresh -> {
                     service
                         .getContainerIndex(
                             containerId = containerId,
@@ -58,13 +61,13 @@ internal class SearchStatusRemoteMediator(
                         )
                 }
 
-                is Request.Prepend -> {
-                    return Result(
+                is PagingRequest.Prepend -> {
+                    return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
 
-                is Request.Append -> {
+                is PagingRequest.Append -> {
                     service.getContainerIndex(
                         containerId = containerId,
                         pageType = "searchall",
@@ -91,7 +94,7 @@ internal class SearchStatusRemoteMediator(
                 )
             }
 
-        return Result(
+        return PagingResult(
             endOfPaginationReached = status.isEmpty(),
             data = data,
             nextKey = (page + 1).toString(),

@@ -52,14 +52,13 @@ public fun UiList.toTabItem(accountKey: MicroBlogKey): TabItem =
             )
 
         is UiList.Channel ->
-            TODO()
-//            Misskey.ChannelTimelineTabItem(
-//                account = AccountType.Specific(accountKey),
-//                channelId = id,
-//                metaData =
-//                    TabMetaData(
-//                        title = TitleType.Text(title),
-//                        icon = IconType.Material(IconType.Material.MaterialIcon.List),
-//                    ),
-//            )
+            Misskey.ChannelTimelineTabItem(
+                account = AccountType.Specific(accountKey),
+                channelId = id,
+                metaData =
+                    TabMetaData(
+                        title = TitleType.Text(title),
+                        icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                    ),
+            )
     }

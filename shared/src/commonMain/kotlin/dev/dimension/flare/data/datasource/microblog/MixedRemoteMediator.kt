@@ -2,9 +2,12 @@ package dev.dimension.flare.data.datasource.microblog
 
 import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -26,8 +29,8 @@ internal class MixedRemoteMediator(
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun timeline(
         pageSize: Int,
-        request: Request,
-    ): Result =
+        request: PagingRequest,
+    ): PagingResult<DbPagingTimelineWithStatus> =
         coroutineScope {
             if (request is Request.Prepend) {
                 Result(endOfPaginationReached = true)

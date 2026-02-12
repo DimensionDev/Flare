@@ -10,8 +10,8 @@ import dev.dimension.flare.ui.model.mapper.render
 
 internal class FeaturedChannelPagingSource(
     private val service: MisskeyService,
-) : BasePagingSource<Int, UiList>() {
-    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiList> =
+) : BasePagingSource<Int, UiList.Channel>() {
+    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiList.Channel> =
         tryRun {
             service
                 .channelsFeatured(
@@ -32,5 +32,5 @@ internal class FeaturedChannelPagingSource(
             },
         )
 
-    override fun getRefreshKey(state: PagingState<Int, UiList>): Int? = null
+    override fun getRefreshKey(state: PagingState<Int, UiList.Channel>): Int? = null
 }

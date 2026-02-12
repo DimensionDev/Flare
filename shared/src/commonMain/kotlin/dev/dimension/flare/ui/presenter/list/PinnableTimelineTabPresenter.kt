@@ -49,6 +49,10 @@ public class PinnableTimelineTabPresenter(
             public data class Antenna(
                 override val data: PagingState<UiList.Antenna>,
             ) : Tab
+
+            public data class Channel(
+                override val data: PagingState<UiList.Channel>,
+            ) : Tab
         }
 
         public val tabs: UiState<ImmutableListWrapper<Tab>>
@@ -90,6 +94,16 @@ public class PinnableTimelineTabPresenter(
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
 
+        val channel =
+            serviceState
+                .mapNotNull {
+                    it as? MisskeyDataSource
+                }.mapNotNull { service ->
+                    remember(service) {
+                        service.channelsList(scope = scope)
+                    }.collectAsLazyPagingItems()
+                }.toPagingState()
+
         val tabs =
             serviceState.map { service ->
                 remember(
@@ -110,6 +124,11 @@ public class PinnableTimelineTabPresenter(
                         },
                         if (service is MisskeyDataSource) {
                             State.Tab.Antenna(antenna)
+                        } else {
+                            null
+                        },
+                        if (service is MisskeyDataSource) {
+                            State.Tab.Channel(channel)
                         } else {
                             null
                         },

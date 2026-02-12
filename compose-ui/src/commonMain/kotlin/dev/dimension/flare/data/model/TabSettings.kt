@@ -851,6 +851,36 @@ public object Misskey {
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
+
+    @Immutable
+    @Serializable
+    public data class ChannelTimelineTabItem(
+        val channelId: String,
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem() {
+        public constructor(accountKey: MicroBlogKey, data: UiList) : this(
+            channelId = data.id,
+            account = AccountType.Specific(accountKey),
+            metaData =
+                TabMetaData(
+                    title = TitleType.Text(data.title),
+                    icon =
+                        IconType.Mixed(
+                            icon = IconType.Material.MaterialIcon.List,
+                            userKey = accountKey,
+                        ),
+                ),
+        )
+
+        override val key: String = "channel_${account}_$channelId"
+
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.list
+                .ChannelTimelinePresenter(account, channelId)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
 }
 
 public object XQT {

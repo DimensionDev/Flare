@@ -1,15 +1,20 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.model.MicroBlogKey
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Immutable
 public sealed class UiList {
-    public abstract val id: String
+//    public abstract val id: String
+    public abstract val key: MicroBlogKey
     public abstract val title: String
 
+    @Serializable
     @Immutable
     public data class List(
-        override val id: String,
+        override val key: MicroBlogKey,
         override val title: String,
         val description: String? = null,
         val avatar: String? = null,
@@ -17,9 +22,10 @@ public sealed class UiList {
         val readonly: Boolean = false,
     ) : UiList()
 
+    @Serializable
     @Immutable
     public data class Feed(
-        override val id: String,
+        override val key: MicroBlogKey,
         override val title: String,
         val description: String? = null,
         val avatar: String? = null,
@@ -28,15 +34,17 @@ public sealed class UiList {
         val liked: Boolean = false,
     ) : UiList()
 
+    @Serializable
     @Immutable
     public data class Antenna(
-        override val id: String,
+        override val key: MicroBlogKey,
         override val title: String,
     ) : UiList()
 
+    @Serializable
     @Immutable
     public data class Channel(
-        override val id: String,
+        override val key: MicroBlogKey,
         override val title: String,
         val isArchived: Boolean,
         val notesCount: Double,

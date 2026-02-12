@@ -1374,10 +1374,7 @@ internal class MisskeyDataSource(
         }
     }
 
-    fun antennasList(
-        scope: CoroutineScope,
-        pageSize: Int = 20,
-    ): Flow<PagingData<UiList.Antenna>> =
+    fun antennasList(scope: CoroutineScope): Flow<PagingData<UiList.Antenna>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -1402,6 +1399,14 @@ internal class MisskeyDataSource(
 
     fun antennasTimelineLoader(id: String) =
         AntennasTimelineRemoteMediator(
+            service = service,
+            database = database,
+            accountKey = accountKey,
+            id = id,
+        )
+
+    fun channelTimelineLoader(id: String) =
+        ChannelTimelineRemoteMediator(
             service = service,
             database = database,
             accountKey = accountKey,

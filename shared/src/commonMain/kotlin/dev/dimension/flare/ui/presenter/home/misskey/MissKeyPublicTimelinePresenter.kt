@@ -1,6 +1,6 @@
 package dev.dimension.flare.ui.presenter.home.misskey
 
-import dev.dimension.flare.common.BaseTimelineLoader
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow

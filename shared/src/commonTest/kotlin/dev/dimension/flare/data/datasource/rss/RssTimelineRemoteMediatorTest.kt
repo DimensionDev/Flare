@@ -3,8 +3,8 @@ package dev.dimension.flare.data.datasource.rss
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.network.rss.model.Feed
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.ui.model.mapper.parseRssDateToInstant

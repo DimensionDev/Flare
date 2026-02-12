@@ -269,4 +269,4 @@ firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 room = { id = "androidx.room", version.ref = "room" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
-stability-analyzer = { id = "com.github.skydoves.compose.stability.analyzer", version = "0.6.6" }
+stability-analyzer = { id = "com.github.skydoves.compose.stability.analyzer", version = "0.6.7" }

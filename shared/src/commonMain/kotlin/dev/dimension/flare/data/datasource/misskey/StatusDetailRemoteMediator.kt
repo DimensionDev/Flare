@@ -2,11 +2,14 @@ package dev.dimension.flare.data.datasource.misskey
 
 import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
@@ -37,13 +40,13 @@ internal class StatusDetailRemoteMediator(
 
     override suspend fun timeline(
         pageSize: Int,
-        request: Request,
-    ): Result {
+        request: PagingRequest,
+    ): PagingResult<DbPagingTimelineWithStatus> {
         val result =
             when (request) {
-                is Request.Append -> {
+                is PagingRequest.Append -> {
                     if (statusOnly) {
-                        return Result(
+                        return PagingResult(
                             endOfPaginationReached = true,
                         )
                     }
@@ -57,12 +60,12 @@ internal class StatusDetailRemoteMediator(
                         )
                 }
 
-                is Request.Prepend ->
-                    return Result(
+                is PagingRequest.Prepend ->
+                    return PagingResult(
                         endOfPaginationReached = true,
                     )
 
-                Request.Refresh -> {
+                PagingRequest.Refresh -> {
                     if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
                         val status =
                             database
@@ -99,7 +102,7 @@ internal class StatusDetailRemoteMediator(
                 }
             }
 
-        return Result(
+        return PagingResult(
             endOfPaginationReached = statusOnly || result.isEmpty(),
             data =
                 result.toDbPagingTimeline(
@@ -110,7 +113,7 @@ internal class StatusDetailRemoteMediator(
                     },
                 ),
             nextKey =
-                if (request == Request.Refresh) {
+                if (request == PagingRequest.Refresh) {
                     ""
                 } else {
                     result.lastOrNull()?.id

@@ -170,9 +170,16 @@ internal fun EditListScreen(
                                     } else {
                                         state.listInfo
                                             .onSuccess {
-                                                if (it.avatar != null) {
+                                                val avatar =
+                                                    when (it) {
+                                                        is dev.dimension.flare.ui.model.UiList.List -> it.avatar
+                                                        is dev.dimension.flare.ui.model.UiList.Feed -> it.avatar
+                                                        is dev.dimension.flare.ui.model.UiList.Channel -> it.banner
+                                                        is dev.dimension.flare.ui.model.UiList.Antenna -> null
+                                                    }
+                                                if (avatar != null) {
                                                     NetworkImage(
-                                                        model = it.avatar,
+                                                        model = avatar,
                                                         contentDescription = null,
                                                         modifier =
                                                             Modifier
@@ -380,7 +387,16 @@ private fun presenter(
                 append(it.title)
             }
             description.edit {
-                append(it.description)
+                val desc =
+                    when (it) {
+                        is dev.dimension.flare.ui.model.UiList.List -> it.description
+                        is dev.dimension.flare.ui.model.UiList.Feed -> it.description
+                        is dev.dimension.flare.ui.model.UiList.Channel -> it.description
+                        is dev.dimension.flare.ui.model.UiList.Antenna -> null
+                    }
+                if (desc != null) {
+                    append(desc)
+                }
             }
         }
     }

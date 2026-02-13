@@ -1,9 +1,12 @@
 package dev.dimension.flare.data.datasource.vvo
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -22,8 +25,8 @@ internal class StatusRepostRemoteMediator(
 
     override suspend fun timeline(
         pageSize: Int,
-        request: Request,
-    ): Result {
+        request: PagingRequest,
+    ): PagingResult<DbPagingTimelineWithStatus> {
         val config = service.config()
         if (config.data?.login != true) {
             throw LoginExpiredException(
@@ -34,14 +37,14 @@ internal class StatusRepostRemoteMediator(
 
         val page =
             when (request) {
-                Request.Refresh -> 1
-                is Request.Append -> request.nextKey.toIntOrNull() ?: 1
-                is Request.Prepend -> return Result(endOfPaginationReached = true)
+                PagingRequest.Refresh -> 1
+                is PagingRequest.Append -> request.nextKey.toIntOrNull() ?: 1
+                is PagingRequest.Prepend -> return PagingResult(endOfPaginationReached = true)
             }
 
         val response =
             when (request) {
-                Request.Refresh -> {
+                PagingRequest.Refresh -> {
                     service
                         .getRepostTimeline(
                             id = statusKey.id,
@@ -49,13 +52,13 @@ internal class StatusRepostRemoteMediator(
                         )
                 }
 
-                is Request.Prepend -> {
-                    return Result(
+                is PagingRequest.Prepend -> {
+                    return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
 
-                is Request.Append -> {
+                is PagingRequest.Append -> {
                     service.getRepostTimeline(
                         id = statusKey.id,
                         page = page,
@@ -80,7 +83,7 @@ internal class StatusRepostRemoteMediator(
                 )
             }
 
-        return Result(
+        return PagingResult(
             endOfPaginationReached = statuses.isEmpty(),
             data = data,
             nextKey = (page + 1).toString(),

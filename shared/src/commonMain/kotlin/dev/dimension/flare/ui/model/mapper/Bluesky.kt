@@ -1371,7 +1371,7 @@ private fun render(
     }
 
 internal fun GeneratorView.render(accountKey: MicroBlogKey) =
-    UiList(
+    UiList.Feed(
         id = uri.atUri,
         title = displayName,
         description = description,
@@ -1379,18 +1379,15 @@ internal fun GeneratorView.render(accountKey: MicroBlogKey) =
         creator = creator.render(accountKey),
         likedCount = UiNumber(likeCount ?: 0),
         liked = viewer?.like?.atUri != null,
-        platformType = PlatformType.Bluesky,
-        type = UiList.Type.Feed,
     )
 
 internal fun ListView.render(accountKey: MicroBlogKey) =
-    UiList(
+    UiList.List(
         id = uri.atUri,
         title = name,
         description = description,
         avatar = avatar?.uri,
         creator = creator.render(accountKey),
-        platformType = PlatformType.Bluesky,
     )
 
 internal fun MessageContent.Bluesky.render(accountKey: MicroBlogKey) =

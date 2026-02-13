@@ -76,7 +76,7 @@ public class BlueskyFeedPresenter(
                 timeline.refreshSuspend()
             }
 
-            override fun subscribe(list: UiList) {
+            override fun subscribe(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is BlueskyDataSource)
@@ -85,7 +85,7 @@ public class BlueskyFeedPresenter(
                 }
             }
 
-            override fun unsubscribe(list: UiList) {
+            override fun unsubscribe(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is BlueskyDataSource)
@@ -94,7 +94,7 @@ public class BlueskyFeedPresenter(
                 }
             }
 
-            override fun favorite(list: UiList) {
+            override fun favorite(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is BlueskyDataSource)
@@ -103,7 +103,7 @@ public class BlueskyFeedPresenter(
                 }
             }
 
-            override fun unfavorite(list: UiList) {
+            override fun unfavorite(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is BlueskyDataSource)
@@ -117,17 +117,17 @@ public class BlueskyFeedPresenter(
 
 @Immutable
 public interface BlueskyFeedState {
-    public val info: UiState<UiList>
+    public val info: UiState<UiList.Feed>
     public val timeline: PagingState<UiTimeline>
     public val subscribed: UiState<Boolean>
 
     public suspend fun refreshSuspend()
 
-    public fun subscribe(list: UiList)
+    public fun subscribe(list: UiList.Feed)
 
-    public fun unsubscribe(list: UiList)
+    public fun unsubscribe(list: UiList.Feed)
 
-    public fun favorite(list: UiList)
+    public fun favorite(list: UiList.Feed)
 
-    public fun unfavorite(list: UiList)
+    public fun unfavorite(list: UiList.Feed)
 }

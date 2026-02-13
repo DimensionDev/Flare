@@ -1,8 +1,8 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import androidx.paging.PagingData
-import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.common.CacheData
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile

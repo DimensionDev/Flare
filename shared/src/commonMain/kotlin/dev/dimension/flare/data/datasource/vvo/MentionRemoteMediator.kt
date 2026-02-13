@@ -1,9 +1,12 @@
 package dev.dimension.flare.data.datasource.vvo
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -22,8 +25,8 @@ internal class MentionRemoteMediator(
 
     override suspend fun timeline(
         pageSize: Int,
-        request: Request,
-    ): Result {
+        request: PagingRequest,
+    ): PagingResult<DbPagingTimelineWithStatus> {
         val config = service.config()
         if (config.data?.login != true) {
             throw LoginExpiredException(
@@ -34,16 +37,16 @@ internal class MentionRemoteMediator(
 
         val page =
             when (request) {
-                Request.Refresh -> 0
-                is Request.Prepend -> return Result(
+                PagingRequest.Refresh -> 0
+                is PagingRequest.Prepend -> return PagingResult(
                     endOfPaginationReached = true,
                 )
-                is Request.Append -> request.nextKey.toIntOrNull() ?: 0
+                is PagingRequest.Append -> request.nextKey.toIntOrNull() ?: 0
             }
 
         val response =
             when (request) {
-                Request.Refresh -> {
+                PagingRequest.Refresh -> {
                     val result =
                         service
                             .getMentionsAt(
@@ -53,13 +56,13 @@ internal class MentionRemoteMediator(
                     result
                 }
 
-                is Request.Prepend -> {
-                    return Result(
+                is PagingRequest.Prepend -> {
+                    return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
 
-                is Request.Append -> {
+                is PagingRequest.Append -> {
                     service.getMentionsAt(
                         page = page,
                     )
@@ -75,7 +78,7 @@ internal class MentionRemoteMediator(
                 )
             }
 
-        return Result(
+        return PagingResult(
             endOfPaginationReached = response.data.isNullOrEmpty(),
             data = data,
             nextKey = (page + 1).toString(),

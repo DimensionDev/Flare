@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.common.PagingState
@@ -11,6 +12,7 @@ import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -36,18 +38,22 @@ public class PinnableTimelineTabPresenter(
     @Immutable
     public interface State {
         public sealed interface Tab {
-            public val data: PagingState<UiList>
+            public val data: PagingState<out UiList>
 
             public data class List(
-                override val data: PagingState<UiList>,
+                override val data: PagingState<UiList.List>,
             ) : Tab
 
             public data class Feed(
-                override val data: PagingState<UiList>,
+                override val data: PagingState<UiList.Feed>,
             ) : Tab
 
             public data class Antenna(
-                override val data: PagingState<UiList>,
+                override val data: PagingState<UiList.Antenna>,
+            ) : Tab
+
+            public data class Channel(
+                override val data: PagingState<UiList.Channel>,
             ) : Tab
         }
 
@@ -66,7 +72,7 @@ public class PinnableTimelineTabPresenter(
                     it as? ListDataSource
                 }.map { service ->
                     remember(service) {
-                        service.myList(scope = scope)
+                        service.listHandler.data.cachedIn(scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
 
@@ -90,6 +96,16 @@ public class PinnableTimelineTabPresenter(
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
 
+        val channel =
+            serviceState
+                .mapNotNull {
+                    it as? MisskeyDataSource
+                }.mapNotNull { service ->
+                    remember(service) {
+                        service.channelsList(scope = scope)
+                    }.collectAsLazyPagingItems()
+                }.toPagingState()
+
         val tabs =
             serviceState.map { service ->
                 remember(
@@ -110,6 +126,11 @@ public class PinnableTimelineTabPresenter(
                         },
                         if (service is MisskeyDataSource) {
                             State.Tab.Antenna(antenna)
+                        } else {
+                            null
+                        },
+                        if (service is MisskeyDataSource) {
+                            State.Tab.Channel(channel)
                         } else {
                             null
                         },

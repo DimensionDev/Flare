@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
@@ -10,7 +9,11 @@ import dev.dimension.flare.data.database.cache.mapper.isBottomEnd
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
@@ -47,12 +50,12 @@ internal class StatusDetailRemoteMediator(
 
     override suspend fun timeline(
         pageSize: Int,
-        request: Request,
-    ): Result {
+        request: PagingRequest,
+    ): PagingResult<DbPagingTimelineWithStatus> {
         when (request) {
-            is Request.Append -> {
+            is PagingRequest.Append -> {
                 if (statusOnly) {
-                    return Result(
+                    return PagingResult(
                         endOfPaginationReached = true,
                     )
                 } else {
@@ -107,19 +110,19 @@ internal class StatusDetailRemoteMediator(
                             }
                     val result = actualTweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
 
-                    return Result(
+                    return PagingResult(
                         endOfPaginationReached = response.isBottomEnd() || actualTweet.size == 1 || response.cursor() == null,
                         data = result,
                         nextKey = response.cursor(),
                     )
                 }
             }
-            is Request.Prepend -> {
-                return Result(
+            is PagingRequest.Prepend -> {
+                return PagingResult(
                     endOfPaginationReached = true,
                 )
             }
-            Request.Refresh -> {
+            PagingRequest.Refresh -> {
                 if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
                     database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
                         database.connect {
@@ -156,7 +159,7 @@ internal class StatusDetailRemoteMediator(
                 val item = tweet.firstOrNull { it.id == statusKey.id }
                 val result = listOf(item).mapNotNull { it?.toDbPagingTimeline(accountKey, pagingKey) }
 
-                return Result(
+                return PagingResult(
                     endOfPaginationReached = statusOnly,
                     data = result,
                     nextKey = "",

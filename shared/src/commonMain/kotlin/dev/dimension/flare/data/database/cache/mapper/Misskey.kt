@@ -135,7 +135,7 @@ private fun Note.toDbStatusWithUser(
     )
 }
 
-private fun UserLite.toDbUser(accountHost: String) =
+internal fun UserLite.toDbUser(accountHost: String) =
     DbUser(
         userKey =
             MicroBlogKey(

@@ -30,7 +30,7 @@ struct AllListScreen: View {
                         )
                 ) {
                     UiListView(data: item)
-                        .if(!item.readonly) { view in
+                        .if(item.readonly) { view in
                             view.swipeActions(edge: .leading) {
                                 Button {
                                     editListId = item.id

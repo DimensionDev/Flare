@@ -11,7 +11,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -32,7 +32,7 @@ import org.koin.core.component.inject
  */
 public class EditListMemberPresenter(
     private val accountType: AccountType,
-    private val listId: String,
+    private val listKey: MicroBlogKey,
 ) : PresenterBase<EditListMemberState>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
@@ -52,10 +52,11 @@ public class EditListMemberPresenter(
                             require(service is ListDataSource)
                             combine(
                                 service.searchUser(query = filter),
-                                service.listMemberCache(listId),
-                            ) { pagingData, cache ->
-                                pagingData.map { user ->
-                                    user to cache.any { it.key == user.key }
+                                service.listMemberHandler.listMembersListFlow(listKey),
+                            ) { users, members ->
+                                users.map { user ->
+                                    val isMember = members.any { it.key == user.key }
+                                    Pair(user, isMember)
                                 }
                             }
                         }.collectAsLazyPagingItems().let {
@@ -74,7 +75,7 @@ public class EditListMemberPresenter(
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is ListDataSource)
-                        it.addMember(listId, userKey)
+                        it.listMemberHandler.addMember(listKey, userKey)
                     }
                 }
             }
@@ -83,7 +84,7 @@ public class EditListMemberPresenter(
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is ListDataSource)
-                        it.removeMember(listId, userKey)
+                        it.listMemberHandler.removeMember(listKey, userKey)
                     }
                 }
             }

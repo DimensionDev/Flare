@@ -17,12 +17,12 @@ public class MisskeyAntennasListWithTabsPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<MisskeyAntennasListWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
-        object : PinTabsPresenter<UiList>() {
+        object : PinTabsPresenter<UiList.Antenna>() {
             override fun List<TimelineTabItem>.filterPinned(): List<String> =
                 filterIsInstance<Misskey.AntennasTimelineTabItem>()
                     .map { it.antennasId }
 
-            override fun getTimelineTabItem(item: UiList): TimelineTabItem =
+            override fun getTimelineTabItem(item: UiList.Antenna): TimelineTabItem =
                 Misskey.AntennasTimelineTabItem(
                     account = accountType,
                     antennasId = item.id,
@@ -33,7 +33,7 @@ public class MisskeyAntennasListWithTabsPresenter(
                         ),
                 )
 
-            override fun List<TimelineTabItem>.filter(item: UiList): List<TimelineTabItem> =
+            override fun List<TimelineTabItem>.filter(item: UiList.Antenna): List<TimelineTabItem> =
                 filter {
                     if (it is Misskey.AntennasTimelineTabItem) {
                         it.antennasId != item.id
@@ -55,10 +55,10 @@ public class MisskeyAntennasListWithTabsPresenter(
         return object :
             State,
             AntennasListPresenter.State by state,
-            PinTabsPresenter.State<UiList> by pinTabsState {}
+            PinTabsPresenter.State<UiList.Antenna> by pinTabsState {}
     }
 
     public interface State :
-        PinTabsPresenter.State<UiList>,
+        PinTabsPresenter.State<UiList.Antenna>,
         AntennasListPresenter.State
 }

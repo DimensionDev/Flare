@@ -7,9 +7,12 @@ import app.bsky.feed.Repost
 import app.bsky.notification.ListNotificationsNotificationReason
 import app.bsky.notification.ListNotificationsQueryParams
 import app.bsky.notification.UpdateSeenRequest
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDb
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.toImmutableList
@@ -33,11 +36,11 @@ internal class NotificationRemoteMediator(
 
     override suspend fun timeline(
         pageSize: Int,
-        request: Request,
-    ): Result {
+        request: PagingRequest,
+    ): PagingResult<DbPagingTimelineWithStatus> {
         val response =
             when (request) {
-                Request.Refresh -> {
+                PagingRequest.Refresh -> {
                     service
                         .listNotifications(
                             ListNotificationsQueryParams(
@@ -55,7 +58,7 @@ internal class NotificationRemoteMediator(
                         }
                 }
 
-                is Request.Append -> {
+                is PagingRequest.Append -> {
                     service
                         .listNotifications(
                             ListNotificationsQueryParams(
@@ -66,11 +69,11 @@ internal class NotificationRemoteMediator(
                 }
 
                 else -> {
-                    return Result(
+                    return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
-            } ?: return Result(
+            } ?: return PagingResult(
                 endOfPaginationReached = true,
             )
 
@@ -111,7 +114,7 @@ internal class NotificationRemoteMediator(
                 .orEmpty()
                 .associateBy { it.uri }
                 .toImmutableMap()
-        return Result(
+        return PagingResult(
             endOfPaginationReached = response.cursor == null,
             data =
                 response.notifications.toDb(

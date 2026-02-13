@@ -1,13 +1,16 @@
 package dev.dimension.flare.data.datasource.rss
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.createDbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.rss.RssService
 import dev.dimension.flare.data.network.rss.model.Feed
 import dev.dimension.flare.model.AccountType
@@ -37,8 +40,8 @@ internal class RssTimelineRemoteMediator(
 
     override suspend fun timeline(
         pageSize: Int,
-        request: Request,
-    ): Result {
+        request: PagingRequest,
+    ): PagingResult<DbPagingTimelineWithStatus> {
         val rssSource = fetchSource(url)
         val response = fetchFeed(url)
         val title = rssSource?.title ?: response.title
@@ -159,7 +162,7 @@ internal class RssTimelineRemoteMediator(
                 )
             }
 
-        return Result(
+        return PagingResult(
             endOfPaginationReached = true,
             data = content,
         )

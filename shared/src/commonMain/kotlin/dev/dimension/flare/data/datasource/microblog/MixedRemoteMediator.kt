@@ -2,9 +2,12 @@ package dev.dimension.flare.data.datasource.microblog
 
 import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -26,13 +29,13 @@ internal class MixedRemoteMediator(
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun timeline(
         pageSize: Int,
-        request: Request,
-    ): Result =
+        request: PagingRequest,
+    ): PagingResult<DbPagingTimelineWithStatus> =
         coroutineScope {
-            if (request is Request.Prepend) {
-                Result(endOfPaginationReached = true)
+            if (request is PagingRequest.Prepend) {
+                PagingResult(endOfPaginationReached = true)
             } else {
-                if (request is Request.Refresh) {
+                if (request is PagingRequest.Refresh) {
                     currentMediators = mediators
                 }
                 val response =
@@ -44,7 +47,7 @@ internal class MixedRemoteMediator(
                                 runCatching {
                                     subRequest.load(pageSize)
                                 }.getOrElse {
-                                    Result(endOfPaginationReached = true)
+                                    PagingResult(endOfPaginationReached = true)
                                 }.let {
                                     SubResponse(subRequest.mediator, it)
                                 }
@@ -77,14 +80,14 @@ internal class MixedRemoteMediator(
 
                 currentMediators =
                     response.mapNotNull {
-                        if (it.result.endOfPaginationReached) {
+                        if (it.result.nextKey == null) {
                             null
                         } else {
                             it.mediator
                         }
                     }
 
-                Result(
+                PagingResult(
                     endOfPaginationReached = currentMediators.isEmpty(),
                     data = mixedTimelineResult + timelineResult,
                     nextKey = if (currentMediators.isEmpty()) null else "mixed_next_key",
@@ -94,46 +97,46 @@ internal class MixedRemoteMediator(
         }
 
     private suspend fun getSubRequest(
-        request: Request,
+        request: PagingRequest,
         mediator: BaseTimelineRemoteMediator,
     ): SubRequest? =
         when (request) {
-            is Request.Append -> {
+            is PagingRequest.Append -> {
                 database
                     .pagingTimelineDao()
                     .getPagingKey(mediator.pagingKey)
                     ?.nextKey
-                    ?.let(Request::Append)
+                    ?.let(PagingRequest::Append)
             }
 
-            is Request.Prepend ->
+            is PagingRequest.Prepend ->
                 database
                     .pagingTimelineDao()
                     .getPagingKey(mediator.pagingKey)
                     ?.prevKey
-                    ?.let(Request::Prepend)
+                    ?.let(PagingRequest::Prepend)
 
-            is Request.Refresh -> Request.Refresh
+            is PagingRequest.Refresh -> PagingRequest.Refresh
         }?.let {
             SubRequest(mediator, it)
         }
 
     private suspend fun saveSubResponse(
-        request: Request,
+        request: PagingRequest,
         subResponse: SubResponse,
     ) {
         val (mediator, result) = subResponse
-        if (request is Request.Prepend && result.previousKey != null) {
+        if (request is PagingRequest.Prepend && result.previousKey != null) {
             database.pagingTimelineDao().updatePagingKeyPrevKey(
                 pagingKey = mediator.pagingKey,
                 prevKey = result.previousKey,
             )
-        } else if (request is Request.Append && result.nextKey != null) {
+        } else if (request is PagingRequest.Append && result.nextKey != null) {
             database.pagingTimelineDao().updatePagingKeyNextKey(
                 pagingKey = mediator.pagingKey,
                 nextKey = result.nextKey,
             )
-        } else if (request is Request.Refresh) {
+        } else if (request is PagingRequest.Refresh) {
             database.pagingTimelineDao().deletePagingKey(mediator.pagingKey)
             database.pagingTimelineDao().insertPagingKey(
                 dev.dimension.flare.data.database.cache.model.DbPagingKey(
@@ -147,13 +150,13 @@ internal class MixedRemoteMediator(
 
     private data class SubRequest(
         val mediator: BaseTimelineRemoteMediator,
-        val request: Request,
+        val request: PagingRequest,
     ) {
         suspend fun load(pageSize: Int) = mediator.timeline(pageSize, request)
     }
 
     private data class SubResponse(
         val mediator: BaseTimelineRemoteMediator,
-        val result: Result,
+        val result: PagingResult<DbPagingTimelineWithStatus>,
     )
 }

@@ -912,7 +912,7 @@ internal fun parseXQTCustomDateTime(dateTimeStr: String): Instant? {
     }
 }
 
-internal fun List<InstructionUnion>.list(accountKey: MicroBlogKey): List<UiList> =
+internal fun List<InstructionUnion>.list(accountKey: MicroBlogKey): List<UiList.List> =
     flatMap {
         when (it) {
             is TimelineAddEntries ->
@@ -946,7 +946,7 @@ internal fun List<InstructionUnion>.list(accountKey: MicroBlogKey): List<UiList>
         it.render(accountKey = accountKey)
     }
 
-internal fun TwitterList.render(accountKey: MicroBlogKey): UiList {
+internal fun TwitterList.render(accountKey: MicroBlogKey): UiList.List {
     val user =
         userResults?.result?.let {
             when (it) {
@@ -954,11 +954,10 @@ internal fun TwitterList.render(accountKey: MicroBlogKey): UiList {
                 else -> null
             }
         }
-    return UiList(
+    return UiList.List(
         id = idStr.orEmpty(),
         title = name.orEmpty(),
         description = description.orEmpty(),
-        platformType = PlatformType.xQt,
         creator = user,
         avatar =
             customBannerMedia?.mediaInfo?.originalImgURL

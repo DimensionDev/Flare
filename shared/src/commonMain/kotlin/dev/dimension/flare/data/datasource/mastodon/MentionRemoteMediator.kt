@@ -1,9 +1,12 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDb
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
 import dev.dimension.flare.model.MicroBlogKey
@@ -20,11 +23,11 @@ internal class MentionRemoteMediator(
 
     override suspend fun timeline(
         pageSize: Int,
-        request: Request,
-    ): Result {
+        request: PagingRequest,
+    ): PagingResult<DbPagingTimelineWithStatus> {
         val response =
             when (request) {
-                Request.Refresh -> {
+                PagingRequest.Refresh -> {
                     service
                         .notification(
                             limit = pageSize,
@@ -32,7 +35,7 @@ internal class MentionRemoteMediator(
                         )
                 }
 
-                is Request.Prepend -> {
+                is PagingRequest.Prepend -> {
                     service.notification(
                         limit = pageSize,
                         min_id = request.previousKey,
@@ -40,7 +43,7 @@ internal class MentionRemoteMediator(
                     )
                 }
 
-                is Request.Append -> {
+                is PagingRequest.Append -> {
                     service.notification(
                         limit = pageSize,
                         max_id = request.nextKey,
@@ -49,7 +52,7 @@ internal class MentionRemoteMediator(
                 }
             }
 
-        return Result(
+        return PagingResult(
             endOfPaginationReached = response.isEmpty(),
             data =
                 response.toDb(

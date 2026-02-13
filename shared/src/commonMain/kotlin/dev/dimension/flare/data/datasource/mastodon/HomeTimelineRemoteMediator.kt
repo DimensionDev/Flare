@@ -1,9 +1,12 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
 
@@ -21,25 +24,25 @@ internal class HomeTimelineRemoteMediator(
 
     override suspend fun timeline(
         pageSize: Int,
-        request: Request,
-    ): Result {
+        request: PagingRequest,
+    ): PagingResult<DbPagingTimelineWithStatus> {
         val response =
             when (request) {
-                Request.Refresh -> {
+                PagingRequest.Refresh -> {
                     service
                         .homeTimeline(
                             limit = pageSize,
                         )
                 }
 
-                is Request.Prepend -> {
+                is PagingRequest.Prepend -> {
                     service.homeTimeline(
                         limit = pageSize,
                         min_id = request.previousKey,
                     )
                 }
 
-                is Request.Append -> {
+                is PagingRequest.Append -> {
                     service.homeTimeline(
                         limit = pageSize,
                         max_id = request.nextKey,
@@ -47,7 +50,7 @@ internal class HomeTimelineRemoteMediator(
                 }
             }
 
-        return Result(
+        return PagingResult(
             endOfPaginationReached = response.isEmpty(),
             data =
                 response.toDbPagingTimeline(

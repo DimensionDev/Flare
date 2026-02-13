@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.misskey.api.model.Antenna
+import dev.dimension.flare.data.network.misskey.api.model.Channel
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.EmojiSimple
 import dev.dimension.flare.data.network.misskey.api.model.Meta200Response
@@ -1043,11 +1044,10 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         }
     }
 
-internal fun UserList.render(): UiList =
-    UiList(
+internal fun UserList.render(): UiList.List =
+    UiList.List(
         id = id,
         title = name,
-        platformType = PlatformType.Misskey,
     )
 
 internal fun Meta200Response.render(): UiInstanceMetadata {
@@ -1100,10 +1100,21 @@ internal fun Meta200Response.render(): UiInstanceMetadata {
     )
 }
 
-internal fun Antenna.render(): UiList =
-    UiList(
+internal fun Antenna.render(): UiList.Antenna =
+    UiList.Antenna(
         id = id,
         title = name,
-        platformType = PlatformType.Misskey,
-        type = UiList.Type.Antenna,
+    )
+
+internal fun Channel.render(): UiList.Channel =
+    UiList.Channel(
+        id = id,
+        title = name,
+        description = description,
+        isArchived = isArchived ?: false,
+        notesCount = notesCount ?: 0.0,
+        usersCount = usersCount ?: 0.0,
+        banner = bannerUrl,
+        isFollowing = isFollowing,
+        isFavorited = isFavorited,
     )

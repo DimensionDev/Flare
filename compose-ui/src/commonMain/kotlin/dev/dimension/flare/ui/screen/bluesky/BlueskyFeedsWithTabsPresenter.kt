@@ -24,10 +24,10 @@ public class BlueskyFeedsWithTabsPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<BlueskyFeedsWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
-        object : PinTabsPresenter<UiList>() {
+        object : PinTabsPresenter<UiList.Feed>() {
             override fun List<TimelineTabItem>.filterPinned(): List<String> = filterIsInstance<Bluesky.FeedTabItem>().map { it.uri }
 
-            override fun getTimelineTabItem(item: UiList): TimelineTabItem =
+            override fun getTimelineTabItem(item: UiList.Feed): TimelineTabItem =
                 Bluesky.FeedTabItem(
                     account = accountType,
                     uri = item.id,
@@ -41,7 +41,7 @@ public class BlueskyFeedsWithTabsPresenter(
                         ),
                 )
 
-            override fun List<TimelineTabItem>.filter(item: UiList): List<TimelineTabItem> =
+            override fun List<TimelineTabItem>.filter(item: UiList.Feed): List<TimelineTabItem> =
                 filter {
                     if (it is Bluesky.FeedTabItem) {
                         it.uri != item.id
@@ -61,7 +61,7 @@ public class BlueskyFeedsWithTabsPresenter(
                 BlueskyFeedsPresenter(accountType = accountType)
             }.invoke()
         val tabState = pinTabsPresenter.invoke()
-        return object : State, BlueskyFeedsState by state, PinTabsPresenter.State<UiList> by tabState {
+        return object : State, BlueskyFeedsState by state, PinTabsPresenter.State<UiList.Feed> by tabState {
             override val isRefreshing: Boolean
                 get() = isRefreshing
 
@@ -77,7 +77,7 @@ public class BlueskyFeedsWithTabsPresenter(
 
     public interface State :
         BlueskyFeedsState,
-        PinTabsPresenter.State<UiList> {
+        PinTabsPresenter.State<UiList.Feed> {
         public val isRefreshing: Boolean
 
         public fun refresh()

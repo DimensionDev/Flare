@@ -4,10 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.data.datasource.microblog.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flatMap
@@ -21,7 +22,7 @@ import org.koin.core.component.inject
  */
 public class ListInfoPresenter(
     private val accountType: AccountType,
-    private val listId: String,
+    private val listKey: MicroBlogKey,
 ) : PresenterBase<ListInfoState>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
@@ -33,7 +34,7 @@ public class ListInfoPresenter(
             serviceState.flatMap {
                 remember(it) {
                     require(it is ListDataSource)
-                    it.listInfo(listId)
+                    it.listHandler.listInfo(listKey)
                 }.collectAsState().toUi()
             }
 

@@ -7,8 +7,8 @@
     <string name="home_tab_me_title">Io</string>
     <string name="home_tab_discover_title">Scopri</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">Nuovo Post %d</item>
-        <item quantity="other">Nuovi Post %d</item>
+        <item quantity="one">Nuovo Post %1$d</item>
+        <item quantity="other">Nuovi Post %1$d</item>
     </plurals>
     <string name="notification_tab_all_title">Tutti</string>
     <string name="notification_tab_mentions_title">Menzioni</string>
@@ -341,12 +341,6 @@
     <string name="import_confirmation_message">Questo importerà i dati dal file. I record esistenti con gli ID corrispondenti saranno sostituiti. Vuoi continuare?</string>
     <string name="changelog_current"><![CDATA[            <span>Versione %1$s:</span>
             <ul>
-                <li>Gruppo personalizzato di timeline mista</li>
-                <li>Esportazione e importazione dati</li>
-                <li>Ricerca multi-account</li>
-                <li>Data e ora assoluta nei post</li>
-                <li>Aggiungi badge piattaforma nei post</li>
-                <li>Gestione RSS è stata spostata nelle impostazioni</li>
                 <li>Correzioni di bug e miglioramenti delle prestazioni.</li>
             </ul>
         ]]></string>

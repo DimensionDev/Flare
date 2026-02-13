@@ -341,16 +341,7 @@
     <string name="import_confirmation_message">Dies wird Daten aus der Datei importieren. Vorhandene Datensätze mit passenden IDs werden ersetzt. Möchten Sie fortfahren?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Benutzerdefinierte Gruppe der gemischten Zeitleiste</li>
-                
-                <li>Datenexport und Import</li>
-                
-                <li>Mehrfachkonten-Suche</li>
-                <li>Absolute Datum und Zeit in Beiträgen</li>
-                <li>Plattform-Abzeichen in Beiträgen</li>
-                
-                <li>RSS-Verwaltung wurde in die Einstellungen</li>
-                <li>Fehlerbehebungen und Leistungsverbesserungen verschoben.</li>
+                <li>Fehlerbehebungen und Leistungsverbesserungen.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Neue Gruppe</string>

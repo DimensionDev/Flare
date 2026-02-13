@@ -21,8 +21,8 @@
     <string name="home_tab_feeds_title">Feed</string>
     <string name="dm_list_title">Messaggi privati</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">Nuovo Post %d</item>
-        <item quantity="other">Nuovi Post %d</item>
+        <item quantity="one">Nuovo Post %1$d</item>
+        <item quantity="other">Nuovi Post %1$d</item>
     </plurals>
     <string name="navigate_back">Indietro</string>
     <string name="service_select_instance_input_placeholder">URL istanza</string>

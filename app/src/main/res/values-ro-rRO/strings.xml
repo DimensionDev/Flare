@@ -7,7 +7,7 @@
     <string name="home_tab_me_title">Eu</string>
     <string name="home_tab_discover_title">Descoperă</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">Postare nouă %d</item>
+        <item quantity="one">Postare nouă %1$d</item>
         <item quantity="few">%1$d Postări noi</item>
         <item quantity="other">%1$d Postări noi</item>
     </plurals>
@@ -340,6 +340,11 @@
     <string name="import_error">Importarea datelor a eșuat</string>
     <string name="import_confirmation_title">Confirmare import</string>
     <string name="import_confirmation_message">Acest lucru va importa date din fișier. Înregistrările existente cu ID-uri de potrivire vor fi înlocuite. Doriți să continuați?</string>
+    <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
+            <ul>
+                <li>Remedieri ale erorilor şi îmbunătăţiri de performanţă.</li>
+            </ul>
+        ]]></string>
     <string name="tab_settings_add_group">Adaugă grup</string>
     <string name="tab_settings_add_tab">Adaugă filă</string>
     <string name="tab_settings_edit_group">Editează grup</string>

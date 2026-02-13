@@ -341,13 +341,7 @@
     <string name="import_confirmation_message">Detta kommer att importera data från filen. Befintliga poster med matchande ID kommer att ersättas. Vill du fortsätta?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Anpassad grupp av blandad tidslinje</li>
-                <li>Dataexport och import</li>
-                <li>Flerkontosökning</li>
-                <li>Absolut datum och tid i inlägg</li>
-                <li>Lägg till plattformsmärke i inlägg</li>
-                <li>RSS-hantering har flyttats till inställningarna</li>
-                <li>Felrättningar och prestandaförbättringar.</li>
+                <li>Felrättelser och prestandaförbättringar.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Lägg till grupp</string>

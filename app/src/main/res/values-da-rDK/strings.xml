@@ -341,13 +341,7 @@
     <string name="import_confirmation_message">Dette vil importere data fra filen. Eksisterende poster med matchende ID\'er vil blive erstattet. Vil du fortsætte?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Brugerdefineret gruppe af blandet tidslinje</li>
-                <li>Dataeksport og import</li>
-                <li>Multikonto søgning</li>
-                <li>Absolut dato og tid i indlæg</li>
-                <li>Tilføj platform badge i indlæg</li>
-                <li>RSS management er blevet flyttet til indstillinger</li>
-                <li>Fejlrettelser og forbedringer ydeevne.</li>
+                <li>Fejlrettelser og ydelsesforbedringer.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Tilføj Gruppe</string>

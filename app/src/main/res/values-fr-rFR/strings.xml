@@ -337,12 +337,6 @@
     <string name="import_confirmation_message">Cela va importer des données à partir du fichier. Les enregistrements existants avec des identifiants correspondants seront remplacés. Voulez-vous continuer ?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Groupe personnalisé de fil mixte</li>
-                <li>Export de données et importation</li>
-                <li>Recherche multi-comptes</li>
-                <li>Date et heure absolues dans les posts</li>
-                <li>Ajouter un badge de plateforme dans les posts</li>
-                <li>La gestion RSS a été déplacée dans les paramètres</li>
                 <li>Corrections de bugs et améliorations de performances.</li>
             </ul>
         ]]></string>

@@ -21,7 +21,7 @@
     <string name="home_tab_feeds_title">Fluxuri</string>
     <string name="dm_list_title">Mesaje directe</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">Postare nouă %d</item>
+        <item quantity="one">Postare nouă %1$d</item>
         <item quantity="few">%1$d Postări noi</item>
         <item quantity="other">%1$d Postări noi</item>
     </plurals>

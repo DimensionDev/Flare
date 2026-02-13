@@ -339,6 +339,11 @@
     <string name="import_error">Gegevens importeren mislukt</string>
     <string name="import_confirmation_title">Import bevestigen</string>
     <string name="import_confirmation_message">Dit zal gegevens uit het bestand importeren. Bestaande records met bijpassende IDs zullen worden vervangen. Wilt u doorgaan?</string>
+    <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
+            <ul>
+                <li>Bugs fixes en prestatieverbeteringen.</li>
+            </ul>
+        ]]></string>
     <string name="tab_settings_add_group">Groep toevoegen</string>
     <string name="tab_settings_add_tab">Tabblad toevoegen</string>
     <string name="tab_settings_edit_group">Groep bewerken</string>

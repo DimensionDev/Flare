@@ -184,6 +184,7 @@ internal object DeepLinkMapping {
             }
 
             PlatformType.VVo -> emptyList()
+            PlatformType.Nostr -> emptyList()
         }
 
     fun matches(

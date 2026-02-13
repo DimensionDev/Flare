@@ -7,7 +7,7 @@
     <string name="home_tab_me_title">Eu</string>
     <string name="home_tab_discover_title">Pendentes</string>
     <plurals name="home_timeline_new_toots">
-        <item quantity="one">Nova publicação %d</item>
+        <item quantity="one">Nova publicação %1$d</item>
         <item quantity="other">%1$d Novas Publicações</item>
     </plurals>
     <string name="notification_tab_all_title">Todos</string>
@@ -339,6 +339,11 @@
     <string name="import_error">Falha ao importar dados</string>
     <string name="import_confirmation_title">Confirmar Importação</string>
     <string name="import_confirmation_message">Isto irá importar dados do arquivo. Registros existentes com IDs correspondentes serão substituídos. Você quer continuar?</string>
+    <string name="changelog_current"><![CDATA[            <span>Versão %1$s:</span>
+            <ul>
+                <li>Correções de erros e melhorias de desempenho.</li>
+            </ul>
+        ]]></string>
     <string name="tab_settings_add_group">Adicionar Grupo</string>
     <string name="tab_settings_add_tab">Adicionar aba</string>
     <string name="tab_settings_edit_group">Editar Grupo</string>

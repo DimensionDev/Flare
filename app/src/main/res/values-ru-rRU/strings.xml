@@ -341,6 +341,11 @@
     <string name="import_error">Не удалось импортировать данные</string>
     <string name="import_confirmation_title">Подтвердить импорт</string>
     <string name="import_confirmation_message">Это импортирует данные из файла. Существующие записи с соответствующими идентификаторами будут заменены. Вы хотите продолжить?</string>
+    <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
+            <ul>
+                <li>Исправления ошибок и улучшения производительности.</li>
+            </ul>
+        ]]></string>
     <string name="tab_settings_add_group">Добавить группу</string>
     <string name="tab_settings_add_tab">Добавить вкладку</string>
     <string name="tab_settings_edit_group">Изменить группу</string>

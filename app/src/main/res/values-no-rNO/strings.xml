@@ -339,6 +339,11 @@
     <string name="import_error">Kan ikke importere data</string>
     <string name="import_confirmation_title">Bekreft import</string>
     <string name="import_confirmation_message">Dette vil importere data fra filen. Eksisterende poster med samsvarende ID-er vil bli erstattet. Vil du fortsette?</string>
+    <string name="changelog_current"><![CDATA[            <span>Versjon %1$s:</span>
+            <ul>
+                <li>Bug fikser og ytelsesforbedringer.</li>
+            </ul>
+        ]]></string>
     <string name="tab_settings_add_group">Legg til gruppe</string>
     <string name="tab_settings_add_tab">Legg til fane</string>
     <string name="tab_settings_edit_group">Rediger gruppe</string>

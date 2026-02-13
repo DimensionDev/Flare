@@ -341,17 +341,6 @@
     <string name="import_error">Import dat se nezdařil</string>
     <string name="import_confirmation_title">Potvrdit import</string>
     <string name="import_confirmation_message">Toto importuje data ze souboru. Existující záznamy s odpovídajícími ID budou nahrazeny. Chcete pokračovat?</string>
-    <string name="changelog_current"><![CDATA[            <span>Verze %1$s:</span>
-            <ul>
-                <li>Vlastní skupina smíšené časové osy</li>
-                <li>Export a import dat</li>
-                <li>Vyhledávání více účtů</li>
-                <li>Absolutní datum a čas v příspěvcích</li>
-                <li>Přidat odznak platformy na příspěvky</li>
-                <li>Řízení RSS bylo přesunuto do nastavení</li>
-                <li>Opravy chyb a vylepšení výkonu.</li>
-            </ul>
-        ]]></string>
     <string name="tab_settings_add_group">Přidat skupinu</string>
     <string name="tab_settings_add_tab">Přidat záložku</string>
     <string name="tab_settings_edit_group">Upravit skupinu</string>

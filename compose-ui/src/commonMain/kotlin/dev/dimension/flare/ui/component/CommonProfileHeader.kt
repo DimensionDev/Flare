@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -172,32 +173,34 @@ internal fun CommonProfileHeader(
                         }.padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Column {
-                    RichText(
-                        text = displayName,
-                        textStyle = PlatformTheme.typography.title,
+                SelectionContainer {
+                    Column {
+                        RichText(
+                            text = displayName,
+                            textStyle = PlatformTheme.typography.title,
 //                        modifier =
 //                            Modifier
 //                                .sharedElement(
 //                                    rememberSharedContentState(key = "profile-display-name-$userKey"),
 //                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                ),
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        PlatformText(
-                            text = handle,
-                            style = PlatformTheme.typography.caption,
+                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            PlatformText(
+                                text = handle,
+                                style = PlatformTheme.typography.caption,
 //                            modifier =
 //                                Modifier
 //                                    .sharedElement(
 //                                        rememberSharedContentState(key = "profile-handle-$userKey"),
 //                                        animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                    ),
-                        )
-                        handleTrailing.invoke(this)
+                            )
+                            handleTrailing.invoke(this)
+                        }
                     }
                 }
                 content()

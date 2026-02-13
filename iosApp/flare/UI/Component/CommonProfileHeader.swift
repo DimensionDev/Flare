@@ -108,10 +108,12 @@ struct CommonProfileHeader: View {
             RichText(text: user.name)
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .textSelection(.enabled)
             HStack {
                 Text(user.handle)
                     .font(.subheadline)
                     .foregroundColor(.gray)
+                    .textSelection(.enabled)
                 ForEach(0..<user.mark.count, id: \.self) { index in
                     let mark = user.mark[index]
                     switch mark {

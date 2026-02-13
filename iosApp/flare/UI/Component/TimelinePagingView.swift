@@ -64,6 +64,8 @@ struct TimelinePagingContent: View {
     @AppStorage("pref_timeline_use_compose_view") private var useComposeView: Bool = false
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
+    @Environment(\.tabKey) private var tabKeyEnv
+    @Environment(\.isActive) private var isActive
     let data: PagingState<UiTimeline>
     let detailStatusKey: MicroBlogKey?
     let key: String
@@ -89,38 +91,60 @@ struct TimelinePagingContent: View {
                     singleListView
                 } else {
                     let columns: [WaterfallItems.Column] = Array(repeating: .init(spacing: 12), count: Int(columnCount))
-                    ScrollView {
-                        TimelineWaterFallPagingView(data: data, detailStatusKey: detailStatusKey, columns: columns)
-                            .padding()
+                    ScrollViewReader { scrollProxy in
+                        ScrollView {
+                            TimelineWaterFallPagingView(data: data, detailStatusKey: detailStatusKey, columns: columns)
+                                .padding()
+                                .id("top")
+                        }
+                        .onReceive(NotificationCenter.default.publisher(for: .scrollToTop)) { notification in
+                            let targetTab = notification.userInfo?["tab"] as? String
+                            if isActive && (targetTab == nil || targetTab == tabKeyEnv) {
+                                withAnimation {
+                                    scrollProxy.scrollTo("top", anchor: .top)
+                                }
+                            }
+                        }
+                        .environment(\.isMultipleColumn, true)
+                        .detectScrolling()
+    //                    .refreshable {
+    //                        try? await presenter.state.refreshSuspend()
+    //                    }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(.systemGroupedBackground))
                     }
-                    .environment(\.isMultipleColumn, true)
-                    .detectScrolling()
-//                    .refreshable {
-//                        try? await presenter.state.refreshSuspend()
-//                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(.systemGroupedBackground))
                 }
             }
         }
     }
     
     var singleListView: some View {
-        List {
-            TimelinePagingView(data: data, detailStatusKey: detailStatusKey)
-                .listRowSeparator(.hidden)
-                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .padding(.horizontal)
-                .listRowBackground(Color.clear)
-        }
-        .detectScrolling()
-        .scrollContentBackground(.hidden)
-        .listRowSpacing(2)
-        .listStyle(.plain)
+        ScrollViewReader { proxy in
+            List {
+                TimelinePagingView(data: data, detailStatusKey: detailStatusKey)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
+                    .padding(.horizontal)
+                    .listRowBackground(Color.clear)
+                    .id("top")
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .scrollToTop)) { notification in
+                let targetTab = notification.userInfo?["tab"] as? String
+                if isActive && (targetTab == nil || targetTab == tabKeyEnv) {
+                    withAnimation {
+                        proxy.scrollTo("top", anchor: .top)
+                    }
+                }
+            }
+            .detectScrolling()
+            .scrollContentBackground(.hidden)
+            .listRowSpacing(2)
+            .listStyle(.plain)
 //        .refreshable {
 //            try? await presenter.state.refreshSuspend()
 //        }
-        .background(Color(.systemGroupedBackground))
+            .background(Color(.systemGroupedBackground))
+        }
     }
 }
 

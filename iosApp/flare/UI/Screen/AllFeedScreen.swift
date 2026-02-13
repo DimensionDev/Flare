@@ -2,6 +2,8 @@ import SwiftUI
 @preconcurrency import KotlinSharedUI
 
 struct AllFeedScreen: View {
+    @Environment(\.tabKey) private var tabKeyEnv
+    @Environment(\.isActive) private var isActive
     @StateObject private var presenter: KotlinPresenter<BlueskyFeedsWithTabsPresenterState>
     private let accountType: AccountType
     
@@ -11,27 +13,10 @@ struct AllFeedScreen: View {
     }
     
     var body: some View {
-        List {
-            Section {
-                PagingView(data: presenter.state.myFeeds) { item in
-                    NavigationLink(
-                        value: Route
-                            .tabItem(
-                                Bluesky.FeedTabItem(account: accountType, uri: item.id, metaData: .init(title: TitleType.Text(content: item.title), icon: IconType.Material(icon: .feeds)))
-                            )
-                    ) {
-                        UiListView(data: item)
-                    }
-                } loadingContent: {
-                    UiListPlaceholder()
-                }
-            } header: {
-                Text("all_feeds_section_my_feeds")
-            }
-            
-            Section {
-                PagingView(data: presenter.state.popularFeeds) { pair in
-                    if let item = pair.first {
+        ScrollViewReader { proxy in
+            List {
+                Section {
+                    PagingView(data: presenter.state.myFeeds) { item in
                         NavigationLink(
                             value: Route
                                 .tabItem(
@@ -40,18 +25,46 @@ struct AllFeedScreen: View {
                         ) {
                             UiListView(data: item)
                         }
+                    } loadingContent: {
+                        UiListPlaceholder()
                     }
-                } loadingContent: {
-                    UiListPlaceholder()
+                } header: {
+                    Text("all_feeds_section_my_feeds")
                 }
-            } header: {
-                Text("all_feeds_section_explore_feeds")
-            }
+                .id("top")
+                
+                Section {
+                    PagingView(data: presenter.state.popularFeeds) { pair in
+                        if let item = pair.first {
+                            NavigationLink(
+                                value: Route
+                                    .tabItem(
+                                        Bluesky.FeedTabItem(account: accountType, uri: item.id, metaData: .init(title: TitleType.Text(content: item.title), icon: IconType.Material(icon: .feeds)))
+                                    )
+                            ) {
+                                UiListView(data: item)
+                            }
+                        }
+                    } loadingContent: {
+                        UiListPlaceholder()
+                    }
+                } header: {
+                    Text("all_feeds_section_explore_feeds")
+                }
 
-        }
-        .navigationTitle("all_feeds_title")
-        .refreshable {
-            try? await presenter.state.refreshSuspend()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .scrollToTop)) { notification in
+                let targetTab = notification.userInfo?["tab"] as? String
+                if isActive && (targetTab == nil || targetTab == tabKeyEnv) {
+                    withAnimation {
+                        proxy.scrollTo("top", anchor: .top)
+                    }
+                }
+            }
+            .navigationTitle("all_feeds_title")
+            .refreshable {
+                try? await presenter.state.refreshSuspend()
+            }
         }
     }
 }

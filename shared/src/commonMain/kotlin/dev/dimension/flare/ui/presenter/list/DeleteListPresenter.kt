@@ -2,10 +2,11 @@ package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.data.datasource.microblog.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -19,7 +20,7 @@ import org.koin.core.component.inject
  */
 public class DeleteListPresenter(
     private val accountType: AccountType,
-    private val listId: String,
+    private val listKey: MicroBlogKey,
 ) : PresenterBase<DeleteListState>(),
     KoinComponent {
     private val scope by inject<CoroutineScope>()
@@ -37,7 +38,8 @@ public class DeleteListPresenter(
                         require(it is ListDataSource)
                         it
                     }.first()
-                        .deleteList(listId)
+                        .listHandler
+                        .delete(listKey)
                 }
             }
         }

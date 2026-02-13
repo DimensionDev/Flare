@@ -5,12 +5,13 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.refreshSuspend
-import dev.dimension.flare.data.datasource.microblog.ListDataSource
-import dev.dimension.flare.data.datasource.microblog.ListMetaData
-import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
+import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
+import dev.dimension.flare.data.datasource.microblog.list.ListMetaDataType
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
@@ -25,7 +26,7 @@ import org.koin.core.component.inject
  */
 public class ListEditPresenter(
     private val accountType: AccountType,
-    private val listId: String,
+    private val listKey: MicroBlogKey,
 ) : PresenterBase<ListEditPresenter.State>(),
     KoinComponent {
     @Immutable
@@ -49,23 +50,23 @@ public class ListEditPresenter(
         val listInfoState =
             remember(
                 accountType,
-                listId,
+                listKey,
             ) {
-                ListInfoPresenter(accountType, listId)
+                ListInfoPresenter(accountType, listKey)
             }.body()
         val state =
             remember(
                 accountType,
-                listId,
+                listKey,
             ) {
-                EditListMemberPresenter(accountType, listId)
+                EditListMemberPresenter(accountType, listKey)
             }.body()
         val memberState =
             remember(
                 accountType,
-                listId,
+                listKey,
             ) {
-                ListMembersPresenter(accountType, listId)
+                ListMembersPresenter(accountType, listKey)
             }.body()
         return object :
             State,
@@ -75,7 +76,7 @@ public class ListEditPresenter(
             override val supportedMetaData =
                 serviceState.map {
                     require(it is ListDataSource)
-                    it.supportedMetaData
+                    it.listHandler.supportedMetaData
                 }
 
             override fun refresh() {
@@ -87,7 +88,7 @@ public class ListEditPresenter(
             override suspend fun updateList(listMetaData: ListMetaData) {
                 serviceState.onSuccess {
                     require(it is ListDataSource)
-                    it.updateList(listId, listMetaData)
+                    it.listHandler.update(listKey, listMetaData)
                 }
             }
         }

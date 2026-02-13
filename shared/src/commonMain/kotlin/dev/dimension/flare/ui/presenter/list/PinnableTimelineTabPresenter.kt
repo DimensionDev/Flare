@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.common.PagingState
@@ -11,6 +12,7 @@ import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -70,7 +72,7 @@ public class PinnableTimelineTabPresenter(
                     it as? ListDataSource
                 }.map { service ->
                     remember(service) {
-                        service.myList(scope = scope)
+                        service.listHandler.data.cachedIn(scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
 

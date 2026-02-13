@@ -26,7 +26,7 @@ internal class ListMemberHandler(
     private val loader: ListMemberLoader,
 ) : KoinComponent {
     private val accountType: DbAccountType = AccountType.Specific(accountKey)
-    val database: CacheDatabase by inject()
+    private val database: CacheDatabase by inject()
     private val memberPagingKey: String
         get() = "${pagingKey}_members"
 
@@ -66,6 +66,17 @@ internal class ListMemberHandler(
                 it.user.render(accountKey)
             }
         }
+
+    fun listMembersListFlow(listKey: MicroBlogKey) =
+        database
+            .listDao()
+            .getListMembersFlow(
+                listKey = listKey,
+            ).map { members ->
+                members.map { member ->
+                    member.user.render(accountKey)
+                }
+            }
 
     suspend fun addMember(
         listKey: MicroBlogKey,

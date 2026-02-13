@@ -1,10 +1,11 @@
 package dev.dimension.flare.data.datasource.microblog.list
 
 import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
+import dev.dimension.flare.model.MicroBlogKey
 
 internal interface ListDataSource {
-    fun listTimeline(listId: String): BaseTimelineLoader
+    fun listTimeline(listKey: MicroBlogKey): BaseTimelineLoader
 
-    val listLoader: ListLoader
-    val listMemberLoader: ListMemberLoader
+    val listHandler: ListHandler
+    val listMemberHandler: ListMemberHandler
 }

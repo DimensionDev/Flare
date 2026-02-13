@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
 import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.PagingState
@@ -24,9 +23,6 @@ import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
 import app.bsky.feed.PostReplyRef
 import app.bsky.feed.ViewerState
-import app.bsky.graph.GetListQueryParams
-import app.bsky.graph.GetListsQueryParams
-import app.bsky.graph.Listitem
 import app.bsky.graph.MuteActorRequest
 import app.bsky.graph.UnmuteActorRequest
 import app.bsky.notification.ListNotificationsQueryParams
@@ -49,21 +45,13 @@ import com.atproto.identity.ResolveHandleQueryParams
 import com.atproto.moderation.CreateReportRequest
 import com.atproto.moderation.CreateReportRequestSubjectUnion
 import com.atproto.moderation.Token
-import com.atproto.repo.ApplyWritesDelete
-import com.atproto.repo.ApplyWritesRequest
-import com.atproto.repo.ApplyWritesRequestWriteUnion
 import com.atproto.repo.CreateRecordRequest
 import com.atproto.repo.CreateRecordResponse
 import com.atproto.repo.DeleteRecordRequest
-import com.atproto.repo.ListRecordsQueryParams
-import com.atproto.repo.ListRecordsRecord
-import com.atproto.repo.PutRecordRequest
 import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.BasePagingSource
-import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
-import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.MemCacheable
@@ -82,17 +70,17 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
-import dev.dimension.flare.data.datasource.microblog.ListDataSource
-import dev.dimension.flare.data.datasource.microblog.ListMetaData
-import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
-import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
-import dev.dimension.flare.data.datasource.microblog.memoryPager
+import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.list.ListHandler
+import dev.dimension.flare.data.datasource.microblog.list.ListLoader
+import dev.dimension.flare.data.datasource.microblog.list.ListMemberHandler
+import dev.dimension.flare.data.datasource.microblog.list.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
@@ -1365,460 +1353,45 @@ internal class BlueskyDataSource(
         }
     }
 
-    private val myListKey = "my_list_$accountKey"
-
-    override fun myList(scope: CoroutineScope): Flow<PagingData<UiList.List>> =
-        memoryPager(
-            pageSize = 20,
-            pagingKey = myListKey,
-            scope = scope,
-            mediator =
-                object : BaseRemoteMediator<Int, UiList.List>() {
-                    var cursor: String? = null
-
-                    override suspend fun doLoad(
-                        loadType: LoadType,
-                        state: PagingState<Int, UiList.List>,
-                    ): MediatorResult {
-                        val result =
-                            service
-                                .getLists(
-                                    params =
-                                        GetListsQueryParams(
-                                            actor = Did(did = accountKey.id),
-                                            cursor = cursor,
-                                        ),
-                                ).requireResponse()
-                        val items =
-                            result
-                                .lists
-                                .map {
-                                    it.render(accountKey)
-                                }.toImmutableList()
-                        cursor = result.cursor
-                        MemoryPagingSource.update<UiList.List>(
-                            key = myListKey,
-                            value = items,
-                        )
-                        return MediatorResult.Success(
-                            endOfPaginationReached = cursor == null,
-                        )
-                    }
-                },
-        )
-
-    private fun listInfoKey(uri: String) = "list_info_$uri"
-
-    override fun listInfo(listId: String): CacheData<UiList.List> =
-        MemCacheable(
-            key = listInfoKey(listId),
-        ) {
-            service
-                .getList(
-                    GetListQueryParams(
-                        list = AtUri(listId),
-                    ),
-                ).requireResponse()
-                .list
-                .render(accountKey)
-        }
-
-    override fun listTimeline(listId: String) =
+    override fun listTimeline(listKey: MicroBlogKey) =
         ListTimelineRemoteMediator(
             service = service,
             accountKey = accountKey,
             database = database,
-            uri = listId,
+            uri = listKey.id,
         )
 
-    private suspend fun createList(
-        title: String,
-        description: String?,
-        icon: FileItem?,
-    ) {
-        tryRun {
-            val iconInfo =
-                if (icon != null) {
-                    service.uploadBlob(icon.readBytes()).maybeResponse()
-                } else {
-                    null
-                }
-            val record =
-                app.bsky.graph.List(
-                    purpose = app.bsky.graph.Token.Curatelist,
-                    name = title,
-                    description = description,
-                    avatar = iconInfo?.blob,
-                    createdAt = Clock.System.now(),
-                )
-            service.createRecord(
-                request =
-                    CreateRecordRequest(
-                        repo = Did(did = accountKey.id),
-                        collection = Nsid("app.bsky.graph.list"),
-                        record = record.bskyJson(),
-                    ),
-            )
-        }.onSuccess {
-            val uri = it.requireResponse().uri
-            service
-                .getList(
-                    params =
-                        GetListQueryParams(
-                            list = uri,
-                        ),
-                ).requireResponse()
-                .list
-                .render(accountKey)
-                .let { list ->
-                    MemoryPagingSource.updateWith<UiList.List>(
-                        key = myListKey,
-                    ) {
-                        (listOf(list) + it).toImmutableList()
-                    }
-                }
-        }
-    }
+    private val myListKey = "my_list_$accountKey"
 
-    override suspend fun deleteList(listId: String) {
-        tryRun {
-            val id = listId.substringAfterLast('/')
-            service.applyWrites(
-                request =
-                    ApplyWritesRequest(
-                        repo = Did(did = accountKey.id),
-                        writes =
-                            persistentListOf(
-                                ApplyWritesRequestWriteUnion.Delete(
-                                    value =
-                                        ApplyWritesDelete(
-                                            collection = Nsid("app.bsky.graph.list"),
-                                            rkey = RKey(id),
-                                        ),
-                                ),
-                            ),
-                    ),
-            )
-        }.onSuccess {
-            MemoryPagingSource.updateWith<UiList.List>(
-                key = myListKey,
-            ) {
-                it.filterNot { item -> item.id == listId }.toImmutableList()
-            }
-        }
-    }
-
-    private suspend fun updateList(
-        uri: String,
-        title: String,
-        description: String?,
-        icon: FileItem?,
-    ) {
-        tryRun {
-            val currentInfo: app.bsky.graph.List =
-                service
-                    .getRecord(
-                        params =
-                            com.atproto.repo.GetRecordQueryParams(
-                                collection = Nsid("app.bsky.graph.list"),
-                                repo = Did(did = accountKey.id),
-                                rkey = RKey(uri.substringAfterLast('/')),
-                            ),
-                    ).requireResponse()
-                    .value
-                    .decodeAs()
-
-            val iconInfo =
-                if (icon != null) {
-                    service.uploadBlob(icon.readBytes()).maybeResponse()
-                } else {
-                    null
-                }
-            val newRecord =
-                currentInfo
-                    .copy(
-                        name = title,
-                        description = description,
-                    ).let {
-                        if (iconInfo != null) {
-                            it.copy(avatar = iconInfo.blob)
-                        } else {
-                            it
-                        }
-                    }
-            service.putRecord(
-                request =
-                    PutRecordRequest(
-                        repo = Did(did = accountKey.id),
-                        collection = Nsid("app.bsky.graph.list"),
-                        rkey = RKey(uri.substringAfterLast('/')),
-                        record = newRecord.bskyJson(),
-                    ),
-            )
-        }.onSuccess {
-            MemoryPagingSource.updateWith<UiList.List>(
-                key = myListKey,
-            ) {
-                it
-                    .map { item ->
-                        if (item.id == uri) {
-                            item.copy(
-                                title = title,
-                                description = description,
-                            )
-                        } else {
-                            item
-                        }
-                    }.toImmutableList()
-            }
-        }
-    }
-
-    private fun listMemberKey(listId: String) = "listMembers_$listId"
-
-    override fun listMembers(
-        listId: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
-        memoryPager(
-            pageSize = pageSize,
-            pagingKey = listMemberKey(listId),
-            scope = scope,
-            mediator =
-                object : BaseRemoteMediator<Int, UiUserV2>() {
-                    private var cursor: String? = null
-
-                    override suspend fun doLoad(
-                        loadType: LoadType,
-                        state: PagingState<Int, UiUserV2>,
-                    ): MediatorResult {
-                        if (loadType == LoadType.PREPEND) {
-                            return MediatorResult.Success(endOfPaginationReached = true)
-                        }
-                        if (loadType == LoadType.REFRESH) {
-                            cursor = null
-                        }
-                        val response =
-                            service
-                                .getList(
-                                    params =
-                                        GetListQueryParams(
-                                            list = AtUri(listId),
-                                            cursor = cursor,
-                                            limit = state.config.pageSize.toLong(),
-                                        ),
-                                ).maybeResponse()
-                        cursor = response?.cursor
-                        val result =
-                            response
-                                ?.items
-                                ?.map {
-                                    it.subject.render(accountKey)
-                                } ?: emptyList()
-
-                        if (loadType == LoadType.REFRESH) {
-                            MemoryPagingSource.update(
-                                key = listMemberKey(listId),
-                                value = result.toImmutableList(),
-                            )
-                        } else if (loadType == LoadType.APPEND) {
-                            MemoryPagingSource.append(
-                                key = listMemberKey(listId),
-                                value = result.toImmutableList(),
-                            )
-                        }
-
-                        return MediatorResult.Success(
-                            endOfPaginationReached = cursor == null,
-                        )
-                    }
-                },
-        )
-
-    override suspend fun addMember(
-        listId: String,
-        userKey: MicroBlogKey,
-    ) {
-        tryRun {
-            val user =
-                service
-                    .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
-                    .requireResponse()
-                    .render(accountKey)
-
-            MemoryPagingSource.updateWith(
-                key = listMemberKey(listId),
-            ) {
-                (listOf(user) + it)
-                    .distinctBy {
-                        it.key
-                    }.toImmutableList()
-            }
-            val list =
-                service
-                    .getList(
-                        params =
-                            GetListQueryParams(
-                                list = AtUri(listId),
-                            ),
-                    ).requireResponse()
-                    .list
-                    .render(accountKey)
-            MemCacheable.updateWith<ImmutableList<UiList.List>>(userListsKey(userKey)) {
-                (it + list).toImmutableList()
-            }
-            service.createRecord(
-                CreateRecordRequest(
-                    repo = Did(did = accountKey.id),
-                    collection = Nsid("app.bsky.graph.listitem"),
-                    record =
-                        app.bsky.graph
-                            .Listitem(
-                                list = AtUri(listId),
-                                subject = Did(userKey.id),
-                                createdAt = Clock.System.now(),
-                            ).bskyJson(),
-                ),
-            )
-        }
-    }
-
-    override suspend fun removeMember(
-        listId: String,
-        userKey: MicroBlogKey,
-    ) {
-        tryRun {
-            MemoryPagingSource.updateWith<UiUserV2>(
-                key = listMemberKey(listId),
-            ) {
-                it
-                    .filter { user -> user.key.id != userKey.id }
-                    .toImmutableList()
-            }
-            MemCacheable.updateWith<ImmutableList<UiList.List>>(userListsKey(userKey)) {
-                it
-                    .filter { list -> list.id != listId }
-                    .toImmutableList()
-            }
-            var record: ListRecordsRecord? = null
-            var cursor: String? = null
-            while (record == null) {
-                val response =
-                    service
-                        .listRecords(
-                            params =
-                                ListRecordsQueryParams(
-                                    repo = Did(did = accountKey.id),
-                                    collection = Nsid("app.bsky.graph.listitem"),
-                                    limit = 100,
-                                    cursor = cursor,
-                                ),
-                        ).requireResponse()
-                if (response.cursor == null || response.records.isEmpty()) {
-                    break
-                }
-                cursor = response.cursor
-                record =
-                    response.records
-                        .firstOrNull {
-                            val item: app.bsky.graph.Listitem = it.value.decodeAs()
-                            item.list.atUri == listId && item.subject.did == userKey.id
-                        }
-            }
-            if (record != null) {
-                service.deleteRecord(
-                    DeleteRecordRequest(
-                        repo = Did(did = accountKey.id),
-                        collection = Nsid("app.bsky.graph.listitem"),
-                        rkey = RKey(record.uri.atUri.substringAfterLast('/')),
-                    ),
-                )
-            }
-        }
-    }
-
-    override val supportedMetaData: ImmutableList<ListMetaDataType>
-        get() =
-            persistentListOf(
-                ListMetaDataType.TITLE,
-                ListMetaDataType.DESCRIPTION,
-                ListMetaDataType.AVATAR,
-            )
-
-    override suspend fun updateList(
-        listId: String,
-        metaData: ListMetaData,
-    ) {
-        updateList(
-            uri = listId,
-            title = metaData.title,
-            description = metaData.description,
-            icon = metaData.avatar,
+    val listLoader: ListLoader by lazy {
+        BlueskyListLoader(
+            service = service,
+            accountKey = accountKey,
         )
     }
 
-    override suspend fun createList(metaData: ListMetaData) {
-        createList(
-            title = metaData.title,
-            description = metaData.description,
-            icon = metaData.avatar,
+    val listMemberLoader: ListMemberLoader by lazy {
+        BlueskyListMemberLoader(
+            service = service,
+            accountKey = accountKey,
         )
     }
 
-    override fun listMemberCache(listId: String): Flow<ImmutableList<UiUserV2>> =
-        MemoryPagingSource.getFlow<UiUserV2>(listMemberKey(listId))
+    override val listHandler: ListHandler by lazy {
+        ListHandler(
+            pagingKey = myListKey,
+            accountKey = accountKey,
+            loader = listLoader,
+        )
+    }
 
-    private fun userListsKey(userKey: MicroBlogKey) = "userLists_${userKey.id}"
-
-    override fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList.List>> =
-        MemCacheable(
-            key = userListsKey(userKey),
-        ) {
-            var cursor: String? = null
-            val lists = mutableListOf<UiList.List>()
-            val allLists =
-                service
-                    .getLists(
-                        params =
-                            GetListsQueryParams(
-                                actor = Did(did = accountKey.id),
-                                limit = 100,
-                            ),
-                    ).requireResponse()
-                    .lists
-                    .map {
-                        it.render(accountKey)
-                    }
-            while (true) {
-                val response =
-                    service
-                        .listRecords(
-                            params =
-                                ListRecordsQueryParams(
-                                    repo = Did(did = accountKey.id),
-                                    collection = Nsid("app.bsky.graph.listitem"),
-                                    limit = 100,
-                                    cursor = cursor,
-                                ),
-                        ).requireResponse()
-                lists.addAll(
-                    response.records
-                        .filter {
-                            val item: Listitem = it.value.decodeAs()
-                            item.subject.did == userKey.id
-                        }.mapNotNull {
-                            val item: Listitem = it.value.decodeAs()
-                            allLists.firstOrNull { it.id == item.list.atUri }
-                        },
-                )
-                cursor = response.cursor
-                if (cursor == null) {
-                    break
-                }
-            }
-            lists.toImmutableList()
-        }
+    override val listMemberHandler: ListMemberHandler by lazy {
+        ListMemberHandler(
+            pagingKey = "list_members_$accountKey",
+            accountKey = accountKey,
+            loader = listMemberLoader,
+        )
+    }
 
     private val notificationMarkerKey: String
         get() = "notificationBadgeCount_$accountKey"

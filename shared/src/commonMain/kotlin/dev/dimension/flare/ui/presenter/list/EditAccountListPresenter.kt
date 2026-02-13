@@ -4,24 +4,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
 import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -47,7 +43,7 @@ public class EditAccountListPresenter(
                 .map { service ->
                     require(service is ListDataSource)
                     remember(service) {
-                        service.myList(scope = scope).map {
+                        service.listHandler.data.cachedIn(scope).map {
                             it.filter {
                                 !it.readonly
                             }
@@ -55,12 +51,13 @@ public class EditAccountListPresenter(
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
         val userLists =
-            serviceState.flatMap { service ->
-                require(service is ListDataSource)
-                remember(service) {
-                    service.userLists(userKey)
-                }.collectAsState().toUi()
-            }
+            serviceState
+                .map { service ->
+                    require(service is ListDataSource)
+                    remember(service) {
+                        service.listMemberHandler.userLists(userKey).cachedIn(scope)
+                    }.collectAsLazyPagingItems()
+                }.toPagingState()
 
         return object : EditAccountListState {
             override val lists = allList
@@ -70,7 +67,7 @@ public class EditAccountListPresenter(
                 serviceState.onSuccess {
                     require(it is ListDataSource)
                     scope.launch {
-                        it.addMember(listId = list.id, userKey = userKey)
+                        it.listMemberHandler.addMember(list.key, userKey = userKey)
                     }
                 }
             }
@@ -79,7 +76,7 @@ public class EditAccountListPresenter(
                 serviceState.onSuccess {
                     require(it is ListDataSource)
                     scope.launch {
-                        it.removeMember(listId = list.id, userKey = userKey)
+                        it.listMemberHandler.removeMember(list.key, userKey = userKey)
                     }
                 }
             }
@@ -92,12 +89,12 @@ public interface EditAccountListState {
     /**
      * All lists.
      */
-    public val lists: PagingState<UiList.List>
+    public val lists: PagingState<UiList>
 
     /**
      * Lists that the user is a member of.
      */
-    public val userLists: UiState<ImmutableList<UiList.List>>
+    public val userLists: PagingState<UiList>
 
     public fun addList(list: UiList)
 

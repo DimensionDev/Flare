@@ -10,6 +10,7 @@ public sealed class UiList {
 //    public abstract val id: String
     public abstract val key: MicroBlogKey
     public abstract val title: String
+    public abstract val readonly: Boolean
 
     @Serializable
     @Immutable
@@ -19,7 +20,7 @@ public sealed class UiList {
         val description: String? = null,
         val avatar: String? = null,
         val creator: UiUserV2? = null,
-        val readonly: Boolean = false,
+        override val readonly: Boolean = false,
     ) : UiList()
 
     @Serializable
@@ -32,6 +33,7 @@ public sealed class UiList {
         val creator: UiUserV2? = null,
         val likedCount: UiNumber = UiNumber(0),
         val liked: Boolean = false,
+        override val readonly: Boolean = false,
     ) : UiList()
 
     @Serializable
@@ -39,6 +41,7 @@ public sealed class UiList {
     public data class Antenna(
         override val key: MicroBlogKey,
         override val title: String,
+        override val readonly: Boolean = false,
     ) : UiList()
 
     @Serializable
@@ -53,5 +56,6 @@ public sealed class UiList {
         val banner: String? = null,
         val isFollowing: Boolean? = null,
         val isFavorited: Boolean? = null,
+        override val readonly: Boolean = false,
     ) : UiList()
 }

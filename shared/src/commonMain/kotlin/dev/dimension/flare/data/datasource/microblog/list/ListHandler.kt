@@ -16,6 +16,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
@@ -28,7 +29,11 @@ internal class ListHandler(
     private val loader: ListLoader,
 ) : KoinComponent {
     private val accountType: DbAccountType = AccountType.Specific(accountKey)
-    val database: CacheDatabase by inject()
+    private val database: CacheDatabase by inject()
+
+    val supportedMetaData: ImmutableList<ListMetaDataType> by lazy {
+        loader.supportedMetaData
+    }
     val data by lazy {
         Pager(
             config = pagingConfig,

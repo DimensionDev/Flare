@@ -26,7 +26,9 @@ import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.list.ListHandler
 import dev.dimension.flare.data.datasource.microblog.list.ListLoader
+import dev.dimension.flare.data.datasource.microblog.list.ListMemberHandler
 import dev.dimension.flare.data.datasource.microblog.list.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
@@ -156,9 +158,9 @@ internal open class MastodonDataSource(
             accountKey,
         )
 
-    override fun listTimeline(listId: String) =
+    override fun listTimeline(listKey: MicroBlogKey) =
         ListTimelineRemoteMediator(
-            listId,
+            listKey.id,
             service,
             database,
             accountKey,
@@ -906,17 +908,33 @@ internal open class MastodonDataSource(
             },
         )
 
-    override val listLoader: ListLoader by lazy {
+    val listLoader: ListLoader by lazy {
         MastodonListLoader(
             service = service,
             accountKey = accountKey,
         )
     }
 
-    override val listMemberLoader: ListMemberLoader by lazy {
+    val listMemberLoader: ListMemberLoader by lazy {
         MastodonListMemberLoader(
             service = service,
             accountKey = accountKey,
+        )
+    }
+
+    override val listHandler: ListHandler by lazy {
+        ListHandler(
+            pagingKey = "lists_$accountKey",
+            accountKey = accountKey,
+            loader = listLoader,
+        )
+    }
+
+    override val listMemberHandler: ListMemberHandler by lazy {
+        ListMemberHandler(
+            pagingKey = "list_members_$accountKey",
+            accountKey = accountKey,
+            loader = listMemberLoader,
         )
     }
 

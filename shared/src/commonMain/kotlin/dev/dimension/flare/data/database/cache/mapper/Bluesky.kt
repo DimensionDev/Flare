@@ -41,7 +41,6 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.coroutines.flow.firstOrNull
 import sh.christian.ozone.api.AtUri
 
-
 internal object Bluesky {
     suspend fun saveDM(
         accountKey: MicroBlogKey,
@@ -581,10 +580,11 @@ internal suspend fun List<FeedViewPost>.toDbPagingTimeline(
     // Identify which posts are parents of other posts in this feed
     val parentUrisInFeed = mutableSetOf<String>()
     for (item in this) {
-        val parentUri = when (val parent = item.reply?.parent) {
-            is ReplyRefParentUnion.PostView -> parent.value.uri.atUri
-            else -> null
-        }
+        val parentUri =
+            when (val parent = item.reply?.parent) {
+                is ReplyRefParentUnion.PostView -> parent.value.uri.atUri
+                else -> null
+            }
         if (parentUri != null) {
             val inFeed = postUriMap.containsKey(parentUri)
             if (inFeed) {
@@ -604,10 +604,11 @@ internal suspend fun List<FeedViewPost>.toDbPagingTimeline(
             visitedUris.add(currentPostUri)
             val currentFeedItem = postUriMap[currentPostUri]
             if (currentFeedItem != null) {
-                val parentPostView = when (val reply = currentFeedItem.reply?.parent) {
-                    is ReplyRefParentUnion.PostView -> reply.value
-                    else -> null
-                }
+                val parentPostView =
+                    when (val reply = currentFeedItem.reply?.parent) {
+                        is ReplyRefParentUnion.PostView -> reply.value
+                        else -> null
+                    }
                 if (parentPostView != null) {
                     parentChain.add(parentPostView)
                     currentPostUri = parentPostView.uri.atUri
@@ -625,13 +626,14 @@ internal suspend fun List<FeedViewPost>.toDbPagingTimeline(
     }
 
     // Filter out posts that are parents of other posts, keeping only leaves/endpoints
-    val result = this.flatMap { item ->
-        if (parentUrisInFeed.contains(item.post.uri.atUri)) {
-            emptyList()
-        } else {
-            processBlueskyFeedItem(item, accountKey, pagingKey, sortIdProvider, parentChainMap)
+    val result =
+        this.flatMap { item ->
+            if (parentUrisInFeed.contains(item.post.uri.atUri)) {
+                emptyList()
+            } else {
+                processBlueskyFeedItem(item, accountKey, pagingKey, sortIdProvider, parentChainMap)
+            }
         }
-    }
     return result
 }
 

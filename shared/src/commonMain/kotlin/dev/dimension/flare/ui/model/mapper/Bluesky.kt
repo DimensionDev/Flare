@@ -529,6 +529,14 @@ internal fun PostView.renderStatus(
             append(uri.atUri.substringAfterLast("/"))
         }
 
+    val parents =
+        references[ReferenceType.Reply]
+            ?.mapNotNull { it as? StatusContent.Bluesky }
+            ?.reversed()
+            ?.map { it.data.renderStatus(accountKey, event) }
+            ?.toPersistentList()
+            ?: persistentListOf()
+
     return UiTimeline.ItemContent.Status(
         platformType = PlatformType.Bluesky,
         user = user,
@@ -539,10 +547,7 @@ internal fun PostView.renderStatus(
         poll = null,
         quote = listOfNotNull(findQuote(accountKey, this, event)).toImmutableList(),
         contentWarning = null,
-        parents =
-            listOfNotNull(
-                parent?.renderStatus(accountKey, event),
-            ).toPersistentList(),
+        parents = parents,
         actions =
             listOfNotNull(
                 ActionMenu.Item(

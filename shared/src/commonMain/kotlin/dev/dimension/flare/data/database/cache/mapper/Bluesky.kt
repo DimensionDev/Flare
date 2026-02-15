@@ -41,6 +41,7 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.coroutines.flow.firstOrNull
 import sh.christian.ozone.api.AtUri
 
+
 internal object Bluesky {
     suspend fun saveDM(
         accountKey: MicroBlogKey,
@@ -570,102 +571,157 @@ internal suspend fun List<FeedViewPost>.toDbPagingTimeline(
             }
         }
     },
-): List<DbPagingTimelineWithStatus> =
-    this.flatMap {
-        val reply =
-            when (val reply = it.reply?.parent) {
-                is ReplyRefParentUnion.PostView ->
-                    if (reply.value.uri != it.post.uri) {
-                        reply.value
-                    } else {
-                        null
-                    }
-
-                else -> null
-            }
-
-        val status =
-            when (val data = it.reason) {
-                is FeedViewPostReasonUnion.ReasonRepost -> {
-                    val user = data.value.by.toDbUser(accountKey.host)
-                    DbStatusWithUser(
-                        user = user,
-                        data =
-                            DbStatus(
-                                statusKey =
-                                    MicroBlogKey(
-                                        it.post.uri.atUri + "_reblog_${user.userKey}",
-                                        accountKey.host,
-                                    ),
-                                userKey =
-                                    data.value.by
-                                        .toDbUser(accountKey.host)
-                                        .userKey,
-                                content = StatusContent.BlueskyReason(data),
-                                accountType = AccountType.Specific(accountKey),
-                                text = null,
-                                createdAt = it.post.indexedAt,
-                            ),
-                    )
-                }
-
-                is FeedViewPostReasonUnion.ReasonPin -> {
-                    val status = it.post.toDbStatusWithUser(accountKey)
-                    DbStatusWithUser(
-                        user = status.user,
-                        data =
-                            DbStatus(
-                                statusKey =
-                                    MicroBlogKey(
-                                        it.post.uri.atUri + "_pin_${status.user?.userKey}",
-                                        accountKey.host,
-                                    ),
-                                userKey = status.user?.userKey,
-                                content = StatusContent.BlueskyReason(data),
-                                accountType = AccountType.Specific(accountKey),
-                                text = status.data.text,
-                                createdAt = it.post.indexedAt,
-                            ),
-                    )
-                }
-
-                else -> {
-                    // bluesky doesn't have "quote" and "retweet" as the same as the other platforms
-                    it.post.toDbStatusWithUser(accountKey)
-                }
-            }
-        val references =
-            listOfNotNull(
-                if (reply != null) {
-                    ReferenceType.Reply to listOfNotNull(reply.toDbStatusWithUser(accountKey))
-                } else {
-                    null
-                },
-                if (it.reason != null) {
-                    ReferenceType.Retweet to listOfNotNull(it.post.toDbStatusWithUser(accountKey))
-                } else {
-                    null
-                },
-            ).toMap()
-        listOfNotNull(
-//            reply?.let {
-//                createDbPagingTimelineWithStatus(
-//                    accountKey = accountKey,
-//                    pagingKey = pagingKey,
-//                    sortId = -SnowflakeIdGenerator.nextId(),
-//                    status = it,
-//                    references = references,
-//                )
-//            },
-            createDbPagingTimelineWithStatus(
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                sortId = sortIdProvider(it),
-                status = status,
-                references = references,
-            ),
-        )
+): List<DbPagingTimelineWithStatus> {
+    // Build a map of all posts by URI for quick lookup
+    val postUriMap = mutableMapOf<String, FeedViewPost>()
+    for (item in this) {
+        postUriMap[item.post.uri.atUri] = item
     }
+
+    // Identify which posts are parents of other posts in this feed
+    val parentUrisInFeed = mutableSetOf<String>()
+    for (item in this) {
+        val parentUri = when (val parent = item.reply?.parent) {
+            is ReplyRefParentUnion.PostView -> parent.value.uri.atUri
+            else -> null
+        }
+        if (parentUri != null) {
+            val inFeed = postUriMap.containsKey(parentUri)
+            if (inFeed) {
+                parentUrisInFeed.add(parentUri)
+            }
+        }
+    }
+
+    // Build complete parent chains for each post
+    val parentChainMap = mutableMapOf<String, List<PostView>>()
+    for (item in this) {
+        val parentChain = mutableListOf<PostView>()
+        var currentPostUri: String? = item.post.uri.atUri
+        val visitedUris = mutableSetOf<String>() // prevent infinite loops
+
+        while (currentPostUri != null && !visitedUris.contains(currentPostUri) && parentChain.size < 1000) {
+            visitedUris.add(currentPostUri)
+            val currentFeedItem = postUriMap[currentPostUri]
+            if (currentFeedItem != null) {
+                val parentPostView = when (val reply = currentFeedItem.reply?.parent) {
+                    is ReplyRefParentUnion.PostView -> reply.value
+                    else -> null
+                }
+                if (parentPostView != null) {
+                    parentChain.add(parentPostView)
+                    currentPostUri = parentPostView.uri.atUri
+                } else {
+                    currentPostUri = null
+                }
+            } else {
+                currentPostUri = null
+            }
+        }
+
+        if (parentChain.isNotEmpty()) {
+            parentChainMap[item.post.uri.atUri] = parentChain
+        }
+    }
+
+    // Filter out posts that are parents of other posts, keeping only leaves/endpoints
+    val result = this.flatMap { item ->
+        if (parentUrisInFeed.contains(item.post.uri.atUri)) {
+            emptyList()
+        } else {
+            processBlueskyFeedItem(item, accountKey, pagingKey, sortIdProvider, parentChainMap)
+        }
+    }
+    return result
+}
+
+private suspend fun processBlueskyFeedItem(
+    it: FeedViewPost,
+    accountKey: MicroBlogKey,
+    pagingKey: String,
+    sortIdProvider: suspend (FeedViewPost) -> Long,
+    parentChainMap: Map<String, List<PostView>>,
+): List<DbPagingTimelineWithStatus> {
+    val parentChain = parentChainMap[it.post.uri.atUri].orEmpty()
+
+    val status =
+        when (val data = it.reason) {
+            is FeedViewPostReasonUnion.ReasonRepost -> {
+                val user = data.value.by.toDbUser(accountKey.host)
+                DbStatusWithUser(
+                    user = user,
+                    data =
+                        DbStatus(
+                            statusKey =
+                                MicroBlogKey(
+                                    it.post.uri.atUri + "_reblog_${user.userKey}",
+                                    accountKey.host,
+                                ),
+                            userKey =
+                                data.value.by
+                                    .toDbUser(accountKey.host)
+                                    .userKey,
+                            content = StatusContent.BlueskyReason(data),
+                            accountType = AccountType.Specific(accountKey),
+                            text = null,
+                            createdAt = it.post.indexedAt,
+                        ),
+                )
+            }
+
+            is FeedViewPostReasonUnion.ReasonPin -> {
+                val status = it.post.toDbStatusWithUser(accountKey)
+                DbStatusWithUser(
+                    user = status.user,
+                    data =
+                        DbStatus(
+                            statusKey =
+                                MicroBlogKey(
+                                    it.post.uri.atUri + "_pin_${status.user?.userKey}",
+                                    accountKey.host,
+                                ),
+                            userKey = status.user?.userKey,
+                            content = StatusContent.BlueskyReason(data),
+                            accountType = AccountType.Specific(accountKey),
+                            text = status.data.text,
+                            createdAt = it.post.indexedAt,
+                        ),
+                )
+            }
+
+            else -> {
+                // bluesky doesn't have "quote" and "retweet" as the same as the other platforms
+                it.post.toDbStatusWithUser(accountKey)
+            }
+        }
+    val references =
+        listOfNotNull(
+            if (parentChain.isNotEmpty()) {
+                val convertedParents = parentChain.mapNotNull { it.toDbStatusWithUser(accountKey) }
+                if (convertedParents.isNotEmpty()) {
+                    ReferenceType.Reply to convertedParents
+                } else {
+                    null
+                }
+            } else {
+                null
+            },
+            if (it.reason != null) {
+                ReferenceType.Retweet to listOfNotNull(it.post.toDbStatusWithUser(accountKey))
+            } else {
+                null
+            },
+        ).toMap()
+    return listOfNotNull(
+        createDbPagingTimelineWithStatus(
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            sortId = sortIdProvider(it),
+            status = status,
+            references = references,
+        ),
+    )
+}
 
 private fun PostView.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser {
     val user = author.toDbUser(accountKey.host)

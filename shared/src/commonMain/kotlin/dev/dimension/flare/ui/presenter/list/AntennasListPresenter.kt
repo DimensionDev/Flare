@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.list
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
@@ -26,7 +27,7 @@ public class AntennasListPresenter(
 
     @androidx.compose.runtime.Immutable
     public interface State {
-        public val data: PagingState<UiList.Antenna>
+        public val data: PagingState<UiList>
 
         public fun refresh()
 
@@ -42,11 +43,11 @@ public class AntennasListPresenter(
                 .map {
                     remember {
                         require(it is MisskeyDataSource)
-                        it.antennasList(scope)
+                        it.antennasList().cachedIn(scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
         return object : State {
-            override val data: PagingState<UiList.Antenna> = data
+            override val data: PagingState<UiList> = data
 
             override fun refresh() {
                 scope.launch {

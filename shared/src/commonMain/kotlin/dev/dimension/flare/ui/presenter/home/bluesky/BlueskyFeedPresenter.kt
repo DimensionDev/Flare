@@ -2,8 +2,10 @@ package dev.dimension.flare.ui.presenter.home.bluesky
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
@@ -56,8 +58,8 @@ public class BlueskyFeedPresenter(
                 .flatMap {
                     require(it is BlueskyDataSource)
                     remember(it) {
-                        it.myFeeds
-                    }.collectAsState().toUi()
+                        it.feedHandler.data.cachedIn(scope)
+                    }.collectAsLazyPagingItems()
                 }.map {
                     it.any { it.id == uri }
                 }

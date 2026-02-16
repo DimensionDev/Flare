@@ -167,4 +167,44 @@ internal class ListHandler(
             }
         }
     }
+
+    suspend fun insertToDatabase(
+        data: UiList,
+    ) {
+        database.connect {
+            database.listDao().insertAll(
+                listOf(
+                    DbList(
+                        listKey = data.key,
+                        accountType = AccountType.Specific(accountKey),
+                        content = DbList.ListContent(data),
+                    ),
+                ),
+            )
+
+            database.listDao().insertAll(
+                listOf(
+                    DbListPaging(
+                        accountType = AccountType.Specific(accountKey),
+                        pagingKey = pagingKey,
+                        listKey = data.key,
+                    ),
+                ),
+            )
+        }
+    }
+
+    suspend fun withDatabase(
+        block: suspend (update: suspend (UiList) -> Unit) -> Unit,
+    ) {
+        block.invoke {  data ->
+            database.connect {
+                database.listDao().updateListContent(
+                    listKey = data.key,
+                    accountType = AccountType.Specific(accountKey),
+                    content = DbList.ListContent(data),
+                )
+            }
+        }
+    }
 }

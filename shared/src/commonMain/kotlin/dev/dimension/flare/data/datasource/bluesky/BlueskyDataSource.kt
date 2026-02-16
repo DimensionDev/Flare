@@ -8,16 +8,12 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import app.bsky.actor.GetProfileQueryParams
 import app.bsky.actor.PreferencesUnion
-import app.bsky.actor.PutPreferencesRequest
-import app.bsky.actor.SavedFeed
-import app.bsky.actor.SavedFeedType
 import app.bsky.bookmark.CreateBookmarkRequest
 import app.bsky.bookmark.DeleteBookmarkRequest
 import app.bsky.embed.Images
 import app.bsky.embed.ImagesImage
 import app.bsky.embed.Record
 import app.bsky.feed.GetFeedGeneratorQueryParams
-import app.bsky.feed.GetFeedGeneratorsQueryParams
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
@@ -110,6 +106,7 @@ import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
+import kotlin.time.Clock
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -133,8 +130,6 @@ import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
 import sh.christian.ozone.api.model.JsonContent
 import sh.christian.ozone.api.model.JsonContent.Companion.encodeAsJsonContent
-import kotlin.time.Clock
-import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal class BlueskyDataSource(
@@ -1080,43 +1075,21 @@ internal class BlueskyDataSource(
                 .orEmpty()
         }
     }
-
     private val myFeedsKey = "my_feeds_$accountKey"
 
-    val myFeeds: CacheData<ImmutableList<UiList.Feed>> by lazy {
-        MemCacheable(
-            key = myFeedsKey,
-        ) {
-            val preferences =
-                service
-                    .getPreferencesForActor()
-                    .maybeResponse()
-                    ?.preferences
-                    .orEmpty()
-            val items =
-                preferences
-                    .filterIsInstance<PreferencesUnion.SavedFeedsPrefV2>()
-                    .firstOrNull()
-                    ?.value
-                    ?.items
-                    ?.filter {
-                        it.type == SavedFeedType.Feed
-                    }.orEmpty()
-            service
-                .getFeedGenerators(
-                    GetFeedGeneratorsQueryParams(
-                        feeds =
-                            items
-                                .map { AtUri(it.value) }
-                                .toImmutableList(),
-                    ),
-                ).maybeResponse()
-                ?.feeds
-                ?.map {
-                    it.render(accountKey)
-                }.orEmpty()
-                .toImmutableList()
-        }
+    internal val feedLoader by lazy {
+        BlueskyFeedLoader(
+            service = service,
+            accountKey = accountKey,
+        )
+    }
+
+    val feedHandler by lazy {
+        ListHandler(
+            pagingKey = myFeedsKey,
+            accountKey = accountKey,
+            loader = feedLoader,
+        )
     }
 
     fun popularFeeds(
@@ -1156,10 +1129,10 @@ internal class BlueskyDataSource(
             .let { feeds ->
                 combine(
                     feeds,
-                    MemCacheable.subscribe<ImmutableList<UiList.Feed>>(myFeedsKey),
+                    database.listDao().getListKeysFlow(myFeedsKey),
                 ) { popular, my ->
                     popular.map { item ->
-                        item to my.any { it.id == item.id }
+                        item to my.any { it == item.key }
                     }
                 }
             }.cachedIn(scope)
@@ -1203,153 +1176,29 @@ internal class BlueskyDataSource(
         )
 
     suspend fun subscribeFeed(data: UiList.Feed) {
-        MemCacheable.updateWith<ImmutableList<UiList.Feed>>(
-            key = myFeedsKey,
-        ) {
-            (it + data).toImmutableList()
-        }
         tryRun {
-            val currentPreferences = service.getPreferencesForActor().requireResponse()
-            val feedInfo =
-                service
-                    .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(data.id)))
-                    .requireResponse()
-            val newPreferences = currentPreferences.preferences.toMutableList()
-            val prefIndex = newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPref }
-            if (prefIndex != -1) {
-                val pref = newPreferences[prefIndex] as PreferencesUnion.SavedFeedsPref
-                val newPref =
-                    pref.value.copy(
-                        saved = (pref.value.saved + feedInfo.view.uri).toImmutableList(),
-                        pinned = (pref.value.pinned + feedInfo.view.uri).toImmutableList(),
-                    )
-                newPreferences[prefIndex] = PreferencesUnion.SavedFeedsPref(newPref)
-            }
-            val prefV2Index =
-                newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPrefV2 }
-            if (prefV2Index != -1) {
-                val pref = newPreferences[prefV2Index] as PreferencesUnion.SavedFeedsPrefV2
-                val newPref =
-                    pref.value.copy(
-                        items =
-                            (
-                                pref.value.items +
-                                    SavedFeed(
-                                        type = SavedFeedType.Feed,
-                                        value = feedInfo.view.uri.atUri,
-                                        pinned = true,
-                                        id = Uuid.random().toString(),
-                                    )
-                            ).toImmutableList(),
-                    )
-                newPreferences[prefV2Index] = PreferencesUnion.SavedFeedsPrefV2(newPref)
-            }
-
-            service.putPreferences(
-                request =
-                    PutPreferencesRequest(
-                        preferences = newPreferences.toImmutableList(),
-                    ),
-            )
-            myFeeds.refresh()
-        }.onFailure {
-            MemCacheable.updateWith<ImmutableList<UiList.Feed>>(
-                key = myFeedsKey,
-            ) {
-                it.filterNot { item -> item.id == data.id }.toImmutableList()
-            }
+            feedLoader.subscribe(data.key)
+            feedHandler.insertToDatabase(data)
         }
     }
 
     suspend fun unsubscribeFeed(data: UiList.Feed) {
-        MemCacheable.updateWith<ImmutableList<UiList.Feed>>(
-            key = myFeedsKey,
-        ) {
-            it.filterNot { item -> item.id == data.id }.toImmutableList()
-        }
-        tryRun {
-            val currentPreferences = service.getPreferencesForActor().requireResponse()
-            val feedInfo =
-                service
-                    .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(data.id)))
-                    .requireResponse()
-            val newPreferences = currentPreferences.preferences.toMutableList()
-            val prefIndex = newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPref }
-            if (prefIndex != -1) {
-                val pref = newPreferences[prefIndex] as PreferencesUnion.SavedFeedsPref
-                val newPref =
-                    pref.value.copy(
-                        saved =
-                            pref.value.saved
-                                .filterNot { it == feedInfo.view.uri }
-                                .toImmutableList(),
-                        pinned =
-                            pref.value.pinned
-                                .filterNot { it == feedInfo.view.uri }
-                                .toImmutableList(),
-                    )
-                newPreferences[prefIndex] = PreferencesUnion.SavedFeedsPref(newPref)
-            }
-            val prefV2Index =
-                newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPrefV2 }
-            if (prefV2Index != -1) {
-                val pref = newPreferences[prefV2Index] as PreferencesUnion.SavedFeedsPrefV2
-                val newPref =
-                    pref.value.copy(
-                        items =
-                            pref.value.items
-                                .filterNot { it.value == feedInfo.view.uri.atUri }
-                                .toImmutableList(),
-                    )
-                newPreferences[prefV2Index] = PreferencesUnion.SavedFeedsPrefV2(newPref)
-            }
-            service.putPreferences(
-                request =
-                    PutPreferencesRequest(
-                        preferences = newPreferences.toImmutableList(),
-                    ),
-            )
-            myFeeds.refresh()
-        }.onFailure {
-            MemCacheable.updateWith<ImmutableList<UiList.Feed>>(
-                key = myFeedsKey,
-            ) {
-                (it + data).toImmutableList()
-            }
-        }
+        feedHandler.delete(data.key)
     }
 
     suspend fun favouriteFeed(data: UiList.Feed) {
-        MemCacheable.update(
-            key = feedInfoKey(data.id),
-            value =
-                data.copy(
-                    liked = !data.liked,
-                ),
-        )
-
-        tryRun {
-            val feedInfo =
-                service
-                    .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(data.id)))
-                    .requireResponse()
-            val likedUri =
-                feedInfo.view.viewer
-                    ?.like
-                    ?.atUri
-            if (likedUri != null) {
-                deleteLikeRecord(likedUri)
-            } else {
-                createLikeRecord(cid = feedInfo.view.cid.cid, uri = feedInfo.view.uri.atUri)
+        feedHandler.withDatabase {  updataCallback ->
+            val newData = data.copy(liked = !data.liked)
+            updataCallback(newData)
+            tryRun {
+                if (newData.liked) {
+                    feedLoader.favourite(data.key)
+                } else {
+                    feedLoader.unfavourite(data.key)
+                }
+            }.onFailure {
+                updataCallback(data)
             }
-        }.onFailure {
-            MemCacheable.update(
-                key = feedInfoKey(data.id),
-                value =
-                    data.copy(
-                        liked = data.liked,
-                    ),
-            )
         }
     }
 

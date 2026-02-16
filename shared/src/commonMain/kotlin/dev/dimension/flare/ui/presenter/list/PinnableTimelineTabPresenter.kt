@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.map
 import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toImmutableListWrapper
@@ -23,6 +24,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -41,19 +43,19 @@ public class PinnableTimelineTabPresenter(
             public val data: PagingState<out UiList>
 
             public data class List(
-                override val data: PagingState<UiList.List>,
+                override val data: PagingState<UiList>,
             ) : Tab
 
             public data class Feed(
-                override val data: PagingState<UiList.Feed>,
+                override val data: PagingState<UiList>,
             ) : Tab
 
             public data class Antenna(
-                override val data: PagingState<UiList.Antenna>,
+                override val data: PagingState<UiList>,
             ) : Tab
 
             public data class Channel(
-                override val data: PagingState<UiList.Channel>,
+                override val data: PagingState<UiList>,
             ) : Tab
         }
 
@@ -75,15 +77,14 @@ public class PinnableTimelineTabPresenter(
                         service.listHandler.data.cachedIn(scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
-
-        val feeds =
-            serviceState
+        val feeds = serviceState
                 .mapNotNull {
                     it as? BlueskyDataSource
                 }.mapNotNull { service ->
-                    remember(service) {
-                        service.myFeeds
+                    val flow = remember(service) {
+                        service.feedHandler.data.cachedIn(scope)
                     }
+                    flow.collectAsLazyPagingItems()
                 }.toPagingState()
 
         val antenna =
@@ -92,7 +93,7 @@ public class PinnableTimelineTabPresenter(
                     it as? MisskeyDataSource
                 }.mapNotNull { service ->
                     remember(service) {
-                        service.antennasList(scope = scope)
+                        service.antennasList().cachedIn(scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
 

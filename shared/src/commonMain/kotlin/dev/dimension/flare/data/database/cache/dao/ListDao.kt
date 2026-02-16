@@ -24,6 +24,9 @@ internal interface ListDao {
     )
     fun getPagingSource(pagingKey: String): PagingSource<Int, DbListWithContent>
 
+    @Query("SELECT listKey FROM DbListPaging WHERE pagingKey = :pagingKey")
+    fun getListKeysFlow(pagingKey: String): Flow<List<MicroBlogKey>>
+
     @Query("SELECT * FROM DbList WHERE listKey = :listKey AND accountType = :accountType")
     fun getList(
         listKey: MicroBlogKey,

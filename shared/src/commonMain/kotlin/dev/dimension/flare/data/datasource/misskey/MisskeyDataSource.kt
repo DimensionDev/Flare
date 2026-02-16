@@ -1122,28 +1122,14 @@ internal class MisskeyDataSource(
         }
     }
 
-    fun antennasList(scope: CoroutineScope): Flow<PagingData<UiList.Antenna>> =
+    fun antennasList(): Flow<PagingData<UiList>> =
         Pager(
             config = pagingConfig,
         ) {
             AntennasListPagingSource(
                 service = service,
             )
-        }.flow.cachedIn(scope)
-
-    fun antennasTimeline(
-        id: String,
-        scope: CoroutineScope,
-        pageSize: Int = 20,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator = antennasTimelineLoader(id),
-        )
+        }.flow
 
     fun antennasTimelineLoader(id: String) =
         AntennasTimelineRemoteMediator(

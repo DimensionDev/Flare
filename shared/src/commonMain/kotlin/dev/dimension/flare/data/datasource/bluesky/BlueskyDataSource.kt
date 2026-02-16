@@ -7,13 +7,11 @@ import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import androidx.paging.map
 import app.bsky.actor.GetProfileQueryParams
-import app.bsky.actor.PreferencesUnion
 import app.bsky.bookmark.CreateBookmarkRequest
 import app.bsky.bookmark.DeleteBookmarkRequest
 import app.bsky.embed.Images
 import app.bsky.embed.ImagesImage
 import app.bsky.embed.Record
-import app.bsky.feed.GetFeedGeneratorQueryParams
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
@@ -106,7 +104,6 @@ import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
-import kotlin.time.Clock
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -130,6 +127,7 @@ import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
 import sh.christian.ozone.api.model.JsonContent
 import sh.christian.ozone.api.model.JsonContent.Companion.encodeAsJsonContent
+import kotlin.time.Clock
 
 @OptIn(ExperimentalPagingApi::class)
 internal class BlueskyDataSource(
@@ -1064,17 +1062,6 @@ internal class BlueskyDataSource(
             },
         )
 
-    private val preferences: MemCacheable<List<PreferencesUnion>> by lazy {
-        MemCacheable(
-            key = "preferences_$accountKey",
-        ) {
-            service
-                .getPreferencesForActor()
-                .maybeResponse()
-                ?.preferences
-                .orEmpty()
-        }
-    }
     private val myFeedsKey = "my_feeds_$accountKey"
 
     internal val feedLoader by lazy {
@@ -1129,43 +1116,13 @@ internal class BlueskyDataSource(
             .let { feeds ->
                 combine(
                     feeds,
-                    database.listDao().getListKeysFlow(myFeedsKey),
+                    feedHandler.cacheData,
                 ) { popular, my ->
                     popular.map { item ->
-                        item to my.any { it == item.key }
+                        item to my.any { it.id == item.id }
                     }
                 }
             }.cachedIn(scope)
-
-    private fun feedInfoKey(uri: String) = "feed_info_$uri"
-
-    fun feedInfo(uri: String): MemCacheable<UiList.Feed> =
-        MemCacheable(
-            key = feedInfoKey(uri),
-        ) {
-            service
-                .getFeedGenerator(
-                    GetFeedGeneratorQueryParams(
-                        feed = AtUri(uri),
-                    ),
-                ).requireResponse()
-                .view
-                .render(accountKey)
-        }
-
-    fun feedTimeline(
-        uri: String,
-        pageSize: Int = 20,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator = feedTimelineLoader(uri),
-        )
 
     fun feedTimelineLoader(uri: String) =
         FeedTimelineRemoteMediator(
@@ -1177,24 +1134,24 @@ internal class BlueskyDataSource(
 
     suspend fun subscribeFeed(data: UiList.Feed) {
         tryRun {
-            feedLoader.subscribe(data.key)
+            feedLoader.subscribe(data.id)
             feedHandler.insertToDatabase(data)
         }
     }
 
     suspend fun unsubscribeFeed(data: UiList.Feed) {
-        feedHandler.delete(data.key)
+        feedHandler.delete(data.id)
     }
 
     suspend fun favouriteFeed(data: UiList.Feed) {
-        feedHandler.withDatabase {  updataCallback ->
+        feedHandler.withDatabase { updataCallback ->
             val newData = data.copy(liked = !data.liked)
             updataCallback(newData)
             tryRun {
                 if (newData.liked) {
-                    feedLoader.favourite(data.key)
+                    feedLoader.favourite(data.id)
                 } else {
-                    feedLoader.unfavourite(data.key)
+                    feedLoader.unfavourite(data.id)
                 }
             }.onFailure {
                 updataCallback(data)
@@ -1202,12 +1159,12 @@ internal class BlueskyDataSource(
         }
     }
 
-    override fun listTimeline(listKey: MicroBlogKey) =
+    override fun listTimeline(listId: String) =
         ListTimelineRemoteMediator(
             service = service,
             accountKey = accountKey,
             database = database,
-            uri = listKey.id,
+            uri = listId,
         )
 
     private val myListKey = "my_list_$accountKey"

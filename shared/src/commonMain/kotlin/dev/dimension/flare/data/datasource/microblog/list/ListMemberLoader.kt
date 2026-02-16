@@ -10,16 +10,16 @@ internal interface ListMemberLoader {
     suspend fun loadMembers(
         pageSize: Int,
         request: PagingRequest,
-        listKey: MicroBlogKey,
+        listId: String,
     ): PagingResult<DbUser>
 
     suspend fun addMember(
-        listKey: MicroBlogKey,
+        listId: String,
         userKey: MicroBlogKey,
     ): DbUser
 
     suspend fun removeMember(
-        listKey: MicroBlogKey,
+        listId: String,
         userKey: MicroBlogKey,
     )
 

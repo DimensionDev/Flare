@@ -24,8 +24,9 @@ internal interface ListDao {
     )
     fun getPagingSource(pagingKey: String): PagingSource<Int, DbListWithContent>
 
-    @Query("SELECT listKey FROM DbListPaging WHERE pagingKey = :pagingKey")
-    fun getListKeysFlow(pagingKey: String): Flow<List<MicroBlogKey>>
+    @Transaction
+    @Query("SELECT * FROM DbListPaging WHERE pagingKey = :pagingKey")
+    fun getListKeysFlow(pagingKey: String): Flow<List<DbListWithContent>>
 
     @Query("SELECT * FROM DbList WHERE listKey = :listKey AND accountType = :accountType")
     fun getList(
@@ -34,10 +35,10 @@ internal interface ListDao {
     ): Flow<DbList?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(timelines: List<DbListPaging>)
+    suspend fun insertAllPaging(timelines: List<DbListPaging>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(lists: List<DbList>)
+    suspend fun insertAllList(lists: List<DbList>)
 
     @Query("DELETE FROM DbListPaging WHERE pagingKey = :pagingKey")
     suspend fun deleteByPagingKey(pagingKey: String)
@@ -79,7 +80,7 @@ internal interface ListDao {
     fun getListMembersFlow(listKey: MicroBlogKey): Flow<List<DbListMemberWithContent>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(members: List<DbListMember>)
+    suspend fun insertAllMember(members: List<DbListMember>)
 
     @Query("DELETE FROM DbListMember WHERE listKey = :listKey")
     suspend fun deleteMembersByListKey(listKey: MicroBlogKey)

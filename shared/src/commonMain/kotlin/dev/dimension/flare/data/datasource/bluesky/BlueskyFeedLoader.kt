@@ -18,8 +18,6 @@ import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.mapper.render
-import kotlin.time.Clock
-import kotlin.uuid.Uuid
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -28,6 +26,8 @@ import sh.christian.ozone.api.Cid
 import sh.christian.ozone.api.Did
 import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
+import kotlin.time.Clock
+import kotlin.uuid.Uuid
 
 internal class BlueskyFeedLoader(
     private val service: BlueskyService,
@@ -45,7 +45,7 @@ internal class BlueskyFeedLoader(
             }
 
         // Feed loading usually doesn't support pagination in the same way lists do via preferences
-        // But we can implement a basic fetch. 
+        // But we can implement a basic fetch.
         // Bluesky preferences don't really support pagination for saved feeds.
         // We'll load all if cursor is null, otherwise return empty (end of list).
         if (cursor != null) {
@@ -71,19 +71,20 @@ internal class BlueskyFeedLoader(
                     it.type == SavedFeedType.Feed
                 }.orEmpty()
 
-        val feeds = service
-            .getFeedGenerators(
-                GetFeedGeneratorsQueryParams(
-                    feeds =
-                        items
-                            .map { AtUri(it.value) }
-                            .toImmutableList(),
-                ),
-            ).requireResponse()
-            .feeds
-            .map {
-                it.render(accountKey)
-            }.toImmutableList()
+        val feeds =
+            service
+                .getFeedGenerators(
+                    GetFeedGeneratorsQueryParams(
+                        feeds =
+                            items
+                                .map { AtUri(it.value) }
+                                .toImmutableList(),
+                    ),
+                ).requireResponse()
+                .feeds
+                .map {
+                    it.render(accountKey)
+                }.toImmutableList()
 
         return PagingResult(
             data = feeds,
@@ -91,11 +92,11 @@ internal class BlueskyFeedLoader(
         )
     }
 
-    override suspend fun info(listKey: MicroBlogKey): UiList =
+    override suspend fun info(listId: String): UiList =
         service
             .getFeedGenerator(
                 GetFeedGeneratorQueryParams(
-                    feed = AtUri(listKey.id),
+                    feed = AtUri(listId),
                 ),
             ).requireResponse()
             .view
@@ -104,19 +105,18 @@ internal class BlueskyFeedLoader(
     override val supportedMetaData: ImmutableList<ListMetaDataType>
         get() = persistentListOf()
 
-    override suspend fun create(metaData: ListMetaData): UiList =
-        throw UnsupportedOperationException("Create feed is not supported")
+    override suspend fun create(metaData: ListMetaData): UiList = throw UnsupportedOperationException("Create feed is not supported")
 
     override suspend fun update(
-        listKey: MicroBlogKey,
+        listId: String,
         metaData: ListMetaData,
     ): UiList = throw UnsupportedOperationException("Update feed is not supported")
 
-    override suspend fun delete(listKey: MicroBlogKey) {
+    override suspend fun delete(listId: String) {
         val currentPreferences = service.getPreferencesForActor().requireResponse()
         val feedInfo =
             service
-                .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(listKey.id)))
+                .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(listId)))
                 .requireResponse()
         val newPreferences = currentPreferences.preferences.toMutableList()
         val prefIndex = newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPref }
@@ -156,11 +156,11 @@ internal class BlueskyFeedLoader(
         )
     }
 
-    suspend fun subscribe(feedKey: MicroBlogKey) {
+    suspend fun subscribe(feedUri: String) {
         val currentPreferences = service.getPreferencesForActor().requireResponse()
         val feedInfo =
             service
-                .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(feedKey.id)))
+                .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(feedUri)))
                 .requireResponse()
         val newPreferences = currentPreferences.preferences.toMutableList()
         val prefIndex = newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPref }
@@ -181,14 +181,14 @@ internal class BlueskyFeedLoader(
                 pref.value.copy(
                     items =
                         (
-                                pref.value.items +
-                                        SavedFeed(
-                                            type = SavedFeedType.Feed,
-                                            value = feedInfo.view.uri.atUri,
-                                            pinned = true,
-                                            id = Uuid.random().toString(),
-                                        )
-                                ).toImmutableList(),
+                            pref.value.items +
+                                SavedFeed(
+                                    type = SavedFeedType.Feed,
+                                    value = feedInfo.view.uri.atUri,
+                                    pinned = true,
+                                    id = Uuid.random().toString(),
+                                )
+                        ).toImmutableList(),
                 )
             newPreferences[prefV2Index] = PreferencesUnion.SavedFeedsPrefV2(newPref)
         }
@@ -201,10 +201,10 @@ internal class BlueskyFeedLoader(
         )
     }
 
-    suspend fun favourite(feedKey: MicroBlogKey) {
+    suspend fun favourite(feedUri: String) {
         val feedInfo =
             service
-                .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(feedKey.id)))
+                .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(feedUri)))
                 .requireResponse()
         val likedUri =
             feedInfo.view.viewer
@@ -218,10 +218,10 @@ internal class BlueskyFeedLoader(
         }
     }
 
-    suspend fun unfavourite(feedKey: MicroBlogKey) {
+    suspend fun unfavourite(feedUri: String) {
         val feedInfo =
             service
-                .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(feedKey.id)))
+                .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(feedUri)))
                 .requireResponse()
         val likedUri =
             feedInfo.view.viewer

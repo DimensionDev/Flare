@@ -158,9 +158,9 @@ internal open class MastodonDataSource(
             accountKey,
         )
 
-    override fun listTimeline(listKey: MicroBlogKey) =
+    override fun listTimeline(listId: String) =
         ListTimelineRemoteMediator(
-            listKey.id,
+            listId,
             service,
             database,
             accountKey,

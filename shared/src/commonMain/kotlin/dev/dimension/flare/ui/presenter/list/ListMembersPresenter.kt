@@ -12,7 +12,6 @@ import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -24,7 +23,7 @@ import org.koin.core.component.inject
  */
 public class ListMembersPresenter(
     private val accountType: AccountType,
-    private val listKey: MicroBlogKey,
+    private val listId: String,
 ) : PresenterBase<ListMembersState>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
@@ -36,9 +35,9 @@ public class ListMembersPresenter(
         val memberInfo =
             serviceState
                 .map {
-                    remember(it, listKey) {
+                    remember(it, listId) {
                         require(it is ListDataSource)
-                        it.listMemberHandler.listMembers(listKey).cachedIn(scope)
+                        it.listMemberHandler.listMembers(listId).cachedIn(scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
 

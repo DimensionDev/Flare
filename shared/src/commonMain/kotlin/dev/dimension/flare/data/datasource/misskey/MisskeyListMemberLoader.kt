@@ -22,7 +22,7 @@ internal class MisskeyListMemberLoader(
     override suspend fun loadMembers(
         pageSize: Int,
         request: PagingRequest,
-        listKey: MicroBlogKey,
+        listId: String,
     ): PagingResult<DbUser> {
         val cursor =
             when (request) {
@@ -35,7 +35,7 @@ internal class MisskeyListMemberLoader(
             service
                 .usersListsGetMemberships(
                     UsersListsMembershipRequest(
-                        listId = listKey.id,
+                        listId = listId,
                         untilId = cursor,
                         limit = pageSize,
                     ),
@@ -53,12 +53,12 @@ internal class MisskeyListMemberLoader(
     }
 
     override suspend fun addMember(
-        listKey: MicroBlogKey,
+        listId: String,
         userKey: MicroBlogKey,
     ): DbUser {
         service.usersListsPush(
             UsersListsPullRequest(
-                listId = listKey.id,
+                listId = listId,
                 userId = userKey.id,
             ),
         )
@@ -71,12 +71,12 @@ internal class MisskeyListMemberLoader(
     }
 
     override suspend fun removeMember(
-        listKey: MicroBlogKey,
+        listId: String,
         userKey: MicroBlogKey,
     ) {
         service.usersListsPull(
             UsersListsPullRequest(
-                listId = listKey.id,
+                listId = listId,
                 userId = userKey.id,
             ),
         )

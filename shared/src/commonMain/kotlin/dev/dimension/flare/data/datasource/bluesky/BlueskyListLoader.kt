@@ -62,11 +62,11 @@ internal class BlueskyListLoader(
         )
     }
 
-    override suspend fun info(listKey: MicroBlogKey): UiList =
+    override suspend fun info(listId: String): UiList =
         service
             .getList(
                 GetListQueryParams(
-                    list = AtUri(listKey.id),
+                    list = AtUri(listId),
                 ),
             ).requireResponse()
             .list
@@ -130,16 +130,16 @@ internal class BlueskyListLoader(
     }
 
     override suspend fun update(
-        listKey: MicroBlogKey,
+        listId: String,
         metaData: ListMetaData,
     ): UiList {
         updateList(
-            uri = listKey.id,
+            uri = listId,
             title = metaData.title,
             description = metaData.description,
             icon = metaData.avatar,
         )
-        return info(listKey)
+        return info(listId)
     }
 
     private suspend fun updateList(
@@ -190,8 +190,8 @@ internal class BlueskyListLoader(
         )
     }
 
-    override suspend fun delete(listKey: MicroBlogKey) {
-        val id = listKey.id.substringAfterLast('/')
+    override suspend fun delete(listId: String) {
+        val id = listId.substringAfterLast('/')
         service.applyWrites(
             request =
                 ApplyWritesRequest(

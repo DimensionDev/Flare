@@ -29,7 +29,7 @@ internal class BlueskyListMemberLoader(
     override suspend fun loadMembers(
         pageSize: Int,
         request: PagingRequest,
-        listKey: MicroBlogKey,
+        listId: String,
     ): PagingResult<DbUser> {
         val cursor =
             when (request) {
@@ -42,7 +42,7 @@ internal class BlueskyListMemberLoader(
                 .getList(
                     params =
                         GetListQueryParams(
-                            list = AtUri(listKey.id),
+                            list = AtUri(listId),
                             cursor = cursor,
                             limit = pageSize.toLong(),
                         ),
@@ -59,7 +59,7 @@ internal class BlueskyListMemberLoader(
     }
 
     override suspend fun addMember(
-        listKey: MicroBlogKey,
+        listId: String,
         userKey: MicroBlogKey,
     ): DbUser {
         val user =
@@ -74,7 +74,7 @@ internal class BlueskyListMemberLoader(
                 record =
                     app.bsky.graph
                         .Listitem(
-                            list = AtUri(listKey.id),
+                            list = AtUri(listId),
                             subject = Did(userKey.id),
                             createdAt = Clock.System.now(),
                         ).bskyJson(),
@@ -84,7 +84,7 @@ internal class BlueskyListMemberLoader(
     }
 
     override suspend fun removeMember(
-        listKey: MicroBlogKey,
+        listId: String,
         userKey: MicroBlogKey,
     ) {
         var record: com.atproto.repo.ListRecordsRecord? = null
@@ -109,7 +109,7 @@ internal class BlueskyListMemberLoader(
                 response.records
                     .firstOrNull {
                         val item: Listitem = it.value.decodeAs()
-                        item.list.atUri == listKey.id && item.subject.did == userKey.id
+                        item.list.atUri == listId && item.subject.did == userKey.id
                     }
         }
         if (record != null) {
@@ -171,7 +171,7 @@ internal class BlueskyListMemberLoader(
                         item.subject.did == userKey.id
                     }.mapNotNull {
                         val item: Listitem = it.value.decodeAs()
-                        allLists.firstOrNull { list -> list.key.id == item.list.atUri }
+                        allLists.firstOrNull { list -> list.id == item.list.atUri }
                     },
             )
             cursor = response.cursor

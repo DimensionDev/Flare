@@ -67,7 +67,7 @@ public class EditAccountListPresenter(
                 serviceState.onSuccess {
                     require(it is ListDataSource)
                     scope.launch {
-                        it.listMemberHandler.addMember(list.key, userKey = userKey)
+                        it.listMemberHandler.addMember(list.id, userKey = userKey)
                     }
                 }
             }
@@ -76,7 +76,7 @@ public class EditAccountListPresenter(
                 serviceState.onSuccess {
                     require(it is ListDataSource)
                     scope.launch {
-                        it.listMemberHandler.removeMember(list.key, userKey = userKey)
+                        it.listMemberHandler.removeMember(list.id, userKey = userKey)
                     }
                 }
             }

@@ -8,7 +8,6 @@ import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flatMap
@@ -22,7 +21,7 @@ import org.koin.core.component.inject
  */
 public class ListInfoPresenter(
     private val accountType: AccountType,
-    private val listKey: MicroBlogKey,
+    private val listId: String,
 ) : PresenterBase<ListInfoState>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
@@ -34,7 +33,7 @@ public class ListInfoPresenter(
             serviceState.flatMap {
                 remember(it) {
                     require(it is ListDataSource)
-                    it.listHandler.listInfo(listKey)
+                    it.listHandler.listInfo(listId)
                 }.collectAsState().toUi()
             }
 

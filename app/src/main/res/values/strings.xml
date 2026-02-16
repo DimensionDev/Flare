@@ -419,4 +419,5 @@
     <string name="tab_settings_group_name_placeholder">Group name</string>
     <string name="tab_settings_group_default_name">New Group</string>
     <string name="status_share_sheet_theme_title">Theme</string>
+    <string name="channel_title">Channel</string>
 </resources>

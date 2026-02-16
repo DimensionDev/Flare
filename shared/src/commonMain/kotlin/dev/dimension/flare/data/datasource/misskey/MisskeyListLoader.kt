@@ -44,11 +44,11 @@ internal class MisskeyListLoader(
         )
     }
 
-    override suspend fun info(listKey: MicroBlogKey): UiList =
+    override suspend fun info(listId: String): UiList =
         service
             .usersListsShow(
                 UsersListsShowRequest(
-                    listId = listKey.id,
+                    listId = listId,
                 ),
             ).render()
 
@@ -60,7 +60,7 @@ internal class MisskeyListLoader(
                 ),
             )
         return UiList.List(
-            key = MicroBlogKey(response.id, accountKey.host),
+            id = response.id,
             title = metaData.title,
             description = null,
             avatar = null,
@@ -69,20 +69,20 @@ internal class MisskeyListLoader(
     }
 
     override suspend fun update(
-        listKey: MicroBlogKey,
+        listId: String,
         metaData: ListMetaData,
     ): UiList =
         service
             .usersListsUpdate(
                 UsersListsUpdateRequest(
-                    listId = listKey.id,
+                    listId = listId,
                     name = metaData.title,
                 ),
             ).render()
 
-    override suspend fun delete(listKey: MicroBlogKey) {
+    override suspend fun delete(listId: String) {
         service.usersListsDelete(
-            UsersListsDeleteRequest(listId = listKey.id),
+            UsersListsDeleteRequest(listId = listId),
         )
     }
 

@@ -1204,9 +1204,9 @@ internal class XQTDataSource(
             },
         ).toPersistentList()
 
-    override fun listTimeline(listKey: MicroBlogKey) =
+    override fun listTimeline(listId: String) =
         ListTimelineRemoteMediator(
-            listKey.id,
+            listId,
             service,
             database,
             accountKey,

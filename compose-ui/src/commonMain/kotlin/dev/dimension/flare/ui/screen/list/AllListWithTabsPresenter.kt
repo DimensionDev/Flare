@@ -19,12 +19,12 @@ public class AllListWithTabsPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<AllListWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
-        object : PinTabsPresenter<UiList.List>() {
+        object : PinTabsPresenter<UiList>() {
             override fun List<TimelineTabItem>.filterPinned(): List<String> =
                 filterIsInstance<ListTimelineTabItem>()
                     .map { it.listId }
 
-            override fun getTimelineTabItem(item: UiList.List): TimelineTabItem =
+            override fun getTimelineTabItem(item: UiList): TimelineTabItem =
                 ListTimelineTabItem(
                     account = accountType,
                     listId = item.id,
@@ -32,13 +32,13 @@ public class AllListWithTabsPresenter(
                         TabMetaData(
                             title = TitleType.Text(item.title),
                             icon =
-                                item.avatar?.let {
+                                item.let { it as? UiList.List }?.avatar?.let {
                                     IconType.Url(it)
                                 } ?: IconType.Material(IconType.Material.MaterialIcon.List),
                         ),
                 )
 
-            override fun List<TimelineTabItem>.filter(item: UiList.List): List<TimelineTabItem> =
+            override fun List<TimelineTabItem>.filter(item: UiList): List<TimelineTabItem> =
                 filter {
                     if (it is ListTimelineTabItem) {
                         it.listId != item.id
@@ -61,11 +61,11 @@ public class AllListWithTabsPresenter(
         return object :
             State,
             AllListState by state,
-            PinTabsPresenter.State<UiList.List> by pinState {
+            PinTabsPresenter.State<UiList> by pinState {
         }
     }
 
     public interface State :
         AllListState,
-        PinTabsPresenter.State<UiList.List>
+        PinTabsPresenter.State<UiList>
 }

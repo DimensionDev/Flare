@@ -46,22 +46,22 @@ internal class ListHandler(
                     },
                     onSave = { request, data ->
                         database.listDao().deleteByPagingKey(pagingKey)
-                        database.listDao().insertAll(
+                        database.listDao().insertAllList(
                             data.map { item ->
                                 DbList(
-                                    listKey = item.key,
+                                    listKey = MicroBlogKey(item.id, accountKey.host),
                                     accountType = accountType,
                                     content = DbList.ListContent(item),
                                 )
                             },
                         )
 
-                        database.listDao().insertAll(
+                        database.listDao().insertAllPaging(
                             data.map { item ->
                                 DbListPaging(
                                     accountType = accountType,
                                     pagingKey = pagingKey,
-                                    listKey = item.key,
+                                    listKey = MicroBlogKey(item.id, accountKey.host),
                                 )
                             },
                         )
@@ -79,15 +79,24 @@ internal class ListHandler(
         }
     }
 
-    fun listInfo(listKey: MicroBlogKey): CacheData<UiList> =
-        Cacheable(
+    val cacheData by lazy {
+        database.listDao().getListKeysFlow(pagingKey).map {
+            it.map {
+                it.list.content.data
+            }
+        }
+    }
+
+    fun listInfo(listId: String): CacheData<UiList> {
+        val listKey = MicroBlogKey(listId, accountKey.host)
+        return Cacheable(
             fetchSource = {
-                val info = loader.info(listKey)
+                val info = loader.info(listId)
                 database.connect {
-                    database.listDao().insertAll(
+                    database.listDao().insertAllList(
                         listOf(
                             DbList(
-                                listKey = info.key,
+                                listKey = MicroBlogKey(info.id, accountKey.host),
                                 accountType = accountType,
                                 content = DbList.ListContent(info),
                             ),
@@ -106,27 +115,28 @@ internal class ListHandler(
                     }
             },
         )
+    }
 
     suspend fun create(metaData: ListMetaData) {
         tryRun {
             loader.create(metaData)
         }.onSuccess { result ->
             database.connect {
-                database.listDao().insertAll(
+                database.listDao().insertAllList(
                     listOf(
                         DbList(
-                            listKey = result.key,
+                            listKey = MicroBlogKey(result.id, accountKey.host),
                             accountType = accountType,
                             content = DbList.ListContent(result),
                         ),
                     ),
                 )
-                database.listDao().insertAll(
+                database.listDao().insertAllPaging(
                     listOf(
                         DbListPaging(
                             accountType = accountType,
                             pagingKey = pagingKey,
-                            listKey = result.key,
+                            listKey = MicroBlogKey(result.id, accountKey.host),
                         ),
                     ),
                 )
@@ -135,11 +145,12 @@ internal class ListHandler(
     }
 
     suspend fun update(
-        listKey: MicroBlogKey,
+        listId: String,
         metaData: ListMetaData,
     ) {
+        val listKey = MicroBlogKey(listId, accountKey.host)
         tryRun {
-            loader.update(listKey, metaData)
+            loader.update(listId, metaData)
         }.onSuccess { result ->
             database.connect {
                 database.listDao().updateListContent(
@@ -151,9 +162,10 @@ internal class ListHandler(
         }
     }
 
-    suspend fun delete(listKey: MicroBlogKey) {
+    suspend fun delete(listId: String) {
+        val listKey = MicroBlogKey(listId, accountKey.host)
         tryRun {
-            loader.delete(listKey)
+            loader.delete(listId)
         }.onSuccess {
             database.connect {
                 database.listDao().deleteByListKey(
@@ -168,39 +180,37 @@ internal class ListHandler(
         }
     }
 
-    suspend fun insertToDatabase(
-        data: UiList,
-    ) {
+    suspend fun insertToDatabase(data: UiList) {
+        val listKey = MicroBlogKey(data.id, accountKey.host)
         database.connect {
-            database.listDao().insertAll(
+            database.listDao().insertAllList(
                 listOf(
                     DbList(
-                        listKey = data.key,
+                        listKey = listKey,
                         accountType = AccountType.Specific(accountKey),
                         content = DbList.ListContent(data),
                     ),
                 ),
             )
 
-            database.listDao().insertAll(
+            database.listDao().insertAllPaging(
                 listOf(
                     DbListPaging(
                         accountType = AccountType.Specific(accountKey),
                         pagingKey = pagingKey,
-                        listKey = data.key,
+                        listKey = listKey,
                     ),
                 ),
             )
         }
     }
 
-    suspend fun withDatabase(
-        block: suspend (update: suspend (UiList) -> Unit) -> Unit,
-    ) {
-        block.invoke {  data ->
+    suspend fun withDatabase(block: suspend (update: suspend (UiList) -> Unit) -> Unit) {
+        block.invoke { data ->
+            val listKey = MicroBlogKey(data.id, accountKey.host)
             database.connect {
                 database.listDao().updateListContent(
-                    listKey = data.key,
+                    listKey = listKey,
                     accountType = AccountType.Specific(accountKey),
                     content = DbList.ListContent(data),
                 )

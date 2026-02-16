@@ -23,7 +23,7 @@ internal class XQTListMemberLoader(
     override suspend fun loadMembers(
         pageSize: Int,
         request: PagingRequest,
-        listKey: MicroBlogKey,
+        listId: String,
     ): PagingResult<DbUser> {
         val cursor = (request as? PagingRequest.Append)?.nextKey
         val response =
@@ -31,7 +31,7 @@ internal class XQTListMemberLoader(
                 .getListMembers(
                     variables =
                         buildString {
-                            append("{\"listId\":\"${listKey.id}\",\"count\":$pageSize")
+                            append("{\"listId\":\"${listId}\",\"count\":$pageSize")
                             if (cursor != null) {
                                 append(",\"cursor\":\"${cursor}\"")
                             }
@@ -58,7 +58,7 @@ internal class XQTListMemberLoader(
     }
 
     override suspend fun addMember(
-        listKey: MicroBlogKey,
+        listId: String,
         userKey: MicroBlogKey,
     ): DbUser {
         service.addMember(
@@ -66,7 +66,7 @@ internal class XQTListMemberLoader(
                 AddMemberRequest(
                     variables =
                         AddMemberRequest.Variables(
-                            listID = listKey.id,
+                            listID = listId,
                             userID = userKey.id,
                         ),
                 ),
@@ -87,7 +87,7 @@ internal class XQTListMemberLoader(
     }
 
     override suspend fun removeMember(
-        listKey: MicroBlogKey,
+        listId: String,
         userKey: MicroBlogKey,
     ) {
         service.removeMember(
@@ -95,7 +95,7 @@ internal class XQTListMemberLoader(
                 RemoveMemberRequest(
                     variables =
                         RemoveMemberRequest.Variables(
-                            listID = listKey.id,
+                            listID = listId,
                             userID = userKey.id,
                         ),
                 ),

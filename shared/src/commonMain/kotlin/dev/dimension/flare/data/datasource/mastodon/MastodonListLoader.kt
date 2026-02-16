@@ -30,8 +30,8 @@ internal class MastodonListLoader(
         )
     }
 
-    override suspend fun info(listKey: MicroBlogKey): UiList =
-        service.getList(listKey.id).toUiList(accountKey)
+    override suspend fun info(listId: String): UiList =
+        service.getList(listId).toUiList(accountKey)
             ?: error("Failed to parse list info")
 
     override suspend fun create(metaData: ListMetaData): UiList =
@@ -41,16 +41,16 @@ internal class MastodonListLoader(
             ?: error("Failed to parse created list")
 
     override suspend fun update(
-        listKey: MicroBlogKey,
+        listId: String,
         metaData: ListMetaData,
     ): UiList =
         service
-            .updateList(listKey.id, PostList(title = metaData.title))
+            .updateList(listId, PostList(title = metaData.title))
             .toUiList(accountKey)
             ?: error("Failed to parse updated list")
 
-    override suspend fun delete(listKey: MicroBlogKey) {
-        service.deleteList(listKey.id)
+    override suspend fun delete(listId: String) {
+        service.deleteList(listId)
     }
 
     override val supportedMetaData: ImmutableList<ListMetaDataType>
@@ -60,7 +60,7 @@ internal class MastodonListLoader(
         val id = id ?: return null
         val title = title ?: return null
         return UiList.List(
-            key = MicroBlogKey(id = id, host = accountKey.host),
+            id = id,
             title = title,
         )
     }

@@ -18,7 +18,7 @@ internal class MastodonListMemberLoader(
     override suspend fun loadMembers(
         pageSize: Int,
         request: PagingRequest,
-        listKey: MicroBlogKey,
+        listId: String,
     ): PagingResult<DbUser> {
         val maxId =
             when (request) {
@@ -29,7 +29,7 @@ internal class MastodonListMemberLoader(
 
         val response =
             service.listMembers(
-                listId = listKey.id,
+                listId = listId,
                 limit = pageSize,
                 max_id = maxId,
             )
@@ -46,11 +46,11 @@ internal class MastodonListMemberLoader(
     }
 
     override suspend fun addMember(
-        listKey: MicroBlogKey,
+        listId: String,
         userKey: MicroBlogKey,
     ): DbUser {
         service.addMember(
-            listId = listKey.id,
+            listId = listId,
             accounts = PostAccounts(listOf(userKey.id)),
         )
         return service
@@ -59,11 +59,11 @@ internal class MastodonListMemberLoader(
     }
 
     override suspend fun removeMember(
-        listKey: MicroBlogKey,
+        listId: String,
         userKey: MicroBlogKey,
     ) {
         service.removeMember(
-            listId = listKey.id,
+            listId = listId,
             accounts = PostAccounts(listOf(userKey.id)),
         )
     }
@@ -90,7 +90,7 @@ internal class MastodonListMemberLoader(
         val id = id ?: return null
         val title = title ?: return null
         return UiList.List(
-            key = MicroBlogKey(id = id, host = accountKey.host),
+            id = id,
             title = title,
         )
     }

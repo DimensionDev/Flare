@@ -39,9 +39,10 @@ public class BlueskyFeedsPresenter(
             serviceState
                 .map { service ->
                     require(service is BlueskyDataSource)
-                    val flow = remember(service) {
-                        service.feedHandler.data.cachedIn(scope)
-                    }
+                    val flow =
+                        remember(service) {
+                            service.feedHandler.data.cachedIn(scope)
+                        }
                     flow.collectAsLazyPagingItems()
                 }.toPagingState()
         val popularFeeds =

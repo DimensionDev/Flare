@@ -30,7 +30,7 @@ internal class ListMemberHandler(
     private val memberPagingKey: String
         get() = "${pagingKey}_members"
 
-    fun listMembers(listKey: MicroBlogKey) =
+    fun listMembers(listId: String) =
         Pager(
             config = pagingConfig,
             remoteMediator =
@@ -41,11 +41,12 @@ internal class ListMemberHandler(
                         loader.loadMembers(
                             pageSize = pageSize,
                             request = request,
-                            listKey = listKey,
+                            listId = listId,
                         )
                     },
                     onSave = { request, data ->
-                        database.listDao().insertAll(
+                        val listKey = MicroBlogKey(listId, accountKey.host)
+                        database.listDao().insertAllMember(
                             data.map { item ->
                                 DbListMember(
                                     listKey = listKey,
@@ -58,7 +59,7 @@ internal class ListMemberHandler(
                 ),
             pagingSourceFactory = {
                 database.listDao().getListMembers(
-                    listKey = listKey,
+                    listKey = MicroBlogKey(listId, accountKey.host),
                 )
             },
         ).flow.map {
@@ -67,11 +68,11 @@ internal class ListMemberHandler(
             }
         }
 
-    fun listMembersListFlow(listKey: MicroBlogKey) =
+    fun listMembersListFlow(listId: String) =
         database
             .listDao()
             .getListMembersFlow(
-                listKey = listKey,
+                listKey = MicroBlogKey(listId, accountKey.host),
             ).map { members ->
                 members.map { member ->
                     member.user.render(accountKey)
@@ -79,14 +80,15 @@ internal class ListMemberHandler(
             }
 
     suspend fun addMember(
-        listKey: MicroBlogKey,
+        listId: String,
         userKey: MicroBlogKey,
     ) {
+        val listKey = MicroBlogKey(listId, accountKey.host)
         tryRun {
-            loader.addMember(listKey, userKey)
+            loader.addMember(listId, userKey)
         }.onSuccess { user ->
             database.connect {
-                database.listDao().insertAll(
+                database.listDao().insertAllMember(
                     listOf(
                         DbListMember(
                             listKey = listKey,
@@ -102,11 +104,12 @@ internal class ListMemberHandler(
     }
 
     suspend fun removeMember(
-        listKey: MicroBlogKey,
+        listId: String,
         userKey: MicroBlogKey,
     ) {
+        val listKey = MicroBlogKey(listId, accountKey.host)
         tryRun {
-            loader.removeMember(listKey, userKey)
+            loader.removeMember(listId, userKey)
         }.onSuccess {
             database.connect {
                 database.listDao().deleteMemberFromList(
@@ -138,19 +141,19 @@ internal class ListMemberHandler(
                         )
                     },
                     onSave = { request, data ->
-                        database.listDao().insertAll(
+                        database.listDao().insertAllList(
                             data.map { item ->
                                 DbList(
-                                    listKey = item.key,
+                                    listKey = MicroBlogKey(item.id, accountKey.host),
                                     accountType = accountType,
                                     content = DbList.ListContent(item),
                                 )
                             },
                         )
-                        database.listDao().insertAll(
+                        database.listDao().insertAllMember(
                             data.map { item ->
                                 DbListMember(
-                                    listKey = item.key,
+                                    listKey = MicroBlogKey(item.id, accountKey.host),
                                     memberKey = userKey,
                                 )
                             },

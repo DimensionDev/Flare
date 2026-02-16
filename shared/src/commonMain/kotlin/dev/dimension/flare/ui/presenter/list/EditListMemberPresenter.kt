@@ -32,7 +32,7 @@ import org.koin.core.component.inject
  */
 public class EditListMemberPresenter(
     private val accountType: AccountType,
-    private val listKey: MicroBlogKey,
+    private val listId: String,
 ) : PresenterBase<EditListMemberState>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
@@ -52,7 +52,7 @@ public class EditListMemberPresenter(
                             require(service is ListDataSource)
                             combine(
                                 service.searchUser(query = filter),
-                                service.listMemberHandler.listMembersListFlow(listKey),
+                                service.listMemberHandler.listMembersListFlow(listId),
                             ) { users, members ->
                                 users.map { user ->
                                     val isMember = members.any { it.key == user.key }
@@ -75,7 +75,7 @@ public class EditListMemberPresenter(
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is ListDataSource)
-                        it.listMemberHandler.addMember(listKey, userKey)
+                        it.listMemberHandler.addMember(listId, userKey)
                     }
                 }
             }
@@ -84,7 +84,7 @@ public class EditListMemberPresenter(
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is ListDataSource)
-                        it.listMemberHandler.removeMember(listKey, userKey)
+                        it.listMemberHandler.removeMember(listId, userKey)
                     }
                 }
             }

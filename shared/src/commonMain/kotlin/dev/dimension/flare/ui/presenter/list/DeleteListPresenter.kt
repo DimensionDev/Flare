@@ -6,7 +6,6 @@ import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -20,7 +19,7 @@ import org.koin.core.component.inject
  */
 public class DeleteListPresenter(
     private val accountType: AccountType,
-    private val listKey: MicroBlogKey,
+    private val listId: String,
 ) : PresenterBase<DeleteListState>(),
     KoinComponent {
     private val scope by inject<CoroutineScope>()
@@ -39,7 +38,7 @@ public class DeleteListPresenter(
                         it
                     }.first()
                         .listHandler
-                        .delete(listKey)
+                        .delete(listId)
                 }
             }
         }

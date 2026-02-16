@@ -5,7 +5,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -17,7 +16,7 @@ import org.koin.core.component.inject
  */
 public class ListTimelinePresenter(
     private val accountType: AccountType,
-    private val listKey: MicroBlogKey,
+    private val listId: String,
 ) : TimelinePresenter(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
@@ -28,7 +27,7 @@ public class ListTimelinePresenter(
             repository = accountRepository,
         ).map { service ->
             require(service is ListDataSource)
-            service.listTimeline(listKey = listKey)
+            service.listTimeline(listId = listId)
         }
     }
 }

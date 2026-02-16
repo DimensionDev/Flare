@@ -57,10 +57,10 @@ internal class XQTListLoader(
         )
     }
 
-    override suspend fun info(listKey: MicroBlogKey): UiList =
+    override suspend fun info(listId: String): UiList =
         service
             .getListByRestId(
-                variables = "{\"listId\":\"${listKey.id}\"}",
+                variables = "{\"listId\":\"${listId}\"}",
             ).body()
             ?.data
             ?.list
@@ -83,7 +83,7 @@ internal class XQTListLoader(
         val data = response.body()?.data?.list
         if (data?.idStr != null) {
             return UiList.List(
-                key = MicroBlogKey(data.idStr, accountKey.host),
+                id = data.idStr,
                 title = metaData.title,
                 description = metaData.description,
                 creator = null,
@@ -96,7 +96,7 @@ internal class XQTListLoader(
     }
 
     override suspend fun update(
-        listKey: MicroBlogKey,
+        listId: String,
         metaData: ListMetaData,
     ): UiList {
         service.updateList(
@@ -104,14 +104,14 @@ internal class XQTListLoader(
                 UpdateListRequest(
                     variables =
                         UpdateListRequest.Variables(
-                            listID = listKey.id,
+                            listID = listId,
                             name = metaData.title,
                             description = metaData.description.orEmpty(),
                             isPrivate = false,
                         ),
                 ),
         )
-        return info(listKey).let {
+        return info(listId).let {
             if (it is UiList.List) {
                 it.copy(
                     title = metaData.title,
@@ -123,13 +123,13 @@ internal class XQTListLoader(
         }
     }
 
-    override suspend fun delete(listKey: MicroBlogKey) {
+    override suspend fun delete(listId: String) {
         service.deleteList(
             request =
                 RemoveListRequest(
                     variables =
                         RemoveListRequest.Variables(
-                            listID = listKey.id,
+                            listID = listId,
                         ),
                 ),
         )

@@ -1008,9 +1008,9 @@ internal class MisskeyDataSource(
     private val listKey: String
         get() = "allLists_$accountKey"
 
-    override fun listTimeline(listKey: MicroBlogKey) =
+    override fun listTimeline(listId: String) =
         ListTimelineRemoteMediator(
-            listKey.id,
+            listId,
             service,
             database,
             accountKey,

@@ -11,7 +11,6 @@ import dev.dimension.flare.data.datasource.microblog.list.ListMetaDataType
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
@@ -26,7 +25,7 @@ import org.koin.core.component.inject
  */
 public class ListEditPresenter(
     private val accountType: AccountType,
-    private val listKey: MicroBlogKey,
+    private val listId: String,
 ) : PresenterBase<ListEditPresenter.State>(),
     KoinComponent {
     @Immutable
@@ -50,23 +49,23 @@ public class ListEditPresenter(
         val listInfoState =
             remember(
                 accountType,
-                listKey,
+                listId,
             ) {
-                ListInfoPresenter(accountType, listKey)
+                ListInfoPresenter(accountType, listId)
             }.body()
         val state =
             remember(
                 accountType,
-                listKey,
+                listId,
             ) {
-                EditListMemberPresenter(accountType, listKey)
+                EditListMemberPresenter(accountType, listId)
             }.body()
         val memberState =
             remember(
                 accountType,
-                listKey,
+                listId,
             ) {
-                ListMembersPresenter(accountType, listKey)
+                ListMembersPresenter(accountType, listId)
             }.body()
         return object :
             State,
@@ -88,7 +87,7 @@ public class ListEditPresenter(
             override suspend fun updateList(listMetaData: ListMetaData) {
                 serviceState.onSuccess {
                     require(it is ListDataSource)
-                    it.listHandler.update(listKey, listMetaData)
+                    it.listHandler.update(listId, listMetaData)
                 }
             }
         }

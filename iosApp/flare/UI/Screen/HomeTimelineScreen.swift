@@ -8,7 +8,7 @@ struct HomeTimelineScreen: View {
     let toTabSetting: () -> Void
     let accountType: AccountType
     @Environment(\.openURL) private var openURL
-    @State private var selectedTabIndex = 0
+    @State private var selectedTabIndex: Int? = 0
     @StateObject private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
 
     init(accountType: AccountType, toServiceSelect: @escaping () -> Void, toCompose: @escaping () -> Void, toTabSetting: @escaping () -> Void) {
@@ -20,84 +20,91 @@ struct HomeTimelineScreen: View {
     }
 
     var body: some View {
-        GeometryReader { proxy in
-            StateView(state: presenter.state.tabState) { state in
-                let tabs: [TimelineTabItem] = state.cast(TimelineTabItem.self)
-                let tab = tabs[min(max(selectedTabIndex, 0), tabs.count - 1)]
-                ZStack {
-                    TimelineScreen(tabItem: tab)
-                        .id(tab.key)
-                }
-                .onChange(of: state.count, { oldValue, newValue in
-                    if !(tabs.indices.contains(selectedTabIndex)) {
-                        selectedTabIndex = 0
-                    }
-                })
-                .toolbar {
-                    let placement = if #available(iOS 26.0, *) {
-                        ToolbarItemPlacement.automatic
-                    } else {
-                        ToolbarItemPlacement.title
-                    }
-                    ToolbarItem(placement: placement) {
-                        ScrollView(.horizontal) {
-                            HStack(
-                                spacing: 8,
-                            ) {
-                                ForEach(0..<tabs.count, id: \.self) { index in
-                                    let tab = tabs[index]
-                                    Label {
-                                        TabTitle(title: tab.metaData.title)
-                                            .font(.subheadline)
-                                    } icon: {
-                                        TabIcon(icon: tab.metaData.icon, accountType: tab.account, size: 20)
-                                    }
-                                    .onTapGesture {
-                                        withAnimation(.spring) {
-                                            selectedTabIndex = index
-                                        }
-                                    }
-                                    .padding(.horizontal)
-                                    .padding(.vertical, 8)
-                                    .foregroundStyle(selectedTabIndex == index ? Color.white : .primary)
-                                    .backport
-                                    .glassEffect(selectedTabIndex == index ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedTabIndex == index ? Color.accentColor : Color(.systemBackground))
-                                }
-                                Button {
-                                    toTabSetting()
-                                } label: {
-                                    Image("fa-plus")
-                                }
-                                .backport
-                                .glassButtonStyle()
-                            }
-//                            .padding(.horizontal)
-                            .padding(.vertical, 8)
-                        }
-                        .scrollIndicators(.hidden)
-                    }
-                    if #available(iOS 26.0, *) {
-                        ToolbarSpacer(.fixed)
-                    }
-                    ToolbarItem(placement: .primaryAction) {
-                        if case .error = onEnum(of: presenter.state.user) {
-                            Button {
-                                toServiceSelect()
-                            } label: {
-                                Text("Login")
-                            }
-                        } else {
-                            Button {
-                                toCompose()
-                            } label: {
-                                Image("fa-pen-to-square")
-                                    .font(.title2)
-                            }
-                        }
+        StateView(state: presenter.state.tabState) { state in
+            let tabs: [TimelineTabItem] = state.cast(TimelineTabItem.self)
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(spacing: 0) {
+                    ForEach(0..<tabs.count, id: \.self) { index in
+                        TimelineScreen(tabItem: tabs[index])
+                            .containerRelativeFrame(.horizontal)
+                            .id(index)
+                            .environment(\.isActive, selectedTabIndex == index)
                     }
                 }
-                .navigationBarTitleDisplayMode(.inline)
+                .scrollTargetLayout()
             }
+            .scrollPosition(id: $selectedTabIndex)
+            .scrollTargetBehavior(.paging)
+            .scrollClipDisabled()
+            .onChange(of: state.count, { oldValue, newValue in
+                if let index = selectedTabIndex, !(tabs.indices.contains(index)) {
+                    selectedTabIndex = 0
+                }
+            })
+            .toolbar {
+                let placement = if #available(iOS 26.0, *) {
+                    ToolbarItemPlacement.automatic
+                } else {
+                    ToolbarItemPlacement.title
+                }
+                ToolbarItem(placement: placement) {
+                    ScrollView(.horizontal) {
+                        HStack(
+                            spacing: 8,
+                        ) {
+                            ForEach(0..<tabs.count, id: \.self) { index in
+                                let tab = tabs[index]
+                                Label {
+                                    TabTitle(title: tab.metaData.title)
+                                        .font(.subheadline)
+                                } icon: {
+                                    TabIcon(icon: tab.metaData.icon, accountType: tab.account, size: 20)
+                                }
+                                .onTapGesture {
+                                    withAnimation(.spring) {
+                                        selectedTabIndex = index
+                                    }
+                                }
+                                .padding(.horizontal)
+                                .padding(.vertical, 8)
+                                .foregroundStyle(selectedTabIndex == index ? Color.white : .primary)
+                                .backport
+                                .glassEffect(selectedTabIndex == index ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedTabIndex == index ? Color.accentColor : Color(.systemBackground))
+                            }
+                            Button {
+                                toTabSetting()
+                            } label: {
+                                Image("fa-plus")
+                            }
+                            .backport
+                            .glassButtonStyle()
+                        }
+//                            .padding(.horizontal)
+                        .padding(.vertical, 8)
+                    }
+                    .scrollIndicators(.hidden)
+                }
+                if #available(iOS 26.0, *) {
+                    ToolbarSpacer(.fixed)
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    if case .error = onEnum(of: presenter.state.user) {
+                        Button {
+                            toServiceSelect()
+                        } label: {
+                            Text("Login")
+                        }
+                    } else {
+                        Button {
+                            toCompose()
+                        } label: {
+                            Image("fa-pen-to-square")
+                                .font(.title2)
+                        }
+                    }
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }

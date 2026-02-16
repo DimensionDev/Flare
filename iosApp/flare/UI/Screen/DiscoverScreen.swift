@@ -4,6 +4,8 @@ import Flow
 
 struct DiscoverScreen: View {
     @Environment(\.openURL) private var openURL
+    @Environment(\.tabKey) private var tabKeyEnv
+    @Environment(\.isActive) private var isActive
     @StateObject private var presenter: KotlinPresenter<DiscoverState>
     @StateObject private var searchPresenter: KotlinPresenter<SearchState>
     @State var searchText = ""
@@ -14,34 +16,45 @@ struct DiscoverScreen: View {
     }
     
     var body: some View {
-        List {
-            if searchPresenter.state.searching {
-                searchResultContent
-            } else {
-                discoverContent
+        ScrollViewReader { proxy in
+            List {
+                if searchPresenter.state.searching {
+                    searchResultContent
+                } else {
+                    discoverContent
+                }
             }
-        }
-        .detectScrolling()
-        .scrollContentBackground(.hidden)
-        .listRowSpacing(2)
-        .listStyle(.plain)
-        .refreshable {
-            try? await presenter.state.refreshSuspend()
-        }
-        .background(Color(.systemGroupedBackground))
-        .navigationTitle("discover_title")
-        .searchable(text: $searchText)
-        .onSubmit(of: .search) {
-            searchPresenter.state.search(new: searchText)
-        }
-        .onChange(of: searchText) {
-            if searchText.isEmpty {
-                searchPresenter.state.search(new: "")
+            .id("top")
+            .onReceive(NotificationCenter.default.publisher(for: .scrollToTop)) { notification in
+                let targetTab = notification.userInfo?["tab"] as? String
+                if isActive && (targetTab == nil || targetTab == tabKeyEnv) {
+                    withAnimation {
+                        proxy.scrollTo("top", anchor: .top)
+                    }
+                }
             }
-        }
-        .onChange(of: presenter.state.selectedAccount) { newAccount in
-            if let newAccount = newAccount {
-                searchPresenter.state.setAccount(profile: newAccount)
+            .detectScrolling()
+            .scrollContentBackground(.hidden)
+            .listRowSpacing(2)
+            .listStyle(.plain)
+            .refreshable {
+                try? await presenter.state.refreshSuspend()
+            }
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("discover_title")
+            .searchable(text: $searchText)
+            .onSubmit(of: .search) {
+                searchPresenter.state.search(new: searchText)
+            }
+            .onChange(of: searchText) {
+                if searchText.isEmpty {
+                    searchPresenter.state.search(new: "")
+                }
+            }
+            .onChange(of: presenter.state.selectedAccount) { newAccount in
+                if let newAccount = newAccount {
+                    searchPresenter.state.setAccount(profile: newAccount)
+                }
             }
         }
     }

@@ -96,15 +96,15 @@ public class PinnableTimelineTabPresenter(
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
 
-//        val channel =
-//            serviceState
-//                .mapNotNull {
-//                    it as? MisskeyDataSource
-//                }.mapNotNull { service ->
-//                    remember(service) {
-//                        service.channelsList(scope = scope)
-//                    }.collectAsLazyPagingItems()
-//                }.toPagingState()
+        val channel =
+            serviceState
+                .mapNotNull {
+                    it as? MisskeyDataSource
+                }.mapNotNull { service ->
+                    remember(service) {
+                        service.channelHandler.data.cachedIn(scope)
+                    }.collectAsLazyPagingItems()
+                }.toPagingState()
 
         val tabs =
             serviceState.map { service ->
@@ -129,11 +129,11 @@ public class PinnableTimelineTabPresenter(
                         } else {
                             null
                         },
-//                        if (service is MisskeyDataSource) {
-//                            State.Tab.Channel(channel)
-//                        } else {
-//                            null
-//                        },
+                        if (service is MisskeyDataSource) {
+                            State.Tab.Channel(channel)
+                        } else {
+                            null
+                        },
                     ).toImmutableList().toImmutableListWrapper()
                 }
             }

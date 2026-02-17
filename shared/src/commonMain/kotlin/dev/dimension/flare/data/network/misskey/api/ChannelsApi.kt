@@ -119,7 +119,7 @@ internal interface ChannelsApi {
      */
     @POST("channels/my-favorites")
     suspend fun channelsMyFavorites(
-        @Body body: kotlin.Any,
+        @Body channelsFollowedRequest: ChannelsFollowedRequest,
     ): kotlin.collections.List<Channel>
 
     /**

@@ -3,7 +3,10 @@ package dev.dimension.flare.data.datasource.misskey
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingData
+import androidx.paging.PagingState
 import androidx.paging.cachedIn
+import androidx.paging.map
+import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileType
@@ -35,6 +38,8 @@ import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
+import dev.dimension.flare.data.network.misskey.api.model.ChannelsFeaturedRequest
+import dev.dimension.flare.data.network.misskey.api.model.ChannelsFollowRequest
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 import dev.dimension.flare.data.network.misskey.api.model.MuteCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
@@ -69,6 +74,7 @@ import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -155,6 +161,51 @@ internal class MisskeyDataSource(
             service,
             database,
         )
+
+    fun featuredChannels(scope: CoroutineScope): Flow<PagingData<UiList>> =
+        Pager(
+            config = pagingConfig,
+        ) {
+            object : BasePagingSource<String, UiList>() {
+                override fun getRefreshKey(state: PagingState<String, UiList>): String? = null
+
+                override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiList> {
+                    val result =
+                        service
+                            .channelsFeatured(
+                                request =
+                                    ChannelsFeaturedRequest(
+                                        limit = params.loadSize,
+                                    ),
+                            )
+                    return LoadResult.Page(
+                        data =
+                            result.map {
+                                it.render()
+                            },
+                        prevKey = null,
+                        nextKey = null,
+                    )
+                }
+            }
+        }.flow
+            .cachedIn(scope)
+            .let { channels ->
+                combine(
+                    channels,
+                    channelHandler.cacheData,
+                ) { featured, followed ->
+                    featured.map { item ->
+                        if (item is UiList.Channel) {
+                            item.copy(
+                                isFollowing = followed.any { it.id == item.id },
+                            )
+                        } else {
+                            item
+                        }
+                    }
+                }
+            }.cachedIn(scope)
 
     override fun notification(
         type: NotificationFilter,
@@ -1044,6 +1095,81 @@ internal class MisskeyDataSource(
             accountKey = accountKey,
             loader = listMemberLoader,
         )
+    }
+
+    val channelHandler: ListHandler by lazy {
+        ListHandler(
+            pagingKey = "followedChannels_$accountKey",
+            accountKey = accountKey,
+            loader =
+                MisskeyChannelLoader(
+                    service = service,
+                    accountKey = accountKey,
+                    source = MisskeyChannelLoader.Source.Followed,
+                ),
+        )
+    }
+
+    val myFavoriteChannelHandler: ListHandler by lazy {
+        ListHandler(
+            pagingKey = "myFavoriteChannels_$accountKey",
+            accountKey = accountKey,
+            loader =
+                MisskeyChannelLoader(
+                    service = service,
+                    accountKey = accountKey,
+                    source = MisskeyChannelLoader.Source.MyFavorites,
+                ),
+        )
+    }
+
+    val ownedChannelHandler: ListHandler by lazy {
+        ListHandler(
+            pagingKey = "ownedChannels_$accountKey",
+            accountKey = accountKey,
+            loader =
+                MisskeyChannelLoader(
+                    service = service,
+                    accountKey = accountKey,
+                    source = MisskeyChannelLoader.Source.Owned,
+                ),
+        )
+    }
+
+    suspend fun followChannel(data: UiList) {
+        tryRun {
+            service.channelsFollow(
+                ChannelsFollowRequest(channelId = data.id),
+            )
+            channelHandler.insertToDatabase(data)
+        }
+    }
+
+    suspend fun unfollowChannel(data: UiList) {
+        tryRun {
+            service.channelsUnfollow(
+                ChannelsFollowRequest(channelId = data.id),
+            )
+        }
+        channelHandler.delete(data.id)
+    }
+
+    suspend fun favoriteChannel(data: UiList) {
+        tryRun {
+            service.channelsFavorite(
+                ChannelsFollowRequest(channelId = data.id),
+            )
+            myFavoriteChannelHandler.insertToDatabase(data)
+        }
+    }
+
+    suspend fun unfavoriteChannel(data: UiList) {
+        tryRun {
+            service.channelsUnfavorite(
+                ChannelsFollowRequest(channelId = data.id),
+            )
+        }
+        myFavoriteChannelHandler.delete(data.id)
     }
 
     override fun acceptFollowRequest(

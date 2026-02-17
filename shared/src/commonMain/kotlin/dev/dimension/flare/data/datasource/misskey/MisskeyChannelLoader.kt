@@ -67,7 +67,7 @@ internal class MisskeyChannelLoader(
                         ),
                     )
             }.map {
-                it.render()
+                it.render(accountKey)
             }.toImmutableList()
 
         return PagingResult(
@@ -82,7 +82,7 @@ internal class MisskeyChannelLoader(
                 ChannelsFollowRequest(
                     channelId = listId,
                 ),
-            ).render()
+            ).render(accountKey)
 
     override suspend fun create(metaData: ListMetaData): UiList =
         service
@@ -91,7 +91,7 @@ internal class MisskeyChannelLoader(
                     name = metaData.title,
                     description = metaData.description,
                 ),
-            ).render()
+            ).render(accountKey)
 
     override suspend fun update(
         listId: String,
@@ -104,7 +104,7 @@ internal class MisskeyChannelLoader(
                     name = metaData.title,
                     description = metaData.description,
                 ),
-            ).render()
+            ).render(accountKey)
 
     override suspend fun delete(listId: String): Unit = throw UnsupportedOperationException("Delete channel is not supported")
 

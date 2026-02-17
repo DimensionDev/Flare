@@ -391,7 +391,7 @@ private fun presenter(
                     when (it) {
                         is dev.dimension.flare.ui.model.UiList.List -> it.description
                         is dev.dimension.flare.ui.model.UiList.Feed -> it.description
-                        is dev.dimension.flare.ui.model.UiList.Channel -> it.description
+                        is dev.dimension.flare.ui.model.UiList.Channel -> null
                         is dev.dimension.flare.ui.model.UiList.Antenna -> null
                     }
                 if (desc != null) {

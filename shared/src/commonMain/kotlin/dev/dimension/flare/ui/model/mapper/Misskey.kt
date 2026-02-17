@@ -1106,11 +1106,17 @@ internal fun Antenna.render(): UiList.Antenna =
         title = name,
     )
 
-internal fun Channel.render(): UiList.Channel =
+internal fun Channel.render(accountKey: MicroBlogKey): UiList.Channel =
     UiList.Channel(
         id = id,
         title = name,
-        description = description,
+        description =
+            description
+                ?.takeIf {
+                    it.isNotEmpty()
+                }?.let {
+                    misskeyParser.parse(it).toHtml(accountKey, emptyMap(), accountKey.host).toUi()
+                },
         isArchived = isArchived ?: false,
         notesCount = notesCount ?: 0.0,
         usersCount = usersCount ?: 0.0,

@@ -9,6 +9,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.model.DbList
 import dev.dimension.flare.data.database.cache.model.DbListPaging
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.createPagingRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.tryRun
@@ -45,7 +46,9 @@ internal class ListHandler(
                         loader.load(pageSize, request)
                     },
                     onSave = { request, data ->
-                        database.listDao().deleteByPagingKey(pagingKey)
+                        if (request == PagingRequest.Refresh) {
+                            database.listDao().deleteByPagingKey(pagingKey)
+                        }
                         database.listDao().insertAllList(
                             data.map { item ->
                                 DbList(

@@ -472,7 +472,7 @@ private fun UiChannelCard(
     modifier: Modifier = Modifier,
 ) {
     val description = item.description
-    if (!description.isNullOrEmpty()) {
+    if (description != null) {
         Column(
             modifier =
                 modifier
@@ -521,7 +521,7 @@ private fun UiChannelCard(
                     }
                 },
             )
-            PlatformText(
+            RichText(
                 text = description,
                 modifier =
                     Modifier

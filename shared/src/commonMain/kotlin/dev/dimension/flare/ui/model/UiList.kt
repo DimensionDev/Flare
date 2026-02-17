@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -51,7 +52,7 @@ public sealed class UiList {
         val isArchived: Boolean,
         val notesCount: Double,
         val usersCount: Double,
-        val description: String? = null,
+        val description: UiRichText? = null,
         val banner: String? = null,
         val isFollowing: Boolean? = null,
         val isFavorited: Boolean? = null,

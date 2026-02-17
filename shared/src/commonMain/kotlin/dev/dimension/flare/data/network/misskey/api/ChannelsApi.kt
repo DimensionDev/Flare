@@ -29,6 +29,7 @@ internal interface ChannelsApi {
     @POST("channels/create")
     suspend fun channelsCreate(
         @Body channelsCreateRequest: ChannelsCreateRequest,
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
     ): Channel
 
     /**
@@ -47,6 +48,7 @@ internal interface ChannelsApi {
     @POST("channels/favorite")
     suspend fun channelsFavorite(
         @Body channelsFollowRequest: ChannelsFollowRequest,
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
     ): Unit
 
     /**
@@ -64,8 +66,8 @@ internal interface ChannelsApi {
      */
     @POST("channels/featured")
     suspend fun channelsFeatured(
-        @Header("Content-Type") contentType: kotlin.String = "application/json",
         @Body request: ChannelsFeaturedRequest,
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
     ): kotlin.collections.List<Channel>
 
     /**
@@ -84,6 +86,7 @@ internal interface ChannelsApi {
     @POST("channels/follow")
     suspend fun channelsFollow(
         @Body channelsFollowRequest: ChannelsFollowRequest,
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
     ): Unit
 
     /**
@@ -102,6 +105,7 @@ internal interface ChannelsApi {
     @POST("channels/followed")
     suspend fun channelsFollowed(
         @Body channelsFollowedRequest: ChannelsFollowedRequest,
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
     ): kotlin.collections.List<Channel>
 
     /**
@@ -120,6 +124,7 @@ internal interface ChannelsApi {
     @POST("channels/my-favorites")
     suspend fun channelsMyFavorites(
         @Body channelsFollowedRequest: ChannelsFollowedRequest,
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
     ): kotlin.collections.List<Channel>
 
     /**
@@ -138,6 +143,7 @@ internal interface ChannelsApi {
     @POST("channels/owned")
     suspend fun channelsOwned(
         @Body channelsFollowedRequest: ChannelsFollowedRequest,
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
     ): kotlin.collections.List<Channel>
 
     /**
@@ -156,6 +162,7 @@ internal interface ChannelsApi {
     @POST("channels/search")
     suspend fun channelsSearch(
         @Body channelsSearchRequest: ChannelsSearchRequest,
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
     ): kotlin.collections.List<Channel>
 
     /**
@@ -174,6 +181,7 @@ internal interface ChannelsApi {
     @POST("channels/show")
     suspend fun channelsShow(
         @Body channelsFollowRequest: ChannelsFollowRequest,
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
     ): Channel
 
     /**
@@ -192,6 +200,7 @@ internal interface ChannelsApi {
     @POST("channels/unfavorite")
     suspend fun channelsUnfavorite(
         @Body channelsFollowRequest: ChannelsFollowRequest,
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
     ): Unit
 
     /**
@@ -210,6 +219,7 @@ internal interface ChannelsApi {
     @POST("channels/unfollow")
     suspend fun channelsUnfollow(
         @Body channelsFollowRequest: ChannelsFollowRequest,
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
     ): Unit
 
     /**
@@ -228,5 +238,6 @@ internal interface ChannelsApi {
     @POST("channels/update")
     suspend fun channelsUpdate(
         @Body channelsUpdateRequest: ChannelsUpdateRequest,
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
     ): Channel
 }

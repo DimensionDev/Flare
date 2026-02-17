@@ -39,6 +39,8 @@ extension TabItem {
             DMListScreen(accountType: directMessageTabItem.account)
         case .antennasListTabItem(let antennasListTabItem):
             AntennasListScreen(accountType: antennasListTabItem.account)
+        case .channelListTabItem(let channelListTabItem):
+            ChannelListScreen(accountType: channelListTabItem.account)
         }
     }
 }

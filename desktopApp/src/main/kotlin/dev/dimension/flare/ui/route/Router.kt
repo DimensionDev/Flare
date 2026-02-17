@@ -69,6 +69,7 @@ import dev.dimension.flare.ui.screen.list.AllListScreen
 import dev.dimension.flare.ui.screen.media.RawMediaScreen
 import dev.dimension.flare.ui.screen.media.StatusMediaScreen
 import dev.dimension.flare.ui.screen.misskey.AntennasListScreen
+import dev.dimension.flare.ui.screen.misskey.ChannelListScreen
 import dev.dimension.flare.ui.screen.rss.EditRssSourceScreen
 import dev.dimension.flare.ui.screen.rss.ImportOPMLScreen
 import dev.dimension.flare.ui.screen.rss.RssListScreen
@@ -830,6 +831,48 @@ internal fun WindowScope.Router(
                         accountType = args.accountType,
                         userKey = args.userKey,
                         onBack = onBack,
+                    )
+                }
+                entry<Route.MisskeyChannelList>(
+                    metadata =
+                        ListDetailSceneStrategy.listPane(
+                            sceneKey = "misskey_channels_list",
+                            detailPlaceholder = {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxSize()
+                                            .background(FluentTheme.colors.background.solid.base),
+                                )
+                            },
+                        ),
+                ) { args ->
+                    ChannelListScreen(
+                        accountType = args.accountType,
+                        toTimeline = {
+                            navigate(Route.MisskeyChannelTimeline(args.accountType, it.id, it.title))
+                        },
+                    )
+                }
+                entry<Route.MisskeyChannelTimeline>(
+                    metadata =
+                        ListDetailSceneStrategy.detailPane(
+                            sceneKey = "misskey_channels_list",
+                        ),
+                ) { args ->
+                    TimelineScreen(
+                        tabItem =
+                            remember(args) {
+                                Misskey.ChannelTimelineTabItem(
+                                    channelId = args.channelId,
+                                    account = args.accountType,
+                                    metaData =
+                                        TabMetaData(
+                                            title = TitleType.Text(args.title),
+                                            icon = IconType.Material(IconType.Material.MaterialIcon.Channel),
+                                        ),
+                                )
+                            },
                     )
                 }
             },

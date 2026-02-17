@@ -364,6 +364,20 @@ internal sealed interface Route : NavKey {
             val title: String,
         ) : Misskey,
             WithAccountType
+
+        @Serializable
+        data class ChannelList(
+            override val accountType: AccountType,
+        ) : Misskey,
+            WithAccountType
+
+        @Serializable
+        data class ChannelTimeline(
+            override val accountType: AccountType,
+            val channelId: String,
+            val title: String,
+        ) : Misskey,
+            WithAccountType
     }
 
     @Serializable

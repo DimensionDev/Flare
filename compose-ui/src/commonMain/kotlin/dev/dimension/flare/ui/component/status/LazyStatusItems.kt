@@ -18,14 +18,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.CircleExclamation
 import compose.icons.fontawesomeicons.solid.File
-import compose.icons.fontawesomeicons.solid.FileCircleExclamation
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onEndOfList
@@ -33,19 +30,14 @@ import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.compose.ui.Res
-import dev.dimension.flare.compose.ui.login_expired
-import dev.dimension.flare.compose.ui.login_expired_message
 import dev.dimension.flare.compose.ui.status_empty
 import dev.dimension.flare.compose.ui.status_loadmore_end
-import dev.dimension.flare.compose.ui.status_loadmore_error
-import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.route.DeeplinkRoute
-import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
@@ -221,64 +213,11 @@ private fun OnError(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    when (error) {
-        is LoginExpiredException -> {
-            LoginExpiredError(error, modifier)
-        }
-
-        else -> {
-            Column(
-                modifier =
-                    modifier
-                        .clickable {
-                            onRetry.invoke()
-                        }.fillMaxWidth()
-                        .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                FAIcon(
-                    imageVector = FontAwesomeIcons.Solid.FileCircleExclamation,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                )
-                PlatformText(text = stringResource(Res.string.status_loadmore_error))
-                error.message?.let { PlatformText(text = it) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LoginExpiredError(
-    exception: LoginExpiredException,
-    modifier: Modifier = Modifier,
-) {
-    val uriHandler = LocalUriHandler.current
-    Column(
-        modifier =
-            modifier
-                .clickable {
-                    uriHandler.openUri(DeeplinkRoute.Login.toUri())
-                },
-        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        FAIcon(
-            imageVector = FontAwesomeIcons.Solid.CircleExclamation,
-            contentDescription = null,
-            modifier = Modifier.size(48.dp),
-        )
-        PlatformText(
-            text = stringResource(resource = Res.string.login_expired),
-        )
-        PlatformText(
-            text = stringResource(resource = Res.string.login_expired_message),
-        )
-        PlatformText(
-            text = exception.accountKey.toString(),
-        )
-    }
+    ErrorContent(
+        error = error,
+        onRetry = onRetry,
+        modifier = modifier,
+    )
 }
 
 @Composable

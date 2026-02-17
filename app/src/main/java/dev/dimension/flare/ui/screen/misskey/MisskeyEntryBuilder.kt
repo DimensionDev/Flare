@@ -18,6 +18,7 @@ import androidx.navigation3.runtime.NavKey
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.SquareRss
+import compose.icons.fontawesomeicons.solid.List
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.Misskey
 import dev.dimension.flare.data.model.TabMetaData
@@ -68,6 +69,43 @@ internal fun EntryProviderScope<NavKey>.misskeyEntryBuilder(
             onBack = onBack,
         )
     }
+
+    entry<Route.Misskey.ChannelList>(
+        metadata = ListDetailSceneStrategy.listPane(
+            sceneKey = "misskey_channels_list",
+            detailPlaceholder = {
+                ChannelsPlaceholder()
+            }
+        )
+    ) { args ->
+        ChannelListScreen(
+            accountType = args.accountType,
+            toTimeline = {
+                navigate(Route.Misskey.ChannelTimeline(args.accountType, it.id, it.title))
+            },
+            onBack = onBack
+        )
+    }
+
+    entry<Route.Misskey.ChannelTimeline>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "misskey_channels_list",
+        )
+    ) { args ->
+        TimelineScreen(
+            tabItem = remember(args) {
+                Misskey.ChannelTimelineTabItem(
+                    channelId = args.channelId,
+                    account = args.accountType,
+                    metaData = TabMetaData(
+                        title = TitleType.Text(args.title),
+                        icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                    ),
+                )
+            },
+            onBack = onBack,
+        )
+    }
 }
 
 
@@ -87,6 +125,29 @@ internal fun AntennasPlaceholder(
         ) {
             FAIcon(
                 FontAwesomeIcons.Solid.SquareRss,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp)
+            )
+        }
+    }
+}
+
+@Composable
+internal fun ChannelsPlaceholder(
+    modifier: Modifier = Modifier,
+) {
+    FlareScaffold(
+        modifier = modifier,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.CenterVertically),
+        ) {
+            FAIcon(
+                FontAwesomeIcons.Solid.List,
                 contentDescription = null,
                 modifier = Modifier.size(64.dp)
             )

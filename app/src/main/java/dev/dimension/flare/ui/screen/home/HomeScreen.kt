@@ -536,6 +536,7 @@ private fun getDirection(
         is DirectMessageTabItem -> Route.DM.List(accountType)
         is RssTabItem -> Route.Rss.Sources
         is Misskey.AntennasListTabItem -> Route.Misskey.AntennasList(accountType)
+        is Misskey.ChannelListTabItem -> Route.Misskey.ChannelList(accountType)
     }
 
 @Composable

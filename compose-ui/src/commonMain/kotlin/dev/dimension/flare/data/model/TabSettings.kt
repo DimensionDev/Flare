@@ -92,6 +92,7 @@ public sealed class TitleType {
             Liked,
             AllRssFeeds,
             Posts,
+            Channel,
         }
     }
 }
@@ -142,6 +143,7 @@ public sealed class IconType {
             Messages,
             Rss,
             Weibo,
+            Channel,
         }
     }
 
@@ -422,6 +424,14 @@ public sealed class TimelineTabItem : TabItem() {
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Antenna),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Rss, accountKey),
+                        ),
+                ),
+                Misskey.ChannelListTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Channel),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Channel, accountKey),
                         ),
                 ),
             )
@@ -878,6 +888,17 @@ public object Misskey {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.list
                 .ChannelTimelinePresenter(account, channelId)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Immutable
+    @Serializable
+    public data class ChannelListTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TabItem() {
+        override val key: String = "channels_$account"
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }

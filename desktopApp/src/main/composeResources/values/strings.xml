@@ -366,4 +366,9 @@
     <string name="import_confirmation_message">This will import data from the file. Existing records with matching IDs will be replaced. Do you want to continue?</string>
 
     <string name="channel_title">Channel</string>
+
+    <string name="misskey_channel_tab_following">Following</string>
+    <string name="misskey_channel_tab_favorites">Favorites</string>
+    <string name="misskey_channel_tab_owned">Owned</string>
+    <string name="misskey_channel_tab_featured">Featured</string>
 </resources>

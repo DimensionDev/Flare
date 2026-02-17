@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.misskey
 
+import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.misskey.api.AccountApi
 import dev.dimension.flare.data.network.misskey.api.AntennasApi
@@ -24,10 +25,13 @@ import dev.dimension.flare.data.network.misskey.api.createNotesApi
 import dev.dimension.flare.data.network.misskey.api.createReactionsApi
 import dev.dimension.flare.data.network.misskey.api.createUsersApi
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
+import dev.dimension.flare.data.network.misskey.api.model.MisskeyException
 import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.header
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
@@ -49,6 +53,19 @@ private fun config(
         install(DefaultRequest) {
             if (contentLength() != 0L) {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
+            }
+        }
+        HttpResponseValidator {
+            validateResponse {
+                runCatching {
+                    it
+                        .bodyAsText()
+                        .decodeJson<MisskeyException>()
+                }.getOrNull()
+                    ?.takeIf { it.error != null }
+                    ?.let {
+                        throw it
+                    }
             }
         }
     },

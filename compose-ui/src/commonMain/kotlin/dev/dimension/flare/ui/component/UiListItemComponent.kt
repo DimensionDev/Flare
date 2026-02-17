@@ -18,14 +18,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.CircleExclamation
 import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Rss
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.feeds_discover_feeds_created_by
 import dev.dimension.flare.compose.ui.list_empty
-import dev.dimension.flare.compose.ui.list_error
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.platform.PlatformListItem
 import dev.dimension.flare.ui.component.platform.PlatformSegmentedListItem
@@ -75,21 +73,12 @@ public fun <T : UiList> LazyListScope.uiListItemComponent(
             )
         },
         errorContent = {
-            Column(
+            ErrorContent(
+                error = it,
                 modifier = Modifier.fillParentMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-            ) {
-                FAIcon(
-                    imageVector = FontAwesomeIcons.Solid.CircleExclamation,
-                    contentDescription = stringResource(Res.string.list_error),
-                    modifier = Modifier.size(48.dp),
-                )
-                PlatformText(
-                    text = stringResource(Res.string.list_error),
-                    style = PlatformTheme.typography.title,
-                )
-            }
+                onRetry = {
+                },
+            )
         },
     ) { index, itemCount, item ->
         UiListItem(

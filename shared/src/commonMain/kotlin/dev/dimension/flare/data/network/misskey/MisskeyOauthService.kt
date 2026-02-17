@@ -36,6 +36,8 @@ private val defaultPermission =
         "read:page-likes",
         "write:gallery-likes",
         "read:gallery-likes",
+        "read:channels",
+        "write:channels",
     )
 
 internal class MisskeyOauthService(

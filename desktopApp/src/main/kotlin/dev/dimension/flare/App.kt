@@ -428,6 +428,7 @@ private fun getRoute(tab: TabItem): Route =
         is DirectMessageTabItem -> Route.DmList(tab.account)
         is RssTabItem -> Route.RssList
         is Misskey.AntennasListTabItem -> Route.MisskeyAntennas(tab.account)
+        is Misskey.ChannelListTabItem -> Route.MisskeyChannelList(tab.account)
     }
 
 @Composable

@@ -94,4 +94,8 @@ internal interface ListDao {
     @Transaction
     @Query("SELECT * FROM DbUser WHERE userKey = :userKey")
     fun getUserByKey(userKey: MicroBlogKey): PagingSource<Int, DbUserWithListMembership>
+
+    @Transaction
+    @Query("SELECT * FROM DbUser WHERE userKey = :userKey")
+    fun getUserByKeyFlow(userKey: MicroBlogKey): Flow<DbUserWithListMembership>
 }

@@ -2,12 +2,13 @@ package dev.dimension.flare.data.datasource.microblog.list
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
-import androidx.paging.flatMap
 import androidx.paging.map
+import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.model.DbList
 import dev.dimension.flare.data.database.cache.model.DbListMember
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.createPagingRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.tryRun
@@ -124,23 +125,17 @@ internal class ListMemberHandler(
         get() = "${pagingKey}_user_lists"
 
     fun userLists(userKey: MicroBlogKey) =
-        Pager(
-            config = pagingConfig,
-            pagingSourceFactory = {
-                database.listDao().getUserByKey(userKey)
-            },
-            remoteMediator =
-                createPagingRemoteMediator(
-                    pagingKey = userListsPagingKey,
-                    database = database,
-                    onLoad = { pageSize, request ->
+        Cacheable(
+            fetchSource = {
+                tryRun {
+                    val result =
                         loader.loadUserLists(
-                            pageSize = pageSize,
-                            request = request,
+                            pageSize = 100,
+                            request = PagingRequest.Refresh,
                             userKey = userKey,
                         )
-                    },
-                    onSave = { request, data ->
+                    val data = result.data
+                    database.connect {
                         database.listDao().insertAllList(
                             data.map { item ->
                                 DbList(
@@ -158,13 +153,18 @@ internal class ListMemberHandler(
                                 )
                             },
                         )
-                    },
-                ),
-        ).flow.map {
-            it.flatMap {
-                it.listMemberships.map {
-                    it.list.content.data
+                    }
                 }
-            }
-        }
+            },
+            cacheSource = {
+                database
+                    .listDao()
+                    .getUserByKeyFlow(userKey)
+                    .map {
+                        it.listMemberships.map {
+                            it.list.content.data
+                        }
+                    }
+            },
+        )
 }

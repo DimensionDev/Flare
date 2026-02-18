@@ -18,8 +18,6 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
-import dev.dimension.flare.common.onLoading
-import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.BackButton
@@ -70,9 +68,10 @@ internal fun EditAccountListScreen(
                 uiListItemComponent(
                     state.lists,
                 ) { item ->
-                    state.userLists
-                        .onSuccess {
-                            if (it.any { list -> list.id == item.id }) {
+                    state
+                        .isInList(item)
+                        .onSuccess { inList ->
+                            if (inList) {
                                 IconButton(
                                     onClick = { state.removeList(item) },
                                 ) {

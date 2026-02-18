@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.cachedIn
@@ -11,13 +12,21 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
 import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -33,6 +42,19 @@ public class EditAccountListPresenter(
 ) : PresenterBase<EditAccountListState>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val userListFlow by lazy {
+        accountServiceFlow(accountType, accountRepository)
+            .flatMapLatest { service ->
+                require(service is ListDataSource)
+                service.listMemberHandler.userLists(userKey).toUi()
+            }.map {
+                it.map {
+                    it.toImmutableList()
+                }
+            }
+    }
 
     @Composable
     override fun body(): EditAccountListState {
@@ -50,15 +72,7 @@ public class EditAccountListPresenter(
                         }
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
-        val userLists =
-            serviceState
-                .map { service ->
-                    require(service is ListDataSource)
-                    remember(service) {
-                        service.listMemberHandler.userLists(userKey).cachedIn(scope)
-                    }.collectAsLazyPagingItems()
-                }.toPagingState()
-
+        val userLists by userListFlow.flattenUiState()
         return object : EditAccountListState {
             override val lists = allList
             override val userLists = userLists
@@ -80,6 +94,13 @@ public class EditAccountListPresenter(
                     }
                 }
             }
+
+            override fun isInList(list: UiList): UiState<Boolean> =
+                userLists.map { item ->
+                    item.any {
+                        it.id == list.id
+                    }
+                }
         }
     }
 }
@@ -94,9 +115,11 @@ public interface EditAccountListState {
     /**
      * Lists that the user is a member of.
      */
-    public val userLists: PagingState<UiList>
+    public val userLists: UiState<ImmutableList<UiList>>
 
     public fun addList(list: UiList)
 
     public fun removeList(list: UiList)
+
+    public fun isInList(list: UiList): UiState<Boolean>
 }

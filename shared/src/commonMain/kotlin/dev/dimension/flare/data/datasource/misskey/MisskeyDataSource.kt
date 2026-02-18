@@ -432,6 +432,7 @@ internal class MisskeyDataSource(
                         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home -> "home"
                         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers -> "followers"
                         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified -> "specified"
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel -> "public"
                     },
                 renoteId = renoteId,
                 replyId = inReplyToID,

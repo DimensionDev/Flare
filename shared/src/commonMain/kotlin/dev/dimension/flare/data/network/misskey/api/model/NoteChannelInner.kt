@@ -25,4 +25,8 @@ import kotlinx.serialization.Serializable
 internal data class NoteChannelInner(
     @SerialName(value = "id") val id: kotlin.String? = null,
     @SerialName(value = "name") val name: kotlin.String? = null,
+    @SerialName(value = "color") val color: kotlin.String? = null,
+    @SerialName(value = "isSensitive") val isSensitive: kotlin.Boolean? = null,
+    @SerialName(value = "allowRenoteToExternal") val allowRenoteToExternal: kotlin.Boolean? = null,
+    @SerialName(value = "userId") val userId: kotlin.String? = null,
 )

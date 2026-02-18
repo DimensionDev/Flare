@@ -139,7 +139,14 @@ public data class UiTimeline internal constructor(
                 @Immutable
                 public data class Reaction internal constructor(
                     val emojiReactions: ImmutableList<EmojiReaction>,
+                    val channel: SourceChannel? = null,
                 ) : BottomContent() {
+                    @Immutable
+                    public data class SourceChannel(
+                        val id: String,
+                        val name: String,
+                    )
+
                     @Immutable
                     public data class EmojiReaction internal constructor(
                         val name: String,
@@ -169,6 +176,7 @@ public data class UiTimeline internal constructor(
                         Home,
                         Followers,
                         Specified,
+                        Channel,
                     }
                 }
             }

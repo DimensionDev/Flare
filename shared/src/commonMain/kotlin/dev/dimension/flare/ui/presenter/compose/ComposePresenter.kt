@@ -41,6 +41,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -340,8 +341,12 @@ public class ComposePresenter(
             override val visibility = visibility
 
             override val allVisibilities =
-                UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.entries
-                    .toImmutableList()
+                persistentListOf(
+                    UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public,
+                    UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home,
+                    UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers,
+                    UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified,
+                )
 
             override val showVisibilityMenu: Boolean
                 get() = showVisibilityMenu

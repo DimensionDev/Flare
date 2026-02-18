@@ -60,6 +60,7 @@ import moe.tlaster.mfm.parser.tree.SearchNode
 import moe.tlaster.mfm.parser.tree.SmallNode
 import moe.tlaster.mfm.parser.tree.StrikeNode
 import moe.tlaster.mfm.parser.tree.UrlNode
+import kotlin.math.roundToLong
 import kotlin.time.Instant
 
 internal fun Notification.render(
@@ -77,30 +78,39 @@ internal fun Notification.render(
             NotificationType.Follow ->
                 UiTimeline.TopMessage.MessageType.Misskey
                     .Follow(id = id)
+
             NotificationType.Mention ->
                 UiTimeline.TopMessage.MessageType.Misskey
                     .Mention(id = id)
+
             NotificationType.Reply ->
                 UiTimeline.TopMessage.MessageType.Misskey
                     .Reply(id = id)
+
             NotificationType.Renote ->
                 UiTimeline.TopMessage.MessageType.Misskey
                     .Renote(id = id)
+
             NotificationType.Quote ->
                 UiTimeline.TopMessage.MessageType.Misskey
                     .Quote(id = id)
+
             NotificationType.Reaction ->
                 UiTimeline.TopMessage.MessageType.Misskey
                     .Reaction(id = id)
+
             NotificationType.PollEnded ->
                 UiTimeline.TopMessage.MessageType.Misskey
                     .PollEnded(id = id)
+
             NotificationType.ReceiveFollowRequest ->
                 UiTimeline.TopMessage.MessageType.Misskey
                     .ReceiveFollowRequest(id = id)
+
             NotificationType.FollowRequestAccepted ->
                 UiTimeline.TopMessage.MessageType.Misskey
                     .FollowRequestAccepted(id = id)
+
             NotificationType.AchievementEarned ->
                 UiTimeline.TopMessage.MessageType.Misskey.AchievementEarned(
                     id = id,
@@ -109,9 +119,11 @@ internal fun Notification.render(
                             MisskeyAchievement.fromString(it)
                         },
                 )
+
             NotificationType.App ->
                 UiTimeline.TopMessage.MessageType.Misskey
                     .App(id = id)
+
             else ->
                 UiTimeline.TopMessage.MessageType.Misskey
                     .UnKnown(id = id, type = type)
@@ -138,7 +150,16 @@ internal fun Notification.render(
             type = topMessageType,
             onClicked = {
                 if (user != null) {
-                    launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = user.key).toUri())
+                    launcher.launch(
+                        DeeplinkRoute.Profile
+                            .User(
+                                accountType =
+                                    AccountType.Specific(
+                                        accountKey,
+                                    ),
+                                userKey = user.key,
+                            ).toUri(),
+                    )
                 }
             },
             statusKey = MicroBlogKey(id, accountKey.host),
@@ -165,6 +186,7 @@ internal fun Notification.render(
                     user != null
                 ->
                     UiTimeline.ItemContent.User(user)
+
                 notificationType == NotificationType.ReceiveFollowRequest && user != null ->
                     UiTimeline.ItemContent.User(
                         user,
@@ -174,7 +196,11 @@ internal fun Notification.render(
                                     onClicked = {
                                         event.acceptFollowRequest(
                                             userKey = user.key,
-                                            notificationStatusKey = MicroBlogKey(id, accountKey.host),
+                                            notificationStatusKey =
+                                                MicroBlogKey(
+                                                    id,
+                                                    accountKey.host,
+                                                ),
                                         )
                                     },
                                 ),
@@ -182,7 +208,11 @@ internal fun Notification.render(
                                     onClicked = {
                                         event.rejectFollowRequest(
                                             userKey = user.key,
-                                            notificationStatusKey = MicroBlogKey(id, accountKey.host),
+                                            notificationStatusKey =
+                                                MicroBlogKey(
+                                                    id,
+                                                    accountKey.host,
+                                                ),
                                         )
                                     },
                                 ),
@@ -346,13 +376,22 @@ private fun Note.renderStatus(
     val parent = references[ReferenceType.Reply]?.firstOrNull() as? StatusContent.Misskey
     val user = user.render(accountKey)
     val isFromMe = user.key == accountKey
-    val canReblog = visibility in listOf(Visibility.Public, Visibility.Home) || (isFromMe && visibility != Visibility.Specified)
+    val canReblog =
+        (channel == null || channel.allowRenoteToExternal == null || channel.allowRenoteToExternal) &&
+            (
+                visibility in listOf(Visibility.Public, Visibility.Home) ||
+                    (isFromMe && visibility != Visibility.Specified)
+            )
     val renderedVisibility =
-        when (visibility) {
-            Visibility.Public -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public
-            Visibility.Home -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home
-            Visibility.Followers -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers
-            Visibility.Specified -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified
+        if (channel?.id != null) {
+            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel
+        } else {
+            when (visibility) {
+                Visibility.Public -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public
+                Visibility.Home -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home
+                Visibility.Followers -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers
+                Visibility.Specified -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified
+            }
         }
     val statusKey =
         MicroBlogKey(
@@ -378,6 +417,15 @@ private fun Note.renderStatus(
                 )
             }.sortedByDescending { it.count.value }
             .toPersistentList()
+    val sourceChannel =
+        if (channel?.id != null && channel.name != null) {
+            UiTimeline.ItemContent.Status.BottomContent.Reaction.SourceChannel(
+                id = channel.id,
+                name = channel.name,
+            )
+        } else {
+            null
+        }
     val postUrl =
         buildString {
             if (!url.isNullOrEmpty()) {
@@ -494,6 +542,7 @@ private fun Note.renderStatus(
                                 ActionMenu.Item.Text.Localized.Type.React
                             },
                         ),
+                    count = UiNumber(reaction.sumOf { it.count.value }),
                     color = if (myReaction != null) ActionMenu.Item.Color.Red else null,
                     onClicked = {
                         if (myReaction == null) {
@@ -576,7 +625,10 @@ private fun Note.renderStatus(
                                             launcher.launch(
                                                 DeeplinkRoute.Status
                                                     .DeleteConfirm(
-                                                        accountType = AccountType.Specific(accountKey),
+                                                        accountType =
+                                                            AccountType.Specific(
+                                                                accountKey,
+                                                            ),
                                                         statusKey = statusKey,
                                                     ).toUri(),
                                             )
@@ -604,7 +656,10 @@ private fun Note.renderStatus(
                                                     .MisskeyReport(
                                                         statusKey = statusKey,
                                                         userKey = user.key,
-                                                        accountType = AccountType.Specific(accountKey),
+                                                        accountType =
+                                                            AccountType.Specific(
+                                                                accountKey,
+                                                            ),
                                                     ).toUri(),
                                             )
                                         },
@@ -653,7 +708,7 @@ private fun Note.renderStatus(
                 .Visibility(renderedVisibility),
         bottomContent =
             UiTimeline.ItemContent.Status.BottomContent
-                .Reaction(reaction),
+                .Reaction(reaction, sourceChannel),
         sensitive = files?.any { it.isSensitive } ?: false,
         onClicked = {
             launcher.launch(
@@ -741,7 +796,11 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
         platformType = PlatformType.Misskey,
         clickEvent =
             ClickEvent.Deeplink(
-                DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri(),
+                DeeplinkRoute.Profile
+                    .User(
+                        accountType = AccountType.Specific(accountKey),
+                        userKey = userKey,
+                    ).toUri(),
             ),
     )
 }
@@ -764,7 +823,10 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         handle = "@$username@$remoteHost",
         key = userKey,
         banner = bannerUrl,
-        description = description?.let { misskeyParser.parse(it).toHtml(accountKey, emojis, remoteHost).toUi() },
+        description =
+            description?.let {
+                misskeyParser.parse(it).toHtml(accountKey, emojis, remoteHost).toUi()
+            },
         matrices =
             UiProfile.Matrices(
                 fansCount = followersCount.toLong(),
@@ -793,14 +855,22 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                         fields =
                             it
                                 .associate { (key, value) ->
-                                    key to misskeyParser.parse(value).toHtml(accountKey, emojis, remoteHost).toUi()
+                                    key to
+                                        misskeyParser
+                                            .parse(value)
+                                            .toHtml(accountKey, emojis, remoteHost)
+                                            .toUi()
                                 }.toImmutableMap(),
                     )
                 },
         platformType = PlatformType.Misskey,
         clickEvent =
             ClickEvent.Deeplink(
-                DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri(),
+                DeeplinkRoute.Profile
+                    .User(
+                        accountType = AccountType.Specific(accountKey),
+                        userKey = userKey,
+                    ).toUri(),
             ),
     )
 }
@@ -911,11 +981,37 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         }
 
         is FnNode -> {
-            Element("fn").apply {
+            if (name == "unixtime") {
+                // for example: 1771316689.8110971
+                val time =
+                    content
+                        .firstOrNull()
+                        ?.let { it as? moe.tlaster.mfm.parser.tree.TextNode }
+                        ?.content
+                        ?.toFloatOrNull()
+                if (time != null) {
+                    Element("time").apply {
+                        appendChild(
+                            TextNode(
+                                Instant.fromEpochSeconds(time.roundToLong()).toUi().full,
+                            ),
+                        )
+                        attributes().put("datetime", time.toString())
+                    }
+                } else {
+                    Element("span").apply {
+                        content.forEach {
+                            appendChild(it.toHtml(accountKey, emojis, remoteHost))
+                        }
+                    }
+                }
+            } else {
+                Element("fn").apply {
 //                attributes["name"] = name
-                attributes().put("name", name)
-                content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
+                    attributes().put("name", name)
+                    content.forEach {
+                        appendChild(it.toHtml(accountKey, emojis, remoteHost))
+                    }
                 }
             }
         }
@@ -955,7 +1051,10 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         is CashNode -> {
             Element("a").apply {
 //                attributes["href"] = AppDeepLink.Search(accountKey, "$$content")
-                attributes().put("href", DeeplinkRoute.Search(AccountType.Specific(accountKey), "$$content").toUri())
+                attributes().put(
+                    "href",
+                    DeeplinkRoute.Search(AccountType.Specific(accountKey), "$$content").toUri(),
+                )
                 appendChild(TextNode("$$content"))
             }
         }
@@ -972,7 +1071,10 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         is HashtagNode -> {
             Element("a").apply {
 //                attributes["href"] = AppDeepLink.Search(accountKey, "#$tag")
-                attributes().put("href", DeeplinkRoute.Search(AccountType.Specific(accountKey), "#$tag").toUri())
+                attributes().put(
+                    "href",
+                    DeeplinkRoute.Search(AccountType.Specific(accountKey), "#$tag").toUri(),
+                )
                 appendChild(TextNode("#$tag"))
             }
         }

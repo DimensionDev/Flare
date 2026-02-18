@@ -394,6 +394,7 @@ internal open class MastodonDataSource(
                         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home -> Visibility.Unlisted
                         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers -> Visibility.Private
                         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified -> Visibility.Direct
+                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel -> Visibility.Public
                     },
                 inReplyToID = inReplyToID,
                 mediaIDS = mediaIds.takeIf { it.isNotEmpty() },

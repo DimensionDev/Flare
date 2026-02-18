@@ -425,4 +425,8 @@
     <string name="tab_settings_group_default_name">New Group</string>
     <string name="status_share_sheet_theme_title">Theme</string>
     <string name="channel_title">Channel</string>
+    <string name="channel_item_follow">Follow</string>
+    <string name="channel_item_unfollow">Unfollow</string>
+    <string name="channel_item_favourite">Favourite</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

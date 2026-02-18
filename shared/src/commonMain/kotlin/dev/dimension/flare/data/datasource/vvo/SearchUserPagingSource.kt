@@ -6,21 +6,21 @@ import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
 internal class SearchUserPagingSource(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
     private val query: String,
-) : BasePagingSource<Int, UiUserV2>() {
+) : BasePagingSource<Int, UiProfile>() {
     private val containerId by lazy {
         "100103type=3&q=$query&t="
     }
 
-    override fun getRefreshKey(state: PagingState<Int, UiUserV2>): Int? = null
+    override fun getRefreshKey(state: PagingState<Int, UiProfile>): Int? = null
 
-    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiUserV2> {
+    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiProfile> {
         val config = service.config()
         if (config.data?.login != true) {
             return LoadResult.Error(

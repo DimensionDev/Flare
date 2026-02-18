@@ -187,7 +187,7 @@ struct ProfileHeader: View {
     let user: UiState<UiProfile>
     let relation: UiState<UiRelation>
     let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiUserV2, UiRelation) -> Void
+    let onFollowClick: (UiProfile, UiRelation) -> Void
     let onFollowingClick: (MicroBlogKey) -> Void
     let onFansClick: (MicroBlogKey) -> Void
     var body: some View {

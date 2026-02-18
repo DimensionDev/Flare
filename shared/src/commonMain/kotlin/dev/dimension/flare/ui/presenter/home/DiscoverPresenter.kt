@@ -22,7 +22,6 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
@@ -143,7 +142,7 @@ public class DiscoverPresenter :
 
 @Immutable
 public interface DiscoverState {
-    public val users: PagingState<UiUserV2>
+    public val users: PagingState<UiProfile>
     public val status: PagingState<UiTimeline>
     public val hashtags: PagingState<UiHashtag>
     public val accounts: UiState<ImmutableList<UiProfile>>

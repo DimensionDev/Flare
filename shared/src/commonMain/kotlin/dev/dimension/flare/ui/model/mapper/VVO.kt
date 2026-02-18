@@ -15,6 +15,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.vvoHostLong
 import dev.dimension.flare.model.vvoHostShort
+import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
@@ -373,9 +374,10 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                     )
                 },
         platformType = PlatformType.VVo,
-        onClicked = {
-            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
-        },
+        clickEvent =
+            ClickEvent.Deeplink(
+                DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri(),
+            ),
     )
 }
 

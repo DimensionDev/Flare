@@ -20,12 +20,12 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformText
-import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.theme.PlatformTheme
 
 @Composable
 public fun CommonStatusHeaderComponent(
-    data: UiUserV2,
+    data: UiProfile,
     onUserClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
     leadingContent: @Composable (RowScope.() -> Unit)? = {

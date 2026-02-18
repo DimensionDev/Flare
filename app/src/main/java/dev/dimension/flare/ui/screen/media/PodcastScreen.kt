@@ -28,8 +28,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.model.UiPodcast
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -150,7 +150,7 @@ internal fun ColumnScope.PodcastContent(
 
 @Composable
 private fun UserItem(
-    item: UiUserV2,
+    item: UiProfile,
     modifier: Modifier = Modifier,
     bottom: @Composable () -> Unit = {},
 ) {

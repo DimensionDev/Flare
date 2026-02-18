@@ -25,9 +25,9 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.EmojiData
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
@@ -102,9 +102,6 @@ public class ComposePresenter(
                                         service.userById(account.accountKey.id)
                                     }.collectAsState()
                                         .toUi()
-                                        .map {
-                                            it as UiUserV2
-                                        }
                                 } to account
                             }.toImmutableList()
                             .toImmutableListWrapper()
@@ -412,8 +409,8 @@ public abstract class ComposeState(
     public val composeConfig: UiState<ComposeConfig>,
     public val enableCrossPost: UiState<Boolean>,
     public val selectedAccounts: ImmutableList<UiAccount>,
-    public val otherAccounts: UiState<ImmutableListWrapper<Pair<UiState<UiUserV2>, UiAccount>>>,
-    public val selectedUsers: UiState<ImmutableListWrapper<Pair<UiState<UiUserV2>, UiAccount>>>,
+    public val otherAccounts: UiState<ImmutableListWrapper<Pair<UiState<UiProfile>, UiAccount>>>,
+    public val selectedUsers: UiState<ImmutableListWrapper<Pair<UiState<UiProfile>, UiAccount>>>,
 ) {
     public abstract fun send(data: ComposeData)
 

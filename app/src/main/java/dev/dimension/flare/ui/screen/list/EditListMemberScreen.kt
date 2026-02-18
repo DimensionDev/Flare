@@ -45,7 +45,6 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.EditListMemberPresenter
 import dev.dimension.flare.ui.presenter.list.EditListMemberState
-import dev.dimension.flare.ui.presenter.list.EmptyQueryException
 import dev.dimension.flare.ui.screen.settings.AccountItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
@@ -188,28 +187,15 @@ internal fun EditListMemberScreen(
                             )
                         }
                     }.onError {
-                        if (it is EmptyQueryException) {
-                            item {
-                                ListItem(
-                                    headlineContent = {
-                                        Text(text = stringResource(id = R.string.edit_list_member_search_empty))
-                                    },
-                                    modifier =
-                                        Modifier
-                                            .listCard(),
-                                )
-                            }
-                        } else {
-                            item {
-                                ListItem(
-                                    headlineContent = {
-                                        Text(text = stringResource(id = R.string.edit_list_member_search_error))
-                                    },
-                                    modifier =
-                                        Modifier
-                                            .listCard(),
-                                )
-                            }
+                        item {
+                            ListItem(
+                                headlineContent = {
+                                    Text(text = stringResource(id = R.string.edit_list_member_search_error))
+                                },
+                                modifier =
+                                    Modifier
+                                        .listCard(),
+                            )
                         }
                     }
             }

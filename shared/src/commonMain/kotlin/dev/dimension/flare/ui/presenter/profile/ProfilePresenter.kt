@@ -22,7 +22,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.flattenUiState
@@ -493,7 +492,7 @@ public class ProfileWithUserNameAndHostPresenter(
                 }.collectAsState().toUi()
             }
         return object : UserState {
-            override val user: UiState<UiUserV2>
+            override val user: UiState<UiProfile>
                 get() = userState
         }
     }

@@ -36,7 +36,7 @@ import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiMedia
-import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
@@ -46,7 +46,7 @@ import org.jetbrains.compose.resources.stringResource
 public fun DMItem(
     item: UiDMItem,
     onRetry: () -> Unit,
-    onUserClicked: (UiUserV2) -> Unit,
+    onUserClicked: (UiProfile) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current

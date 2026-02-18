@@ -19,7 +19,7 @@ public sealed class UiList {
         override val title: String,
         val description: String? = null,
         val avatar: String? = null,
-        val creator: UiUserV2? = null,
+        val creator: UiProfile? = null,
         override val readonly: Boolean = false,
     ) : UiList()
 
@@ -30,7 +30,7 @@ public sealed class UiList {
         override val title: String,
         val description: String? = null,
         val avatar: String? = null,
-        val creator: UiUserV2? = null,
+        val creator: UiProfile? = null,
         val likedCount: UiNumber = UiNumber(0),
         val liked: Boolean = false,
         override val readonly: Boolean = false,

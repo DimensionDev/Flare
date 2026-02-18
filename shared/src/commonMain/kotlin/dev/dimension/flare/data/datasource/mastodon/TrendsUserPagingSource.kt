@@ -4,17 +4,17 @@ import androidx.paging.PagingState
 import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.data.network.mastodon.api.TrendsResources
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
 internal class TrendsUserPagingSource(
     private val service: TrendsResources,
     private val accountKey: MicroBlogKey?,
     private val host: String,
-) : BasePagingSource<Int, UiUserV2>() {
-    override fun getRefreshKey(state: PagingState<Int, UiUserV2>): Int? = null
+) : BasePagingSource<Int, UiProfile>() {
+    override fun getRefreshKey(state: PagingState<Int, UiProfile>): Int? = null
 
-    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiUserV2> {
+    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiProfile> {
         service
             .suggestionsUsers()
             .mapNotNull {

@@ -22,6 +22,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
@@ -738,9 +739,10 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
         mark = persistentListOf(),
         bottomContent = null,
         platformType = PlatformType.Misskey,
-        onClicked = {
-            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
-        },
+        clickEvent =
+            ClickEvent.Deeplink(
+                DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri(),
+            ),
     )
 }
 
@@ -796,9 +798,10 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                     )
                 },
         platformType = PlatformType.Misskey,
-        onClicked = {
-            launcher.launch(DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri())
-        },
+        clickEvent =
+            ClickEvent.Deeplink(
+                DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri(),
+            ),
     )
 }
 

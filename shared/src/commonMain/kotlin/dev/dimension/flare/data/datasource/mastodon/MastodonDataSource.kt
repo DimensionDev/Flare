@@ -54,7 +54,6 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
@@ -228,7 +227,7 @@ internal open class MastodonDataSource(
                 NotificationFilter.Mention,
             )
 
-    override fun userByAcct(acct: String): CacheData<UiUserV2> {
+    override fun userByAcct(acct: String): CacheData<UiProfile> {
         val (name, host) = MicroBlogKey.valueOf(acct)
         return Cacheable(
             fetchSource = {
@@ -770,7 +769,7 @@ internal open class MastodonDataSource(
         }
     }
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -808,7 +807,7 @@ internal open class MastodonDataSource(
     override fun searchUser(
         query: String,
         pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
+    ): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -824,7 +823,7 @@ internal open class MastodonDataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int = 20,
-    ): Flow<PagingData<UiUserV2>> =
+    ): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -1045,7 +1044,7 @@ internal open class MastodonDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
+    ): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -1061,7 +1060,7 @@ internal open class MastodonDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
+    ): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {

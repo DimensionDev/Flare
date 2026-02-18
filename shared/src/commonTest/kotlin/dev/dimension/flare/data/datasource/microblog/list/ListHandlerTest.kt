@@ -356,6 +356,7 @@ private class FakeListLoader : ListLoader {
         return nextCreateResult
     }
 
+    @OptIn(kotlin.experimental.ExperimentalNativeApi::class)
     override suspend fun update(
         listId: String,
         metaData: ListMetaData,

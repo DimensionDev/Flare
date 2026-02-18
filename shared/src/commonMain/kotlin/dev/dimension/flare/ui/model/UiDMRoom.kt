@@ -9,7 +9,7 @@ import kotlinx.collections.immutable.ImmutableList
 @Immutable
 public data class UiDMRoom internal constructor(
     val key: MicroBlogKey,
-    val users: ImmutableList<UiUserV2>,
+    val users: ImmutableList<UiProfile>,
     val lastMessage: UiDMItem?,
     val unreadCount: Long,
 ) {
@@ -33,7 +33,7 @@ public data class UiDMRoom internal constructor(
 @Immutable
 public data class UiDMItem internal constructor(
     val key: MicroBlogKey,
-    val user: UiUserV2,
+    val user: UiProfile,
     val content: Message,
     val timestamp: UiDateTime,
     val isFromMe: Boolean,

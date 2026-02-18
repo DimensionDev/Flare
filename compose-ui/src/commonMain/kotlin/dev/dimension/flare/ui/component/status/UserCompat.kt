@@ -14,12 +14,12 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformText
-import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.theme.PlatformTheme
 
 @Composable
 internal fun UserCompat(
-    user: UiUserV2,
+    user: UiProfile,
     modifier: Modifier = Modifier,
     onUserClick: (MicroBlogKey) -> Unit = {},
     leading: @Composable (RowScope.() -> Unit)? = {

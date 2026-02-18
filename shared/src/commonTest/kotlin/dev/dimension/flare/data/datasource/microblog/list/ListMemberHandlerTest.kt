@@ -242,7 +242,7 @@ class ListMemberHandlerTest : RobolectricTest() {
             fakeLoader.nextAddMemberResult = createDbUser(userKey2, name = "Bob")
             handler.addMember(listId, userKey2)
 
-            // listMembersListFlow calls render() — verify it returns UiUserV2 items
+            // listMembersListFlow calls render() — verify it returns UiProfile items
             val rendered = handler.listMembersListFlow(listId).first()
             assertEquals(2, rendered.size)
             val names = rendered.map { it.name.raw }.toSet()

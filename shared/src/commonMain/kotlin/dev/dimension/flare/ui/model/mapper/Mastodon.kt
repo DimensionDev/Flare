@@ -24,6 +24,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiInstance
@@ -871,8 +872,8 @@ internal fun Account.render(
                     )
                 },
         platformType = PlatformType.Mastodon,
-        onClicked = {
-            launcher.launch(
+        clickEvent =
+            ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
                     .User(
                         accountType =
@@ -883,8 +884,7 @@ internal fun Account.render(
                             } ?: AccountType.Guest,
                         userKey = userKey,
                     ).toUri(),
-            )
-        },
+            ),
     )
 }
 

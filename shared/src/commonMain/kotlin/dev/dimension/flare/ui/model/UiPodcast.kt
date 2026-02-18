@@ -9,8 +9,8 @@ public data class UiPodcast(
     val title: String,
     val playbackUrl: String?,
     val ended: Boolean,
-    val creator: UiUserV2,
-    val hosts: ImmutableList<UiUserV2>,
-    val speakers: ImmutableList<UiUserV2>,
-    val listeners: ImmutableList<UiUserV2>,
+    val creator: UiProfile,
+    val hosts: ImmutableList<UiProfile>,
+    val speakers: ImmutableList<UiProfile>,
+    val listeners: ImmutableList<UiProfile>,
 )

@@ -35,6 +35,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
@@ -46,7 +47,6 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
@@ -838,8 +838,8 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                 null
             },
         platformType = PlatformType.xQt,
-        onClicked = {
-            launcher.launch(
+        clickEvent =
+            ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
                     .User(
                         accountType =
@@ -847,8 +847,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                                 .Specific(accountKey),
                         userKey = userKey,
                     ).toUri(),
-            )
-        },
+            ),
     )
 }
 
@@ -1181,7 +1180,7 @@ internal fun AudioSpace.render(
     ended = metadata.state == "Ended" || metadata.endedAt != null,
 )
 
-private fun Admin.render(accountKey: MicroBlogKey): UiUserV2 {
+private fun Admin.render(accountKey: MicroBlogKey): UiProfile {
     val key =
         MicroBlogKey(
             id = userResults?.restID ?: throw Exception("No ID"),
@@ -1197,8 +1196,8 @@ private fun Admin.render(accountKey: MicroBlogKey): UiUserV2 {
                 }.toUi(),
         handle = "@$twitterScreenName@${accountKey.host}",
         platformType = PlatformType.xQt,
-        onClicked = {
-            launcher.launch(
+        clickEvent =
+            ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
                     .User(
                         accountType =
@@ -1206,8 +1205,7 @@ private fun Admin.render(accountKey: MicroBlogKey): UiUserV2 {
                                 .Specific(accountKey),
                         userKey = key,
                     ).toUri(),
-            )
-        },
+            ),
         description = null,
         banner = null,
         matrices = UiProfile.Matrices(0, 0, 0),

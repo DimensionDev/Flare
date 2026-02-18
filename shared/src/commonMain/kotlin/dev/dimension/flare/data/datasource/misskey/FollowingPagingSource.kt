@@ -5,17 +5,17 @@ import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.UsersFollowersRequest
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
 internal class FollowingPagingSource(
     private val service: MisskeyService,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
-) : BasePagingSource<String, UiUserV2>() {
-    override fun getRefreshKey(state: PagingState<String, UiUserV2>): String? = null
+) : BasePagingSource<String, UiProfile>() {
+    override fun getRefreshKey(state: PagingState<String, UiProfile>): String? = null
 
-    override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiUserV2> {
+    override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiProfile> {
         val maxId = params.key
         val limit = params.loadSize
         val response =

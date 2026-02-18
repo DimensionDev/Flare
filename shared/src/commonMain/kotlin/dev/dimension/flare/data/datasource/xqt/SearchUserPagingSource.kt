@@ -8,7 +8,7 @@ import dev.dimension.flare.data.database.cache.mapper.isBottomEnd
 import dev.dimension.flare.data.database.cache.mapper.users
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 import io.ktor.http.encodeURLQueryComponent
 
@@ -16,10 +16,10 @@ internal class SearchUserPagingSource(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
     private val query: String,
-) : BasePagingSource<String, UiUserV2>() {
-    override fun getRefreshKey(state: PagingState<String, UiUserV2>): String? = null
+) : BasePagingSource<String, UiProfile>() {
+    override fun getRefreshKey(state: PagingState<String, UiProfile>): String? = null
 
-    override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiUserV2> {
+    override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiProfile> {
         val response =
             service
                 .getSearchTimeline(

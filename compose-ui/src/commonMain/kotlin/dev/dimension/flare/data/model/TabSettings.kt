@@ -7,8 +7,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRssSource
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.MixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
@@ -254,7 +254,7 @@ public sealed class TimelineTabItem : TabItem() {
                 SettingsTabItem,
             )
 
-        public fun defaultPrimary(user: UiUserV2): ImmutableList<TabItem> =
+        public fun defaultPrimary(user: UiProfile): ImmutableList<TabItem> =
             when (user.platformType) {
                 PlatformType.Mastodon -> mastodon(user.key)
                 PlatformType.Misskey -> misskey(user.key)
@@ -275,7 +275,7 @@ public sealed class TimelineTabItem : TabItem() {
             return result.toImmutableList()
         }
 
-        public fun secondaryFor(user: UiUserV2): ImmutableList<TabItem> =
+        public fun secondaryFor(user: UiProfile): ImmutableList<TabItem> =
             when (user.platformType) {
                 PlatformType.Mastodon -> defaultMastodonSecondaryItems(user.key)
                 PlatformType.Misskey -> defaultMisskeySecondaryItems(user.key)

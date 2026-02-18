@@ -16,8 +16,8 @@ import dev.dimension.flare.login_expired
 import dev.dimension.flare.login_expired_relogin
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -27,16 +27,16 @@ import io.github.composefluent.component.Text
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun <T : UiUserV2> AccountItem(
+fun <T : UiProfile> AccountItem(
     userState: UiState<T>,
     onClick: (MicroBlogKey) -> Unit,
     toLogin: () -> Unit,
     modifier: Modifier = Modifier,
-    trailingContent: @Composable (UiUserV2?) -> Unit = { },
-    headlineContent: @Composable (UiUserV2) -> Unit = {
+    trailingContent: @Composable (UiProfile?) -> Unit = { },
+    headlineContent: @Composable (UiProfile) -> Unit = {
         RichText(text = it.name, maxLines = 1)
     },
-    supportingContent: @Composable (UiUserV2) -> Unit = {
+    supportingContent: @Composable (UiProfile) -> Unit = {
         Text(text = it.handle, maxLines = 1)
     },
     avatarSize: Dp = 24.dp,

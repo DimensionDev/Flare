@@ -14,14 +14,14 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformText
-import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
 
 @Composable
 internal fun StatusRetweetHeaderComponent(
     icon: ImageVector,
-    user: UiUserV2?,
+    user: UiProfile?,
     text: String,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = PlatformTheme.typography.caption,

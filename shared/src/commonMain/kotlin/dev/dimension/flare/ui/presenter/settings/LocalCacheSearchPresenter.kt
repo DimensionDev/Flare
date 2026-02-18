@@ -16,9 +16,9 @@ import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
@@ -39,8 +39,8 @@ public class LocalCacheSearchPresenter :
     public interface State {
         public val data: PagingState<UiTimeline>
         public val history: PagingState<UiTimeline>
-        public val userHistory: PagingState<UiUserV2>
-        public val searchUser: PagingState<UiUserV2>
+        public val userHistory: PagingState<UiProfile>
+        public val searchUser: PagingState<UiProfile>
 
         public fun setQuery(value: String)
     }
@@ -124,7 +124,7 @@ public class LocalCacheSearchPresenter :
                             it.data.accountType is AccountType.Specific
                         }.map {
                             require(it.data.accountType is AccountType.Specific)
-                            it.user.render(it.data.accountType.accountKey) as UiUserV2
+                            it.user.render(it.data.accountType.accountKey)
                         }
                 }
             }.collectAsLazyPagingItems().toPagingState()
@@ -144,7 +144,7 @@ public class LocalCacheSearchPresenter :
                                 // TODO: potential bug: after logout, there might be no such a platform type for this user
                                 val account =
                                     accounts.first { it.platformType == user.platformType }
-                                user.render(account.accountKey) as UiUserV2
+                                user.render(account.accountKey)
                             }
                         }
                     }
@@ -160,8 +160,8 @@ public class LocalCacheSearchPresenter :
 
             override val data: PagingState<UiTimeline> = data
             override val history: PagingState<UiTimeline> = history
-            override val userHistory: PagingState<UiUserV2> = userHistory
-            override val searchUser: PagingState<UiUserV2> = searchUser
+            override val userHistory: PagingState<UiProfile> = userHistory
+            override val searchUser: PagingState<UiProfile> = searchUser
         }
     }
 }

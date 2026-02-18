@@ -26,8 +26,8 @@ import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.listCard
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.FansPresenter
 import dev.dimension.flare.ui.presenter.profile.FollowingPresenter
@@ -112,7 +112,7 @@ internal fun FansScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun UserListScreen(
-    data: PagingState<UiUserV2>,
+    data: PagingState<UiProfile>,
     title: @Composable () -> Unit,
     onBack: () -> Unit,
     isRefreshing: Boolean,

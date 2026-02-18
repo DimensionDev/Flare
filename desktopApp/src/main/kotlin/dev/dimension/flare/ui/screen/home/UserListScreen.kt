@@ -15,8 +15,8 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.AccountItem
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.FansPresenter
 import dev.dimension.flare.ui.presenter.profile.FollowingPresenter
@@ -85,7 +85,7 @@ internal fun FansScreen(
 
 @Composable
 private fun UserListScreen(
-    data: PagingState<UiUserV2>,
+    data: PagingState<UiProfile>,
     onUserClick: (MicroBlogKey) -> Unit,
 ) {
     LazyColumn(

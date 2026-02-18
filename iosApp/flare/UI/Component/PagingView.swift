@@ -107,7 +107,7 @@ extension PagingView {
 
 struct UserPagingView: View {
     @Environment(\.openURL) private var openURL
-    let data: PagingState<UiUserV2>
+    let data: PagingState<UiProfile>
     var body: some View {
         PagingView(data: data) { user in
             UserCompatView(data: user)

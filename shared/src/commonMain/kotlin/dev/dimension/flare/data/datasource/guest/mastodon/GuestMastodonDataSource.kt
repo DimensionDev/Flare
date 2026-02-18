@@ -23,7 +23,6 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.renderGuest
 import kotlinx.collections.immutable.ImmutableList
@@ -50,7 +49,7 @@ internal class GuestMastodonDataSource(
             GuestTimelinePagingSource(host = host, service = service)
         }
 
-    override fun userByAcct(acct: String): CacheData<UiUserV2> {
+    override fun userByAcct(acct: String): CacheData<UiProfile> {
         val (name, host) = MicroBlogKey.valueOf(acct)
         return Cacheable(
             fetchSource = {
@@ -144,7 +143,7 @@ internal class GuestMastodonDataSource(
     override fun searchUser(
         query: String,
         pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
+    ): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -156,7 +155,7 @@ internal class GuestMastodonDataSource(
             )
         }.flow
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> {
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiProfile>> {
         // not supported
         throw UnsupportedOperationException("Discover users not supported")
     }
@@ -179,7 +178,7 @@ internal class GuestMastodonDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
+    ): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -195,7 +194,7 @@ internal class GuestMastodonDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
+    ): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {

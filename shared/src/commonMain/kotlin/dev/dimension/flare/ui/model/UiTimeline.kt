@@ -103,7 +103,7 @@ public data class UiTimeline internal constructor(
             val images: ImmutableList<UiMedia>,
             val sensitive: Boolean,
             val contentWarning: UiRichText?,
-            val user: UiUserV2?,
+            val user: UiProfile?,
             val quote: ImmutableList<Status>,
             val content: UiRichText,
             val actions: ImmutableList<ActionMenu>,
@@ -139,7 +139,14 @@ public data class UiTimeline internal constructor(
                 @Immutable
                 public data class Reaction internal constructor(
                     val emojiReactions: ImmutableList<EmojiReaction>,
+                    val channel: SourceChannel? = null,
                 ) : BottomContent() {
+                    @Immutable
+                    public data class SourceChannel(
+                        val id: String,
+                        val name: String,
+                    )
+
                     @Immutable
                     public data class EmojiReaction internal constructor(
                         val name: String,
@@ -169,6 +176,7 @@ public data class UiTimeline internal constructor(
                         Home,
                         Followers,
                         Specified,
+                        Channel,
                     }
                 }
             }
@@ -184,7 +192,7 @@ public data class UiTimeline internal constructor(
 
         @Immutable
         public data class User internal constructor(
-            val value: UiUserV2,
+            val value: UiProfile,
             val button: ImmutableList<Button> = persistentListOf(),
         ) : ItemContent() {
             val id: String by lazy {
@@ -213,7 +221,7 @@ public data class UiTimeline internal constructor(
 
         @Immutable
         public data class UserList internal constructor(
-            val users: ImmutableList<UiUserV2>,
+            val users: ImmutableList<UiProfile>,
             val status: Status? = null,
         ) : ItemContent() {
             val id: String by lazy {
@@ -233,7 +241,7 @@ public data class UiTimeline internal constructor(
 
     @Immutable
     public data class TopMessage internal constructor(
-        val user: UiUserV2?,
+        val user: UiProfile?,
         val icon: Icon,
         val type: MessageType,
         val onClicked: ClickContext.() -> Unit,

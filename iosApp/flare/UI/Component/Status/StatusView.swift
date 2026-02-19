@@ -187,7 +187,15 @@ struct StatusView: View {
                             )
                         }
 
-                        if case .reaction(let reaction) = onEnum(of: data.bottomContent), showMedia {
+                        if case .reaction(let reaction) = onEnum(of: data.bottomContent), showMedia, !isQuote {
+                            if let channel = reaction.channel {
+                                HStack {
+                                    Image(.faTv)
+                                    Text(channel.name)
+                                }
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                            }
                             if !reaction.emojiReactions.isEmpty {
                                 StatusReactionView(data: reaction)
                             }

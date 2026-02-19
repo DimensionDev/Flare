@@ -3,7 +3,7 @@ import KotlinSharedUI
 
 struct UserOnelineView<TrailingContent: View>: View {
     @Environment(\.openURL) private var openURL
-    let data: UiUserV2
+    let data: UiProfile
     let showAvatar: Bool
     let trailing: () -> TrailingContent
     let onClicked: (() -> Void)?
@@ -39,7 +39,7 @@ struct UserOnelineView<TrailingContent: View>: View {
 }
 
 extension UserOnelineView {
-    init(data: UiUserV2) where TrailingContent == EmptyView {
+    init(data: UiProfile) where TrailingContent == EmptyView {
         self.data = data
         self.trailing = {
             EmptyView()

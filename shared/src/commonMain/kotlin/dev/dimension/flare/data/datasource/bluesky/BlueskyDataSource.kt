@@ -1,32 +1,22 @@
 package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
 import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import androidx.paging.map
 import app.bsky.actor.GetProfileQueryParams
-import app.bsky.actor.PreferencesUnion
-import app.bsky.actor.PutPreferencesRequest
-import app.bsky.actor.SavedFeed
-import app.bsky.actor.SavedFeedType
 import app.bsky.bookmark.CreateBookmarkRequest
 import app.bsky.bookmark.DeleteBookmarkRequest
 import app.bsky.embed.Images
 import app.bsky.embed.ImagesImage
 import app.bsky.embed.Record
-import app.bsky.feed.GetFeedGeneratorQueryParams
-import app.bsky.feed.GetFeedGeneratorsQueryParams
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
 import app.bsky.feed.PostReplyRef
 import app.bsky.feed.ViewerState
-import app.bsky.graph.GetListQueryParams
-import app.bsky.graph.GetListsQueryParams
-import app.bsky.graph.Listitem
 import app.bsky.graph.MuteActorRequest
 import app.bsky.graph.UnmuteActorRequest
 import app.bsky.notification.ListNotificationsQueryParams
@@ -49,22 +39,13 @@ import com.atproto.identity.ResolveHandleQueryParams
 import com.atproto.moderation.CreateReportRequest
 import com.atproto.moderation.CreateReportRequestSubjectUnion
 import com.atproto.moderation.Token
-import com.atproto.repo.ApplyWritesDelete
-import com.atproto.repo.ApplyWritesRequest
-import com.atproto.repo.ApplyWritesRequestWriteUnion
 import com.atproto.repo.CreateRecordRequest
 import com.atproto.repo.CreateRecordResponse
 import com.atproto.repo.DeleteRecordRequest
-import com.atproto.repo.ListRecordsQueryParams
-import com.atproto.repo.ListRecordsRecord
-import com.atproto.repo.PutRecordRequest
 import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.BasePagingSource
-import dev.dimension.flare.common.BaseRemoteMediator
-import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
-import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.MemCacheable
@@ -83,17 +64,18 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
-import dev.dimension.flare.data.datasource.microblog.ListDataSource
-import dev.dimension.flare.data.datasource.microblog.ListMetaData
-import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
-import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
-import dev.dimension.flare.data.datasource.microblog.memoryPager
+import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.list.ListHandler
+import dev.dimension.flare.data.datasource.microblog.list.ListLoader
+import dev.dimension.flare.data.datasource.microblog.list.ListMemberHandler
+import dev.dimension.flare.data.datasource.microblog.list.ListMemberLoader
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
@@ -115,7 +97,6 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.bskyJson
 import dev.dimension.flare.ui.model.mapper.parseBskyFacets
 import dev.dimension.flare.ui.model.mapper.render
@@ -146,7 +127,6 @@ import sh.christian.ozone.api.RKey
 import sh.christian.ozone.api.model.JsonContent
 import sh.christian.ozone.api.model.JsonContent.Companion.encodeAsJsonContent
 import kotlin.time.Clock
-import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal class BlueskyDataSource(
@@ -238,7 +218,7 @@ internal class BlueskyDataSource(
     override val supportedNotificationFilter: List<NotificationFilter>
         get() = listOf(NotificationFilter.All)
 
-    override fun userByAcct(acct: String): CacheData<UiUserV2> {
+    override fun userByAcct(acct: String): CacheData<UiProfile> {
         val (name, host) = MicroBlogKey.valueOf(acct)
         return Cacheable(
             fetchSource = {
@@ -999,7 +979,7 @@ internal class BlueskyDataSource(
     override fun searchUser(
         query: String,
         pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
+    ): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -1010,7 +990,7 @@ internal class BlueskyDataSource(
             )
         }.flow
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -1081,67 +1061,34 @@ internal class BlueskyDataSource(
             },
         )
 
-    private val preferences: MemCacheable<List<PreferencesUnion>> by lazy {
-        MemCacheable(
-            key = "preferences_$accountKey",
-        ) {
-            service
-                .getPreferencesForActor()
-                .maybeResponse()
-                ?.preferences
-                .orEmpty()
-        }
-    }
-
     private val myFeedsKey = "my_feeds_$accountKey"
 
-    val myFeeds: CacheData<ImmutableList<UiList>> by lazy {
-        MemCacheable(
-            key = myFeedsKey,
-        ) {
-            val preferences =
-                service
-                    .getPreferencesForActor()
-                    .maybeResponse()
-                    ?.preferences
-                    .orEmpty()
-            val items =
-                preferences
-                    .filterIsInstance<PreferencesUnion.SavedFeedsPrefV2>()
-                    .firstOrNull()
-                    ?.value
-                    ?.items
-                    ?.filter {
-                        it.type == SavedFeedType.Feed
-                    }.orEmpty()
-            service
-                .getFeedGenerators(
-                    GetFeedGeneratorsQueryParams(
-                        feeds =
-                            items
-                                .map { AtUri(it.value) }
-                                .toImmutableList(),
-                    ),
-                ).maybeResponse()
-                ?.feeds
-                ?.map {
-                    it.render(accountKey)
-                }.orEmpty()
-                .toImmutableList()
-        }
+    internal val feedLoader by lazy {
+        BlueskyFeedLoader(
+            service = service,
+            accountKey = accountKey,
+        )
+    }
+
+    val feedHandler by lazy {
+        ListHandler(
+            pagingKey = myFeedsKey,
+            accountKey = accountKey,
+            loader = feedLoader,
+        )
     }
 
     fun popularFeeds(
         query: String?,
         scope: CoroutineScope,
-    ): Flow<PagingData<Pair<UiList, Boolean>>> =
+    ): Flow<PagingData<Pair<UiList.Feed, Boolean>>> =
         Pager(
             config = pagingConfig,
         ) {
-            object : BasePagingSource<String, UiList>() {
-                override fun getRefreshKey(state: PagingState<String, UiList>): String? = null
+            object : BasePagingSource<String, UiList.Feed>() {
+                override fun getRefreshKey(state: PagingState<String, UiList.Feed>): String? = null
 
-                override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiList> {
+                override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiList.Feed> {
                     val result =
                         service
                             .getPopularFeedGeneratorsUnspecced(
@@ -1168,43 +1115,13 @@ internal class BlueskyDataSource(
             .let { feeds ->
                 combine(
                     feeds,
-                    MemCacheable.subscribe<ImmutableList<UiList>>(myFeedsKey),
+                    feedHandler.cacheData,
                 ) { popular, my ->
                     popular.map { item ->
                         item to my.any { it.id == item.id }
                     }
                 }
             }.cachedIn(scope)
-
-    private fun feedInfoKey(uri: String) = "feed_info_$uri"
-
-    fun feedInfo(uri: String): MemCacheable<UiList> =
-        MemCacheable(
-            key = feedInfoKey(uri),
-        ) {
-            service
-                .getFeedGenerator(
-                    GetFeedGeneratorQueryParams(
-                        feed = AtUri(uri),
-                    ),
-                ).requireResponse()
-                .view
-                .render(accountKey)
-        }
-
-    fun feedTimeline(
-        uri: String,
-        pageSize: Int = 20,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator = feedTimelineLoader(uri),
-        )
 
     fun feedTimelineLoader(uri: String) =
         FeedTimelineRemoteMediator(
@@ -1214,214 +1131,32 @@ internal class BlueskyDataSource(
             uri = uri,
         )
 
-    suspend fun subscribeFeed(data: UiList) {
-        MemCacheable.updateWith<ImmutableList<UiList>>(
-            key = myFeedsKey,
-        ) {
-            (it + data).toImmutableList()
-        }
+    suspend fun subscribeFeed(data: UiList.Feed) {
         tryRun {
-            val currentPreferences = service.getPreferencesForActor().requireResponse()
-            val feedInfo =
-                service
-                    .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(data.id)))
-                    .requireResponse()
-            val newPreferences = currentPreferences.preferences.toMutableList()
-            val prefIndex = newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPref }
-            if (prefIndex != -1) {
-                val pref = newPreferences[prefIndex] as PreferencesUnion.SavedFeedsPref
-                val newPref =
-                    pref.value.copy(
-                        saved = (pref.value.saved + feedInfo.view.uri).toImmutableList(),
-                        pinned = (pref.value.pinned + feedInfo.view.uri).toImmutableList(),
-                    )
-                newPreferences[prefIndex] = PreferencesUnion.SavedFeedsPref(newPref)
-            }
-            val prefV2Index =
-                newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPrefV2 }
-            if (prefV2Index != -1) {
-                val pref = newPreferences[prefV2Index] as PreferencesUnion.SavedFeedsPrefV2
-                val newPref =
-                    pref.value.copy(
-                        items =
-                            (
-                                pref.value.items +
-                                    SavedFeed(
-                                        type = SavedFeedType.Feed,
-                                        value = feedInfo.view.uri.atUri,
-                                        pinned = true,
-                                        id = Uuid.random().toString(),
-                                    )
-                            ).toImmutableList(),
-                    )
-                newPreferences[prefV2Index] = PreferencesUnion.SavedFeedsPrefV2(newPref)
-            }
-
-            service.putPreferences(
-                request =
-                    PutPreferencesRequest(
-                        preferences = newPreferences.toImmutableList(),
-                    ),
-            )
-            myFeeds.refresh()
-        }.onFailure {
-            MemCacheable.updateWith<ImmutableList<UiList>>(
-                key = myFeedsKey,
-            ) {
-                it.filterNot { item -> item.id == data.id }.toImmutableList()
-            }
+            feedLoader.subscribe(data.id)
+            feedHandler.insertToDatabase(data)
         }
     }
 
-    suspend fun unsubscribeFeed(data: UiList) {
-        MemCacheable.updateWith<ImmutableList<UiList>>(
-            key = myFeedsKey,
-        ) {
-            it.filterNot { item -> item.id == data.id }.toImmutableList()
-        }
-        tryRun {
-            val currentPreferences = service.getPreferencesForActor().requireResponse()
-            val feedInfo =
-                service
-                    .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(data.id)))
-                    .requireResponse()
-            val newPreferences = currentPreferences.preferences.toMutableList()
-            val prefIndex = newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPref }
-            if (prefIndex != -1) {
-                val pref = newPreferences[prefIndex] as PreferencesUnion.SavedFeedsPref
-                val newPref =
-                    pref.value.copy(
-                        saved =
-                            pref.value.saved
-                                .filterNot { it == feedInfo.view.uri }
-                                .toImmutableList(),
-                        pinned =
-                            pref.value.pinned
-                                .filterNot { it == feedInfo.view.uri }
-                                .toImmutableList(),
-                    )
-                newPreferences[prefIndex] = PreferencesUnion.SavedFeedsPref(newPref)
-            }
-            val prefV2Index =
-                newPreferences.indexOfFirst { it is PreferencesUnion.SavedFeedsPrefV2 }
-            if (prefV2Index != -1) {
-                val pref = newPreferences[prefV2Index] as PreferencesUnion.SavedFeedsPrefV2
-                val newPref =
-                    pref.value.copy(
-                        items =
-                            pref.value.items
-                                .filterNot { it.value == feedInfo.view.uri.atUri }
-                                .toImmutableList(),
-                    )
-                newPreferences[prefV2Index] = PreferencesUnion.SavedFeedsPrefV2(newPref)
-            }
-            service.putPreferences(
-                request =
-                    PutPreferencesRequest(
-                        preferences = newPreferences.toImmutableList(),
-                    ),
-            )
-            myFeeds.refresh()
-        }.onFailure {
-            MemCacheable.updateWith<ImmutableList<UiList>>(
-                key = myFeedsKey,
-            ) {
-                (it + data).toImmutableList()
+    suspend fun unsubscribeFeed(data: UiList.Feed) {
+        feedHandler.delete(data.id)
+    }
+
+    suspend fun favouriteFeed(data: UiList.Feed) {
+        feedHandler.withDatabase { updataCallback ->
+            val newData = data.copy(liked = !data.liked)
+            updataCallback(newData)
+            tryRun {
+                if (newData.liked) {
+                    feedLoader.favourite(data.id)
+                } else {
+                    feedLoader.unfavourite(data.id)
+                }
+            }.onFailure {
+                updataCallback(data)
             }
         }
     }
-
-    suspend fun favouriteFeed(data: UiList) {
-        MemCacheable.update(
-            key = feedInfoKey(data.id),
-            value =
-                data.copy(
-                    liked = !data.liked,
-                ),
-        )
-
-        tryRun {
-            val feedInfo =
-                service
-                    .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(data.id)))
-                    .requireResponse()
-            val likedUri =
-                feedInfo.view.viewer
-                    ?.like
-                    ?.atUri
-            if (likedUri != null) {
-                deleteLikeRecord(likedUri)
-            } else {
-                createLikeRecord(cid = feedInfo.view.cid.cid, uri = feedInfo.view.uri.atUri)
-            }
-        }.onFailure {
-            MemCacheable.update(
-                key = feedInfoKey(data.id),
-                value =
-                    data.copy(
-                        liked = data.liked,
-                    ),
-            )
-        }
-    }
-
-    private val myListKey = "my_list_$accountKey"
-
-    override fun myList(scope: CoroutineScope): Flow<PagingData<UiList>> =
-        memoryPager(
-            pageSize = 20,
-            pagingKey = myListKey,
-            scope = scope,
-            mediator =
-                object : BaseRemoteMediator<Int, UiList>() {
-                    var cursor: String? = null
-
-                    override suspend fun doLoad(
-                        loadType: LoadType,
-                        state: PagingState<Int, UiList>,
-                    ): MediatorResult {
-                        val result =
-                            service
-                                .getLists(
-                                    params =
-                                        GetListsQueryParams(
-                                            actor = Did(did = accountKey.id),
-                                            cursor = cursor,
-                                        ),
-                                ).requireResponse()
-                        val items =
-                            result
-                                .lists
-                                .map {
-                                    it.render(accountKey)
-                                }.toImmutableList()
-                        cursor = result.cursor
-                        MemoryPagingSource.update<UiList>(
-                            key = myListKey,
-                            value = items,
-                        )
-                        return MediatorResult.Success(
-                            endOfPaginationReached = cursor == null,
-                        )
-                    }
-                },
-        )
-
-    private fun listInfoKey(uri: String) = "list_info_$uri"
-
-    override fun listInfo(listId: String): MemCacheable<UiList> =
-        MemCacheable(
-            key = listInfoKey(listId),
-        ) {
-            service
-                .getList(
-                    GetListQueryParams(
-                        list = AtUri(listId),
-                    ),
-                ).requireResponse()
-                .list
-                .render(accountKey)
-        }
 
     override fun listTimeline(listId: String) =
         ListTimelineRemoteMediator(
@@ -1431,394 +1166,37 @@ internal class BlueskyDataSource(
             uri = listId,
         )
 
-    private suspend fun createList(
-        title: String,
-        description: String?,
-        icon: FileItem?,
-    ) {
-        tryRun {
-            val iconInfo =
-                if (icon != null) {
-                    service.uploadBlob(icon.readBytes()).maybeResponse()
-                } else {
-                    null
-                }
-            val record =
-                app.bsky.graph.List(
-                    purpose = app.bsky.graph.Token.Curatelist,
-                    name = title,
-                    description = description,
-                    avatar = iconInfo?.blob,
-                    createdAt = Clock.System.now(),
-                )
-            service.createRecord(
-                request =
-                    CreateRecordRequest(
-                        repo = Did(did = accountKey.id),
-                        collection = Nsid("app.bsky.graph.list"),
-                        record = record.bskyJson(),
-                    ),
-            )
-        }.onSuccess {
-            val uri = it.requireResponse().uri
-            service
-                .getList(
-                    params =
-                        GetListQueryParams(
-                            list = uri,
-                        ),
-                ).requireResponse()
-                .list
-                .render(accountKey)
-                .let { list ->
-                    MemoryPagingSource.updateWith<UiList>(
-                        key = myListKey,
-                    ) {
-                        (listOf(list) + it).toImmutableList()
-                    }
-                }
-        }
-    }
+    private val myListKey = "my_list_$accountKey"
 
-    override suspend fun deleteList(listId: String) {
-        tryRun {
-            val id = listId.substringAfterLast('/')
-            service.applyWrites(
-                request =
-                    ApplyWritesRequest(
-                        repo = Did(did = accountKey.id),
-                        writes =
-                            persistentListOf(
-                                ApplyWritesRequestWriteUnion.Delete(
-                                    value =
-                                        ApplyWritesDelete(
-                                            collection = Nsid("app.bsky.graph.list"),
-                                            rkey = RKey(id),
-                                        ),
-                                ),
-                            ),
-                    ),
-            )
-        }.onSuccess {
-            MemoryPagingSource.updateWith<UiList>(
-                key = myListKey,
-            ) {
-                it.filterNot { item -> item.id == listId }.toImmutableList()
-            }
-        }
-    }
-
-    private suspend fun updateList(
-        uri: String,
-        title: String,
-        description: String?,
-        icon: FileItem?,
-    ) {
-        tryRun {
-            val currentInfo: app.bsky.graph.List =
-                service
-                    .getRecord(
-                        params =
-                            com.atproto.repo.GetRecordQueryParams(
-                                collection = Nsid("app.bsky.graph.list"),
-                                repo = Did(did = accountKey.id),
-                                rkey = RKey(uri.substringAfterLast('/')),
-                            ),
-                    ).requireResponse()
-                    .value
-                    .decodeAs()
-
-            val iconInfo =
-                if (icon != null) {
-                    service.uploadBlob(icon.readBytes()).maybeResponse()
-                } else {
-                    null
-                }
-            val newRecord =
-                currentInfo
-                    .copy(
-                        name = title,
-                        description = description,
-                    ).let {
-                        if (iconInfo != null) {
-                            it.copy(avatar = iconInfo.blob)
-                        } else {
-                            it
-                        }
-                    }
-            service.putRecord(
-                request =
-                    PutRecordRequest(
-                        repo = Did(did = accountKey.id),
-                        collection = Nsid("app.bsky.graph.list"),
-                        rkey = RKey(uri.substringAfterLast('/')),
-                        record = newRecord.bskyJson(),
-                    ),
-            )
-        }.onSuccess {
-            MemoryPagingSource.updateWith<UiList>(
-                key = myListKey,
-            ) {
-                it
-                    .map { item ->
-                        if (item.id == uri) {
-                            item.copy(
-                                title = title,
-                                description = description,
-                            )
-                        } else {
-                            item
-                        }
-                    }.toImmutableList()
-            }
-        }
-    }
-
-    private fun listMemberKey(listId: String) = "listMembers_$listId"
-
-    override fun listMembers(
-        listId: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
-        memoryPager(
-            pageSize = pageSize,
-            pagingKey = listMemberKey(listId),
-            scope = scope,
-            mediator =
-                object : BaseRemoteMediator<Int, UiUserV2>() {
-                    private var cursor: String? = null
-
-                    override suspend fun doLoad(
-                        loadType: LoadType,
-                        state: PagingState<Int, UiUserV2>,
-                    ): MediatorResult {
-                        if (loadType == LoadType.PREPEND) {
-                            return MediatorResult.Success(endOfPaginationReached = true)
-                        }
-                        if (loadType == LoadType.REFRESH) {
-                            cursor = null
-                        }
-                        val response =
-                            service
-                                .getList(
-                                    params =
-                                        GetListQueryParams(
-                                            list = AtUri(listId),
-                                            cursor = cursor,
-                                            limit = state.config.pageSize.toLong(),
-                                        ),
-                                ).maybeResponse()
-                        cursor = response?.cursor
-                        val result =
-                            response
-                                ?.items
-                                ?.map {
-                                    it.subject.render(accountKey)
-                                } ?: emptyList()
-
-                        if (loadType == LoadType.REFRESH) {
-                            MemoryPagingSource.update(
-                                key = listMemberKey(listId),
-                                value = result.toImmutableList(),
-                            )
-                        } else if (loadType == LoadType.APPEND) {
-                            MemoryPagingSource.append(
-                                key = listMemberKey(listId),
-                                value = result.toImmutableList(),
-                            )
-                        }
-
-                        return MediatorResult.Success(
-                            endOfPaginationReached = cursor == null,
-                        )
-                    }
-                },
-        )
-
-    override suspend fun addMember(
-        listId: String,
-        userKey: MicroBlogKey,
-    ) {
-        tryRun {
-            val user =
-                service
-                    .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
-                    .requireResponse()
-                    .render(accountKey)
-
-            MemoryPagingSource.updateWith(
-                key = listMemberKey(listId),
-            ) {
-                (listOf(user) + it)
-                    .distinctBy {
-                        it.key
-                    }.toImmutableList()
-            }
-            val list =
-                service
-                    .getList(
-                        params =
-                            GetListQueryParams(
-                                list = AtUri(listId),
-                            ),
-                    ).requireResponse()
-                    .list
-                    .render(accountKey)
-            MemCacheable.updateWith<ImmutableList<UiList>>(userListsKey(userKey)) {
-                (it + list).toImmutableList()
-            }
-            service.createRecord(
-                CreateRecordRequest(
-                    repo = Did(did = accountKey.id),
-                    collection = Nsid("app.bsky.graph.listitem"),
-                    record =
-                        app.bsky.graph
-                            .Listitem(
-                                list = AtUri(listId),
-                                subject = Did(userKey.id),
-                                createdAt = Clock.System.now(),
-                            ).bskyJson(),
-                ),
-            )
-        }
-    }
-
-    override suspend fun removeMember(
-        listId: String,
-        userKey: MicroBlogKey,
-    ) {
-        tryRun {
-            MemoryPagingSource.updateWith<UiUserV2>(
-                key = listMemberKey(listId),
-            ) {
-                it
-                    .filter { user -> user.key.id != userKey.id }
-                    .toImmutableList()
-            }
-            MemCacheable.updateWith<ImmutableList<UiList>>(userListsKey(userKey)) {
-                it
-                    .filter { list -> list.id != listId }
-                    .toImmutableList()
-            }
-            var record: ListRecordsRecord? = null
-            var cursor: String? = null
-            while (record == null) {
-                val response =
-                    service
-                        .listRecords(
-                            params =
-                                ListRecordsQueryParams(
-                                    repo = Did(did = accountKey.id),
-                                    collection = Nsid("app.bsky.graph.listitem"),
-                                    limit = 100,
-                                    cursor = cursor,
-                                ),
-                        ).requireResponse()
-                if (response.cursor == null || response.records.isEmpty()) {
-                    break
-                }
-                cursor = response.cursor
-                record =
-                    response.records
-                        .firstOrNull {
-                            val item: app.bsky.graph.Listitem = it.value.decodeAs()
-                            item.list.atUri == listId && item.subject.did == userKey.id
-                        }
-            }
-            if (record != null) {
-                service.deleteRecord(
-                    DeleteRecordRequest(
-                        repo = Did(did = accountKey.id),
-                        collection = Nsid("app.bsky.graph.listitem"),
-                        rkey = RKey(record.uri.atUri.substringAfterLast('/')),
-                    ),
-                )
-            }
-        }
-    }
-
-    override val supportedMetaData: ImmutableList<ListMetaDataType>
-        get() =
-            persistentListOf(
-                ListMetaDataType.TITLE,
-                ListMetaDataType.DESCRIPTION,
-                ListMetaDataType.AVATAR,
-            )
-
-    override suspend fun updateList(
-        listId: String,
-        metaData: ListMetaData,
-    ) {
-        updateList(
-            uri = listId,
-            title = metaData.title,
-            description = metaData.description,
-            icon = metaData.avatar,
+    val listLoader: ListLoader by lazy {
+        BlueskyListLoader(
+            service = service,
+            accountKey = accountKey,
         )
     }
 
-    override suspend fun createList(metaData: ListMetaData) {
-        createList(
-            title = metaData.title,
-            description = metaData.description,
-            icon = metaData.avatar,
+    val listMemberLoader: ListMemberLoader by lazy {
+        BlueskyListMemberLoader(
+            service = service,
+            accountKey = accountKey,
         )
     }
 
-    override fun listMemberCache(listId: String): Flow<ImmutableList<UiUserV2>> =
-        MemoryPagingSource.getFlow<UiUserV2>(listMemberKey(listId))
+    override val listHandler: ListHandler by lazy {
+        ListHandler(
+            pagingKey = myListKey,
+            accountKey = accountKey,
+            loader = listLoader,
+        )
+    }
 
-    private fun userListsKey(userKey: MicroBlogKey) = "userLists_${userKey.id}"
-
-    override fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList>> =
-        MemCacheable(
-            key = userListsKey(userKey),
-        ) {
-            var cursor: String? = null
-            val lists = mutableListOf<UiList>()
-            val allLists =
-                service
-                    .getLists(
-                        params =
-                            GetListsQueryParams(
-                                actor = Did(did = accountKey.id),
-                                limit = 100,
-                            ),
-                    ).requireResponse()
-                    .lists
-                    .map {
-                        it.render(accountKey)
-                    }
-            while (true) {
-                val response =
-                    service
-                        .listRecords(
-                            params =
-                                ListRecordsQueryParams(
-                                    repo = Did(did = accountKey.id),
-                                    collection = Nsid("app.bsky.graph.listitem"),
-                                    limit = 100,
-                                    cursor = cursor,
-                                ),
-                        ).requireResponse()
-                lists.addAll(
-                    response.records
-                        .filter {
-                            val item: Listitem = it.value.decodeAs()
-                            item.subject.did == userKey.id
-                        }.mapNotNull {
-                            val item: Listitem = it.value.decodeAs()
-                            allLists.firstOrNull { it.id == item.list.atUri }
-                        },
-                )
-                cursor = response.cursor
-                if (cursor == null) {
-                    break
-                }
-            }
-            lists.toImmutableList()
-        }
+    override val listMemberHandler: ListMemberHandler by lazy {
+        ListMemberHandler(
+            pagingKey = "list_members_$accountKey",
+            accountKey = accountKey,
+            loader = listMemberLoader,
+        )
+    }
 
     private val notificationMarkerKey: String
         get() = "notificationBadgeCount_$accountKey"
@@ -2199,7 +1577,7 @@ internal class BlueskyDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
+    ): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -2214,7 +1592,7 @@ internal class BlueskyDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
+    ): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {

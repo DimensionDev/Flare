@@ -81,8 +81,8 @@ import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.component.TopLevelBackStack
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.platform.isBigScreen
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.isError
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onLoading
@@ -311,7 +311,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalSharedTransitionApi::class)
 private fun HomeRailHeader(
     wideNavigationRailState: WideNavigationRailState,
-    userState: UiState<UiUserV2>,
+    userState: UiState<UiProfile>,
     layoutType: NavigationSuiteType,
     currentRoute: Route,
     navigate: (Route) -> Unit,
@@ -536,6 +536,7 @@ private fun getDirection(
         is DirectMessageTabItem -> Route.DM.List(accountType)
         is RssTabItem -> Route.Rss.Sources
         is Misskey.AntennasListTabItem -> Route.Misskey.AntennasList(accountType)
+        is Misskey.ChannelListTabItem -> Route.Misskey.ChannelList(accountType)
     }
 
 @Composable

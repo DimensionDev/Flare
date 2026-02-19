@@ -1,11 +1,14 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
 
@@ -21,24 +24,24 @@ internal class MentionRemoteMediator(
 
     override suspend fun timeline(
         pageSize: Int,
-        request: Request,
-    ): Result {
+        request: PagingRequest,
+    ): PagingResult<DbPagingTimelineWithStatus> {
         val response =
             when (request) {
-                Request.Refresh -> {
+                PagingRequest.Refresh -> {
                     service
                         .getNotificationsMentions(
                             count = pageSize,
                         )
                 }
 
-                is Request.Prepend -> {
-                    return Result(
+                is PagingRequest.Prepend -> {
+                    return PagingResult(
                         endOfPaginationReached = true,
                     )
                 }
 
-                is Request.Append -> {
+                is PagingRequest.Append -> {
                     service.getNotificationsMentions(
                         count = pageSize,
                         cursor = request.nextKey,
@@ -49,7 +52,7 @@ internal class MentionRemoteMediator(
 
         val data = tweets.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
 
-        return Result(
+        return PagingResult(
             endOfPaginationReached = tweets.isEmpty(),
             data = data,
             nextKey = response.cursor(),

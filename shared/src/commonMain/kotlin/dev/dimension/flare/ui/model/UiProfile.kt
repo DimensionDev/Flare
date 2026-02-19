@@ -2,32 +2,33 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import com.fleeksoft.ksoup.nodes.Element
+import dev.dimension.flare.common.SerializableImmutableList
+import dev.dimension.flare.common.SerializableImmutableMap
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.Formatter.humanize
-import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Immutable
 public data class UiProfile internal constructor(
-    override val key: MicroBlogKey,
-    override val handle: String,
-    override val avatar: String,
+    val key: MicroBlogKey,
+    val handle: String,
+    val avatar: String,
     private val nameInternal: UiRichText,
-    override val platformType: PlatformType,
-    override val onClicked: ClickContext.() -> Unit,
+    val platformType: PlatformType,
+    private val clickEvent: ClickEvent,
     public val banner: String?,
     public val description: UiRichText?,
     public val matrices: Matrices,
-    public val mark: ImmutableList<Mark>,
+    public val mark: SerializableImmutableList<Mark>,
     public val bottomContent: BottomContent?,
-) : UiUserV2 {
+) {
     // If name is blank, use handle without @ as display name
-    override val name: UiRichText by lazy {
+    val name: UiRichText by lazy {
         if (nameInternal.raw.isEmpty() || nameInternal.raw.isBlank()) {
             Element("span")
                 .apply {
@@ -38,6 +39,11 @@ public data class UiProfile internal constructor(
         }
     }
 
+    val onClicked: ClickContext.() -> Unit by lazy {
+        clickEvent.onClicked
+    }
+
+    @Serializable
     @Immutable
     public data class Matrices internal constructor(
         val fansCount: Long,
@@ -70,13 +76,16 @@ public data class UiProfile internal constructor(
         }
     }
 
+    @Serializable
     public sealed interface BottomContent {
+        @Serializable
         public data class Fields internal constructor(
-            val fields: ImmutableMap<String, UiRichText>,
+            val fields: SerializableImmutableMap<String, UiRichText>,
         ) : BottomContent
 
+        @Serializable
         public data class Iconify internal constructor(
-            val items: ImmutableMap<Icon, UiRichText>,
+            val items: SerializableImmutableMap<Icon, UiRichText>,
         ) : BottomContent {
             public enum class Icon {
                 Location,
@@ -86,6 +95,7 @@ public data class UiProfile internal constructor(
         }
     }
 
+    @Serializable
     public enum class Mark {
         Verified,
         Cat,
@@ -101,7 +111,7 @@ public fun createSampleUser(): UiProfile =
         avatar = "https://example.com/avatar.jpg",
         nameInternal = Element("span").toUi(),
         platformType = PlatformType.Mastodon,
-        onClicked = { /* Handle click */ },
+        clickEvent = ClickEvent.Noop,
         banner = "https://example.com/banner.jpg",
         description = null,
         matrices =

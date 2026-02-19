@@ -5,7 +5,14 @@ import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
 import de.cketti.codepoints.codePointCount
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
+@Serializable(with = UiRichTextSerializer::class)
 @Immutable
 public data class UiRichText(
     val data: Element,
@@ -32,6 +39,24 @@ public data class UiRichText(
     public val imageUrls: List<String> =
         data.getElementsByTag("img").mapNotNull { it.attr("src").ifEmpty { null } } +
             data.getElementsByTag("emoji").mapNotNull { it.attr("target").ifEmpty { null } }
+}
+
+internal object UiRichTextSerializer : KSerializer<UiRichText> {
+    override val descriptor by lazy {
+        PrimitiveSerialDescriptor("UiRichText", PrimitiveKind.STRING)
+    }
+
+    override fun serialize(
+        encoder: Encoder,
+        value: UiRichText,
+    ) {
+        encoder.encodeString(value.html)
+    }
+
+    override fun deserialize(decoder: Decoder): UiRichText {
+        val html = decoder.decodeString()
+        return parseHtml(html).toUi()
+    }
 }
 
 internal fun Element.toUi(): UiRichText =

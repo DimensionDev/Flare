@@ -32,6 +32,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiList
@@ -826,15 +827,14 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
         mark = persistentListOf(),
         bottomContent = null,
         platformType = PlatformType.Bluesky,
-        onClicked = {
-            launcher.launch(
+        clickEvent =
+            ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
                     .User(
                         accountType = AccountType.Specific(accountKey),
                         userKey = userKey,
                     ).toUri(),
-            )
-        },
+            ),
     )
 }
 
@@ -864,15 +864,14 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
         mark = persistentListOf(),
         bottomContent = null,
         platformType = PlatformType.Bluesky,
-        onClicked = {
-            launcher.launch(
+        clickEvent =
+            ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
                     .User(
                         accountType = AccountType.Specific(accountKey),
                         userKey = userKey,
                     ).toUri(),
-            )
-        },
+            ),
     )
 }
 
@@ -902,15 +901,14 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
         mark = persistentListOf(),
         bottomContent = null,
         platformType = PlatformType.Bluesky,
-        onClicked = {
-            launcher.launch(
+        clickEvent =
+            ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
                     .User(
                         accountType = AccountType.Specific(accountKey),
                         userKey = userKey,
                     ).toUri(),
-            )
-        },
+            ),
     )
 }
 
@@ -1376,7 +1374,7 @@ private fun render(
     }
 
 internal fun GeneratorView.render(accountKey: MicroBlogKey) =
-    UiList(
+    UiList.Feed(
         id = uri.atUri,
         title = displayName,
         description = description,
@@ -1384,18 +1382,15 @@ internal fun GeneratorView.render(accountKey: MicroBlogKey) =
         creator = creator.render(accountKey),
         likedCount = UiNumber(likeCount ?: 0),
         liked = viewer?.like?.atUri != null,
-        platformType = PlatformType.Bluesky,
-        type = UiList.Type.Feed,
     )
 
 internal fun ListView.render(accountKey: MicroBlogKey) =
-    UiList(
+    UiList.List(
         id = uri.atUri,
         title = name,
         description = description,
         avatar = avatar?.uri,
         creator = creator.render(accountKey),
-        platformType = PlatformType.Bluesky,
     )
 
 internal fun MessageContent.Bluesky.render(accountKey: MicroBlogKey) =

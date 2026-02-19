@@ -4,7 +4,7 @@ import androidx.paging.PagingState
 import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.data.network.mastodon.api.SearchResources
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
 internal class SearchUserPagingSource(
@@ -14,10 +14,10 @@ internal class SearchUserPagingSource(
     private val query: String,
     private val following: Boolean = false,
     private val resolve: Boolean? = null,
-) : BasePagingSource<String, UiUserV2>() {
-    override fun getRefreshKey(state: PagingState<String, UiUserV2>): String? = null
+) : BasePagingSource<String, UiProfile>() {
+    override fun getRefreshKey(state: PagingState<String, UiProfile>): String? = null
 
-    override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiUserV2> {
+    override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiProfile> {
         service
             .searchV2(
                 query = query,

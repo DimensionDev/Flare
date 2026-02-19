@@ -2,9 +2,9 @@ package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.data.datasource.microblog.ListDataSource
-import dev.dimension.flare.data.datasource.microblog.ListMetaData
-import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
+import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
+import dev.dimension.flare.data.datasource.microblog.list.ListMetaDataType
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -33,13 +33,13 @@ public class CreateListPresenter(
             override val supportedMetaData =
                 serviceState.map {
                     require(it is ListDataSource)
-                    it.supportedMetaData
+                    it.listHandler.supportedMetaData
                 }
 
             override suspend fun createList(listMetaData: ListMetaData) {
                 serviceState.onSuccess {
                     require(it is ListDataSource)
-                    it.createList(listMetaData)
+                    it.listHandler.create(listMetaData)
                 }
             }
         }

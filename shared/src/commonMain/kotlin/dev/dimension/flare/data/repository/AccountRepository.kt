@@ -153,6 +153,12 @@ public data class LoginExpiredException(
     val platformType: PlatformType,
 ) : Exception("Login expired.")
 
+@Immutable
+public data class RequireReLoginException(
+    val accountKey: MicroBlogKey,
+    val platformType: PlatformType,
+) : Exception("Login required.")
+
 @Composable
 internal fun accountProvider(
     accountType: AccountType,

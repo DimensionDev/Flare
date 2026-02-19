@@ -199,6 +199,16 @@ internal sealed interface Route : NavKey {
         val accountType: AccountType,
     ) : ScreenRoute
 
+    data class MisskeyChannelList(
+        val accountType: AccountType,
+    ) : ScreenRoute
+
+    data class MisskeyChannelTimeline(
+        val accountType: AccountType,
+        val channelId: String,
+        val title: String,
+    ) : ScreenRoute
+
     data object TabSetting : ScreenRoute
 
     data class TabGroupConfig(

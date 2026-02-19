@@ -76,11 +76,13 @@ import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import compose.icons.fontawesomeicons.solid.Trash
+import compose.icons.fontawesomeicons.solid.Tv
 import compose.icons.fontawesomeicons.solid.UserSlash
 import compose.icons.fontawesomeicons.solid.VolumeXmark
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.bookmark_add
 import dev.dimension.flare.compose.ui.bookmark_remove
+import dev.dimension.flare.compose.ui.channel_title
 import dev.dimension.flare.compose.ui.comment
 import dev.dimension.flare.compose.ui.delete
 import dev.dimension.flare.compose.ui.fx_share
@@ -393,17 +395,19 @@ public fun CommonStatusComponent(
                 )
             }
 
-            when (val content = item.bottomContent) {
-                is UiTimeline.ItemContent.Status.BottomContent.Reaction -> {
-                    if (content.emojiReactions.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        StatusReactionComponent(
-                            data = content,
-                        )
+            if (!isQuote) {
+                when (val content = item.bottomContent) {
+                    is UiTimeline.ItemContent.Status.BottomContent.Reaction -> {
+                        if (content.emojiReactions.isNotEmpty() || content.channel != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            StatusReactionComponent(
+                                data = content,
+                            )
+                        }
                     }
-                }
 
-                null -> Unit
+                    null -> Unit
+                }
             }
 
             if (isDetail) {
@@ -559,55 +563,82 @@ private fun StatusReactionComponent(
     data: UiTimeline.ItemContent.Status.BottomContent.Reaction,
     modifier: Modifier = Modifier,
 ) {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
         modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        items(data.emojiReactions) { reaction ->
-            val color =
-                if (reaction.me) {
-                    PlatformTheme.colorScheme.primaryContainer
-                } else {
-                    PlatformTheme.colorScheme.cardAlt
-                }
-            val borderColor =
-                if (reaction.me) {
-                    PlatformTheme.colorScheme.primary
-                } else {
-                    Color.Transparent
-                }
-            PlatformCard(
-                shape = RoundedCornerShape(100),
-                containerColor = color,
-                modifier =
-                    Modifier
-                        .border(
-                            FlareDividerDefaults.thickness,
-                            color = borderColor,
-                            shape = RoundedCornerShape(100),
-                        ),
+        data.channel?.let { channel ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                FAIcon(
+                    imageVector = FontAwesomeIcons.Solid.Tv,
+                    contentDescription = channel.name,
+                    tint = PlatformTheme.colorScheme.caption,
                     modifier =
                         Modifier
-                            .clickable {
-                                reaction.onClicked.invoke()
-                            }.padding(horizontal = 8.dp, vertical = 4.dp),
-                ) {
-                    if (reaction.isUnicode) {
-                        PlatformText(reaction.name)
-                    } else {
-                        EmojiImage(
-                            uri = reaction.url,
-                            modifier = Modifier.height(16.dp),
-                        )
+                            .size(12.dp),
+                )
+                PlatformText(
+                    text = channel.name,
+                    style = PlatformTheme.typography.caption,
+                    color = PlatformTheme.colorScheme.caption,
+                    maxLines = 1,
+                )
+            }
+        }
+        if (data.emojiReactions.isNotEmpty()) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                items(data.emojiReactions) { reaction ->
+                    val color =
+                        if (reaction.me) {
+                            PlatformTheme.colorScheme.primaryContainer
+                        } else {
+                            PlatformTheme.colorScheme.cardAlt
+                        }
+                    val borderColor =
+                        if (reaction.me) {
+                            PlatformTheme.colorScheme.primary
+                        } else {
+                            Color.Transparent
+                        }
+                    PlatformCard(
+                        shape = RoundedCornerShape(100),
+                        containerColor = color,
+                        modifier =
+                            Modifier
+                                .border(
+                                    FlareDividerDefaults.thickness,
+                                    color = borderColor,
+                                    shape = RoundedCornerShape(100),
+                                ),
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier =
+                                Modifier
+                                    .clickable {
+                                        reaction.onClicked.invoke()
+                                    }.padding(horizontal = 8.dp, vertical = 4.dp),
+                        ) {
+                            if (reaction.isUnicode) {
+                                PlatformText(reaction.name)
+                            } else {
+                                EmojiImage(
+                                    uri = reaction.url,
+                                    modifier = Modifier.height(16.dp),
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            PlatformText(
+                                text = reaction.count.humanized,
+                            )
+                        }
                     }
-                    Spacer(modifier = Modifier.width(4.dp))
-                    PlatformText(
-                        text = reaction.count.humanized,
-                    )
                 }
             }
         }
@@ -755,6 +786,14 @@ public fun StatusVisibilityComponent(
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.At,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_direct),
+                modifier = modifier,
+                tint = tint,
+            )
+
+        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel ->
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Tv,
+                contentDescription = stringResource(resource = Res.string.channel_title),
                 modifier = modifier,
                 tint = tint,
             )

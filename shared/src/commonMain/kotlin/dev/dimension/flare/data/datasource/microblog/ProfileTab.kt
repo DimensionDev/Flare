@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.common.BaseTimelineLoader
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
 
 @Immutable
 public sealed interface ProfileTab {

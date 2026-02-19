@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
@@ -38,9 +39,11 @@ public class BlueskyFeedsPresenter(
             serviceState
                 .map { service ->
                     require(service is BlueskyDataSource)
-                    remember(service) {
-                        service.myFeeds
-                    }
+                    val flow =
+                        remember(service) {
+                            service.feedHandler.data.cachedIn(scope)
+                        }
+                    flow.collectAsLazyPagingItems()
                 }.toPagingState()
         val popularFeeds =
             serviceState
@@ -64,7 +67,7 @@ public class BlueskyFeedsPresenter(
                 popularFeeds.refreshSuspend()
             }
 
-            override fun subscribe(list: UiList) {
+            override fun subscribe(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is BlueskyDataSource)
@@ -73,7 +76,7 @@ public class BlueskyFeedsPresenter(
                 }
             }
 
-            override fun unsubscribe(list: UiList) {
+            override fun unsubscribe(list: UiList.Feed) {
                 serviceState.onSuccess {
                     scope.launch {
                         require(it is BlueskyDataSource)
@@ -88,13 +91,13 @@ public class BlueskyFeedsPresenter(
 @Immutable
 public interface BlueskyFeedsState {
     public val myFeeds: PagingState<UiList>
-    public val popularFeeds: PagingState<Pair<UiList, Boolean>>
+    public val popularFeeds: PagingState<Pair<UiList.Feed, Boolean>>
 
     public fun search(value: String)
 
     public suspend fun refreshSuspend()
 
-    public fun subscribe(list: UiList)
+    public fun subscribe(list: UiList.Feed)
 
-    public fun unsubscribe(list: UiList)
+    public fun unsubscribe(list: UiList.Feed)
 }

@@ -9,6 +9,7 @@ struct StatusVisibilityView: View {
         case .home:      Image("fa-lock-open")
         case .followers: Image("fa-lock")
         case .specified: Image("fa-at")
+        case .channel:   Image(.faTv)
         }
     }
 }

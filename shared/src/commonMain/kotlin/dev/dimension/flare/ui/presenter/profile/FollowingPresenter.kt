@@ -14,7 +14,7 @@ import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +30,7 @@ public abstract class UserListPresenter(
 
     @Immutable
     public interface State {
-        public val listState: PagingState<UiUserV2>
+        public val listState: PagingState<UiProfile>
 
         public suspend fun refreshSuspend()
     }
@@ -60,7 +60,7 @@ public abstract class UserListPresenter(
     internal abstract fun dataSource(
         service: MicroblogDataSource,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiUserV2>>
+    ): Flow<PagingData<UiProfile>>
 }
 
 public class FollowingPresenter(

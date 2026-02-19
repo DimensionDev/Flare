@@ -38,8 +38,8 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Rss
 import dev.dimension.flare.R
 import dev.dimension.flare.common.FileItem
-import dev.dimension.flare.data.datasource.microblog.ListMetaData
-import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
+import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
+import dev.dimension.flare.data.datasource.microblog.list.ListMetaDataType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon

@@ -59,8 +59,8 @@ import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.ThemeIconData
 import dev.dimension.flare.ui.component.ThemedIcon
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.isError
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
@@ -232,16 +232,16 @@ internal fun AccountsScreen(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun <T : UiUserV2> AccountItem(
-    userState: UiState<T>,
+fun AccountItem(
+    userState: UiState<UiProfile>,
     onClick: (MicroBlogKey) -> Unit,
     toLogin: () -> Unit,
     modifier: Modifier = Modifier,
-    trailingContent: @Composable (UiUserV2) -> Unit = { },
-    headlineContent: @Composable (UiUserV2) -> Unit = {
+    trailingContent: @Composable (UiProfile) -> Unit = { },
+    headlineContent: @Composable (UiProfile) -> Unit = {
         RichText(text = it.name, maxLines = 1)
     },
-    supportingContent: @Composable (UiUserV2) -> Unit = {
+    supportingContent: @Composable (UiProfile) -> Unit = {
         Text(text = it.handle, maxLines = 1)
     },
     avatarSize: Dp = AvatarComponentDefaults.size,

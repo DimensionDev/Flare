@@ -59,9 +59,11 @@ private fun buildContentAnnotatedString(
 
 internal class BuildContentAnnotatedStringContext {
     private var isBlockState = false
+
     sealed interface InlineType {
         data class Emoji(val url: String) : InlineType
     }
+
     val inlineContent = mutableMapOf<String, InlineType>()
     fun appendInlineContent(
         type: InlineType,
@@ -69,12 +71,15 @@ internal class BuildContentAnnotatedStringContext {
         val id = "inline_${inlineContent.size}"
         inlineContent[id] = type
     }
+
     fun pushBlockState() {
         isBlockState = true
     }
+
     fun popBlockState() {
         isBlockState = false
     }
+
     fun isInBlockState(): Boolean = isBlockState
     fun appendImageInlineContent(
         url: String,
@@ -194,7 +199,7 @@ private class ContentBuilder(
 
     private fun restoreStyles() {
         activeStyleOps.forEach { op ->
-            when(op) {
+            when (op) {
                 is StyleOp.Span -> currentBuilder.pushStyle(op.style)
                 is StyleOp.Paragraph -> currentBuilder.pushStyle(op.style)
                 is StyleOp.Annotation -> currentBuilder.pushStringAnnotation(op.tag, op.annotation)
@@ -210,6 +215,7 @@ private class ContentBuilder(
     }
 }
 
+
 private fun ContentBuilder.renderNode(
     node: Node,
     styleData: StyleData,
@@ -223,6 +229,7 @@ private fun ContentBuilder.renderNode(
         is TextNode -> {
             renderText(node.text())
         }
+
         else -> Unit
     }
 }
@@ -232,6 +239,7 @@ private fun ContentBuilder.renderText(
 ) {
     append(text)
 }
+
 
 private fun ContentBuilder.renderElement(
     element: Element,
@@ -249,12 +257,22 @@ private fun ContentBuilder.renderElement(
 
         "center" -> {
             val style =
-                styleData.textStyle.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                styleData.textStyle.copy(
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
             withStyle(
-                style.toSpanStyle(),
+                style.toParagraphStyle()
             ) {
-                element.childNodes().fastForEach {
-                    renderNode(node = it, styleData = styleData, context = context)
+                withStyle(style.toSpanStyle()) {
+                    element.childNodes().fastForEach {
+                        renderNode(
+                            node = it,
+                            styleData = styleData.copy(
+                                style = style,
+                            ),
+                            context = context,
+                        )
+                    }
                 }
             }
         }
@@ -340,51 +358,105 @@ private fun ContentBuilder.renderElement(
         }
 
         "strong", "b" -> {
+            val style = styleData.textStyle.copy(fontWeight = FontWeight.Bold)
             pushStyle(
-                styleData.textStyle.copy(fontWeight = FontWeight.Bold).toSpanStyle(),
+                style.toSpanStyle(),
             )
             element.childNodes().fastForEach {
-                renderNode(node = it, styleData = styleData, context = context)
+                renderNode(
+                    node = it,
+                    styleData = styleData.copy(
+                        style = style,
+                        linkStyle = styleData.linkStyle.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                    ),
+                    context = context
+                )
             }
             pop()
         }
 
         "em", "i" -> {
+            val style = styleData.textStyle.copy(fontStyle = FontStyle.Italic)
             pushStyle(
-                styleData.textStyle.copy(fontStyle = FontStyle.Italic).toSpanStyle(),
+                style.toSpanStyle(),
             )
             element.childNodes().fastForEach {
-                renderNode(node = it, styleData = styleData, context = context)
+                renderNode(
+                    node = it,
+                    styleData = styleData.copy(
+                        style = style,
+                        linkStyle = styleData.linkStyle.copy(
+                            fontStyle = FontStyle.Italic
+                        ),
+                    ),
+                    context = context
+                )
             }
             pop()
         }
 
         "del", "s" -> {
+            val style = styleData.textStyle.copy(textDecoration = TextDecoration.LineThrough)
             pushStyle(
-                styleData.textStyle.copy(textDecoration = TextDecoration.LineThrough).toSpanStyle(),
+                style.toSpanStyle(),
             )
             element.childNodes().fastForEach {
-                renderNode(node = it, styleData = styleData, context = context)
+                renderNode(
+                    node = it,
+                    styleData = styleData.copy(
+                        style = style,
+                        linkStyle = styleData.linkStyle.copy(
+                            textDecoration = TextDecoration.LineThrough
+                        ),
+                    ),
+                    context = context
+                )
             }
             pop()
         }
 
         "u" -> {
+            val style = styleData.textStyle.copy(textDecoration = TextDecoration.Underline)
             pushStyle(
-                styleData.textStyle.copy(textDecoration = TextDecoration.Underline).toSpanStyle(),
+                style.toSpanStyle(),
             )
             element.childNodes().fastForEach {
-                renderNode(node = it, styleData = styleData, context = context)
+                renderNode(
+                    node = it,
+                    styleData = styleData.copy(
+                        style = style,
+                        linkStyle = styleData.linkStyle.copy(
+                            textDecoration = TextDecoration.Underline
+                        ),
+                    ),
+                    context = context
+                )
             }
             pop()
         }
 
         "small" -> {
+            val style = styleData.textStyle.copy(
+                fontSize = styleData.textStyle.fontSize * 0.8,
+                color = styleData.color.copy(alpha = 0.7f),
+            )
             pushStyle(
-                styleData.textStyle.copy(fontSize = styleData.textStyle.fontSize * 0.8).toSpanStyle(),
+                style.toSpanStyle(),
             )
             element.childNodes().fastForEach {
-                renderNode(node = it, styleData = styleData, context = context)
+                renderNode(
+                    node = it,
+                    styleData = styleData.copy(
+                        style = style,
+                        linkStyle = styleData.linkStyle.copy(
+                            fontSize = styleData.linkStyle.fontSize * 0.8,
+                            color = styleData.linkStyle.color.copy(alpha = 0.7f),
+                        ),
+                    ),
+                    context = context
+                )
             }
             pop()
         }
@@ -398,7 +470,6 @@ private fun ContentBuilder.renderElement(
         }
 
         "ul" -> {
-
             element.childNodes().fastForEach {
                 renderNode(node = it, styleData = styleData, context = context)
             }
@@ -517,6 +588,25 @@ private fun ContentBuilder.renderElement(
                 }
             }
             appendLine()
+        }
+
+        "time" -> {
+            val style =
+                styleData.textStyle.copy(
+                    color = styleData.color.copy(alpha = 0.7f),
+                    background = styleData.color.copy(alpha = 0.05f),
+                )
+            withStyle(style.toSpanStyle()) {
+                element.childNodes().fastForEach {
+                    renderNode(
+                        node = it,
+                        styleData = styleData.copy(
+                            style = style
+                        ),
+                        context = context,
+                    )
+                }
+            }
         }
 
         else -> {

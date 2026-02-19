@@ -35,7 +35,7 @@ public class InstanceMetadataPresenter(
                         PlatformType.Mastodon ->
                             MastodonInstanceService("https://$host/").instance().render()
                         PlatformType.Misskey ->
-                            MisskeyService("https://$host/api/", null).meta(MetaRequest()).render()
+                            MisskeyService("https://$host/api/").meta(MetaRequest()).render()
                         PlatformType.Bluesky -> throw UnsupportedOperationException(
                             "Bluesky is not supported yet",
                         )

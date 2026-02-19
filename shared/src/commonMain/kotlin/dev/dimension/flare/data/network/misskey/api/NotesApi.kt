@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.network.misskey.api
 
 import de.jensklingenberg.ktorfit.http.Body
+import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsTimelineRequest
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
@@ -42,6 +43,7 @@ internal interface NotesApi {
      */
     @POST("channels/timeline")
     suspend fun channelsTimeline(
+        @Header("Content-Type") contentType: kotlin.String = "application/json",
         @Body channelsTimelineRequest: ChannelsTimelineRequest,
     ): kotlin.collections.List<Note>
 

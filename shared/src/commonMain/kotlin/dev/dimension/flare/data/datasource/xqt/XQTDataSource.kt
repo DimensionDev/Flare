@@ -1,14 +1,10 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
 import androidx.paging.Pager
 import androidx.paging.PagingData
-import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import androidx.paging.map
-import dev.dimension.flare.common.BaseRemoteMediator
-import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileType
@@ -19,10 +15,8 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.XQT
-import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.mapper.tweets
-import dev.dimension.flare.data.database.cache.mapper.users
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.MessageContent
@@ -34,26 +28,23 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
-import dev.dimension.flare.data.datasource.microblog.ListDataSource
-import dev.dimension.flare.data.datasource.microblog.ListMetaData
-import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
-import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
-import dev.dimension.flare.data.datasource.microblog.memoryPager
+import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.list.ListHandler
+import dev.dimension.flare.data.datasource.microblog.list.ListMemberHandler
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.xqt.XQTService
-import dev.dimension.flare.data.network.xqt.model.AddMemberRequest
 import dev.dimension.flare.data.network.xqt.model.AddToConversationRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequestVariables
-import dev.dimension.flare.data.network.xqt.model.CreateListRequest
 import dev.dimension.flare.data.network.xqt.model.DeleteBookmarkRequest
 import dev.dimension.flare.data.network.xqt.model.DeleteBookmarkRequestVariables
 import dev.dimension.flare.data.network.xqt.model.LiveVideoStreamStatusResponse
@@ -72,9 +63,6 @@ import dev.dimension.flare.data.network.xqt.model.PostDmNew2Request
 import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
-import dev.dimension.flare.data.network.xqt.model.RemoveListRequest
-import dev.dimension.flare.data.network.xqt.model.RemoveMemberRequest
-import dev.dimension.flare.data.network.xqt.model.UpdateListRequest
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.repository.AccountRepository
@@ -88,20 +76,16 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiHashtag
-import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUserV2
-import dev.dimension.flare.ui.model.mapper.list
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
@@ -155,6 +139,24 @@ internal class XQTDataSource(
                     .map { it.chocolate },
         )
     }
+
+    private val listLoader = XQTListLoader(service, accountKey)
+
+    private val listMemberLoader = XQTListMemberLoader(service, accountKey)
+
+    override val listHandler =
+        ListHandler(
+            pagingKey = "list_$accountKey",
+            accountKey = accountKey,
+            loader = listLoader,
+        )
+
+    override val listMemberHandler =
+        ListMemberHandler(
+            pagingKey = "list_member_$accountKey",
+            accountKey = accountKey,
+            loader = listMemberLoader,
+        )
 
     override fun homeTimeline() =
         HomeTimelineRemoteMediator(
@@ -252,7 +254,7 @@ internal class XQTDataSource(
     override val supportedNotificationFilter: List<NotificationFilter>
         get() = listOf(NotificationFilter.All, NotificationFilter.Mention)
 
-    override fun userByAcct(acct: String): CacheData<UiUserV2> {
+    override fun userByAcct(acct: String): CacheData<UiProfile> {
         val (name, host) = MicroBlogKey.valueOf(acct.removePrefix("@"))
         return Cacheable(
             fetchSource = {
@@ -646,7 +648,7 @@ internal class XQTDataSource(
     override fun searchUser(
         query: String,
         pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
+    ): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -657,7 +659,7 @@ internal class XQTDataSource(
             )
         }.flow
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -1142,7 +1144,7 @@ internal class XQTDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
+    ): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -1157,7 +1159,7 @@ internal class XQTDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
+    ): Flow<PagingData<UiProfile>> =
         Pager(
             config = pagingConfig,
         ) {
@@ -1200,356 +1202,6 @@ internal class XQTDataSource(
                 null
             },
         ).toPersistentList()
-
-    private val listKey: String
-        get() = "allLists_$accountKey"
-
-    override fun myList(scope: CoroutineScope): Flow<PagingData<UiList>> =
-        memoryPager(
-            pageSize = 20,
-            pagingKey = listKey,
-            scope = scope,
-            mediator =
-                object : BaseRemoteMediator<Int, UiList>() {
-                    var cursor: String? = null
-
-                    override suspend fun doLoad(
-                        loadType: LoadType,
-                        state: PagingState<Int, UiList>,
-                    ): MediatorResult {
-                        if (loadType == LoadType.PREPEND) {
-                            return MediatorResult.Success(endOfPaginationReached = true)
-                        }
-                        if (loadType == LoadType.REFRESH) {
-                            cursor = null
-                        }
-                        val response =
-                            service
-                                .getListsManagementPageTimeline(
-                                    variables =
-                                        buildString {
-                                            append("{\"count\":20")
-                                            if (cursor != null) {
-                                                append(",\"cursor\":\"${cursor}\"")
-                                            }
-                                            append("}")
-                                        },
-                                ).body()
-                                ?.data
-                                ?.viewer
-                                ?.listManagementTimeline
-                                ?.timeline
-                                ?.instructions
-
-                        cursor = response?.cursor()
-
-                        val result =
-                            response
-                                ?.list(accountKey = accountKey)
-                                .orEmpty()
-                                .toImmutableList()
-
-                        if (loadType == LoadType.REFRESH) {
-                            MemoryPagingSource.update<UiList>(
-                                key = listKey,
-                                value = result,
-                            )
-                        } else if (loadType == LoadType.APPEND) {
-                            MemoryPagingSource.append<UiList>(
-                                key = listKey,
-                                value = result,
-                            )
-                        }
-
-                        return MediatorResult.Success(
-                            endOfPaginationReached = result.isEmpty(),
-                        )
-                    }
-                },
-        )
-
-    override suspend fun createList(metaData: ListMetaData) {
-        tryRun {
-            service.createList(
-                request =
-                    CreateListRequest(
-                        variables =
-                            CreateListRequest.Variables(
-                                name = metaData.title,
-                                description = metaData.description.orEmpty(),
-                                isPrivate = false,
-                            ),
-                    ),
-            )
-        }.onSuccess { response ->
-            val data = response.body()?.data?.list
-            if (data?.idStr != null) {
-                MemoryPagingSource.updateWith<UiList>(
-                    key = listKey,
-                ) {
-                    it
-                        .plus(
-                            UiList(
-                                id = data.idStr,
-                                title = metaData.title,
-                                description = metaData.description,
-                                platformType = PlatformType.Mastodon,
-                            ),
-                        ).toImmutableList()
-                }
-            }
-        }
-    }
-
-    override suspend fun deleteList(listId: String) {
-        tryRun {
-            service.deleteList(
-                request =
-                    RemoveListRequest(
-                        variables =
-                            RemoveListRequest.Variables(
-                                listID = listId,
-                            ),
-                    ),
-            )
-        }.onSuccess {
-            MemoryPagingSource.updateWith<UiList>(
-                key = listKey,
-            ) {
-                it
-                    .filter { list -> list.id != listId }
-                    .toImmutableList()
-            }
-        }
-    }
-
-    override suspend fun updateList(
-        listId: String,
-        metaData: ListMetaData,
-    ) {
-        tryRun {
-            service.updateList(
-                request =
-                    UpdateListRequest(
-                        variables =
-                            UpdateListRequest.Variables(
-                                listID = listId,
-                                name = metaData.title,
-                                description = metaData.description.orEmpty(),
-                                isPrivate = false,
-                            ),
-                    ),
-            )
-        }.onSuccess {
-            MemoryPagingSource.updateWith<UiList>(
-                key = listKey,
-            ) {
-                it
-                    .map { list ->
-                        if (list.id == listId) {
-                            list.copy(
-                                title = metaData.title,
-                                description = metaData.description,
-                            )
-                        } else {
-                            list
-                        }
-                    }.toImmutableList()
-            }
-        }
-    }
-
-    override fun listInfo(listId: String): CacheData<UiList> =
-        MemCacheable(
-            key = "listInfo_$listId",
-            fetchSource = {
-                getListInfo(listId)
-                    ?: throw Exception("List not found")
-            },
-        )
-
-    private suspend fun getListInfo(listId: String) =
-        service
-            .getListByRestId(
-                variables = "{\"listId\":\"${listId}\"}",
-            ).body()
-            ?.data
-            ?.list
-            ?.render(accountKey = accountKey)
-
-    private fun listMemberKey(listId: String) = "listMembers_$listId"
-
-    override fun listMembers(
-        listId: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiUserV2>> =
-        memoryPager(
-            pageSize = pageSize,
-            pagingKey = listMemberKey(listId),
-            scope = scope,
-            mediator =
-                object : BaseRemoteMediator<Int, UiUserV2>() {
-                    var cursor: String? = null
-
-                    override suspend fun doLoad(
-                        loadType: LoadType,
-                        state: PagingState<Int, UiUserV2>,
-                    ): MediatorResult {
-                        if (loadType == LoadType.PREPEND) {
-                            return MediatorResult.Success(endOfPaginationReached = true)
-                        }
-                        if (loadType == LoadType.REFRESH) {
-                            cursor = null
-                        }
-                        val response =
-                            service
-                                .getListMembers(
-                                    variables =
-                                        buildString {
-                                            append("{\"listId\":\"${listId}\",\"count\":$pageSize")
-                                            if (cursor != null) {
-                                                append(",\"cursor\":\"${cursor}\"")
-                                            }
-                                            append("}")
-                                        },
-                                ).body()
-                                ?.data
-                                ?.list
-                                ?.membersTimeline
-                                ?.timeline
-                                ?.instructions
-
-                        cursor = response?.cursor()
-
-                        val result =
-                            response?.users().orEmpty().map {
-                                it.render(accountKey = accountKey)
-                            }
-
-                        if (loadType == LoadType.REFRESH) {
-                            MemoryPagingSource.update(
-                                key = listMemberKey(listId),
-                                value = result.toImmutableList(),
-                            )
-                        } else if (loadType == LoadType.APPEND) {
-                            MemoryPagingSource.append(
-                                key = listMemberKey(listId),
-                                value = result.toImmutableList(),
-                            )
-                        }
-
-                        return MediatorResult.Success(
-                            endOfPaginationReached = result.isEmpty(),
-                        )
-                    }
-                },
-        )
-
-    private fun userListsKey(userKey: MicroBlogKey) = "userLists_${userKey.id}"
-
-    override suspend fun addMember(
-        listId: String,
-        userKey: MicroBlogKey,
-    ) {
-        tryRun {
-            service.addMember(
-                request =
-                    AddMemberRequest(
-                        variables =
-                            AddMemberRequest.Variables(
-                                listID = listId,
-                                userID = userKey.id,
-                            ),
-                    ),
-            )
-            val user =
-                service
-                    .userById(userKey.id)
-                    .body()
-                    ?.data
-                    ?.user
-                    ?.result
-                    ?.let {
-                        when (it) {
-                            is User -> it
-                            is UserUnavailable -> null
-                        }
-                    }?.toDbUser(accountKey)
-                    ?.render(accountKey = accountKey) ?: throw Exception("User not found")
-            MemoryPagingSource.updateWith(
-                key = listMemberKey(listId),
-            ) {
-                (listOf(user) + it)
-                    .distinctBy {
-                        it.key
-                    }.toImmutableList()
-            }
-            val list = getListInfo(listId)
-            if (list?.id != null) {
-                MemCacheable.updateWith<ImmutableList<UiList>>(
-                    key = userListsKey(userKey),
-                ) {
-                    it
-                        .plus(list)
-                        .toImmutableList()
-                }
-            }
-        }
-    }
-
-    override suspend fun removeMember(
-        listId: String,
-        userKey: MicroBlogKey,
-    ) {
-        tryRun {
-            service.removeMember(
-                request =
-                    RemoveMemberRequest(
-                        variables =
-                            RemoveMemberRequest.Variables(
-                                listID = listId,
-                                userID = userKey.id,
-                            ),
-                    ),
-            )
-            MemoryPagingSource.updateWith<UiUserV2>(
-                key = listMemberKey(listId),
-            ) {
-                it
-                    .filter { user -> user.key.id != userKey.id }
-                    .toImmutableList()
-            }
-            MemCacheable.updateWith<ImmutableList<UiList>>(
-                key = userListsKey(userKey),
-            ) {
-                it
-                    .filter { list -> list.id != listId }
-                    .toImmutableList()
-            }
-        }
-    }
-
-    override fun listMemberCache(listId: String): Flow<ImmutableList<UiUserV2>> =
-        MemoryPagingSource.getFlow<UiUserV2>(listMemberKey(listId))
-
-    override fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList>> =
-        MemCacheable(
-            key = userListsKey(userKey),
-        ) {
-            service
-                .getListsMemberships(
-                    userId = userKey.id,
-                ).body()
-                ?.lists
-                ?.mapNotNull {
-                    it.render(accountKey = accountKey)
-                }.orEmpty()
-                .toImmutableList()
-        }
-
-    override val supportedMetaData: ImmutableList<ListMetaDataType>
-        get() = persistentListOf(ListMetaDataType.TITLE, ListMetaDataType.DESCRIPTION)
 
     override fun listTimeline(listId: String) =
         ListTimelineRemoteMediator(

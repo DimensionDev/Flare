@@ -53,8 +53,8 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.data.datasource.microblog.ListMetaData
-import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
+import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
+import dev.dimension.flare.data.datasource.microblog.list.ListMetaDataType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.BackButton
@@ -170,9 +170,16 @@ internal fun EditListScreen(
                                     } else {
                                         state.listInfo
                                             .onSuccess {
-                                                if (it.avatar != null) {
+                                                val avatar =
+                                                    when (it) {
+                                                        is dev.dimension.flare.ui.model.UiList.List -> it.avatar
+                                                        is dev.dimension.flare.ui.model.UiList.Feed -> it.avatar
+                                                        is dev.dimension.flare.ui.model.UiList.Channel -> it.banner
+                                                        is dev.dimension.flare.ui.model.UiList.Antenna -> null
+                                                    }
+                                                if (avatar != null) {
                                                     NetworkImage(
-                                                        model = it.avatar,
+                                                        model = avatar,
                                                         contentDescription = null,
                                                         modifier =
                                                             Modifier
@@ -380,7 +387,16 @@ private fun presenter(
                 append(it.title)
             }
             description.edit {
-                append(it.description)
+                val desc =
+                    when (it) {
+                        is dev.dimension.flare.ui.model.UiList.List -> it.description
+                        is dev.dimension.flare.ui.model.UiList.Feed -> it.description
+                        is dev.dimension.flare.ui.model.UiList.Channel -> null
+                        is dev.dimension.flare.ui.model.UiList.Antenna -> null
+                    }
+                if (desc != null) {
+                    append(desc)
+                }
             }
         }
     }

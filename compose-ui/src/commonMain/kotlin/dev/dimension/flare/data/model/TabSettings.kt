@@ -7,8 +7,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRssSource
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.MixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
@@ -92,6 +92,7 @@ public sealed class TitleType {
             Liked,
             AllRssFeeds,
             Posts,
+            Channel,
         }
     }
 }
@@ -142,6 +143,7 @@ public sealed class IconType {
             Messages,
             Rss,
             Weibo,
+            Channel,
         }
     }
 
@@ -252,7 +254,7 @@ public sealed class TimelineTabItem : TabItem() {
                 SettingsTabItem,
             )
 
-        public fun defaultPrimary(user: UiUserV2): ImmutableList<TabItem> =
+        public fun defaultPrimary(user: UiProfile): ImmutableList<TabItem> =
             when (user.platformType) {
                 PlatformType.Mastodon -> mastodon(user.key)
                 PlatformType.Misskey -> misskey(user.key)
@@ -273,7 +275,7 @@ public sealed class TimelineTabItem : TabItem() {
             return result.toImmutableList()
         }
 
-        public fun secondaryFor(user: UiUserV2): ImmutableList<TabItem> =
+        public fun secondaryFor(user: UiProfile): ImmutableList<TabItem> =
             when (user.platformType) {
                 PlatformType.Mastodon -> defaultMastodonSecondaryItems(user.key)
                 PlatformType.Misskey -> defaultMisskeySecondaryItems(user.key)
@@ -422,6 +424,14 @@ public sealed class TimelineTabItem : TabItem() {
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Antenna),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Rss, accountKey),
+                        ),
+                ),
+                Misskey.ChannelListTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Channel),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Channel, accountKey),
                         ),
                 ),
             )
@@ -848,6 +858,47 @@ public object Misskey {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.list
                 .AntennasTimelinePresenter(account, antennasId)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Immutable
+    @Serializable
+    public data class ChannelTimelineTabItem(
+        val channelId: String,
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem() {
+        public constructor(accountKey: MicroBlogKey, data: UiList) : this(
+            channelId = data.id,
+            account = AccountType.Specific(accountKey),
+            metaData =
+                TabMetaData(
+                    title = TitleType.Text(data.title),
+                    icon =
+                        IconType.Mixed(
+                            icon = IconType.Material.MaterialIcon.List,
+                            userKey = accountKey,
+                        ),
+                ),
+        )
+
+        override val key: String = "channel_${account}_$channelId"
+
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.list
+                .ChannelTimelinePresenter(account, channelId)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Immutable
+    @Serializable
+    public data class ChannelListTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TabItem() {
+        override val key: String = "channels_$account"
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }

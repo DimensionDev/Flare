@@ -9,15 +9,12 @@ import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.flattenUiState
-import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -43,10 +40,6 @@ public open class UserPresenter(
                     flowOf(UiState.Error(NoActiveAccountException))
                 } else {
                     service.userById(userId).toUi()
-                }
-            }.map {
-                it.map {
-                    it as UiUserV2
                 }
             }
     }

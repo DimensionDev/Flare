@@ -11,6 +11,7 @@ import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Attachment
 import dev.dimension.flare.data.network.mastodon.api.model.InstanceData
+import dev.dimension.flare.data.network.mastodon.api.model.MastodonList
 import dev.dimension.flare.data.network.mastodon.api.model.MediaType
 import dev.dimension.flare.data.network.mastodon.api.model.Mention
 import dev.dimension.flare.data.network.mastodon.api.model.Notification
@@ -23,10 +24,12 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPoll
@@ -869,8 +872,8 @@ internal fun Account.render(
                     )
                 },
         platformType = PlatformType.Mastodon,
-        onClicked = {
-            launcher.launch(
+        clickEvent =
+            ClickEvent.Deeplink(
                 DeeplinkRoute.Profile
                     .User(
                         accountType =
@@ -881,8 +884,7 @@ internal fun Account.render(
                             } ?: AccountType.Guest,
                         userKey = userKey,
                     ).toUri(),
-            )
-        },
+            ),
     )
 }
 
@@ -1173,3 +1175,9 @@ internal fun InstanceData.render(): UiInstanceMetadata {
         configuration = configuration,
     )
 }
+
+internal fun MastodonList.render(): UiList.List =
+    UiList.List(
+        id = id.toString(),
+        title = title.orEmpty(),
+    )

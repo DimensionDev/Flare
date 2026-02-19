@@ -102,12 +102,40 @@ extension PagingView {
             }
         )
     }
+    
+    
+    init(
+        data: PagingState<T>,
+        @ViewBuilder
+        successContent: @escaping (T) -> SuccessContent,
+        @ViewBuilder
+        loadingContent: @escaping () -> LoadingContent,
+        @ViewBuilder
+        errorContent: @escaping (KotlinThrowable, @escaping () -> Void) -> ErrorContent,
+        @ViewBuilder
+        emptyContent: @escaping () -> EmptyContent
+    ) {
+        self.init(
+            data: data,
+            emptyContent: { emptyContent() },
+            errorContent: { error, retry in
+                errorContent(error, retry)
+            },
+            loadingContent: { index, loadingCount in
+                loadingContent()
+            },
+            successContent: { item, index, itemCount in
+                successContent(item)
+            }
+        )
+    }
+    
 }
 
 
 struct UserPagingView: View {
     @Environment(\.openURL) private var openURL
-    let data: PagingState<UiUserV2>
+    let data: PagingState<UiProfile>
     var body: some View {
         PagingView(data: data) { user in
             UserCompatView(data: user)

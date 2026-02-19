@@ -52,6 +52,7 @@ internal fun FeedListScreen(
             adapter = scrollbarAdapter,
         ) {
             LazyColumn(
+                state = listState,
                 contentPadding =
                     PaddingValues(
                         vertical = 8.dp,

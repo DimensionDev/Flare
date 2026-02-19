@@ -238,6 +238,9 @@ internal fun TabAddBottomSheet(
 
                                                     is PinnableTimelineTabPresenter.State.Tab.Antenna ->
                                                         R.string.home_tab_antennas_title
+
+                                                    is PinnableTimelineTabPresenter.State.Tab.Channel ->
+                                                        R.string.channel_title
                                                 }
                                             }.map { stringResource(id = it) }
                                 ButtonGroup(

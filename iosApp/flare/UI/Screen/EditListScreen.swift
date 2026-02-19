@@ -33,7 +33,12 @@ struct EditListScreen: View {
                                     .frame(width: 96, height: 96)
                             } else {
                                 StateView(state: presenter.state.listInfo) { info in
-                                    if let remote = info.avatar {
+                                    let avatar: String? = switch onEnum(of: info) {
+                                    case .list(let data): data.avatar
+                                    case .feed(let data): data.avatar
+                                    default: nil
+                                    }
+                                    if let remote = avatar {
                                         NetworkImage(data: remote)
                                             .frame(width: 96, height: 96)
                                     } else {
@@ -113,7 +118,11 @@ struct EditListScreen: View {
         }
         .onSuccessOf(of: presenter.state.listInfo, data: { listInfo in
             self.title = listInfo.title
-            self.desc = listInfo.description_ ?? ""
+            switch onEnum(of: listInfo) {
+            case .list(let data): self.desc = data.description_ ?? ""
+            case .feed(let data): self.desc = data.description_ ?? ""
+                default: self.desc = ""
+            }
         })
         .navigationTitle("list_edit_title")
         .sheet(isPresented: $showEditMember, content: {
@@ -179,62 +188,3 @@ struct EditListScreen: View {
 }
 
 
-struct EditListMemberScreen: View {
-    @Environment(\.dismiss) var dismiss
-    @StateObject private var presenter: KotlinPresenter<EditListMemberState>
-    @State private var searchText: String = ""
-
-    init(accountType: AccountType, listId: String) {
-        self._presenter = .init(wrappedValue: .init(presenter: EditListMemberPresenter(accountType: accountType, listId: listId)))
-    }
-    
-    var body: some View {
-        List {
-            PagingView(data: presenter.state.users) { user in
-                if let added = user.second, let data = user.first {
-                    UserCompatView(data: data) {
-                        if added.boolValue {
-                            Button(role: .destructive) {
-                                presenter.state.removeMember(userKey: data.key)
-                            } label: {
-                                Image(.faTrash)
-                            }
-                        } else {
-                            Button {
-                                presenter.state.addMember(userKey: data.key)
-                            } label: {
-                                Image(.faPlus)
-                            }
-                        }
-                    } onClicked: {
-                        
-                    }
-                } else {
-                    EmptyView()
-                }
-            } loadingContent: {
-                UserLoadingView()
-            } errorContent: { error, retry in
-                if error is EmptyQueryException {
-                    ListEmptyView()
-                } else {
-                    ListErrorView(error: error, onRetry: retry)
-                }
-            }
-        }
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image("fa-xmark")
-                }
-            }
-        }
-        .navigationTitle("list_edit_member_title")
-        .searchable(text: $searchText, prompt: "search")
-        .onSubmit(of: .search) {
-            presenter.state.setFilter(value: searchText)
-        }
-    }
-}

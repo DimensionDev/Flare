@@ -54,15 +54,8 @@ internal class AppleFormatter(
                 formatter.timeStyle = NSDateFormatterShortStyle
             }
             daysDiff < 7 -> {
-                val dayFormatter = NSDateFormatter()
-                dayFormatter.setLocalizedDateFormatFromTemplate("E")
-                val day = dayFormatter.stringFromDate(date)
-
-                formatter.dateStyle = NSDateFormatterNoStyle
+                formatter.dateStyle = NSDateFormatterShortStyle
                 formatter.timeStyle = NSDateFormatterShortStyle
-                val time = formatter.stringFromDate(date)
-
-                return "$day $time"
             }
             else -> {
                 formatter.dateStyle = NSDateFormatterShortStyle

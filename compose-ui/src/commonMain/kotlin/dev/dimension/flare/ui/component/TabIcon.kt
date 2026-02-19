@@ -36,10 +36,12 @@ import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Message
 import compose.icons.fontawesomeicons.solid.RectangleList
 import compose.icons.fontawesomeicons.solid.SquareRss
+import compose.icons.fontawesomeicons.solid.Tv
 import compose.icons.fontawesomeicons.solid.Users
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.all_rss_feeds_title
 import dev.dimension.flare.compose.ui.antenna_title
+import dev.dimension.flare.compose.ui.channel_title
 import dev.dimension.flare.compose.ui.dm_list_title
 import dev.dimension.flare.compose.ui.home_tab_bookmarks_title
 import dev.dimension.flare.compose.ui.home_tab_discover_title
@@ -62,7 +64,6 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.icons.Misskey
@@ -283,6 +284,7 @@ internal val TitleType.Localized.res: StringResource
             TitleType.Localized.LocalizedKey.Liked -> Res.string.liked_title
             TitleType.Localized.LocalizedKey.AllRssFeeds -> Res.string.all_rss_feeds_title
             TitleType.Localized.LocalizedKey.Posts -> Res.string.posts_title
+            TitleType.Localized.LocalizedKey.Channel -> Res.string.channel_title
         }
 
 internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =
@@ -306,4 +308,5 @@ internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =
         IconType.Material.MaterialIcon.Messages -> FontAwesomeIcons.Solid.Message
         IconType.Material.MaterialIcon.Rss -> FontAwesomeIcons.Solid.SquareRss
         IconType.Material.MaterialIcon.Weibo -> FontAwesomeIcons.Brands.Weibo
+        IconType.Material.MaterialIcon.Channel -> FontAwesomeIcons.Solid.Tv
     }

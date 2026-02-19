@@ -1267,6 +1267,9 @@ internal val UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.localNa
 
             UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
                 Res.string.misskey_visibility_specified
+
+            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel ->
+                Res.string.misskey_visibility_public
         }
 
 internal val UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.localDescription: StringResource
@@ -1283,4 +1286,7 @@ internal val UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.localDe
 
             UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
                 Res.string.misskey_visibility_specified_description
+
+            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel ->
+                Res.string.misskey_visibility_public_description
         }

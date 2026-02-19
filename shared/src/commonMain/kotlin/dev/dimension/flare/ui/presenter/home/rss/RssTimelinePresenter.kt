@@ -3,10 +3,10 @@ package dev.dimension.flare.ui.presenter.home.rss
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
 import dev.dimension.flare.data.datasource.rss.RssDataSource
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState

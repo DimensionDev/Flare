@@ -746,7 +746,7 @@ private fun PostView.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithU
     )
 }
 
-private fun ProfileView.toDbUser(host: String) =
+internal fun ProfileView.toDbUser(host: String) =
     DbUser(
         userKey =
             MicroBlogKey(
@@ -768,7 +768,7 @@ private fun ProfileView.toDbUser(host: String) =
             ),
     )
 
-private fun ProfileViewBasic.toDbUser(host: String) =
+internal fun ProfileViewBasic.toDbUser(host: String) =
     DbUser(
         userKey =
             MicroBlogKey(
@@ -782,7 +782,7 @@ private fun ProfileViewBasic.toDbUser(host: String) =
         content = UserContent.BlueskyLite(this),
     )
 
-private fun chat.bsky.actor.ProfileViewBasic.toDbUser(host: String) =
+internal fun chat.bsky.actor.ProfileViewBasic.toDbUser(host: String) =
     DbUser(
         userKey =
             MicroBlogKey(

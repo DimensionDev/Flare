@@ -35,7 +35,7 @@ public class BlueskyFeedsWithTabsPresenter(
                         TabMetaData(
                             title = TitleType.Text(item.title),
                             icon =
-                                item.avatar?.let {
+                                item.let { it as? UiList.Feed }?.avatar?.let {
                                     IconType.Url(it)
                                 } ?: IconType.Material(IconType.Material.MaterialIcon.Feeds),
                         ),

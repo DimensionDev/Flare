@@ -3,7 +3,7 @@ import KotlinSharedUI
 
 struct UserCompatView<TrailingContent: View>: View {
     @Environment(\.openURL) private var openURL
-    let data: UiUserV2
+    let data: UiProfile
     let trailing: () -> TrailingContent
     let onClicked: (() -> Void)?
     var body: some View {
@@ -38,7 +38,7 @@ struct UserCompatView<TrailingContent: View>: View {
 }
 
 extension UserCompatView {
-    init(data: UiUserV2) where TrailingContent == EmptyView {
+    init(data: UiProfile) where TrailingContent == EmptyView {
         self.data = data
         self.trailing = {
             EmptyView()

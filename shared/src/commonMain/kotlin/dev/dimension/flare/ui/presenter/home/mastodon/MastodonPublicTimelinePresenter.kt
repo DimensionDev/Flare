@@ -1,7 +1,7 @@
 package dev.dimension.flare.ui.presenter.home.mastodon
 
-import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType

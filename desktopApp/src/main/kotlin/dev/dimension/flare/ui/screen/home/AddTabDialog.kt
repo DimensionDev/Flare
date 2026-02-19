@@ -33,6 +33,7 @@ import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.Res
 import dev.dimension.flare.add_rss_source
 import dev.dimension.flare.antenna_title
+import dev.dimension.flare.channel_title
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.ok
 import dev.dimension.flare.rss_title
@@ -226,6 +227,9 @@ internal fun AddTabDialog(
 
                                                         is PinnableTimelineTabPresenter.State.Tab.Antenna ->
                                                             Res.string.antenna_title
+
+                                                        is PinnableTimelineTabPresenter.State.Tab.Channel ->
+                                                            Res.string.channel_title
                                                     }
                                                 }.map { stringResource(it) }
                                     LiteFilter(

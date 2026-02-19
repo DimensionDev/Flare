@@ -4,15 +4,15 @@ import androidx.paging.PagingState
 import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiUserV2
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
 internal class FansPagingSource(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
-) : BasePagingSource<Int, UiUserV2>() {
-    override fun getRefreshKey(state: PagingState<Int, UiUserV2>): Int? = null
+) : BasePagingSource<Int, UiProfile>() {
+    override fun getRefreshKey(state: PagingState<Int, UiProfile>): Int? = null
 
     private val containerId by lazy {
         if (accountKey == userKey) {
@@ -22,7 +22,7 @@ internal class FansPagingSource(
         }
     }
 
-    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiUserV2> {
+    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiProfile> {
         val nextPage = params.key ?: 0
         val limit = params.loadSize
         val users =

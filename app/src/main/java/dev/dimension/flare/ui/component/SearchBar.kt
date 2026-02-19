@@ -47,10 +47,10 @@ import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiSearchHistory
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.SearchHistoryPresenter
 import dev.dimension.flare.ui.presenter.home.SearchHistoryState
@@ -165,7 +165,7 @@ private fun SearchContent(
 }
 
 internal fun LazyStaggeredGridScope.searchContent(
-    searchUsers: PagingState<UiUserV2>,
+    searchUsers: PagingState<UiProfile>,
     searchStatus: PagingState<UiTimeline>,
     toUser: (MicroBlogKey) -> Unit,
 ) {

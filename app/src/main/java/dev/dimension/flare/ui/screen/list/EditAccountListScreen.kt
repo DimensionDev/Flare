@@ -68,9 +68,10 @@ internal fun EditAccountListScreen(
                 uiListItemComponent(
                     state.lists,
                 ) { item ->
-                    state.userLists
-                        .onSuccess {
-                            if (it.any { list -> list.id == item.id }) {
+                    state
+                        .isInList(item)
+                        .onSuccess { inList ->
+                            if (inList) {
                                 IconButton(
                                     onClick = { state.removeList(item) },
                                 ) {

@@ -1,9 +1,9 @@
 package dev.dimension.flare.ui.presenter.home
 
-import dev.dimension.flare.common.BaseTimelineLoader
-import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
+import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import org.koin.core.component.KoinComponent

@@ -374,6 +374,11 @@
     <string name="podcast_living">Podcast live</string>
 
     <string name="home_tab_antennas_title">Antenna</string>
+    <string name="home_tab_channels_title">Channels</string>
+    <string name="misskey_channel_tab_following">Following</string>
+    <string name="misskey_channel_tab_favorites">Favorites</string>
+    <string name="misskey_channel_tab_owned">Owned</string>
+    <string name="misskey_channel_tab_featured">Featured</string>
     <string name="antennas_empty">No antennas</string>
     <string name="home_tab_mixed_timeline_title">Mixed</string>
     <string name="tab_settings_mixed_timeline">Add mixed timeline tab</string>
@@ -419,4 +424,9 @@
     <string name="tab_settings_group_name_placeholder">Group name</string>
     <string name="tab_settings_group_default_name">New Group</string>
     <string name="status_share_sheet_theme_title">Theme</string>
+    <string name="channel_title">Channel</string>
+    <string name="channel_item_follow">Follow</string>
+    <string name="channel_item_unfollow">Unfollow</string>
+    <string name="channel_item_favourite">Favourite</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

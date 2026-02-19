@@ -36,7 +36,7 @@ internal class ListMemberHandler(
             config = pagingConfig,
             remoteMediator =
                 createPagingRemoteMediator(
-                    pagingKey = memberPagingKey,
+                    pagingKey = "${memberPagingKey}_$listId",
                     database = database,
                     onLoad = { pageSize, request ->
                         loader.loadMembers(
@@ -47,6 +47,9 @@ internal class ListMemberHandler(
                     },
                     onSave = { request, data ->
                         val listKey = MicroBlogKey(listId, accountKey.host)
+                        if (request == PagingRequest.Refresh) {
+                            database.listDao().deleteMembersByListKey(listKey)
+                        }
                         database.listDao().insertAllMember(
                             data.map { item ->
                                 DbListMember(

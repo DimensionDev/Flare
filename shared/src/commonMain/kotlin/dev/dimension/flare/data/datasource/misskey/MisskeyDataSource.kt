@@ -1151,8 +1151,8 @@ internal class MisskeyDataSource(
             service.channelsUnfollow(
                 ChannelsFollowRequest(channelId = data.id),
             )
+            channelHandler.delete(data.id)
         }
-        channelHandler.delete(data.id)
     }
 
     suspend fun favoriteChannel(data: UiList) {
@@ -1169,8 +1169,8 @@ internal class MisskeyDataSource(
             service.channelsUnfavorite(
                 ChannelsFollowRequest(channelId = data.id),
             )
+            myFavoriteChannelHandler.delete(data.id)
         }
-        myFavoriteChannelHandler.delete(data.id)
     }
 
     override fun acceptFollowRequest(

@@ -1,7 +1,5 @@
 package dev.dimension.flare.ui.humanizer
 
-import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
@@ -14,6 +12,8 @@ import platform.Foundation.NSDateFormatterShortStyle
 import platform.Foundation.NSRelativeDateTimeFormatter
 import platform.Foundation.NSRelativeDateTimeFormatterStyleNumeric
 import platform.Foundation.dateWithTimeIntervalSince1970
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 public interface SwiftFormatter {
     public fun formatNumber(number: Long): String

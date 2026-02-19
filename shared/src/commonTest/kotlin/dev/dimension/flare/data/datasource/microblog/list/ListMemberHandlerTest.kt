@@ -26,6 +26,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
@@ -277,6 +278,57 @@ class ListMemberHandlerTest : RobolectricTest() {
             assertEquals(2, dbMembers.size)
         }
 
+    @Test
+    fun listMembersPagerHandlesLoadMore() =
+        runTest {
+            val listId = "list-load-more"
+            val members =
+                (1..50).map { i ->
+                    createDbUser(
+                        userKey = MicroBlogKey(id = "user-$i", host = "test.social"),
+                        name = "User $i",
+                    )
+                }
+            fakeLoader.setMembers(listId, members)
+
+            val snapshot = handler.listMembers(listId).asSnapshot()
+
+            assertEquals(50, snapshot.size)
+            val names = snapshot.map { it.name.raw }.toSet()
+            assertTrue(names.contains("User 1"))
+            assertTrue(names.contains("User 50"))
+        }
+
+    @Test
+    fun listMembersPagerHandlesRefresh() =
+        runTest {
+            val listId = "list-refresh"
+            val initialMembers =
+                (1..20).map { i ->
+                    createDbUser(
+                        userKey = MicroBlogKey(id = "refresh-user-$i", host = "test.social"),
+                        name = "Refresh User $i",
+                    )
+                }
+            fakeLoader.setMembers(listId, initialMembers)
+
+            // Initial load
+            val initialSnapshot = handler.listMembers(listId).asSnapshot()
+            assertEquals(20, initialSnapshot.size)
+
+            // Update remote data (remove half)
+            val updatedMembers = initialMembers.take(10)
+            fakeLoader.setMembers(listId, updatedMembers)
+
+            // Refresh by creating new pager/flow collection
+            val refreshedSnapshot = handler.listMembers(listId).asSnapshot()
+
+            assertEquals(10, refreshedSnapshot.size)
+            val names = refreshedSnapshot.map { it.name.raw }.toSet()
+            assertTrue(names.contains("Refresh User 1"))
+            assertFalse(names.contains("Refresh User 20"))
+        }
+
     private fun createDbUser(
         userKey: MicroBlogKey,
         name: String = userKey.id,
@@ -306,15 +358,43 @@ private class FakeListMemberLoader : ListMemberLoader {
 
     private val members = mutableMapOf<String, MutableList<DbUser>>()
 
+    fun setMembers(
+        listId: String,
+        users: List<DbUser>,
+    ) {
+        members[listId] = users.toMutableList()
+    }
+
     override suspend fun loadMembers(
         pageSize: Int,
         request: PagingRequest,
         listId: String,
-    ): PagingResult<DbUser> =
-        PagingResult(
-            data = members[listId]?.toList() ?: emptyList(),
-            endOfPaginationReached = true,
+    ): PagingResult<DbUser> {
+        val allMembers = members[listId] ?: emptyList()
+        val page =
+            when (request) {
+                is PagingRequest.Refresh -> 1
+                is PagingRequest.Append ->
+                    request.nextKey.toIntOrNull()
+                        ?: return PagingResult(data = emptyList(), endOfPaginationReached = true)
+                is PagingRequest.Prepend -> return PagingResult(data = emptyList(), endOfPaginationReached = true)
+            }
+
+        val fromIndex = (page - 1) * pageSize
+        if (fromIndex >= allMembers.size) {
+            return PagingResult(data = emptyList(), endOfPaginationReached = true)
+        }
+
+        val toIndex = minOf(fromIndex + pageSize, allMembers.size)
+        val data = allMembers.subList(fromIndex, toIndex)
+        val nextKey = if (toIndex < allMembers.size) (page + 1).toString() else null
+
+        return PagingResult(
+            data = data,
+            nextKey = nextKey,
+            endOfPaginationReached = nextKey == null,
         )
+    }
 
     override suspend fun addMember(
         listId: String,

@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.humanizer
 
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
@@ -12,8 +14,6 @@ import platform.Foundation.NSDateFormatterShortStyle
 import platform.Foundation.NSRelativeDateTimeFormatter
 import platform.Foundation.NSRelativeDateTimeFormatterStyleNumeric
 import platform.Foundation.dateWithTimeIntervalSince1970
-import kotlin.time.Clock
-import kotlin.time.Instant
 
 public interface SwiftFormatter {
     public fun formatNumber(number: Long): String
@@ -54,15 +54,8 @@ internal class AppleFormatter(
                 formatter.timeStyle = NSDateFormatterShortStyle
             }
             daysDiff < 7 -> {
-                val dayFormatter = NSDateFormatter()
-                dayFormatter.setLocalizedDateFormatFromTemplate("E")
-                val day = dayFormatter.stringFromDate(date)
-
-                formatter.dateStyle = NSDateFormatterNoStyle
+                formatter.dateStyle = NSDateFormatterShortStyle
                 formatter.timeStyle = NSDateFormatterShortStyle
-                val time = formatter.stringFromDate(date)
-
-                return "$day $time"
             }
             else -> {
                 formatter.dateStyle = NSDateFormatterShortStyle

@@ -429,6 +429,8 @@ struct AccountTabListView: View {
                             .tag(index + 1)
                     case .list: Text("all_lists_title")
                             .tag(index + 1)
+                    case .channel: Text("channels_title")
+                            .tag(index + 1)
                     }
                 }
             } label: {

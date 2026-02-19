@@ -100,6 +100,7 @@ internal class MisskeyDataSource(
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
             baseUrl = "https://$host/api/",
+            accountKey = accountKey,
             accessTokenFlow =
                 accountRepository
                     .credentialFlow<UiAccount.Misskey.Credential>(accountKey)

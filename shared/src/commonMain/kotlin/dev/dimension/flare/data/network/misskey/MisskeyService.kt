@@ -26,6 +26,9 @@ import dev.dimension.flare.data.network.misskey.api.createReactionsApi
 import dev.dimension.flare.data.network.misskey.api.createUsersApi
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.MisskeyException
+import dev.dimension.flare.data.repository.RequireReLoginException
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.request.forms.MultiPartFormDataContent
@@ -41,6 +44,7 @@ import kotlinx.coroutines.flow.firstOrNull
 
 private fun config(
     baseUrl: String,
+    accountKey: MicroBlogKey?,
     accessTokenFlow: Flow<String>?,
 ) = ktorfit(
     baseUrl = baseUrl,
@@ -64,7 +68,14 @@ private fun config(
                 }.getOrNull()
                     ?.takeIf { it.error != null }
                     ?.let {
-                        throw it
+                        if (it.error?.code == "PERMISSION_DENIED" && accountKey != null) {
+                            throw RequireReLoginException(
+                                accountKey = accountKey,
+                                platformType = PlatformType.Misskey,
+                            )
+                        } else {
+                            throw it
+                        }
                     }
             }
         }
@@ -73,18 +84,19 @@ private fun config(
 
 internal class MisskeyService(
     baseUrl: String,
-    private val accessTokenFlow: Flow<String>?,
-) : UsersApi by config(baseUrl, accessTokenFlow).createUsersApi(),
-    MetaApi by config(baseUrl, accessTokenFlow).createMetaApi(),
-    NotesApi by config(baseUrl, accessTokenFlow).createNotesApi(),
-    AccountApi by config(baseUrl, accessTokenFlow).createAccountApi(),
-    DriveApi by config(baseUrl, accessTokenFlow).createDriveApi(),
-    ReactionsApi by config(baseUrl, accessTokenFlow).createReactionsApi(),
-    FollowingApi by config(baseUrl, accessTokenFlow).createFollowingApi(),
-    HashtagsApi by config(baseUrl, accessTokenFlow).createHashtagsApi(),
-    ListsApi by config(baseUrl, accessTokenFlow).createListsApi(),
-    AntennasApi by config(baseUrl, accessTokenFlow).createAntennasApi(),
-    ChannelsApi by config(baseUrl, accessTokenFlow).createChannelsApi() {
+    accountKey: MicroBlogKey? = null,
+    private val accessTokenFlow: Flow<String>? = null,
+) : UsersApi by config(baseUrl, accountKey, accessTokenFlow).createUsersApi(),
+    MetaApi by config(baseUrl, accountKey, accessTokenFlow).createMetaApi(),
+    NotesApi by config(baseUrl, accountKey, accessTokenFlow).createNotesApi(),
+    AccountApi by config(baseUrl, accountKey, accessTokenFlow).createAccountApi(),
+    DriveApi by config(baseUrl, accountKey, accessTokenFlow).createDriveApi(),
+    ReactionsApi by config(baseUrl, accountKey, accessTokenFlow).createReactionsApi(),
+    FollowingApi by config(baseUrl, accountKey, accessTokenFlow).createFollowingApi(),
+    HashtagsApi by config(baseUrl, accountKey, accessTokenFlow).createHashtagsApi(),
+    ListsApi by config(baseUrl, accountKey, accessTokenFlow).createListsApi(),
+    AntennasApi by config(baseUrl, accountKey, accessTokenFlow).createAntennasApi(),
+    ChannelsApi by config(baseUrl, accountKey, accessTokenFlow).createChannelsApi() {
     suspend fun upload(
         data: ByteArray,
         name: String,

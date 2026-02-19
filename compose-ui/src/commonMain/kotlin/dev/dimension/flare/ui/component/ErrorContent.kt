@@ -21,8 +21,8 @@ import dev.dimension.flare.compose.ui.login_expired_message
 import dev.dimension.flare.compose.ui.permission_denied_message
 import dev.dimension.flare.compose.ui.permission_denied_title
 import dev.dimension.flare.compose.ui.status_loadmore_error
-import dev.dimension.flare.data.network.misskey.api.model.MisskeyException
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.data.repository.RequireReLoginException
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
@@ -39,14 +39,9 @@ public fun ErrorContent(
             LoginExpiredError(error, modifier)
         }
 
-        is MisskeyException -> {
-            MisskeyError(
-                error = error,
-                modifier = modifier,
-                onRetry = onRetry,
-            )
+        is RequireReLoginException -> {
+            RequireReLoginError(error, modifier)
         }
-
         else -> {
             CommonError(
                 error = error,
@@ -84,39 +79,30 @@ private fun CommonError(
 }
 
 @Composable
-private fun MisskeyError(
-    error: MisskeyException,
-    onRetry: () -> Unit,
+private fun RequireReLoginError(
+    error: RequireReLoginException,
     modifier: Modifier = Modifier,
 ) {
-    if (error.error?.code == "PERMISSION_DENIED") {
-        val uriHandler = LocalUriHandler.current
-        Column(
-            modifier =
-                modifier
-                    .clickable {
-                        uriHandler.openUri(DeeplinkRoute.Login.toUri())
-                    },
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-        ) {
-            FAIcon(
-                imageVector = FontAwesomeIcons.Solid.CircleExclamation,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-            )
-            PlatformText(
-                text = stringResource(resource = Res.string.permission_denied_title),
-            )
-            PlatformText(
-                text = stringResource(resource = Res.string.permission_denied_message),
-            )
-        }
-    } else {
-        CommonError(
-            error = error,
-            onRetry = onRetry,
-            modifier = modifier,
+    val uriHandler = LocalUriHandler.current
+    Column(
+        modifier =
+            modifier
+                .clickable {
+                    uriHandler.openUri(DeeplinkRoute.Login.toUri())
+                },
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+    ) {
+        FAIcon(
+            imageVector = FontAwesomeIcons.Solid.CircleExclamation,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+        )
+        PlatformText(
+            text = stringResource(resource = Res.string.permission_denied_title),
+        )
+        PlatformText(
+            text = stringResource(resource = Res.string.permission_denied_message),
         )
     }
 }

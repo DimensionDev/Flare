@@ -2,66 +2,17 @@ import SwiftUI
 @preconcurrency import KotlinSharedUI
 
 struct ChannelListScreen: View {
+    @StateObject private var presenter: KotlinPresenter<MisskeyChannelListPresenterState>
     let accountType: AccountType
-    @State private var selectedTab: ChannelTab = .following
-
-    var body: some View {
-        VStack {
-            Picker("Tabs", selection: $selectedTab) {
-                ForEach(ChannelTab.allCases, id: \.self) { tab in
-                    Text(tab.localizedName).tag(tab)
-                }
-            }
-            .pickerStyle(.segmented)
-            .padding()
-
-            switch selectedTab {
-            case .following:
-                ChannelListOfType(accountType: accountType, type: .following)
-            case .favorites:
-                ChannelListOfType(accountType: accountType, type: .favorites)
-            case .owned:
-                ChannelListOfType(accountType: accountType, type: .owned)
-            case .featured:
-                ChannelListOfType(accountType: accountType, type: .featured)
-            }
-        }
-        .navigationTitle(NSLocalizedString("channels_title", comment: ""))
-    }
-}
-
-enum ChannelTab: CaseIterable {
-    case following, favorites, owned, featured
-
-    var localizedName: String {
-        switch self {
-        case .following: return NSLocalizedString("misskey_channel_tab_following", comment: "")
-        case .favorites: return NSLocalizedString("misskey_channel_tab_favorites", comment: "")
-        case .owned: return NSLocalizedString("misskey_channel_tab_owned", comment: "")
-        case .featured: return NSLocalizedString("misskey_channel_tab_featured", comment: "")
-        }
-    }
-}
-
-struct ChannelListOfType: View {
-    let accountType: AccountType
-    @StateObject private var presenter: KotlinPresenter<MisskeyBaseChannelPresenterState>
-
-    init(accountType: AccountType, type: ChannelTab) {
+    @State private var selectedTab: MisskeyChannelListPresenterStateType = .following
+    init(accountType: AccountType) {
         self.accountType = accountType
-        let p: MisskeyBaseChannelPresenter
-        switch type {
-        case .following: p = MisskeyFollowedChannelsPresenter(accountType: accountType)
-        case .favorites: p = MisskeyFavoriteChannelsPresenter(accountType: accountType)
-        case .owned: p = MisskeyOwnedChannelsPresenter(accountType: accountType)
-        case .featured: p = MisskeyFeaturedChannelsPresenter(accountType: accountType)
-        }
-        _presenter = StateObject(wrappedValue: KotlinPresenter(p))
+        self._presenter = .init(wrappedValue: .init(presenter: MisskeyChannelListPresenter(accountType: accountType)))
     }
 
     var body: some View {
         List {
-             PagingView(data: presenter.state.data) { item in
+            PagingView(data: presenter.state.data) { item in
                  NavigationLink(value: Route.timeline(
                      Misskey.ChannelTimelineTabItem(
                          channelId: item.id,
@@ -73,13 +24,87 @@ struct ChannelListOfType: View {
                      )
                  )) {
                      UiListView(data: item)
+                         .contextMenu {
+                             if case .channel(let data) = onEnum(of: item) {
+                                 if let isFollowing = data.isFollowing {
+                                     if isFollowing.boolValue {
+                                         Button {
+                                             presenter.state.unfollow(list: item)
+                                         } label: {
+                                             Label {
+                                                 Text("misskey_channel_unfollow")
+                                             } icon: {
+                                                 Image(.faMinus)
+                                             }
+                                         }
+                                     } else {
+                                         Button {
+                                             presenter.state.follow(list: item)
+                                         } label: {
+                                             Label {
+                                                 Text("misskey_channel_follow")
+                                             } icon: {
+                                                 Image(.faPlus)
+                                             }
+                                         }
+                                     }
+                                 }
+                                 if let isFavorited = data.isFavorited {
+                                     if isFavorited.boolValue {
+                                         Button {
+                                             presenter.state.unfavorite(list: item)
+                                         } label: {
+                                             Label {
+                                                 Text("misskey_channel_unfavorite")
+                                             } icon: {
+                                                 Image(.faHeartCircleMinus)
+                                             }
+                                         }
+                                     } else {
+                                         Button {
+                                             presenter.state.favorite(list: item)
+                                         } label: {
+                                             Label {
+                                                 Text("misskey_channel_favorite")
+                                             } icon: {
+                                                 Image(.faHeartCirclePlus )
+                                             }
+                                         }
+                                     }
+                                 }
+                             }
+                         }
                  }
              } loadingContent: {
                  UiListPlaceholder()
              }
         }
+        .safeAreaInset(edge: .top, content: {
+            Picker("Tabs", selection: $selectedTab) {
+                ForEach(presenter.state.allTypes, id: \.self) { tab in
+                    Text(tab.localizedName).tag(tab)
+                }
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+        })
         .refreshable {
              try? await presenter.state.refreshSuspend()
+        }
+        .onChange(of: selectedTab, { oldValue, newValue in
+            presenter.state.setType(data: newValue)
+        })
+        .navigationTitle("channels_title")
+    }
+}
+
+extension MisskeyChannelListPresenterStateType {
+    var localizedName: String {
+        switch self {
+        case .following: return NSLocalizedString("misskey_channel_tab_following", comment: "")
+        case .favorites: return NSLocalizedString("misskey_channel_tab_favorites", comment: "")
+        case .owned: return NSLocalizedString("misskey_channel_tab_owned", comment: "")
+        case .featured: return NSLocalizedString("misskey_channel_tab_featured", comment: "")
         }
     }
 }

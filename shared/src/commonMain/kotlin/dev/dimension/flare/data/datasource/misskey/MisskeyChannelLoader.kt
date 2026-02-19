@@ -73,6 +73,7 @@ internal class MisskeyChannelLoader(
         return PagingResult(
             data = result,
             nextKey = result.lastOrNull()?.id,
+            endOfPaginationReached = result.size < pageSize,
         )
     }
 

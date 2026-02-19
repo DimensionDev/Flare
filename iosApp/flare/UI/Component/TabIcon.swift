@@ -33,6 +33,7 @@ extension TitleType {
             case .liked: String(localized: "liked_tab_title")
             case .allRssFeeds: String(localized: "all_rss_feeds_title")
             case .posts: String(localized: "posts_title")
+            case .channel: String(localized: "channel_title")
             }
             return text
         case .text(let text):
@@ -137,6 +138,7 @@ extension IconType.MaterialMaterialIcon {
         case .messages:     "fa-message"
         case .rss:          "fa-square-rss"
         case .weibo: "fa-weibo"
+        case .channel: "fa-tv"
         }
     }
 }

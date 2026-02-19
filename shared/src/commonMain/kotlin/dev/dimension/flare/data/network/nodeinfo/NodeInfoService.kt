@@ -144,7 +144,6 @@ internal data object NodeInfoService {
                             tryRun {
                                 MisskeyService(
                                     "https://$hostCleaned/api/",
-                                    accessTokenFlow = null,
                                 ).meta(MetaRequest()).let {
                                     requireNotNull(it.name)
                                     // should be able to use as misskey

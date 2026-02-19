@@ -23,7 +23,23 @@ struct ListErrorView: View {
                 }
                 .backport
                 .glassProminentButtonStyle()
-            } else {
+            } else if let requireReLogin = error as? RequireReLoginException {
+                Image(systemName: "person.badge.shield.exclamationmark")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 64, height: 64)
+                Text("permission_denied_title")
+                    .multilineTextAlignment(.center)
+                    .font(.headline)
+                Text("permission_denied_message")
+                Button {
+                    openURL(URL(string: DeeplinkRoute.Login.shared.toUri())!)
+                } label: {
+                    Text("error_login_expired_action")
+                }
+                .backport
+                .glassProminentButtonStyle()
+            } else  {
                 Image(systemName: "exclamationmark.triangle.text.page")
                     .resizable()
                     .scaledToFit()

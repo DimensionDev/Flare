@@ -130,6 +130,7 @@ internal fun ChannelListScreen(
                         contentPadding +
                             PaddingValues(
                                 vertical = 16.dp,
+                                horizontal = screenHorizontalPadding,
                             ),
                     verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
                 ) {

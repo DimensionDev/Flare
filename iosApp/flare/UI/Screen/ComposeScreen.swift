@@ -745,6 +745,8 @@ extension UiTimeline.ItemContentStatusTopEndContentVisibilityType {
             return LocalizedStringResource("status_visibility_followers")
         case .specified:
             return LocalizedStringResource("status_visibility_specified")
+        case .channel:
+            return LocalizedStringResource("status_visibility_public")
         }
     }
     var desc: LocalizedStringResource {
@@ -757,6 +759,8 @@ extension UiTimeline.ItemContentStatusTopEndContentVisibilityType {
             return LocalizedStringResource("status_visibility_followers_description")
         case .specified:
             return LocalizedStringResource("status_visibility_specified_description")
+        case .channel:
+            return LocalizedStringResource("status_visibility_public_description")
         }
     }
 }

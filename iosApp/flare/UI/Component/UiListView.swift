@@ -112,7 +112,7 @@ private struct UiChannelRow: View {
                 }
             }
             if let desc = data.description_, !desc.isEmpty {
-                Text(desc)
+                RichText(text: desc)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

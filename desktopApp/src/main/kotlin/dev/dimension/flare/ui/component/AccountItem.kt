@@ -15,7 +15,6 @@ import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.login_expired
 import dev.dimension.flare.login_expired_relogin
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onError
@@ -27,8 +26,8 @@ import io.github.composefluent.component.Text
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun <T : UiProfile> AccountItem(
-    userState: UiState<T>,
+fun AccountItem(
+    userState: UiState<UiProfile>,
     onClick: (MicroBlogKey) -> Unit,
     toLogin: () -> Unit,
     modifier: Modifier = Modifier,

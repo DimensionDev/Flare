@@ -32,10 +32,10 @@ jobs:
           submodules: true
 
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v5
         with:
-          distribution: "zulu"
-          java-version: 21
+          distribution: 'jetbrains'
+          java-version: 25
 
       - name: Build
         env:

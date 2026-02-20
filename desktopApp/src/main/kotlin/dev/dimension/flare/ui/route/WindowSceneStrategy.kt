@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.route
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.window.Window
@@ -15,6 +16,11 @@ import dev.dimension.flare.flare_logo
 import dev.dimension.flare.ui.route.WindowSceneStrategy.Companion.window
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.ProvideComposeWindow
+import io.github.composefluent.FluentTheme
+import io.github.kdroidfilter.nucleus.window.DecoratedWindow
+import io.github.kdroidfilter.nucleus.window.NucleusDecoratedWindowTheme
+import io.github.kdroidfilter.nucleus.window.TitleBar
+import io.github.kdroidfilter.nucleus.window.styling.LocalTitleBarStyle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -24,27 +30,47 @@ internal class WindowScene<T : Any>(
     private val entry: NavEntry<T>,
     override val previousEntries: List<NavEntry<T>>,
     override val overlaidEntries: List<NavEntry<T>>,
+    private val isDarkTheme: Boolean,
     private val onBack: () -> Unit,
 ) : OverlayScene<T> {
     override val entries: List<NavEntry<T>> = listOf(entry)
 
     override val content: @Composable (() -> Unit) = {
-        Window(
-            onCloseRequest = onBack,
-            title = stringResource(Res.string.app_name),
-            icon = painterResource(Res.drawable.flare_logo),
-            onKeyEvent = {
-                if (it.key == Key.Escape) {
-                    onBack.invoke()
-                    true
-                } else {
-                    false
-                }
-            },
+        NucleusDecoratedWindowTheme(
+            isDark = isDarkTheme,
         ) {
-            FlareTheme {
-                ProvideComposeWindow {
-                    entry.Content()
+            DecoratedWindow(
+                onCloseRequest = onBack,
+                title = stringResource(Res.string.app_name),
+                icon = painterResource(Res.drawable.flare_logo),
+                onKeyEvent = {
+                    if (it.key == Key.Escape) {
+                        onBack.invoke()
+                        true
+                    } else {
+                        false
+                    }
+                },
+            ) {
+                FlareTheme(
+                    isDarkTheme = isDarkTheme,
+                ) {
+                    ProvideComposeWindow {
+                        entry.Content()
+                    }
+                    TitleBar(
+                        style =
+                            LocalTitleBarStyle.current.copy(
+                                colors =
+                                    LocalTitleBarStyle.current.colors.copy(
+                                        background =
+                                            FluentTheme.colors.background.mica.base
+                                                .copy(alpha = 0f),
+                                        inactiveBackground = Color.Transparent,
+                                    ),
+                            ),
+                    ) {
+                    }
                 }
             }
         }
@@ -81,14 +107,15 @@ internal class WindowScene<T : Any>(
 public class WindowSceneStrategy<T : Any> : SceneStrategy<T> {
     public override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T>? {
         val lastEntry = entries.lastOrNull()
-        val isWindow = lastEntry?.metadata?.get(WINDOW_KEY) as? Boolean
-        return if (isWindow == true) {
+        val isDarkTheme = lastEntry?.metadata?.get(WINDOW_KEY) as? Boolean
+        return if (isDarkTheme != null) {
             WindowScene(
                 key = lastEntry.contentKey,
                 entry = lastEntry,
                 previousEntries = entries.dropLast(1),
                 overlaidEntries = entries.dropLast(1),
                 onBack = onBack,
+                isDarkTheme = isDarkTheme,
             )
         } else {
             null
@@ -100,7 +127,7 @@ public class WindowSceneStrategy<T : Any> : SceneStrategy<T> {
          * Function to be called on the [NavEntry.metadata] to mark this entry as something that
          * should be displayed within a [Window].
          */
-        public fun window(): Map<String, Any> = mapOf(WINDOW_KEY to true)
+        public fun window(isDarkTheme: Boolean): Map<String, Any> = mapOf(WINDOW_KEY to isDarkTheme)
 
         const val WINDOW_KEY = "compose_window"
     }

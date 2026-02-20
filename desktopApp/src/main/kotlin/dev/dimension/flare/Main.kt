@@ -38,6 +38,7 @@ import io.github.kdroidfilter.nucleus.window.DecoratedWindow
 import io.github.kdroidfilter.nucleus.window.TitleBar
 import io.github.kdroidfilter.nucleus.window.styling.LocalTitleBarStyle
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.context.startKoin
@@ -141,7 +142,15 @@ fun main(args: Array<String>) {
                                 onClick = {
                                     backButtonState.onClick.invoke()
                                 },
-                                modifier = Modifier.width(70.dp),
+                                modifier =
+                                    Modifier
+                                        .let {
+                                            if (SystemUtils.IS_OS_WINDOWS) {
+                                                it.width(70.dp)
+                                            } else {
+                                                it
+                                            }
+                                        },
                                 disabled = !backButtonState.canGoBack,
                             )
                         }

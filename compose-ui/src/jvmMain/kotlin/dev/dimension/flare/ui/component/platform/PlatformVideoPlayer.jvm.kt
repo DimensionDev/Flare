@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import dev.dimension.flare.ui.component.VideoPlayer
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -25,4 +26,20 @@ internal actual fun PlatformVideoPlayer(
     errorContent: @Composable BoxScope.() -> Unit,
     loadingPlaceholder: @Composable BoxScope.() -> Unit,
 ) {
+    VideoPlayer(
+        uri = uri,
+        previewUri = previewUri,
+        contentDescription = contentDescription,
+        modifier = modifier,
+        muted = muted,
+        showControls = showControls,
+        keepScreenOn = keepScreenOn,
+        aspectRatio = aspectRatio,
+        contentScale = contentScale,
+        onClick = onClick,
+        onLongClick = onLongClick,
+        autoPlay = autoPlay,
+        remainingTimeContent = remainingTimeContent,
+        loadingPlaceholder = loadingPlaceholder,
+    )
 }

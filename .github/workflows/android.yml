@@ -31,8 +31,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
-          distribution: 'microsoft'
-          java-version: 21
+          distribution: 'jetbrains'
+          java-version: 25
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2

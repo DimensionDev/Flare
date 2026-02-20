@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import io.github.kdroidfilter.webview.util.KLogSeverity
 import io.github.kdroidfilter.webview.web.WebView
 import io.github.kdroidfilter.webview.web.rememberWebViewState
 import io.ktor.http.Url
@@ -19,8 +18,6 @@ internal fun WebViewLoginScreen(
 ) {
     val state = rememberWebViewState(url)
     LaunchedEffect(Unit) {
-        state.webSettings.logSeverity = KLogSeverity.Debug
-        state.cookieManager.removeAllCookies()
         val urlData = Url(url)
         val actualUrl =
             urlData.protocol.name

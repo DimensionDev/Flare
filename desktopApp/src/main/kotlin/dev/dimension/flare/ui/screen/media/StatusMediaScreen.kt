@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -132,8 +133,11 @@ internal fun StatusMediaScreen(
                     is UiMedia.Video -> {
                         if (pagerState.currentPage == it) {
                             val playerState = rememberVideoPlayerState()
-                            LaunchedEffect(Unit) {
+                            DisposableEffect(Unit) {
                                 playerState.openUri(media.url)
+                                onDispose {
+                                    playerState.dispose()
+                                }
                             }
                             VideoPlayerSurface(
                                 playerState = playerState,

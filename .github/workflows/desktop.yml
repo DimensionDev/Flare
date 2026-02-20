@@ -32,8 +32,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          distribution: "jetbrains"
-          java-version: 21
+          distribution: 'jetbrains'
+          java-version: 25
       - name: import certs
         if: startsWith(github.ref, 'refs/tags/')
         uses: apple-actions/import-codesign-certs@v5
@@ -91,8 +91,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          distribution: "jetbrains"
-          java-version: 21
+          distribution: 'jetbrains'
+          java-version: 25
       # Run tests
       - name: Run Tests
         run: ./gradlew jvmTest

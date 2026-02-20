@@ -72,6 +72,8 @@
     <string name="login_expired">Relace přihlášení vypršela</string>
     <string name="login_expired_message">Klikněte pro přihlášení znovu</string>
     <string name="login_expired_relogin">Přihlásit se znovu</string>
+    <string name="permission_denied_title">Oprávnění odepřeno</string>
+    <string name="permission_denied_message">Pro přístup na tuto stránku je třeba se znovu přihlásit</string>
     <string name="misskey_compose_local_only">Pouze místní</string>
     <string name="misskey_compose_local_only_description">Pouze uživatelé v této instanci mohou vidět tento příspěvek</string>
     <string name="misskey_item_action_renote">Renote</string>
@@ -378,4 +380,5 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Pomozte nám přeložit Flare</string>
     <string name="settings_privacy_policy">Ochrana osobních údajů</string>
+    <string name="channel_title">Kanál</string>
 </resources>

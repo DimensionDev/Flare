@@ -2,7 +2,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="login_button">Se connecter</string>
     <string name="navigate_back">Revenir en arrière</string>
-    <string name="home_tab_home_title">Domicile</string>
+    <string name="home_tab_home_title">Accueil</string>
     <string name="home_tab_notifications_title">Notifications</string>
     <string name="home_tab_me_title">Moi</string>
     <string name="home_tab_discover_title">Découvrir</string>
@@ -12,7 +12,7 @@
     <string name="notification_tab_likes_title">J\'aime</string>
     <string name="compose_title">Composer</string>
     <string name="compose_reply_title">Répondre</string>
-    <string name="compose_quote_title">Devis</string>
+    <string name="compose_quote_title">Citer</string>
     <string name="compose_vvo_comment_title">Commenter</string>
     <string name="compose_hint">Que se passe-t-il ?</string>
     <string name="compose_poll_option_hint">Option %1$s</string>
@@ -37,7 +37,7 @@
     <string name="settings_storage_title">Stockage</string>
     <string name="settings_storage_subtitle">Gérer le stockage de Fusée éclairante</string>
     <string name="settings_about_title">À propos de</string>
-    <string name="settings_about_subtitle">En savoir plus sur Fusée éclairante</string>
+    <string name="settings_about_subtitle">En savoir plus sur Flare</string>
     <string name="settings_side_panel">Personnalisation du panneau latéral</string>
     <string name="settings_side_panel_description">Personnaliser le panneau latéral</string>
     <string name="settings_local_filter_title">Filtre local</string>
@@ -311,6 +311,11 @@
     <string name="podcast_ended">Podcast terminé</string>
     <string name="podcast_living">Podcast en direct</string>
     <string name="home_tab_antennas_title">Antenne</string>
+    <string name="home_tab_channels_title">Canaux</string>
+    <string name="misskey_channel_tab_following">Abonnements</string>
+    <string name="misskey_channel_tab_favorites">Favoris</string>
+    <string name="misskey_channel_tab_owned">Possédé</string>
+    <string name="misskey_channel_tab_featured">En vedette</string>
     <string name="antennas_empty">Aucune antenne</string>
     <string name="home_tab_mixed_timeline_title">Mixte</string>
     <string name="tab_settings_mixed_timeline">Ajouter un onglet de timeline mixte</string>
@@ -347,4 +352,9 @@
     <string name="tab_settings_group_name_placeholder">Nom du groupe</string>
     <string name="tab_settings_group_default_name">Nouveau groupe</string>
     <string name="status_share_sheet_theme_title">Thème</string>
+    <string name="channel_title">Chaîne</string>
+    <string name="channel_item_follow">Suivre</string>
+    <string name="channel_item_unfollow">Ne plus suivre</string>
+    <string name="channel_item_favourite">Favori</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

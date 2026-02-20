@@ -315,6 +315,11 @@
     <string name="podcast_ended">Podcast beendet</string>
     <string name="podcast_living">Podcast live</string>
     <string name="home_tab_antennas_title">Antenne</string>
+    <string name="home_tab_channels_title">Kanäle</string>
+    <string name="misskey_channel_tab_following">Folgt</string>
+    <string name="misskey_channel_tab_favorites">Favoriten</string>
+    <string name="misskey_channel_tab_owned">Besitzt</string>
+    <string name="misskey_channel_tab_featured">Empfohlen</string>
     <string name="antennas_empty">Keine Antennen</string>
     <string name="home_tab_mixed_timeline_title">Gemischt</string>
     <string name="tab_settings_mixed_timeline">Tab für gemischte Zeitleiste hinzufügen</string>
@@ -351,4 +356,9 @@
     <string name="tab_settings_group_name_placeholder">Gruppenname</string>
     <string name="tab_settings_group_default_name">Neue Gruppe</string>
     <string name="status_share_sheet_theme_title">Theme</string>
+    <string name="channel_title">Kanal</string>
+    <string name="channel_item_follow">Folgen</string>
+    <string name="channel_item_unfollow">Entfolgen</string>
+    <string name="channel_item_favourite">Favorit</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

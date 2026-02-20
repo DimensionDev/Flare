@@ -319,6 +319,11 @@
     <string name="podcast_ended">تم إنهاء Podcast</string>
     <string name="podcast_living">Podcast مباشرة</string>
     <string name="home_tab_antennas_title">هوائي</string>
+    <string name="home_tab_channels_title">القنوات</string>
+    <string name="misskey_channel_tab_following">تابع</string>
+    <string name="misskey_channel_tab_favorites">المفضلة</string>
+    <string name="misskey_channel_tab_owned">مملوك</string>
+    <string name="misskey_channel_tab_featured">مميز</string>
     <string name="antennas_empty">لا هوائيات</string>
     <string name="home_tab_mixed_timeline_title">مختلطة</string>
     <string name="tab_settings_mixed_timeline">إضافة علامة تبويب الخيط الزمني المختلط</string>
@@ -355,4 +360,9 @@
     <string name="tab_settings_group_name_placeholder">اسم المجموعة</string>
     <string name="tab_settings_group_default_name">مجموعة جديدة</string>
     <string name="status_share_sheet_theme_title">السمة</string>
+    <string name="channel_title">قناة</string>
+    <string name="channel_item_follow">اتبع</string>
+    <string name="channel_item_unfollow">إلغاء المتابعة</string>
+    <string name="channel_item_favourite">المفضلة</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

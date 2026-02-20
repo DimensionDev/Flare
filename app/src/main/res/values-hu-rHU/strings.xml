@@ -238,6 +238,8 @@
     <string name="podcast_ended">Podcast vége</string>
     <string name="podcast_living">Podcast élő</string>
     <string name="home_tab_antennas_title">Antenna</string>
+    <string name="misskey_channel_tab_following">Követés</string>
+    <string name="misskey_channel_tab_featured">Kiemelt</string>
     <string name="antennas_empty">Nincs antenna</string>
     <string name="home_tab_mixed_timeline_title">Keverve</string>
     <string name="tab_settings_mixed_timeline">Keverve idővonal fül hozzáadása</string>
@@ -245,4 +247,5 @@
     <string name="home_tab_social_timeline_title">Szociális</string>
     <string name="deeplink_account_selection_browser">Megnyitás a böngészőben</string>
     <string name="status_share_sheet_theme_title">Téma</string>
+    <string name="channel_item_follow">Követés</string>
 </resources>

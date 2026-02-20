@@ -72,6 +72,8 @@
     <string name="login_expired">Innloggingsøkten har utløpt</string>
     <string name="login_expired_message">Trykk for å logge inn igjen</string>
     <string name="login_expired_relogin">Logg inn på nytt</string>
+    <string name="permission_denied_title">Tilgang nektet</string>
+    <string name="permission_denied_message">Du må logge inn på nytt for å få tilgang til denne siden</string>
     <string name="misskey_compose_local_only">Kun lokalt</string>
     <string name="misskey_compose_local_only_description">Bare brukere i denne forekomsten kan se dette innlegget</string>
     <string name="misskey_item_action_renote">Renote</string>
@@ -378,4 +380,5 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Hjelp oss å oversette Flare</string>
     <string name="settings_privacy_policy">Retningslinjer for personvern</string>
+    <string name="channel_title">Kanal</string>
 </resources>

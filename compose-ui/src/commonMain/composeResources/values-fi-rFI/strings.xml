@@ -72,6 +72,8 @@
     <string name="login_expired">Kirjautumissessio on vanhentunut</string>
     <string name="login_expired_message">Klikkaa kirjautuaksesi uudelleen</string>
     <string name="login_expired_relogin">Kirjaudu uudelleen</string>
+    <string name="permission_denied_title">Lupa Estetty</string>
+    <string name="permission_denied_message">Sinun täytyy kirjautua uudelleen päästäksesi tälle sivulle</string>
     <string name="misskey_compose_local_only">Vain paikallinen</string>
     <string name="misskey_compose_local_only_description">Vain tämän instanssin käyttäjät voivat nähdä tämän viestin</string>
     <string name="misskey_item_action_renote">Renote</string>
@@ -378,4 +380,5 @@
     <string name="settings_about_localization">Crowdiini</string>
     <string name="settings_about_localization_description">Auta meitä kääntämään Flare</string>
     <string name="settings_privacy_policy">Yksityisyyden Suoja</string>
+    <string name="channel_title">Kanava</string>
 </resources>

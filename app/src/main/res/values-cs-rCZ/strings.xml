@@ -317,6 +317,11 @@
     <string name="podcast_ended">Podcast ukončen</string>
     <string name="podcast_living">Podcast živě</string>
     <string name="home_tab_antennas_title">Antény</string>
+    <string name="home_tab_channels_title">Kanály</string>
+    <string name="misskey_channel_tab_following">Sledovat</string>
+    <string name="misskey_channel_tab_favorites">Oblíbené</string>
+    <string name="misskey_channel_tab_owned">Vlastněno</string>
+    <string name="misskey_channel_tab_featured">Doporučené</string>
     <string name="antennas_empty">Žádné antény</string>
     <string name="home_tab_mixed_timeline_title">Smíšená</string>
     <string name="tab_settings_mixed_timeline">Přidat smíšenou časovou osu</string>
@@ -348,4 +353,9 @@
     <string name="tab_settings_group_name_placeholder">Název skupiny</string>
     <string name="tab_settings_group_default_name">Nová skupina</string>
     <string name="status_share_sheet_theme_title">Téma</string>
+    <string name="channel_title">Kanál</string>
+    <string name="channel_item_follow">Sledovat</string>
+    <string name="channel_item_unfollow">Přestat sledovat</string>
+    <string name="channel_item_favourite">Oblíbená</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

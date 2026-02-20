@@ -237,10 +237,13 @@
     <string name="podcast_ended">Podcast đã kết thúc</string>
     <string name="podcast_living">Podcast đang diễn ra</string>
     <string name="home_tab_antennas_title">Ăng ten</string>
+    <string name="misskey_channel_tab_following">Đang theo dõi</string>
+    <string name="misskey_channel_tab_featured">Nổi bật</string>
     <string name="antennas_empty">Không có ăng ten</string>
     <string name="home_tab_mixed_timeline_title">Hỗn hợp</string>
     <string name="tab_settings_mixed_timeline">Thêm tab dòng thời gian hỗn hợp</string>
     <string name="tab_settings_mixed_timeline_desc">Dòng thời gian hỗn hợp sẽ kết hợp tất cả kết quả dòng thời gian của các tab thành một tab</string>
     <string name="deeplink_account_selection_browser">Mở trong trình duyệt</string>
     <string name="status_share_sheet_theme_title">Chủ đề</string>
+    <string name="channel_item_follow">Theo dõi</string>
 </resources>

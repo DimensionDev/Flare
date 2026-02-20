@@ -230,4 +230,6 @@
     <string name="settings_storage_app_log">פתח יומן אפליקציה</string>
     <string name="settings_storage_app_log_description">צפה ביומן האפליקציה</string>
     <string name="deeplink_account_selection_browser">פתח בדפדפן</string>
+    <string name="misskey_channel_tab_following">עוקב</string>
+    <string name="misskey_channel_tab_featured">מוצגים</string>
 </resources>

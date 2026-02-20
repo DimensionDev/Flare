@@ -315,6 +315,11 @@
     <string name="podcast_ended">Το Podcast τελείωσε</string>
     <string name="podcast_living">Podcast ζωντανά</string>
     <string name="home_tab_antennas_title">Κεραία</string>
+    <string name="home_tab_channels_title">Κανάλια</string>
+    <string name="misskey_channel_tab_following">Ακολουθεί</string>
+    <string name="misskey_channel_tab_favorites">Αγαπημένα</string>
+    <string name="misskey_channel_tab_owned">Ιδιοκτησία</string>
+    <string name="misskey_channel_tab_featured">Προτεινόμενα</string>
     <string name="antennas_empty">Καμία κεραία</string>
     <string name="home_tab_mixed_timeline_title">Μεικτό</string>
     <string name="tab_settings_mixed_timeline">Προσθήκη μικτής καρτέλας χρονολογίου</string>
@@ -351,4 +356,9 @@
     <string name="tab_settings_group_name_placeholder">Όνομα ομάδας</string>
     <string name="tab_settings_group_default_name">Νέα Ομάδα</string>
     <string name="status_share_sheet_theme_title">Θέμα</string>
+    <string name="channel_title">Κανάλι</string>
+    <string name="channel_item_follow">Ακολουθήστε</string>
+    <string name="channel_item_unfollow">Ακολούθηση</string>
+    <string name="channel_item_favourite">Αγαπημένο</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

@@ -257,6 +257,8 @@
     <string name="podcast_ended">播客已結束</string>
     <string name="podcast_living">播客直播中</string>
     <string name="home_tab_antennas_title">天線</string>
+    <string name="misskey_channel_tab_following">追蹤中</string>
+    <string name="misskey_channel_tab_featured">推薦</string>
     <string name="antennas_empty">沒有天線</string>
     <string name="home_tab_mixed_timeline_title">綜合</string>
     <string name="tab_settings_mixed_timeline">添加綜合時間線標籤</string>
@@ -264,4 +266,6 @@
     <string name="home_tab_social_timeline_title">社會</string>
     <string name="deeplink_account_selection_browser">在瀏覽器中打開</string>
     <string name="status_share_sheet_theme_title">主題</string>
+    <string name="channel_item_follow">追蹤</string>
+    <string name="channel_item_favourite">最愛</string>
 </resources>

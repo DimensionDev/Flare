@@ -238,6 +238,8 @@
     <string name="podcast_ended">팟캐스트 종료</string>
     <string name="podcast_living">팟캐스트 라이브</string>
     <string name="home_tab_antennas_title">안테나</string>
+    <string name="misskey_channel_tab_following">팔로잉</string>
+    <string name="misskey_channel_tab_featured">추천</string>
     <string name="antennas_empty">안테나가 없습니다</string>
     <string name="home_tab_mixed_timeline_title">혼합</string>
     <string name="tab_settings_mixed_timeline">혼합된 타임라인 탭 추가</string>
@@ -245,4 +247,5 @@
     <string name="home_tab_social_timeline_title">소셜</string>
     <string name="deeplink_account_selection_browser">브라우저에서 열기</string>
     <string name="status_share_sheet_theme_title">테마</string>
+    <string name="channel_item_follow">팔로우</string>
 </resources>

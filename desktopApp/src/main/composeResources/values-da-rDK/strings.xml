@@ -317,4 +317,9 @@
     <string name="import_error">Import af data mislykkedes</string>
     <string name="import_confirmation_title">Bekræft Import</string>
     <string name="import_confirmation_message">Dette vil importere data fra filen. Eksisterende poster med matchende ID\'er vil blive erstattet. Vil du fortsætte?</string>
+    <string name="channel_title">Kanal</string>
+    <string name="misskey_channel_tab_following">Følger</string>
+    <string name="misskey_channel_tab_favorites">Favoritter</string>
+    <string name="misskey_channel_tab_owned">Ejet</string>
+    <string name="misskey_channel_tab_featured">Fremhævet</string>
 </resources>

@@ -315,6 +315,11 @@
     <string name="podcast_ended">Podcast avslutad</string>
     <string name="podcast_living">Podcast live</string>
     <string name="home_tab_antennas_title">Antenn</string>
+    <string name="home_tab_channels_title">Kanaler</string>
+    <string name="misskey_channel_tab_following">Följer</string>
+    <string name="misskey_channel_tab_favorites">Favoriter</string>
+    <string name="misskey_channel_tab_owned">Ägd</string>
+    <string name="misskey_channel_tab_featured">Utvalda</string>
     <string name="antennas_empty">Inga antenner</string>
     <string name="home_tab_mixed_timeline_title">Blandad</string>
     <string name="tab_settings_mixed_timeline">Lägg till blandad tidslinje</string>
@@ -351,4 +356,9 @@
     <string name="tab_settings_group_name_placeholder">Gruppens namn</string>
     <string name="tab_settings_group_default_name">Ny grupp</string>
     <string name="status_share_sheet_theme_title">Tema</string>
+    <string name="channel_title">Kanal</string>
+    <string name="channel_item_follow">Följ</string>
+    <string name="channel_item_unfollow">Sluta följa</string>
+    <string name="channel_item_favourite">Favorit</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

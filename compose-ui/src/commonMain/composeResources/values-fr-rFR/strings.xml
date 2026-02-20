@@ -72,6 +72,8 @@
     <string name="login_expired">Session de connexion expirée</string>
     <string name="login_expired_message">Cliquez pour vous connecter à nouveau</string>
     <string name="login_expired_relogin">Reconnectez-vous</string>
+    <string name="permission_denied_title">Autorisation refusée</string>
+    <string name="permission_denied_message">Vous devez vous reconnecter pour accéder à cette page</string>
     <string name="misskey_compose_local_only">Seulement en local</string>
     <string name="misskey_compose_local_only_description">Seuls les utilisateurs de cette instance peuvent voir ce message</string>
     <string name="misskey_item_action_renote">Renote</string>
@@ -348,7 +350,7 @@
     <string name="service_select_compatibility_warning">Ce serveur utilise %1$s, Fusée éclairante fonctionnera en mode de compatibilité. Certaines fonctionnalités peuvent ne pas fonctionner correctement.</string>
     <string name="login_agreement">En vous connectant, vous acceptez l\' %1$s.</string>
     <string name="eula_privacy_policy">CLUF et politique de confidentialité</string>
-    <string name="home_tab_home_title">Domicile</string>
+    <string name="home_tab_home_title">Accueil</string>
     <string name="home_tab_notifications_title">Notifications</string>
     <string name="home_tab_me_title">Moi</string>
     <string name="home_tab_discover_title">Découvrir</string>
@@ -378,4 +380,5 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Aidez-nous à traduire Flare</string>
     <string name="settings_privacy_policy">Politique de confidentialité</string>
+    <string name="channel_title">Chaîne</string>
 </resources>

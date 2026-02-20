@@ -314,6 +314,11 @@
     <string name="podcast_ended">ポッドキャスト終了</string>
     <string name="podcast_living">ポッドキャストライブ</string>
     <string name="home_tab_antennas_title">アンテナ</string>
+    <string name="home_tab_channels_title">チャンネル</string>
+    <string name="misskey_channel_tab_following">フォロー中</string>
+    <string name="misskey_channel_tab_favorites">お気に入り</string>
+    <string name="misskey_channel_tab_owned">所有しています</string>
+    <string name="misskey_channel_tab_featured">注目</string>
     <string name="antennas_empty">アンテナがありません</string>
     <string name="home_tab_mixed_timeline_title">混在しました</string>
     <string name="tab_settings_mixed_timeline">混合タイムラインタブを追加</string>
@@ -345,4 +350,9 @@
     <string name="tab_settings_group_name_placeholder">グループ名</string>
     <string name="tab_settings_group_default_name">新しいグループ</string>
     <string name="status_share_sheet_theme_title">テーマ</string>
+    <string name="channel_title">チャンネル</string>
+    <string name="channel_item_follow">フォロー</string>
+    <string name="channel_item_unfollow">フォローを解除</string>
+    <string name="channel_item_favourite">お気に入り</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

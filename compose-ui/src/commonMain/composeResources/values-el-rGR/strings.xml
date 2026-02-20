@@ -70,6 +70,8 @@
     <string name="login_expired">Η συνεδρία σύνδεσης έχει λήξει</string>
     <string name="login_expired_message">Κάντε κλικ για να συνδεθείτε ξανά</string>
     <string name="login_expired_relogin">Είσοδος ξανά</string>
+    <string name="permission_denied_title">Άρνηση Άδειας</string>
+    <string name="permission_denied_message">Χρειάζεται να συνδεθείτε ξανά για να αποκτήσετε πρόσβαση σε αυτή τη σελίδα</string>
     <string name="misskey_compose_local_only">Τοπικό μόνο</string>
     <string name="misskey_compose_local_only_description">Μόνο οι χρήστες σε αυτήν την παρουσία μπορούν να δουν αυτήν την ανάρτηση</string>
     <string name="misskey_item_action_renote">Renote</string>
@@ -376,4 +378,5 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Βοηθήστε μας να μεταφράσουμε το Flare</string>
     <string name="settings_privacy_policy">Πολιτική Απορρήτου</string>
+    <string name="channel_title">Κανάλι</string>
 </resources>

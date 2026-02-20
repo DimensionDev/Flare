@@ -72,6 +72,8 @@
     <string name="login_expired">La sesión de inicio ha expirado</string>
     <string name="login_expired_message">Haga clic para volver a iniciar sesión</string>
     <string name="login_expired_relogin">Iniciar sesión de nuevo</string>
+    <string name="permission_denied_title">Permiso denegado</string>
+    <string name="permission_denied_message">Necesitas volver a iniciar sesión para acceder a esta página</string>
     <string name="misskey_compose_local_only">Solo local</string>
     <string name="misskey_compose_local_only_description">Sólo los usuarios en esta instancia pueden ver esta publicación</string>
     <string name="misskey_item_action_renote">Renote</string>
@@ -378,4 +380,5 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Ayúdanos a traducir bengala</string>
     <string name="settings_privacy_policy">Política de privacidad</string>
+    <string name="channel_title">Canal</string>
 </resources>

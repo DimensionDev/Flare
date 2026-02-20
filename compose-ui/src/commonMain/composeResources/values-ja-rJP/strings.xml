@@ -72,6 +72,8 @@
     <string name="login_expired">ログインセッションの有効期限が切れました</string>
     <string name="login_expired_message">クリックして再度ログインする</string>
     <string name="login_expired_relogin">再度ログインする</string>
+    <string name="permission_denied_title">アクセスが拒否されました</string>
+    <string name="permission_denied_message">このページにアクセスするには再ログインが必要です</string>
     <string name="misskey_compose_local_only">ローカルのみ</string>
     <string name="misskey_compose_local_only_description">このインスタンス上のユーザーのみがこの投稿を見ることができます</string>
     <string name="misskey_item_action_renote">リノート</string>
@@ -378,4 +380,5 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Flareの翻訳にご協力ください</string>
     <string name="settings_privacy_policy">プライバシーポリシー</string>
+    <string name="channel_title">チャンネル</string>
 </resources>

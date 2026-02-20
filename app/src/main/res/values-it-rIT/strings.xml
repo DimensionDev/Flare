@@ -315,6 +315,11 @@
     <string name="podcast_ended">Podcast terminato</string>
     <string name="podcast_living">Podcast in diretta</string>
     <string name="home_tab_antennas_title">Antenna</string>
+    <string name="home_tab_channels_title">Canali</string>
+    <string name="misskey_channel_tab_following">Seguendo</string>
+    <string name="misskey_channel_tab_favorites">Preferiti</string>
+    <string name="misskey_channel_tab_owned">Posseduto</string>
+    <string name="misskey_channel_tab_featured">In evidenza</string>
     <string name="antennas_empty">Nessuna antenna</string>
     <string name="home_tab_mixed_timeline_title">Ibrida</string>
     <string name="tab_settings_mixed_timeline">Aggiungi scheda timeline ibrida</string>
@@ -351,4 +356,9 @@
     <string name="tab_settings_group_name_placeholder">Nome del gruppo</string>
     <string name="tab_settings_group_default_name">Nuovo Gruppo</string>
     <string name="status_share_sheet_theme_title">Tema</string>
+    <string name="channel_title">Canale</string>
+    <string name="channel_item_follow">Segui</string>
+    <string name="channel_item_unfollow">Non Segui</string>
+    <string name="channel_item_favourite">Preferiti</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

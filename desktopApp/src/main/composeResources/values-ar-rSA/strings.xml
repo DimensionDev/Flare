@@ -321,4 +321,9 @@
     <string name="import_error">فشل استيراد البيانات</string>
     <string name="import_confirmation_title">تأكيد الاستيراد</string>
     <string name="import_confirmation_message">سيتم استيراد البيانات من الملف. سيتم استبدال السجلات الموجودة مع مطابقة المعرفات. هل تريد المتابعة؟</string>
+    <string name="channel_title">قناة</string>
+    <string name="misskey_channel_tab_following">تابع</string>
+    <string name="misskey_channel_tab_favorites">المفضلة</string>
+    <string name="misskey_channel_tab_owned">مملوك</string>
+    <string name="misskey_channel_tab_featured">مميز</string>
 </resources>

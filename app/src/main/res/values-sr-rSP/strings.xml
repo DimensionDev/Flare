@@ -237,10 +237,13 @@
     <string name="podcast_ended">Подкаст завршен</string>
     <string name="podcast_living">Подкаст уживо</string>
     <string name="home_tab_antennas_title">Антена</string>
+    <string name="misskey_channel_tab_following">Пратим</string>
+    <string name="misskey_channel_tab_featured">Истакнути</string>
     <string name="antennas_empty">Нема антена</string>
     <string name="home_tab_mixed_timeline_title">Мешано</string>
     <string name="tab_settings_mixed_timeline">Додајте таб раста</string>
     <string name="tab_settings_mixed_timeline_desc">Мешана временска линија ће комбиновати све резултате таба у један таб</string>
     <string name="deeplink_account_selection_browser">Отворите у прегледаћу</string>
     <string name="status_share_sheet_theme_title">Тема</string>
+    <string name="channel_item_follow">Следите</string>
 </resources>

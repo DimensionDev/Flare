@@ -314,6 +314,11 @@
     <string name="podcast_ended">播客已结束</string>
     <string name="podcast_living">实时播报</string>
     <string name="home_tab_antennas_title">天线</string>
+    <string name="home_tab_channels_title">频道</string>
+    <string name="misskey_channel_tab_following">正在关注</string>
+    <string name="misskey_channel_tab_favorites">收藏夹</string>
+    <string name="misskey_channel_tab_owned">拥有的</string>
+    <string name="misskey_channel_tab_featured">精选</string>
     <string name="antennas_empty">无天线</string>
     <string name="home_tab_mixed_timeline_title">混合</string>
     <string name="tab_settings_mixed_timeline">添加混合时间线</string>
@@ -345,4 +350,9 @@
     <string name="tab_settings_group_name_placeholder">群组名称</string>
     <string name="tab_settings_group_default_name">新建群组</string>
     <string name="status_share_sheet_theme_title">主题</string>
+    <string name="channel_title">频道</string>
+    <string name="channel_item_follow">关注</string>
+    <string name="channel_item_unfollow">取消关注</string>
+    <string name="channel_item_favourite">收藏夹</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

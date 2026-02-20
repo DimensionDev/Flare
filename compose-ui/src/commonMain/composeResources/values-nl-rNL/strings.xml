@@ -72,6 +72,8 @@
     <string name="login_expired">Inlogsessie verlopen</string>
     <string name="login_expired_message">Klik om opnieuw in te loggen</string>
     <string name="login_expired_relogin">Opnieuw inloggen</string>
+    <string name="permission_denied_title">Toestemming geweigerd</string>
+    <string name="permission_denied_message">U moet opnieuw inloggen om toegang te krijgen tot deze pagina</string>
     <string name="misskey_compose_local_only">Alleen lokaal</string>
     <string name="misskey_compose_local_only_description">Alleen gebruikers op dit exemplaar kunnen dit bericht zien</string>
     <string name="misskey_item_action_renote">Renote</string>
@@ -378,4 +380,5 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Help ons Flare te vertalen</string>
     <string name="settings_privacy_policy">Privacy Beleid</string>
+    <string name="channel_title">Kanaal</string>
 </resources>

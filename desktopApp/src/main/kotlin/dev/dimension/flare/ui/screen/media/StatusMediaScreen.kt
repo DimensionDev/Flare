@@ -42,6 +42,7 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FloppyDisk
 import compose.icons.fontawesomeicons.solid.UpRightAndDownLeftFromCenter
+import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.media_fullscreen
 import dev.dimension.flare.media_save
@@ -59,12 +60,13 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.presenter.status.StatusState
-import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.GridViewItem
 import io.github.composefluent.component.HorizontalFlipView
 import io.github.composefluent.component.SubtleButton
+import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
+import io.github.kdroidfilter.composemediaplayer.rememberVideoPlayerState
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import me.saket.telephoto.ExperimentalTelephotoApi
@@ -94,158 +96,177 @@ internal fun StatusMediaScreen(
             window = window,
         )
     }
-    FlareTheme(
-        isDarkTheme = true,
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize(),
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize(),
-        ) {
-            state.medias.onSuccess { medias ->
-                val pagerState =
-                    rememberPagerState(
-                        initialPage = index,
-                    ) {
-                        medias.size
-                    }
-                HorizontalFlipView(
-                    state = pagerState,
-                    enabled = state.lockPager,
-                    modifier =
-                        Modifier.fillMaxSize(),
+        state.medias.onSuccess { medias ->
+            val pagerState =
+                rememberPagerState(
+                    initialPage = index,
                 ) {
-                    val media = medias[it]
-                    when (media) {
-                        is UiMedia.Image ->
-                            ImageItem(
-                                modifier = Modifier.fillMaxSize(),
-                                url = media.url,
-                                previewUrl = media.previewUrl,
-                                description = media.description,
-                                isFocused = pagerState.currentPage == it,
-                                setLockPager = state::setLockPager,
-                                onClick = {
-                                    state.setShowThumbnailList(!state.showThumbnailList)
-                                },
-                            )
-
-                        else ->
-                            CompositionLocalProvider(
-                                LocalComponentAppearance provides
-                                    LocalComponentAppearance
-                                        .current
-                                        .copy(
-                                            videoAutoplay = ComponentAppearance.VideoAutoplay.ALWAYS,
-                                        ),
-                            ) {
-                                MediaItem(
-                                    media = media,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Fit,
-                                )
-                            }
-                    }
+                    medias.size
                 }
-                AnimatedVisibility(
-                    state.showThumbnailList,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.TopCenter),
-                    enter = slideInVertically { -it } + fadeIn(),
-                    exit = slideOutVertically { -it } + fadeOut(),
-                ) {
-                    Row(
-                        modifier =
-                            Modifier
-                                .background(FluentTheme.colors.background.layer.default)
-                                .height(48.dp)
-                                .padding(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Spacer(modifier = Modifier.weight(1f))
-                        SubtleButton(
+            HorizontalFlipView(
+                state = pagerState,
+                enabled = state.lockPager,
+                modifier =
+                    Modifier.fillMaxSize(),
+            ) {
+                val media = medias[it]
+                when (media) {
+                    is UiMedia.Image ->
+                        ImageItem(
+                            modifier = Modifier.fillMaxSize(),
+                            url = media.url,
+                            previewUrl = media.previewUrl,
+                            description = media.description,
+                            isFocused = pagerState.currentPage == it,
+                            setLockPager = state::setLockPager,
                             onClick = {
-                                val current = medias[pagerState.currentPage]
-                                state.save(current)
-                            },
-                            content = {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.FloppyDisk,
-                                    contentDescription = stringResource(Res.string.media_save),
-                                )
+                                state.setShowThumbnailList(!state.showThumbnailList)
                             },
                         )
-                        SubtleButton(
-                            onClick = {
-                                if (window != null) {
-                                    val current = window.placement
-                                    if (current == WindowPlacement.Fullscreen) {
-                                        window.placement = WindowPlacement.Floating
-                                    } else {
-                                        window.placement = WindowPlacement.Fullscreen
+
+                    is UiMedia.Video -> {
+                        if (pagerState.currentPage == it) {
+                            val playerState = rememberVideoPlayerState()
+                            LaunchedEffect(Unit) {
+                                playerState.openUri(media.url)
+                            }
+                            VideoPlayerSurface(
+                                playerState = playerState,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        } else {
+                            MediaItem(
+                                media = media,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit,
+                            )
+                        }
+                    }
+
+                    else ->
+                        CompositionLocalProvider(
+                            LocalComponentAppearance provides
+                                LocalComponentAppearance
+                                    .current
+                                    .copy(
+                                        videoAutoplay = ComponentAppearance.VideoAutoplay.ALWAYS,
+                                    ),
+                        ) {
+                            MediaItem(
+                                media = media,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit,
+                            )
+                        }
+                }
+            }
+            AnimatedVisibility(
+                state.showThumbnailList,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter),
+                enter = slideInVertically { -it } + fadeIn(),
+                exit = slideOutVertically { -it } + fadeOut(),
+            ) {
+                Row(
+                    modifier =
+                        Modifier
+                            .background(FluentTheme.colors.background.layer.default)
+                            .padding(
+                                top = LocalWindowPadding.current.calculateTopPadding(),
+                                bottom = 8.dp,
+                                start = 8.dp,
+                                end = 8.dp,
+                            ),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    SubtleButton(
+                        onClick = {
+                            val current = medias[pagerState.currentPage]
+                            state.save(current)
+                        },
+                        content = {
+                            FAIcon(
+                                FontAwesomeIcons.Solid.FloppyDisk,
+                                contentDescription = stringResource(Res.string.media_save),
+                            )
+                        },
+                    )
+                    SubtleButton(
+                        onClick = {
+                            if (window != null) {
+                                val current = window.placement
+                                if (current == WindowPlacement.Fullscreen) {
+                                    window.placement = WindowPlacement.Floating
+                                } else {
+                                    window.placement = WindowPlacement.Fullscreen
+                                }
+                            }
+                        },
+                        content = {
+                            FAIcon(
+                                FontAwesomeIcons.Solid.UpRightAndDownLeftFromCenter,
+                                contentDescription = stringResource(Res.string.media_fullscreen),
+                            )
+                        },
+                    )
+                }
+            }
+
+            AnimatedVisibility(
+                state.showThumbnailList,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut(),
+            ) {
+                LazyRow(
+                    modifier =
+                        Modifier
+                            .background(FluentTheme.colors.background.layer.default)
+                            .height(96.dp)
+                            .padding(8.dp),
+                    horizontalArrangement =
+                        Arrangement.spacedBy(
+                            8.dp,
+                            Alignment.CenterHorizontally,
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    items(medias.size) { index ->
+                        val media = medias[index]
+                        GridViewItem(
+                            selected = pagerState.currentPage == index,
+                            onSelectedChange = {
+                                if (it) {
+                                    scope.launch {
+                                        pagerState.scrollToPage(index)
                                     }
                                 }
                             },
-                            content = {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.UpRightAndDownLeftFromCenter,
-                                    contentDescription = stringResource(Res.string.media_fullscreen),
-                                )
-                            },
-                        )
-                    }
-                }
-
-                AnimatedVisibility(
-                    state.showThumbnailList,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.BottomCenter),
-                    enter = slideInVertically { it } + fadeIn(),
-                    exit = slideOutVertically { it } + fadeOut(),
-                ) {
-                    LazyRow(
-                        modifier =
-                            Modifier
-                                .background(FluentTheme.colors.background.layer.default)
-                                .height(96.dp)
-                                .padding(8.dp),
-                        horizontalArrangement =
-                            Arrangement.spacedBy(
-                                8.dp,
-                                Alignment.CenterHorizontally,
-                            ),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        items(medias.size) { index ->
-                            val media = medias[index]
-                            GridViewItem(
-                                selected = pagerState.currentPage == index,
-                                onSelectedChange = {
-                                    if (it) {
-                                        scope.launch {
-                                            pagerState.scrollToPage(index)
-                                        }
-                                    }
-                                },
-                            ) {
-                                NetworkImage(
-                                    model =
-                                        when (media) {
-                                            is UiMedia.Audio -> media.previewUrl
-                                            is UiMedia.Gif -> media.previewUrl
-                                            is UiMedia.Image -> media.previewUrl
-                                            is UiMedia.Video -> media.thumbnailUrl
-                                        },
-                                    contentDescription = null,
-                                    modifier =
-                                        Modifier
-                                            .aspectRatio(1f),
-                                )
-                            }
+                        ) {
+                            NetworkImage(
+                                model =
+                                    when (media) {
+                                        is UiMedia.Audio -> media.previewUrl
+                                        is UiMedia.Gif -> media.previewUrl
+                                        is UiMedia.Image -> media.previewUrl
+                                        is UiMedia.Video -> media.thumbnailUrl
+                                    },
+                                contentDescription = null,
+                                modifier =
+                                    Modifier
+                                        .aspectRatio(1f),
+                            )
                         }
                     }
                 }

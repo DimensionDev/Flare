@@ -42,7 +42,10 @@ import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.darkColors
 import io.github.composefluent.lightColors
-import io.github.kdroidfilter.platformtools.darkmodedetector.isSystemInDarkMode
+import io.github.kdroidfilter.nucleus.darkmodedetector.isSystemInDarkMode
+import io.github.kdroidfilter.nucleus.window.DecoratedWindowDefaults
+import io.github.kdroidfilter.nucleus.window.NucleusDecoratedWindowTheme
+import io.github.kdroidfilter.nucleus.window.styling.LocalTitleBarStyle
 import kotlinx.coroutines.launch
 import org.apache.commons.lang3.SystemUtils
 import org.koin.compose.koinInject
@@ -109,16 +112,12 @@ internal fun WindowScope.ProvideComposeWindow(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalComposeWindow provides composeWindow,
         LocalWindowPadding provides
-            if (SystemUtils.IS_OS_MAC) {
-                PaddingValues(
-                    start = 0.dp,
-                    top = 24.dp + 8.dp,
-                    end = 0.dp,
-                    bottom = 8.dp,
-                )
-            } else {
-                PaddingValues(vertical = 8.dp)
-            },
+            PaddingValues(
+                start = 0.dp,
+                top = LocalTitleBarStyle.current.metrics.height + 8.dp,
+                end = 0.dp,
+                bottom = 8.dp,
+            ),
     ) {
         content.invoke()
     }
@@ -246,8 +245,27 @@ internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
                     )
                 },
             content = {
+                val isDark = isDarkTheme()
+                val titleBarStyle =
+                    if (isDark) {
+                        DecoratedWindowDefaults.darkTitleBarStyle()
+                    } else {
+                        DecoratedWindowDefaults.lightTitleBarStyle()
+                    }.let {
+                        it.copy(
+                            metrics =
+                                it.metrics.copy(
+                                    height = 40.dp,
+                                ),
+                        )
+                    }
                 key(appSettings.language) {
-                    content.invoke()
+                    NucleusDecoratedWindowTheme(
+                        isDark = isDark,
+                        titleBarStyle = titleBarStyle,
+                    ) {
+                        content.invoke()
+                    }
                 }
             },
         )

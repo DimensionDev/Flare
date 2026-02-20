@@ -24,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
@@ -41,7 +42,6 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.UserPlus
-import dev.dimension.flare.common.NativeWindowBridge
 import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.AllNotificationTabItem
 import dev.dimension.flare.data.model.Bluesky
@@ -77,21 +77,16 @@ import io.github.composefluent.component.Badge
 import io.github.composefluent.component.BadgeStatus
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.Icon
-import io.github.composefluent.component.NavigationDefaults
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
-import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 
 @Composable
-internal fun WindowScope.FlareApp() {
+internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
     val state by producePresenter { presenter() }
     val uriHandler = LocalUriHandler.current
-    val nativeWindowBridge = koinInject<NativeWindowBridge>()
-
     state.tabs.onSuccess { tabs ->
         val topLevelBackStack =
             retain(
@@ -107,14 +102,6 @@ internal fun WindowScope.FlareApp() {
 
         fun navigate(route: Route) {
             when (route) {
-                is Route.RawImage if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS) -> {
-                    nativeWindowBridge.openImageImageViewer(route.rawImage)
-                }
-
-                is Route.StatusMedia if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_WINDOWS) -> {
-                    nativeWindowBridge.openStatusImageViewer(route)
-                }
-
                 is Route.UrlRoute -> {
                     uriHandler.openUri(route.url)
                 }
@@ -127,6 +114,16 @@ internal fun WindowScope.FlareApp() {
 
         fun goBack() {
             topLevelBackStack.pop()
+        }
+
+        LaunchedEffect(topLevelBackStack) {
+            backButtonState.attach {
+                goBack()
+            }
+        }
+
+        LaunchedEffect(topLevelBackStack.canGoBack) {
+            backButtonState.update(topLevelBackStack.canGoBack)
         }
 
         val deeplinkPresenter by producePresenter("deeplink_presenter") {
@@ -152,14 +149,7 @@ internal fun WindowScope.FlareApp() {
                         ).fillMaxHeight()
                         .width(72.dp)
                         .verticalScroll(rememberScrollState())
-                        .padding(top = 16.dp)
-                        .let {
-                            if (SystemUtils.IS_OS_MAC) {
-                                it.padding(top = 24.dp)
-                            } else {
-                                it
-                            }
-                        },
+                        .padding(top = LocalWindowPadding.current.calculateTopPadding()),
             ) {
                 state.user
                     .onSuccess { user ->
@@ -347,15 +337,15 @@ internal fun WindowScope.FlareApp() {
                             navigate = { route -> navigate(route) },
                             onBack = { goBack() },
                         )
-                        if (topLevelBackStack.canGoBack) {
-                            NavigationDefaults.BackButton(
-                                onClick = {
-                                    goBack()
-                                },
-                                disabled = !topLevelBackStack.canGoBack,
-                                modifier = Modifier.align(Alignment.TopStart),
-                            )
-                        }
+//                        if (topLevelBackStack.canGoBack) {
+//                            NavigationDefaults.BackButton(
+//                                onClick = {
+//                                    goBack()
+//                                },
+//                                disabled = !topLevelBackStack.canGoBack,
+//                                modifier = Modifier.align(Alignment.TopStart),
+//                            )
+//                        }
                         InAppNotificationComponent(
                             modifier =
                                 Modifier

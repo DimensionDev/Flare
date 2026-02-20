@@ -1,9 +1,18 @@
 package dev.dimension.flare
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
@@ -12,64 +21,60 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.DeeplinkHandler
-import dev.dimension.flare.common.NoopIPC
 import dev.dimension.flare.common.SandboxHelper
-import dev.dimension.flare.common.windows.WindowsIPC
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.di.composeUiModule
 import dev.dimension.flare.di.desktopModule
-import dev.dimension.flare.ui.route.APPSCHEMA
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.ProvideComposeWindow
 import dev.dimension.flare.ui.theme.ProvideThemeSettings
-import io.github.kdroidfilter.platformtools.darkmodedetector.windows.setWindowsAdaptiveTitleBar
-import it.sauronsoftware.junique.AlreadyLockedException
-import it.sauronsoftware.junique.JUnique
-import org.apache.commons.lang3.SystemUtils
+import io.github.composefluent.FluentTheme
+import io.github.composefluent.component.NavigationDefaults
+import io.github.kdroidfilter.nucleus.aot.runtime.AotRuntime
+import io.github.kdroidfilter.nucleus.core.runtime.DeepLinkHandler
+import io.github.kdroidfilter.nucleus.core.runtime.SingleInstanceManager
+import io.github.kdroidfilter.nucleus.window.DecoratedWindow
+import io.github.kdroidfilter.nucleus.window.TitleBar
+import io.github.kdroidfilter.nucleus.window.styling.LocalTitleBarStyle
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.context.startKoin
-import org.koin.dsl.module
-import java.awt.Desktop
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.Paths
-import kotlin.io.path.absolutePathString
+import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.toJavaDuration
 
 fun main(args: Array<String>) {
-    if (SystemUtils.IS_OS_LINUX && isRunning(args)) {
+    if (AotRuntime.isTraining()) {
+        Thread({
+            Thread.sleep(15.seconds.toJavaDuration())
+            exitProcess(0)
+        }, "aot-timer").apply {
+            isDaemon = false
+            start()
+        }
+    }
+    val restoreRequestFlow = MutableStateFlow(0)
+    DeepLinkHandler.register(args) { uri ->
+        DeeplinkHandler.handleDeeplink(uri.toString())
+    }
+    val isFirstInstance =
+        SingleInstanceManager.isSingleInstance(
+            onRestoreFileCreated = { DeepLinkHandler.writeUriTo(this) },
+            onRestoreRequest = {
+                DeepLinkHandler.readUriFrom(this)
+                restoreRequestFlow.value++
+            },
+        )
+    if (!isFirstInstance) {
         return
     }
-    if (SystemUtils.IS_OS_LINUX) {
-        ensureMimeInfo()
-        ensureDesktopEntry()
-    }
     SandboxHelper.configureSandboxArgs()
-    val ports = WindowsIPC.parsePorts(args)
-    val platformIPC =
-        if (ports != null) {
-            WindowsIPC(
-                ports,
-                onDeeplink = {
-                    DeeplinkHandler.handleDeeplink(it)
-                },
-            )
-        } else {
-            NoopIPC
-        }
     startKoin {
         modules(
-            desktopModule + KoinHelper.modules() + composeUiModule +
-                module {
-                    single { platformIPC }
-                },
+            desktopModule + KoinHelper.modules() + composeUiModule,
         )
-    }
-    if (SystemUtils.IS_OS_MAC_OSX) {
-        Desktop.getDesktop().setOpenURIHandler {
-            DeeplinkHandler.handleDeeplink(it.uri.toString())
-        }
     }
     application {
         setSingletonImageLoaderFactory { context ->
@@ -88,10 +93,9 @@ fun main(args: Array<String>) {
                 .build()
         }
         ProvideThemeSettings {
-            Window(
+            DecoratedWindow(
                 onCloseRequest = {
                     exitApplication()
-                    platformIPC.sendShutdown()
                 },
                 title = stringResource(Res.string.app_name),
                 icon = painterResource(Res.drawable.flare_logo),
@@ -101,12 +105,46 @@ fun main(args: Array<String>) {
                         size = DpSize(520.dp, 840.dp),
                     ),
             ) {
-                if (SystemUtils.IS_OS_WINDOWS) {
-                    window.setWindowsAdaptiveTitleBar()
+                val restoreRequest by restoreRequestFlow.collectAsState()
+                LaunchedEffect(restoreRequest) {
+                    if (restoreRequest > 0) {
+                        window.toFront()
+                        window.requestFocus()
+                    }
                 }
+                val backButtonState =
+                    remember {
+                        NavigationBackButtonState()
+                    }
                 FlareTheme {
                     ProvideComposeWindow {
-                        FlareApp()
+                        FlareApp(
+                            backButtonState = backButtonState,
+                        )
+                    }
+                    TitleBar(
+                        style =
+                            LocalTitleBarStyle.current.copy(
+                                colors =
+                                    LocalTitleBarStyle.current.colors.copy(
+                                        background =
+                                            FluentTheme.colors.background.mica.base
+                                                .copy(alpha = 0f),
+                                        inactiveBackground = Color.Transparent,
+                                    ),
+                            ),
+                    ) {
+                        Row(
+                            modifier = Modifier.align(Alignment.Start),
+                        ) {
+                            NavigationDefaults.BackButton(
+                                onClick = {
+                                    backButtonState.onClick.invoke()
+                                },
+                                modifier = Modifier.width(70.dp),
+                                disabled = !backButtonState.canGoBack,
+                            )
+                        }
                     }
                 }
             }
@@ -114,57 +152,17 @@ fun main(args: Array<String>) {
     }
 }
 
-private const val ENTRY_FILE_NAME = "flare.desktop"
-private const val LOCK_ID = "dev.dimensiondev.flare"
+internal class NavigationBackButtonState {
+    var canGoBack by mutableStateOf(false)
+        private set
+    var onClick: () -> Unit = {}
+        private set
 
-private fun ensureDesktopEntry() {
-    val entryFile =
-        File("${System.getProperty("user.home")}/.local/share/applications/$ENTRY_FILE_NAME")
-    if (!entryFile.exists()) {
-        entryFile.createNewFile()
+    fun attach(onClick: () -> Unit) {
+        this.onClick = onClick
     }
-    val path = Files.readSymbolicLink(Paths.get("/proc/self/exe"))
-    entryFile.writeText(
-        "[Desktop Entry]${System.lineSeparator()}" +
-            "Type=Application${System.lineSeparator()}" +
-            "Name=Flare${System.lineSeparator()}" +
-            "Icon=\"${path.parent.parent.absolutePathString() + "/lib/Flare.png" + "\""}${System.lineSeparator()}" +
-            "Exec=\"${path.absolutePathString() + "\" %u"}${System.lineSeparator()}" +
-            "Terminal=false${System.lineSeparator()}" +
-            "Categories=Network;Internet;${System.lineSeparator()}" +
-            "MimeType=application/x-$APPSCHEMA;x-scheme-handler/$APPSCHEMA;",
-    )
-}
 
-private fun ensureMimeInfo() {
-    val file = File("${System.getProperty("user.home")}/.local/share/applications/mimeinfo.cache")
-    if (!file.exists()) {
-        file.createNewFile()
+    fun update(canGoBack: Boolean) {
+        this.canGoBack = canGoBack
     }
-    val text = file.readText()
-    if (text.isEmpty() || text.isBlank()) {
-        file.writeText("[MIME Cache]${System.lineSeparator()}")
-    }
-    if (!file.readText().contains("x-scheme-handler/$APPSCHEMA=$ENTRY_FILE_NAME;")) {
-        file.appendText("${System.lineSeparator()}x-scheme-handler/$APPSCHEMA=$ENTRY_FILE_NAME;")
-    }
-}
-
-private fun isRunning(args: Array<String>): Boolean {
-    val running =
-        try {
-            JUnique.acquireLock(LOCK_ID) {
-                DeeplinkHandler.handleDeeplink(it)
-                null
-            }
-            false
-        } catch (e: AlreadyLockedException) {
-            true
-        }
-    if (running) {
-        args.forEach {
-            JUnique.sendMessage(LOCK_ID, it)
-        }
-    }
-    return running
 }

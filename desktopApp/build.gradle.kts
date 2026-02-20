@@ -1,6 +1,5 @@
 
 import org.jetbrains.compose.compose
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -9,6 +8,7 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.stability.analyzer)
+    id("io.github.kdroidfilter.nucleus") version "1.1.6"
 }
 
 dependencies {
@@ -40,73 +40,145 @@ dependencies {
     implementation(libs.zoomable)
     implementation(libs.datastore)
     implementation(libs.reorderable)
-    implementation(libs.platformtools.darkmodedetector)
     implementation(libs.jna)
-    implementation(libs.junique)
+    implementation("io.github.kdroidfilter:composemediaplayer:0.8.7")
+    implementation("io.github.kdroidfilter:nucleus.darkmode-detector:1.1.6")
+    implementation("io.github.kdroidfilter:nucleus.aot-runtime:1.1.6")
+    implementation("io.github.kdroidfilter:nucleus.decorated-window:1.1.6")
+    implementation("io.github.kdroidfilter:composewebview:1.0.0-alpha-10")
 }
 
-compose.desktop {
-    application {
-        mainClass = "dev.dimension.flare.MainKt"
+nucleus.application {
+    jvmArgs += "--enable-native-access=ALL-UNNAMED"
+    mainClass = "dev.dimension.flare.MainKt"
+    nativeDistributions {
+        cleanupNativeLibs = true
+        enableAotCache = true
+        homepage = "https://github.com/DimensionDev/Flare"
+        appResourcesRootDir.set(file("resources"))
+        targetFormats(
+            io.github.kdroidfilter.nucleus.desktop.application.dsl.TargetFormat.Pkg,
+            io.github.kdroidfilter.nucleus.desktop.application.dsl.TargetFormat.Flatpak,
+            io.github.kdroidfilter.nucleus.desktop.application.dsl.TargetFormat.AppX,
+        )
+        packageName = "Flare"
+        val buildVersion = System.getenv("BUILD_VERSION")?.toString()?.takeIf {
+            // match semantic versioning
+            Regex("""\d+\.\d+\.\d+(-\S+)?""").matches(it)
+        } ?: "1.0.0"
+        packageVersion = buildVersion
 
-        nativeDistributions {
-            targetFormats(TargetFormat.Pkg, TargetFormat.Exe, TargetFormat.Deb)
-            packageName = "Flare"
-            val buildVersion = System.getenv("BUILD_VERSION")?.toString()?.takeIf {
-                // match semantic versioning
-                Regex("""\d+\.\d+\.\d+(-\S+)?""").matches(it)
-            } ?: "1.0.0"
-            packageVersion = buildVersion
-            macOS {
-                val hasSigningProps = project.file("embedded.provisionprofile").exists() && project.file("runtime.provisionprofile").exists()
-                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "1"
-                bundleID = "dev.dimension.flare"
-                minimumSystemVersion = "14.0"
-                appStore = hasSigningProps
+        protocol("Flare", "flare")
 
-                jvmArgs(
-                    "-Dapple.awt.application.appearance=system",
-                )
+        macOS {
+            val hasSigningProps = project.file("embedded.provisionprofile").exists() && project.file("runtime.provisionprofile").exists()
+            packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "1"
+            bundleID = "dev.dimension.flare"
+            minimumSystemVersion = "14.0"
+            appStore = hasSigningProps
 
-                infoPlist {
-                    extraKeysRawXml = macExtraPlistKeys
+            jvmArgs(
+                "-Dapple.awt.application.appearance=system",
+            )
+
+            infoPlist {
+                extraKeysRawXml = macExtraPlistKeys
+            }
+
+            if (hasSigningProps) {
+                signing {
+                    sign.set(true)
+                    identity.set("SUJITEKU LIMITED LIABILITY CO.")
                 }
 
-                if (hasSigningProps) {
-                    signing {
-                        sign.set(true)
-                        identity.set("SUJITEKU LIMITED LIABILITY CO.")
-                    }
+                entitlementsFile.set(project.file("entitlements.plist"))
+                runtimeEntitlementsFile.set(project.file("runtime-entitlements.plist"))
+                provisioningProfile.set(project.file("embedded.provisionprofile"))
+                runtimeProvisioningProfile.set(project.file("runtime.provisionprofile"))
+            }
 
-                    entitlementsFile.set(project.file("entitlements.plist"))
-                    runtimeEntitlementsFile.set(project.file("runtime-entitlements.plist"))
-                    provisioningProfile.set(project.file("embedded.provisionprofile"))
-                    runtimeProvisioningProfile.set(project.file("runtime.provisionprofile"))
-                }
-
-                iconFile.set(project.file("resources/ic_launcher.icns"))
-            }
-            windows {
-                iconFile.set(project.file("resources/ic_launcher.ico"))
-            }
-            linux {
-                iconFile.set(project.file("resources/ic_launcher.png"))
-            }
-            appResourcesRootDir.set(file("resources"))
+            iconFile.set(project.file("resources/ic_launcher.icns"))
         }
-        buildTypes {
-            release {
-                proguard {
-                   this.isEnabled.set(false)
-                    // version.set("7.7.0")
-                    // this.configurationFiles.from(
-                        // file("proguard-rules.pro")
-                    // )
-                }
+        windows {
+            iconFile.set(project.file("resources/ic_launcher.ico"))
+            appx {
+            }
+        }
+        linux {
+            iconFile.set(project.file("resources/ic_launcher.png"))
+            flatpak {
+                runtime = "org.freedesktop.Platform"
+                runtimeVersion = "24.08"
+                sdk = "org.freedesktop.Sdk"
+                branch = "master"
+                finishArgs = listOf("--share=ipc", "--socket=x11", "--socket=wayland")
             }
         }
     }
 }
+
+//compose.desktop {
+//    application {
+//        mainClass = "dev.dimension.flare.MainKt"
+//
+//        nativeDistributions {
+//            targetFormats(TargetFormat.Pkg, TargetFormat.Exe, TargetFormat.Deb)
+//            packageName = "Flare"
+//            val buildVersion = System.getenv("BUILD_VERSION")?.toString()?.takeIf {
+//                // match semantic versioning
+//                Regex("""\d+\.\d+\.\d+(-\S+)?""").matches(it)
+//            } ?: "1.0.0"
+//            packageVersion = buildVersion
+//            macOS {
+//                val hasSigningProps = project.file("embedded.provisionprofile").exists() && project.file("runtime.provisionprofile").exists()
+//                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "1"
+//                bundleID = "dev.dimension.flare"
+//                minimumSystemVersion = "14.0"
+//                appStore = hasSigningProps
+//
+//                jvmArgs(
+//                    "-Dapple.awt.application.appearance=system",
+//                )
+//
+//                infoPlist {
+//                    extraKeysRawXml = macExtraPlistKeys
+//                }
+//
+//                if (hasSigningProps) {
+//                    signing {
+//                        sign.set(true)
+//                        identity.set("SUJITEKU LIMITED LIABILITY CO.")
+//                    }
+//
+//                    entitlementsFile.set(project.file("entitlements.plist"))
+//                    runtimeEntitlementsFile.set(project.file("runtime-entitlements.plist"))
+//                    provisioningProfile.set(project.file("embedded.provisionprofile"))
+//                    runtimeProvisioningProfile.set(project.file("runtime.provisionprofile"))
+//                }
+//
+//                iconFile.set(project.file("resources/ic_launcher.icns"))
+//            }
+//            windows {
+//                iconFile.set(project.file("resources/ic_launcher.ico"))
+//            }
+//            linux {
+//                iconFile.set(project.file("resources/ic_launcher.png"))
+//            }
+//            appResourcesRootDir.set(file("resources"))
+//        }
+//        buildTypes {
+//            release {
+//                proguard {
+//                   this.isEnabled.set(false)
+//                    // version.set("7.7.0")
+//                    // this.configurationFiles.from(
+//                        // file("proguard-rules.pro")
+//                    // )
+//                }
+//            }
+//        }
+//    }
+//}
 
 compose.resources {
     packageOfResClass = "dev.dimension.flare"
@@ -146,8 +218,8 @@ extra["sqliteOsArch"] = "osx_arm64"
 extra["jnaVersion"] = libs.versions.jna.get()
 extra["nativeDestDir"] = "resources/macos-arm64"
 
-apply(from = File(projectDir, "install-native-libs.gradle.kts"))
-apply(from = File(projectDir, "build-swift.gradle.kts"))
+//apply(from = File(projectDir, "install-native-libs.gradle.kts"))
+//apply(from = File(projectDir, "build-swift.gradle.kts"))
 
 
 

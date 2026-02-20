@@ -74,10 +74,10 @@ import dev.dimension.flare.ui.screen.rss.EditRssSourceScreen
 import dev.dimension.flare.ui.screen.rss.ImportOPMLScreen
 import dev.dimension.flare.ui.screen.rss.RssListScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
+import dev.dimension.flare.ui.screen.serviceselect.WebViewLoginScreen
 import dev.dimension.flare.ui.screen.settings.AppLoggingScreen
 import dev.dimension.flare.ui.screen.settings.LocalCacheScreen
 import dev.dimension.flare.ui.screen.settings.SettingsScreen
-import dev.dimension.flare.ui.screen.settings.WebViewLoginScreen
 import dev.dimension.flare.ui.screen.status.StatusScreen
 import dev.dimension.flare.ui.screen.status.VVOCommentScreen
 import dev.dimension.flare.ui.screen.status.VVOStatusScreen
@@ -502,6 +502,14 @@ internal fun WindowScope.Router(
                 entry<Route.ServiceSelect> {
                     ServiceSelectScreen(
                         onBack = onBack,
+                        onWebViewLogin = { url, callback ->
+                            navigate(
+                                Route.WebViewLogin(
+                                    url = url,
+                                    callback = callback,
+                                ),
+                            )
+                        },
                     )
                 }
 
@@ -662,12 +670,12 @@ internal fun WindowScope.Router(
                 }
 
                 entry<Route.RawImage>(
-                    metadata = window(),
+                    metadata = window(isDarkTheme = true),
                 ) { args ->
                     RawMediaScreen(url = args.rawImage)
                 }
                 entry<Route.StatusMedia>(
-                    metadata = window(),
+                    metadata = window(isDarkTheme = true),
                 ) { args ->
                     StatusMediaScreen(
                         accountType = args.accountType,
@@ -800,10 +808,12 @@ internal fun WindowScope.Router(
                     )
                 }
 
-                entry<Route.WebViewLogin>(
-                    metadata = window(),
-                ) { args ->
-                    WebViewLoginScreen(route = args)
+                entry<Route.WebViewLogin> { args ->
+                    WebViewLoginScreen(
+                        url = args.url,
+                        callback = args.callback,
+                        onBack = onBack,
+                    )
                 }
 
                 entry<Route.BlockUser>(

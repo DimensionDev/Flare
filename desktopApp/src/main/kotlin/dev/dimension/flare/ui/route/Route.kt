@@ -229,8 +229,8 @@ internal sealed interface Route : NavKey {
 
     data class WebViewLogin(
         val url: String,
-        val cookieCallback: ((cookies: String?) -> Unit)?,
-    ) : WindowRoute
+        val callback: (cookies: String?) -> Boolean,
+    ) : ScreenRoute
 
     data class DeepLinkAccountPicker(
         val originalUrl: String,

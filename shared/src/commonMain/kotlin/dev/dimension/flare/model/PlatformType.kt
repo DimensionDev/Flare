@@ -15,6 +15,7 @@ public enum class PlatformType {
     xQt,
 
     VVo,
+    Nostr,
 }
 
 public val PlatformType.logoUrl: String
@@ -31,6 +32,9 @@ public val PlatformType.logoUrl: String
             PlatformType.VVo ->
                 "https://upload.wikimedia.org/wikipedia/en/thumb/6/" +
                     "6e/Sina_Weibo.svg/2560px-Sina_Weibo.svg.png"
+            PlatformType.Nostr ->
+                "https://github.com/mbarulli/nostr-logo/blob/" +
+                    "main/PNG/nostr-icon-purple-transparent-256x256.png?raw=true"
         }
 
 public val xqtOldHost: String =

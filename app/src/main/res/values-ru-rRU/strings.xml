@@ -317,6 +317,11 @@
     <string name="podcast_ended">Подкаст завершен</string>
     <string name="podcast_living">Подкаст в эфире</string>
     <string name="home_tab_antennas_title">Антенны</string>
+    <string name="home_tab_channels_title">Каналы</string>
+    <string name="misskey_channel_tab_following">Подписки</string>
+    <string name="misskey_channel_tab_favorites">Избранное</string>
+    <string name="misskey_channel_tab_owned">Приобретено</string>
+    <string name="misskey_channel_tab_featured">Избранные</string>
     <string name="antennas_empty">Нет антенн</string>
     <string name="home_tab_mixed_timeline_title">Общая</string>
     <string name="tab_settings_mixed_timeline">Добавить вкладку общей ленты</string>
@@ -353,4 +358,9 @@
     <string name="tab_settings_group_name_placeholder">Название группы</string>
     <string name="tab_settings_group_default_name">Новая группа</string>
     <string name="status_share_sheet_theme_title">Тема</string>
+    <string name="channel_title">Канал</string>
+    <string name="channel_item_follow">Подписаться</string>
+    <string name="channel_item_unfollow">Отписаться</string>
+    <string name="channel_item_favourite">Избранное</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

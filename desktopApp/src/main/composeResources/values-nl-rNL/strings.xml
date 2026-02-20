@@ -317,4 +317,9 @@
     <string name="import_error">Gegevens importeren mislukt</string>
     <string name="import_confirmation_title">Import bevestigen</string>
     <string name="import_confirmation_message">Dit zal gegevens uit het bestand importeren. Bestaande records met bijpassende IDs zullen worden vervangen. Wilt u doorgaan?</string>
+    <string name="channel_title">Kanaal</string>
+    <string name="misskey_channel_tab_following">Volgt</string>
+    <string name="misskey_channel_tab_favorites">Favorieten</string>
+    <string name="misskey_channel_tab_owned">Eigendom</string>
+    <string name="misskey_channel_tab_featured">Aanbevolen</string>
 </resources>

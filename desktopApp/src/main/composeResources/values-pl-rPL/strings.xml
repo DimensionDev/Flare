@@ -319,4 +319,9 @@
     <string name="import_error">Nie udało się zaimportować danych</string>
     <string name="import_confirmation_title">Potwierdź import</string>
     <string name="import_confirmation_message">Spowoduje to zaimportowanie danych z pliku. Istniejące rekordy z pasującymi identyfikatorami zostaną zastąpione. Czy chcesz kontynuować?</string>
+    <string name="channel_title">Kanał</string>
+    <string name="misskey_channel_tab_following">Obserwowane</string>
+    <string name="misskey_channel_tab_favorites">Ulubione</string>
+    <string name="misskey_channel_tab_owned">Własność</string>
+    <string name="misskey_channel_tab_featured">Polecane</string>
 </resources>

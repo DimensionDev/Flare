@@ -318,4 +318,9 @@
     <string name="import_error">Importarea datelor a eșuat</string>
     <string name="import_confirmation_title">Confirmare import</string>
     <string name="import_confirmation_message">Acest lucru va importa date din fișier. Înregistrările existente cu ID-uri de potrivire vor fi înlocuite. Doriți să continuați?</string>
+    <string name="channel_title">Canal</string>
+    <string name="misskey_channel_tab_following">Urmăriți</string>
+    <string name="misskey_channel_tab_favorites">Favorite</string>
+    <string name="misskey_channel_tab_owned">Deținute</string>
+    <string name="misskey_channel_tab_featured">Recomandate</string>
 </resources>

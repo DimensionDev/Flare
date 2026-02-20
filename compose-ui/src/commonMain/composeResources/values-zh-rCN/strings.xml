@@ -72,6 +72,8 @@
     <string name="login_expired">登录会话已过期</string>
     <string name="login_expired_message">点击重新登录</string>
     <string name="login_expired_relogin">重新登录</string>
+    <string name="permission_denied_title">权限被拒绝</string>
+    <string name="permission_denied_message">您需要重新登录才能访问此页面</string>
     <string name="misskey_compose_local_only">仅本站可见</string>
     <string name="misskey_compose_local_only_description">只有在此实例上的用户可以看到此帖子</string>
     <string name="misskey_item_action_renote">转发</string>
@@ -378,4 +380,5 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">帮助我们翻译 Flare</string>
     <string name="settings_privacy_policy">隐私政策</string>
+    <string name="channel_title">频道</string>
 </resources>

@@ -316,4 +316,9 @@
     <string name="import_error">データのインポートに失敗しました</string>
     <string name="import_confirmation_title">インポートの確認</string>
     <string name="import_confirmation_message">これはファイルからデータをインポートします。一致するIDを持つ既存のレコードは置き換えられます。続行しますか？</string>
+    <string name="channel_title">チャンネル</string>
+    <string name="misskey_channel_tab_following">フォロー中</string>
+    <string name="misskey_channel_tab_favorites">お気に入り</string>
+    <string name="misskey_channel_tab_owned">所有しています</string>
+    <string name="misskey_channel_tab_featured">注目</string>
 </resources>

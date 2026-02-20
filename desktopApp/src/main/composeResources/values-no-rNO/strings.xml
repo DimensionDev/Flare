@@ -317,4 +317,9 @@
     <string name="import_error">Kan ikke importere data</string>
     <string name="import_confirmation_title">Bekreft import</string>
     <string name="import_confirmation_message">Dette vil importere data fra filen. Eksisterende poster med samsvarende ID-er vil bli erstattet. Vil du fortsette?</string>
+    <string name="channel_title">Kanal</string>
+    <string name="misskey_channel_tab_following">Følger</string>
+    <string name="misskey_channel_tab_favorites">Favoritter</string>
+    <string name="misskey_channel_tab_owned">Eid</string>
+    <string name="misskey_channel_tab_featured">Anbefalt</string>
 </resources>

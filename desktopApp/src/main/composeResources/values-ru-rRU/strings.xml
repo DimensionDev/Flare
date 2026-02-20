@@ -319,4 +319,9 @@
     <string name="import_error">Не удалось импортировать данные</string>
     <string name="import_confirmation_title">Подтвердить импорт</string>
     <string name="import_confirmation_message">Это импортирует данные из файла. Существующие записи с соответствующими идентификаторами будут заменены. Вы хотите продолжить?</string>
+    <string name="channel_title">Канал</string>
+    <string name="misskey_channel_tab_following">Подписки</string>
+    <string name="misskey_channel_tab_favorites">Избранное</string>
+    <string name="misskey_channel_tab_owned">Приобретено</string>
+    <string name="misskey_channel_tab_featured">Избранные</string>
 </resources>

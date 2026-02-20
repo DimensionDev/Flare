@@ -316,4 +316,9 @@
     <string name="import_error">导入数据失败</string>
     <string name="import_confirmation_title">确认导入</string>
     <string name="import_confirmation_message">这将从文件中导入数据。将替换匹配ID的现有记录。您确定要继续吗？</string>
+    <string name="channel_title">频道</string>
+    <string name="misskey_channel_tab_following">正在关注</string>
+    <string name="misskey_channel_tab_favorites">收藏夹</string>
+    <string name="misskey_channel_tab_owned">拥有的</string>
+    <string name="misskey_channel_tab_featured">精选</string>
 </resources>

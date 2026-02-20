@@ -72,6 +72,8 @@
     <string name="login_expired">انتهت صلاحية جلسة تسجيل الدخول</string>
     <string name="login_expired_message">انقر لتسجيل الدخول مرة أخرى</string>
     <string name="login_expired_relogin">تسجيل الدخول مرة أخرى</string>
+    <string name="permission_denied_title">تم رفض الإذن</string>
+    <string name="permission_denied_message">تحتاج إلى إعادة تسجيل الدخول للوصول إلى هذه الصفحة</string>
     <string name="misskey_compose_local_only">محلي فقط</string>
     <string name="misskey_compose_local_only_description">يمكن فقط للمستخدمين في هذا المظهر رؤية هذه المشاركة</string>
     <string name="misskey_item_action_renote">Renote</string>
@@ -378,4 +380,5 @@
     <string name="settings_about_localization">كرودن</string>
     <string name="settings_about_localization_description">ساعدنا في ترجمة الشفق</string>
     <string name="settings_privacy_policy">سياسة الخصوصية</string>
+    <string name="channel_title">قناة</string>
 </resources>

@@ -7,7 +7,7 @@
     <string name="home_compose">Composer</string>
     <string name="home_login">Se connecter</string>
     <string name="home_settings">Réglages</string>
-    <string name="home_tab_home_title">Domicile</string>
+    <string name="home_tab_home_title">Accueil</string>
     <string name="home_tab_notifications_title">Notifications</string>
     <string name="home_tab_me_title">Moi</string>
     <string name="home_tab_discover_title">Découvrir</string>
@@ -127,7 +127,7 @@
     <string name="settings_storage_title">Stockage</string>
     <string name="settings_storage_subtitle">Gérer le stockage de Fusée éclairante</string>
     <string name="settings_about_title">À propos de</string>
-    <string name="settings_about_subtitle">En savoir plus sur Fusée éclairante</string>
+    <string name="settings_about_subtitle">En savoir plus sur Flare</string>
     <string name="settings_side_panel">Personnalisation du panneau latéral</string>
     <string name="settings_side_panel_description">Personnaliser le panneau latéral</string>
     <string name="settings_local_filter_title">Filtre local</string>
@@ -228,7 +228,7 @@
     <string name="compose_media_sensitive">Marquer le média comme sensible</string>
     <string name="compose_notification_title">Envoyé avec succès</string>
     <string name="misskey_visibility_public">Publique</string>
-    <string name="misskey_visibility_home">Domicile</string>
+    <string name="misskey_visibility_home">Accueil</string>
     <string name="misskey_visibility_followers">Abonnés</string>
     <string name="misskey_visibility_specified">Spécifié</string>
     <string name="misskey_visibility_public_description">N\'importe qui peut voir et améliorer ce message</string>
@@ -313,4 +313,9 @@
     <string name="import_error">Impossible d\'importer les données</string>
     <string name="import_confirmation_title">Confirmer l\'importation</string>
     <string name="import_confirmation_message">Cela va importer des données à partir du fichier. Les enregistrements existants avec des identifiants correspondants seront remplacés. Voulez-vous continuer ?</string>
+    <string name="channel_title">Chaîne</string>
+    <string name="misskey_channel_tab_following">Abonnements</string>
+    <string name="misskey_channel_tab_favorites">Favoris</string>
+    <string name="misskey_channel_tab_owned">Possédé</string>
+    <string name="misskey_channel_tab_featured">En vedette</string>
 </resources>

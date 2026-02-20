@@ -72,6 +72,8 @@
     <string name="login_expired">Die Anmeldesitzung ist abgelaufen</string>
     <string name="login_expired_message">Zum erneuten Anmelden klicken</string>
     <string name="login_expired_relogin">Erneut anmelden</string>
+    <string name="permission_denied_title">Berechtigung verweigert</string>
+    <string name="permission_denied_message">Sie müssen sich erneut anmelden, um auf diese Seite zugreifen zu können</string>
     <string name="misskey_compose_local_only">Nur lokal</string>
     <string name="misskey_compose_local_only_description">Nur Benutzer in dieser Instanz können diesen Beitrag sehen</string>
     <string name="misskey_item_action_renote">Renote</string>
@@ -378,4 +380,5 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Hilf uns, Flare zu übersetzen</string>
     <string name="settings_privacy_policy">Datenschutzerklärung</string>
+    <string name="channel_title">Kanal</string>
 </resources>

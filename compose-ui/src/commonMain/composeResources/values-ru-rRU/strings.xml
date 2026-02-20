@@ -72,6 +72,8 @@
     <string name="login_expired">Сессия входа истекла</string>
     <string name="login_expired_message">Нажмите, чтобы войти снова</string>
     <string name="login_expired_relogin">Войти снова</string>
+    <string name="permission_denied_title">Доступ запрещен</string>
+    <string name="permission_denied_message">Вам нужно повторно войти для доступа к этой странице</string>
     <string name="misskey_compose_local_only">Только локальные</string>
     <string name="misskey_compose_local_only_description">Только пользователи этого экземпляра могут видеть это сообщение</string>
     <string name="misskey_item_action_renote">Renote</string>
@@ -378,4 +380,5 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Помогите нам перевести сигнал</string>
     <string name="settings_privacy_policy">Политика конфиденциальности</string>
+    <string name="channel_title">Канал</string>
 </resources>

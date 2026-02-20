@@ -315,6 +315,11 @@
     <string name="podcast_ended">Podcast päättyi</string>
     <string name="podcast_living">Elävä Podcast</string>
     <string name="home_tab_antennas_title">Antenni</string>
+    <string name="home_tab_channels_title">Kanavat</string>
+    <string name="misskey_channel_tab_following">Seurataan</string>
+    <string name="misskey_channel_tab_favorites">Suosikit</string>
+    <string name="misskey_channel_tab_owned">Omistettu</string>
+    <string name="misskey_channel_tab_featured">Suositellut</string>
     <string name="antennas_empty">Ei antennia</string>
     <string name="home_tab_mixed_timeline_title">Sekoitettu</string>
     <string name="tab_settings_mixed_timeline">Lisää sekoitettu aikajana-välilehti</string>
@@ -351,4 +356,9 @@
     <string name="tab_settings_group_name_placeholder">Ryhmän nimi</string>
     <string name="tab_settings_group_default_name">Uusi Ryhmä</string>
     <string name="status_share_sheet_theme_title">Teema</string>
+    <string name="channel_title">Kanava</string>
+    <string name="channel_item_follow">Seuraa</string>
+    <string name="channel_item_unfollow">Lopeta</string>
+    <string name="channel_item_favourite">Suosikki</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

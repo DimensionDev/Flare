@@ -317,4 +317,9 @@
     <string name="import_error">Tietojen tuonti epäonnistui</string>
     <string name="import_confirmation_title">Vahvista Tuonti</string>
     <string name="import_confirmation_message">Tämä tuo tiedostosta tietoja. Olemassa olevat tietueet ja vastaavat ID:t korvataan. Haluatko jatkaa?</string>
+    <string name="channel_title">Kanava</string>
+    <string name="misskey_channel_tab_following">Seurataan</string>
+    <string name="misskey_channel_tab_favorites">Suosikit</string>
+    <string name="misskey_channel_tab_owned">Omistettu</string>
+    <string name="misskey_channel_tab_featured">Suositellut</string>
 </resources>

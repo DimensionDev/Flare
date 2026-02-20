@@ -310,6 +310,11 @@
     <string name="podcast_ended">Подкаст закінчився</string>
     <string name="podcast_living">Подкаст в реальному часі</string>
     <string name="home_tab_antennas_title">Антена</string>
+    <string name="home_tab_channels_title">Канали</string>
+    <string name="misskey_channel_tab_following">Слідкую</string>
+    <string name="misskey_channel_tab_favorites">Вподобання</string>
+    <string name="misskey_channel_tab_owned">Отримано</string>
+    <string name="misskey_channel_tab_featured">Рекомендовані</string>
     <string name="antennas_empty">Немає антени</string>
     <string name="home_tab_mixed_timeline_title">Змішаний</string>
     <string name="tab_settings_mixed_timeline">Додати змішану вкладку часової шкали</string>
@@ -341,4 +346,9 @@
     <string name="tab_settings_group_name_placeholder">Назва групи</string>
     <string name="tab_settings_group_default_name">Нова група</string>
     <string name="status_share_sheet_theme_title">Тема</string>
+    <string name="channel_title">Канал</string>
+    <string name="channel_item_follow">Слідкувати</string>
+    <string name="channel_item_unfollow">Не стежити</string>
+    <string name="channel_item_favourite">Вибране</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

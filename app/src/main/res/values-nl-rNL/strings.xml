@@ -315,6 +315,11 @@
     <string name="podcast_ended">Podcast beëindigd</string>
     <string name="podcast_living">Podcast live</string>
     <string name="home_tab_antennas_title">Antenne</string>
+    <string name="home_tab_channels_title">Kanalen</string>
+    <string name="misskey_channel_tab_following">Volgt</string>
+    <string name="misskey_channel_tab_favorites">Favorieten</string>
+    <string name="misskey_channel_tab_owned">Eigendom</string>
+    <string name="misskey_channel_tab_featured">Aanbevolen</string>
     <string name="antennas_empty">Geen antennes</string>
     <string name="home_tab_mixed_timeline_title">Gemengd</string>
     <string name="tab_settings_mixed_timeline">Voeg gemengde tabblad tijdlijn toe</string>
@@ -351,4 +356,9 @@
     <string name="tab_settings_group_name_placeholder">Groep naam</string>
     <string name="tab_settings_group_default_name">Nieuwe groep</string>
     <string name="status_share_sheet_theme_title">Thema</string>
+    <string name="channel_title">Kanaal</string>
+    <string name="channel_item_follow">Volgen</string>
+    <string name="channel_item_unfollow">Ontvolgen</string>
+    <string name="channel_item_favourite">Favoriete</string>
+    <string name="channel_item_unfavourite">Unfavourite</string>
 </resources>

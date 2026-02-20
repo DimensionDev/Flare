@@ -72,6 +72,8 @@
     <string name="login_expired">Sessionen för inloggning har gått ut</string>
     <string name="login_expired_message">Klicka för att logga in igen</string>
     <string name="login_expired_relogin">Logga in igen</string>
+    <string name="permission_denied_title">Åtkomst nekad</string>
+    <string name="permission_denied_message">Du måste logga in igen för att komma åt denna sida</string>
     <string name="misskey_compose_local_only">Endast lokalt</string>
     <string name="misskey_compose_local_only_description">Endast användare på denna instans kan se detta inlägg</string>
     <string name="misskey_item_action_renote">Renote</string>
@@ -378,4 +380,5 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Hjälp oss att översätta Flare</string>
     <string name="settings_privacy_policy">Integritetspolicy</string>
+    <string name="channel_title">Kanal</string>
 </resources>

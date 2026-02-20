@@ -235,4 +235,6 @@
     <string name="settings_storage_app_log">Uygulama günlüğünü aç</string>
     <string name="settings_storage_app_log_description">Uygulama günlüğünü görüntüle</string>
     <string name="deeplink_account_selection_browser">Tarayıcıda aç</string>
+    <string name="misskey_channel_tab_following">Takip Edilenler</string>
+    <string name="misskey_channel_tab_featured">Özellikli</string>
 </resources>

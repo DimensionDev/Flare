@@ -72,6 +72,8 @@
     <string name="login_expired">Сесію входу закрито</string>
     <string name="login_expired_message">Нажміть кнопку для входу знову</string>
     <string name="login_expired_relogin">Знову увійти в систему</string>
+    <string name="permission_denied_title">Немає дозволу</string>
+    <string name="permission_denied_message">Ви повинні авторизуватися повторно для того, щоб отримати доступ до цієї сторінки</string>
     <string name="misskey_compose_local_only">Лише локально</string>
     <string name="misskey_compose_local_only_description">Тільки користувачі цього екземпляру можуть бачити цей пост</string>
     <string name="misskey_item_action_renote">Renote</string>
@@ -378,4 +380,5 @@
     <string name="settings_about_localization">Кравдін</string>
     <string name="settings_about_localization_description">Допоможіть нам перекласти Flare</string>
     <string name="settings_privacy_policy">Політика конфіденційності</string>
+    <string name="channel_title">Канал</string>
 </resources>

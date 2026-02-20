@@ -230,4 +230,6 @@
     <string name="settings_storage_app_log">Mở nhật ký ứng dụng</string>
     <string name="settings_storage_app_log_description">Xem nhật ký ứng dụng</string>
     <string name="deeplink_account_selection_browser">Mở trong trình duyệt</string>
+    <string name="misskey_channel_tab_following">Đang theo dõi</string>
+    <string name="misskey_channel_tab_featured">Nổi bật</string>
 </resources>

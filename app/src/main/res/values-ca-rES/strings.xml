@@ -237,10 +237,13 @@
     <string name="podcast_ended">Podcast finalitzat</string>
     <string name="podcast_living">Podcast en directe</string>
     <string name="home_tab_antennas_title">Antena</string>
+    <string name="misskey_channel_tab_following">Seguint</string>
+    <string name="misskey_channel_tab_featured">Destacats</string>
     <string name="antennas_empty">Sense antenes</string>
     <string name="home_tab_mixed_timeline_title">Mixt</string>
     <string name="tab_settings_mixed_timeline">Afegir fitxa de línia de temps mixta</string>
     <string name="tab_settings_mixed_timeline_desc">La línia de temps mixta combinarà el resultat de totes les línies de temps en una fitxa</string>
     <string name="deeplink_account_selection_browser">Obre al navegador</string>
     <string name="status_share_sheet_theme_title">Tema</string>
+    <string name="channel_item_follow">Seguir</string>
 </resources>

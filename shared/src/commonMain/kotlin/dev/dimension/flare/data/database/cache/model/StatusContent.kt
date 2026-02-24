@@ -125,6 +125,12 @@ internal sealed interface StatusContent {
     }
 
     @Serializable
+    @SerialName("nostr")
+    data class Nostr internal constructor(
+        internal val json: String,
+    ) : StatusContent
+
+    @Serializable
     @SerialName("Test")
     data class Test internal constructor(
         internal val data: String,

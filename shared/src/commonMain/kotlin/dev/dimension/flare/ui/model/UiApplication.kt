@@ -63,6 +63,7 @@ public sealed interface UiApplication {
                 PlatformType.xQt -> XQT
 
                 PlatformType.VVo -> VVo
+                PlatformType.Nostr -> throw UnsupportedOperationException("Nostr should not use DbApplication")
             }
     }
 }

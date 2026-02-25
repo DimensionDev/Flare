@@ -2,13 +2,16 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Immutable
 public sealed interface UiMedia {
     public val url: String
     public val description: String?
     public val customHeaders: ImmutableMap<String, String>?
 
+    @Serializable
     @Immutable
     public data class Image internal constructor(
         override val url: String,
@@ -23,6 +26,7 @@ public sealed interface UiMedia {
             get() = (width / (height.takeUnless { it == 0f } ?: 1f)).takeUnless { it == 0f } ?: 1f
     }
 
+    @Serializable
     @Immutable
     public data class Video internal constructor(
         override val url: String,
@@ -36,6 +40,7 @@ public sealed interface UiMedia {
             get() = (width / (height.takeUnless { it == 0f } ?: 1f)).takeUnless { it == 0f } ?: 1f
     }
 
+    @Serializable
     @Immutable
     public data class Gif internal constructor(
         override val url: String,
@@ -49,6 +54,7 @@ public sealed interface UiMedia {
             get() = (width / (height.takeUnless { it == 0f } ?: 1f)).takeUnless { it == 0f } ?: 1f
     }
 
+    @Serializable
     @Immutable
     public data class Audio internal constructor(
         override val url: String,

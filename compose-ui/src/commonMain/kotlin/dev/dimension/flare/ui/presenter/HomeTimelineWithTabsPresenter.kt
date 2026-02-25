@@ -108,12 +108,28 @@ public class HomeTimelineWithTabsPresenter(
                 settingsRepository.updateTabSettings {
                     copy(
                         mainTabs =
-                            mainTabs.filterNot {
-                                it.account ==
-                                    AccountType.Specific(
-                                        accountKey,
-                                    )
-                            },
+                            mainTabs
+                                .filterNot {
+                                    it.account ==
+                                        AccountType.Specific(
+                                            accountKey,
+                                        )
+                                }.map {
+                                    if (it is MixedTimelineTabItem) {
+                                        it.copy(
+                                            subTimelineTabItem =
+                                                it.subTimelineTabItem
+                                                    .filterNot {
+                                                        it.account ==
+                                                            AccountType.Specific(
+                                                                accountKey,
+                                                            )
+                                                    }.toImmutableList(),
+                                        )
+                                    } else {
+                                        it
+                                    }
+                                },
                     )
                 }
             }

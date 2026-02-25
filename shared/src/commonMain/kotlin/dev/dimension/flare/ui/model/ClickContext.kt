@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.model
 
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import kotlinx.serialization.Serializable
 
 public data class ClickContext(
@@ -12,9 +14,11 @@ internal sealed interface ClickEvent {
     data object Noop : ClickEvent
 
     @Serializable
-    data class Deeplink(
+    data class Deeplink private constructor(
         val url: String,
-    ) : ClickEvent
+    ) : ClickEvent {
+        constructor(route: DeeplinkRoute) : this(route.toUri())
+    }
 }
 
 internal val ClickEvent.onClicked: ClickContext.() -> Unit

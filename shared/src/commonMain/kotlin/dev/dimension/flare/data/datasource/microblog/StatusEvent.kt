@@ -1,7 +1,9 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.model.MicroBlogKey
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.Serializable
 
 internal sealed interface StatusEvent {
     val accountKey: MicroBlogKey
@@ -138,5 +140,171 @@ internal sealed interface StatusEvent {
             statusKey: MicroBlogKey,
             favorited: Boolean,
         )
+    }
+}
+
+@Serializable
+internal sealed interface PostEvent {
+    @Serializable
+    sealed interface PollEvent : PostEvent {
+        val options: ImmutableList<Int>
+    }
+
+    @Serializable
+    sealed interface Mastodon : PostEvent {
+        @Serializable
+        data class Reblog(
+            val statusKey: MicroBlogKey,
+            val reblogged: Boolean,
+        ) : Mastodon
+
+        @Serializable
+        data class Like(
+            val statusKey: MicroBlogKey,
+            val liked: Boolean,
+        ) : Mastodon
+
+        @Serializable
+        data class Bookmark(
+            val statusKey: MicroBlogKey,
+            val bookmarked: Boolean,
+        ) : Mastodon
+
+        @Serializable
+        data class Vote(
+            val statusKey: MicroBlogKey,
+            override val options: ImmutableList<Int>,
+        ) : Mastodon,
+            PollEvent
+
+        @Serializable
+        data class AcceptFollowRequest(
+            val userKey: MicroBlogKey,
+            val notificationStatusKey: MicroBlogKey,
+        ) : Mastodon
+
+        @Serializable
+        data class RejectFollowRequest(
+            val userKey: MicroBlogKey,
+            val notificationStatusKey: MicroBlogKey,
+        ) : Mastodon
+    }
+
+    @Serializable
+    sealed interface Pleroma : PostEvent {
+        @Serializable
+        data class React(
+            val statusKey: MicroBlogKey,
+            val hasReacted: Boolean,
+            val reaction: String,
+        ) : Pleroma
+    }
+
+    @Serializable
+    sealed interface Misskey : PostEvent {
+        @Serializable
+        data class React(
+            val statusKey: MicroBlogKey,
+            val hasReacted: Boolean,
+            val reaction: String,
+        ) : Misskey
+
+        @Serializable
+        data class Renote(
+            val statusKey: MicroBlogKey,
+        ) : Misskey
+
+        @Serializable
+        data class Vote(
+            val statusKey: MicroBlogKey,
+            override val options: ImmutableList<Int>,
+        ) : Misskey,
+            PollEvent
+
+        @Serializable
+        data class Favourite(
+            val statusKey: MicroBlogKey,
+            val favourited: Boolean,
+        ) : Misskey
+
+        @Serializable
+        data class AcceptFollowRequest(
+            val userKey: MicroBlogKey,
+            val notificationStatusKey: MicroBlogKey,
+        ) : Misskey
+
+        @Serializable
+        data class RejectFollowRequest(
+            val userKey: MicroBlogKey,
+            val notificationStatusKey: MicroBlogKey,
+        ) : Misskey
+    }
+
+    @Serializable
+    sealed interface Bluesky : PostEvent {
+        @Serializable
+        data class Reblog(
+            val statusKey: MicroBlogKey,
+            val reblogged: Boolean,
+        ) : Bluesky
+
+        @Serializable
+        data class Like(
+            val statusKey: MicroBlogKey,
+            val liked: Boolean,
+        ) : Bluesky
+
+        @Serializable
+        data class Bookmark(
+            val statusKey: MicroBlogKey,
+            val bookmarked: Boolean,
+        ) : Bluesky
+
+        @Serializable
+        data class Unbookmark(
+            val statusKey: MicroBlogKey,
+        ) : Bluesky
+    }
+
+    @Serializable
+    sealed interface XQT : PostEvent {
+        @Serializable
+        data class Retweet(
+            val statusKey: MicroBlogKey,
+            val retweeted: Boolean,
+        ) : XQT
+
+        @Serializable
+        data class Like(
+            val statusKey: MicroBlogKey,
+            val liked: Boolean,
+        ) : XQT
+
+        @Serializable
+        data class Bookmark(
+            val statusKey: MicroBlogKey,
+            val bookmarked: Boolean,
+        ) : XQT
+    }
+
+    @Serializable
+    sealed interface VVO : PostEvent {
+        @Serializable
+        data class Like(
+            val statusKey: MicroBlogKey,
+            val liked: Boolean,
+        ) : VVO
+
+        @Serializable
+        data class LikeComment(
+            val statusKey: MicroBlogKey,
+            val liked: Boolean,
+        ) : VVO
+
+        @Serializable
+        data class Favorite(
+            val statusKey: MicroBlogKey,
+            val favorited: Boolean,
+        ) : VVO
     }
 }

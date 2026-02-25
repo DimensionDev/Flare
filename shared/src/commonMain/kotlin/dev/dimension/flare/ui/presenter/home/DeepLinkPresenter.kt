@@ -7,7 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.accountServiceFlow
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.model.DeeplinkEvent
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.route.APPSCHEMA
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -51,7 +55,20 @@ public class DeepLinkPresenter(
         var pendingUrl by remember { mutableStateOf<String?>(null) }
         pendingUrl?.let { url ->
             LaunchedEffect(url) {
-                if (url.startsWith("$APPSCHEMA://")) {
+                if (DeeplinkEvent.isDeeplinkEvent(url)) {
+                    val event = DeeplinkEvent.parse(url)
+                    if (event != null) {
+                        accountServiceFlow(
+                            accountType = AccountType.Specific(event.accountKey),
+                            repository = accountRepository,
+                        ).collect { service ->
+                            if (service is AuthenticatedMicroblogDataSource) {
+                                service.handleEvent(event.postEvent)
+                            }
+                        }
+                    }
+                    pendingUrl = null
+                } else if (DeeplinkRoute.isDeeplink(url)) {
                     DeeplinkRoute.parse(url)?.let {
                         if (it is DeeplinkRoute.OpenLinkDirectly) {
                             withContext(Dispatchers.Main) {

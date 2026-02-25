@@ -223,6 +223,8 @@ public sealed class DeeplinkRoute {
             runCatching {
                 ProtoBuf.decodeFromHexString<RoutePackage>(uri.removePrefix("$APPSCHEMA://")).route
             }.getOrNull()
+
+        public fun isDeeplink(uri: String): Boolean = uri.startsWith("$APPSCHEMA://")
     }
 }
 

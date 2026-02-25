@@ -41,6 +41,8 @@ internal interface AuthenticatedMicroblogDataSource :
     )
 
     fun notificationBadgeCount(): CacheData<Int> = Cacheable({ }, { flowOf(0) })
+
+    fun handleEvent(event: PostEvent)
 }
 
 internal interface RelationDataSource {

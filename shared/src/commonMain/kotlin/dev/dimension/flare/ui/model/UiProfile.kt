@@ -76,6 +76,13 @@ public data class UiProfile internal constructor(
         }
     }
 
+    val host: String? by lazy {
+        handle
+            .removePrefix("@")
+            .split("@")
+            .getOrNull(1)
+    }
+
     @Serializable
     public sealed interface BottomContent {
         @Serializable

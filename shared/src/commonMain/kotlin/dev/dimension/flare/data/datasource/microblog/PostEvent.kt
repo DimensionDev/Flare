@@ -2,146 +2,145 @@ package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 
-internal sealed interface StatusEvent {
-    val accountKey: MicroBlogKey
-
-    interface Mastodon : StatusEvent {
-        fun reblog(
-            statusKey: MicroBlogKey,
-            reblogged: Boolean,
-        )
-
-        fun like(
-            statusKey: MicroBlogKey,
-            liked: Boolean,
-        )
-
-        fun bookmark(
-            statusKey: MicroBlogKey,
-            bookmarked: Boolean,
-        )
-
-        fun vote(
-            statusKey: MicroBlogKey,
-            id: String,
-            options: List<Int>,
-        )
-
-        fun acceptFollowRequest(
-            userKey: MicroBlogKey,
-            notificationStatusKey: MicroBlogKey,
-        )
-
-        fun rejectFollowRequest(
-            userKey: MicroBlogKey,
-            notificationStatusKey: MicroBlogKey,
-        )
-    }
-
-    interface Pleroma : Mastodon {
-        fun react(
-            statusKey: MicroBlogKey,
-            hasReacted: Boolean,
-            reaction: String,
-        )
-    }
-
-    interface Misskey : StatusEvent {
-        fun react(
-            statusKey: MicroBlogKey,
-            hasReacted: Boolean,
-            reaction: String,
-        )
-
-        fun renote(statusKey: MicroBlogKey)
-
-        fun vote(
-            statusKey: MicroBlogKey,
-            options: List<Int>,
-        )
-
-        fun favourite(
-            statusKey: MicroBlogKey,
-            favourited: Boolean,
-        )
-
-        fun favouriteState(statusKey: MicroBlogKey): Flow<Boolean>
-
-        fun acceptFollowRequest(
-            userKey: MicroBlogKey,
-            notificationStatusKey: MicroBlogKey,
-        )
-
-        fun rejectFollowRequest(
-            userKey: MicroBlogKey,
-            notificationStatusKey: MicroBlogKey,
-        )
-    }
-
-    interface Bluesky : StatusEvent {
-        fun reblog(
-            statusKey: MicroBlogKey,
-            cid: String,
-            uri: String,
-            repostUri: String?,
-        )
-
-        fun like(
-            statusKey: MicroBlogKey,
-            cid: String,
-            uri: String,
-            likedUri: String?,
-        )
-
-        fun bookmark(
-            statusKey: MicroBlogKey,
-            uri: String,
-            cid: String,
-        )
-
-        fun unbookmark(
-            statusKey: MicroBlogKey,
-            uri: String,
-        )
-    }
-
-    interface XQT : StatusEvent {
-        fun retweet(
-            statusKey: MicroBlogKey,
-            retweeted: Boolean,
-        )
-
-        fun like(
-            statusKey: MicroBlogKey,
-            liked: Boolean,
-        )
-
-        fun bookmark(
-            statusKey: MicroBlogKey,
-            bookmarked: Boolean,
-        )
-    }
-
-    interface VVO : StatusEvent {
-        fun like(
-            statusKey: MicroBlogKey,
-            liked: Boolean,
-        )
-
-        fun likeComment(
-            statusKey: MicroBlogKey,
-            liked: Boolean,
-        )
-
-        fun favorite(
-            statusKey: MicroBlogKey,
-            favorited: Boolean,
-        )
-    }
-}
+// internal sealed interface StatusEvent {
+//    val accountKey: MicroBlogKey
+//
+//    interface Mastodon : StatusEvent {
+//        fun reblog(
+//            statusKey: MicroBlogKey,
+//            reblogged: Boolean,
+//        )
+//
+//        fun like(
+//            statusKey: MicroBlogKey,
+//            liked: Boolean,
+//        )
+//
+//        fun bookmark(
+//            statusKey: MicroBlogKey,
+//            bookmarked: Boolean,
+//        )
+//
+//        fun vote(
+//            statusKey: MicroBlogKey,
+//            id: String,
+//            options: List<Int>,
+//        )
+//
+//        fun acceptFollowRequest(
+//            userKey: MicroBlogKey,
+//            notificationStatusKey: MicroBlogKey,
+//        )
+//
+//        fun rejectFollowRequest(
+//            userKey: MicroBlogKey,
+//            notificationStatusKey: MicroBlogKey,
+//        )
+//    }
+//
+//    interface Pleroma : Mastodon {
+//        fun react(
+//            statusKey: MicroBlogKey,
+//            hasReacted: Boolean,
+//            reaction: String,
+//        )
+//    }
+//
+//    interface Misskey : StatusEvent {
+//        fun react(
+//            statusKey: MicroBlogKey,
+//            hasReacted: Boolean,
+//            reaction: String,
+//        )
+//
+//        fun renote(statusKey: MicroBlogKey)
+//
+//        fun vote(
+//            statusKey: MicroBlogKey,
+//            options: List<Int>,
+//        )
+//
+//        fun favourite(
+//            statusKey: MicroBlogKey,
+//            favourited: Boolean,
+//        )
+//
+//        fun favouriteState(statusKey: MicroBlogKey): Flow<Boolean>
+//
+//        fun acceptFollowRequest(
+//            userKey: MicroBlogKey,
+//            notificationStatusKey: MicroBlogKey,
+//        )
+//
+//        fun rejectFollowRequest(
+//            userKey: MicroBlogKey,
+//            notificationStatusKey: MicroBlogKey,
+//        )
+//    }
+//
+//    interface Bluesky : StatusEvent {
+//        fun reblog(
+//            statusKey: MicroBlogKey,
+//            cid: String,
+//            uri: String,
+//            repostUri: String?,
+//        )
+//
+//        fun like(
+//            statusKey: MicroBlogKey,
+//            cid: String,
+//            uri: String,
+//            likedUri: String?,
+//        )
+//
+//        fun bookmark(
+//            statusKey: MicroBlogKey,
+//            uri: String,
+//            cid: String,
+//        )
+//
+//        fun unbookmark(
+//            statusKey: MicroBlogKey,
+//            uri: String,
+//        )
+//    }
+//
+//    interface XQT : StatusEvent {
+//        fun retweet(
+//            statusKey: MicroBlogKey,
+//            retweeted: Boolean,
+//        )
+//
+//        fun like(
+//            statusKey: MicroBlogKey,
+//            liked: Boolean,
+//        )
+//
+//        fun bookmark(
+//            statusKey: MicroBlogKey,
+//            bookmarked: Boolean,
+//        )
+//    }
+//
+//    interface VVO : StatusEvent {
+//        fun like(
+//            statusKey: MicroBlogKey,
+//            liked: Boolean,
+//        )
+//
+//        fun likeComment(
+//            statusKey: MicroBlogKey,
+//            liked: Boolean,
+//        )
+//
+//        fun favorite(
+//            statusKey: MicroBlogKey,
+//            favorited: Boolean,
+//        )
+//    }
+// }
 
 @Serializable
 internal sealed interface PostEvent {

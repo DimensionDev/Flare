@@ -36,4 +36,5 @@ public enum class UiIcon {
     Edit,
     Info,
     Pin,
+    Check,
 }

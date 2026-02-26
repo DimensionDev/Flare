@@ -8,7 +8,6 @@ import androidx.room.Relation
 import androidx.room.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import kotlin.time.Instant
@@ -17,13 +16,12 @@ import kotlin.uuid.Uuid
 @Entity(
     indices = [
         Index(
-            value = ["accountType", "statusKey", "pagingKey"],
+            value = ["statusKey", "pagingKey"],
             unique = true,
         ),
     ],
 )
 internal data class DbPagingTimeline(
-    val accountType: DbAccountType,
     val pagingKey: String,
     val statusKey: MicroBlogKey,
     val sortId: Long,
@@ -53,7 +51,44 @@ internal data class DbPagingTimelineWithStatus(
 internal data class DbStatusWithUser(
     @Embedded
     val data: DbStatus,
-    @Relation(parentColumn = "userKey", entityColumn = "userKey")
+    @Relation(
+        parentColumn = "statusKey",
+        entityColumn = "statusKey",
+        entity = DbStatusReference::class,
+    )
+    val references: List<DbStatusUserReferenceWithUser>,
+)
+
+@Entity(
+    tableName = "status_user_reference",
+    indices = [
+        Index(
+            value = [
+                "statusKey",
+                "referenceUserKey",
+            ],
+            unique = true,
+        ),
+    ],
+)
+internal data class DbStatusUserReference(
+    /**
+     * Id that being used in the database
+     */
+    @PrimaryKey
+    val _id: String,
+    val statusKey: MicroBlogKey,
+    val referenceUserKey: MicroBlogKey,
+)
+
+internal data class DbStatusUserReferenceWithUser(
+    @Embedded
+    val reference: DbStatusUserReference,
+    @Relation(
+        parentColumn = "referenceUserKey",
+        entityColumn = "userKey",
+        entity = DbUser::class,
+    )
     val user: DbUser?,
 )
 

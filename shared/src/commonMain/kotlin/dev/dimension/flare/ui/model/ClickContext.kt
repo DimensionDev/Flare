@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.model
 
+import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import kotlinx.serialization.Serializable
@@ -18,6 +20,23 @@ internal sealed interface ClickEvent {
         val url: String,
     ) : ClickEvent {
         constructor(route: DeeplinkRoute) : this(route.toUri())
+        constructor(route: DeeplinkEvent) : this(route.toUri())
+    }
+
+    companion object {
+        fun event(
+            accountKey: MicroBlogKey?,
+            postEvent: PostEvent,
+        ) = if (accountKey == null) {
+            Noop
+        } else {
+            Deeplink(
+                DeeplinkEvent(
+                    accountKey = accountKey,
+                    postEvent = postEvent,
+                ),
+            )
+        }
     }
 }
 

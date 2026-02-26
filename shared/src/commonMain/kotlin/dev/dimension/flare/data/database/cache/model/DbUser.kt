@@ -3,11 +3,9 @@ package dev.dimension.flare.data.database.cache.model
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
-import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.UiProfile
 
 @Entity(
     indices = [
@@ -21,13 +19,5 @@ internal data class DbUser(
     val name: String,
     val handle: String,
     val host: String,
-    val content: UserContent,
+    val content: UiProfile,
 )
-
-internal class UserContentConverters {
-    @TypeConverter
-    fun fromUserContent(content: UserContent): String = content.encodeJson()
-
-    @TypeConverter
-    fun toUserContent(value: String): UserContent = value.decodeJson()
-}

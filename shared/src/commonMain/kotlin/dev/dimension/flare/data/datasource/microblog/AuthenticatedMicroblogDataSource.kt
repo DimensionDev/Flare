@@ -1,54 +1,47 @@
 package dev.dimension.flare.data.datasource.microblog
 
-import androidx.paging.PagingData
-import dev.dimension.flare.common.CacheData
-import dev.dimension.flare.common.Cacheable
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import dev.dimension.flare.ui.model.UiTimelineV2
 
-internal interface AuthenticatedMicroblogDataSource :
-    MicroblogDataSource,
-    StatusEvent {
-    fun notification(
-        type: NotificationFilter = NotificationFilter.All,
-        pageSize: Int = 20,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>>
+internal interface AuthenticatedMicroblogDataSource : MicroblogDataSource {
+    val accountKey: MicroBlogKey
+
+    fun notification(type: NotificationFilter = NotificationFilter.All): RemoteLoader<UiTimelineV2>
 
     val supportedNotificationFilter: List<NotificationFilter>
-
-    fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>>
 
     suspend fun compose(
         data: ComposeData,
         progress: (ComposeProgress) -> Unit,
     )
 
-    suspend fun deleteStatus(statusKey: MicroBlogKey)
+    fun deleteStatus(statusKey: MicroBlogKey)
 
     fun composeConfig(type: ComposeType): ComposeConfig
 
-    fun profileActions(): List<ProfileAction>
+    fun profileActions(): List<ActionMenu>
 
-    suspend fun follow(
-        userKey: MicroBlogKey,
-        relation: UiRelation,
-    )
-
-    fun notificationBadgeCount(): CacheData<Int> = Cacheable({ }, { flowOf(0) })
+    suspend fun notificationBadgeCount(): Int
 
     fun handleEvent(event: PostEvent)
 }
 
 internal interface RelationDataSource {
-    suspend fun block(userKey: MicroBlogKey)
+    suspend fun relation(userKey: MicroBlogKey): UiRelation
 
-    suspend fun mute(userKey: MicroBlogKey)
+    fun follow(userKey: MicroBlogKey)
+
+    fun unfollow(userKey: MicroBlogKey)
+
+    fun block(userKey: MicroBlogKey)
+
+    fun unblock(userKey: MicroBlogKey)
+
+    fun mute(userKey: MicroBlogKey)
+
+    fun unmute(userKey: MicroBlogKey)
 }
 
 internal enum class ComposeType {

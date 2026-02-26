@@ -1,7 +1,8 @@
 package dev.dimension.flare.data.datasource.mastodon
 
-import androidx.paging.PagingState
-import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.mastodon.api.SearchResources
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
@@ -14,27 +15,49 @@ internal class SearchUserPagingSource(
     private val query: String,
     private val following: Boolean = false,
     private val resolve: Boolean? = null,
-) : BasePagingSource<String, UiProfile>() {
-    override fun getRefreshKey(state: PagingState<String, UiProfile>): String? = null
+) : RemoteLoader<UiProfile> {
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiProfile> {
+        val response =
+            when (request) {
+                is PagingRequest.Prepend -> {
+                    return PagingResult(
+                        endOfPaginationReached = true,
+                    )
+                }
 
-    override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiProfile> {
-        service
-            .searchV2(
-                query = query,
-                limit = params.loadSize,
-                max_id = params.key,
-                type = "accounts",
-                following = following,
-                resolve = resolve,
-            ).accounts
-            ?.let { accounts ->
-                return LoadResult.Page(
-                    data = accounts.map { it.render(accountKey = accountKey, host = host) },
-                    prevKey = null,
-                    nextKey = accounts.lastOrNull()?.id?.takeIf { it != params.key && accounts.size == params.loadSize },
-                )
-            } ?: run {
-            return LoadResult.Error(Exception("No data"))
-        }
+                PagingRequest.Refresh -> {
+                    service
+                        .searchV2(
+                            query = query,
+                            limit = pageSize,
+                            type = "accounts",
+                            following = following,
+                            resolve = resolve,
+                        ).accounts ?: emptyList()
+                }
+
+                is PagingRequest.Append -> {
+                    service
+                        .searchV2(
+                            query = query,
+                            limit = pageSize,
+                            max_id = request.nextKey,
+                            type = "accounts",
+                            following = following,
+                            resolve = resolve,
+                        ).accounts ?: emptyList()
+                }
+            }
+
+        return PagingResult(
+            data = response.map { it.render(accountKey = accountKey, host = host) },
+            nextKey =
+                response.lastOrNull()?.id?.takeIf {
+                    (request !is PagingRequest.Append || it != request.nextKey) && response.size == pageSize
+                },
+        )
     }
 }

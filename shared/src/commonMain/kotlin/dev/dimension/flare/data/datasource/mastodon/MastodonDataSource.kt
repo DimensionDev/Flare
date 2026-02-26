@@ -1,18 +1,12 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.Pager
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.Mastodon
 import dev.dimension.flare.data.database.cache.mapper.toDb
-import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
@@ -21,18 +15,17 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.RelationDataSource
-import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.list.ListHandler
 import dev.dimension.flare.data.datasource.microblog.list.ListLoader
 import dev.dimension.flare.data.datasource.microblog.list.ListMemberHandler
 import dev.dimension.flare.data.datasource.microblog.list.ListMemberLoader
-import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
-import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
@@ -41,22 +34,19 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.toUi
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -64,7 +54,6 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -79,11 +68,9 @@ internal open class MastodonDataSource(
     val instance: String,
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
-    StatusEvent.Mastodon,
     ListDataSource,
     RelationDataSource {
     private val database: CacheDatabase by inject()
-    private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
     private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
@@ -97,63 +84,24 @@ internal open class MastodonDataSource(
         )
     }
 
+    override fun handleEvent(event: PostEvent) {
+    }
+
     override fun homeTimeline() =
         HomeTimelineRemoteMediator(
             service,
-            database,
             accountKey,
-        )
-
-    fun localTimeline(
-        pageSize: Int = 20,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator = publicTimelineLoader(local = true),
-        )
-
-    fun bookmarkTimeline(
-        pageSize: Int = 20,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator = bookmarkTimelineLoader(),
         )
 
     fun bookmarkTimelineLoader() =
         BookmarkTimelineRemoteMediator(
             service,
-            database,
             accountKey,
-        )
-
-    fun favouriteTimeline(
-        pageSize: Int = 20,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator = favouriteTimelineLoader(),
         )
 
     fun favouriteTimelineLoader() =
         FavouriteTimelineRemoteMediator(
             service,
-            database,
             accountKey,
         )
 
@@ -161,64 +109,35 @@ internal open class MastodonDataSource(
         ListTimelineRemoteMediator(
             listId,
             service,
-            database,
             accountKey,
-        )
-
-    fun publicTimeline(
-        pageSize: Int = 20,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator = publicTimelineLoader(local = false),
         )
 
     fun publicTimelineLoader(local: Boolean) =
         PublicTimelineRemoteMediator(
             service,
-            database,
             accountKey,
             local = local,
         )
 
-    override fun notification(
-        type: NotificationFilter,
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forNotification = true),
-            accountRepository = accountRepository,
-            mediator =
-                when (type) {
-                    NotificationFilter.All ->
-                        NotificationRemoteMediator(
-                            service,
-                            database,
-                            accountKey,
-                            onClearMarker = {
-                                MemCacheable.update(notificationMarkerKey, 0)
-                            },
-                        )
+    override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
+        when (type) {
+            NotificationFilter.All ->
+                NotificationRemoteMediator(
+                    service,
+                    accountKey,
+                    onClearMarker = {
+                        MemCacheable.update(notificationMarkerKey, 0)
+                    },
+                )
 
-                    NotificationFilter.Mention ->
-                        MentionRemoteMediator(
-                            service,
-                            database,
-                            accountKey,
-                        )
+            NotificationFilter.Mention ->
+                MentionRemoteMediator(
+                    service,
+                    accountKey,
+                )
 
-                    else -> throw IllegalStateException("Unsupported notification type")
-                },
-        )
+            else -> throw IllegalStateException("Unsupported notification type")
+        }
 
     override val supportedNotificationFilter: List<NotificationFilter>
         get() =
@@ -227,56 +146,76 @@ internal open class MastodonDataSource(
                 NotificationFilter.Mention,
             )
 
-    override fun userByAcct(acct: String): CacheData<UiProfile> {
-        val (name, host) = MicroBlogKey.valueOf(acct)
-        return Cacheable(
-            fetchSource = {
-                val user =
-                    service
-                        .lookupUserByAcct("$name@$host")
-                        ?.toDbUser(accountKey.host) ?: throw Exception("User not found")
-                database.userDao().insert(user)
-            },
-            cacheSource = {
-                database
-                    .userDao()
-                    .findByHandleAndHost(name, host, PlatformType.Mastodon)
-                    .distinctUntilChanged()
-                    .mapNotNull { it?.render(accountKey) }
-            },
-        )
-    }
+    override suspend fun userByNameAndHost(
+        name: String,
+        host: String,
+    ): UiProfile =
+        service
+            .lookupUserByAcct("$name@$host")
+            ?.render(
+                accountKey = accountKey,
+                host = accountKey.host,
+            ) ?: throw Exception("User not found")
 
-    override fun userById(id: String): CacheData<UiProfile> {
-        val userKey = MicroBlogKey(id, accountKey.host)
-        return Cacheable(
-            fetchSource = {
-                val user = service.lookupUser(id).toDbUser(accountKey.host)
-                database.userDao().insert(user)
-            },
-            cacheSource = {
-                database
-                    .userDao()
-                    .findByKey(userKey)
-                    .distinctUntilChanged()
-                    .mapNotNull { it?.render(accountKey) }
-            },
-        )
-    }
+//    override fun userByAcct(acct: String): CacheData<UiProfile> {
+//        val (name, host) = MicroBlogKey.valueOf(acct)
+//        return Cacheable(
+//            fetchSource = {
+//                val user =
+//                    service
+//                        .lookupUserByAcct("$name@$host")
+//                        ?.toDbUser(accountKey.host) ?: throw Exception("User not found")
+//                database.userDao().insert(user)
+//            },
+//            cacheSource = {
+//                database
+//                    .userDao()
+//                    .findByHandleAndHost(name, host, PlatformType.Mastodon)
+//                    .distinctUntilChanged()
+//                    .mapNotNull { it?.render(accountKey) }
+//            },
+//        )
+//    }
 
-    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> =
-        MemCacheable<UiRelation>(
-            relationKeyWithUserKey(userKey),
-        ) {
-            service.showFriendships(listOf(userKey.id)).first().toUi()
-        }.toUi()
+    override suspend fun userById(id: String): UiProfile =
+        service
+            .lookupUser(id)
+            .render(
+                accountKey = accountKey,
+                host = accountKey.host,
+            )
+
+//    override fun userById(id: String): CacheData<UiProfile> {
+//        val userKey = MicroBlogKey(id, accountKey.host)
+//        return Cacheable(
+//            fetchSource = {
+//                val user = service.lookupUser(id).toDbUser(accountKey.host)
+//                database.userDao().insert(user)
+//            },
+//            cacheSource = {
+//                database
+//                    .userDao()
+//                    .findByKey(userKey)
+//                    .distinctUntilChanged()
+//                    .mapNotNull { it?.render(accountKey) }
+//            },
+//        )
+//    }
+
+    override suspend fun relation(userKey: MicroBlogKey): UiRelation = service.showFriendships(listOf(userKey.id)).first().toUi()
+
+//    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> =
+//        MemCacheable<UiRelation>(
+//            relationKeyWithUserKey(userKey),
+//        ) {
+//            service.showFriendships(listOf(userKey.id)).first().toUi()
+//        }.toUi()
 
     override fun userTimeline(
         userKey: MicroBlogKey,
         mediaOnly: Boolean,
     ) = UserTimelineRemoteMediator(
         service,
-        database,
         accountKey,
         userKey,
         onlyMedia = mediaOnly,
@@ -291,30 +230,14 @@ internal open class MastodonDataSource(
             statusOnly = false,
         )
 
-    override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
-        val pagingKey = "status_only_$statusKey"
-        return Cacheable(
-            fetchSource = {
-                val result =
-                    service.lookupStatus(
-                        statusKey.id,
-                    )
-                Mastodon.save(
-                    database = database,
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                    data = listOf(result),
-                )
-            },
-            cacheSource = {
-                database
-                    .statusDao()
-                    .get(statusKey, AccountType.Specific(accountKey))
-                    .distinctUntilChanged()
-                    .mapNotNull { it?.content?.render(this) }
-            },
-        )
-    }
+    override suspend fun status(statusKey: MicroBlogKey): UiTimelineV2 =
+        service
+            .lookupStatus(
+                statusKey.id,
+            ).render(
+                accountKey = accountKey,
+                host = accountKey.host,
+            )
 
     fun emoji(): Cacheable<ImmutableMap<String, ImmutableList<UiEmoji>>> =
         Cacheable(
@@ -770,73 +693,53 @@ internal open class MastodonDataSource(
         }
     }
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            TrendsUserPagingSource(
-                service = service,
-                accountKey = accountKey,
-                host = accountKey.host,
-            )
-        }.flow
+    override fun discoverUsers(): RemoteLoader<UiProfile> =
+        TrendsUserLoader(
+            service = service,
+            accountKey = accountKey,
+            host = accountKey.host,
+        )
 
     override fun discoverStatuses() =
         DiscoverStatusRemoteMediator(
             service,
-            database,
             accountKey,
         )
 
-    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            TrendHashtagPagingSource(
-                service,
-            )
-        }.flow
+    override fun discoverHashtags(): RemoteLoader<UiHashtag> =
+        TrendHashtagPagingSource(
+            service = service,
+        )
 
     override fun searchStatus(query: String) =
         SearchStatusPagingSource(
             service,
-            database,
             accountKey,
             query,
         )
 
-    override fun searchUser(
-        query: String,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            SearchUserPagingSource(
-                service = service,
-                accountKey = accountKey,
-                query = query,
-                host = accountKey.host,
-            )
-        }.flow
+//    override fun searchUser(
+//        query: String,
+//        pageSize: Int,
+//    ): Flow<PagingData<UiProfile>> =
+//        Pager(
+//            config = pagingConfig,
+//        ) {
+//            SearchUserPagingSource(
+//                service = service,
+//                accountKey = accountKey,
+//                query = query,
+//                host = accountKey.host,
+//            )
+//        }.flow
 
-    fun searchFollowing(
-        query: String,
-        scope: CoroutineScope,
-        pageSize: Int = 20,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            SearchUserPagingSource(
-                service = service,
-                accountKey = accountKey,
-                query = query,
-                host = accountKey.host,
-                following = true,
-                resolve = false,
-            )
-        }.flow.cachedIn(scope)
+    override fun searchUser(query: String): RemoteLoader<UiProfile> =
+        SearchUserPagingSource(
+            service = service,
+            accountKey = accountKey,
+            query = query,
+            host = accountKey.host,
+        )
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
@@ -941,16 +844,23 @@ internal open class MastodonDataSource(
     private val notificationMarkerKey: String
         get() = "notificationBadgeCount_$accountKey"
 
-    override fun notificationBadgeCount(): CacheData<Int> {
-        return MemCacheable(
-            key = notificationMarkerKey,
-            fetchSource = {
-                val marker =
-                    service.notificationMarkers().notifications?.lastReadID ?: return@MemCacheable 0
-                val timeline = service.notification(min_id = marker)
-                timeline.size
-            },
-        )
+//    override fun notificationBadgeCount(): CacheData<Int> {
+//        return MemCacheable(
+//            key = notificationMarkerKey,
+//            fetchSource = {
+//                val marker =
+//                    service.notificationMarkers().notifications?.lastReadID ?: return@MemCacheable 0
+//                val timeline = service.notification(min_id = marker)
+//                timeline.size
+//            },
+//        )
+//    }
+
+    override suspend fun notificationBadgeCount(): Int {
+        val marker =
+            service.notificationMarkers().notifications?.lastReadID ?: return 0
+        val timeline = service.notification(min_id = marker)
+        return timeline.size
     }
 
     override fun vote(
@@ -1041,37 +951,53 @@ internal open class MastodonDataSource(
         }
     }
 
-    override fun following(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            MastodonFollowingPagingSource(
-                service = service,
-                host = accountKey.host,
-                userKey = userKey,
-                accountKey = accountKey,
-            )
-        }.flow.cachedIn(scope)
+//    override fun following(
+//        userKey: MicroBlogKey,
+//        scope: CoroutineScope,
+//        pageSize: Int,
+//    ): Flow<PagingData<UiProfile>> =
+//        Pager(
+//            config = pagingConfig,
+//        ) {
+//            MastodonFollowingPagingSource(
+//                service = service,
+//                host = accountKey.host,
+//                userKey = userKey,
+//                accountKey = accountKey,
+//            )
+//        }.flow.cachedIn(scope)
+//
+//    override fun fans(
+//        userKey: MicroBlogKey,
+//        scope: CoroutineScope,
+//        pageSize: Int,
+//    ): Flow<PagingData<UiProfile>> =
+//        Pager(
+//            config = pagingConfig,
+//        ) {
+//            MastodonFansPagingSource(
+//                service = service,
+//                host = accountKey.host,
+//                userKey = userKey,
+//                accountKey = accountKey,
+//            )
+//        }.flow.cachedIn(scope)
 
-    override fun fans(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            MastodonFansPagingSource(
-                service = service,
-                host = accountKey.host,
-                userKey = userKey,
-                accountKey = accountKey,
-            )
-        }.flow.cachedIn(scope)
+    override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> =
+        MastodonFansPagingSource(
+            service = service,
+            host = accountKey.host,
+            userKey = userKey,
+            accountKey = accountKey,
+        )
+
+    override fun following(userKey: MicroBlogKey): RemoteLoader<UiProfile> =
+        MastodonFollowingPagingSource(
+            service = service,
+            host = accountKey.host,
+            userKey = userKey,
+            accountKey = accountKey,
+        )
 
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         listOfNotNull(
@@ -1080,7 +1006,6 @@ internal open class MastodonDataSource(
                 loader =
                     UserTimelineRemoteMediator(
                         service = service,
-                        database = database,
                         accountKey = accountKey,
                         userKey = userKey,
                         withPinned = true,
@@ -1092,7 +1017,6 @@ internal open class MastodonDataSource(
                     UserTimelineRemoteMediator(
                         service = service,
                         accountKey = accountKey,
-                        database = database,
                         userKey = userKey,
                         withReplies = true,
                     ),

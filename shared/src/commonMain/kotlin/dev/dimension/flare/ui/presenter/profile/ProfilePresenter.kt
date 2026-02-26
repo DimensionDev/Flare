@@ -12,7 +12,7 @@ import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.NoActiveAccountException
 import dev.dimension.flare.data.repository.accountServiceFlow
@@ -22,6 +22,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.flattenUiState
@@ -154,7 +155,7 @@ public class ProfilePresenter(
                                 type = it.type,
                                 presenter =
                                     object : TimelinePresenter() {
-                                        override val loader: Flow<BaseTimelineLoader>
+                                        override val loader: Flow<RemoteLoader<UiTimelineV2>>
                                             get() = flowOf(it.loader)
                                     },
                             )

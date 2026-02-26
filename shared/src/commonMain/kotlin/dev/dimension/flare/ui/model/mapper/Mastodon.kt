@@ -4,9 +4,8 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import dev.dimension.flare.data.database.cache.model.DbEmoji
 import dev.dimension.flare.data.database.cache.model.EmojiContent
-import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Attachment
@@ -23,10 +22,10 @@ import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiList
@@ -35,7 +34,7 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -56,199 +55,200 @@ private val mastodonParser by lazy {
     )
 }
 
-internal fun Notification.render(
-    accountKey: MicroBlogKey,
-    event: StatusEvent.Mastodon,
-    references: Map<ReferenceType, List<StatusContent>>,
-): UiTimeline {
+internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
     requireNotNull(account) { "account is null" }
     val user = account.render(accountKey, host = accountKey.host)
-    val status =
-        (references[ReferenceType.Notification]?.firstOrNull() as? StatusContent.Mastodon)
-            ?.data
-            ?.renderStatus(
-                host = accountKey.host,
-                accountKey = accountKey,
-                dataSource = event,
-            )
-    val topMessageType =
-        when (type) {
-            NotificationTypes.Follow ->
-                UiTimeline.TopMessage.MessageType.Mastodon
-                    .Follow(id = id.orEmpty())
-
-            NotificationTypes.Favourite ->
-                UiTimeline.TopMessage.MessageType.Mastodon
-                    .Favourite(id = id.orEmpty())
-
-            NotificationTypes.Reblog ->
-                UiTimeline.TopMessage.MessageType.Mastodon
-                    .Reblogged(id = id.orEmpty())
-
-            NotificationTypes.Mention ->
-                UiTimeline.TopMessage.MessageType.Mastodon
-                    .Mention(id = id.orEmpty())
-
-            NotificationTypes.Poll ->
-                UiTimeline.TopMessage.MessageType.Mastodon
-                    .Poll(id = id.orEmpty())
-
-            NotificationTypes.FollowRequest ->
-                UiTimeline.TopMessage.MessageType.Mastodon
-                    .FollowRequest(id = id.orEmpty())
-
-            NotificationTypes.Status ->
-                UiTimeline.TopMessage.MessageType.Mastodon
-                    .Status(id = id.orEmpty())
-
-            NotificationTypes.Update ->
-                UiTimeline.TopMessage.MessageType.Mastodon
-                    .Update(id = id.orEmpty())
-
-            null ->
-                UiTimeline.TopMessage.MessageType.Mastodon
-                    .UnKnown(id = id.orEmpty())
-        }
-    val topMessage =
-        topMessageType.let {
-            UiTimeline.TopMessage(
-                user = user,
-                icon =
-                    when (type) {
-                        NotificationTypes.Follow -> UiTimeline.TopMessage.Icon.Follow
-                        NotificationTypes.Favourite -> UiTimeline.TopMessage.Icon.Favourite
-                        NotificationTypes.Reblog -> UiTimeline.TopMessage.Icon.Retweet
-                        NotificationTypes.Mention -> UiTimeline.TopMessage.Icon.Mention
-                        NotificationTypes.Poll -> UiTimeline.TopMessage.Icon.Poll
-                        NotificationTypes.FollowRequest -> UiTimeline.TopMessage.Icon.Follow
-                        NotificationTypes.Status -> UiTimeline.TopMessage.Icon.Edit
-                        NotificationTypes.Update -> UiTimeline.TopMessage.Icon.Edit
-                        null -> UiTimeline.TopMessage.Icon.Info
-                    },
-                type = it,
-                onClicked = {
-                    launcher.launch(
-                        DeeplinkRoute.Profile
-                            .User(
-                                accountType = AccountType.Specific(accountKey),
-                                userKey = user.key,
-                            ).toUri(),
-                    )
-                },
-                statusKey = MicroBlogKey(id ?: "", accountKey.host),
-            )
-        }
-    return UiTimeline(
-        topMessage = topMessage,
-        content =
+    val messageType =
+        if (type == null) {
+            UiTimelineV2.Message.Type.Unknown(rawType = "")
+        } else {
             when (type) {
-                in listOf(NotificationTypes.Follow) -> UiTimeline.ItemContent.User(user)
+                NotificationTypes.Follow ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.Follow
+
+                NotificationTypes.Favourite ->
+                    UiTimelineV2.Message.Type.Localized.MessageId
+                        .Favourite
+
+                NotificationTypes.Reblog ->
+                    UiTimelineV2.Message.Type.Localized.MessageId
+                        .Repost
+
+                NotificationTypes.Mention ->
+                    UiTimelineV2.Message.Type.Localized.MessageId
+                        .Mention
+
+                NotificationTypes.Poll ->
+                    UiTimelineV2.Message.Type.Localized.MessageId
+                        .PollEnded
+
                 NotificationTypes.FollowRequest ->
-                    UiTimeline.ItemContent.User(
-                        user,
-                        button =
-                            persistentListOf(
-                                UiTimeline.ItemContent.User.Button.AcceptFollowRequest(
-                                    onClicked = {
-                                        event.acceptFollowRequest(
-                                            userKey = user.key,
-                                            notificationStatusKey =
-                                                MicroBlogKey(
-                                                    id ?: "",
-                                                    accountKey.host,
-                                                ),
-                                        )
-                                    },
-                                ),
-                                UiTimeline.ItemContent.User.Button.RejectFollowRequest(
-                                    onClicked = {
-                                        event.rejectFollowRequest(
-                                            userKey = user.key,
-                                            notificationStatusKey =
-                                                MicroBlogKey(
-                                                    id ?: "",
-                                                    accountKey.host,
-                                                ),
-                                        )
-                                    },
+                    UiTimelineV2.Message.Type.Localized.MessageId
+                        .FollowRequest
+
+                NotificationTypes.Status ->
+                    UiTimelineV2.Message.Type.Localized.MessageId
+                        .NewPost
+
+                NotificationTypes.Update ->
+                    UiTimelineV2.Message.Type.Localized.MessageId
+                        .PostUpdated
+            }.let {
+                UiTimelineV2.Message.Type.Localized(it)
+            }
+        }
+    val message =
+        UiTimelineV2.Message(
+            user = user,
+            icon =
+                when (type) {
+                    NotificationTypes.Follow -> UiIcon.Follow
+                    NotificationTypes.Favourite -> UiIcon.Favourite
+                    NotificationTypes.Reblog -> UiIcon.Retweet
+                    NotificationTypes.Mention -> UiIcon.Mention
+                    NotificationTypes.Poll -> UiIcon.Poll
+                    NotificationTypes.FollowRequest -> UiIcon.Follow
+                    NotificationTypes.Status -> UiIcon.Edit
+                    NotificationTypes.Update -> UiIcon.Edit
+                    null -> UiIcon.Info
+                },
+            type = messageType,
+            statusKey = MicroBlogKey(id ?: "", accountKey.host),
+            createdAt = createdAt?.toUi() ?: Instant.DISTANT_PAST.toUi(),
+            clickEvent =
+                ClickEvent.Deeplink(
+                    DeeplinkRoute.Profile
+                        .User(
+                            accountType = AccountType.Specific(accountKey),
+                            userKey = user.key,
+                        ),
+                ),
+        )
+    if (type in listOf(NotificationTypes.FollowRequest)) {
+        return UiTimelineV2.User(
+            value = user,
+            message = message,
+            button =
+                persistentListOf(
+                    ActionMenu.Item(
+                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.AcceptFollowRequest),
+                        clickEvent =
+                            ClickEvent.event(
+                                accountKey,
+                                PostEvent.Mastodon.AcceptFollowRequest(
+                                    userKey = user.key,
+                                    notificationStatusKey =
+                                        MicroBlogKey(
+                                            id ?: "",
+                                            accountKey.host,
+                                        ),
                                 ),
                             ),
-                    )
-
-                else -> status ?: UiTimeline.ItemContent.User(user)
-            },
-    )
+                        color = ActionMenu.Item.Color.PrimaryColor,
+                        icon = UiIcon.Check,
+                    ),
+                    ActionMenu.Item(
+                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.RejectFollowRequest),
+                        clickEvent =
+                            ClickEvent.event(
+                                accountKey,
+                                PostEvent.Mastodon.RejectFollowRequest(
+                                    userKey = user.key,
+                                    notificationStatusKey =
+                                        MicroBlogKey(
+                                            id ?: "",
+                                            accountKey.host,
+                                        ),
+                                ),
+                            ),
+                        color = ActionMenu.Item.Color.Red,
+                    ),
+                ),
+            createdAt = createdAt?.toUi() ?: Instant.DISTANT_PAST.toUi(),
+            statusKey = MicroBlogKey(id ?: "", accountKey.host),
+        )
+    } else if (status != null) {
+        return status
+            .renderStatus(
+                host = accountKey.host,
+                accountKey = accountKey,
+            ).copy(
+                message = message,
+            )
+    } else {
+        return UiTimelineV2.User(
+            value = user,
+            message = message,
+            createdAt = createdAt?.toUi() ?: Instant.DISTANT_PAST.toUi(),
+            statusKey = MicroBlogKey(id ?: "", accountKey.host),
+        )
+    }
 }
 
-internal fun Status.renderGuest(host: String) =
-    render(
-        host = host,
-        event = null,
-        references =
-            reblog
-                ?.let { reblog ->
-                    mapOf(
-                        ReferenceType.Retweet to listOfNotNull(StatusContent.Mastodon(reblog)),
-                    )
-                }.orEmpty(),
-    )
+internal fun List<Status>.render(accountKey: MicroBlogKey) = this.map { it.render(host = accountKey.host, accountKey = accountKey) }
 
 internal fun Status.render(
     host: String,
-    event: StatusEvent.Mastodon?,
-    references: Map<ReferenceType, List<StatusContent>> = mapOf(),
-): UiTimeline {
-    val accountKey = event?.accountKey
+    accountKey: MicroBlogKey?,
+): UiTimelineV2 {
     requireNotNull(account) { "account is null" }
-    val user = account.render(accountKey, host)
-    val currentStatus = this.renderStatus(host, accountKey, event)
-    val actualStatus =
-        (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.Mastodon)?.data ?: this
     val topMessage =
         if (pinned == true) {
-            UiTimeline.TopMessage(
+            val currentStatus = this.renderStatus(host, accountKey)
+            UiTimelineV2.Message(
                 user = null,
-                icon = UiTimeline.TopMessage.Icon.Pin,
+                icon = UiIcon.Pin,
                 type =
-                    UiTimeline.TopMessage.MessageType.Mastodon
-                        .Pinned(id = id.orEmpty()),
-                onClicked = { },
+                    UiTimelineV2.Message.Type.Localized(
+                        UiTimelineV2.Message.Type.Localized.MessageId.Pinned,
+                    ),
                 statusKey = currentStatus.statusKey,
+                createdAt = currentStatus.createdAt,
+                clickEvent = ClickEvent.Noop,
             )
-        } else if (reblog == null) {
-            null
+        } else if (reblog != null) {
+            val currentStatus = this.renderStatus(host, accountKey)
+            val userKey = currentStatus.user?.key
+            UiTimelineV2.Message(
+                user = currentStatus.user,
+                icon = UiIcon.Retweet,
+                type =
+                    UiTimelineV2.Message.Type.Localized(
+                        UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                    ),
+                statusKey = currentStatus.statusKey,
+                createdAt = currentStatus.createdAt,
+                clickEvent =
+                    if (userKey != null) {
+                        ClickEvent.Deeplink(
+                            DeeplinkRoute.Profile
+                                .User(
+                                    accountType =
+                                        accountKey?.let { AccountType.Specific(it) }
+                                            ?: AccountType.Guest,
+                                    userKey = userKey,
+                                ),
+                        )
+                    } else {
+                        ClickEvent.Noop
+                    },
+            )
         } else {
-            UiTimeline.TopMessage(
-                user = user,
-                icon = UiTimeline.TopMessage.Icon.Retweet,
-                type =
-                    UiTimeline.TopMessage.MessageType.Mastodon
-                        .Reblogged(id = id.orEmpty()),
-                onClicked = {
-                    launcher.launch(
-                        DeeplinkRoute.Profile
-                            .User(
-                                accountType =
-                                    accountKey?.let { AccountType.Specific(it) }
-                                        ?: AccountType.Guest,
-                                userKey = user.key,
-                            ).toUri(),
-                    )
-                },
-                statusKey = currentStatus.statusKey,
-            )
+            null
         }
-    return UiTimeline(
-        topMessage = topMessage,
-        content = actualStatus.renderStatus(host, accountKey, event),
-    )
+    return (this.reblog ?: this)
+        .renderStatus(
+            host = host,
+            accountKey = accountKey,
+        ).copy(
+            message = topMessage,
+        )
 }
 
 private fun Status.renderStatus(
     host: String,
     accountKey: MicroBlogKey?,
-    dataSource: StatusEvent.Mastodon?,
-): UiTimeline.ItemContent.Status {
+): UiTimelineV2.Post {
     requireNotNull(account) { "actualStatus.account is null" }
     val actualUser = account.render(accountKey, host)
     val isFromMe = actualUser.key == accountKey
@@ -260,7 +260,7 @@ private fun Status.renderStatus(
             ) ||
             (isFromMe && visibility != Visibility.Direct)
     val canQuote =
-        if (dataSource is StatusEvent.Pleroma) {
+        if (emojiReactions != null) { // assuming that is pleroma
             canReblog
         } else if (quoteApproval != null && quoteApproval.currentUser != null) {
             when (quoteApproval.currentUser) {
@@ -296,36 +296,35 @@ private fun Status.renderStatus(
         )
     val renderedVisibility =
         when (visibility) {
-            Visibility.Public -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public
-            Visibility.Unlisted -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home
-            Visibility.Private -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers
-            Visibility.Direct -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified
-            Visibility.List -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers
-            Visibility.Local -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home
+            Visibility.Public -> UiTimelineV2.Post.Visibility.Public
+            Visibility.Unlisted -> UiTimelineV2.Post.Visibility.Home
+            Visibility.Private -> UiTimelineV2.Post.Visibility.Followers
+            Visibility.Direct -> UiTimelineV2.Post.Visibility.Specified
+            Visibility.List -> UiTimelineV2.Post.Visibility.Followers
+            Visibility.Local -> UiTimelineV2.Post.Visibility.Home
             null -> null
         }
-    val bottomContent =
-        if (!emojiReactions.isNullOrEmpty()) {
-            UiTimeline.ItemContent.Status.BottomContent.Reaction(
-                emojiReactions
-                    .map {
-                        UiTimeline.ItemContent.Status.BottomContent.Reaction.EmojiReaction(
-                            name = it.name.orEmpty(),
-                            count = UiNumber(it.count ?: 0),
-                            me = it.me ?: false,
-                            url = it.url.orEmpty(),
-                            isUnicode = it.url.isNullOrEmpty(),
-                            onClicked = {
-                                if (dataSource is StatusEvent.Pleroma) {
-                                    dataSource.react(statusKey, true, it.name.orEmpty())
-                                }
-                            },
-                        )
-                    }.toImmutableList(),
-            )
-        } else {
-            null
-        }
+    val reactions =
+        emojiReactions
+            .orEmpty()
+            .map {
+                UiTimelineV2.Post.EmojiReaction(
+                    name = it.name.orEmpty(),
+                    count = UiNumber(it.count ?: 0),
+                    me = it.me ?: false,
+                    url = it.url.orEmpty(),
+                    isUnicode = it.url.isNullOrEmpty(),
+                    clickEvent =
+                        ClickEvent.event(
+                            accountKey = accountKey,
+                            PostEvent.Pleroma.React(
+                                statusKey = statusKey,
+                                hasReacted = true,
+                                reaction = it.name.orEmpty(),
+                            ),
+                        ),
+                )
+            }.toImmutableList()
     val postUrl =
         buildString {
             if (!url.isNullOrEmpty()) {
@@ -336,8 +335,8 @@ private fun Status.renderStatus(
                 append("https://$host/@${account.acct}/$id")
             }
         }
-    val quoteStatus = quote?.renderStatus(host, accountKey, dataSource)
-    return UiTimeline.ItemContent.Status(
+    val quoteStatus = quote?.renderStatus(host, accountKey)
+    return UiTimelineV2.Post(
         images =
             mediaAttachments
                 ?.mapNotNull { attachment ->
@@ -376,20 +375,21 @@ private fun Status.renderStatus(
             buildList {
                 add(
                     ActionMenu.Item(
-                        icon = ActionMenu.Item.Icon.Reply,
+                        icon = UiIcon.Reply,
                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
                         count = UiNumber(repliesCount ?: 0),
-                        onClicked = {
-                            if (accountKey != null) {
-                                launcher.launch(
+                        clickEvent =
+                            if (accountKey == null) {
+                                ClickEvent.Noop
+                            } else {
+                                ClickEvent.Deeplink(
                                     DeeplinkRoute.Compose
                                         .Reply(
                                             accountKey = accountKey,
                                             statusKey = statusKey,
-                                        ).toUri(),
+                                        ),
                                 )
-                            }
-                        },
+                            },
                     ),
                 )
                 if (canReblog && canQuote && accountKey != null) {
@@ -397,7 +397,7 @@ private fun Status.renderStatus(
                         ActionMenu.Group(
                             displayItem =
                                 ActionMenu.Item(
-                                    icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
+                                    icon = if (reblogged == true) UiIcon.Unretweet else UiIcon.Retweet,
                                     text =
                                         ActionMenu.Item.Text.Localized(
                                             if (reblogged ==
@@ -416,24 +416,23 @@ private fun Status.renderStatus(
                                     if (canQuote) {
                                         add(
                                             ActionMenu.Item(
-                                                icon = ActionMenu.Item.Icon.Quote,
+                                                icon = UiIcon.Quote,
                                                 text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
                                                 count = UiNumber(quotesCount ?: 0),
-                                                onClicked = {
-                                                    launcher.launch(
+                                                clickEvent =
+                                                    ClickEvent.Deeplink(
                                                         DeeplinkRoute.Compose
                                                             .Quote(
                                                                 accountKey = accountKey,
                                                                 statusKey = statusKey,
-                                                            ).toUri(),
-                                                    )
-                                                },
+                                                            ),
+                                                    ),
                                             ),
                                         )
                                     }
                                     add(
                                         ActionMenu.Item(
-                                            icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
+                                            icon = if (reblogged == true) UiIcon.Unretweet else UiIcon.Retweet,
                                             text =
                                                 ActionMenu.Item.Text.Localized(
                                                     if (reblogged ==
@@ -446,9 +445,17 @@ private fun Status.renderStatus(
                                                 ),
                                             count = UiNumber(reblogsCount ?: 0),
                                             color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
-                                            onClicked = {
-                                                dataSource?.reblog(statusKey, reblogged ?: false)
-                                            },
+//                                            onClicked = {
+//                                                dataSource?.reblog(statusKey, reblogged ?: false)
+//                                            },
+                                            clickEvent =
+                                                ClickEvent.event(
+                                                    accountKey,
+                                                    PostEvent.Mastodon.Reblog(
+                                                        statusKey = statusKey,
+                                                        reblogged = reblogged ?: false,
+                                                    ),
+                                                ),
                                         ),
                                     )
                                 }.toImmutableList(),
@@ -457,26 +464,27 @@ private fun Status.renderStatus(
                 } else if (canQuote) {
                     add(
                         ActionMenu.Item(
-                            icon = ActionMenu.Item.Icon.Quote,
+                            icon = UiIcon.Quote,
                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
                             count = UiNumber(quotesCount ?: 0),
-                            onClicked = {
-                                if (accountKey != null) {
-                                    launcher.launch(
+                            clickEvent =
+                                if (accountKey == null) {
+                                    ClickEvent.Noop
+                                } else {
+                                    ClickEvent.Deeplink(
                                         DeeplinkRoute.Compose
                                             .Quote(
                                                 accountKey = accountKey,
                                                 statusKey = statusKey,
-                                            ).toUri(),
+                                            ),
                                     )
-                                }
-                            },
+                                },
                         ),
                     )
                 } else if (canReblog) {
                     add(
                         ActionMenu.Item(
-                            icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
+                            icon = if (reblogged == true) UiIcon.Unretweet else UiIcon.Retweet,
                             text =
                                 ActionMenu.Item.Text.Localized(
                                     if (reblogged ==
@@ -489,15 +497,20 @@ private fun Status.renderStatus(
                                 ),
                             count = UiNumber(reblogsCount ?: 0),
                             color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
-                            onClicked = {
-                                dataSource?.reblog(statusKey, reblogged ?: false)
-                            },
+                            clickEvent =
+                                ClickEvent.event(
+                                    accountKey,
+                                    PostEvent.Mastodon.Reblog(
+                                        statusKey = statusKey,
+                                        reblogged = reblogged ?: false,
+                                    ),
+                                ),
                         ),
                     )
                 } else if (accountKey == null) {
                     add(
                         ActionMenu.Item(
-                            icon = if (reblogged == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
+                            icon = if (reblogged == true) UiIcon.Unretweet else UiIcon.Retweet,
                             text =
                                 ActionMenu.Item.Text.Localized(
                                     if (reblogged ==
@@ -515,7 +528,7 @@ private fun Status.renderStatus(
                 }
                 add(
                     ActionMenu.Item(
-                        icon = if (favourited == true) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
+                        icon = if (favourited == true) UiIcon.Unlike else UiIcon.Like,
                         text =
                             ActionMenu.Item.Text.Localized(
                                 if (favourited ==
@@ -528,27 +541,33 @@ private fun Status.renderStatus(
                             ),
                         count = UiNumber(favouritesCount ?: 0),
                         color = if (favourited == true) ActionMenu.Item.Color.Red else null,
-                        onClicked = {
-                            dataSource?.like(statusKey, favourited ?: false)
-                        },
+                        clickEvent =
+                            ClickEvent.event(
+                                accountKey,
+                                PostEvent.Mastodon.Like(
+                                    statusKey = statusKey,
+                                    liked = favourited ?: false,
+                                ),
+                            ),
                     ),
                 )
                 if (canReact) {
                     add(
                         ActionMenu.Item(
-                            icon = ActionMenu.Item.Icon.React,
+                            icon = UiIcon.React,
                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.React),
-                            onClicked = {
-                                if (accountKey != null) {
-                                    launcher.launch(
+                            clickEvent =
+                                if (accountKey == null) {
+                                    ClickEvent.Noop
+                                } else {
+                                    ClickEvent.Deeplink(
                                         DeeplinkRoute.Status
                                             .AddReaction(
                                                 statusKey = statusKey,
                                                 accountType = AccountType.Specific(accountKey),
-                                            ).toUri(),
+                                            ),
                                     )
-                                }
-                            },
+                                },
                         ),
                     )
                 }
@@ -556,7 +575,7 @@ private fun Status.renderStatus(
                     ActionMenu.Group(
                         displayItem =
                             ActionMenu.Item(
-                                icon = ActionMenu.Item.Icon.More,
+                                icon = UiIcon.More,
                                 text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                             ),
                         actions =
@@ -568,9 +587,9 @@ private fun Status.renderStatus(
                                                 if (bookmarked ==
                                                     true
                                                 ) {
-                                                    ActionMenu.Item.Icon.Unbookmark
+                                                    UiIcon.Unbookmark
                                                 } else {
-                                                    ActionMenu.Item.Icon.Bookmark
+                                                    UiIcon.Bookmark
                                                 },
                                             text =
                                                 ActionMenu.Item.Text.Localized(
@@ -583,18 +602,38 @@ private fun Status.renderStatus(
                                                     },
                                                 ),
                                             count = UiNumber(0),
-                                            onClicked = {
-                                                dataSource?.bookmark(statusKey, bookmarked ?: false)
-                                            },
+                                            clickEvent =
+                                                ClickEvent.event(
+                                                    accountKey,
+                                                    PostEvent.Mastodon.Bookmark(
+                                                        statusKey = statusKey,
+                                                        bookmarked = bookmarked ?: false,
+                                                    ),
+                                                ),
                                         ),
                                     )
                                 }
                                 add(
                                     ActionMenu.Item(
-                                        icon = ActionMenu.Item.Icon.Share,
+                                        icon = UiIcon.Share,
                                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                        onClicked = {
-                                            launcher.launch(
+//                                        onClicked = {
+//                                            launcher.launch(
+//                                                DeeplinkRoute.Status
+//                                                    .ShareSheet(
+//                                                        statusKey = statusKey,
+//                                                        accountType =
+//                                                            if (accountKey != null) {
+//                                                                AccountType.Specific(accountKey)
+//                                                            } else {
+//                                                                AccountType.Guest
+//                                                            },
+//                                                        shareUrl = postUrl,
+//                                                    ).toUri(),
+//                                            )
+//                                        },
+                                        clickEvent =
+                                            ClickEvent.Deeplink(
                                                 DeeplinkRoute.Status
                                                     .ShareSheet(
                                                         statusKey = statusKey,
@@ -605,20 +644,19 @@ private fun Status.renderStatus(
                                                                 AccountType.Guest
                                                             },
                                                         shareUrl = postUrl,
-                                                    ).toUri(),
-                                            )
-                                        },
+                                                    ),
+                                            ),
                                     ),
                                 )
 
                                 if (isFromMe) {
                                     add(
                                         ActionMenu.Item(
-                                            icon = ActionMenu.Item.Icon.Delete,
+                                            icon = UiIcon.Delete,
                                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
                                             color = ActionMenu.Item.Color.Red,
-                                            onClicked = {
-                                                launcher.launch(
+                                            clickEvent =
+                                                ClickEvent.Deeplink(
                                                     DeeplinkRoute.Status
                                                         .DeleteConfirm(
                                                             accountType =
@@ -626,9 +664,8 @@ private fun Status.renderStatus(
                                                                     accountKey,
                                                                 ),
                                                             statusKey = statusKey,
-                                                        ).toUri(),
-                                                )
-                                            },
+                                                        ),
+                                                ),
                                         ),
                                     )
                                 } else {
@@ -643,39 +680,23 @@ private fun Status.renderStatus(
                                     add(ActionMenu.Divider)
                                     add(
                                         ActionMenu.Item(
-                                            icon = ActionMenu.Item.Icon.Report,
+                                            icon = UiIcon.Report,
                                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
                                             color = ActionMenu.Item.Color.Red,
-                                            onClicked = {
-                                                if (accountKey != null) {
-                                                    launcher.launch(
-                                                        DeeplinkRoute.Status
-                                                            .MastodonReport(
-                                                                statusKey = statusKey,
-                                                                userKey = actualUser.key,
-                                                                accountType =
-                                                                    AccountType.Specific(
-                                                                        accountKey,
-                                                                    ),
-                                                            ).toUri(),
-                                                    )
-                                                } else {
-                                                    launcher.launch(
-                                                        DeeplinkRoute.Status
-                                                            .MastodonReport(
-                                                                statusKey = statusKey,
-                                                                userKey = actualUser.key,
-                                                                accountType =
-                                                                    AccountType.Specific(
-                                                                        MicroBlogKey(
-                                                                            "",
-                                                                            "",
-                                                                        ),
-                                                                    ),
-                                                            ).toUri(),
-                                                    )
-                                                }
-                                            },
+                                            clickEvent =
+                                                ClickEvent.Deeplink(
+                                                    DeeplinkRoute.Status
+                                                        .MastodonReport(
+                                                            statusKey = statusKey,
+                                                            userKey = actualUser.key,
+                                                            accountType =
+                                                                if (accountKey != null) {
+                                                                    AccountType.Specific(accountKey)
+                                                                } else {
+                                                                    AccountType.Guest
+                                                                },
+                                                        ),
+                                                ),
                                         ),
                                     )
                                 }
@@ -708,55 +729,30 @@ private fun Status.renderStatus(
                     expiresAt = it.expiresAt,
                     multiple = it.multiple ?: false,
                     ownVotes = it.ownVotes?.toPersistentList() ?: persistentListOf(),
-                    onVote = { options ->
-                        if (it.id != null && dataSource != null) {
-                            dataSource.vote(statusKey, it.id, options)
-                        }
-                    },
-                    enabled = dataSource != null && !isFromMe,
+//                    onVote = { options ->
+//                        if (it.id != null && dataSource != null) {
+//                            dataSource.vote(statusKey, it.id, options)
+//                        }
+//                    },
+                    enabled = accountKey != null && !isFromMe,
                 )
             },
         statusKey = statusKey,
         createdAt = createdAt?.toUi() ?: Instant.DISTANT_PAST.toUi(),
-        topEndContent =
-            renderedVisibility?.let {
-                UiTimeline.ItemContent.Status.TopEndContent
-                    .Visibility(it)
-            },
+        visibility = renderedVisibility,
         sensitive = sensitive ?: false,
-        onClicked = {
-            launcher.launch(
+        clickEvent =
+            ClickEvent.Deeplink(
                 DeeplinkRoute.Status
                     .Detail(
                         statusKey = statusKey,
                         accountType =
                             accountKey?.let { AccountType.Specific(it) }
                                 ?: AccountType.Guest,
-                    ).toUri(),
-            )
-        },
+                    ),
+            ),
         platformType = PlatformType.Mastodon,
-        onMediaClicked = { media, index ->
-            launcher.launch(
-                DeeplinkRoute.Media
-                    .StatusMedia(
-                        accountType =
-                            accountKey?.let { AccountType.Specific(it) }
-                                ?: AccountType.Guest,
-                        statusKey = statusKey,
-                        index = index,
-                        preview =
-                            when (media) {
-                                is UiMedia.Image -> media.previewUrl
-                                is UiMedia.Video -> media.thumbnailUrl
-                                is UiMedia.Audio -> null
-                                is UiMedia.Gif -> media.previewUrl
-                            },
-                    ).toUri(),
-            )
-        },
-        bottomContent = bottomContent,
-        url = postUrl,
+        emojiReactions = reactions,
     )
 }
 
@@ -883,7 +879,7 @@ internal fun Account.render(
                                 )
                             } ?: AccountType.Guest,
                         userKey = userKey,
-                    ).toUri(),
+                    ),
             ),
     )
 }

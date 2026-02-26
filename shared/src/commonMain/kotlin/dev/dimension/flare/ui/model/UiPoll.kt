@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
-import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.ui.humanizer.humanizePercentage
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.toUi
@@ -17,7 +16,7 @@ public data class UiPoll internal constructor(
     val options: SerializableImmutableList<Option>,
     val multiple: Boolean,
     val ownVotes: SerializableImmutableList<Int>,
-    private val voteEvent: PostEvent.PollEvent,
+//    private val voteEvent: PostEvent.PollEvent,
     // null indicates no expiration
     private val expiresAt: Instant?,
     private val enabled: Boolean = true,

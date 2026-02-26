@@ -11,7 +11,6 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 @Serializable
 @Immutable
@@ -41,9 +40,7 @@ public sealed class ActionMenu {
         val text: Text? = null,
         val count: UiNumber? = null,
         val color: Color? = null,
-        private val clickEvent: ClickEvent? = null,
-        @Transient
-        private val clickAction: (ClickContext.() -> Unit)? = null,
+        private val clickEvent: ClickEvent = ClickEvent.Noop,
     ) : ActionMenu() {
         init {
             require(icon != null || text != null) {
@@ -51,8 +48,8 @@ public sealed class ActionMenu {
             }
         }
 
-        val onClicked: (ClickContext.() -> Unit)? by lazy {
-            clickAction ?: clickEvent?.onClicked
+        val onClicked: ClickContext.() -> Unit by lazy {
+            clickEvent.onClicked
         }
 
         @Serializable
@@ -103,6 +100,8 @@ public sealed class ActionMenu {
                     UnBlock,
                     BlockWithHandleParameter,
                     MuteWithHandleParameter,
+                    AcceptFollowRequest,
+                    RejectFollowRequest,
                 }
             }
         }

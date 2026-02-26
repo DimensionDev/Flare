@@ -1,22 +1,20 @@
 package dev.dimension.flare.data.datasource.microblog
 
-import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlin.uuid.Uuid
 
 internal class MixedRemoteMediator(
     private val database: CacheDatabase,
-    private val mediators: List<BaseTimelineRemoteMediator>,
-) : BaseTimelineRemoteMediator(database = database) {
+    private val mediators: List<CacheableRemoteLoader<UiTimelineV2>>,
+) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey =
         buildString {
             append("mixed_timeline")
@@ -27,10 +25,10 @@ internal class MixedRemoteMediator(
     private var currentMediators = mediators
 
     @OptIn(ExperimentalPagingApi::class)
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> =
+    ): PagingResult<UiTimelineV2> =
         coroutineScope {
             if (request is PagingRequest.Prepend) {
                 PagingResult(endOfPaginationReached = true)
@@ -59,17 +57,7 @@ internal class MixedRemoteMediator(
                 val mixedTimelineResult =
                     timelineResult
                         .sortedByDescending {
-                            it.status.status.data.createdAt
-                                .toEpochMilliseconds()
-                        }.map {
-                            it.copy(
-                                timeline =
-                                    it.timeline.copy(
-                                        pagingKey = pagingKey,
-                                        sortId = -SnowflakeIdGenerator.nextId(),
-                                        _id = Uuid.random().toString(),
-                                    ),
-                            )
+                            it.createdAt.value.toEpochMilliseconds()
                         }
 
                 database.connect {
@@ -98,7 +86,7 @@ internal class MixedRemoteMediator(
 
     private suspend fun getSubRequest(
         request: PagingRequest,
-        mediator: BaseTimelineRemoteMediator,
+        mediator: CacheableRemoteLoader<UiTimelineV2>,
     ): SubRequest? =
         when (request) {
             is PagingRequest.Append -> {
@@ -149,14 +137,14 @@ internal class MixedRemoteMediator(
     }
 
     private data class SubRequest(
-        val mediator: BaseTimelineRemoteMediator,
+        val mediator: CacheableRemoteLoader<UiTimelineV2>,
         val request: PagingRequest,
     ) {
-        suspend fun load(pageSize: Int) = mediator.timeline(pageSize, request)
+        suspend fun load(pageSize: Int) = mediator.load(pageSize, request)
     }
 
     private data class SubResponse(
-        val mediator: BaseTimelineRemoteMediator,
-        val result: PagingResult<DbPagingTimelineWithStatus>,
+        val mediator: CacheableRemoteLoader<UiTimelineV2>,
+        val result: PagingResult<UiTimelineV2>,
     )
 }

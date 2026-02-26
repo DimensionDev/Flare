@@ -5,6 +5,7 @@ import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.mapper.fromRss
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.route.DeeplinkRoute
@@ -18,32 +19,47 @@ public sealed class UiTimelineV2 {
         itemKey
     }
 
+    internal abstract val extraKey: String?
+
+    internal abstract val searchText: String?
+    internal abstract val statusKey: MicroBlogKey
+    internal abstract val createdAt: UiDateTime
+
     public abstract val itemKey: String
 
-    public val itemType: String
-        get() =
-            when (this) {
-                is Feed -> "feed"
-                is Post -> "post"
-                is User -> "user"
-                is UserList -> "user_list"
-                is Message -> "message"
-            }
+    public val itemType: String =
+        when (this) {
+            is Feed -> "feed"
+            is Post -> "post"
+            is User -> "user"
+            is UserList -> "user_list"
+            is Message -> "message"
+        }
 
     @Serializable
     @Immutable
     public data class Message internal constructor(
-        private val _id: String,
         val user: UiProfile? = null,
-        val statusKey: MicroBlogKey? = null,
+        override val statusKey: MicroBlogKey,
         val icon: UiIcon,
         val type: Type,
+        override val createdAt: UiDateTime,
         private val clickEvent: ClickEvent,
+        override val extraKey: String? = null,
     ) : UiTimelineV2() {
+        override val searchText: String? = null
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
         }
-        override val itemKey: String = "Message_${_id}"
+        override val itemKey: String =
+            buildString {
+                append("Message_")
+                append(statusKey)
+                if (extraKey != null) {
+                    append("_")
+                    append(extraKey)
+                }
+            }
 
         @Serializable
         @Immutable
@@ -85,8 +101,6 @@ public sealed class UiTimelineV2 {
                     App,
                     StarterpackJoined,
                     Pinned,
-                    AcceptFollowRequest,
-                    RejectFollowRequest,
                 }
             }
         }
@@ -98,7 +112,7 @@ public sealed class UiTimelineV2 {
         val title: String?,
         val description: String?,
         val url: String,
-        val createdAt: UiDateTime?,
+        override val createdAt: UiDateTime,
         val source: Source,
         val openInBrowser: Boolean,
         val media: UiMedia.Image? = null,
@@ -108,16 +122,31 @@ public sealed class UiTimelineV2 {
             } else {
                 ClickEvent.Deeplink(DeeplinkRoute.Rss.Detail(url))
             },
+        override val extraKey: String? = null,
     ) : UiTimelineV2() {
+        override val statusKey: MicroBlogKey = MicroBlogKey.fromRss(url)
+        override val searchText: String =
+            buildString {
+                title?.let {
+                    append(it)
+                    append(" ")
+                }
+                description?.let {
+                    append(it)
+                }
+            }
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
         }
-        override val itemKey: String
-            get() =
-                buildString {
-                    append("Feed_")
-                    append(url)
+        override val itemKey: String =
+            buildString {
+                append("Feed_")
+                append(url)
+                if (extraKey != null) {
+                    append("_")
+                    append(extraKey)
                 }
+            }
 
         @Serializable
         @Immutable
@@ -140,30 +169,55 @@ public sealed class UiTimelineV2 {
         val content: UiRichText,
         val actions: SerializableImmutableList<ActionMenu>,
         val poll: UiPoll?,
-        val statusKey: MicroBlogKey,
+        override val statusKey: MicroBlogKey,
         val card: UiCard?,
-        val createdAt: UiDateTime,
+        override val createdAt: UiDateTime,
         val emojiReactions: SerializableImmutableList<EmojiReaction> = persistentListOf(),
         val sourceChannel: SourceChannel? = null,
         val visibility: Visibility? = null,
         val replyToHandle: String? = null,
         val parents: SerializableImmutableList<Post> = persistentListOf(),
         private val clickEvent: ClickEvent,
+        override val extraKey: String? = null,
     ) : UiTimelineV2() {
+        override val searchText: String =
+            buildString {
+                user?.name?.raw?.let {
+                    append(it)
+                    append(" ")
+                }
+                contentWarning?.raw?.let {
+                    append(it)
+                    append(" ")
+                }
+                content.raw.let {
+                    append(it)
+                    append(" ")
+                }
+                quote.forEach { post ->
+                    post.content.raw.let { quoteContent ->
+                        append(quoteContent)
+                        append(" ")
+                    }
+                }
+            }
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
         }
-        override val itemKey: String
-            get() =
-                buildString {
-                    append(platformType.name)
+        override val itemKey: String =
+            buildString {
+                append(platformType.name)
+                append("_")
+                append(statusKey)
+                message?.let {
                     append("_")
-                    append(statusKey)
-                    message?.let {
-                        append("_")
-                        append(it.itemKey)
-                    }
+                    append(it.itemKey)
                 }
+                if (extraKey != null) {
+                    append("_")
+                    append(extraKey)
+                }
+            }
 
         val shouldExpandTextByDefault: Boolean by lazy {
             (contentWarning == null || contentWarning.isEmpty) && !content.isLongText
@@ -209,29 +263,25 @@ public sealed class UiTimelineV2 {
     public data class User internal constructor(
         val message: Message? = null,
         val value: UiProfile,
-        val button: SerializableImmutableList<Button> = persistentListOf(),
+        override val createdAt: UiDateTime,
+        override val statusKey: MicroBlogKey,
+        val button: SerializableImmutableList<ActionMenu.Item> = persistentListOf(),
+        override val extraKey: String? = null,
     ) : UiTimelineV2() {
-        override val itemKey: String
-            get() =
-                buildString {
-                    append("User_")
-                    append(value.key)
-                    message?.let {
-                        append("_")
-                        append(it.itemKey)
-                    }
+        override val searchText: String? = null
+        override val itemKey: String =
+            buildString {
+                append("User_")
+                append(value.key)
+                message?.let {
+                    append("_")
+                    append(it.itemKey)
                 }
-
-        @Serializable
-        @Immutable
-        public data class Button internal constructor(
-            val messageId: Message.Type.Localized.MessageId,
-            private val clickEvent: ClickEvent,
-        ) {
-            val onClicked: ClickContext.() -> Unit by lazy {
-                clickEvent.onClicked
+                if (extraKey != null) {
+                    append("_")
+                    append(extraKey)
+                }
             }
-        }
     }
 
     @Serializable
@@ -239,21 +289,28 @@ public sealed class UiTimelineV2 {
     public data class UserList internal constructor(
         val message: Message? = null,
         val users: SerializableImmutableList<UiProfile>,
-        val status: Post? = null,
+        override val createdAt: UiDateTime,
+        override val statusKey: MicroBlogKey,
+        val post: Post? = null,
+        override val extraKey: String? = null,
     ) : UiTimelineV2() {
-        override val itemKey: String
-            get() =
-                buildString {
-                    append("UserList_")
-                    append(users.hashCode())
-                    status?.let {
-                        append("_")
-                        append(it.itemKey)
-                    }
-                    message?.let {
-                        append("_")
-                        append(it.itemKey)
-                    }
+        override val searchText: String? = null
+        override val itemKey: String =
+            buildString {
+                append("UserList_")
+                append(users.hashCode())
+                post?.let {
+                    append("_")
+                    append(it.itemKey)
                 }
+                message?.let {
+                    append("_")
+                    append(it.itemKey)
+                }
+                if (extraKey != null) {
+                    append("_")
+                    append(extraKey)
+                }
+            }
     }
 }

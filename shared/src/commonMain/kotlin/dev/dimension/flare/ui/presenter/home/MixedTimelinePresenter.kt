@@ -2,8 +2,9 @@ package dev.dimension.flare.ui.presenter.home
 
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import org.koin.core.component.KoinComponent
@@ -15,12 +16,12 @@ public class MixedTimelinePresenter(
     KoinComponent {
     private val database: CacheDatabase by inject()
     override val useDbKeyInItemKey: Boolean = true
-    override val loader: Flow<BaseTimelineLoader>
+    override val loader: Flow<RemoteLoader<UiTimelineV2>>
         get() =
             combine(subTimelinePresenter.map { it.loader }) {
                 MixedRemoteMediator(
                     database = database,
-                    mediators = it.filterIsInstance<BaseTimelineRemoteMediator>(),
+                    mediators = it.filterIsInstance<CacheableRemoteLoader<UiTimelineV2>>(),
                 )
             }
 }

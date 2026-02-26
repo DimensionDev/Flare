@@ -22,6 +22,16 @@ public sealed interface UiMedia {
         val sensitive: Boolean,
         override val customHeaders: SerializableImmutableMap<String, String>? = null,
     ) : UiMedia {
+        internal constructor(url: String, customHeaders: SerializableImmutableMap<String, String>? = null) : this(
+            url = url,
+            previewUrl = url,
+            description = null,
+            height = 0f,
+            width = 0f,
+            sensitive = false,
+            customHeaders = customHeaders,
+        )
+
         val aspectRatio: Float
             get() = (width / (height.takeUnless { it == 0f } ?: 1f)).takeUnless { it == 0f } ?: 1f
     }

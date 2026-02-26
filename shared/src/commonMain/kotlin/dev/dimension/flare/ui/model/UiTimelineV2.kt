@@ -1,14 +1,13 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 
@@ -41,6 +40,9 @@ public sealed class UiTimelineV2 {
         val type: Type,
         private val clickEvent: ClickEvent,
     ) : UiTimelineV2() {
+        val onClicked: ClickContext.() -> Unit by lazy {
+            clickEvent.onClicked
+        }
         override val itemKey: String = "Message_${_id}"
 
         @Serializable
@@ -62,7 +64,7 @@ public sealed class UiTimelineV2 {
             @Immutable
             public data class Localized internal constructor(
                 val data: MessageId,
-                val args: ImmutableList<String> = persistentListOf(),
+                val args: SerializableImmutableList<String> = persistentListOf(),
             ) : Type() {
                 @Serializable
                 @Immutable
@@ -83,6 +85,8 @@ public sealed class UiTimelineV2 {
                     App,
                     StarterpackJoined,
                     Pinned,
+                    AcceptFollowRequest,
+                    RejectFollowRequest,
                 }
             }
         }
@@ -94,11 +98,10 @@ public sealed class UiTimelineV2 {
         val title: String?,
         val description: String?,
         val url: String,
-        val image: String?,
         val createdAt: UiDateTime?,
         val source: Source,
-        val imageHeaders: ImmutableMap<String, String>?,
         val openInBrowser: Boolean,
+        val media: UiMedia.Image? = null,
         private val clickEvent: ClickEvent =
             if (openInBrowser) {
                 ClickEvent.Deeplink(DeeplinkRoute.OpenLinkDirectly(url))
@@ -106,6 +109,9 @@ public sealed class UiTimelineV2 {
                 ClickEvent.Deeplink(DeeplinkRoute.Rss.Detail(url))
             },
     ) : UiTimelineV2() {
+        val onClicked: ClickContext.() -> Unit by lazy {
+            clickEvent.onClicked
+        }
         override val itemKey: String
             get() =
                 buildString {
@@ -126,25 +132,27 @@ public sealed class UiTimelineV2 {
     public data class Post internal constructor(
         val message: Message? = null,
         val platformType: PlatformType,
-        val images: ImmutableList<UiMedia>,
+        val images: SerializableImmutableList<UiMedia>,
         val sensitive: Boolean,
         val contentWarning: UiRichText?,
         val user: UiProfile?,
-        val quote: ImmutableList<Post> = persistentListOf(),
+        val quote: SerializableImmutableList<Post> = persistentListOf(),
         val content: UiRichText,
-        val actions: ImmutableList<ActionMenu>,
+        val actions: SerializableImmutableList<ActionMenu>,
         val poll: UiPoll?,
         val statusKey: MicroBlogKey,
         val card: UiCard?,
         val createdAt: UiDateTime,
-        val emojiReactions: ImmutableList<EmojiReaction> = persistentListOf(),
+        val emojiReactions: SerializableImmutableList<EmojiReaction> = persistentListOf(),
         val sourceChannel: SourceChannel? = null,
         val visibility: Visibility? = null,
         val replyToHandle: String? = null,
-        val parents: ImmutableList<Post> = persistentListOf(),
+        val parents: SerializableImmutableList<Post> = persistentListOf(),
         private val clickEvent: ClickEvent,
-        private val mediaClickEvent: ClickEvent,
     ) : UiTimelineV2() {
+        val onClicked: ClickContext.() -> Unit by lazy {
+            clickEvent.onClicked
+        }
         override val itemKey: String
             get() =
                 buildString {
@@ -178,6 +186,9 @@ public sealed class UiTimelineV2 {
             val isUnicode: Boolean,
             val me: Boolean,
         ) {
+            val onClicked: ClickContext.() -> Unit by lazy {
+                clickEvent.onClicked
+            }
             val isImageReaction: Boolean by lazy {
                 name.startsWith(":") && name.endsWith(":")
             }
@@ -198,7 +209,7 @@ public sealed class UiTimelineV2 {
     public data class User internal constructor(
         val message: Message? = null,
         val value: UiProfile,
-        val button: ImmutableList<Button> = persistentListOf(),
+        val button: SerializableImmutableList<Button> = persistentListOf(),
     ) : UiTimelineV2() {
         override val itemKey: String
             get() =
@@ -213,18 +224,13 @@ public sealed class UiTimelineV2 {
 
         @Serializable
         @Immutable
-        public sealed class Button {
-            @Serializable
-            @Immutable
-            public data class AcceptFollowRequest internal constructor(
-                private val clickEvent: ClickEvent,
-            ) : Button()
-
-            @Serializable
-            @Immutable
-            public data class RejectFollowRequest internal constructor(
-                private val clickEvent: ClickEvent,
-            ) : Button()
+        public data class Button internal constructor(
+            val messageId: Message.Type.Localized.MessageId,
+            private val clickEvent: ClickEvent,
+        ) {
+            val onClicked: ClickContext.() -> Unit by lazy {
+                clickEvent.onClicked
+            }
         }
     }
 
@@ -232,7 +238,7 @@ public sealed class UiTimelineV2 {
     @Immutable
     public data class UserList internal constructor(
         val message: Message? = null,
-        val users: ImmutableList<UiProfile>,
+        val users: SerializableImmutableList<UiProfile>,
         val status: Post? = null,
     ) : UiTimelineV2() {
         override val itemKey: String

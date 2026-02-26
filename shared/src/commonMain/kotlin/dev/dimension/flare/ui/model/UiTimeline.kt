@@ -1,6 +1,8 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.common.SerializableImmutableList
+import dev.dimension.flare.common.SerializableImmutableMap
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -9,8 +11,6 @@ import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 
@@ -79,7 +79,7 @@ public data class UiTimeline internal constructor(
             val createdAt: UiDateTime?,
             val source: String,
             val sourceIcon: String?,
-            val imageHeaders: ImmutableMap<String, String>?,
+            val imageHeaders: SerializableImmutableMap<String, String>?,
             private val openInBrowser: Boolean,
         ) : ItemContent() {
             val id: String by lazy {
@@ -100,13 +100,13 @@ public data class UiTimeline internal constructor(
         @Immutable
         public data class Status internal constructor(
             val platformType: PlatformType,
-            val images: ImmutableList<UiMedia>,
+            val images: SerializableImmutableList<UiMedia>,
             val sensitive: Boolean,
             val contentWarning: UiRichText?,
             val user: UiProfile?,
-            val quote: ImmutableList<Status>,
+            val quote: SerializableImmutableList<Status>,
             val content: UiRichText,
-            val actions: ImmutableList<ActionMenu>,
+            val actions: SerializableImmutableList<ActionMenu>,
             val poll: UiPoll?,
             val statusKey: MicroBlogKey,
             val card: UiCard?,
@@ -114,7 +114,7 @@ public data class UiTimeline internal constructor(
             val bottomContent: BottomContent? = null,
             val topEndContent: TopEndContent? = null,
             val aboveTextContent: AboveTextContent? = null,
-            val parents: ImmutableList<Status> = persistentListOf(),
+            val parents: SerializableImmutableList<Status> = persistentListOf(),
             val url: String,
             val onClicked: ClickContext.() -> Unit,
             val onMediaClicked: ClickContext.(media: UiMedia, index: Int) -> Unit,
@@ -138,7 +138,7 @@ public data class UiTimeline internal constructor(
             public sealed class BottomContent {
                 @Immutable
                 public data class Reaction internal constructor(
-                    val emojiReactions: ImmutableList<EmojiReaction>,
+                    val emojiReactions: SerializableImmutableList<EmojiReaction>,
                     val channel: SourceChannel? = null,
                 ) : BottomContent() {
                     @Immutable
@@ -193,7 +193,7 @@ public data class UiTimeline internal constructor(
         @Immutable
         public data class User internal constructor(
             val value: UiProfile,
-            val button: ImmutableList<Button> = persistentListOf(),
+            val button: SerializableImmutableList<Button> = persistentListOf(),
         ) : ItemContent() {
             val id: String by lazy {
                 itemKey
@@ -221,7 +221,7 @@ public data class UiTimeline internal constructor(
 
         @Immutable
         public data class UserList internal constructor(
-            val users: ImmutableList<UiProfile>,
+            val users: SerializableImmutableList<UiProfile>,
             val status: Status? = null,
         ) : ItemContent() {
             val id: String by lazy {

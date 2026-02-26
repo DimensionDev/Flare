@@ -1,13 +1,13 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
+import dev.dimension.flare.common.SerializableImmutableList
+import dev.dimension.flare.common.SerializableImmutableMap
 
 @Immutable
 public data class UiInstanceMetadata internal constructor(
     val instance: UiInstance,
-    val rules: ImmutableMap<String, String>,
+    val rules: SerializableImmutableMap<String, String>,
     val configuration: Configuration,
 ) {
     @Immutable
@@ -32,7 +32,7 @@ public data class UiInstanceMetadata internal constructor(
         public data class MediaAttachment(
             val imageSizeLimit: Long,
             val descriptionLimit: Long,
-            val supportedMimeTypes: ImmutableList<String>,
+            val supportedMimeTypes: SerializableImmutableList<String>,
         )
 
         @Immutable

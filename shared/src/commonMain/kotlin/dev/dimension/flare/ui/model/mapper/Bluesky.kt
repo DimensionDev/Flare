@@ -48,7 +48,6 @@ import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.Url
 import io.ktor.utils.io.charsets.Charsets
 import io.ktor.utils.io.core.toByteArray
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -947,7 +946,7 @@ private fun findCard(postView: PostView): UiCard? =
         null
     }
 
-private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
+private fun findMedias(postView: PostView): SerializableImmutableList<UiMedia> =
     when (val embed = postView.embed) {
         is PostViewEmbedUnion.ImagesView -> {
             embed.value.images

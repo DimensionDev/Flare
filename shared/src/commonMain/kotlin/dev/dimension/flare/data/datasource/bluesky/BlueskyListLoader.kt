@@ -8,9 +8,9 @@ import com.atproto.repo.ApplyWritesRequestWriteUnion
 import com.atproto.repo.CreateRecordRequest
 import com.atproto.repo.PutRecordRequest
 import dev.dimension.flare.common.FileItem
-import dev.dimension.flare.data.datasource.microblog.list.ListLoader
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaDataType
+import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService

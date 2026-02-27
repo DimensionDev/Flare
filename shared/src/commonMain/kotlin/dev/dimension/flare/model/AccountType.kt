@@ -18,6 +18,7 @@ public sealed class AccountType {
         override fun toString(): String = "specific_$accountKey"
     }
 
+    @Deprecated("Use Specific with the current account's key instead")
     @Serializable
     @Immutable
     public data object Active : AccountType() {
@@ -30,3 +31,10 @@ public sealed class AccountType {
         override fun toString(): String = "guest"
     }
 }
+
+internal fun MicroBlogKey?.toAccountType(): AccountType =
+    if (this == null) {
+        AccountType.Guest
+    } else {
+        AccountType.Specific(this)
+    }

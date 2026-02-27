@@ -2,9 +2,11 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.ui.humanizer.humanizePercentage
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.toUi
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.serialization.Serializable
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -16,7 +18,7 @@ public data class UiPoll internal constructor(
     val options: SerializableImmutableList<Option>,
     val multiple: Boolean,
     val ownVotes: SerializableImmutableList<Int>,
-//    private val voteEvent: PostEvent.PollEvent,
+    private val voteEvent: PostEvent.PollEvent?,
     // null indicates no expiration
     private val expiresAt: Instant?,
     private val enabled: Boolean = true,
@@ -30,6 +32,20 @@ public data class UiPoll internal constructor(
     }
     val voted: Boolean by lazy { ownVotes.isNotEmpty() }
     val expiredAt: UiDateTime? by lazy { expiresAt?.toUi() }
+    val onVote: ClickContext.(
+        options: ImmutableList<Int>,
+    ) -> Unit by lazy {
+        { options ->
+            if (voteEvent != null) {
+                ClickEvent
+                    .event(
+                        accountKey = voteEvent.accountKey,
+                        postEvent = voteEvent.copyWithOptions(options = options),
+                    ).onClicked
+                    .invoke(this)
+            }
+        }
+    }
 
     val canVote: Boolean by lazy { !expired && !voted && enabled }
 

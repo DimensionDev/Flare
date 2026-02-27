@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.mapper.fromRss
@@ -24,6 +25,7 @@ public sealed class UiTimelineV2 {
     internal abstract val searchText: String?
     internal abstract val statusKey: MicroBlogKey
     internal abstract val createdAt: UiDateTime
+    internal abstract val accountType: AccountType
 
     public abstract val itemKey: String
 
@@ -46,6 +48,7 @@ public sealed class UiTimelineV2 {
         override val createdAt: UiDateTime,
         private val clickEvent: ClickEvent,
         override val extraKey: String? = null,
+        override val accountType: AccountType,
     ) : UiTimelineV2() {
         override val searchText: String? = null
         val onClicked: ClickContext.() -> Unit by lazy {
@@ -123,6 +126,7 @@ public sealed class UiTimelineV2 {
                 ClickEvent.Deeplink(DeeplinkRoute.Rss.Detail(url))
             },
         override val extraKey: String? = null,
+        override val accountType: AccountType,
     ) : UiTimelineV2() {
         override val statusKey: MicroBlogKey = MicroBlogKey.fromRss(url)
         override val searchText: String =
@@ -179,6 +183,7 @@ public sealed class UiTimelineV2 {
         val parents: SerializableImmutableList<Post> = persistentListOf(),
         private val clickEvent: ClickEvent,
         override val extraKey: String? = null,
+        override val accountType: AccountType,
     ) : UiTimelineV2() {
         override val searchText: String =
             buildString {
@@ -267,6 +272,7 @@ public sealed class UiTimelineV2 {
         override val statusKey: MicroBlogKey,
         val button: SerializableImmutableList<ActionMenu.Item> = persistentListOf(),
         override val extraKey: String? = null,
+        override val accountType: AccountType,
     ) : UiTimelineV2() {
         override val searchText: String? = null
         override val itemKey: String =
@@ -293,6 +299,7 @@ public sealed class UiTimelineV2 {
         override val statusKey: MicroBlogKey,
         val post: Post? = null,
         override val extraKey: String? = null,
+        override val accountType: AccountType,
     ) : UiTimelineV2() {
         override val searchText: String? = null
         override val itemKey: String =

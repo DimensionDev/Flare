@@ -63,7 +63,7 @@ public class DeepLinkPresenter(
                             repository = accountRepository,
                         ).collect { service ->
                             if (service is AuthenticatedMicroblogDataSource) {
-                                service.handleEvent(event.postEvent)
+                                service.postEventHandler.handleEvent(event.postEvent)
                             }
                         }
                     }

@@ -14,6 +14,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatusUserReferenceWithUs
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.database.cache.model.DbUser
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -41,7 +42,10 @@ internal class TimelineRemoteMediator(
             )
         val data =
             result.data.map {
-                mapping(it)
+                mapping(
+                    data = it,
+                    pagingKey = pagingKey,
+                )
             }
         return PagingResult(
             data = data,
@@ -50,107 +54,112 @@ internal class TimelineRemoteMediator(
         )
     }
 
-    private suspend fun mapping(data: UiTimelineV2): DbPagingTimelineWithStatus =
-        DbPagingTimelineWithStatus(
-            timeline =
-                DbPagingTimeline(
-                    pagingKey = pagingKey,
-                    statusKey = data.statusKey,
-                    sortId = -SnowflakeIdGenerator.nextId(),
-                ),
-            status =
-                DbStatusWithReference(
-                    status = mappingDbStatusWithUser(data),
-                    references =
-                        when (data) {
-                            is UiTimelineV2.Feed -> emptyList()
-                            is UiTimelineV2.Message -> emptyList()
-                            is UiTimelineV2.Post ->
-                                data.quote.map {
-                                    mappingDbStatusReferenceWithStatus(
-                                        data = it,
-                                        referenceType = ReferenceType.Quote,
-                                        rootStatusKey = data.statusKey,
-                                    )
-                                } +
-                                    data.parents.map {
-                                        mappingDbStatusReferenceWithStatus(
-                                            data = it,
-                                            referenceType = ReferenceType.Reply,
-                                            rootStatusKey = data.statusKey,
-                                        )
-                                    }
-
-                            is UiTimelineV2.User -> emptyList()
-                            is UiTimelineV2.UserList ->
-                                listOfNotNull(
-                                    data.post?.let {
+    companion object {
+        suspend fun mapping(
+            data: UiTimelineV2,
+            pagingKey: String,
+        ): DbPagingTimelineWithStatus =
+            DbPagingTimelineWithStatus(
+                timeline =
+                    DbPagingTimeline(
+                        pagingKey = pagingKey,
+                        statusKey = data.statusKey,
+                        sortId = -SnowflakeIdGenerator.nextId(),
+                    ),
+                status =
+                    DbStatusWithReference(
+                        status = mappingDbStatusWithUser(data),
+                        references =
+                            when (data) {
+                                is UiTimelineV2.Feed -> emptyList()
+                                is UiTimelineV2.Message -> emptyList()
+                                is UiTimelineV2.Post ->
+                                    data.quote.map {
                                         mappingDbStatusReferenceWithStatus(
                                             data = it,
                                             referenceType = ReferenceType.Quote,
                                             rootStatusKey = data.statusKey,
                                         )
-                                    },
-                                )
-                        },
+                                    } +
+                                        data.parents.map {
+                                            mappingDbStatusReferenceWithStatus(
+                                                data = it,
+                                                referenceType = ReferenceType.Reply,
+                                                rootStatusKey = data.statusKey,
+                                            )
+                                        }
+
+                                is UiTimelineV2.User -> emptyList()
+                                is UiTimelineV2.UserList ->
+                                    listOfNotNull(
+                                        data.post?.let {
+                                            mappingDbStatusReferenceWithStatus(
+                                                data = it,
+                                                referenceType = ReferenceType.Quote,
+                                                rootStatusKey = data.statusKey,
+                                            )
+                                        },
+                                    )
+                            },
+                    ),
+            )
+
+        private fun mappingDbStatusReferenceWithStatus(
+            data: UiTimelineV2,
+            referenceType: ReferenceType,
+            rootStatusKey: MicroBlogKey,
+        ) = DbStatusReferenceWithStatus(
+            reference =
+                DbStatusReference(
+                    referenceType = referenceType,
+                    statusKey = rootStatusKey,
+                    referenceStatusKey = data.statusKey,
+                    _id = Uuid.random().toString(),
                 ),
+            status = mappingDbStatusWithUser(data),
         )
 
-    private fun mappingDbStatusReferenceWithStatus(
-        data: UiTimelineV2,
-        referenceType: ReferenceType,
-        rootStatusKey: MicroBlogKey,
-    ) = DbStatusReferenceWithStatus(
-        reference =
-            DbStatusReference(
-                referenceType = referenceType,
-                statusKey = rootStatusKey,
-                referenceStatusKey = data.statusKey,
-                _id = Uuid.random().toString(),
-            ),
-        status = mappingDbStatusWithUser(data),
-    )
-
-    private fun mappingDbStatusWithUser(data: UiTimelineV2): DbStatusWithUser {
-        val user =
-            if (data is UiTimelineV2.Post) {
-                listOfNotNull(data.user)
-            } else if (data is UiTimelineV2.User) {
-                listOfNotNull(data.value)
-            } else if (data is UiTimelineV2.UserList) {
-                data.users
-            } else {
-                emptyList()
-            }
-        return DbStatusWithUser(
-            data =
-                DbStatus(
-                    statusKey = data.statusKey,
-                    content = data,
-                    pagingKey = pagingKey,
-                    text = data.searchText,
-                ),
-            references =
-                user.map {
-                    DbStatusUserReferenceWithUser(
-                        reference =
-                            DbStatusUserReference(
-                                statusKey = data.statusKey,
-                                referenceUserKey = it.key,
-                                _id = Uuid.random().toString(),
-                            ),
-                        user =
-                            DbUser(
-                                userKey = it.key,
-                                platformType = it.platformType,
-                                name = it.name.raw,
-                                handle = it.handle,
-                                host = it.host ?: it.key.host,
-                                content = it,
-                            ),
-                    )
-                },
-        )
+        private fun mappingDbStatusWithUser(data: UiTimelineV2): DbStatusWithUser {
+            val user =
+                if (data is UiTimelineV2.Post) {
+                    listOfNotNull(data.user)
+                } else if (data is UiTimelineV2.User) {
+                    listOfNotNull(data.value)
+                } else if (data is UiTimelineV2.UserList) {
+                    data.users
+                } else {
+                    emptyList()
+                }
+            return DbStatusWithUser(
+                data =
+                    DbStatus(
+                        statusKey = data.statusKey,
+                        content = data,
+                        accountType = data.accountType as DbAccountType,
+                        text = data.searchText,
+                    ),
+                references =
+                    user.map {
+                        DbStatusUserReferenceWithUser(
+                            reference =
+                                DbStatusUserReference(
+                                    statusKey = data.statusKey,
+                                    referenceUserKey = it.key,
+                                    _id = Uuid.random().toString(),
+                                ),
+                            user =
+                                DbUser(
+                                    userKey = it.key,
+                                    platformType = it.platformType,
+                                    name = it.name.raw,
+                                    handle = it.handle,
+                                    host = it.host ?: it.key.host,
+                                    content = it,
+                                ),
+                        )
+                    },
+            )
+        }
     }
 
     suspend fun timeline(

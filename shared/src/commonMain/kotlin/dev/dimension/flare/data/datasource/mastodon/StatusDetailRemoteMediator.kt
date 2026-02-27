@@ -13,15 +13,18 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.coroutines.flow.firstOrNull
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
     private val statusKey: MicroBlogKey,
     private val service: MastodonService,
-    private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val statusOnly: Boolean,
-) : CacheableRemoteLoader<UiTimelineV2> {
+) : CacheableRemoteLoader<UiTimelineV2>,
+    KoinComponent {
+    private val database: CacheDatabase by inject()
     override val pagingKey: String =
         buildString {
             append("status_detail_")

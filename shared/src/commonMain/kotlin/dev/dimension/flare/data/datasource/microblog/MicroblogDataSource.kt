@@ -10,23 +10,12 @@ import kotlinx.collections.immutable.ImmutableList
 internal interface MicroblogDataSource {
     fun homeTimeline(): RemoteLoader<UiTimelineV2>
 
-//    suspend fun userByAcct(acct: String): UiProfile
-
-    suspend fun userByNameAndHost(
-        name: String,
-        host: String,
-    ): UiProfile
-
-    suspend fun userById(id: String): UiProfile
-
     fun userTimeline(
         userKey: MicroBlogKey,
         mediaOnly: Boolean = false,
     ): RemoteLoader<UiTimelineV2>
 
     fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2>
-
-    suspend fun status(statusKey: MicroBlogKey): UiTimelineV2
 
     fun searchStatus(query: String): RemoteLoader<UiTimelineV2>
 

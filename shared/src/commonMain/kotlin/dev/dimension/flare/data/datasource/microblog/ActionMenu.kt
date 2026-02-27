@@ -36,6 +36,7 @@ public sealed class ActionMenu {
     @Immutable
     @Serializable
     public data class Item internal constructor(
+        internal val updateKey: String = "",
         val icon: UiIcon? = null,
         val text: Text? = null,
         val count: UiNumber? = null,

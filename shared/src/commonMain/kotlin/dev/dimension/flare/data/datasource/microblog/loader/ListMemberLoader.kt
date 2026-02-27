@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.datasource.microblog.list
+package dev.dimension.flare.data.datasource.microblog.loader
 
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest

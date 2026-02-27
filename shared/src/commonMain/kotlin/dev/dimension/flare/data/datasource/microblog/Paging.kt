@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import androidx.paging.PagingConfig
-import dev.dimension.flare.ui.model.UiTimeline
 
 internal val pagingConfig: PagingConfig =
     PagingConfig(
@@ -52,20 +51,20 @@ internal val pagingConfig: PagingConfig =
 //    }.cachedIn(scope)
 // }
 
-internal fun UiTimeline.contains(keywords: List<String>): Boolean {
-    val text =
-        if (content is UiTimeline.ItemContent.Status) {
-            listOfNotNull(
-                content.content.raw,
-                content.contentWarning?.raw,
-            )
-        } else {
-            emptyList()
-        }
-    return keywords.any { keyword ->
-        text.any { it.contains(keyword, ignoreCase = true) }
-    }
-}
+// internal fun UiTimeline.contains(keywords: List<String>): Boolean {
+//    val text =
+//        if (content is UiTimeline.ItemContent.Status) {
+//            listOfNotNull(
+//                content.content.raw,
+//                content.contentWarning?.raw,
+//            )
+//        } else {
+//            emptyList()
+//        }
+//    return keywords.any { keyword ->
+//        text.any { it.contains(keyword, ignoreCase = true) }
+//    }
+// }
 
 // internal class MemoryPagingSource<T : Any>(
 //    private val key: String,

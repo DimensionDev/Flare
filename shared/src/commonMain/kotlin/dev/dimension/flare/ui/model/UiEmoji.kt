@@ -3,13 +3,15 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.SerializableImmutableMap
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Immutable
 public data class UiEmoji internal constructor(
     val shortcode: String,
     val url: String,
     val category: String,
-    val searchKeywords: List<String>,
+    val searchKeywords: SerializableImmutableList<String>,
     val insertText: String,
 )
 

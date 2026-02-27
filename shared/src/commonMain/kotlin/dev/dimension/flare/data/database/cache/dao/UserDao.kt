@@ -10,10 +10,10 @@ import dev.dimension.flare.data.database.cache.model.DbStatusUserReference
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.DbUserHistory
 import dev.dimension.flare.data.database.cache.model.DbUserHistoryWithUser
+import dev.dimension.flare.data.database.cache.model.DbUserRelation
 import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -39,11 +39,10 @@ internal interface UserDao {
     @Query("SELECT * FROM DbUser WHERE userKey = :userKey")
     fun findByKey(userKey: MicroBlogKey): Flow<DbUser?>
 
-    @Query("SELECT * FROM DbUser WHERE handle = :handle AND host = :host AND platformType = :platformType")
+    @Query("SELECT * FROM DbUser WHERE handle = :handle AND host = :host")
     fun findByHandleAndHost(
         handle: String,
         host: String,
-        platformType: PlatformType,
     ): Flow<DbUser?>
 
     @Query("SELECT COUNT(*) FROM DbUser")
@@ -68,4 +67,22 @@ internal interface UserDao {
 
     @Query("DELETE FROM DbUserHistory WHERE accountType = :accountType")
     suspend fun deleteHistoryByAccountType(accountType: DbAccountType)
+
+    @Query("SELECT * FROM DbUserRelation WHERE accountKey = :accountKey AND userKey = :userKey")
+    fun getUserRelation(
+        accountKey: MicroBlogKey,
+        userKey: MicroBlogKey,
+    ): Flow<DbUserRelation?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUserRelation(relation: DbUserRelation)
+
+    @Query("DELETE FROM DbUserRelation WHERE accountKey = :accountKey AND userKey = :userKey")
+    suspend fun deleteUserRelation(
+        accountKey: MicroBlogKey,
+        userKey: MicroBlogKey,
+    )
+
+    @Query("DELETE FROM DbUserRelation")
+    suspend fun clearUserRelations()
 }

@@ -2,7 +2,7 @@ package dev.dimension.flare.data.datasource.misskey
 
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.DbUser
-import dev.dimension.flare.data.datasource.microblog.list.ListMemberLoader
+import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.misskey.MisskeyService

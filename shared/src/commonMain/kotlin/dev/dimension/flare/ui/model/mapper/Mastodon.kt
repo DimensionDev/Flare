@@ -22,6 +22,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiEmoji
@@ -119,10 +120,11 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 ClickEvent.Deeplink(
                     DeeplinkRoute.Profile
                         .User(
-                            accountType = AccountType.Specific(accountKey),
+                            accountType = accountKey.toAccountType(),
                             userKey = user.key,
                         ),
                 ),
+            accountType = accountKey.toAccountType(),
         )
     if (type in listOf(NotificationTypes.FollowRequest)) {
         return UiTimelineV2.User(
@@ -137,7 +139,7 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                                 accountKey,
                                 PostEvent.Mastodon.AcceptFollowRequest(
                                     userKey = user.key,
-                                    notificationStatusKey =
+                                    postKey =
                                         MicroBlogKey(
                                             id ?: "",
                                             accountKey.host,
@@ -154,7 +156,7 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                                 accountKey,
                                 PostEvent.Mastodon.RejectFollowRequest(
                                     userKey = user.key,
-                                    notificationStatusKey =
+                                    postKey =
                                         MicroBlogKey(
                                             id ?: "",
                                             accountKey.host,
@@ -166,6 +168,7 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 ),
             createdAt = createdAt?.toUi() ?: Instant.DISTANT_PAST.toUi(),
             statusKey = MicroBlogKey(id ?: "", accountKey.host),
+            accountType = accountKey.toAccountType(),
         )
     } else if (status != null) {
         return status
@@ -181,6 +184,7 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
             message = message,
             createdAt = createdAt?.toUi() ?: Instant.DISTANT_PAST.toUi(),
             statusKey = MicroBlogKey(id ?: "", accountKey.host),
+            accountType = accountKey.toAccountType(),
         )
     }
 }
@@ -205,6 +209,7 @@ internal fun Status.render(
                 statusKey = currentStatus.statusKey,
                 createdAt = currentStatus.createdAt,
                 clickEvent = ClickEvent.Noop,
+                accountType = accountKey.toAccountType(),
             )
         } else if (reblog != null) {
             val currentStatus = this.renderStatus(host, accountKey)
@@ -223,15 +228,14 @@ internal fun Status.render(
                         ClickEvent.Deeplink(
                             DeeplinkRoute.Profile
                                 .User(
-                                    accountType =
-                                        accountKey?.let { AccountType.Specific(it) }
-                                            ?: AccountType.Guest,
+                                    accountType = accountKey.toAccountType(),
                                     userKey = userKey,
                                 ),
                         )
                     } else {
                         ClickEvent.Noop
                     },
+                accountType = accountKey.toAccountType(),
             )
         } else {
             null
@@ -318,7 +322,7 @@ private fun Status.renderStatus(
                         ClickEvent.event(
                             accountKey = accountKey,
                             PostEvent.Pleroma.React(
-                                statusKey = statusKey,
+                                postKey = statusKey,
                                 hasReacted = true,
                                 reaction = it.name.orEmpty(),
                             ),
@@ -396,20 +400,11 @@ private fun Status.renderStatus(
                     add(
                         ActionMenu.Group(
                             displayItem =
-                                ActionMenu.Item(
-                                    icon = if (reblogged == true) UiIcon.Unretweet else UiIcon.Retweet,
-                                    text =
-                                        ActionMenu.Item.Text.Localized(
-                                            if (reblogged ==
-                                                true
-                                            ) {
-                                                ActionMenu.Item.Text.Localized.Type.Unretweet
-                                            } else {
-                                                ActionMenu.Item.Text.Localized.Type.Retweet
-                                            },
-                                        ),
-                                    count = UiNumber(reblogsCount ?: 0),
-                                    color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
+                                ActionMenu.mastodonRepost(
+                                    reblogged = reblogged ?: false,
+                                    reblogsCount = reblogsCount ?: 0,
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
                                 ),
                             actions =
                                 buildList {
@@ -431,31 +426,11 @@ private fun Status.renderStatus(
                                         )
                                     }
                                     add(
-                                        ActionMenu.Item(
-                                            icon = if (reblogged == true) UiIcon.Unretweet else UiIcon.Retweet,
-                                            text =
-                                                ActionMenu.Item.Text.Localized(
-                                                    if (reblogged ==
-                                                        true
-                                                    ) {
-                                                        ActionMenu.Item.Text.Localized.Type.Unretweet
-                                                    } else {
-                                                        ActionMenu.Item.Text.Localized.Type.Retweet
-                                                    },
-                                                ),
-                                            count = UiNumber(reblogsCount ?: 0),
-                                            color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
-//                                            onClicked = {
-//                                                dataSource?.reblog(statusKey, reblogged ?: false)
-//                                            },
-                                            clickEvent =
-                                                ClickEvent.event(
-                                                    accountKey,
-                                                    PostEvent.Mastodon.Reblog(
-                                                        statusKey = statusKey,
-                                                        reblogged = reblogged ?: false,
-                                                    ),
-                                                ),
+                                        ActionMenu.mastodonRepost(
+                                            reblogged = reblogged ?: false,
+                                            reblogsCount = reblogsCount ?: 0,
+                                            accountKey = accountKey,
+                                            statusKey = statusKey,
                                         ),
                                     )
                                 }.toImmutableList(),
@@ -483,72 +458,29 @@ private fun Status.renderStatus(
                     )
                 } else if (canReblog) {
                     add(
-                        ActionMenu.Item(
-                            icon = if (reblogged == true) UiIcon.Unretweet else UiIcon.Retweet,
-                            text =
-                                ActionMenu.Item.Text.Localized(
-                                    if (reblogged ==
-                                        true
-                                    ) {
-                                        ActionMenu.Item.Text.Localized.Type.Unretweet
-                                    } else {
-                                        ActionMenu.Item.Text.Localized.Type.Retweet
-                                    },
-                                ),
-                            count = UiNumber(reblogsCount ?: 0),
-                            color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
-                            clickEvent =
-                                ClickEvent.event(
-                                    accountKey,
-                                    PostEvent.Mastodon.Reblog(
-                                        statusKey = statusKey,
-                                        reblogged = reblogged ?: false,
-                                    ),
-                                ),
+                        ActionMenu.mastodonRepost(
+                            reblogged = reblogged ?: false,
+                            reblogsCount = reblogsCount ?: 0,
+                            accountKey = accountKey,
+                            statusKey = statusKey,
                         ),
                     )
                 } else if (accountKey == null) {
                     add(
-                        ActionMenu.Item(
-                            icon = if (reblogged == true) UiIcon.Unretweet else UiIcon.Retweet,
-                            text =
-                                ActionMenu.Item.Text.Localized(
-                                    if (reblogged ==
-                                        true
-                                    ) {
-                                        ActionMenu.Item.Text.Localized.Type.Unretweet
-                                    } else {
-                                        ActionMenu.Item.Text.Localized.Type.Retweet
-                                    },
-                                ),
-                            count = UiNumber(reblogsCount ?: 0),
-                            color = if (reblogged == true) ActionMenu.Item.Color.PrimaryColor else null,
+                        ActionMenu.mastodonRepost(
+                            reblogged = reblogged ?: false,
+                            reblogsCount = reblogsCount ?: 0,
+                            accountKey = accountKey,
+                            statusKey = statusKey,
                         ),
                     )
                 }
                 add(
-                    ActionMenu.Item(
-                        icon = if (favourited == true) UiIcon.Unlike else UiIcon.Like,
-                        text =
-                            ActionMenu.Item.Text.Localized(
-                                if (favourited ==
-                                    true
-                                ) {
-                                    ActionMenu.Item.Text.Localized.Type.Unlike
-                                } else {
-                                    ActionMenu.Item.Text.Localized.Type.Like
-                                },
-                            ),
-                        count = UiNumber(favouritesCount ?: 0),
-                        color = if (favourited == true) ActionMenu.Item.Color.Red else null,
-                        clickEvent =
-                            ClickEvent.event(
-                                accountKey,
-                                PostEvent.Mastodon.Like(
-                                    statusKey = statusKey,
-                                    liked = favourited ?: false,
-                                ),
-                            ),
+                    ActionMenu.mastodonLike(
+                        favourited = favourited ?: false,
+                        favouritesCount = favouritesCount ?: 0,
+                        accountKey = accountKey,
+                        statusKey = statusKey,
                     ),
                 )
                 if (canReact) {
@@ -582,34 +514,10 @@ private fun Status.renderStatus(
                             buildList {
                                 if (accountKey != null) {
                                     add(
-                                        ActionMenu.Item(
-                                            icon =
-                                                if (bookmarked ==
-                                                    true
-                                                ) {
-                                                    UiIcon.Unbookmark
-                                                } else {
-                                                    UiIcon.Bookmark
-                                                },
-                                            text =
-                                                ActionMenu.Item.Text.Localized(
-                                                    if (bookmarked ==
-                                                        true
-                                                    ) {
-                                                        ActionMenu.Item.Text.Localized.Type.Unbookmark
-                                                    } else {
-                                                        ActionMenu.Item.Text.Localized.Type.Bookmark
-                                                    },
-                                                ),
-                                            count = UiNumber(0),
-                                            clickEvent =
-                                                ClickEvent.event(
-                                                    accountKey,
-                                                    PostEvent.Mastodon.Bookmark(
-                                                        statusKey = statusKey,
-                                                        bookmarked = bookmarked ?: false,
-                                                    ),
-                                                ),
+                                        ActionMenu.mastodonBookmark(
+                                            bookmarked ?: false,
+                                            accountKey,
+                                            statusKey,
                                         ),
                                     )
                                 }
@@ -735,6 +643,17 @@ private fun Status.renderStatus(
 //                        }
 //                    },
                     enabled = accountKey != null && !isFromMe,
+                    voteEvent =
+                        if (accountKey != null) {
+                            PostEvent.Mastodon.Vote(
+                                id = it.id ?: "",
+                                postKey = statusKey,
+                                accountKey = accountKey,
+                                options = persistentListOf(),
+                            )
+                        } else {
+                            null
+                        },
                 )
             },
         statusKey = statusKey,
@@ -753,8 +672,99 @@ private fun Status.renderStatus(
             ),
         platformType = PlatformType.Mastodon,
         emojiReactions = reactions,
+        accountType = accountKey.toAccountType(),
     )
 }
+
+internal fun ActionMenu.Companion.mastodonLike(
+    favourited: Boolean,
+    favouritesCount: Long,
+    accountKey: MicroBlogKey?,
+    statusKey: MicroBlogKey,
+): ActionMenu.Item =
+    ActionMenu.Item(
+        updateKey = "like",
+        icon = if (favourited) UiIcon.Unlike else UiIcon.Like,
+        text =
+            ActionMenu.Item.Text.Localized(
+                if (favourited) {
+                    ActionMenu.Item.Text.Localized.Type.Unlike
+                } else {
+                    ActionMenu.Item.Text.Localized.Type.Like
+                },
+            ),
+        count = UiNumber(favouritesCount),
+        color = if (favourited) ActionMenu.Item.Color.Red else null,
+        clickEvent =
+            ClickEvent.event(
+                accountKey,
+                PostEvent.Mastodon.Like(
+                    postKey = statusKey,
+                    liked = favourited,
+                ),
+            ),
+    )
+
+internal fun ActionMenu.Companion.mastodonRepost(
+    reblogged: Boolean,
+    reblogsCount: Long,
+    accountKey: MicroBlogKey?,
+    statusKey: MicroBlogKey,
+): ActionMenu.Item =
+    ActionMenu.Item(
+        updateKey = "reblog",
+        icon = if (reblogged) UiIcon.Unretweet else UiIcon.Retweet,
+        text =
+            ActionMenu.Item.Text.Localized(
+                if (reblogged) {
+                    ActionMenu.Item.Text.Localized.Type.Unretweet
+                } else {
+                    ActionMenu.Item.Text.Localized.Type.Retweet
+                },
+            ),
+        count = UiNumber(reblogsCount),
+        color = if (reblogged) ActionMenu.Item.Color.PrimaryColor else null,
+        clickEvent =
+            ClickEvent.event(
+                accountKey,
+                PostEvent.Mastodon.Reblog(
+                    postKey = statusKey,
+                    reblogged = reblogged,
+                ),
+            ),
+    )
+
+internal fun ActionMenu.Companion.mastodonBookmark(
+    bookmarked: Boolean,
+    accountKey: MicroBlogKey?,
+    statusKey: MicroBlogKey,
+): ActionMenu.Item =
+    ActionMenu.Item(
+        updateKey = "bookmark",
+        icon =
+            if (bookmarked) {
+                UiIcon.Unbookmark
+            } else {
+                UiIcon.Bookmark
+            },
+        text =
+            ActionMenu.Item.Text.Localized(
+                if (bookmarked) {
+                    ActionMenu.Item.Text.Localized.Type.Unbookmark
+                } else {
+                    ActionMenu.Item.Text.Localized.Type.Bookmark
+                },
+            ),
+        count = UiNumber(0),
+        clickEvent =
+            ClickEvent.event(
+                accountKey,
+                PostEvent.Mastodon.Bookmark(
+                    postKey = statusKey,
+                    bookmarked = bookmarked,
+                ),
+            ),
+    )
 
 private fun Attachment.toUi(sensitive: Boolean): UiMedia? =
     when (type) {

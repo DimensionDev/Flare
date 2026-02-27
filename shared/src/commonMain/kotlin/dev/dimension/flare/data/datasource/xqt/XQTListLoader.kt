@@ -1,9 +1,9 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import dev.dimension.flare.data.database.cache.mapper.cursor
-import dev.dimension.flare.data.datasource.microblog.list.ListLoader
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.list.ListMetaDataType
+import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQTService

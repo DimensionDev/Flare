@@ -28,6 +28,7 @@ internal const val CACHE_DATABASE_VERSION = 24
         dev.dimension.flare.data.database.cache.model.DbList::class,
         dev.dimension.flare.data.database.cache.model.DbListPaging::class,
         dev.dimension.flare.data.database.cache.model.DbListMember::class,
+        dev.dimension.flare.data.database.cache.model.DbUserRelation::class,
     ],
     version = CACHE_DATABASE_VERSION,
     exportSchema = false,

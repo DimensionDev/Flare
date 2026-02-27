@@ -5,9 +5,9 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import dev.dimension.flare.data.database.cache.model.DbStatus
-import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -28,7 +28,7 @@ internal interface StatusDao {
     suspend fun update(
         statusKey: MicroBlogKey,
         accountType: DbAccountType,
-        content: StatusContent,
+        content: UiTimelineV2,
     )
 
     @Query("DELETE FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")

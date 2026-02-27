@@ -5,6 +5,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
 
 internal class AccountTypeConverter {
@@ -25,4 +26,10 @@ internal class AccountTypeConverter {
 
     @TypeConverter
     fun toUiTimelineV2(value: String): UiTimelineV2 = value.decodeJson()
+
+    @TypeConverter
+    fun fromUiRelation(value: UiRelation): String = value.encodeJson()
+
+    @TypeConverter
+    fun toUiRelation(value: String): UiRelation = value.decodeJson()
 }

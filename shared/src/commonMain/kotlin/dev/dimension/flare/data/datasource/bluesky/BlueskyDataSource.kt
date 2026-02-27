@@ -67,14 +67,14 @@ import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
-import dev.dimension.flare.data.datasource.microblog.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
-import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
-import dev.dimension.flare.data.datasource.microblog.list.ListHandler
-import dev.dimension.flare.data.datasource.microblog.list.ListLoader
-import dev.dimension.flare.data.datasource.microblog.list.ListMemberHandler
-import dev.dimension.flare.data.datasource.microblog.list.ListMemberLoader
+import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.handler.ListHandler
+import dev.dimension.flare.data.datasource.microblog.handler.ListMemberHandler
+import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
+import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
+import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
@@ -136,7 +136,7 @@ internal class BlueskyDataSource(
     StatusEvent.Bluesky,
     ListDataSource,
     DirectMessageDataSource,
-    RelationDataSource {
+    RelationLoader {
     private val database: CacheDatabase by inject()
     private val appDatabase: AppDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()

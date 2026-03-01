@@ -1,11 +1,13 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.TextStyle
 import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.ui.render.UiRichText
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -44,10 +46,18 @@ class RichTextStateTest {
         val state = RichTextState(ui, defaultStyleData())
 
         val textContent = state.contents.single() as RichTextContent.Text
-        val annotations = textContent.content.getStringAnnotations(0, textContent.content.length)
-        val a = annotations.firstOrNull { it.tag == TAG_URL }
-        assertNotNull(a)
-        assertEquals(url, a.item)
+        if (allowLinkAnnotation) {
+            val annotations = textContent.content.getLinkAnnotations(0, textContent.content.length)
+            val a = annotations.firstOrNull { it.item is LinkAnnotation.Url }
+            assertNotNull(a)
+            assertIs<LinkAnnotation.Url>(a.item)
+            assertEquals(url, (a.item as LinkAnnotation.Url).url)
+        } else {
+            val annotations = textContent.content.getStringAnnotations(0, textContent.content.length)
+            val a = annotations.firstOrNull { it.tag == TAG_URL }
+            assertNotNull(a)
+            assertEquals(url, a.item)
+        }
     }
 
     @Test

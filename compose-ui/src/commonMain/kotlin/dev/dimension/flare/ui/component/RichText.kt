@@ -53,6 +53,8 @@ internal const val TAG_URL = "url"
 private val lightLinkColor = Color(0xff0066cc)
 private val darkLinkColor = Color(0xff99c3ff)
 
+internal expect val allowLinkAnnotation: Boolean
+
 @Composable
 public fun RichText(
     text: UiRichText,
@@ -127,27 +129,34 @@ public fun RichText(
                         is RichTextContent.Text -> {
                             PlatformText(
                                 modifier =
-                                    Modifier.pointerInput(Unit) {
-                                        awaitEachGesture {
-                                            val change = awaitFirstDown()
-                                            val annotation =
-                                                layoutResult?.getOffsetForPosition(change.position)?.let {
-                                                    content.content
-                                                        .getStringAnnotations(start = it, end = it)
-                                                        .firstOrNull()
-                                                }
-                                            if (annotation != null && annotation.tag == TAG_URL) {
-                                                if (change.pressed != change.previousPressed) change.consume()
-                                                val up =
-                                                    waitForUpOrCancellation()?.also {
-                                                        if (it.pressed != it.previousPressed) it.consume()
+                                    Modifier
+                                        .let {
+                                            if (allowLinkAnnotation) {
+                                                it
+                                            } else {
+                                                it.pointerInput(Unit) {
+                                                    awaitEachGesture {
+                                                        val change = awaitFirstDown()
+                                                        val annotation =
+                                                            layoutResult?.getOffsetForPosition(change.position)?.let {
+                                                                content.content
+                                                                    .getStringAnnotations(start = it, end = it)
+                                                                    .firstOrNull()
+                                                            }
+                                                        if (annotation != null && annotation.tag == TAG_URL) {
+                                                            if (change.pressed != change.previousPressed) change.consume()
+                                                            val up =
+                                                                waitForUpOrCancellation()?.also {
+                                                                    if (it.pressed != it.previousPressed) it.consume()
+                                                                }
+                                                            if (up != null) {
+                                                                uriHandler.openUri(annotation.item)
+                                                            }
+                                                        }
                                                     }
-                                                if (up != null) {
-                                                    uriHandler.openUri(annotation.item)
                                                 }
                                             }
-                                        }
-                                    },
+                                        },
                                 maxLines = maxLines,
                                 color = color,
                                 fontSize = fontSize,

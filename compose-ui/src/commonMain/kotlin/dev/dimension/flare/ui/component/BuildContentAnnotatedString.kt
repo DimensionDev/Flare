@@ -4,6 +4,7 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -194,6 +195,30 @@ private class ContentBuilder(
             block()
         } finally {
             pop()
+        }
+    }
+
+    inline fun withLinkAnnotation(url: String, block: ContentBuilder.() -> Unit) {
+        currentBuilder.pushLink(LinkAnnotation.Url(url))
+        try {
+            block()
+        } finally {
+            currentBuilder.pop()
+        }
+    }
+
+    inline fun withLink(
+        url: String,
+        block: ContentBuilder.() -> Unit
+    ) {
+        if (allowLinkAnnotation) {
+            withLinkAnnotation(url, block)
+        } else {
+            withAnnotation(
+                tag = TAG_URL,
+                annotation = url,
+                block = block,
+            )
         }
     }
 
@@ -624,7 +649,7 @@ private fun ContentBuilder.renderLink(
 ) {
     val href = element.attribute("href")?.value
     if (!href.isNullOrEmpty()) {
-        withAnnotation(tag = TAG_URL, annotation = href) {
+        withLink(href) {
             withStyle(
                 styleData.linkStyle.toSpanStyle(),
             ) {

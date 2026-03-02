@@ -3,6 +3,8 @@ package dev.dimension.flare.data.datastore
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
+import dev.dimension.flare.data.datastore.model.AppSettings
+import dev.dimension.flare.data.datastore.model.AppSettingsSerializer
 import dev.dimension.flare.data.datastore.model.ComposeConfigData
 import dev.dimension.flare.data.datastore.model.ComposeConfigDataSerializer
 import dev.dimension.flare.data.datastore.model.FlareConfig
@@ -13,10 +15,10 @@ import dev.dimension.flare.data.io.PlatformPathProducer
 import okio.FileSystem
 import okio.SYSTEM
 
-internal class AppDataStore(
+public class AppDataStore(
     private val platformPathProducer: PlatformPathProducer,
 ) {
-    val guestDataStore: DataStore<GuestData> by lazy {
+    internal val guestDataStore: DataStore<GuestData> by lazy {
         DataStoreFactory.create(
             storage =
                 OkioStorage(
@@ -29,7 +31,7 @@ internal class AppDataStore(
         )
     }
 
-    val flareDataStore: DataStore<FlareConfig> by lazy {
+    internal val flareDataStore: DataStore<FlareConfig> by lazy {
         DataStoreFactory.create(
             storage =
                 OkioStorage(
@@ -42,7 +44,7 @@ internal class AppDataStore(
         )
     }
 
-    val composeConfigData: DataStore<ComposeConfigData> by lazy {
+    internal val composeConfigData: DataStore<ComposeConfigData> by lazy {
         DataStoreFactory.create(
             storage =
                 OkioStorage(
@@ -50,6 +52,19 @@ internal class AppDataStore(
                     serializer = ComposeConfigDataSerializer,
                     producePath = {
                         platformPathProducer.dataStoreFile("compose_config.pb")
+                    },
+                ),
+        )
+    }
+
+    public val appSettingsStore: DataStore<AppSettings> by lazy {
+        DataStoreFactory.create(
+            storage =
+                OkioStorage(
+                    fileSystem = FileSystem.SYSTEM,
+                    serializer = AppSettingsSerializer,
+                    producePath = {
+                        platformPathProducer.dataStoreFile("app_settings.pb")
                     },
                 ),
         )

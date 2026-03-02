@@ -723,7 +723,6 @@ private fun TranslationComponent(
                 contentWarning = contentWarning,
                 content = content,
                 targetLanguage = Locale.current.language,
-                useAi = componentAppearance.aiConfig.translation,
             )
         }
         state.contentWarning

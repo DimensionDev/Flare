@@ -5,7 +5,6 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.server.AiTLDRPresenter
-import dev.dimension.flare.ui.presenter.server.AiTranslatePresenter
 import dev.dimension.flare.ui.presenter.status.TranslatePresenter
 import dev.dimension.flare.ui.render.UiRichText
 
@@ -14,13 +13,12 @@ internal fun statusTranslatePresenter(
     contentWarning: UiRichText?,
     content: UiRichText,
     targetLanguage: String,
-    useAi: Boolean,
 ): TranslateResult {
     val contentWarningState =
         contentWarning?.takeIf { !it.isEmpty }?.let {
-            translateText(it.innerText, targetLanguage, useAi)
+            translateText(it.innerText, targetLanguage)
         }
-    val textState = translateText(content.innerText, targetLanguage, useAi)
+    val textState = translateText(content.innerText, targetLanguage)
     return TranslateResult(
         contentWarning = contentWarningState,
         text = textState,
@@ -31,14 +29,9 @@ internal fun statusTranslatePresenter(
 private fun translateText(
     text: String,
     targetLanguage: String,
-    useAi: Boolean,
 ) = run {
-    remember(text, targetLanguage, useAi) {
-        if (useAi) {
-            AiTranslatePresenter(text, targetLanguage)
-        } else {
-            TranslatePresenter(text, targetLanguage)
-        }
+    remember(text, targetLanguage) {
+        TranslatePresenter(text, targetLanguage)
     }.invoke()
 }
 

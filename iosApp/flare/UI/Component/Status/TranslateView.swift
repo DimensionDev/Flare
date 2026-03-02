@@ -33,9 +33,9 @@ struct StatusTranslateView: View {
                 
                 if enableTranslate {
                     if let cw = contentWarning {
-                        TranslateTextView(text: cw.innerText, useAI: aiConfig.translation)
+                        TranslateTextView(text: cw.innerText)
                     }
-                    TranslateTextView(text: content.innerText, useAI: aiConfig.translation)
+                    TranslateTextView(text: content.innerText)
                 }
                 if enableTLDR, content.isLongText, aiConfig.tldr {
                     
@@ -50,14 +50,9 @@ struct TranslateTextView: View {
     @StateObject private var presenter: KotlinPresenter<UiState<NSString>>
     
     init(
-        text: String,
-        useAI: Bool = false
+        text: String
     ) {
-        if useAI {
-            self._presenter = .init(wrappedValue: .init(presenter: AiTranslatePresenter(source: text, targetLanguage: Locale.current.language.languageCode?.identifier ?? "en")))
-        } else {
-            self._presenter = .init(wrappedValue: .init(presenter: TranslatePresenter(source: text, targetLanguage: Locale.current.language.languageCode?.identifier ?? "en")))
-        }
+        self._presenter = .init(wrappedValue: .init(presenter: TranslatePresenter(source: text, targetLanguage: Locale.current.language.languageCode?.identifier ?? "en")))
     }
     
     var body: some View {

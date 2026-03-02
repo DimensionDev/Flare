@@ -4,10 +4,10 @@ import androidx.compose.runtime.Stable
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioStorage
+import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.model.AccountPreferencesSerializer
-import dev.dimension.flare.data.model.AppSettings
-import dev.dimension.flare.data.model.AppSettingsSerializer
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TabSettingsSerializer
@@ -18,6 +18,7 @@ import okio.SYSTEM
 @Stable
 public class SettingsRepository internal constructor(
     private val pathProducer: PlatformPathProducer,
+    private val appDataStore: AppDataStore,
 ) {
     private val appearanceSettingsStore by lazy {
         createDataStore(
@@ -28,12 +29,7 @@ public class SettingsRepository internal constructor(
     public val appearanceSettings: Flow<AppearanceSettings> by lazy {
         appearanceSettingsStore.data
     }
-    private val appSettingsStore by lazy {
-        createDataStore(
-            name = "app_settings.pb",
-            serializer = AppSettingsSerializer,
-        )
-    }
+    private val appSettingsStore: DataStore<AppSettings> by lazy { appDataStore.appSettingsStore }
     public val appSettings: Flow<AppSettings> by lazy {
         appSettingsStore.data
     }

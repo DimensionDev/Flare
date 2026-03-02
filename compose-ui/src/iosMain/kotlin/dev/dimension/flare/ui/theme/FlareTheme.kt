@@ -6,7 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.slapps.cupertino.theme.CupertinoTheme
-import dev.dimension.flare.data.model.AppSettings
+import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings

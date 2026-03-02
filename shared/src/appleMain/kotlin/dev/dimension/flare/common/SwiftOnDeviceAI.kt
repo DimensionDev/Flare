@@ -1,15 +1,15 @@
 package dev.dimension.flare.common
 
 public interface SwiftOnDeviceAI {
-    public fun isAvailable(): Boolean
+    public suspend fun isAvailable(): Boolean
 
-    public fun translate(
+    public suspend fun translate(
         source: String,
         targetLanguage: String,
         prompt: String,
     ): String?
 
-    public fun tldr(
+    public suspend fun tldr(
         source: String,
         targetLanguage: String,
         prompt: String,

@@ -71,9 +71,10 @@ struct AiConfigScreen: View {
                 }
 
                 if isOpenAIType(presenter.state.aiConfig.type) {
+                    let selectedModel = openAIValue(presenter.state.aiConfig.type).model
                     Picker(
                         selection: Binding(
-                            get: { String(openAIValue(presenter.state.aiConfig.type).model) },
+                            get: { String(selectedModel) },
                             set: { model in
                                 if model.hasPrefix("__meta__") {
                                     return
@@ -101,6 +102,9 @@ struct AiConfigScreen: View {
                     ) {
                         switch onEnum(of: presenter.state.openAIModels) {
                         case .loading:
+                            if !selectedModel.isEmpty {
+                                Text(selectedModel).tag(selectedModel)
+                            }
                             Text("Loading models...").tag("__meta__loading")
                         case .error:
                             Text("Failed to load models").tag("__meta__error")

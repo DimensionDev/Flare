@@ -8,11 +8,9 @@ final class FoundationModelOnDeviceAI: SwiftOnDeviceAI {
     static let shared = FoundationModelOnDeviceAI()
 
     func __isAvailable() async throws -> KotlinBoolean {
-        #if canImport(FoundationModels)
         if #available(iOS 26.0, *) {
             return KotlinBoolean(bool: SystemLanguageModel.default.isAvailable)
         }
-        #endif
         return KotlinBoolean(bool: false)
     }
 

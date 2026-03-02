@@ -33,9 +33,9 @@ struct StatusTranslateView: View {
                 
                 if enableTranslate {
                     if let cw = contentWarning {
-                        TranslateTextView(text: cw.innerText)
+                        TranslateTextView(text: cw)
                     }
-                    TranslateTextView(text: content.innerText)
+                    TranslateTextView(text: content)
                 }
                 if enableTLDR, content.isLongText, aiConfig.tldr {
                     
@@ -47,17 +47,17 @@ struct StatusTranslateView: View {
 }
 
 struct TranslateTextView: View {
-    @StateObject private var presenter: KotlinPresenter<UiState<NSString>>
+    @StateObject private var presenter: KotlinPresenter<UiState<UiRichText>>
     
     init(
-        text: String
+        text: UiRichText
     ) {
         self._presenter = .init(wrappedValue: .init(presenter: TranslatePresenter(source: text, targetLanguage: Locale.current.language.languageCode?.identifier ?? "en")))
     }
     
     var body: some View {
         StateView(state: presenter.state) { text in
-            Text(String(text))
+            RichText(text: text)
         } errorContent: { error in
             Text(error.message ?? "Unknown Error")
         } loadingContent: {

@@ -16,9 +16,9 @@ internal fun statusTranslatePresenter(
 ): TranslateResult {
     val contentWarningState =
         contentWarning?.takeIf { !it.isEmpty }?.let {
-            translateText(it.innerText, targetLanguage)
+            translateText(it, targetLanguage)
         }
-    val textState = translateText(content.innerText, targetLanguage)
+    val textState = translateText(content, targetLanguage)
     return TranslateResult(
         contentWarning = contentWarningState,
         text = textState,
@@ -27,7 +27,7 @@ internal fun statusTranslatePresenter(
 
 @Composable
 private fun translateText(
-    text: String,
+    text: UiRichText,
     targetLanguage: String,
 ) = run {
     remember(text, targetLanguage) {

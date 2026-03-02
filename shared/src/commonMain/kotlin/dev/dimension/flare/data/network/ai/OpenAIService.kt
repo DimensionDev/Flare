@@ -3,6 +3,7 @@ package dev.dimension.flare.data.network.ai
 import com.aallam.openai.api.chat.ChatCompletionRequest
 import com.aallam.openai.api.chat.ChatMessage
 import com.aallam.openai.api.chat.ChatRole
+import com.aallam.openai.api.http.Timeout
 import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.OpenAI
 import com.aallam.openai.client.OpenAIConfig
@@ -13,6 +14,7 @@ import dev.dimension.flare.data.network.FlareLogger
 import dev.dimension.flare.data.network.httpClientEngine
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import kotlin.time.Duration.Companion.minutes
 
 internal class OpenAIService {
     suspend fun models(
@@ -61,6 +63,12 @@ internal class OpenAIService {
                 host = OpenAIHost(baseUrl = serverUrl),
                 token = apiKey,
                 engine = httpClientEngine,
+                timeout =
+                    Timeout(
+                        request = 1.minutes,
+                        socket = 1.minutes,
+                        connect = 1.minutes,
+                    ),
                 httpClientConfig = {
                     install(Logging) {
                         logger = FlareLogger

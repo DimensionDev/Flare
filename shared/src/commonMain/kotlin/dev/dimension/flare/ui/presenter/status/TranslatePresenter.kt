@@ -11,6 +11,9 @@ import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.render.parseHtml
+import dev.dimension.flare.ui.render.toUi
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -23,17 +26,17 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 public class TranslatePresenter(
-    private val source: String,
+    private val source: UiRichText,
     private val targetLanguage: String = Locale.language,
-) : PresenterBase<UiState<String>>(),
+) : PresenterBase<UiState<UiRichText>>(),
     KoinComponent {
     private val openAIService by inject<OpenAIService>()
     private val appDataStore: AppDataStore by inject()
     private val onDeviceAI: OnDeviceAI by inject()
 
     @Composable
-    override fun body(): UiState<String> {
-        return produceState(UiState.Loading()) {
+    override fun body(): UiState<UiRichText> {
+        return produceState<UiState<UiRichText>>(initialValue = UiState.Loading()) {
             value =
                 runCatching {
                     val aiConfig =
@@ -41,7 +44,7 @@ public class TranslatePresenter(
                             .first()
                             .aiConfig
                     if (!aiConfig.translation) {
-                        return@runCatching legacyGoogleTranslate()
+                        return@runCatching toUiRichText(legacyGoogleTranslate())
                     }
                     val promptTemplate =
                         aiConfig.translatePrompt.ifBlank {
@@ -50,7 +53,7 @@ public class TranslatePresenter(
                     val prompt = buildTranslatePrompt(promptTemplate, targetLanguage, source)
                     when (val type = aiConfig.type) {
                         AppSettings.AiConfig.Type.OnDevice ->
-                            onDeviceAI.translate(source, targetLanguage, prompt) ?: legacyGoogleTranslate()
+                            onDeviceAI.translate(source.html, targetLanguage, prompt) ?: legacyGoogleTranslate()
                         is AppSettings.AiConfig.Type.OpenAI -> {
                             if (type.serverUrl.isBlank() || type.apiKey.isBlank() || type.model.isBlank()) {
                                 legacyGoogleTranslate()
@@ -61,7 +64,7 @@ public class TranslatePresenter(
                                 )
                             }
                         }
-                    }
+                    }.let(::toUiRichText)
                 }.fold(
                     onSuccess = { UiState.Success(it) },
                     onFailure = { UiState.Error(it) },
@@ -79,7 +82,7 @@ public class TranslatePresenter(
                     parameter("sl", "auto")
                     parameter("tl", targetLanguage)
                     parameter("dt", "t")
-                    parameter("q", source)
+                    parameter("q", source.innerText)
                     parameter("ie", "UTF-8")
                     parameter("oe", "UTF-8")
                 }.body<JsonArray>()
@@ -99,9 +102,18 @@ public class TranslatePresenter(
     private fun buildTranslatePrompt(
         template: String,
         targetLanguage: String,
-        sourceText: String,
+        source: UiRichText,
     ): String =
         template
             .replace("{target_language}", targetLanguage)
-            .replace("{source_text}", sourceText)
+            .replace("{source_html}", source.html)
+
+    private fun toUiRichText(translatedContent: String): UiRichText =
+        parseHtml(
+            translatedContent
+                .removePrefix("```html")
+                .removePrefix("```")
+                .removeSuffix("```")
+                .trim(),
+        ).toUi()
 }

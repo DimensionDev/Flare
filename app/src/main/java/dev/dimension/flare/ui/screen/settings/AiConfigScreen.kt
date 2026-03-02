@@ -4,7 +4,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -27,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.ui.component.BackButton
@@ -43,6 +46,7 @@ import dev.dimension.flare.ui.theme.first
 import dev.dimension.flare.ui.theme.item
 import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import dev.dimension.flare.ui.theme.single
 import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,7 +94,12 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                 onCheckedChange = {
                     state.setShowTypeDropdown(it)
                 },
-                shapes = ListItemDefaults.first(),
+                shapes =
+                    if (selectedType == AiTypeOption.OpenAI) {
+                        ListItemDefaults.first()
+                    } else {
+                        ListItemDefaults.single()
+                    },
                 content = {
                     Text(
                         text = stringResource(id = R.string.settings_ai_config_type),
@@ -243,7 +252,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     onCheckedChange = { checked ->
                         state.setShowModelDropdown(checked)
                     },
-                    shapes = ListItemDefaults.item(),
+                    shapes = ListItemDefaults.last(),
                     content = {
                         Text(text = stringResource(id = R.string.settings_ai_config_model))
                     },
@@ -317,13 +326,14 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     },
                 )
             }
+            Spacer(modifier = Modifier.height(12.dp))
             SegmentedListItem(
                 onClick = {
                     state.update {
                         copy(translation = !state.aiConfig.translation)
                     }
                 },
-                shapes = ListItemDefaults.item(),
+                shapes = ListItemDefaults.first(),
                 content = {
                     Text(
                         text = stringResource(id = R.string.settings_ai_config_entable_translation),

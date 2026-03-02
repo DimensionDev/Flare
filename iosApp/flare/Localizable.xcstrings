@@ -1799,7 +1799,14 @@
       }
     },
     "AI Type" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI Type"
+          }
+        }
+      }
     },
     "ai_config_description" : {
       "localizations" : {
@@ -4421,7 +4428,14 @@
       }
     },
     "API Key" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API Key"
+          }
+        }
+      }
     },
     "app_log" : {
       "localizations" : {
@@ -25516,7 +25530,14 @@
       }
     },
     "Failed to load models" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to load models"
+          }
+        }
+      }
     },
     "fx_share" : {
       "localizations" : {
@@ -30957,7 +30978,14 @@
       }
     },
     "Loading models..." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading models..."
+          }
+        }
+      }
     },
     "Loading..." : {
       "localizations" : {
@@ -30989,6 +31017,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Φόρτωση..."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading..."
           }
         },
         "es" : {
@@ -73273,7 +73307,14 @@
       }
     },
     "Model" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model"
+          }
+        }
+      }
     },
     "more" : {
       "localizations" : {
@@ -74230,7 +74271,14 @@
       }
     },
     "No models available" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No models available"
+          }
+        }
+      }
     },
     "Not done yet for %@" : {
       "localizations" : {
@@ -76241,7 +76289,14 @@
       }
     },
     "OpenAI model used for translation and summary" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OpenAI model used for translation and summary"
+          }
+        }
+      }
     },
     "opml_import" : {
       "localizations" : {
@@ -83904,7 +83959,14 @@
       }
     },
     "Select AI provider" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select AI provider"
+          }
+        }
+      }
     },
     "Select Icon" : {
       "localizations" : {
@@ -84364,7 +84426,14 @@
       }
     },
     "Server URL" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Server URL"
+          }
+        }
+      }
     },
     "settings_rss_management_description" : {
       "localizations" : {
@@ -89420,7 +89489,14 @@
       }
     },
     "Summarize long text with AI" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summarize long text with AI"
+          }
+        }
+      }
     },
     "Summarize this article" : {
       "localizations" : {
@@ -89553,7 +89629,14 @@
       }
     },
     "Summary Prompt" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Summary Prompt"
+          }
+        }
+      }
     },
     "System" : {
       "localizations" : {
@@ -92652,10 +92735,24 @@
       }
     },
     "Translate Prompt" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Translate Prompt"
+          }
+        }
+      }
     },
     "Translate text with AI" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Translate text with AI"
+          }
+        }
+      }
     },
     "unblock" : {
       "localizations" : {

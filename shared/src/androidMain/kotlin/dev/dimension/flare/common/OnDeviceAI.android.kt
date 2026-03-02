@@ -1,21 +1,26 @@
 package dev.dimension.flare.common
 
 import android.content.Context
+import com.google.common.util.concurrent.ListenableFuture
 import com.google.mlkit.genai.common.FeatureStatus
 import com.google.mlkit.genai.prompt.Generation
 import com.google.mlkit.genai.summarization.Summarization
 import com.google.mlkit.genai.summarization.SummarizationRequest
 import com.google.mlkit.genai.summarization.SummarizerOptions
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.concurrent.Executor
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 internal actual class OnDeviceAI(
     private val context: Context,
 ) {
-    actual fun isAvailable(): Boolean =
+    actual suspend fun isAvailable(): Boolean =
         runCatching {
             val summarizer = createSummarizer("en")
             try {
-                val status = summarizer.checkFeatureStatus().get()
+                val status = summarizer.checkFeatureStatus().await()
                 status == FeatureStatus.AVAILABLE ||
                     status == FeatureStatus.DOWNLOADABLE ||
                     status == FeatureStatus.DOWNLOADING
@@ -56,7 +61,7 @@ internal actual class OnDeviceAI(
             runCatching {
                 val summarizer = createSummarizer(targetLanguage)
                 try {
-                    val status = summarizer.checkFeatureStatus().get()
+                    val status = summarizer.checkFeatureStatus().await()
                     if (status == FeatureStatus.UNAVAILABLE) {
                         return@runCatching null
                     }
@@ -124,3 +129,18 @@ internal actual class OnDeviceAI(
         return Summarization.getClient(options)
     }
 }
+
+private suspend fun <T> ListenableFuture<T>.await(): T =
+    suspendCancellableCoroutine { continuation ->
+        addListener(
+            {
+                runCatching { get() }
+                    .onSuccess { continuation.resume(it) }
+                    .onFailure { continuation.resumeWithException(it) }
+            },
+            Executor(Runnable::run),
+        )
+        continuation.invokeOnCancellation {
+            cancel(true)
+        }
+    }

@@ -63,15 +63,19 @@ public class AiConfigPresenter :
         var openAIModels by remember {
             mutableStateOf<UiState<ImmutableList<String>>>(UiState.Success(persistentListOf()))
         }
-        val supportedTypes =
-            remember {
+        var supportedTypes by remember {
+            mutableStateOf<ImmutableList<AiTypeOption>>(persistentListOf(AiTypeOption.OpenAI))
+        }
+
+        LaunchedEffect(Unit) {
+            supportedTypes =
                 buildList {
                     if (onDeviceAI.isAvailable()) {
                         add(AiTypeOption.OnDevice)
                     }
                     add(AiTypeOption.OpenAI)
                 }.toImmutableList()
-            }
+        }
 
         LaunchedEffect(Unit) {
             snapshotFlow { aiConfig.type as? AppSettings.AiConfig.Type.OpenAI }

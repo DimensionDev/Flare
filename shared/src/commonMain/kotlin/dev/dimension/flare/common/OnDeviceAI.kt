@@ -1,7 +1,7 @@
 package dev.dimension.flare.common
 
 internal expect class OnDeviceAI {
-    fun isAvailable(): Boolean
+    suspend fun isAvailable(): Boolean
 
     suspend fun translate(
         source: String,

@@ -6,6 +6,7 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
+import dev.dimension.flare.common.SwiftOnDeviceAI
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.ui.humanizer.SwiftFormatter
@@ -21,6 +22,7 @@ public object ComposeUIHelper {
     public fun initialize(
         inAppNotification: InAppNotification,
         swiftFormatter: SwiftFormatter,
+        swiftOnDeviceAI: SwiftOnDeviceAI,
     ) {
         startKoin {
             modules(KoinHelper.modules())
@@ -32,6 +34,9 @@ public object ComposeUIHelper {
                     single {
                         swiftFormatter
                     } bind SwiftFormatter::class
+                    single {
+                        swiftOnDeviceAI
+                    } bind SwiftOnDeviceAI::class
                 },
             )
             modules(dev.dimension.flare.di.composeUiModule)

@@ -1,17 +1,17 @@
 package dev.dimension.flare.common
 
-internal actual class OnDeviceAI {
-    actual suspend fun isAvailable(): Boolean = false
+public interface SwiftOnDeviceAI {
+    public fun isAvailable(): Boolean
 
-    actual suspend fun translate(
+    public fun translate(
         source: String,
         targetLanguage: String,
         prompt: String,
-    ): String? = null
+    ): String?
 
-    actual suspend fun tldr(
+    public fun tldr(
         source: String,
         targetLanguage: String,
         prompt: String,
-    ): String? = null
+    ): String?
 }

@@ -293,11 +293,11 @@ public sealed class UiTimelineV2 {
     @Serializable
     @Immutable
     public data class UserList internal constructor(
-        val message: Message? = null,
+        val message: Message?,
         val users: SerializableImmutableList<UiProfile>,
         override val createdAt: UiDateTime,
         override val statusKey: MicroBlogKey,
-        val post: Post? = null,
+        val post: Post?,
         override val extraKey: String? = null,
         override val accountType: AccountType,
     ) : UiTimelineV2() {

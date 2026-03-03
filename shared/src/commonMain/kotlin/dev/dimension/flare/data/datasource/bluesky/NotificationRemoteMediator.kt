@@ -7,14 +7,13 @@ import app.bsky.feed.Repost
 import app.bsky.notification.ListNotificationsNotificationReason
 import app.bsky.notification.ListNotificationsQueryParams
 import app.bsky.notification.UpdateSeenRequest
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.toDb
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlin.time.Clock
@@ -23,21 +22,18 @@ import kotlin.time.Clock
 internal class NotificationRemoteMediator(
     private val service: BlueskyService,
     private val accountKey: MicroBlogKey,
-    private val database: CacheDatabase,
     private val onClearMarker: () -> Unit,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
+) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String =
         buildString {
             append("notification_")
             append(accountKey.toString())
         }
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
@@ -116,12 +112,7 @@ internal class NotificationRemoteMediator(
                 .toImmutableMap()
         return PagingResult(
             endOfPaginationReached = response.cursor == null,
-            data =
-                response.notifications.toDb(
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                    references = references,
-                ),
+            data = response.notifications.render(accountKey, references),
             nextKey = response.cursor,
         )
     }

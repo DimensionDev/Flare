@@ -2,29 +2,25 @@ package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
 import app.bsky.bookmark.GetBookmarksQueryParams
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.toDb
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
 internal class BookmarkTimelineRemoteMediator(
     private val service: BlueskyService,
-    database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
+) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String = "bookmark_$accountKey"
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
@@ -55,11 +51,7 @@ internal class BookmarkTimelineRemoteMediator(
 
         return PagingResult(
             endOfPaginationReached = response.bookmarks.isEmpty() || response.cursor == null,
-            data =
-                response.bookmarks.toDb(
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                ),
+            data = response.bookmarks.mapNotNull { it.render(accountKey) },
             nextKey = response.cursor,
         )
     }

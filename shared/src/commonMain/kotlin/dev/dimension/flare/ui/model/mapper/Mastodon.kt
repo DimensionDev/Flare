@@ -2,8 +2,6 @@ package dev.dimension.flare.ui.model.mapper
 
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
-import dev.dimension.flare.data.database.cache.model.DbEmoji
-import dev.dimension.flare.data.database.cache.model.EmojiContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
@@ -25,7 +23,6 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
-import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
@@ -974,58 +971,58 @@ internal fun RelationshipResponse.toUi(): UiRelation =
         muted = muting ?: false,
         hasPendingFollowRequestFromYou = requested ?: false,
     )
-
-internal fun DbEmoji.toUi(): List<UiEmoji> =
-    when (content) {
-        is EmojiContent.Mastodon -> {
-            content.data.filter { it.visibleInPicker == true }.map {
-                val shortCode =
-                    it.shortcode
-                        .orEmpty()
-                        .let { if (!it.startsWith(':') && !it.endsWith(':')) ":$it:" else it }
-                UiEmoji(
-                    shortcode = shortCode,
-                    url = it.url.orEmpty(),
-                    category = it.category.orEmpty(),
-                    searchKeywords =
-                        listOfNotNull(
-                            it.shortcode,
-                        ),
-                    insertText = " $shortCode ",
-                )
-            }
-        }
-
-        is EmojiContent.Misskey -> {
-            content.data.map {
-                it.toUi()
-            }
-        }
-
-        is EmojiContent.VVO ->
-            content.data.data
-                ?.emoticon
-                ?.zhCN
-                ?.flatMap { (category, items) ->
-                    items.mapNotNull { item ->
-                        if (item.phrase.isNullOrEmpty() || item.url.isNullOrEmpty()) {
-                            return@mapNotNull null
-                        }
-                        UiEmoji(
-                            shortcode = item.phrase,
-                            url = item.url,
-                            category = category,
-                            searchKeywords =
-                                listOfNotNull(
-                                    item.phrase,
-                                ),
-                            insertText = item.phrase,
-                        )
-                    }
-                }.orEmpty()
-
-        is EmojiContent.FavIcon -> emptyList()
-    }
+//
+// internal fun DbEmoji.toUi(): List<UiEmoji> =
+//    when (content) {
+//        is EmojiContent.Mastodon -> {
+//            content.data.filter { it.visibleInPicker == true }.map {
+//                val shortCode =
+//                    it.shortcode
+//                        .orEmpty()
+//                        .let { if (!it.startsWith(':') && !it.endsWith(':')) ":$it:" else it }
+//                UiEmoji(
+//                    shortcode = shortCode,
+//                    url = it.url.orEmpty(),
+//                    category = it.category.orEmpty(),
+//                    searchKeywords =
+//                        listOfNotNull(
+//                            it.shortcode,
+//                        ),
+//                    insertText = " $shortCode ",
+//                )
+//            }
+//        }
+//
+//        is EmojiContent.Misskey -> {
+//            content.data.map {
+//                it.toUi()
+//            }
+//        }
+//
+//        is EmojiContent.VVO ->
+//            content.data.data
+//                ?.emoticon
+//                ?.zhCN
+//                ?.flatMap { (category, items) ->
+//                    items.mapNotNull { item ->
+//                        if (item.phrase.isNullOrEmpty() || item.url.isNullOrEmpty()) {
+//                            return@mapNotNull null
+//                        }
+//                        UiEmoji(
+//                            shortcode = item.phrase,
+//                            url = item.url,
+//                            category = category,
+//                            searchKeywords =
+//                                listOfNotNull(
+//                                    item.phrase,
+//                                ),
+//                            insertText = item.phrase,
+//                        )
+//                    }
+//                }.orEmpty()
+//
+//        is EmojiContent.FavIcon -> emptyList()
+//    }
 
 private fun parseName(status: Account): Element {
     val emoji = status.emojis.orEmpty()

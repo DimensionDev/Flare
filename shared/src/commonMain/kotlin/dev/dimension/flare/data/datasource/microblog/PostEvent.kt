@@ -121,24 +121,25 @@ internal sealed interface PostEvent {
         @Serializable
         data class Reblog(
             override val postKey: MicroBlogKey,
-            val reblogged: Boolean,
+            val cid: String,
+            val uri: String,
+            val repostUri: String?,
         ) : Bluesky
 
         @Serializable
         data class Like(
             override val postKey: MicroBlogKey,
-            val liked: Boolean,
+            val cid: String,
+            val uri: String,
+            val likedUri: String?,
         ) : Bluesky
 
         @Serializable
         data class Bookmark(
             override val postKey: MicroBlogKey,
+            val uri: String,
+            val cid: String,
             val bookmarked: Boolean,
-        ) : Bluesky
-
-        @Serializable
-        data class Unbookmark(
-            override val postKey: MicroBlogKey,
         ) : Bluesky
     }
 

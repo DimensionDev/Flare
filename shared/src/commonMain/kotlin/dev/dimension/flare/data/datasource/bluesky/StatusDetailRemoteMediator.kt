@@ -12,15 +12,15 @@ import app.bsky.feed.ThreadViewPost
 import app.bsky.feed.ThreadViewPostParentUnion
 import app.bsky.feed.ThreadViewPostReplieUnion
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.firstOrNull
 import sh.christian.ozone.api.AtUri
@@ -32,9 +32,7 @@ internal class StatusDetailRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val database: CacheDatabase,
     private val statusOnly: Boolean,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
+) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String =
         buildString {
             append("status_detail_")
@@ -46,10 +44,10 @@ internal class StatusDetailRemoteMediator(
             append(accountKey.toString())
         }
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         val result =
             when (request) {
                 is PagingRequest.Append -> {
@@ -145,7 +143,6 @@ internal class StatusDetailRemoteMediator(
                                 .insertAll(
                                     listOf(
                                         DbPagingTimeline(
-                                            accountType = AccountType.Specific(accountKey),
                                             statusKey = statusKey,
                                             pagingKey = pagingKey,
                                             sortId = 0,
@@ -171,13 +168,7 @@ internal class StatusDetailRemoteMediator(
         val shouldLoadMore = !(request is PagingRequest.Append || statusOnly)
         return PagingResult(
             endOfPaginationReached = !shouldLoadMore,
-            data =
-                result.toDbPagingTimeline(
-                    accountKey,
-                    pagingKey,
-                ) {
-                    -result.indexOf(it).toLong()
-                },
+            data = result.render(accountKey),
             nextKey = if (shouldLoadMore) pagingKey else null,
         )
     }

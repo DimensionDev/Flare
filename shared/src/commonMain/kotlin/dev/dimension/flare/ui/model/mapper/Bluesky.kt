@@ -3,16 +3,23 @@ package dev.dimension.flare.ui.model.mapper
 import app.bsky.actor.ProfileView
 import app.bsky.actor.ProfileViewBasic
 import app.bsky.actor.ProfileViewDetailed
+import app.bsky.bookmark.BookmarkView
+import app.bsky.bookmark.BookmarkViewItemUnion
 import app.bsky.embed.ExternalView
 import app.bsky.embed.RecordViewRecordEmbedUnion
 import app.bsky.embed.RecordViewRecordUnion
 import app.bsky.embed.RecordWithMediaViewMediaUnion
+import app.bsky.feed.FeedViewPost
 import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.GeneratorView
+import app.bsky.feed.Like
 import app.bsky.feed.Post
 import app.bsky.feed.PostView
 import app.bsky.feed.PostViewEmbedUnion
+import app.bsky.feed.ReplyRefParentUnion
+import app.bsky.feed.Repost
 import app.bsky.graph.ListView
+import app.bsky.notification.ListNotificationsNotification
 import app.bsky.notification.ListNotificationsNotificationReason
 import app.bsky.richtext.Facet
 import app.bsky.richtext.FacetByteSlice
@@ -23,23 +30,24 @@ import app.bsky.richtext.FacetTag
 import chat.bsky.convo.MessageView
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
+import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.database.cache.model.MessageContent
-import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
@@ -48,6 +56,7 @@ import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.Url
 import io.ktor.utils.io.charsets.Charsets
 import io.ktor.utils.io.core.toByteArray
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -62,6 +71,7 @@ import moe.tlaster.twitter.parser.HashTagToken
 import moe.tlaster.twitter.parser.TwitterParser
 import moe.tlaster.twitter.parser.UrlToken
 import moe.tlaster.twitter.parser.UserNameToken
+import sh.christian.ozone.api.AtUri
 import sh.christian.ozone.api.Did
 import sh.christian.ozone.api.Uri
 import sh.christian.ozone.api.model.JsonContent
@@ -91,6 +101,14 @@ internal val bskyJson by lazy {
 }
 
 private fun List<Byte>.stringify(): String = this.toByteArray().decodeToString()
+
+internal fun BookmarkView.render(accountKey: MicroBlogKey): UiTimelineV2? =
+    when (val content = item) {
+        is BookmarkViewItemUnion.BlockedPost -> null
+        is BookmarkViewItemUnion.NotFoundPost -> null
+        is BookmarkViewItemUnion.PostView -> content.value.render(accountKey)
+        is BookmarkViewItemUnion.Unknown -> null
+    }
 
 private fun Element.appendTextWithBr(text: String) {
     val parts = text.split("\n")
@@ -304,197 +322,329 @@ private fun parseBluesky(
     return element.toUi()
 }
 
-internal fun FeedViewPostReasonUnion.render(
-    accountKey: MicroBlogKey,
-    event: StatusEvent.Bluesky,
-    references: Map<ReferenceType, List<StatusContent>>,
-): UiTimeline {
-    val data = (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.Bluesky)?.data
-    val topMessage =
+private val ListNotificationsNotificationReason.icon: UiIcon
+    get() =
         when (this) {
-            is FeedViewPostReasonUnion.ReasonPin -> {
-                val user = data?.author?.render(accountKey = accountKey)
-                UiTimeline.TopMessage(
-                    user = user,
-                    icon = UiTimeline.TopMessage.Icon.Pin,
-                    type = UiTimeline.TopMessage.MessageType.Bluesky.Pinned,
-                    onClicked = { },
-                    statusKey =
-                        MicroBlogKey(
-                            id = data?.uri?.atUri.orEmpty(),
-                            host = accountKey.host,
-                        ),
-                )
-            }
-
-            is FeedViewPostReasonUnion.ReasonRepost -> {
-                val user = value.by.render(accountKey)
-                UiTimeline.TopMessage(
-                    user = user,
-                    icon = UiTimeline.TopMessage.Icon.Retweet,
-                    type = UiTimeline.TopMessage.MessageType.Bluesky.Repost,
-                    onClicked = {
-                        launcher.launch(
-                            DeeplinkRoute.Profile
-                                .User(
-                                    accountType = AccountType.Specific(accountKey),
-                                    userKey = user.key,
-                                ).toUri(),
-                        )
-                    },
-                    statusKey =
-                        MicroBlogKey(
-                            id = data?.uri?.atUri.orEmpty(),
-                            host = accountKey.host,
-                        ),
-                )
-            }
-
-            is FeedViewPostReasonUnion.Unknown -> null
+            ListNotificationsNotificationReason.Like -> UiIcon.Favourite
+            ListNotificationsNotificationReason.Repost -> UiIcon.Retweet
+            ListNotificationsNotificationReason.Follow -> UiIcon.Follow
+            ListNotificationsNotificationReason.Mention -> UiIcon.Mention
+            ListNotificationsNotificationReason.Reply -> UiIcon.Reply
+            ListNotificationsNotificationReason.Quote -> UiIcon.Reply
+            is ListNotificationsNotificationReason.Unknown -> UiIcon.Info
+            ListNotificationsNotificationReason.StarterpackJoined -> UiIcon.Info
+            ListNotificationsNotificationReason.Unverified -> UiIcon.Info
+            ListNotificationsNotificationReason.Verified -> UiIcon.Info
+            ListNotificationsNotificationReason.LikeViaRepost -> UiIcon.Favourite
+            ListNotificationsNotificationReason.RepostViaRepost -> UiIcon.Retweet
+            ListNotificationsNotificationReason.SubscribedPost -> UiIcon.Info
+            ListNotificationsNotificationReason.ContactMatch -> UiIcon.Info
         }
-    return UiTimeline(
-        topMessage = topMessage,
-        content = data?.renderStatus(accountKey, event),
-    )
+
+private val ListNotificationsNotificationReason.type: UiTimelineV2.Message.Type
+    get() =
+        when (this) {
+            ListNotificationsNotificationReason.Like ->
+                UiTimelineV2.Message.Type.Localized(
+                    UiTimelineV2.Message.Type.Localized.MessageId.Favourite,
+                )
+
+            ListNotificationsNotificationReason.Repost ->
+                UiTimelineV2.Message.Type.Localized(
+                    UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                )
+
+            ListNotificationsNotificationReason.Follow ->
+                UiTimelineV2.Message.Type.Localized(
+                    UiTimelineV2.Message.Type.Localized.MessageId.Follow,
+                )
+
+            ListNotificationsNotificationReason.Mention ->
+                UiTimelineV2.Message.Type.Localized(
+                    UiTimelineV2.Message.Type.Localized.MessageId.Mention,
+                )
+
+            ListNotificationsNotificationReason.Reply ->
+                UiTimelineV2.Message.Type.Localized(
+                    UiTimelineV2.Message.Type.Localized.MessageId.Reply,
+                )
+
+            ListNotificationsNotificationReason.Quote ->
+                UiTimelineV2.Message.Type.Localized(
+                    UiTimelineV2.Message.Type.Localized.MessageId.Quote,
+                )
+
+            is ListNotificationsNotificationReason.Unknown ->
+                UiTimelineV2.Message.Type.Unknown(
+                    rawType = rawValue,
+                )
+
+            ListNotificationsNotificationReason.StarterpackJoined ->
+                UiTimelineV2.Message.Type.Localized(
+                    UiTimelineV2.Message.Type.Localized.MessageId.StarterpackJoined,
+                )
+
+            ListNotificationsNotificationReason.Unverified ->
+                UiTimelineV2.Message.Type.Unknown(
+                    rawType = "Unverified",
+                )
+
+            ListNotificationsNotificationReason.Verified ->
+                UiTimelineV2.Message.Type.Unknown(
+                    rawType = "Verified",
+                )
+
+            ListNotificationsNotificationReason.LikeViaRepost ->
+                UiTimelineV2.Message.Type.Localized(
+                    UiTimelineV2.Message.Type.Localized.MessageId.Favourite,
+                )
+
+            ListNotificationsNotificationReason.RepostViaRepost ->
+                UiTimelineV2.Message.Type.Localized(
+                    UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                )
+
+            ListNotificationsNotificationReason.SubscribedPost ->
+                UiTimelineV2.Message.Type.Unknown(
+                    rawType = "SubscribedPost",
+                )
+
+            ListNotificationsNotificationReason.ContactMatch ->
+                UiTimelineV2.Message.Type.Unknown(
+                    rawType = "ContactMatch",
+                )
+        }
+
+internal fun List<FeedViewPost>.render(accountKey: MicroBlogKey): List<UiTimelineV2> {
+    // TODO: https://github.com/DimensionDev/Flare/issues/1671
+    return this.map { it.render(accountKey) }
 }
 
-internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
+internal fun List<ListNotificationsNotification>.render(
     accountKey: MicroBlogKey,
-    event: StatusEvent.Bluesky,
-    references: Map<ReferenceType, List<StatusContent>> = emptyMap(),
-): UiTimeline {
-    return when (this) {
-        is StatusContent.BlueskyNotification.Normal -> {
-            val user = data.author.render(accountKey = accountKey)
-            val topMessage =
-                UiTimeline.TopMessage(
-                    user = user,
-                    icon = data.reason.icon,
-                    type = data.reason.type,
-                    onClicked = {
-                        launcher.launch(
-                            DeeplinkRoute.Profile
-                                .User(
-                                    accountType = AccountType.Specific(accountKey),
-                                    userKey = user.key,
-                                ).toUri(),
-                        )
-                    },
-                    statusKey = MicroBlogKey(id = data.uri.atUri, host = accountKey.host),
-                )
-            val content =
-                UiTimeline.ItemContent.User(
-                    value = user,
-                )
-            UiTimeline(
-                topMessage = topMessage,
-                content = content,
-            )
-        }
-
-        is StatusContent.BlueskyNotification.Post ->
-            references[ReferenceType.Notification]?.firstOrNull()?.render(event) ?: post.render(
-                accountKey,
-                event = event,
-            )
-
-        is StatusContent.BlueskyNotification.UserList -> {
-            val reason = this.data.firstOrNull()?.reason
-            val uri =
-                this.data
-                    .firstOrNull()
-                    ?.uri
-                    ?.atUri ?: ""
-            val topMessage =
-                if (reason != null) {
-                    UiTimeline.TopMessage(
-                        user = null,
-                        icon = reason.icon,
-                        type = reason.type,
-                        onClicked = {
-//                        launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
-                        },
-                        statusKey = MicroBlogKey(id = uri, host = accountKey.host),
-                    )
-                } else {
-                    null
-                }
-            val content =
-                UiTimeline.ItemContent.UserList(
-                    users =
-                        this.data
-                            .map { it.author.render(accountKey = accountKey) }
-                            .toImmutableList(),
-                    status =
-                        references[ReferenceType.Notification]
-                            ?.firstOrNull()
-                            ?.let { it as? StatusContent.Bluesky }
-                            ?.data
-                            ?.renderStatus(
-                                accountKey,
-                                event,
+    references: ImmutableMap<AtUri, PostView>,
+): List<UiTimelineV2> {
+    val grouped = this.groupBy { it.reason }.filter { it.value.any() }
+    return grouped.flatMap { (reason, items) ->
+        when (reason) {
+            ListNotificationsNotificationReason.Repost, ListNotificationsNotificationReason.Like -> {
+                val post =
+                    items
+                        .first()
+                        .record
+                        .let {
+                            when (reason) {
+                                ListNotificationsNotificationReason.Repost -> it.decodeAs<Repost>().subject
+                                ListNotificationsNotificationReason.Like -> it.decodeAs<Like>().subject
+                            }
+                        }.uri
+                        .let {
+                            references[it]
+                        }
+                val idSuffix =
+                    when (reason) {
+                        ListNotificationsNotificationReason.Repost -> "_repost"
+                        ListNotificationsNotificationReason.Like -> "_like"
+                    }
+                listOf(
+                    UiTimelineV2.UserList(
+                        message =
+                            UiTimelineV2.Message(
+                                user = null,
+                                icon = reason.icon,
+                                type = reason.type,
+                                statusKey =
+                                    MicroBlogKey(
+                                        id = items.joinToString("_") { it.uri.atUri } + idSuffix,
+                                        host = accountKey.host,
+                                    ),
+                                clickEvent = ClickEvent.Noop,
+                                createdAt = items.first().indexedAt.toUi(),
+                                accountType = accountKey.toAccountType(),
                             ),
+                        users =
+                            items
+                                .map {
+                                    it.author.render(accountKey)
+                                }.toImmutableList(),
+                        createdAt = items.first().indexedAt.toUi(),
+                        post = post?.render(accountKey),
+                        statusKey =
+                            MicroBlogKey(
+                                id = items.joinToString("_") { it.uri.atUri } + idSuffix,
+                                host = accountKey.host,
+                            ),
+                        accountType = accountKey.toAccountType(),
+                    ),
                 )
-            return UiTimeline(
-                topMessage = topMessage,
-                content = content,
-            )
+            }
+
+            ListNotificationsNotificationReason.Follow -> {
+                listOf(
+                    UiTimelineV2.UserList(
+                        message =
+                            UiTimelineV2.Message(
+                                user = null,
+                                icon = reason.icon,
+                                type = reason.type,
+                                statusKey =
+                                    MicroBlogKey(
+                                        id = items.joinToString("_") { it.uri.atUri } + "_follow",
+                                        host = accountKey.host,
+                                    ),
+                                clickEvent = ClickEvent.Noop,
+                                createdAt = items.first().indexedAt.toUi(),
+                                accountType = accountKey.toAccountType(),
+                            ),
+                        users =
+                            items
+                                .map {
+                                    it.author.render(accountKey)
+                                }.toImmutableList(),
+                        createdAt = items.first().indexedAt.toUi(),
+                        post = null,
+                        statusKey =
+                            MicroBlogKey(
+                                id = items.joinToString("_") { it.uri.atUri } + "_follow",
+                                host = accountKey.host,
+                            ),
+                        accountType = accountKey.toAccountType(),
+                    ),
+                )
+            }
+
+            ListNotificationsNotificationReason.LikeViaRepost,
+            ListNotificationsNotificationReason.RepostViaRepost,
+            ListNotificationsNotificationReason.SubscribedPost,
+            ListNotificationsNotificationReason.ContactMatch,
+            ListNotificationsNotificationReason.Mention,
+            ListNotificationsNotificationReason.Reply,
+            ListNotificationsNotificationReason.Quote,
+            -> {
+                items.mapNotNull {
+                    references[it.uri]
+                        ?.render(
+                            accountKey,
+                        )?.copy(
+                            message =
+                                UiTimelineV2.Message(
+                                    user = it.author.render(accountKey),
+                                    icon = reason.icon,
+                                    type = reason.type,
+                                    statusKey =
+                                        MicroBlogKey(
+                                            id = it.uri.atUri,
+                                            host = accountKey.host,
+                                        ),
+                                    clickEvent = ClickEvent.Noop,
+                                    createdAt = it.indexedAt.toUi(),
+                                    accountType = accountKey.toAccountType(),
+                                ),
+                        )
+                }
+            }
+
+            else -> {
+                items.map {
+                    UiTimelineV2.User(
+                        message =
+                            UiTimelineV2.Message(
+                                user = it.author.render(accountKey),
+                                icon = reason.icon,
+                                type = reason.type,
+                                statusKey =
+                                    MicroBlogKey(
+                                        id = it.uri.atUri,
+                                        host = accountKey.host,
+                                    ),
+                                clickEvent = ClickEvent.Noop,
+                                createdAt = it.indexedAt.toUi(),
+                                accountType = accountKey.toAccountType(),
+                            ),
+                        value = it.author.render(accountKey),
+                        statusKey =
+                            MicroBlogKey(
+                                id = it.uri.atUri,
+                                host = accountKey.host,
+                            ),
+                        createdAt = it.indexedAt.toUi(),
+                        accountType = accountKey.toAccountType(),
+                    )
+                }
+            }
         }
     }
 }
 
-private val ListNotificationsNotificationReason.icon: UiTimeline.TopMessage.Icon
-    get() =
-        when (this) {
-            ListNotificationsNotificationReason.Like -> UiTimeline.TopMessage.Icon.Favourite
-            ListNotificationsNotificationReason.Repost -> UiTimeline.TopMessage.Icon.Retweet
-            ListNotificationsNotificationReason.Follow -> UiTimeline.TopMessage.Icon.Follow
-            ListNotificationsNotificationReason.Mention -> UiTimeline.TopMessage.Icon.Mention
-            ListNotificationsNotificationReason.Reply -> UiTimeline.TopMessage.Icon.Reply
-            ListNotificationsNotificationReason.Quote -> UiTimeline.TopMessage.Icon.Reply
-            is ListNotificationsNotificationReason.Unknown -> UiTimeline.TopMessage.Icon.Info
-            ListNotificationsNotificationReason.StarterpackJoined -> UiTimeline.TopMessage.Icon.Info
-            ListNotificationsNotificationReason.Unverified -> UiTimeline.TopMessage.Icon.Info
-            ListNotificationsNotificationReason.Verified -> UiTimeline.TopMessage.Icon.Info
-            ListNotificationsNotificationReason.LikeViaRepost -> UiTimeline.TopMessage.Icon.Favourite
-            ListNotificationsNotificationReason.RepostViaRepost -> UiTimeline.TopMessage.Icon.Retweet
-            ListNotificationsNotificationReason.SubscribedPost -> UiTimeline.TopMessage.Icon.Info
-            ListNotificationsNotificationReason.ContactMatch -> UiTimeline.TopMessage.Icon.Info
+private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
+    val renderedPost = post.render(accountKey)
+    val message =
+        when (val reason = reason) {
+            is FeedViewPostReasonUnion.ReasonPin ->
+                UiTimelineV2.Message(
+                    user = renderedPost.user,
+                    icon = UiIcon.Pin,
+                    type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Pinned),
+                    statusKey =
+                        MicroBlogKey(
+                            id = post.uri.atUri + "_pin_${renderedPost.user?.key}",
+                            host = accountKey.host,
+                        ),
+                    createdAt = renderedPost.createdAt,
+                    accountType = accountKey.toAccountType(),
+                    clickEvent =
+                        ClickEvent.Deeplink(
+                            DeeplinkRoute.Status.Detail(
+                                statusKey = renderedPost.statusKey,
+                                accountType = accountKey.toAccountType(),
+                            ),
+                        ),
+                )
+
+            is FeedViewPostReasonUnion.ReasonRepost -> {
+                val user = reason.value.by.render(accountKey)
+                UiTimelineV2.Message(
+                    user = user,
+                    icon = UiIcon.Retweet,
+                    type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Repost),
+                    statusKey =
+                        MicroBlogKey(
+                            id = post.uri.atUri + "_reblog_${user.key}",
+                            host = accountKey.host,
+                        ),
+                    createdAt = renderedPost.createdAt,
+                    accountType = accountKey.toAccountType(),
+                    clickEvent =
+                        ClickEvent.Deeplink(
+                            DeeplinkRoute.Profile.User(
+                                accountType = AccountType.Specific(accountKey),
+                                userKey = user.key,
+                            ),
+                        ),
+                )
+            }
+
+            else -> null
         }
 
-private val ListNotificationsNotificationReason.type: UiTimeline.TopMessage.MessageType
-    get() =
-        when (this) {
-            ListNotificationsNotificationReason.Like -> UiTimeline.TopMessage.MessageType.Bluesky.Like
-            ListNotificationsNotificationReason.Repost -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
-            ListNotificationsNotificationReason.Follow -> UiTimeline.TopMessage.MessageType.Bluesky.Follow
-            ListNotificationsNotificationReason.Mention -> UiTimeline.TopMessage.MessageType.Bluesky.Mention
-            ListNotificationsNotificationReason.Reply -> UiTimeline.TopMessage.MessageType.Bluesky.Reply
-            ListNotificationsNotificationReason.Quote -> UiTimeline.TopMessage.MessageType.Bluesky.Quote
-            is ListNotificationsNotificationReason.Unknown -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
-            ListNotificationsNotificationReason.StarterpackJoined -> UiTimeline.TopMessage.MessageType.Bluesky.StarterpackJoined
-            ListNotificationsNotificationReason.Unverified -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
-            ListNotificationsNotificationReason.Verified -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
-            ListNotificationsNotificationReason.LikeViaRepost -> UiTimeline.TopMessage.MessageType.Bluesky.Like
-            ListNotificationsNotificationReason.RepostViaRepost -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
-            ListNotificationsNotificationReason.SubscribedPost -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
-            ListNotificationsNotificationReason.ContactMatch -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
-        }
+    val reply =
+        when (val reply = reply?.parent) {
+            is ReplyRefParentUnion.PostView ->
+                if (reply.value.uri != post.uri) {
+                    reply.value
+                } else {
+                    null
+                }
 
-internal fun PostView.render(
-    accountKey: MicroBlogKey,
-    event: StatusEvent.Bluesky,
-    references: Map<ReferenceType, List<StatusContent>> = mapOf(),
-) = UiTimeline(
-    topMessage = null,
-    content = renderStatus(accountKey, event, references),
-)
+            else -> null
+        }?.render(accountKey)
+    return renderedPost.copy(
+        message = message,
+        parents = listOfNotNull(reply).toImmutableList(),
+    )
+}
 
-internal fun PostView.renderStatus(
-    accountKey: MicroBlogKey,
-    event: StatusEvent.Bluesky,
-    references: Map<ReferenceType, List<StatusContent>> = mapOf(),
-): UiTimeline.ItemContent.Status {
+internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
     val user = author.render(accountKey)
     val isFromMe = user.key == accountKey
     val statusKey =
@@ -502,13 +652,6 @@ internal fun PostView.renderStatus(
             id = uri.atUri,
             host = accountKey.host,
         )
-    val parent =
-        references[ReferenceType.Reply]?.firstOrNull()?.let {
-            when (it) {
-                is StatusContent.Bluesky -> it.data
-                else -> null
-            }
-        }
 
     val sensitive =
         this.labels.orEmpty().any {
@@ -529,15 +672,7 @@ internal fun PostView.renderStatus(
             append(uri.atUri.substringAfterLast("/"))
         }
 
-    val parents =
-        references[ReferenceType.Reply]
-            ?.mapNotNull { it as? StatusContent.Bluesky }
-            ?.reversed()
-            ?.map { it.data.renderStatus(accountKey, event) }
-            ?.toPersistentList()
-            ?: persistentListOf()
-
-    return UiTimeline.ItemContent.Status(
+    return UiTimelineV2.Post(
         platformType = PlatformType.Bluesky,
         user = user,
         images = findMedias(this),
@@ -545,29 +680,28 @@ internal fun PostView.renderStatus(
         statusKey = statusKey,
         content = parseBlueskyJson(record, accountKey),
         poll = null,
-        quote = listOfNotNull(findQuote(accountKey, this, event)).toImmutableList(),
+        quote = listOfNotNull(findQuote(accountKey, this)).toImmutableList(),
         contentWarning = null,
-        parents = parents,
+        parents = persistentListOf(),
         actions =
             listOfNotNull(
                 ActionMenu.Item(
-                    icon = ActionMenu.Item.Icon.Reply,
+                    icon = UiIcon.Reply,
                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
                     count = UiNumber(replyCount ?: 0),
-                    onClicked = {
-                        launcher.launch(
+                    clickEvent =
+                        ClickEvent.Deeplink(
                             DeeplinkRoute.Compose
                                 .Reply(
                                     accountKey = accountKey,
                                     statusKey = statusKey,
-                                ).toUri(),
-                        )
-                    },
+                                ),
+                        ),
                 ),
                 ActionMenu.Group(
                     displayItem =
                         ActionMenu.Item(
-                            icon = if (viewer?.repost?.atUri != null) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
+                            icon = if (viewer?.repost?.atUri != null) UiIcon.Unretweet else UiIcon.Retweet,
                             text =
                                 ActionMenu.Item.Text.Localized(
                                     if (viewer?.repost?.atUri !=
@@ -588,9 +722,9 @@ internal fun PostView.renderStatus(
                                     if (viewer?.repost?.atUri !=
                                         null
                                     ) {
-                                        ActionMenu.Item.Icon.Unretweet
+                                        UiIcon.Unretweet
                                     } else {
-                                        ActionMenu.Item.Icon.Retweet
+                                        UiIcon.Retweet
                                     },
                                 text =
                                     ActionMenu.Item.Text.Localized(
@@ -604,33 +738,34 @@ internal fun PostView.renderStatus(
                                     ),
                                 count = UiNumber(repostCount ?: 0),
                                 color = if (viewer?.repost?.atUri != null) ActionMenu.Item.Color.PrimaryColor else null,
-                                onClicked = {
-                                    event.reblog(
-                                        statusKey = statusKey,
-                                        cid = cid.cid,
-                                        uri = uri.atUri,
-                                        repostUri = viewer?.repost?.atUri,
-                                    )
-                                },
+                                clickEvent =
+                                    ClickEvent.event(
+                                        accountKey,
+                                        PostEvent.Bluesky.Reblog(
+                                            postKey = statusKey,
+                                            cid = cid.cid,
+                                            uri = uri.atUri,
+                                            repostUri = viewer?.repost?.atUri,
+                                        ),
+                                    ),
                             ),
                             ActionMenu.Item(
-                                icon = ActionMenu.Item.Icon.Quote,
+                                icon = UiIcon.Quote,
                                 text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
                                 count = UiNumber(quoteCount ?: 0),
-                                onClicked = {
-                                    launcher.launch(
+                                clickEvent =
+                                    ClickEvent.Deeplink(
                                         DeeplinkRoute.Compose
                                             .Quote(
                                                 accountKey = accountKey,
                                                 statusKey = statusKey,
-                                            ).toUri(),
-                                    )
-                                },
+                                            ),
+                                    ),
                             ),
                         ).toImmutableList(),
                 ),
                 ActionMenu.Item(
-                    icon = if (viewer?.like?.atUri != null) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
+                    icon = if (viewer?.like?.atUri != null) UiIcon.Unlike else UiIcon.Like,
                     text =
                         ActionMenu.Item.Text.Localized(
                             if (viewer?.like?.atUri !=
@@ -643,19 +778,21 @@ internal fun PostView.renderStatus(
                         ),
                     count = UiNumber(likeCount ?: 0),
                     color = if (viewer?.like?.atUri != null) ActionMenu.Item.Color.Red else null,
-                    onClicked = {
-                        event.like(
-                            statusKey = statusKey,
-                            cid = cid.cid,
-                            uri = uri.atUri,
-                            likedUri = viewer?.like?.atUri,
-                        )
-                    },
+                    clickEvent =
+                        ClickEvent.event(
+                            accountKey,
+                            PostEvent.Bluesky.Like(
+                                postKey = statusKey,
+                                cid = cid.cid,
+                                uri = uri.atUri,
+                                likedUri = viewer?.like?.atUri,
+                            ),
+                        ),
                 ),
                 ActionMenu.Group(
                     displayItem =
                         ActionMenu.Item(
-                            icon = ActionMenu.Item.Icon.More,
+                            icon = UiIcon.More,
                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                         ),
                     actions =
@@ -666,9 +803,9 @@ internal fun PostView.renderStatus(
                                         if (viewer?.bookmarked ==
                                             true
                                         ) {
-                                            ActionMenu.Item.Icon.Unbookmark
+                                            UiIcon.Unbookmark
                                         } else {
-                                            ActionMenu.Item.Icon.Bookmark
+                                            UiIcon.Bookmark
                                         },
                                     text =
                                         ActionMenu.Item.Text.Localized(
@@ -681,48 +818,43 @@ internal fun PostView.renderStatus(
                                             },
                                         ),
                                     count = UiNumber(bookmarkCount ?: 0),
-                                    onClicked = {
-                                        if (viewer?.bookmarked == true) {
-                                            event.unbookmark(
-                                                statusKey = statusKey,
-                                                uri = uri.atUri,
-                                            )
-                                        } else {
-                                            event.bookmark(
-                                                statusKey = statusKey,
+                                    clickEvent =
+                                        ClickEvent.event(
+                                            accountKey,
+                                            PostEvent.Bluesky.Bookmark(
+                                                postKey = statusKey,
                                                 uri = uri.atUri,
                                                 cid = cid.cid,
-                                            )
-                                        }
-                                    },
+                                                bookmarked = viewer?.bookmarked == true,
+                                            ),
+                                        ),
                                 ),
                             )
                             add(
                                 ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Share,
+                                    icon = UiIcon.Share,
                                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                    onClicked = {
-                                        launcher.launch(
+                                    clickEvent =
+                                        ClickEvent.Deeplink(
                                             DeeplinkRoute.Status
                                                 .ShareSheet(
                                                     statusKey = statusKey,
                                                     accountType = AccountType.Specific(accountKey),
                                                     shareUrl = url,
                                                     fxShareUrl = fxUrl,
-                                                ).toUri(),
-                                        )
-                                    },
+                                                ),
+                                        ),
                                 ),
                             )
 
                             if (isFromMe) {
                                 add(
                                     ActionMenu.Item(
-                                        icon = ActionMenu.Item.Icon.Delete,
+                                        icon = UiIcon.Delete,
                                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
                                         color = ActionMenu.Item.Color.Red,
-                                        onClicked = {
-                                            launcher.launch(
+                                        clickEvent =
+                                            ClickEvent.Deeplink(
                                                 DeeplinkRoute.Status
                                                     .DeleteConfirm(
                                                         accountType =
@@ -730,9 +862,8 @@ internal fun PostView.renderStatus(
                                                                 accountKey,
                                                             ),
                                                         statusKey = statusKey,
-                                                    ).toUri(),
-                                            )
-                                        },
+                                                    ),
+                                            ),
                                     ),
                                 )
                             } else {
@@ -747,11 +878,11 @@ internal fun PostView.renderStatus(
                                 add(ActionMenu.Divider)
                                 add(
                                     ActionMenu.Item(
-                                        icon = ActionMenu.Item.Icon.Report,
+                                        icon = UiIcon.Report,
                                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
                                         color = ActionMenu.Item.Color.Red,
-                                        onClicked = {
-                                            launcher.launch(
+                                        clickEvent =
+                                            ClickEvent.Deeplink(
                                                 DeeplinkRoute.Status
                                                     .BlueskyReport(
                                                         statusKey = statusKey,
@@ -759,9 +890,8 @@ internal fun PostView.renderStatus(
                                                             AccountType.Specific(
                                                                 accountKey,
                                                             ),
-                                                    ).toUri(),
-                                            )
-                                        },
+                                                    ),
+                                            ),
                                     ),
                                 )
                             }
@@ -770,33 +900,15 @@ internal fun PostView.renderStatus(
             ).toImmutableList(),
         createdAt = indexedAt.toUi(),
         sensitive = sensitive,
-        onClicked = {
-            launcher.launch(
+        accountType = AccountType.Specific(accountKey),
+        clickEvent =
+            ClickEvent.Deeplink(
                 DeeplinkRoute.Status
                     .Detail(
                         statusKey = statusKey,
                         accountType = AccountType.Specific(accountKey),
-                    ).toUri(),
-            )
-        },
-        onMediaClicked = { media, index ->
-            launcher.launch(
-                DeeplinkRoute.Media
-                    .StatusMedia(
-                        accountType = AccountType.Specific(accountKey),
-                        statusKey = statusKey,
-                        index = index,
-                        preview =
-                            when (media) {
-                                is UiMedia.Image -> media.previewUrl
-                                is UiMedia.Video -> media.thumbnailUrl
-                                is UiMedia.Audio -> null
-                                is UiMedia.Gif -> media.previewUrl
-                            },
-                    ).toUri(),
-            )
-        },
-        url = url,
+                    ),
+            ),
     )
 }
 
@@ -832,7 +944,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
                     .User(
                         accountType = AccountType.Specific(accountKey),
                         userKey = userKey,
-                    ).toUri(),
+                    ),
             ),
     )
 }
@@ -869,7 +981,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
                     .User(
                         accountType = AccountType.Specific(accountKey),
                         userKey = userKey,
-                    ).toUri(),
+                    ),
             ),
     )
 }
@@ -906,7 +1018,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
                     .User(
                         accountType = AccountType.Specific(accountKey),
                         userKey = userKey,
-                    ).toUri(),
+                    ),
             ),
     )
 }
@@ -1067,15 +1179,13 @@ private fun findMediaFromExternal(value: ExternalView): PersistentList<UiMedia> 
 private fun findQuote(
     accountKey: MicroBlogKey,
     postView: PostView,
-    event: StatusEvent.Bluesky,
-): UiTimeline.ItemContent.Status? =
+): UiTimelineV2.Post? =
     when (val embed = postView.embed) {
-        is PostViewEmbedUnion.RecordView -> render(accountKey, embed.value.record, event)
+        is PostViewEmbedUnion.RecordView -> render(accountKey, embed.value.record)
         is PostViewEmbedUnion.RecordWithMediaView ->
             render(
                 accountKey,
                 embed.value.record.record,
-                event = event,
             )
 
         else -> null
@@ -1084,8 +1194,7 @@ private fun findQuote(
 private fun render(
     accountKey: MicroBlogKey,
     record: RecordViewRecordUnion,
-    event: StatusEvent.Bluesky,
-): UiTimeline.ItemContent.Status? =
+): UiTimelineV2.Post? =
     when (record) {
         is RecordViewRecordUnion.ViewRecord -> {
             val user = record.value.author.render(accountKey)
@@ -1115,7 +1224,7 @@ private fun render(
                             .substringAfterLast("/"),
                     )
                 }
-            UiTimeline.ItemContent.Status(
+            UiTimelineV2.Post(
                 user = user,
                 images =
                     record.value.embeds
@@ -1203,99 +1312,100 @@ private fun render(
                 actions =
                     listOfNotNull(
                         ActionMenu.Item(
-                            icon = ActionMenu.Item.Icon.Reply,
+                            icon = UiIcon.Reply,
                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
                             count = UiNumber(record.value.replyCount ?: 0),
-                            onClicked = {
-                                launcher.launch(
+                            clickEvent =
+                                ClickEvent.Deeplink(
                                     DeeplinkRoute.Compose
                                         .Reply(
                                             accountKey = accountKey,
                                             statusKey = statusKey,
-                                        ).toUri(),
-                                )
-                            },
+                                        ),
+                                ),
                         ),
                         ActionMenu.Group(
                             displayItem =
                                 ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Retweet,
+                                    icon = UiIcon.Retweet,
                                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Retweet),
                                     count = UiNumber(record.value.repostCount ?: 0),
                                 ),
                             actions =
                                 listOfNotNull(
                                     ActionMenu.Item(
-                                        icon = ActionMenu.Item.Icon.Retweet,
+                                        icon = UiIcon.Retweet,
                                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Retweet),
                                         count = UiNumber(record.value.repostCount ?: 0),
-                                        onClicked = {
-                                            event.reblog(
-                                                statusKey = statusKey,
-                                                cid = record.value.cid.cid,
-                                                uri = record.value.uri.atUri,
-                                                repostUri = null,
-                                            )
-                                        },
+                                        clickEvent =
+                                            ClickEvent.event(
+                                                accountKey,
+                                                PostEvent.Bluesky.Reblog(
+                                                    postKey = statusKey,
+                                                    cid = record.value.cid.cid,
+                                                    uri = record.value.uri.atUri,
+                                                    repostUri = null,
+                                                ),
+                                            ),
                                     ),
                                     ActionMenu.Item(
-                                        icon = ActionMenu.Item.Icon.Quote,
+                                        icon = UiIcon.Quote,
                                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
                                         count = UiNumber(record.value.quoteCount ?: 0),
-                                        onClicked = {
-                                            launcher.launch(
+                                        clickEvent =
+                                            ClickEvent.Deeplink(
                                                 DeeplinkRoute.Compose
                                                     .Quote(
                                                         accountKey = accountKey,
                                                         statusKey = statusKey,
-                                                    ).toUri(),
-                                            )
-                                        },
+                                                    ),
+                                            ),
                                     ),
                                 ).toImmutableList(),
                         ),
                         ActionMenu.Item(
-                            icon = ActionMenu.Item.Icon.Like,
+                            icon = UiIcon.Like,
                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Like),
                             count = UiNumber(record.value.likeCount ?: 0),
-                            onClicked = {
-                                event.like(
-                                    statusKey = statusKey,
-                                    cid = record.value.cid.cid,
-                                    uri = record.value.uri.atUri,
-                                    likedUri = null,
-                                )
-                            },
+                            clickEvent =
+                                ClickEvent.event(
+                                    accountKey,
+                                    PostEvent.Bluesky.Like(
+                                        postKey = statusKey,
+                                        cid = record.value.cid.cid,
+                                        uri = record.value.uri.atUri,
+                                        likedUri = null,
+                                    ),
+                                ),
                         ),
                         ActionMenu.Group(
                             displayItem =
                                 ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.More,
+                                    icon = UiIcon.More,
                                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                                 ),
                             actions =
                                 listOfNotNull(
                                     ActionMenu.Item(
-                                        icon = ActionMenu.Item.Icon.Share,
+                                        icon = UiIcon.Share,
                                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                        onClicked = {
-                                            launcher.launch(
+                                        clickEvent =
+                                            ClickEvent.Deeplink(
                                                 DeeplinkRoute.Status
                                                     .ShareSheet(
                                                         statusKey = statusKey,
                                                         accountType = AccountType.Specific(accountKey),
                                                         shareUrl = url,
                                                         fxShareUrl = fxUrl,
-                                                    ).toUri(),
-                                            )
-                                        },
+                                                    ),
+                                            ),
                                     ),
                                     if (isFromMe) {
                                         ActionMenu.Item(
-                                            icon = ActionMenu.Item.Icon.Delete,
+                                            icon = UiIcon.Delete,
                                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
-                                            onClicked = {
-                                                launcher.launch(
+                                            clickEvent =
+                                                ClickEvent.Deeplink(
                                                     DeeplinkRoute.Status
                                                         .DeleteConfirm(
                                                             accountType =
@@ -1303,16 +1413,15 @@ private fun render(
                                                                     accountKey,
                                                                 ),
                                                             statusKey = statusKey,
-                                                        ).toUri(),
-                                                )
-                                            },
+                                                        ),
+                                                ),
                                         )
                                     } else {
                                         ActionMenu.Item(
-                                            icon = ActionMenu.Item.Icon.Report,
+                                            icon = UiIcon.Report,
                                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
-                                            onClicked = {
-                                                launcher.launch(
+                                            clickEvent =
+                                                ClickEvent.Deeplink(
                                                     DeeplinkRoute.Status
                                                         .BlueskyReport(
                                                             statusKey = statusKey,
@@ -1320,9 +1429,8 @@ private fun render(
                                                                 AccountType.Specific(
                                                                     accountKey,
                                                                 ),
-                                                        ).toUri(),
-                                                )
-                                            },
+                                                        ),
+                                                ),
                                         )
                                     },
                                 ).toImmutableList(),
@@ -1338,34 +1446,16 @@ private fun render(
                     record.value.labels.orEmpty().any {
                         it.`val` in sensitiveLabels
                     },
-                onClicked = {
-                    launcher.launch(
+                platformType = PlatformType.Bluesky,
+                accountType = AccountType.Specific(accountKey),
+                clickEvent =
+                    ClickEvent.Deeplink(
                         DeeplinkRoute.Status
                             .Detail(
                                 statusKey = statusKey,
                                 accountType = AccountType.Specific(accountKey),
-                            ).toUri(),
-                    )
-                },
-                platformType = PlatformType.Bluesky,
-                onMediaClicked = { media, index ->
-                    launcher.launch(
-                        DeeplinkRoute.Media
-                            .StatusMedia(
-                                accountType = AccountType.Specific(accountKey),
-                                statusKey = statusKey,
-                                index = index,
-                                preview =
-                                    when (media) {
-                                        is UiMedia.Image -> media.previewUrl
-                                        is UiMedia.Video -> media.thumbnailUrl
-                                        is UiMedia.Audio -> null
-                                        is UiMedia.Gif -> media.previewUrl
-                                    },
-                            ).toUri(),
-                    )
-                },
-                url = url,
+                            ),
+                    ),
             )
         }
 

@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
@@ -283,7 +283,7 @@ internal fun TimelineItemContent(
     val layoutDirection = LocalLayoutDirection.current
     val paddingWithStatusBar =
         PaddingValues(
-            top = maxOf(WindowInsets.statusBars.asPaddingValues().calculateTopPadding(), contentPadding.calculateTopPadding()),
+            top = maxOf(WindowInsets.safeContent.asPaddingValues().calculateTopPadding(), contentPadding.calculateTopPadding()),
             bottom = contentPadding.calculateBottomPadding(),
             start = contentPadding.calculateStartPadding(layoutDirection),
             end = contentPadding.calculateEndPadding(layoutDirection),

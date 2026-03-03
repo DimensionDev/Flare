@@ -2,6 +2,8 @@ package dev.dimension.flare.ui.theme
 
 import android.app.Activity
 import android.os.Build
+import android.view.Window
+import android.view.WindowInsetsController
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -11,6 +13,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
@@ -149,6 +152,7 @@ fun FlareTheme(
                 }
             }
         }
+        ApplyCaptionBarAppearance((view.context as Activity).window, darkTheme)
     }
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
@@ -166,6 +170,30 @@ fun FlareTheme(
 private fun isDarkTheme(): Boolean =
     LocalAppearanceSettings.current.theme == Theme.DARK ||
         (LocalAppearanceSettings.current.theme == Theme.SYSTEM && isSystemInDarkTheme())
+
+@Composable
+private fun ApplyCaptionBarAppearance(
+    window: Window,
+    dark: Boolean,
+) {
+    LaunchedEffect(dark, window) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            window.insetsController?.setSystemBarsAppearance(
+                WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND,
+                WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND,
+            )
+
+            window.insetsController?.setSystemBarsAppearance(
+                if (dark) {
+                    0
+                } else {
+                    WindowInsetsController.APPEARANCE_LIGHT_CAPTION_BARS
+                },
+                WindowInsetsController.APPEARANCE_LIGHT_CAPTION_BARS,
+            )
+        }
+    }
+}
 
 @Composable
 fun ColorScheme.isLight() = this.background.luminance() > 0.5

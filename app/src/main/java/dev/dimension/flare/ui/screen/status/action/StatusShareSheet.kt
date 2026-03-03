@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativePaint
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -401,7 +402,7 @@ private fun Modifier.captureableShadow(
 
     this.drawIntoCanvas {
         val paint = Paint()
-        val frameworkPaint = paint.asFrameworkPaint()
+        val frameworkPaint = paint.nativePaint
         frameworkPaint.color = transparentColor
 
         frameworkPaint.setShadowLayer(

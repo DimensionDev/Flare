@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.controllers
 
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
+import coil3.annotation.ExperimentalCoilApi
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.InAppNotification
@@ -19,6 +20,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 public object ComposeUIHelper {
+    @OptIn(ExperimentalCoilApi::class)
     public fun initialize(
         inAppNotification: InAppNotification,
         swiftFormatter: SwiftFormatter,

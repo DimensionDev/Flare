@@ -723,12 +723,14 @@ private fun TranslationComponent(
                 contentWarning = contentWarning,
                 content = content,
                 targetLanguage = Locale.current.language,
-                useAi = componentAppearance.aiConfig.translation,
             )
         }
         state.contentWarning
             ?.onSuccess {
-                PlatformText(text = it)
+                RichText(
+                    text = it,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }?.onLoading {
                 PlatformText(
                     text = "Lores ipsum dolor sit amet",
@@ -739,7 +741,10 @@ private fun TranslationComponent(
             }
         state.text
             .onSuccess {
-                PlatformText(text = it)
+                RichText(
+                    text = it,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }.onLoading {
                 PlatformText(
                     text = "Lores ipsum dolor sit amet",

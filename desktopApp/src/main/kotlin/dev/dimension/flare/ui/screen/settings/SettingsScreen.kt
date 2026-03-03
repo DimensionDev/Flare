@@ -13,19 +13,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil3.PlatformContext
@@ -37,8 +34,6 @@ import compose.icons.fontawesomeicons.brands.Github
 import compose.icons.fontawesomeicons.brands.Line
 import compose.icons.fontawesomeicons.brands.Telegram
 import compose.icons.fontawesomeicons.solid.AngleRight
-import compose.icons.fontawesomeicons.solid.CircleCheck
-import compose.icons.fontawesomeicons.solid.CircleXmark
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Lock
@@ -52,7 +47,7 @@ import dev.dimension.flare.action_import
 import dev.dimension.flare.add_account
 import dev.dimension.flare.app_name
 import dev.dimension.flare.cancel
-import dev.dimension.flare.data.model.AppSettings
+import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
@@ -80,15 +75,29 @@ import dev.dimension.flare.settings_about_telegram
 import dev.dimension.flare.settings_about_telegram_description
 import dev.dimension.flare.settings_about_title
 import dev.dimension.flare.settings_accounts_title
+import dev.dimension.flare.settings_ai_config_api_key
+import dev.dimension.flare.settings_ai_config_api_key_hint
 import dev.dimension.flare.settings_ai_config_description
 import dev.dimension.flare.settings_ai_config_enable_tldr
 import dev.dimension.flare.settings_ai_config_entable_translation
+import dev.dimension.flare.settings_ai_config_model
+import dev.dimension.flare.settings_ai_config_model_description
+import dev.dimension.flare.settings_ai_config_model_error
+import dev.dimension.flare.settings_ai_config_model_loading
+import dev.dimension.flare.settings_ai_config_model_no_models
+import dev.dimension.flare.settings_ai_config_model_select
 import dev.dimension.flare.settings_ai_config_server
 import dev.dimension.flare.settings_ai_config_server_hint
-import dev.dimension.flare.settings_ai_config_server_self_host_description
 import dev.dimension.flare.settings_ai_config_title
 import dev.dimension.flare.settings_ai_config_tldr_description
+import dev.dimension.flare.settings_ai_config_tldr_prompt
+import dev.dimension.flare.settings_ai_config_translate_prompt
 import dev.dimension.flare.settings_ai_config_translation_description
+import dev.dimension.flare.settings_ai_config_type
+import dev.dimension.flare.settings_ai_config_type_description
+import dev.dimension.flare.settings_ai_config_type_on_device
+import dev.dimension.flare.settings_ai_config_type_openai
+import dev.dimension.flare.settings_ai_config_value_empty_placeholder
 import dev.dimension.flare.settings_appearance_absolute_timestamp
 import dev.dimension.flare.settings_appearance_absolute_timestamp_description
 import dev.dimension.flare.settings_appearance_avatar_shape
@@ -163,7 +172,8 @@ import dev.dimension.flare.ui.presenter.ImportDataPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.settings.FlareServerProviderPresenter
+import dev.dimension.flare.ui.presenter.settings.AiConfigPresenter
+import dev.dimension.flare.ui.presenter.settings.AiTypeOption
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
 import dev.dimension.flare.ui.theme.LocalComposeWindow
@@ -182,7 +192,6 @@ import io.github.composefluent.component.HyperlinkButton
 import io.github.composefluent.component.MenuFlyout
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
-import io.github.composefluent.component.ProgressRing
 import io.github.composefluent.component.RadioButton
 import io.github.composefluent.component.ScrollbarContainer
 import io.github.composefluent.component.SubtleButton
@@ -190,11 +199,6 @@ import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import kotlinx.collections.immutable.persistentMapOf
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
@@ -984,60 +988,45 @@ internal fun SettingsScreen(
             }
 
             Header(stringResource(Res.string.settings_ai_config_title))
-            ContentDialog(
-                title = stringResource(Res.string.settings_ai_config_server),
-                visible = state.aiConfigState.showServerDialog,
-                content = {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.settings_ai_config_server_self_host_description),
-                        )
-                        Spacer(modifier = Modifier.size(8.dp))
-                        TextField(
-                            state.aiConfigState.serverText,
-                            placeholder = { Text(stringResource(Res.string.settings_ai_config_server_hint)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            trailing = {
-                                state.aiConfigState.serverValidation
-                                    .onSuccess {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.CircleCheck,
-                                            contentDescription = null,
-                                            tint = FluentTheme.colors.system.neutral,
-                                        )
-                                    }.onError {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.CircleXmark,
-                                            contentDescription = null,
-                                            tint = FluentTheme.colors.system.critical,
-                                        )
-                                    }.onLoading {
-                                        ProgressRing(
-                                            modifier = Modifier.size(24.dp),
-                                        )
-                                    }
-                            },
-                        )
+            state.aiConfigState.textEditDialog?.let { dialog ->
+                val textState = rememberTextFieldState()
+                LaunchedEffect(dialog) {
+                    textState.edit {
+                        replace(0, length, dialog.value)
                     }
-                },
-                primaryButtonText = stringResource(Res.string.ok),
-                closeButtonText = stringResource(Res.string.cancel),
-                onButtonClick = {
-                    when (it) {
-                        ContentDialogButton.Primary -> {
-                            if (state.aiConfigState.serverValidation.isSuccess) {
-                                state.aiConfigState.setShowServerDialog(false)
-                                state.aiConfigState.confirm()
+                }
+                ContentDialog(
+                    title = dialog.title,
+                    visible = true,
+                    content = {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                        ) {
+                            if (dialog.placeholder.isNotBlank()) {
+                                Text(
+                                    text = dialog.placeholder,
+                                )
+                                Spacer(modifier = Modifier.size(8.dp))
                             }
+                            TextField(
+                                state = textState,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
                         }
-                        else -> {
-                            state.aiConfigState.setShowServerDialog(false)
+                    },
+                    primaryButtonText = stringResource(Res.string.ok),
+                    closeButtonText = stringResource(Res.string.cancel),
+                    onButtonClick = {
+                        when (it) {
+                            ContentDialogButton.Primary -> {
+                                dialog.onConfirm(textState.text.toString())
+                                state.aiConfigState.setTextEditDialog(null)
+                            }
+                            else -> state.aiConfigState.setTextEditDialog(null)
                         }
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             ContentDialog(
                 title = stringResource(Res.string.import_confirmation_title),
@@ -1073,29 +1062,208 @@ internal fun SettingsScreen(
                 },
                 icon = null,
             ) {
+                val serverTitle = stringResource(Res.string.settings_ai_config_server)
+                val serverHint = stringResource(Res.string.settings_ai_config_server_hint)
+                val apiKeyTitle = stringResource(Res.string.settings_ai_config_api_key)
+                val apiKeyHint = stringResource(Res.string.settings_ai_config_api_key_hint)
+                val translatePromptTitle = stringResource(Res.string.settings_ai_config_translate_prompt)
+                val tldrPromptTitle = stringResource(Res.string.settings_ai_config_tldr_prompt)
+                val selectedType =
+                    when (state.aiConfigState.aiConfig.type) {
+                        is AppSettings.AiConfig.Type.OpenAI -> AiTypeOption.OpenAI
+                        AppSettings.AiConfig.Type.OnDevice -> AiTypeOption.OnDevice
+                    }
                 ExpanderItem(
-//                    onClick = {
-//                        state.aiConfigState.setShowServerDialog(true)
-//                    },
                     heading = {
-                        Text(stringResource(Res.string.settings_ai_config_server))
+                        Text(stringResource(Res.string.settings_ai_config_type))
                     },
                     caption = {
-                        state.aiConfigState.currentServer.onSuccess {
-                            Text(it)
-                        }
+                        Text(stringResource(Res.string.settings_ai_config_type_description))
                     },
                     trailing = {
-                        Button(
+                        DropDownButton(
                             onClick = {
-                                state.aiConfigState.setShowServerDialog(true)
+                                state.aiConfigState.setShowTypeDropdown(!state.aiConfigState.showTypeDropdown)
                             },
                         ) {
-                            Text(stringResource(Res.string.edit))
+                            Text(
+                                stringResource(
+                                    when (selectedType) {
+                                        AiTypeOption.OnDevice -> Res.string.settings_ai_config_type_on_device
+                                        AiTypeOption.OpenAI -> Res.string.settings_ai_config_type_openai
+                                    },
+                                ),
+                            )
+                        }
+                        MenuFlyout(
+                            visible = state.aiConfigState.showTypeDropdown,
+                            onDismissRequest = { state.aiConfigState.setShowTypeDropdown(false) },
+                            placement = FlyoutPlacement.BottomAlignedEnd,
+                            modifier = Modifier.heightIn(max = 200.dp),
+                        ) {
+                            state.aiConfigState.supportedTypes.forEach { type ->
+                                MenuFlyoutItem(
+                                    text = {
+                                        Text(
+                                            stringResource(
+                                                when (type) {
+                                                    AiTypeOption.OnDevice -> Res.string.settings_ai_config_type_on_device
+                                                    AiTypeOption.OpenAI -> Res.string.settings_ai_config_type_openai
+                                                },
+                                            ),
+                                        )
+                                    },
+                                    onClick = {
+                                        state.aiConfigState.selectType(type)
+                                        state.aiConfigState.setShowTypeDropdown(false)
+                                    },
+                                )
+                            }
                         }
                     },
                 )
                 ExpanderItemSeparator()
+                val openAIType = state.aiConfigState.aiConfig.type as? AppSettings.AiConfig.Type.OpenAI
+                val openAITypeForDisplay = openAIType ?: AppSettings.AiConfig.Type.OpenAI("", "", "")
+                AnimatedVisibility(openAIType != null) {
+                    Column {
+                        ExpanderItem(
+                            heading = { Text(stringResource(Res.string.settings_ai_config_server)) },
+                            caption = {
+                                Text(
+                                    openAITypeForDisplay.serverUrl.ifBlank {
+                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                    },
+                                )
+                            },
+                            trailing = {
+                                Button(
+                                    onClick = {
+                                        state.aiConfigState.setTextEditDialog(
+                                            TextEditDialogState(
+                                                title = serverTitle,
+                                                placeholder = serverHint,
+                                                value = openAITypeForDisplay.serverUrl,
+                                                onConfirm = { newValue ->
+                                                    state.aiConfigState.update {
+                                                        val currentType = type as? AppSettings.AiConfig.Type.OpenAI
+                                                        copy(
+                                                            type =
+                                                                (currentType ?: AppSettings.AiConfig.Type.OpenAI("", "", ""))
+                                                                    .copy(serverUrl = newValue),
+                                                        )
+                                                    }
+                                                },
+                                            ),
+                                        )
+                                    },
+                                ) {
+                                    Text(stringResource(Res.string.edit))
+                                }
+                            },
+                        )
+                        ExpanderItemSeparator()
+                        ExpanderItem(
+                            heading = { Text(stringResource(Res.string.settings_ai_config_api_key)) },
+                            caption = {
+                                Text(
+                                    openAITypeForDisplay.apiKey.ifBlank {
+                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                    },
+                                )
+                            },
+                            trailing = {
+                                Button(
+                                    onClick = {
+                                        state.aiConfigState.setTextEditDialog(
+                                            TextEditDialogState(
+                                                title = apiKeyTitle,
+                                                placeholder = apiKeyHint,
+                                                value = openAITypeForDisplay.apiKey,
+                                                onConfirm = { newValue ->
+                                                    state.aiConfigState.update {
+                                                        val currentType = type as? AppSettings.AiConfig.Type.OpenAI
+                                                        copy(
+                                                            type =
+                                                                (currentType ?: AppSettings.AiConfig.Type.OpenAI("", "", ""))
+                                                                    .copy(apiKey = newValue),
+                                                        )
+                                                    }
+                                                },
+                                            ),
+                                        )
+                                    },
+                                ) {
+                                    Text(stringResource(Res.string.edit))
+                                }
+                            },
+                        )
+                        ExpanderItemSeparator()
+                        ExpanderItem(
+                            heading = { Text(stringResource(Res.string.settings_ai_config_model)) },
+                            caption = { Text(stringResource(Res.string.settings_ai_config_model_description)) },
+                            trailing = {
+                                DropDownButton(
+                                    onClick = {
+                                        state.aiConfigState.setShowModelDropdown(!state.aiConfigState.showModelDropdown)
+                                    },
+                                ) {
+                                    Text(
+                                        openAITypeForDisplay.model.ifBlank {
+                                            stringResource(Res.string.settings_ai_config_model_select)
+                                        },
+                                    )
+                                }
+                                MenuFlyout(
+                                    visible = state.aiConfigState.showModelDropdown,
+                                    onDismissRequest = { state.aiConfigState.setShowModelDropdown(false) },
+                                    placement = FlyoutPlacement.BottomAlignedEnd,
+                                    modifier = Modifier.heightIn(max = 200.dp),
+                                ) {
+                                    state.aiConfigState.openAIModels
+                                        .onLoading {
+                                            MenuFlyoutItem(
+                                                text = { Text(stringResource(Res.string.settings_ai_config_model_loading)) },
+                                                onClick = {},
+                                            )
+                                        }.onError {
+                                            MenuFlyoutItem(
+                                                text = { Text(stringResource(Res.string.settings_ai_config_model_error)) },
+                                                onClick = {},
+                                            )
+                                        }.onSuccess { models ->
+                                            if (models.isEmpty()) {
+                                                MenuFlyoutItem(
+                                                    text = { Text(stringResource(Res.string.settings_ai_config_model_no_models)) },
+                                                    onClick = {},
+                                                )
+                                            } else {
+                                                models.forEach { model ->
+                                                    MenuFlyoutItem(
+                                                        text = { Text(model) },
+                                                        onClick = {
+                                                            state.aiConfigState.update {
+                                                                val currentType = type as? AppSettings.AiConfig.Type.OpenAI
+                                                                copy(
+                                                                    type =
+                                                                        (
+                                                                            currentType
+                                                                                ?: AppSettings.AiConfig.Type.OpenAI("", "", "")
+                                                                        ).copy(model = model),
+                                                                )
+                                                            }
+                                                            state.aiConfigState.setShowModelDropdown(false)
+                                                        },
+                                                    )
+                                                }
+                                            }
+                                        }
+                                }
+                            },
+                        )
+                        ExpanderItemSeparator()
+                    }
+                }
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_ai_config_entable_translation))
@@ -1114,6 +1282,41 @@ internal fun SettingsScreen(
                     },
                 )
                 ExpanderItemSeparator()
+                AnimatedVisibility(state.aiConfigState.aiConfig.translation) {
+                    Column {
+                        ExpanderItem(
+                            heading = { Text(stringResource(Res.string.settings_ai_config_translate_prompt)) },
+                            caption = {
+                                Text(
+                                    state.aiConfigState.aiConfig.translatePrompt.ifBlank {
+                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                    },
+                                )
+                            },
+                            trailing = {
+                                Button(
+                                    onClick = {
+                                        state.aiConfigState.setTextEditDialog(
+                                            TextEditDialogState(
+                                                title = translatePromptTitle,
+                                                placeholder = "",
+                                                value = state.aiConfigState.aiConfig.translatePrompt,
+                                                onConfirm = { newValue ->
+                                                    state.aiConfigState.update {
+                                                        copy(translatePrompt = newValue)
+                                                    }
+                                                },
+                                            ),
+                                        )
+                                    },
+                                ) {
+                                    Text(stringResource(Res.string.edit))
+                                }
+                            },
+                        )
+                        ExpanderItemSeparator()
+                    }
+                }
                 ExpanderItem(
                     heading = {
                         Text(stringResource(Res.string.settings_ai_config_enable_tldr))
@@ -1131,6 +1334,41 @@ internal fun SettingsScreen(
                         )
                     },
                 )
+                AnimatedVisibility(state.aiConfigState.aiConfig.tldr) {
+                    Column {
+                        ExpanderItemSeparator()
+                        ExpanderItem(
+                            heading = { Text(stringResource(Res.string.settings_ai_config_tldr_prompt)) },
+                            caption = {
+                                Text(
+                                    state.aiConfigState.aiConfig.tldrPrompt.ifBlank {
+                                        stringResource(Res.string.settings_ai_config_value_empty_placeholder)
+                                    },
+                                )
+                            },
+                            trailing = {
+                                Button(
+                                    onClick = {
+                                        state.aiConfigState.setTextEditDialog(
+                                            TextEditDialogState(
+                                                title = tldrPromptTitle,
+                                                placeholder = "",
+                                                value = state.aiConfigState.aiConfig.tldrPrompt,
+                                                onConfirm = { newValue ->
+                                                    state.aiConfigState.update {
+                                                        copy(tldrPrompt = newValue)
+                                                    }
+                                                },
+                                            ),
+                                        )
+                                    },
+                                ) {
+                                    Text(stringResource(Res.string.edit))
+                                }
+                            },
+                        )
+                    }
+                }
             }
 
             Header(stringResource(Res.string.settings_about_title))
@@ -1448,53 +1686,52 @@ private fun accountsPresenter(settingsRepository: SettingsRepository = koinInjec
         }
     }
 
-@OptIn(FlowPreview::class)
 @Composable
-private fun aiConfigPresenter(settingsRepository: SettingsRepository = koinInject<SettingsRepository>()) =
+private fun aiConfigPresenter() =
     run {
         var expanded by remember { mutableStateOf(false) }
-        var showServerDialog by remember { mutableStateOf(false) }
-        val serverText = rememberTextFieldState()
-        val scope = rememberCoroutineScope()
-        val state = remember { FlareServerProviderPresenter() }.invoke()
-        val aiConfig by remember { settingsRepository.appSettings.map { it.aiConfig } }
-            .collectAsState(AppSettings.AiConfig())
-        state.currentServer.onSuccess { currentServer ->
-            LaunchedEffect(currentServer) {
-                serverText.edit {
-                    delete(0, length)
-                    append(currentServer)
-                }
-            }
-        }
-
-        LaunchedEffect(Unit) {
-            snapshotFlow { serverText.text }
-                .distinctUntilChanged()
-                .debounce(666L)
-                .collectLatest {
-                    state.checkServer(it.toString())
-                }
-        }
-
-        object : FlareServerProviderPresenter.State by state {
-            val showServerDialog = showServerDialog
-            val serverText = serverText
-            val aiConfig = aiConfig
+        val state = remember { AiConfigPresenter() }.invoke()
+        var showTypeDropdown by remember { mutableStateOf(false) }
+        var showModelDropdown by remember { mutableStateOf(false) }
+        var textEditDialog by remember { mutableStateOf<TextEditDialogState?>(null) }
+        object {
+            val aiConfig = state.aiConfig
+            val openAIModels = state.openAIModels
+            val supportedTypes = state.supportedTypes
             val expanded = expanded
+            val showTypeDropdown = showTypeDropdown
+            val showModelDropdown = showModelDropdown
+            val textEditDialog = textEditDialog
 
             fun setExpanded(value: Boolean) {
                 expanded = value
             }
 
             fun update(block: AppSettings.AiConfig.() -> AppSettings.AiConfig) {
-                scope.launch {
-                    settingsRepository.updateAppSettings { copy(aiConfig = block.invoke(this.aiConfig)) }
-                }
+                state.update(block)
             }
 
-            fun setShowServerDialog(value: Boolean) {
-                showServerDialog = value
+            fun selectType(type: AiTypeOption) {
+                state.selectType(type)
+            }
+
+            fun setShowTypeDropdown(value: Boolean) {
+                showTypeDropdown = value
+            }
+
+            fun setShowModelDropdown(value: Boolean) {
+                showModelDropdown = value
+            }
+
+            fun setTextEditDialog(value: TextEditDialogState?) {
+                textEditDialog = value
             }
         }
     }
+
+private data class TextEditDialogState(
+    val title: String,
+    val placeholder: String,
+    val value: String,
+    val onConfirm: (String) -> Unit,
+)

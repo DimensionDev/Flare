@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.presenter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import dev.dimension.flare.data.model.AppSettings
+import dev.dimension.flare.data.datastore.model.AppSettings
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.repository.SettingsRepository

@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.model
+package dev.dimension.flare.data.datastore.model
 
 import androidx.datastore.core.okio.OkioSerializer
 import kotlinx.coroutines.Dispatchers
@@ -21,12 +21,28 @@ public data class AppSettings(
     @Serializable
     public data class AiConfig(
         val translation: Boolean = false,
-        val tldr: Boolean = true,
-    )
+        val tldr: Boolean = false,
+        val type: Type = Type.OpenAI("", "", ""),
+        val translatePrompt: String = AiPromptDefaults.TRANSLATE_PROMPT,
+        val tldrPrompt: String = AiPromptDefaults.TLDR_PROMPT,
+    ) {
+        @Serializable
+        public sealed interface Type {
+            @Serializable
+            public data object OnDevice : Type
+
+            @Serializable
+            public data class OpenAI(
+                val serverUrl: String,
+                val apiKey: String,
+                val model: String = "",
+            ) : Type
+        }
+    }
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-public object AppSettingsSerializer : OkioSerializer<AppSettings> {
+internal object AppSettingsSerializer : OkioSerializer<AppSettings> {
     override val defaultValue: AppSettings
         get() =
             AppSettings(

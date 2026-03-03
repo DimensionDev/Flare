@@ -48,7 +48,7 @@ public fun ktorClient(
     HttpClient(httpClientEngine) {
         config.invoke(this)
         install(Logging) {
-            logger = NapierLogger
+            logger = FlareLogger
             level =
                 if (BuildConfig.debug) {
                     LogLevel.ALL
@@ -60,7 +60,7 @@ public fun ktorClient(
 
 internal expect val httpClientEngine: HttpClientEngine
 
-private data object NapierLogger : io.ktor.client.plugins.logging.Logger {
+internal data object FlareLogger : io.ktor.client.plugins.logging.Logger {
     override fun log(message: String) {
         if (BuildConfig.debug) {
             println(message)

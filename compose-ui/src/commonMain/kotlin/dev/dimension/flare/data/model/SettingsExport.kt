@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.model
 
+import dev.dimension.flare.data.datastore.model.AppSettings
 import kotlinx.serialization.Serializable
 
 @Serializable

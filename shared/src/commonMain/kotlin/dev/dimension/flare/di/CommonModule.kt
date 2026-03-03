@@ -2,6 +2,7 @@ package dev.dimension.flare.di
 
 import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
+import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ApplicationRepository
@@ -25,4 +26,5 @@ internal val commonModule =
         singleOf(::ComposeUseCase)
         singleOf(::SearchHistoryRepository)
         singleOf(::Readability)
+        singleOf(::OpenAIService)
     }

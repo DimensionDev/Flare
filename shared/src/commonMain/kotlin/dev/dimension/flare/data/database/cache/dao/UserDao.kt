@@ -11,9 +11,9 @@ import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.DbUserHistory
 import dev.dimension.flare.data.database.cache.model.DbUserHistoryWithUser
 import dev.dimension.flare.data.database.cache.model.DbUserRelation
-import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -30,7 +30,7 @@ internal interface UserDao {
     @Query("UPDATE DbUser SET content = :content WHERE userKey = :userKey")
     suspend fun update(
         userKey: MicroBlogKey,
-        content: UserContent,
+        content: UiProfile,
     )
 
     @Query("SELECT * FROM DbUser WHERE userKey IN (:userKeys)")

@@ -22,6 +22,7 @@ internal data class DbUser(
 )
 
 @Entity(
+    primaryKeys = ["accountKey", "userKey"],
     indices = [
         Index(value = ["accountKey", "userKey"], unique = true),
     ],

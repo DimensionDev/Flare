@@ -54,7 +54,7 @@ internal data class DbStatusWithUser(
     @Relation(
         parentColumn = "statusKey",
         entityColumn = "statusKey",
-        entity = DbStatusReference::class,
+        entity = DbStatusUserReference::class,
     )
     val references: List<DbStatusUserReferenceWithUser>,
 )

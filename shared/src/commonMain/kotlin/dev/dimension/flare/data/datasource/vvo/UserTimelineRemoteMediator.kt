@@ -1,11 +1,7 @@
 package dev.dimension.flare.data.datasource.vvo
 
-import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.vvo.VVOService
@@ -13,18 +9,17 @@ import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvo
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
 internal class UserTimelineRemoteMediator(
     private val userKey: MicroBlogKey,
     private val service: VVOService,
-    private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val mediaOnly: Boolean,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
-    override val pagingKey =
+) : CacheableRemoteLoader<UiTimelineV2> {
+    override val pagingKey: String =
         buildString {
             append("user_timeline")
             if (mediaOnly) {
@@ -33,14 +28,14 @@ internal class UserTimelineRemoteMediator(
             append(accountKey.toString())
             append(userKey.toString())
         }
+
     private var containerid: String? = null
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         if (mediaOnly) {
-            // Not supported yet
             return PagingResult(
                 endOfPaginationReached = true,
             )
@@ -53,6 +48,7 @@ internal class UserTimelineRemoteMediator(
                 platformType = PlatformType.VVo,
             )
         }
+
         if (containerid == null) {
             containerid =
                 service
@@ -64,15 +60,15 @@ internal class UserTimelineRemoteMediator(
                         it.tabType == vvo
                     }?.containerid
         }
+
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
-                    service
-                        .getContainerIndex(
-                            type = "uid",
-                            value = userKey.id,
-                            containerId = containerid,
-                        )
+                    service.getContainerIndex(
+                        type = "uid",
+                        value = userKey.id,
+                        containerId = containerid,
+                    )
                 }
 
                 is PagingRequest.Prepend -> {
@@ -90,22 +86,13 @@ internal class UserTimelineRemoteMediator(
                     )
                 }
             }
-        val status =
+
+        val data =
             response.data
                 ?.cards
                 ?.mapNotNull { it.mblog }
                 .orEmpty()
-
-        val data =
-            status.map { statusItem ->
-                statusItem.toDbPagingTimeline(
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                    sortIdProvider = {
-                        -SnowflakeIdGenerator.nextId()
-                    },
-                )
-            }
+                .map { it.render(accountKey) }
 
         return PagingResult(
             endOfPaginationReached = response.data?.cardlistInfo?.sinceID == null,

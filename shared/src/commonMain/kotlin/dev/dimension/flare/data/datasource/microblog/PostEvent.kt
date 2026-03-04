@@ -11,6 +11,9 @@ import dev.dimension.flare.ui.model.mapper.mastodonRepost
 import dev.dimension.flare.ui.model.mapper.misskeyFavourite
 import dev.dimension.flare.ui.model.mapper.misskeyReact
 import dev.dimension.flare.ui.model.mapper.misskeyRenote
+import dev.dimension.flare.ui.model.mapper.vvoFavorite
+import dev.dimension.flare.ui.model.mapper.vvoLike
+import dev.dimension.flare.ui.model.mapper.vvoLikeComment
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
 
@@ -290,19 +293,50 @@ internal sealed interface PostEvent {
         data class Like(
             override val postKey: MicroBlogKey,
             val liked: Boolean,
-        ) : VVO
+            val count: Long = 0,
+            val accountKey: MicroBlogKey,
+        ) : VVO,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.vvoLike(
+                    statusKey = postKey,
+                    liked = !liked,
+                    count = (count + if (!liked) 1 else -1).coerceAtLeast(0),
+                    accountKey = accountKey,
+                )
+        }
 
         @Serializable
         data class LikeComment(
             override val postKey: MicroBlogKey,
             val liked: Boolean,
-        ) : VVO
+            val count: Long = 0,
+            val accountKey: MicroBlogKey,
+        ) : VVO,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.vvoLikeComment(
+                    statusKey = postKey,
+                    liked = !liked,
+                    count = (count + if (!liked) 1 else -1).coerceAtLeast(0),
+                    accountKey = accountKey,
+                )
+        }
 
         @Serializable
         data class Favorite(
             override val postKey: MicroBlogKey,
             val favorited: Boolean,
-        ) : VVO
+            val accountKey: MicroBlogKey,
+        ) : VVO,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.vvoFavorite(
+                    statusKey = postKey,
+                    favorited = !favorited,
+                    accountKey = accountKey,
+                )
+        }
     }
 }
 

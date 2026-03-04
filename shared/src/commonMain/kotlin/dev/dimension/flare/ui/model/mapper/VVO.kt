@@ -4,7 +4,8 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.vvo.model.Attitude
 import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
@@ -16,70 +17,80 @@ import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.vvoHostLong
 import dev.dimension.flare.model.vvoHostShort
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.decodeURLPart
+import kotlin.time.Clock
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
-import kotlin.time.Clock
 
-internal fun Status.render(
-    accountKey: MicroBlogKey,
-    event: StatusEvent.VVO,
-): UiTimeline {
-    val message = title?.text
-    return UiTimeline(
-        topMessage =
-            message?.let {
-                UiTimeline.TopMessage(
-                    user = null,
-                    icon = UiTimeline.TopMessage.Icon.Info,
-                    type =
-                        UiTimeline.TopMessage.MessageType.VVO
-                            .Custom(it),
-                    onClicked = {
+internal fun Status.render(accountKey: MicroBlogKey): UiTimelineV2 = renderStatusV2(accountKey)
+
+internal fun Comment.render(accountKey: MicroBlogKey): UiTimelineV2 = renderStatusV2(accountKey)
+
+internal fun Attitude.render(accountKey: MicroBlogKey): UiTimelineV2 {
+    val content = status?.renderStatusV2(accountKey)
+    val user = user?.render(accountKey)
+    return UiTimelineV2.UserList(
+        message =
+            UiTimelineV2.Message(
+                user = user,
+                statusKey = MicroBlogKey(id.toString(), vvoHost),
+                icon = UiIcon.Like,
+                type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Favourite),
+                createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
+                clickEvent =
+                    if (user != null) {
+                        ClickEvent.Deeplink(
+                            DeeplinkRoute.Profile
+                                .User(
+                                    accountType = AccountType.Specific(accountKey),
+                                    userKey = user.key,
+                                ),
+                        )
+                    } else {
+                        ClickEvent.Noop
                     },
-                    statusKey = MicroBlogKey(id, vvoHost),
-                )
-            },
-        content = renderStatus(accountKey, event),
+                accountType = AccountType.Specific(accountKey),
+            ),
+        users = listOfNotNull(user).toImmutableList(),
+        post = content,
+        createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
+        statusKey = MicroBlogKey(id.toString(), vvoHost),
+        accountType = AccountType.Specific(accountKey),
     )
 }
 
-internal fun Status.renderStatus(
-    accountKey: MicroBlogKey,
-    event: StatusEvent.VVO,
-): UiTimeline.ItemContent.Status {
+private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
     val media =
         picsList.orEmpty().mapNotNull {
             val url = it.large?.url ?: it.url
             if (url.isNullOrEmpty()) {
                 null
+            } else if (it.type == "video" && it.videoSrc != null) {
+                UiMedia.Video(
+                    url = it.videoSrc,
+                    thumbnailUrl = it.url ?: url,
+                    width = it.large?.geoValue?.widthValue ?: it.geoValue?.widthValue ?: 0f,
+                    height = it.large?.geoValue?.heightValue ?: it.geoValue?.heightValue ?: 0f,
+                    description = null,
+                )
             } else {
-                if (it.type == "video" && it.videoSrc != null) {
-                    UiMedia.Video(
-                        url = it.videoSrc,
-                        thumbnailUrl = it.url ?: url,
-                        width = it.large?.geoValue?.widthValue ?: it.geoValue?.widthValue ?: 0f,
-                        height = it.large?.geoValue?.heightValue ?: it.geoValue?.heightValue ?: 0f,
-                        description = null,
-                    )
-                } else {
-                    UiMedia.Image(
-                        url = url,
-                        width = it.large?.geoValue?.widthValue ?: it.geoValue?.widthValue ?: 0f,
-                        height = it.large?.geoValue?.heightValue ?: it.geoValue?.heightValue ?: 0f,
-                        previewUrl = it.url ?: url,
-                        description = null,
-                        sensitive = false,
-                    )
-                }
+                UiMedia.Image(
+                    url = url,
+                    width = it.large?.geoValue?.widthValue ?: it.geoValue?.widthValue ?: 0f,
+                    height = it.large?.geoValue?.heightValue ?: it.geoValue?.heightValue ?: 0f,
+                    previewUrl = it.url ?: url,
+                    description = null,
+                    sensitive = false,
+                )
             }
         }
     val pageInfoVideo =
@@ -138,184 +149,272 @@ internal fun Status.renderStatus(
         } ?: pageInfoVideo.takeIf {
             it.isNotEmpty()
         } ?: pageInfoImage
+
+    val user = this.user?.render(accountKey)
+    val isFromMe = user?.key == accountKey
+    val displayUser = user?.copy(handle = regionName ?: source ?: user.handle)
+    val statusKey = MicroBlogKey(id = id, host = vvoHost)
     val canReblog = visible?.type == null || visible.type == 0L
-    val rawUser = this.user?.render(accountKey)
-    val isFromMe = rawUser?.key == accountKey
-    val displayUser =
-        rawUser?.copy(
-            handle = regionName ?: source ?: rawUser.handle,
-        )
-    val element = renderVVOText(text.orEmpty(), accountKey)
-    val statusKey =
-        MicroBlogKey(
-            id = id,
-            host = vvoHost,
-        )
     val url =
         buildString {
             append("https://$vvoHostLong/")
-            append(user?.id)
+            append(this@renderStatusV2.user?.id)
             append('/')
             append(bid)
         }
-    return UiTimeline.ItemContent.Status(
-        statusKey = statusKey,
-        content = element.toUi(),
-        user = displayUser,
-        quote =
-            listOfNotNull(
-                retweetedStatus?.renderStatus(
-                    accountKey,
-                    event,
-                ),
-            ).toImmutableList(),
-        card = null,
-        contentWarning = null,
+
+    return UiTimelineV2.Post(
+        platformType = PlatformType.VVo,
         images = actualMedia.toImmutableList(),
+        sensitive = false,
+        contentWarning = null,
+        user = displayUser,
+        quote = listOfNotNull(retweetedStatus?.renderStatusV2(accountKey)).toImmutableList(),
+        content = renderVVOText(text.orEmpty(), accountKey).toUi(),
         actions =
             listOfNotNull(
                 if (canReblog) {
                     ActionMenu.Item(
-                        icon = ActionMenu.Item.Icon.Reply,
-                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
+                        icon = UiIcon.Quote,
+                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
                         count = UiNumber(repostsCount?.content?.toLongOrNull() ?: 0),
-                        onClicked = {
-                            launcher.launch(
-                                DeeplinkRoute.Compose
-                                    .Quote(
-                                        accountKey = accountKey,
-                                        statusKey = statusKey,
-                                    ).toUri(),
-                            )
-                        },
+                        clickEvent =
+                            ClickEvent.Deeplink(
+                                DeeplinkRoute.Compose.Quote(
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
+                                ),
+                            ),
                     )
                 } else {
                     null
                 },
                 ActionMenu.Item(
-                    icon = ActionMenu.Item.Icon.Comment,
+                    icon = UiIcon.Comment,
                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Comment),
                     count = UiNumber(commentsCount ?: 0),
-                    onClicked = {
-                        launcher.launch(
-                            DeeplinkRoute.Compose
-                                .Reply(
-                                    accountKey = accountKey,
-                                    statusKey = statusKey,
-                                ).toUri(),
-                        )
-                    },
-                ),
-                ActionMenu.Item(
-                    icon = if (liked == true) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
-                    text =
-                        ActionMenu.Item.Text.Localized(
-                            if (liked == true) ActionMenu.Item.Text.Localized.Type.Unlike else ActionMenu.Item.Text.Localized.Type.Like,
+                    clickEvent =
+                        ClickEvent.Deeplink(
+                            DeeplinkRoute.Compose.Reply(
+                                accountKey = accountKey,
+                                statusKey = statusKey,
+                            ),
                         ),
-                    count = UiNumber(attitudesCount ?: 0),
-                    color = if (liked == true) ActionMenu.Item.Color.Red else null,
-                    onClicked = {
-                        event.like(statusKey, liked ?: false)
-                    },
+                ),
+                ActionMenu.vvoLike(
+                    statusKey = statusKey,
+                    liked = liked == true,
+                    count = attitudesCount ?: 0,
+                    accountKey = accountKey,
                 ),
                 ActionMenu.Group(
                     displayItem =
                         ActionMenu.Item(
-                            icon = ActionMenu.Item.Icon.More,
+                            icon = UiIcon.More,
+                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
+                        ),
+                    actions =
+                        listOfNotNull(
+                            ActionMenu.vvoFavorite(
+                                statusKey = statusKey,
+                                favorited = favorited == true,
+                                accountKey = accountKey,
+                            ),
+                            ActionMenu.Item(
+                                icon = UiIcon.Share,
+                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
+                                clickEvent =
+                                    ClickEvent.Deeplink(
+                                        DeeplinkRoute.Status.ShareSheet(
+                                            statusKey = statusKey,
+                                            accountType = AccountType.Specific(accountKey),
+                                            shareUrl = url,
+                                        ),
+                                    ),
+                            ),
+                            if (isFromMe) {
+                                ActionMenu.Item(
+                                    icon = UiIcon.Delete,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                    color = ActionMenu.Item.Color.Red,
+                                    clickEvent =
+                                        ClickEvent.Deeplink(
+                                            DeeplinkRoute.Status.DeleteConfirm(
+                                                accountType = AccountType.Specific(accountKey),
+                                                statusKey = statusKey,
+                                            ),
+                                        ),
+                                )
+                            } else {
+                                null
+                            },
+                            *userActionsMenu(
+                                accountKey = accountKey,
+                                userKey = user?.key ?: statusKey,
+                                handle = user?.handle ?: "",
+                            ).toTypedArray(),
+                        ).toImmutableList(),
+                ),
+            ).toImmutableList(),
+        poll = null,
+        statusKey = statusKey,
+        card = null,
+        createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
+        clickEvent =
+            ClickEvent.Deeplink(
+                DeeplinkRoute.Status.VVOStatus(
+                    statusKey = statusKey,
+                    accountType = AccountType.Specific(accountKey),
+                ),
+            ),
+        accountType = AccountType.Specific(accountKey),
+    )
+}
+
+private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
+    val statusKey = MicroBlogKey(id = id, host = vvoHost)
+    val statusMid =
+        status?.mid ?: analysis_extra
+            ?.split('|')
+            ?.mapNotNull {
+                val pair = it.split(':')
+                if (pair.size == 2) pair[0] to pair[1] else null
+            }?.toMap()
+            ?.get("mid")
+    val user = this.user?.render(accountKey)
+    val isFromMe = user?.key == accountKey
+    val displayUser = user?.copy(handle = source ?: user.handle)
+    val url =
+        buildString {
+            append("https://$vvoHostLong/")
+            append(this@renderStatusV2.user?.id)
+            append('/')
+            append(bid)
+        }
+    val media =
+        listOfNotNull(
+            pic?.let {
+                val imageUrl = it.large?.url ?: it.url
+                val previewUrl = it.url ?: imageUrl
+                if (!imageUrl.isNullOrEmpty() && !previewUrl.isNullOrEmpty()) {
+                    UiMedia.Image(
+                        url = imageUrl,
+                        width = it.large?.geoValue?.widthValue ?: it.geoValue?.widthValue ?: 0f,
+                        height = it.large?.geoValue?.heightValue ?: it.geoValue?.heightValue ?: 0f,
+                        previewUrl = previewUrl,
+                        description = null,
+                        sensitive = false,
+                    )
+                } else {
+                    null
+                }
+            },
+        )
+
+    val quote =
+        commentList
+            ?.map {
+                it.renderStatusV2(accountKey).copy(
+                    clickEvent =
+                        ClickEvent.Deeplink(
+                            DeeplinkRoute.Status.VVOComment(
+                                commentKey = statusKey,
+                                accountType = AccountType.Specific(accountKey),
+                            ),
+                        ),
+                )
+            }?.toImmutableList()
+            ?: listOfNotNull(status?.renderStatusV2(accountKey)).toImmutableList()
+
+    return UiTimelineV2.Post(
+        platformType = PlatformType.VVo,
+        images = media.toImmutableList(),
+        sensitive = false,
+        contentWarning = null,
+        user = displayUser,
+        quote = quote,
+        content = renderVVOText(text.orEmpty(), accountKey).toUi(),
+        actions =
+            listOfNotNull(
+                statusMid?.let {
+                    ActionMenu.Item(
+                        icon = UiIcon.Comment,
+                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Comment),
+                        count = UiNumber(totalNumber ?: 0),
+                        clickEvent =
+                            ClickEvent.Deeplink(
+                                DeeplinkRoute.Compose.VVOReplyComment(
+                                    accountKey = accountKey,
+                                    replyTo = statusKey,
+                                    rootId = statusMid,
+                                ),
+                            ),
+                    )
+                },
+                ActionMenu.vvoLikeComment(
+                    statusKey = statusKey,
+                    liked = liked == true,
+                    count = likeCount ?: 0,
+                    accountKey = accountKey,
+                ),
+                ActionMenu.Group(
+                    displayItem =
+                        ActionMenu.Item(
+                            icon = UiIcon.More,
                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                         ),
                     actions =
                         listOfNotNull(
                             ActionMenu.Item(
-                                icon = if (favorited == true) ActionMenu.Item.Icon.Unbookmark else ActionMenu.Item.Icon.Bookmark,
-                                text =
-                                    ActionMenu.Item.Text.Localized(
-                                        if (favorited ==
-                                            true
-                                        ) {
-                                            ActionMenu.Item.Text.Localized.Type.Unbookmark
-                                        } else {
-                                            ActionMenu.Item.Text.Localized.Type.Bookmark
-                                        },
-                                    ),
-                                count = UiNumber(0),
-                                onClicked = {
-                                    event.favorite(statusKey, favorited ?: false)
-                                },
-                            ),
-                            ActionMenu.Item(
-                                icon = ActionMenu.Item.Icon.Share,
+                                icon = UiIcon.Share,
                                 text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                onClicked = {
-                                    launcher.launch(
-                                        DeeplinkRoute.Status
-                                            .ShareSheet(
-                                                statusKey = statusKey,
-                                                accountType = AccountType.Specific(accountKey),
-                                                shareUrl = url,
-                                            ).toUri(),
-                                    )
-                                },
+                                clickEvent =
+                                    ClickEvent.Deeplink(
+                                        DeeplinkRoute.Status.ShareSheet(
+                                            statusKey = statusKey,
+                                            accountType = AccountType.Specific(accountKey),
+                                            shareUrl = url,
+                                        ),
+                                    ),
                             ),
                             if (isFromMe) {
                                 ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Delete,
+                                    icon = UiIcon.Delete,
                                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
                                     color = ActionMenu.Item.Color.Red,
-                                    onClicked = {
-                                        launcher.launch(
-                                            DeeplinkRoute.Status
-                                                .DeleteConfirm(
-                                                    accountType = AccountType.Specific(accountKey),
-                                                    statusKey = statusKey,
-                                                ).toUri(),
-                                        )
-                                    },
+                                    clickEvent =
+                                        ClickEvent.Deeplink(
+                                            DeeplinkRoute.Status.DeleteConfirm(
+                                                accountType = AccountType.Specific(accountKey),
+                                                statusKey = statusKey,
+                                            ),
+                                        ),
                                 )
                             } else {
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Report,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
-                                    color = ActionMenu.Item.Color.Red,
-                                    onClicked = {
-                                        // TODO: Report
-                                    },
-                                )
+                                null
                             },
                         ).toImmutableList(),
                 ),
             ).toImmutableList(),
         poll = null,
+        statusKey = statusKey,
+        card = null,
         createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
-        sensitive = false,
-        onClicked = {
-            launcher.launch(
-                DeeplinkRoute.Status
-                    .VVOStatus(
-                        statusKey = statusKey,
+        clickEvent =
+            ClickEvent.Deeplink(
+                if (status != null) {
+                    DeeplinkRoute.Status.VVOStatus(
+                        statusKey = status.renderStatusV2(accountKey).statusKey,
                         accountType = AccountType.Specific(accountKey),
-                    ).toUri(),
-            )
-        },
-        platformType = PlatformType.VVo,
-        onMediaClicked = { media, index ->
-            launcher.launch(
-                DeeplinkRoute.Media
-                    .StatusMedia(
+                    )
+                } else {
+                    DeeplinkRoute.Status.VVOComment(
+                        commentKey = statusKey,
                         accountType = AccountType.Specific(accountKey),
-                        statusKey = statusKey,
-                        index = index,
-                        preview =
-                            when (media) {
-                                is UiMedia.Image -> media.previewUrl
-                                is UiMedia.Video -> media.thumbnailUrl
-                                is UiMedia.Audio -> null
-                                is UiMedia.Gif -> media.previewUrl
-                            },
-                    ).toUri(),
-            )
-        },
-        url = url,
+                    )
+                },
+            ),
+        accountType = AccountType.Specific(accountKey),
     )
 }
 
@@ -376,266 +475,91 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         platformType = PlatformType.VVo,
         clickEvent =
             ClickEvent.Deeplink(
-                DeeplinkRoute.Profile.User(accountType = AccountType.Specific(accountKey), userKey = userKey).toUri(),
+                DeeplinkRoute.Profile.User(
+                    accountType = AccountType.Specific(accountKey),
+                    userKey = userKey,
+                ),
             ),
     )
 }
 
-internal fun Comment.render(
+internal fun ActionMenu.Companion.vvoLike(
+    statusKey: MicroBlogKey,
+    liked: Boolean,
+    count: Long,
     accountKey: MicroBlogKey,
-    event: StatusEvent.VVO,
-): UiTimeline =
-    UiTimeline(
-        topMessage = null,
-        content = renderStatus(accountKey, event),
-    )
-
-internal fun Comment.renderStatus(
-    accountKey: MicroBlogKey,
-    event: StatusEvent.VVO,
-): UiTimeline.ItemContent.Status {
-    val element = renderVVOText(text.orEmpty(), accountKey)
-    val rawUser = this.user?.render(accountKey)
-    val isFromMe = rawUser?.key == accountKey
-    val displayUser =
-        rawUser?.copy(
-            handle = source ?: rawUser.handle,
-        )
-    val statusKey =
-        MicroBlogKey(
-            id = id,
-            host = vvoHost,
-        )
-    val statusMid =
-        status?.mid ?: run {
-            analysis_extra
-                ?.split('|')
-                ?.mapNotNull {
-                    val pair = it.split(':')
-                    if (pair.size == 2) {
-                        pair[0] to pair[1]
-                    } else {
-                        null
-                    }
-                }?.toMap()
-                ?.get("mid")
-        }
-    val url =
-        buildString {
-            append("https://$vvoHostLong/")
-            append(user?.id)
-            append('/')
-            append(bid)
-        }
-
-    return UiTimeline.ItemContent.Status(
-        statusKey = statusKey,
-        content = element.toUi(),
-        user = displayUser,
-        quote =
-            commentList
-                ?.map {
-                    it
-                        .renderStatus(
-                            accountKey,
-                            event,
-                        ).copy(
-                            onClicked = {
-                                launcher.launch(
-                                    DeeplinkRoute.Status
-                                        .VVOComment(
-                                            commentKey = statusKey,
-                                            accountType = AccountType.Specific(accountKey),
-                                        ).toUri(),
-                                )
-                            },
-                        )
-                }?.toImmutableList() ?: listOfNotNull(status)
-                .map {
-                    it.renderStatus(
-                        accountKey,
-                        event,
-                    )
-                }.toImmutableList(),
-        card = null,
-        contentWarning = null,
-        images =
-            listOfNotNull(
-                pic?.let {
-                    val url = it.large?.url ?: it.url
-                    val previewUrl = it.url ?: url
-                    if (!url.isNullOrEmpty() && !previewUrl.isNullOrEmpty()) {
-                        UiMedia.Image(
-                            url = url,
-                            width = it.large?.geoValue?.widthValue ?: it.geoValue?.widthValue ?: 0f,
-                            height = it.large?.geoValue?.heightValue ?: it.geoValue?.heightValue ?: 0f,
-                            previewUrl = previewUrl,
-                            description = null,
-                            sensitive = false,
-                        )
-                    } else {
-                        null
-                    }
-                },
-            ).toImmutableList(),
-        poll = null,
-        actions =
-            listOfNotNull(
-                statusMid?.let {
-                    ActionMenu.Item(
-                        icon = ActionMenu.Item.Icon.Comment,
-                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Comment),
-                        count = UiNumber(totalNumber ?: 0),
-                        onClicked = {
-                            launcher.launch(
-                                DeeplinkRoute.Compose
-                                    .VVOReplyComment(
-                                        accountKey = accountKey,
-                                        replyTo = statusKey,
-                                        rootId = statusMid,
-                                    ).toUri(),
-                            )
-                        },
-                    )
-                },
-                ActionMenu.Item(
-                    icon = if (liked == true) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
-                    text =
-                        ActionMenu.Item.Text.Localized(
-                            if (liked == true) ActionMenu.Item.Text.Localized.Type.Unlike else ActionMenu.Item.Text.Localized.Type.Like,
-                        ),
-                    count = UiNumber(likeCount ?: 0),
-                    color = if (liked == true) ActionMenu.Item.Color.Red else null,
-                    onClicked = {
-                        event.likeComment(statusKey, liked ?: false)
-                    },
-                ),
-                ActionMenu.Group(
-                    displayItem =
-                        ActionMenu.Item(
-                            icon = ActionMenu.Item.Icon.More,
-                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
-                        ),
-                    actions =
-                        listOfNotNull(
-                            ActionMenu.Item(
-                                icon = ActionMenu.Item.Icon.Share,
-                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                onClicked = {
-                                    launcher.launch(
-                                        DeeplinkRoute.Status
-                                            .ShareSheet(
-                                                statusKey = statusKey,
-                                                accountType = AccountType.Specific(accountKey),
-                                                shareUrl = url,
-                                            ).toUri(),
-                                    )
-                                },
-                            ),
-                            if (isFromMe) {
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Delete,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
-                                    color = ActionMenu.Item.Color.Red,
-                                    onClicked = {
-                                        launcher.launch(
-                                            DeeplinkRoute.Status
-                                                .DeleteConfirm(
-                                                    accountType = AccountType.Specific(accountKey),
-                                                    statusKey = statusKey,
-                                                ).toUri(),
-                                        )
-                                    },
-                                )
-                            } else {
-                                ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Report,
-                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
-                                    color = ActionMenu.Item.Color.Red,
-                                    onClicked = {
-                                        // TODO: Report
-                                    },
-                                )
-                            },
-                        ).toImmutableList(),
-                ),
-            ).toImmutableList(),
-        createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
-        sensitive = false,
-        onClicked = {
-            if (status != null) {
-                launcher.launch(
-                    DeeplinkRoute.Status
-                        .VVOStatus(
-                            statusKey = status.renderStatus(accountKey, event).statusKey,
-                            accountType = AccountType.Specific(accountKey),
-                        ).toUri(),
-                )
-            } else {
-                launcher.launch(
-                    DeeplinkRoute.Status
-                        .VVOComment(
-                            commentKey = statusKey,
-                            accountType = AccountType.Specific(accountKey),
-                        ).toUri(),
-                )
-            }
-        },
-        platformType = PlatformType.VVo,
-        onMediaClicked = { media, index ->
-            launcher.launch(
-                DeeplinkRoute.Media
-                    .StatusMedia(
-                        accountType = AccountType.Specific(accountKey),
-                        statusKey = statusKey,
-                        index = index,
-                        preview =
-                            when (media) {
-                                is UiMedia.Image -> media.previewUrl
-                                is UiMedia.Video -> media.thumbnailUrl
-                                is UiMedia.Audio -> null
-                                is UiMedia.Gif -> media.previewUrl
-                            },
-                    ).toUri(),
-            )
-        },
-        url = url,
-    )
-}
-
-internal fun Attitude.render(
-    accountKey: MicroBlogKey,
-    event: StatusEvent.VVO,
-): UiTimeline {
-    val content = status?.renderStatus(accountKey, event)
-    val user = user?.render(accountKey)
-    val userListContent =
-        UiTimeline.ItemContent.UserList(
-            users = listOfNotNull(user).toImmutableList(),
-            status = content,
-        )
-    return UiTimeline(
-        topMessage =
-            UiTimeline.TopMessage(
-                user = user,
-                icon = UiTimeline.TopMessage.Icon.Favourite,
-                type = UiTimeline.TopMessage.MessageType.VVO.Like,
-                onClicked = {
-                    if (user != null) {
-                        launcher.launch(
-                            DeeplinkRoute.Profile
-                                .User(
-                                    accountType = AccountType.Specific(accountKey),
-                                    userKey = user.key,
-                                ).toUri(),
-                        )
-                    }
-                },
-                statusKey = MicroBlogKey(id.toString(), vvoHost),
+): ActionMenu.Item =
+    ActionMenu.Item(
+        updateKey = "vvo_like_$statusKey",
+        icon = if (liked) UiIcon.Unlike else UiIcon.Like,
+        text =
+            ActionMenu.Item.Text.Localized(
+                if (liked) ActionMenu.Item.Text.Localized.Type.Unlike else ActionMenu.Item.Text.Localized.Type.Like,
             ),
-        content = userListContent,
+        count = UiNumber(count),
+        color = if (liked) ActionMenu.Item.Color.Red else null,
+        clickEvent =
+            ClickEvent.event(
+                accountKey,
+                PostEvent.VVO.Like(
+                    postKey = statusKey,
+                    liked = liked,
+                    count = count,
+                    accountKey = accountKey,
+                ),
+            ),
     )
-}
+
+internal fun ActionMenu.Companion.vvoLikeComment(
+    statusKey: MicroBlogKey,
+    liked: Boolean,
+    count: Long,
+    accountKey: MicroBlogKey,
+): ActionMenu.Item =
+    ActionMenu.Item(
+        updateKey = "vvo_like_comment_$statusKey",
+        icon = if (liked) UiIcon.Unlike else UiIcon.Like,
+        text =
+            ActionMenu.Item.Text.Localized(
+                if (liked) ActionMenu.Item.Text.Localized.Type.Unlike else ActionMenu.Item.Text.Localized.Type.Like,
+            ),
+        count = UiNumber(count),
+        color = if (liked) ActionMenu.Item.Color.Red else null,
+        clickEvent =
+            ClickEvent.event(
+                accountKey,
+                PostEvent.VVO.LikeComment(
+                    postKey = statusKey,
+                    liked = liked,
+                    count = count,
+                    accountKey = accountKey,
+                ),
+            ),
+    )
+
+internal fun ActionMenu.Companion.vvoFavorite(
+    statusKey: MicroBlogKey,
+    favorited: Boolean,
+    accountKey: MicroBlogKey,
+): ActionMenu.Item =
+    ActionMenu.Item(
+        updateKey = "vvo_favorite_$statusKey",
+        icon = if (favorited) UiIcon.Unbookmark else UiIcon.Bookmark,
+        text =
+            ActionMenu.Item.Text.Localized(
+                if (favorited) ActionMenu.Item.Text.Localized.Type.Unbookmark else ActionMenu.Item.Text.Localized.Type.Bookmark,
+            ),
+        count = UiNumber(0),
+        clickEvent =
+            ClickEvent.event(
+                accountKey,
+                PostEvent.VVO.Favorite(
+                    postKey = statusKey,
+                    favorited = favorited,
+                    accountKey = accountKey,
+                ),
+            ),
+    )
 
 internal fun renderVVOText(
     text: String,

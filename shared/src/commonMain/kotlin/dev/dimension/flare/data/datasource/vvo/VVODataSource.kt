@@ -1,83 +1,67 @@
 package dev.dimension.flare.data.datasource.vvo
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.Pager
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import dev.dimension.flare.common.CacheData
-import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.VVO
-import dev.dimension.flare.data.database.cache.mapper.toDbUser
-import dev.dimension.flare.data.database.cache.model.DbEmoji
-import dev.dimension.flare.data.database.cache.model.EmojiContent
-import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
+import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
-import dev.dimension.flare.data.datasource.microblog.StatusEvent
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
-import dev.dimension.flare.data.datasource.microblog.pagingConfig
-import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
-import dev.dimension.flare.data.datasource.microblog.timelinePager
+import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.handler.EmojiHandler
+import dev.dimension.flare.data.datasource.microblog.handler.NotificationHandler
+import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
+import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
+import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
+import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
-import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
-import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.time.Clock
 
 @OptIn(ExperimentalPagingApi::class)
 internal class VVODataSource(
     override val accountKey: MicroBlogKey,
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
-    StatusEvent.VVO {
-    private val database: CacheDatabase by inject()
-    private val localFilterRepository: LocalFilterRepository by inject()
-    private val coroutineScope: CoroutineScope by inject()
+    NotificationDataSource,
+    UserDataSource,
+    RelationDataSource,
+    PostDataSource,
+    PostEventHandler.Handler {
     private val accountRepository: AccountRepository by inject()
     private val inAppNotification: InAppNotification by inject()
     private val imageCompressor: ImageCompressor by inject()
@@ -90,66 +74,103 @@ internal class VVODataSource(
         )
     }
 
+    private val loader by lazy {
+        VVOLoader(
+            accountKey = accountKey,
+            service = service,
+        )
+    }
+
+    private val emojiHandler by lazy {
+        EmojiHandler(
+            host = accountKey.host,
+            loader = loader,
+        )
+    }
+
+    override val notificationHandler by lazy {
+        NotificationHandler(
+            accountKey = accountKey,
+            loader = loader,
+        )
+    }
+
+    override val userHandler by lazy {
+        UserHandler(
+            accountKey = accountKey,
+            loader = loader,
+        )
+    }
+
+    override val postHandler by lazy {
+        PostHandler(
+            accountType = AccountType.Specific(accountKey),
+            loader = loader,
+        )
+    }
+
+    override val relationHandler by lazy {
+        RelationHandler(
+            dataSource = loader,
+        )
+    }
+
+    override val postEventHandler by lazy {
+        PostEventHandler(
+            accountKey = accountKey,
+            handler = this,
+        )
+    }
+
+    override suspend fun handle(
+        event: PostEvent,
+        updater: DatabaseUpdater,
+    ) {
+        require(event is PostEvent.VVO)
+        when (event) {
+            is PostEvent.VVO.Favorite -> favorite(event)
+            is PostEvent.VVO.Like -> like(event)
+            is PostEvent.VVO.LikeComment -> likeComment(event)
+        }
+    }
+
     override fun homeTimeline() =
         HomeTimelineRemoteMediator(
-            service,
-            database,
-            accountKey,
-            inAppNotification,
+            service = service,
+            accountKey = accountKey,
+            inAppNotification = inAppNotification,
         )
 
-    override fun notification(
-        type: NotificationFilter,
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
+    override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
         when (type) {
-            NotificationFilter.All -> TODO()
-            NotificationFilter.Mention ->
-                timelinePager(
-                    pageSize = pageSize,
-                    database = database,
-                    scope = scope,
-                    filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                    accountRepository = accountRepository,
-                    mediator =
-                        MentionRemoteMediator(
-                            service,
-                            database,
-                            accountKey,
-                            onClearMarker = {
-                                MemCacheable.update(notificationMarkerMentionKey, 0)
-                            },
-                        ),
+            NotificationFilter.All,
+            NotificationFilter.Mention,
+            ->
+                MentionRemoteMediator(
+                    service = service,
+                    accountKey = accountKey,
+                    onClearMarker = {
+                        MemCacheable.update(notificationMarkerMentionKey, 0)
+                    },
                 )
 
             NotificationFilter.Comment ->
-                Pager(
-                    config = pagingConfig,
-                ) {
-                    CommentPagingSource(
-                        service = service,
-                        accountKey = accountKey,
-                        event = this,
-                        onClearMarker = {
-                            MemCacheable.update(notificationMarkerCommentKey, 0)
-                        },
-                    )
-                }.flow.cachedIn(scope)
+                CommentPagingSource(
+                    service = service,
+                    accountKey = accountKey,
+                    onClearMarker = {
+                        MemCacheable.update(notificationMarkerCommentKey, 0)
+                    },
+                )
 
             NotificationFilter.Like ->
-                Pager(
-                    config = pagingConfig,
-                ) {
-                    LikePagingSource(
-                        service = service,
-                        accountKey = accountKey,
-                        event = this,
-                        onClearMarker = {
-                            MemCacheable.update(notificationMarkerLikeKey, 0)
-                        },
-                    )
-                }.flow.cachedIn(scope)
+                LikePagingSource(
+                    service = service,
+                    accountKey = accountKey,
+                    onClearMarker = {
+                        MemCacheable.update(notificationMarkerLikeKey, 0)
+                    },
+                )
         }
 
     override val supportedNotificationFilter: List<NotificationFilter>
@@ -160,210 +181,118 @@ internal class VVODataSource(
                 NotificationFilter.Like,
             )
 
-    override fun userByAcct(acct: String): CacheData<UiProfile> {
-        val (name, host) = MicroBlogKey.valueOf(acct.removePrefix("@"))
-        return Cacheable(
-            fetchSource = {
-                val config = service.config()
-                val uid = service.getUid(name)
-                requireNotNull(uid) { "user not found" }
-                val st = config.data?.st
-                requireNotNull(st) { "st is null" }
-                val profile = service.profileInfo(uid, st)
-                val user = profile.data?.user?.toDbUser()
-                requireNotNull(user) { "user not found" }
-                database.userDao().insert(user)
-            },
-            cacheSource = {
-                database
-                    .userDao()
-                    .findByHandleAndHost(name, host, PlatformType.VVo)
-                    .distinctUntilChanged()
-                    .mapNotNull { it?.render(accountKey) }
-            },
-        )
-    }
-
-    override fun userById(id: String): CacheData<UiProfile> {
-        val userKey = MicroBlogKey(id, accountKey.host)
-        return Cacheable(
-            fetchSource = {
-                val config = service.config()
-                if (config.data?.login != true) {
-                    throw LoginExpiredException(
-                        accountKey = accountKey,
-                        platformType = PlatformType.VVo,
-                    )
-                }
-                val st = config.data.st
-                requireNotNull(st) { "st is null" }
-                val profile = service.profileInfo(id, st)
-                val user = profile.data?.user?.toDbUser()
-                requireNotNull(user) { "user not found" }
-                database.userDao().insert(user)
-            },
-            cacheSource = {
-                database
-                    .userDao()
-                    .findByKey(userKey)
-                    .distinctUntilChanged()
-                    .mapNotNull { it?.render(accountKey) }
-            },
-        )
-    }
-
-    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> =
-        MemCacheable<UiRelation>(
-            relationKeyWithUserKey(userKey),
-        ) {
-            val config = service.config()
-            if (config.data?.login != true) {
-                throw LoginExpiredException(
-                    accountKey = accountKey,
-                    platformType = PlatformType.VVo,
-                )
-            }
-            val st = config.data.st
-            requireNotNull(st) { "st is null" }
-            val profile = service.profileInfo(userKey.id, st)
-            val user =
-                profile.data
-                    ?.user
-            requireNotNull(user) { "user not found" }
-            UiRelation(
-                following = user.following,
-                isFans = user.followMe ?: false,
-            )
-        }.toUi()
-
     override fun userTimeline(
         userKey: MicroBlogKey,
         mediaOnly: Boolean,
     ) = UserTimelineRemoteMediator(
         userKey = userKey,
         service = service,
-        database = database,
         accountKey = accountKey,
         mediaOnly = mediaOnly,
     )
 
-    override fun context(statusKey: MicroBlogKey): BaseTimelineLoader {
-        TODO("Not yet implemented")
-    }
+    override fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+        object : RemoteLoader<UiTimelineV2> {
+            override suspend fun load(
+                pageSize: Int,
+                request: PagingRequest,
+            ): PagingResult<UiTimelineV2> {
+                when (request) {
+                    is PagingRequest.Prepend,
+                    is PagingRequest.Append,
+                    ->
+                        return PagingResult(
+                            endOfPaginationReached = true,
+                        )
 
-    override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
-        val pagingKey = "status_only_$statusKey"
-        val regex =
-            "\\\$render_data\\s*=\\s*(\\[\\{.*?\\}\\])\\[0\\]\\s*\\|\\|\\s*\\{\\};"
-                .toRegex()
-        return Cacheable(
-            fetchSource = {
-                val response =
-                    service
-                        .getStatusDetail(statusKey.id)
-                        .split("\n")
-                        .joinToString("")
-                val json =
-                    regex
-                        .find(response)
-                        ?.groupValues
-                        ?.get(1)
-                        ?.decodeJson<List<StatusDetailItem>>()
-                        ?: throw Exception("status not found")
-                val item = json.firstOrNull()?.status
-
-                if (item != null) {
-                    VVO.saveStatus(
-                        accountKey = accountKey,
-                        pagingKey = pagingKey,
-                        database = database,
-                        statuses = listOf(item),
-                    )
-                } else {
-                    throw Exception("status not found")
+                    PagingRequest.Refresh -> Unit
                 }
-            },
-            cacheSource = {
-                database
-                    .statusDao()
-                    .get(statusKey, accountType = AccountType.Specific(accountKey))
-                    .distinctUntilChanged()
-                    .mapNotNull { it?.content?.render(this) }
-            },
-        )
-    }
 
-    fun comment(statusKey: MicroBlogKey): CacheData<UiTimeline> {
-        val pagingKey = "comment_only_$statusKey"
-        return Cacheable(
-            fetchSource = {
-                val item =
+                val status = loadStatusDetail(statusKey)
+                val comments =
                     service
-                        .getHotFlowChild(statusKey.id)
-                        .rootComment
-                        ?.firstOrNull()
-                if (item != null) {
-                    // prevent overwrite status with empty quote
-//                    VVO.saveComment(
-//                        accountKey = accountKey,
-//                        pagingKey = pagingKey,
-//                        database = database,
-//                        statuses = listOf(item),
-//                    )
-                } else {
-                    throw Exception("status not found")
-                }
-            },
-            cacheSource = {
-                database
-                    .statusDao()
-                    .get(statusKey, accountType = AccountType.Specific(accountKey))
-                    .distinctUntilChanged()
-                    .mapNotNull { it?.content?.render(event = this) }
-            },
-        )
-    }
+                        .getHotComments(
+                            id = statusKey.id,
+                            mid = statusKey.id,
+                            maxId = null,
+                        ).data
+                        ?.data
+                        .orEmpty()
+                        .map { it.render(accountKey) }
 
-    private suspend fun uploadMedia(
-        fileItem: FileItem,
-        st: String,
-    ): String {
-        val bytes = fileItem.readBytes()
-        val isImage = fileItem.type == FileType.Image
-
-        val finalBytes =
-            if (isImage) {
-                imageCompressor.compress(
-                    imageBytes = bytes,
-                    maxSize = 5 * 1024 * 1024,
-                    maxDimensions = 4096 to 4096,
+                return PagingResult(
+                    endOfPaginationReached = true,
+                    data = listOf(status) + comments,
                 )
-            } else {
-                bytes
             }
-        val response =
-            service.uploadPic(
-                st = st,
-                bytes = finalBytes,
-                filename = fileItem.name ?: "file",
-            )
-        return response.picID ?: throw Exception("upload failed")
-    }
+        }
+
+    override fun searchStatus(query: String) =
+        SearchStatusRemoteMediator(
+            service = service,
+            accountKey = accountKey,
+            query = query,
+        )
+
+    override fun searchUser(query: String): RemoteLoader<UiProfile> =
+        SearchUserPagingSource(
+            service = service,
+            accountKey = accountKey,
+            query = query,
+        )
+
+    override fun discoverUsers(): RemoteLoader<UiProfile> =
+        object : RemoteLoader<UiProfile> {
+            override suspend fun load(
+                pageSize: Int,
+                request: PagingRequest,
+            ): PagingResult<UiProfile> =
+                PagingResult(
+                    endOfPaginationReached = true,
+                )
+        }
+
+    override fun discoverStatuses() =
+        DiscoverStatusRemoteMediator(
+            service = service,
+            accountKey = accountKey,
+        )
+
+    override fun discoverHashtags(): RemoteLoader<UiHashtag> =
+        TrendHashtagPagingSource(
+            accountKey = accountKey,
+            service = service,
+        )
+
+    override fun following(userKey: MicroBlogKey): RemoteLoader<UiProfile> =
+        FollowingPagingSource(
+            service = service,
+            userKey = userKey,
+            accountKey = accountKey,
+        )
+
+    override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> =
+        FansPagingSource(
+            service = service,
+            userKey = userKey,
+            accountKey = accountKey,
+        )
+
+    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
+        persistentListOf(
+            ProfileTab.Timeline(
+                type = ProfileTab.Timeline.Type.Status,
+                loader = userTimeline(userKey, false),
+            ),
+        )
 
     override suspend fun compose(
         data: ComposeData,
         progress: (ComposeProgress) -> Unit,
     ) {
         val maxProgress = data.medias.size + 1
-        val config = service.config()
-        if (config.data?.login != true) {
-            throw LoginExpiredException(
-                accountKey = accountKey,
-                platformType = PlatformType.VVo,
-            )
-        }
-        val st = config.data.st
-        requireNotNull(st) { "st is null" }
+        val st = ensureLogin()
+
         val mediaIds =
             data.medias.mapIndexed { index, (it, _) ->
                 uploadMedia(it, st).also {
@@ -404,76 +333,6 @@ internal class VVODataSource(
         }
     }
 
-    override suspend fun deleteStatus(statusKey: MicroBlogKey) {
-        val config = service.config()
-        if (config.data?.login != true) {
-            throw LoginExpiredException(
-                accountKey = accountKey,
-                platformType = PlatformType.VVo,
-            )
-        }
-        val st = config.data.st
-        requireNotNull(st) { "st is null" }
-        service.deleteStatus(
-            mid = statusKey.id,
-            st = st,
-        )
-        database.connect {
-            database.statusDao().delete(
-                statusKey = statusKey,
-                accountType = AccountType.Specific(accountKey),
-            )
-            database.statusReferenceDao().delete(statusKey)
-            database.pagingTimelineDao().deleteStatus(
-                accountKey = accountKey,
-                statusKey = statusKey,
-            )
-        }
-    }
-
-    override fun searchStatus(query: String) =
-        SearchStatusRemoteMediator(
-            service,
-            database,
-            accountKey,
-            query,
-        )
-
-    override fun searchUser(
-        query: String,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            SearchUserPagingSource(
-                service = service,
-                accountKey = accountKey,
-                query = query,
-            )
-        }.flow
-
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiProfile>> {
-        TODO("Not yet implemented")
-    }
-
-    override fun discoverStatuses() =
-        DiscoverStatusRemoteMediator(
-            service,
-            database,
-            accountKey,
-        )
-
-    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            TrendHashtagPagingSource(
-                accountKey = accountKey,
-                service = service,
-            )
-        }.flow
-
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(2000),
@@ -484,395 +343,142 @@ internal class VVODataSource(
                     altTextMaxLength = -1,
                     allowMediaOnly = false,
                 ),
-            emoji = ComposeConfig.Emoji(emoji = emoji(), mergeTag = "vvo@${accountKey.host}"),
+            emoji = ComposeConfig.Emoji(emoji = emojiHandler.emoji, mergeTag = "vvo@${accountKey.host}"),
         )
 
-    fun emoji(): Cacheable<ImmutableMap<String, ImmutableList<UiEmoji>>> =
-        Cacheable(
-            fetchSource = {
-                val emojis = service.emojis()
-                database
-                    .emojiDao()
-                    .insert(
-                        DbEmoji(
-                            accountKey.host,
-                            EmojiContent.VVO(emojis),
-                        ),
-                    )
-            },
-            cacheSource = {
-                database
-                    .emojiDao()
-                    .get(accountKey.host)
-                    .distinctUntilChanged()
-                    .mapNotNull {
-                        it
-                            ?.toUi()
-                            ?.groupBy { it.category }
-                            ?.map { it.key to it.value.toImmutableList() }
-                            ?.toMap()
-                            ?.toImmutableMap()
-                    }
-            },
-        )
-
-    override suspend fun follow(
-        userKey: MicroBlogKey,
-        relation: UiRelation,
-    ) {
-        if (relation.following) {
-            unfollow(userKey)
+    private suspend fun like(event: PostEvent.VVO.Like) {
+        val st = ensureLogin()
+        if (event.liked) {
+            service.unlikeStatus(id = event.postKey.id, st = st)
         } else {
-            follow(userKey)
+            service.likeStatus(id = event.postKey.id, st = st)
         }
     }
 
-    override fun profileActions(): List<ProfileAction> = emptyList()
-
-    suspend fun follow(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                following = true,
-            )
-        }
-        tryRun {
-            val config = service.config()
-            if (config.data?.login != true) {
-                throw LoginExpiredException(
-                    accountKey = accountKey,
-                    platformType = PlatformType.VVo,
-                )
-            }
-            val st = config.data.st
-            requireNotNull(st) { "st is null" }
-            service.follow(
-                st = st,
-                uid = userKey.id,
-            )
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    following = false,
-                )
-            }
+    private suspend fun likeComment(event: PostEvent.VVO.LikeComment) {
+        val st = ensureLogin()
+        if (event.liked) {
+            service.likesDestroy(id = event.postKey.id, st = st)
+        } else {
+            service.likesUpdate(id = event.postKey.id, st = st)
         }
     }
 
-    suspend fun unfollow(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                following = false,
-            )
-        }
-        tryRun {
-            val config = service.config()
-            if (config.data?.login != true) {
-                throw LoginExpiredException(
-                    accountKey = accountKey,
-                    platformType = PlatformType.VVo,
-                )
-            }
-            val st = config.data.st
-            requireNotNull(st) { "st is null" }
-            service.unfollow(
-                st = st,
-                uid = userKey.id,
-            )
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    following = true,
-                )
-            }
+    private suspend fun favorite(event: PostEvent.VVO.Favorite) {
+        val st = ensureLogin()
+        if (event.favorited) {
+            service.unfavoriteStatus(id = event.postKey.id, st = st)
+        } else {
+            service.favoriteStatus(id = event.postKey.id, st = st)
         }
     }
 
-    fun statusComment(
-        statusKey: MicroBlogKey,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> {
-        val pagingKey = "status_comment_$statusKey"
-        return timelinePager(
-            pageSize = 20,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                StatusCommentRemoteMediator(
-                    service = service,
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                    database = database,
-                ),
+    fun favouriteTimeline() =
+        FavouriteRemoteMediator(
+            service = service,
+            accountKey = accountKey,
         )
-    }
 
-    fun statusRepost(
-        statusKey: MicroBlogKey,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> {
-        val pagingKey = "status_repost_$statusKey"
-        return timelinePager(
-            pageSize = 20,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                StatusRepostRemoteMediator(
-                    service = service,
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                    database = database,
-                ),
+    fun likeRemoteMediator() =
+        LikeRemoteMediator(
+            service = service,
+            accountKey = accountKey,
         )
-    }
 
-    fun commentChild(
-        commentKey: MicroBlogKey,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> {
-        val pagingKey = "comment_child_$commentKey"
-        return timelinePager(
-            pageSize = 20,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                CommentChildRemoteMediator(
-                    service = service,
-                    accountKey = accountKey,
-                    commentKey = commentKey,
-                    database = database,
-                ),
+    fun statusComment(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+        StatusCommentRemoteMediator(
+            service = service,
+            accountKey = accountKey,
+            statusKey = statusKey,
         )
-    }
+
+    fun statusRepost(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+        StatusRepostRemoteMediator(
+            service = service,
+            accountKey = accountKey,
+            statusKey = statusKey,
+        )
+
+    fun commentChild(commentKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+        CommentChildRemoteMediator(
+            service = service,
+            accountKey = accountKey,
+            commentKey = commentKey,
+        )
+
+    fun comment(statusKey: MicroBlogKey): CacheData<UiTimelineV2> =
+        MemCacheable("vvo_comment_$accountKey_$statusKey") {
+            service
+                .getHotFlowChild(statusKey.id)
+                .rootComment
+                ?.firstOrNull()
+                ?.render(accountKey)
+                ?: throw Exception("status not found")
+        }
 
     fun statusExtendedText(statusKey: MicroBlogKey): Flow<UiState<String>> =
         MemCacheable(
             "status_extended_text_$statusKey",
         ) {
-            val config = service.config()
-            if (config.data?.login != true) {
-                throw LoginExpiredException(
-                    accountKey = accountKey,
-                    platformType = PlatformType.VVo,
-                )
-            }
-            val st = config.data.st
-            requireNotNull(st) { "st is null" }
+            val st = ensureLogin()
             val response = service.getStatusExtend(statusKey.id, st)
             response.data?.longTextContent.orEmpty()
         }.toUi()
 
-    override fun like(
-        statusKey: MicroBlogKey,
-        liked: Boolean,
-    ) {
-        coroutineScope.launch {
-            updateStatusUseCase<StatusContent.VVO>(
-                statusKey = statusKey,
-                accountKey = accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(
-                        data =
-                            it.data.copy(
-                                liked = !liked,
-                                attitudesCount =
-                                    if (liked) {
-                                        it.data.attitudesCount?.minus(1)
-                                    } else {
-                                        it.data.attitudesCount?.plus(1)
-                                    },
-                            ),
-                    )
-                },
-            )
+    private suspend fun uploadMedia(
+        fileItem: FileItem,
+        st: String,
+    ): String {
+        val bytes = fileItem.readBytes()
+        val isImage = fileItem.type == FileType.Image
 
-            tryRun {
-                val config = service.config()
-                if (config.data?.login != true) {
-                    throw LoginExpiredException(
-                        accountKey = accountKey,
-                        platformType = PlatformType.VVo,
-                    )
-                }
-                val st = config.data.st
-                requireNotNull(st) { "st is null" }
-                if (liked) {
-                    service.unlikeStatus(id = statusKey.id, st = st)
-                } else {
-                    service.likeStatus(id = statusKey.id, st = st)
-                }
-            }.onFailure {
-                updateStatusUseCase<StatusContent.VVO>(
-                    statusKey = statusKey,
-                    accountKey = accountKey,
-                    cacheDatabase = database,
-                    update = {
-                        it.copy(
-                            data =
-                                it.data.copy(
-                                    liked = liked,
-                                    attitudesCount =
-                                        if (liked) {
-                                            it.data.attitudesCount?.plus(1)
-                                        } else {
-                                            it.data.attitudesCount?.minus(1)
-                                        },
-                                ),
-                        )
-                    },
+        val finalBytes =
+            if (isImage) {
+                imageCompressor.compress(
+                    imageBytes = bytes,
+                    maxSize = 5 * 1024 * 1024,
+                    maxDimensions = 4096 to 4096,
                 )
-            }.onSuccess {
+            } else {
+                bytes
             }
-        }
+        val response =
+            service.uploadPic(
+                st = st,
+                bytes = finalBytes,
+                filename = fileItem.name ?: "file",
+            )
+        return response.picID ?: throw Exception("upload failed")
     }
 
-    override fun likeComment(
-        statusKey: MicroBlogKey,
-        liked: Boolean,
-    ) {
-        coroutineScope.launch {
-            updateStatusUseCase<StatusContent.VVOComment>(
-                statusKey = statusKey,
+    private suspend fun ensureLogin(): String {
+        val config = service.config()
+        if (config.data?.login != true) {
+            throw LoginExpiredException(
                 accountKey = accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(
-                        data =
-                            it.data.copy(
-                                liked = !liked,
-                                likeCount =
-                                    if (liked) {
-                                        it.data.likeCount?.minus(1)
-                                    } else {
-                                        it.data.likeCount?.plus(1)
-                                    },
-                            ),
-                    )
-                },
+                platformType = PlatformType.VVo,
             )
-
-            tryRun {
-                val config = service.config()
-                if (config.data?.login != true) {
-                    throw LoginExpiredException(
-                        accountKey = accountKey,
-                        platformType = PlatformType.VVo,
-                    )
-                }
-                val st = config.data.st
-                requireNotNull(st) { "st is null" }
-                if (liked) {
-                    service.likesDestroy(id = statusKey.id, st = st)
-                } else {
-                    service.likesUpdate(id = statusKey.id, st = st)
-                }
-            }.onFailure {
-                updateStatusUseCase<StatusContent.VVOComment>(
-                    statusKey = statusKey,
-                    accountKey = accountKey,
-                    cacheDatabase = database,
-                    update = {
-                        it.copy(
-                            data =
-                                it.data.copy(
-                                    liked = liked,
-                                    likeCount =
-                                        if (liked) {
-                                            it.data.likeCount?.plus(1)
-                                        } else {
-                                            it.data.likeCount?.minus(1)
-                                        },
-                                ),
-                        )
-                    },
-                )
-            }.onSuccess {
-            }
         }
+        return requireNotNull(config.data.st) { "st is null" }
     }
 
-    override fun favorite(
-        statusKey: MicroBlogKey,
-        favorited: Boolean,
-    ) {
-        coroutineScope.launch {
-            updateStatusUseCase<StatusContent.VVO>(
-                statusKey = statusKey,
-                accountKey = accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(
-                        data =
-                            it.data.copy(
-                                favorited = !favorited,
-                            ),
-                    )
-                },
-            )
+    private suspend fun loadStatusDetail(statusKey: MicroBlogKey): UiTimelineV2 {
+        val regex =
+            "\\\$render_data\\s*=\\s*(\\[\\{.*?\\}\\])\\[0\\]\\s*\\|\\|\\s*\\{\\};".toRegex()
+        val response =
+            service
+                .getStatusDetail(statusKey.id)
+                .split("\n")
+                .joinToString("")
+        val json =
+            regex
+                .find(response)
+                ?.groupValues
+                ?.get(1)
+                ?.decodeJson<List<StatusDetailItem>>()
+                ?: throw Exception("status not found")
 
-            tryRun {
-                val config = service.config()
-                if (config.data?.login != true) {
-                    throw LoginExpiredException(
-                        accountKey = accountKey,
-                        platformType = PlatformType.VVo,
-                    )
-                }
-                val st = config.data.st
-                requireNotNull(st) { "st is null" }
-                if (favorited) {
-                    service.unfavoriteStatus(id = statusKey.id, st = st)
-                } else {
-                    service.favoriteStatus(id = statusKey.id, st = st)
-                }
-            }.onFailure {
-                updateStatusUseCase<StatusContent.VVO>(
-                    statusKey = statusKey,
-                    accountKey = accountKey,
-                    cacheDatabase = database,
-                    update = {
-                        it.copy(
-                            data =
-                                it.data.copy(
-                                    favorited = favorited,
-                                ),
-                        )
-                    },
-                )
-            }.onSuccess {
-                if (it.ok != 1L) {
-                    updateStatusUseCase<StatusContent.VVO>(
-                        statusKey = statusKey,
-                        accountKey = accountKey,
-                        cacheDatabase = database,
-                        update = {
-                            it.copy(
-                                data =
-                                    it.data.copy(
-                                        favorited = favorited,
-                                    ),
-                            )
-                        },
-                    )
-                }
-            }
-        }
+        return json.firstOrNull()?.status?.render(accountKey) ?: throw Exception("status not found")
     }
 
     private val notificationMarkerMentionKey: String
@@ -883,91 +489,4 @@ internal class VVODataSource(
 
     private val notificationMarkerLikeKey: String
         get() = "notificationBadgeCount_like_$accountKey"
-
-    override fun notificationBadgeCount(): CacheData<Int> =
-        Cacheable(
-            fetchSource = {
-                val config = service.config()
-                if (config.data?.login != true) {
-                    throw LoginExpiredException(
-                        accountKey = accountKey,
-                        platformType = PlatformType.VVo,
-                    )
-                }
-                val st = config.data.st
-                requireNotNull(st) { "st is null" }
-                val response =
-                    service.remindUnread(
-                        time = Clock.System.now().toEpochMilliseconds() / 1000,
-                        st = st,
-                    )
-                val mention = response.data?.mentionStatus ?: 0
-                val comment = response.data?.cmt ?: 0
-                val like = response.data?.attitude ?: 0
-
-                MemCacheable.update(notificationMarkerMentionKey, mention)
-                MemCacheable.update(notificationMarkerCommentKey, comment)
-                MemCacheable.update(notificationMarkerLikeKey, like)
-            },
-            cacheSource = {
-                val mentionFlow = MemCacheable.subscribe<Long>(notificationMarkerMentionKey)
-                val commentFlow = MemCacheable.subscribe<Long>(notificationMarkerCommentKey)
-                val likeFlow = MemCacheable.subscribe<Long>(notificationMarkerLikeKey)
-                combine(mentionFlow, commentFlow, likeFlow) { mention, comment, like ->
-                    (mention + comment + like).toInt()
-                }
-            },
-        )
-
-    override fun following(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            FollowingPagingSource(
-                service = service,
-                userKey = userKey,
-                accountKey = accountKey,
-            )
-        }.flow.cachedIn(scope)
-
-    override fun fans(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            FansPagingSource(
-                service = service,
-                userKey = userKey,
-                accountKey = accountKey,
-            )
-        }.flow.cachedIn(scope)
-
-    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
-        persistentListOf(
-            ProfileTab.Timeline(
-                type = ProfileTab.Timeline.Type.Status,
-                loader = userTimeline(userKey, false),
-            ),
-        )
-
-    fun favouriteTimeline() =
-        FavouriteRemoteMediator(
-            service = service,
-            database = database,
-            accountKey = accountKey,
-        )
-
-    fun likeRemoteMediator() =
-        LikeRemoteMediator(
-            service = service,
-            database = database,
-            accountKey = accountKey,
-        )
 }

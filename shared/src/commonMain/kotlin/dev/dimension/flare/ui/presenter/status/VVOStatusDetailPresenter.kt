@@ -4,19 +4,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.Pager
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapper.renderVVOText
@@ -37,13 +39,13 @@ public class VVOStatusDetailPresenter(
 
     @Composable
     override fun body(): VVOStatusDetailState {
-        val scope = rememberCoroutineScope()
         val service = accountServiceProvider(accountType, repository = accountRepository)
         val status =
             service
                 .flatMap {
                     remember(statusKey, accountType) {
-                        it.status(statusKey)
+                        require(it is VVODataSource)
+                        it.postHandler.post(statusKey)
                     }.collectAsState().toUi()
                 }
 
@@ -65,17 +67,13 @@ public class VVOStatusDetailPresenter(
                         is UiState.Error -> item
                         is UiState.Loading -> item
                         is UiState.Success -> {
-                            val content = item.content
-                            if (content is UiTimeline.ItemContent.Status) {
+                            if (item is UiTimelineV2.Post) {
                                 item.copy(
                                     content =
-                                        content.copy(
-                                            content =
-                                                renderVVOText(
-                                                    extendedText.data,
-                                                    service.accountKey,
-                                                ).toUi(),
-                                        ),
+                                        renderVVOText(
+                                            extendedText.data,
+                                            service.accountKey,
+                                        ).toUi(),
                                 )
                             } else {
                                 item
@@ -90,14 +88,17 @@ public class VVOStatusDetailPresenter(
                 .map {
                     require(it is VVODataSource)
                     remember(statusKey, accountType) {
-                        it.statusRepost(statusKey = statusKey, scope = scope).map {
-                            it.map {
-                                it.copy(
-                                    content =
-                                        (it.content as? UiTimeline.ItemContent.Status)?.copy(
-                                            quote = persistentListOf(),
-                                        ) ?: it.content,
-                                )
+                        Pager(config = pagingConfig) {
+                            it.statusRepost(statusKey = statusKey).toPagingSource()
+                        }.flow.map { data ->
+                            data.map { item ->
+                                if (item is UiTimelineV2.Post) {
+                                    item.copy(
+                                        quote = persistentListOf(),
+                                    )
+                                } else {
+                                    item
+                                }
                             }
                         }
                     }.collectAsLazyPagingItems()
@@ -108,7 +109,9 @@ public class VVOStatusDetailPresenter(
                 .map {
                     require(it is VVODataSource)
                     remember(statusKey, accountType) {
-                        it.statusComment(statusKey = statusKey, scope = scope)
+                        Pager(config = pagingConfig) {
+                            it.statusComment(statusKey = statusKey).toPagingSource()
+                        }.flow
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
 
@@ -122,7 +125,7 @@ public class VVOStatusDetailPresenter(
 
 @Immutable
 public interface VVOStatusDetailState {
-    public val status: UiState<UiTimeline>
-    public val comment: PagingState<UiTimeline>
-    public val repost: PagingState<UiTimeline>
+    public val status: UiState<UiTimelineV2>
+    public val comment: PagingState<UiTimelineV2>
+    public val repost: PagingState<UiTimelineV2>
 }

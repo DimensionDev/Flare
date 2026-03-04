@@ -12,6 +12,7 @@ import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 @Serializable
 @Immutable
@@ -24,7 +25,7 @@ public sealed class UiTimelineV2 {
 
     internal abstract val searchText: String?
     internal abstract val statusKey: MicroBlogKey
-    internal abstract val createdAt: UiDateTime
+    public abstract val createdAt: UiDateTime
     internal abstract val accountType: AccountType
 
     public abstract val itemKey: String
@@ -128,6 +129,13 @@ public sealed class UiTimelineV2 {
         override val extraKey: String? = null,
         override val accountType: AccountType,
     ) : UiTimelineV2() {
+        val actualCreatedAt: UiDateTime? by lazy {
+            if (createdAt.value == Instant.fromEpochMilliseconds(0L)) {
+                null
+            } else {
+                createdAt
+            }
+        }
         override val statusKey: MicroBlogKey = MicroBlogKey.fromRss(url)
         override val searchText: String =
             buildString {

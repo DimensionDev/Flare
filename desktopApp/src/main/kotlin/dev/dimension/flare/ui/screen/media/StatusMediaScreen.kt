@@ -78,7 +78,7 @@ import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.getFileName
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
@@ -581,7 +581,7 @@ private fun presenter(
 
     val medias =
         state.status.map {
-            (it.content as? UiTimeline.ItemContent.Status)?.images.orEmpty().toImmutableList()
+            (it as? UiTimelineV2.Post)?.images.orEmpty().toImmutableList()
         }
 
     medias.onSuccess {
@@ -606,11 +606,10 @@ private fun presenter(
         }
 
         fun save(item: UiMedia) {
-            val status = (state.status.takeSuccess()?.content as? UiTimeline.ItemContent.Status)
+            val status = state.status.takeSuccess() as? UiTimelineV2.Post
             if (status != null) {
-                val statusKey = status.statusKey.toString()
-                val userHandle = status.user?.handle ?: "unknown"
-                val fileName = item.getFileName(statusKey, userHandle)
+                val userHandle = status.user?.handle?.canonical ?: "unknown"
+                val fileName = item.getFileName(statusKey.toString(), userHandle)
 
                 when (item) {
                     is UiMedia.Audio -> Unit

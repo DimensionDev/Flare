@@ -37,13 +37,13 @@ import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformText
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
 
 public fun LazyStaggeredGridScope.status(
-    pagingState: PagingState<UiTimeline>,
+    pagingState: PagingState<UiTimelineV2>,
     detailStatusKey: MicroBlogKey? = null,
 ): Unit =
     with(pagingState) {
@@ -222,8 +222,7 @@ private fun OnError(
 
 @Composable
 public fun StatusItem(
-    item: UiTimeline?,
-//    event: StatusEvent,
+    item: UiTimelineV2?,
     modifier: Modifier = Modifier,
     detailStatusKey: MicroBlogKey? = null,
     horizontalPadding: Dp = screenHorizontalPadding,

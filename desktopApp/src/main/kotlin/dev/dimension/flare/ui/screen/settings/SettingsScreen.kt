@@ -274,7 +274,7 @@ internal fun SettingsScreen(
                             AvatarComponent(data = activeAccount.avatar, size = 24.dp)
                         },
                         caption = {
-                            Text(text = activeAccount.handle)
+                            Text(text = activeAccount.handle.canonical)
                         },
                     ) {
                         state.accountState.accounts.onSuccess { accounts ->

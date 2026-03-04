@@ -1,13 +1,11 @@
 package dev.dimension.flare.data.datasource.misskey
 
 import dev.dimension.flare.data.datasource.microblog.loader.EmojiLoader
-import dev.dimension.flare.data.datasource.microblog.loader.NotificationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
-import dev.dimension.flare.data.network.misskey.api.model.INotificationsRequest
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 import dev.dimension.flare.data.network.misskey.api.model.MuteCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
@@ -27,19 +25,10 @@ import kotlinx.collections.immutable.toImmutableMap
 internal class MisskeyLoader(
     override val accountKey: MicroBlogKey,
     private val service: MisskeyService,
-) : NotificationLoader,
-    UserLoader,
+) : UserLoader,
     PostLoader,
     RelationLoader,
     EmojiLoader {
-    override suspend fun notificationBadgeCount(): Int =
-        service
-            .iNotifications(
-                INotificationsRequest(
-                    limit = 1,
-                ),
-            ).size
-
     override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile =
         service
             .usersShow(

@@ -122,7 +122,6 @@ import dev.dimension.flare.compose.ui.user_unmute
 import dev.dimension.flare.compose.ui.vote
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.model.PostActionStyle
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -147,10 +146,10 @@ import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.icons.Misskey
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -164,7 +163,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 public fun CommonStatusComponent(
-    item: UiTimeline.ItemContent.Status,
+    item: UiTimelineV2.Post,
     modifier: Modifier = Modifier,
     isDetail: Boolean = false,
     isQuote: Boolean = false,
@@ -219,18 +218,14 @@ public fun CommonStatusComponent(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        when (val content = item.topEndContent) {
-                            is UiTimeline.ItemContent.Status.TopEndContent.Visibility -> {
-                                StatusVisibilityComponent(
-                                    visibility = content.visibility,
-                                    modifier =
-                                        Modifier
-                                            .size(PlatformTheme.typography.caption.fontSize.value.dp),
-                                    tint = PlatformTheme.colorScheme.caption,
-                                )
-                            }
-
-                            null -> Unit
+                        item.visibility?.let {
+                            StatusVisibilityComponent(
+                                visibility = it,
+                                modifier =
+                                    Modifier
+                                        .size(PlatformTheme.typography.caption.fontSize.value.dp),
+                                tint = PlatformTheme.colorScheme.caption,
+                            )
                         }
                         if (appearanceSettings.showPlatformLogo) {
                             val icon =
@@ -312,15 +307,11 @@ public fun CommonStatusComponent(
                     }
                 }
             }
-            when (val content = item.aboveTextContent) {
-                is UiTimeline.ItemContent.Status.AboveTextContent.ReplyTo -> {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    StatusReplyComponent(
-                        replyHandle = content.handle,
-                    )
-                }
-
-                null -> Unit
+            item.replyToHandle?.let { replyHandle ->
+                Spacer(modifier = Modifier.height(4.dp))
+                StatusReplyComponent(
+                    replyHandle = replyHandle,
+                )
             }
             if (isDetail) {
                 SelectionContainer {
@@ -350,7 +341,7 @@ public fun CommonStatusComponent(
 
             if (isDetail && !item.content.isEmpty && appearanceSettings.showTranslateButton) {
                 TranslationComponent(
-                    statusKey = item.statusKey,
+                    statusKey = item.itemKey,
                     contentWarning = item.contentWarning,
                     rawContent = item.content.innerText,
                     content = item.content,
@@ -362,15 +353,7 @@ public fun CommonStatusComponent(
                 StatusMediasComponent(
                     item,
                     onMediaClick = { media ->
-                        item.onMediaClicked.invoke(
-                            ClickContext(
-                                launcher = {
-                                    uriHandler.openUri(it)
-                                },
-                            ),
-                            media,
-                            item.images.indexOf(media),
-                        )
+                        uriHandler.openUri(media.url)
                     },
                 )
             }
@@ -395,19 +378,11 @@ public fun CommonStatusComponent(
                 )
             }
 
-            if (!isQuote) {
-                when (val content = item.bottomContent) {
-                    is UiTimeline.ItemContent.Status.BottomContent.Reaction -> {
-                        if (content.emojiReactions.isNotEmpty() || content.channel != null) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            StatusReactionComponent(
-                                data = content,
-                            )
-                        }
-                    }
-
-                    null -> Unit
-                }
+            if (!isQuote && (item.emojiReactions.isNotEmpty() || item.sourceChannel != null)) {
+                Spacer(modifier = Modifier.height(4.dp))
+                StatusReactionComponent(
+                    data = item,
+                )
             }
 
             if (isDetail) {
@@ -453,7 +428,7 @@ public fun CommonStatusComponent(
 
 @Composable
 internal fun StatusMediasComponent(
-    item: UiTimeline.ItemContent.Status,
+    item: UiTimelineV2.Post,
     onMediaClick: (UiMedia) -> Unit,
 ) {
     val appearanceSettings = LocalComponentAppearance.current
@@ -520,7 +495,7 @@ internal fun StatusMediasComponent(
 
 @Composable
 private fun StatusQuoteComponent(
-    quotes: ImmutableList<UiTimeline.ItemContent.Status>,
+    quotes: ImmutableList<UiTimelineV2.Post>,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -560,14 +535,15 @@ private fun StatusQuoteComponent(
 
 @Composable
 private fun StatusReactionComponent(
-    data: UiTimeline.ItemContent.Status.BottomContent.Reaction,
+    data: UiTimelineV2.Post,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        data.channel?.let { channel ->
+        data.sourceChannel?.let { channel ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -622,7 +598,9 @@ private fun StatusReactionComponent(
                             modifier =
                                 Modifier
                                     .clickable {
-                                        reaction.onClicked.invoke()
+                                        reaction.onClicked.invoke(
+                                            ClickContext(uriHandler::openUri),
+                                        )
                                     }.padding(horizontal = 8.dp, vertical = 4.dp),
                         ) {
                             if (reaction.isUnicode) {
@@ -647,7 +625,7 @@ private fun StatusReactionComponent(
 
 @Composable
 private fun TranslationComponent(
-    statusKey: MicroBlogKey,
+    statusKey: String,
     contentWarning: UiRichText?,
     rawContent: String,
     content: UiRichText,
@@ -843,44 +821,6 @@ internal fun StatusActions(
                                     StatusActionItemMenu(subActions, closeMenu, launcher)
                                 }
 
-                                is ActionMenu.AsyncActionMenuItem -> {
-                                    if (isMenuShown) {
-                                        val state by subActions.flow.collectAsUiState()
-                                        state
-                                            .onSuccess {
-                                                StatusActionItemMenu(it, closeMenu, launcher)
-                                            }.onLoading {
-                                                PlatformDropdownMenuItem(
-                                                    text = {
-                                                        PlatformText(
-                                                            text = "Loading",
-                                                            modifier =
-                                                                Modifier.placeholder(
-                                                                    true,
-                                                                    color = PlatformTheme.colorScheme.cardAlt,
-                                                                ),
-                                                        )
-                                                    },
-                                                    leadingIcon = {
-                                                        FAIcon(
-                                                            imageVector = FontAwesomeIcons.Solid.Ellipsis,
-                                                            contentDescription = "Loading",
-                                                            modifier =
-                                                                Modifier
-                                                                    .size(PlatformTextStyle.current.fontSize.value.dp + 2.dp)
-                                                                    .placeholder(
-                                                                        true,
-                                                                        color = PlatformTheme.colorScheme.cardAlt,
-                                                                    ),
-                                                        )
-                                                    },
-                                                    onClick = {
-                                                    },
-                                                )
-                                            }
-                                    }
-                                }
-
                                 // nested group is not supported
                                 is ActionMenu.Group -> Unit
                                 ActionMenu.Divider -> PlatformDropdownMenuDivider()
@@ -896,7 +836,7 @@ internal fun StatusActions(
                         color = action.color?.toComposeColor() ?: PlatformContentColor.current,
                         withTextMinWidth = index != items.lastIndex,
                         onClicked = {
-                            action.onClicked?.let { onClick ->
+                            action.onClicked.let { onClick ->
                                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
                                 onClick.invoke(
                                     ClickContext(
@@ -910,8 +850,6 @@ internal fun StatusActions(
                     )
                 }
 
-                // async action item is only supported in group
-                is ActionMenu.AsyncActionMenuItem -> Unit
                 // divider is only supported in group
                 ActionMenu.Divider -> Unit
             }
@@ -946,7 +884,7 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
         },
         onClick = {
             closeMenu.invoke()
-            subActions.onClicked?.invoke(
+            subActions.onClicked.invoke(
                 ClickContext(
                     launcher = {
                         launcher.openUri(it)
@@ -988,6 +926,8 @@ private fun ActionMenu.Item.Text.asString(): String =
                     ActionMenu.Item.Text.Localized.Type.UnBlock -> Res.string.user_unblock
                     ActionMenu.Item.Text.Localized.Type.BlockWithHandleParameter -> Res.string.user_block_with_parameter
                     ActionMenu.Item.Text.Localized.Type.MuteWithHandleParameter -> Res.string.user_mute_with_parameter
+                    ActionMenu.Item.Text.Localized.Type.AcceptFollowRequest -> Res.string.more
+                    ActionMenu.Item.Text.Localized.Type.RejectFollowRequest -> Res.string.more
                 }
             stringResource(resource, *parameters.toTypedArray())
         }
@@ -1025,6 +965,7 @@ private fun UiIcon.toImageVector(): ImageVector =
         UiIcon.UnMute -> FontAwesomeIcons.Solid.VolumeXmark
         UiIcon.Block -> FontAwesomeIcons.Solid.UserSlash
         UiIcon.UnBlock -> FontAwesomeIcons.Solid.UserSlash
+        else -> FontAwesomeIcons.Solid.Ellipsis
     }
 
 @Composable
@@ -1204,10 +1145,14 @@ private fun StatusPollComponent(
             }
         }
         if (poll.canVote) {
+            val uriHandler = LocalUriHandler.current
             PlatformFilledTonalButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    poll.onVote.invoke(selectedOptions.toImmutableList())
+                    poll.onVote.invoke(
+                        ClickContext(launcher = uriHandler::openUri),
+                        selectedOptions.toImmutableList(),
+                    )
                 },
             ) {
                 PlatformText(

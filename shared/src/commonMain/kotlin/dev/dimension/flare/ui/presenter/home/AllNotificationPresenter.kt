@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -68,21 +69,39 @@ public class AllNotificationPresenter :
 
     private val accountsNotificationFlow by lazy {
         accountRepository.allAccounts
-            .map {
-                it.map {
-                    combine(
-                        (it.dataSource as UserDataSource).userHandler.userById(it.accountKey.id).data,
-                        (it.dataSource as NotificationDataSource).notificationHandler.notificationBadgeCount.data,
-                    ) { user, badge ->
-                        if (user is CacheState.Success) {
-                            user.data to
-                                if (badge is CacheState.Success) {
-                                    badge.data
+            .map { accounts ->
+                accounts.map { account ->
+                    when (val dataSource = account.dataSource) {
+                        !is UserDataSource -> {
+                            flowOf(null)
+                        }
+
+                        !is NotificationDataSource -> {
+                            dataSource.userHandler.userById(account.accountKey.id).data.map {
+                                if (it is CacheState.Success) {
+                                    it.data to 0
                                 } else {
-                                    0
+                                    null
                                 }
-                        } else {
-                            null
+                            }
+                        }
+
+                        else -> {
+                            combine(
+                                dataSource.userHandler.userById(account.accountKey.id).data,
+                                dataSource.notificationHandler.notificationBadgeCount.data,
+                            ) { user, badge ->
+                                if (user is CacheState.Success) {
+                                    user.data to
+                                        if (badge is CacheState.Success) {
+                                            badge.data
+                                        } else {
+                                            0
+                                        }
+                                } else {
+                                    null
+                                }
+                            }
                         }
                     }
                 }

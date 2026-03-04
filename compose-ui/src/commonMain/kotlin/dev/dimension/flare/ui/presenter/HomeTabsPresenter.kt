@@ -62,7 +62,7 @@ public class HomeTabsPresenter :
                         tabsState.secondaryItems ?: TimelineTabItem.defaultSecondary(account)
                     State.HomeTabState(
                         primary =
-                            TimelineTabItem.default.toImmutableList(),
+                            TimelineTabItem.default(account.accountKey).toImmutableList(),
                         secondary =
                             secondary.toImmutableList(),
                         extraProfileRoute =

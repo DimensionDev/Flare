@@ -17,14 +17,12 @@ import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.ReactionDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
-import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.EmojiHandler
 import dev.dimension.flare.data.datasource.microblog.handler.ListHandler
 import dev.dimension.flare.data.datasource.microblog.handler.ListMemberHandler
-import dev.dimension.flare.data.datasource.microblog.handler.NotificationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
 import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
@@ -74,7 +72,6 @@ internal class MisskeyDataSource(
     override val accountKey: MicroBlogKey,
     private val host: String,
 ) : AuthenticatedMicroblogDataSource,
-    NotificationDataSource,
     UserDataSource,
     PostDataSource,
     KoinComponent,
@@ -105,13 +102,6 @@ internal class MisskeyDataSource(
     private val emojiHandler by lazy {
         EmojiHandler(
             host = accountKey.host,
-            loader = loader,
-        )
-    }
-
-    override val notificationHandler by lazy {
-        NotificationHandler(
-            accountKey = accountKey,
             loader = loader,
         )
     }

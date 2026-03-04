@@ -162,7 +162,7 @@ public data object AllNotificationTabItem : TabItem() {
             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
             icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
         )
-    override val account: AccountType = AccountType.Active
+    override val account: AccountType = AccountType.Guest
     override val key: String = "all_notification"
 
     override fun update(metaData: TabMetaData): TabItem = this
@@ -186,53 +186,75 @@ public sealed class TimelineTabItem : TabItem() {
     public abstract fun createPresenter(): TimelinePresenter
 
     public companion object {
-        public val default: ImmutableList<TabItem> =
-            persistentListOf(
-                HomeTimelineTabItem(
-                    account = AccountType.Active,
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Home),
-                        ),
-                ),
-                AllNotificationTabItem,
-                DiscoverTabItem(
-                    account = AccountType.Active,
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Search),
-                        ),
-                ),
-            )
-        public val mainSidePanel: ImmutableList<TabItem> =
-            persistentListOf(
-                HomeTimelineTabItem(
-                    account = AccountType.Active,
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Home),
-                        ),
-                ),
-                AllNotificationTabItem,
-                RssTabItem(
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Rss),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
-                        ),
-                ),
-                DiscoverTabItem(
-                    account = AccountType.Active,
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Search),
-                        ),
-                ),
-            )
+        public fun default(accountKey: MicroBlogKey?): ImmutableList<TabItem> =
+            accountKey?.let {
+                val accountType = AccountType.Specific(it)
+                persistentListOf(
+                    HomeTimelineTabItem(
+                        account = accountType,
+                        metaData =
+                            TabMetaData(
+                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
+                                icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                            ),
+                    ),
+                    NotificationTabItem(
+                        account = accountType,
+                        metaData =
+                            TabMetaData(
+                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
+                                icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
+                            ),
+                    ),
+                    DiscoverTabItem(
+                        account = accountType,
+                        metaData =
+                            TabMetaData(
+                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
+                                icon = IconType.Material(IconType.Material.MaterialIcon.Search),
+                            ),
+                    ),
+                )
+            } ?: guest
+
+        public fun mainSidePanel(accountKey: MicroBlogKey?): ImmutableList<TabItem> =
+            accountKey?.let {
+                val accountType = AccountType.Specific(it)
+                persistentListOf(
+                    HomeTimelineTabItem(
+                        account = accountType,
+                        metaData =
+                            TabMetaData(
+                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
+                                icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                            ),
+                    ),
+                    NotificationTabItem(
+                        account = accountType,
+                        metaData =
+                            TabMetaData(
+                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
+                                icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
+                            ),
+                    ),
+                    RssTabItem(
+                        metaData =
+                            TabMetaData(
+                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Rss),
+                                icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+                            ),
+                    ),
+                    DiscoverTabItem(
+                        account = accountType,
+                        metaData =
+                            TabMetaData(
+                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
+                                icon = IconType.Material(IconType.Material.MaterialIcon.Search),
+                            ),
+                    ),
+                )
+            } ?: guest
+
         public val guest: ImmutableList<TabItem> =
             persistentListOf(
                 HomeTimelineTabItem(
@@ -1121,7 +1143,7 @@ public data class AllRssTimelineTabItem(
             title = TitleType.Localized(TitleType.Localized.LocalizedKey.AllRssFeeds),
             icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
         ),
-    override val account: AccountType = AccountType.Active,
+    override val account: AccountType = AccountType.Guest,
 ) : TimelineTabItem() {
     override val key: String = "all_rss"
 
@@ -1171,7 +1193,7 @@ public data class DiscoverTabItem(
 @Serializable
 public data object SettingsTabItem : TabItem() {
     override val account: AccountType
-        get() = AccountType.Active
+        get() = AccountType.Guest
     override val key: String
         get() = "settings"
     override val metaData: TabMetaData
@@ -1199,7 +1221,7 @@ public data class DirectMessageTabItem(
 @Serializable
 public data class RssTabItem(
     override val metaData: TabMetaData,
-    override val account: AccountType = AccountType.Active,
+    override val account: AccountType = AccountType.Guest,
 ) : TabItem() {
     override val key: String = "rss"
 

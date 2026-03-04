@@ -131,7 +131,7 @@ public fun LazyListScope.dmList(
                                     )
                                     if (item.users.size == 1) {
                                         PlatformText(
-                                            text = user.handle,
+                                            text = user.handle.canonical,
                                             style = PlatformTheme.typography.caption,
                                             color = PlatformTheme.colorScheme.caption,
                                             maxLines = 1,

@@ -144,7 +144,7 @@ internal fun AddTabDialog(
                                         overflow = TextOverflow.Ellipsis,
                                     )
                                     Text(
-                                        text = tab.profile.handle,
+                                        text = tab.profile.handle.canonical,
                                         style = FluentTheme.typography.caption,
                                         color =
                                             if (pagerState.currentPage == index + 1) {

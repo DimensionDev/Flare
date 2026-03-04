@@ -55,7 +55,7 @@ import dev.dimension.flare.ui.component.floatingToolbarVerticalNestedScroll
 import dev.dimension.flare.ui.component.rememberPullToRefreshState
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.TimelineItemPresenterWithLazyListState
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.launch
@@ -142,7 +142,7 @@ public fun TimelineItemController(
 
 @Suppress("FunctionName")
 public fun TimelineController(
-    state: ComposeUIStateProxy<PagingState<UiTimeline>>,
+    state: ComposeUIStateProxy<PagingState<UiTimelineV2>>,
     detailStatusKey: MicroBlogKey?,
     topPadding: Int,
     onExpand: () -> Unit,

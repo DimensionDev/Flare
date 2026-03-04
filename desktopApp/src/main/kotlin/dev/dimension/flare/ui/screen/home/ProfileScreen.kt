@@ -60,7 +60,7 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -333,8 +333,7 @@ internal fun ProfileScreen(
                                                     vertical = 4.dp,
                                                 ).clipToBounds()
                                                 .clickable {
-                                                    val content = item.status.content
-                                                    if (content is UiTimeline.ItemContent.Status) {
+                                                    if (item.status is UiTimelineV2.Post) {
 //                                                onItemClicked(
 //                                                    content.statusKey,
 //                                                    item.index,
@@ -481,7 +480,7 @@ private fun presenter(
 private sealed interface ProfileTabItem {
     data class Timeline(
         val type: ProfileTab.Timeline.Type,
-        val data: PagingState<UiTimeline>,
+        val data: PagingState<UiTimelineV2>,
     ) : ProfileTabItem
 
     data class Media(

@@ -29,8 +29,8 @@ public class AllNotificationBadgePresenter :
     private val allBadgeFlow by lazy {
         accountRepository.allAccounts
             .map {
-                it.map {
-                    (it.dataSource as NotificationDataSource).notificationHandler.notificationBadgeCount
+                it.map { it.dataSource }.filterIsInstance<NotificationDataSource>().map {
+                    it.notificationHandler.notificationBadgeCount
                 }
             }
     }

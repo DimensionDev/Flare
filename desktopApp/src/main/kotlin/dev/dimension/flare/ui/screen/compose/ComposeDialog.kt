@@ -98,7 +98,7 @@ import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onError
@@ -236,7 +236,7 @@ fun ComposeDialog(
                                 },
                                 content = {
                                     AvatarComponent(it.avatar, size = 24.dp)
-                                    Text(it.handle)
+                                    Text(it.handle.canonical)
                                 },
                             )
                         }
@@ -250,7 +250,7 @@ fun ComposeDialog(
                                         user.onSuccess { data ->
                                             MenuFlyoutItem(
                                                 text = {
-                                                    Text(text = data.handle)
+                                                    Text(text = data.handle.canonical)
                                                 },
                                                 onClick = {
                                                     state.state.selectAccount(account)
@@ -600,8 +600,8 @@ fun ComposeDialog(
 
             state.state.replyState?.let { replyState ->
                 replyState.onSuccess { state ->
-                    val content = state.content
-                    if (content is UiTimeline.ItemContent.Status) {
+                    val content = state as? UiTimelineV2.Post
+                    if (content is UiTimelineV2.Post) {
                         Card(
                             modifier =
                                 Modifier

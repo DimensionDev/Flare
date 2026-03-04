@@ -63,8 +63,12 @@ public abstract class TimelinePresenter :
                 }.flatMapLatest { pager ->
                     filterFlow.map { filterList ->
                         pager.filter { item ->
-                            filterList.any { filter ->
-                                item.searchText.orEmpty().contains(filter, ignoreCase = true)
+                            if (filterList.isEmpty()) {
+                                true
+                            } else {
+                                !filterList.any { filter ->
+                                    item.searchText.orEmpty().contains(filter, ignoreCase = true)
+                                }
                             }
                         }
                     }

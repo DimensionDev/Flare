@@ -888,7 +888,7 @@ internal fun parseXQTCustomDateTime(dateTimeStr: String): Instant? {
             "Dec" to 12,
         )
 
-    val parts = dateTimeStr.split(" ")
+    val parts = dateTimeStr.trim().split(Regex("\\s+"))
     if (parts.size != 6) return null
 
     try {
@@ -896,20 +896,20 @@ internal fun parseXQTCustomDateTime(dateTimeStr: String): Instant? {
         val day = parts[2].toInt()
         val timeParts = parts[3].split(":").map { it.toInt() }
         val year = parts[5].toInt()
+        val timezoneOffset = parts[4]
+        if (timezoneOffset.length != 5 || (timezoneOffset[0] != '+' && timezoneOffset[0] != '-')) return null
+        val offsetHours = timezoneOffset.substring(1, 3).toInt()
+        val offsetMinutes = timezoneOffset.substring(3, 5).toInt()
 
         val hour = timeParts[0]
         val minute = timeParts[1]
         val second = timeParts[2]
 
-        // Assuming the timezone is always in the format of +HHMM or -HHMM
-//        val timezoneOffset = parts[4]
-//        val offsetHours = timezoneOffset.substring(1, 3).toInt()
-//        val offsetMinutes = timezoneOffset.substring(3, 5).toInt()
-//        val totalOffsetMinutes = offsetHours * 60 + offsetMinutes
-//        val offsetSign = if (timezoneOffset.startsWith("+")) 1 else -1
-
         val dateTime = LocalDateTime(year, month, day, hour, minute, second)
-        return dateTime.toInstant(TimeZone.UTC)
+        val offsetSign = if (timezoneOffset.startsWith("+")) 1 else -1
+        val totalOffsetMillis = ((offsetHours * 60L) + offsetMinutes) * 60_000L
+        val utcEpochMillis = dateTime.toInstant(TimeZone.UTC).toEpochMilliseconds() - (offsetSign * totalOffsetMillis)
+        return Instant.fromEpochMilliseconds(utcEpochMillis)
     } catch (e: Exception) {
         return null
     }

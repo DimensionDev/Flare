@@ -78,8 +78,15 @@ public class AllTabsPresenter(
             }
 
         return object : State {
+            val defaultAccountKey =
+                accountTabs
+                    .takeSuccess()
+                    ?.firstOrNull()
+                    ?.profile
+                    ?.key
             override val defaultTabs =
-                TimelineTabItem.mainSidePanel
+                TimelineTabItem
+                    .mainSidePanel(defaultAccountKey)
                     .let {
                         if (filterIsTimeline) {
                             it.filterIsInstance<TimelineTabItem>()

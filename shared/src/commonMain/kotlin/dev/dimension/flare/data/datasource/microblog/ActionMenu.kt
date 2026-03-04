@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.ClickEvent
@@ -8,8 +9,8 @@ import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.onClicked
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -19,7 +20,7 @@ public sealed class ActionMenu {
     @Serializable
     public data class Group internal constructor(
         val displayItem: Item,
-        val actions: ImmutableList<ActionMenu>,
+        val actions: SerializableImmutableList<ActionMenu>,
     ) : ActionMenu()
 
 //    @Immutable
@@ -72,8 +73,9 @@ public sealed class ActionMenu {
             @Immutable
             @Serializable
             public data class Localized(
+                @SerialName("action_type")
                 val type: Type,
-                val parameters: ImmutableList<String> = persistentListOf(),
+                val parameters: SerializableImmutableList<String> = persistentListOf(),
             ) : Text {
                 @Serializable
                 public enum class Type {

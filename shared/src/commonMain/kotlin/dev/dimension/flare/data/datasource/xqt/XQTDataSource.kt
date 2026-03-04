@@ -384,8 +384,7 @@ internal class XQTDataSource(
                     data.referenceStatus.data as? UiTimelineV2.Post
                 }?.user
                 ?.handle
-                ?.removePrefix("@")
-                ?.removeSuffix("@${accountKey.host}")
+                ?.normalizedRaw
         val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias.mapIndexed { index, (item, altText) ->

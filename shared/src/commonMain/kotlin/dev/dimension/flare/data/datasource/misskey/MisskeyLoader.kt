@@ -13,6 +13,7 @@ import dev.dimension.flare.data.network.misskey.api.model.MuteCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -39,10 +40,14 @@ internal class MisskeyLoader(
                 ),
             ).size
 
-    override suspend fun userByHandleAndHost(
-        handle: String,
-        host: String,
-    ): UiProfile = service.usersShow(UsersShowRequest(username = handle, host = host)).render(accountKey)
+    override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile =
+        service
+            .usersShow(
+                UsersShowRequest(
+                    username = uiHandle.normalizedRaw,
+                    host = uiHandle.normalizedHost,
+                ),
+            ).render(accountKey)
 
     override suspend fun userById(id: String): UiProfile = service.usersShow(UsersShowRequest(userId = id)).render(accountKey)
 

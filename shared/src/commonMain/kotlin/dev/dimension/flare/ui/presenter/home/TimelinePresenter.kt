@@ -17,17 +17,15 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -91,84 +89,9 @@ public abstract class TimelinePresenter :
             },
         ).flow.map { pagingData ->
             pagingData.map { item ->
-                mapping(item, loader.pagingKey, useDbKeyInItemKey)
+                TimelinePagingMapper.toUi(item, loader.pagingKey, useDbKeyInItemKey)
             }
         }
-
-    internal companion object {
-        fun mapping(
-            item: DbPagingTimelineWithStatus,
-            pagingKey: String,
-            useDbKeyInItemKey: Boolean,
-        ): UiTimelineV2 {
-            val root = mappingDbStatusWithUser(item.status.status, pagingKey, useDbKeyInItemKey)
-            val references =
-                item.status.references
-                    .mapNotNull { it.status }
-                    .map { mappingDbStatusWithUser(it, pagingKey, useDbKeyInItemKey) }
-            return when (root) {
-                is UiTimelineV2.Feed -> root
-                is UiTimelineV2.Message -> root
-                is UiTimelineV2.Post ->
-                    root.copy(
-                        parents =
-                            root.parents
-                                .map { parent ->
-                                    references.find { it.statusKey == parent.statusKey } as? UiTimelineV2.Post ?: parent
-                                }.toImmutableList(),
-                        quote =
-                            root.quote
-                                .map { quote ->
-                                    references.find { it.statusKey == quote.statusKey } as? UiTimelineV2.Post ?: quote
-                                }.toImmutableList(),
-                    )
-                is UiTimelineV2.User -> root
-                is UiTimelineV2.UserList ->
-                    root.copy(
-                        post =
-                            root.post?.let { post ->
-                                references.find { it.statusKey == post.statusKey } as? UiTimelineV2.Post ?: post
-                            },
-                    )
-            }
-        }
-
-        private fun mappingDbStatusWithUser(
-            data: DbStatusWithUser,
-            pagingKey: String,
-            useDbKeyInItemKey: Boolean,
-        ): UiTimelineV2 {
-            val root = data.data.content
-            val users = data.references.mapNotNull { it.user?.content }
-            return when (root) {
-                is UiTimelineV2.Feed -> root
-                is UiTimelineV2.Message ->
-                    root.copy(
-                        user = users.find { root.user?.key == it.key },
-                        extraKey = if (useDbKeyInItemKey) pagingKey else null,
-                    )
-                is UiTimelineV2.Post ->
-                    root.copy(
-                        user = users.find { root.user?.key == it.key },
-                        extraKey = if (useDbKeyInItemKey) pagingKey else null,
-                    )
-                is UiTimelineV2.User ->
-                    root.copy(
-                        value = users.find { root.value.key == it.key } ?: root.value,
-                        extraKey = if (useDbKeyInItemKey) pagingKey else null,
-                    )
-                is UiTimelineV2.UserList ->
-                    root.copy(
-                        users =
-                            root.users
-                                .map { user ->
-                                    users.find { user.key == it.key } ?: user
-                                }.toImmutableList(),
-                        extraKey = if (useDbKeyInItemKey) pagingKey else null,
-                    )
-            }
-        }
-    }
 
     protected open suspend fun transform(data: UiTimelineV2): UiTimelineV2 = data
 

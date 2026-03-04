@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
 @Immutable
 public data class UiProfile internal constructor(
     val key: MicroBlogKey,
-    val handle: String,
+    val handle: UiHandle,
     val avatar: String,
     private val nameInternal: UiRichText,
     val platformType: PlatformType,
@@ -57,17 +57,11 @@ public data class UiProfile internal constructor(
     }
 
     val handleWithoutAt: String by lazy {
-        handle.removePrefix("@")
+        handle.normalizedRaw
     }
 
     val handleWithoutAtAndHost: String by lazy {
-        run {
-            handle
-                .removePrefix("@")
-                .split("@")
-                .firstOrNull()
-                ?: handleWithoutAt
-        }.let {
+        handleWithoutAt.let {
             if (platformType == PlatformType.Bluesky) {
                 it.removeSuffix(".bsky.social")
             } else {
@@ -77,10 +71,7 @@ public data class UiProfile internal constructor(
     }
 
     val host: String? by lazy {
-        handle
-            .removePrefix("@")
-            .split("@")
-            .getOrNull(1)
+        handle.normalizedHost
     }
 
     @Serializable
@@ -114,7 +105,11 @@ public data class UiProfile internal constructor(
 public fun createSampleUser(): UiProfile =
     UiProfile(
         key = MicroBlogKey("sampleKey", "sampleHost"),
-        handle = "@sampleUser",
+        handle =
+            UiHandle(
+                raw = "sampleUser",
+                host = "sampleHost",
+            ),
         avatar = "https://example.com/avatar.jpg",
         nameInternal = Element("span").toUi(),
         platformType = PlatformType.Mastodon,

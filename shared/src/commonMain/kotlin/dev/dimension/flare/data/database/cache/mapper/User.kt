@@ -7,7 +7,7 @@ internal fun UiProfile.toDbUser(host: String = this.host ?: key.host) =
     DbUser(
         userKey = key,
         name = name.raw,
-        handle = handle,
+        canonicalHandle = handle.canonical,
         host = host,
         content = this,
     )

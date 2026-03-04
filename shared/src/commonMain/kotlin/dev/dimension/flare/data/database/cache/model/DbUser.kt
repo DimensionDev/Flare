@@ -9,14 +9,14 @@ import dev.dimension.flare.ui.model.UiRelation
 
 @Entity(
     indices = [
-        Index(value = ["handle", "host"], unique = true),
+        Index(value = ["canonicalHandle", "host"], unique = true),
     ],
 )
 internal data class DbUser(
     @PrimaryKey
     val userKey: MicroBlogKey,
     val name: String,
-    val handle: String,
+    val canonicalHandle: String,
     val host: String,
     val content: UiProfile,
 )

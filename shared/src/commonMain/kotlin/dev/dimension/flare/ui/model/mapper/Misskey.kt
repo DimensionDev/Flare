@@ -23,6 +23,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
@@ -547,7 +548,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                     userActionsMenu(
                                         accountKey = accountKey,
                                         userKey = user.key,
-                                        handle = user.handle,
+                                        handle = user.handle.canonical,
                                     ),
                                 )
                                 add(ActionMenu.Divider)
@@ -763,7 +764,11 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
     return UiProfile(
         avatar = avatarUrl.orEmpty(),
         nameInternal = parseName(name.orEmpty(), accountKey, emojis).toUi(),
-        handle = "@$username@$remoteHost",
+        handle =
+            UiHandle(
+                raw = username.orEmpty(),
+                host = remoteHost,
+            ),
         key = userKey,
         banner = null,
         description = null,
@@ -802,7 +807,11 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
     return UiProfile(
         avatar = avatarUrl.orEmpty(),
         nameInternal = parseName(name.orEmpty(), accountKey, emojis).toUi(),
-        handle = "@$username@$remoteHost",
+        handle =
+            UiHandle(
+                raw = username.orEmpty(),
+                host = remoteHost,
+            ),
         key = userKey,
         banner = bannerUrl,
         description =

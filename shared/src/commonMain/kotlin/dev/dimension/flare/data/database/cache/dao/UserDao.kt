@@ -39,9 +39,9 @@ internal interface UserDao {
     @Query("SELECT * FROM DbUser WHERE userKey = :userKey")
     fun findByKey(userKey: MicroBlogKey): Flow<DbUser?>
 
-    @Query("SELECT * FROM DbUser WHERE handle = :handle AND host = :host")
-    fun findByHandleAndHost(
-        handle: String,
+    @Query("SELECT * FROM DbUser WHERE canonicalHandle = :canonicalHandle AND host = :host")
+    fun findByCanonicalHandleAndHost(
+        canonicalHandle: String,
         host: String,
     ): Flow<DbUser?>
 
@@ -61,7 +61,7 @@ internal interface UserDao {
     @Transaction
     @Query(
         "SELECT * FROM DbUser " +
-            "WHERE DbUser.name like :query OR DbUser.handle like :query",
+            "WHERE DbUser.name like :query OR DbUser.canonicalHandle like :query",
     )
     fun searchUser(query: String): PagingSource<Int, DbUser>
 

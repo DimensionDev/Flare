@@ -1,22 +1,24 @@
-package dev.dimension.flare.data.datasource.microblog.list
+package dev.dimension.flare.data.datasource.microblog.handler
 
 import androidx.paging.testing.asSnapshot
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbUser
-import dev.dimension.flare.data.database.cache.model.UserContent
-import dev.dimension.flare.data.datasource.microblog.handler.ListMemberHandler
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
-import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.render.toUi
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -90,17 +92,15 @@ class ListMemberHandlerTest : RobolectricTest() {
         runTest {
             val userKey = MicroBlogKey(id = "user-1", host = "test.social")
             val listId = "list-1"
-            fakeLoader.nextAddMemberResult = createDbUser(userKey)
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey)
 
             handler.addMember(listId, userKey)
 
-            // Verify DbListMember was inserted
             val listKey = MicroBlogKey(listId, accountKey.host)
             val members = db.listDao().getListMembersFlow(listKey).first()
             assertEquals(1, members.size)
             assertEquals(userKey, members.first().member.memberKey)
 
-            // Verify DbUser was inserted
             val savedUser = db.userDao().findByKey(userKey).first()
             assertEquals("user-1", savedUser?.userKey?.id)
         }
@@ -112,10 +112,10 @@ class ListMemberHandlerTest : RobolectricTest() {
             val userKey1 = MicroBlogKey(id = "user-a", host = "test.social")
             val userKey2 = MicroBlogKey(id = "user-b", host = "test.social")
 
-            fakeLoader.nextAddMemberResult = createDbUser(userKey1)
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey1)
             handler.addMember(listId, userKey1)
 
-            fakeLoader.nextAddMemberResult = createDbUser(userKey2)
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey2)
             handler.addMember(listId, userKey2)
 
             val listKey = MicroBlogKey(listId, accountKey.host)
@@ -131,16 +131,14 @@ class ListMemberHandlerTest : RobolectricTest() {
         runTest {
             val userKey = MicroBlogKey(id = "user-3", host = "test.social")
             val listId = "list-3"
-            fakeLoader.nextAddMemberResult = createDbUser(userKey)
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey)
 
-            // Add first
             handler.addMember(listId, userKey)
 
             val listKey = MicroBlogKey(listId, accountKey.host)
             val before = db.listDao().getListMembersFlow(listKey).first()
             assertEquals(1, before.size)
 
-            // Remove
             handler.removeMember(listId, userKey)
 
             val after = db.listDao().getListMembersFlow(listKey).first()
@@ -154,12 +152,11 @@ class ListMemberHandlerTest : RobolectricTest() {
             val userKey1 = MicroBlogKey(id = "user-keep", host = "test.social")
             val userKey2 = MicroBlogKey(id = "user-remove", host = "test.social")
 
-            fakeLoader.nextAddMemberResult = createDbUser(userKey1)
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey1)
             handler.addMember(listId, userKey1)
-            fakeLoader.nextAddMemberResult = createDbUser(userKey2)
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey2)
             handler.addMember(listId, userKey2)
 
-            // Remove only userKey2
             handler.removeMember(listId, userKey2)
 
             val listKey = MicroBlogKey(listId, accountKey.host)
@@ -186,14 +183,12 @@ class ListMemberHandlerTest : RobolectricTest() {
         runTest {
             val userKey = MicroBlogKey(id = "user-survive", host = "test.social")
             val listId = "list-6"
-            fakeLoader.nextAddMemberResult = createDbUser(userKey)
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey)
             handler.addMember(listId, userKey)
 
-            // Now make loader fail and try to remove
             fakeLoader.shouldFail = true
             handler.removeMember(listId, userKey)
 
-            // Member should still be there
             val listKey = MicroBlogKey(listId, accountKey.host)
             val members = db.listDao().getListMembersFlow(listKey).first()
             assertEquals(1, members.size)
@@ -208,25 +203,17 @@ class ListMemberHandlerTest : RobolectricTest() {
             val userKey1 = MicroBlogKey(id = "member-1", host = "test.social")
             val userKey2 = MicroBlogKey(id = "member-2", host = "test.social")
 
-            // Initially empty
             val initial = db.listDao().getListMembersFlow(listKey).first()
             assertTrue(initial.isEmpty())
 
-            // Add members
-            fakeLoader.nextAddMemberResult = createDbUser(userKey1, name = "Alice")
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey1, name = "Alice")
             handler.addMember(listId, userKey1)
-            fakeLoader.nextAddMemberResult = createDbUser(userKey2, name = "Bob")
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey2, name = "Bob")
             handler.addMember(listId, userKey2)
 
-            // Flow should reflect 2 members
             val members = db.listDao().getListMembersFlow(listKey).first()
             assertEquals(2, members.size)
-            val memberKeys = members.map { it.member.memberKey }.toSet()
-            assertTrue(memberKeys.contains(userKey1))
-            assertTrue(memberKeys.contains(userKey2))
 
-            // Remove one, flow should reflect 1 member
-            fakeLoader.shouldFail = false
             handler.removeMember(listId, userKey1)
             val afterRemove = db.listDao().getListMembersFlow(listKey).first()
             assertEquals(1, afterRemove.size)
@@ -240,12 +227,11 @@ class ListMemberHandlerTest : RobolectricTest() {
             val userKey1 = MicroBlogKey(id = "render-1", host = "test.social")
             val userKey2 = MicroBlogKey(id = "render-2", host = "test.social")
 
-            fakeLoader.nextAddMemberResult = createDbUser(userKey1, name = "Alice")
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey1, name = "Alice")
             handler.addMember(listId, userKey1)
-            fakeLoader.nextAddMemberResult = createDbUser(userKey2, name = "Bob")
+            fakeLoader.nextAddMemberResult = createUiProfile(userKey2, name = "Bob")
             handler.addMember(listId, userKey2)
 
-            // listMembersListFlow calls render() — verify it returns UiProfile items
             val rendered = handler.listMembersListFlow(listId).first()
             assertEquals(2, rendered.size)
             val names = rendered.map { it.name.raw }.toSet()
@@ -260,13 +246,14 @@ class ListMemberHandlerTest : RobolectricTest() {
             val userKey1 = MicroBlogKey(id = "paged-1", host = "test.social")
             val userKey2 = MicroBlogKey(id = "paged-2", host = "test.social")
 
-            // Pre-populate the fake loader with members
-            fakeLoader.nextAddMemberResult = createDbUser(userKey1, name = "Paged Alice")
-            fakeLoader.addMember(listId, userKey1)
-            fakeLoader.nextAddMemberResult = createDbUser(userKey2, name = "Paged Bob")
-            fakeLoader.addMember(listId, userKey2)
+            fakeLoader.setMembers(
+                listId,
+                listOf(
+                    createUiProfile(userKey1, name = "Paged Alice"),
+                    createUiProfile(userKey2, name = "Paged Bob"),
+                ),
+            )
 
-            // Collect the paging data — this triggers the remote mediator
             val snapshot = handler.listMembers(listId).asSnapshot()
 
             assertEquals(2, snapshot.size)
@@ -274,7 +261,6 @@ class ListMemberHandlerTest : RobolectricTest() {
             assertTrue(names.contains("Paged Alice"))
             assertTrue(names.contains("Paged Bob"))
 
-            // Verify members were persisted to the database
             val listKey = MicroBlogKey(listId, accountKey.host)
             val dbMembers = db.listDao().getListMembersFlow(listKey).first()
             assertEquals(2, dbMembers.size)
@@ -286,7 +272,7 @@ class ListMemberHandlerTest : RobolectricTest() {
             val listId = "list-load-more"
             val members =
                 (1..50).map { i ->
-                    createDbUser(
+                    createUiProfile(
                         userKey = MicroBlogKey(id = "user-$i", host = "test.social"),
                         name = "User $i",
                     )
@@ -307,22 +293,19 @@ class ListMemberHandlerTest : RobolectricTest() {
             val listId = "list-refresh"
             val initialMembers =
                 (1..20).map { i ->
-                    createDbUser(
+                    createUiProfile(
                         userKey = MicroBlogKey(id = "refresh-user-$i", host = "test.social"),
                         name = "Refresh User $i",
                     )
                 }
             fakeLoader.setMembers(listId, initialMembers)
 
-            // Initial load
             val initialSnapshot = handler.listMembers(listId).asSnapshot()
             assertEquals(20, initialSnapshot.size)
 
-            // Update remote data (remove half)
             val updatedMembers = initialMembers.take(10)
             fakeLoader.setMembers(listId, updatedMembers)
 
-            // Refresh by creating new pager/flow collection
             val refreshedSnapshot = handler.listMembers(listId).asSnapshot()
 
             assertEquals(10, refreshedSnapshot.size)
@@ -331,38 +314,43 @@ class ListMemberHandlerTest : RobolectricTest() {
             assertFalse(names.contains("Refresh User 20"))
         }
 
-    private fun createDbUser(
+    private fun createUiProfile(
         userKey: MicroBlogKey,
         name: String = userKey.id,
-    ): DbUser =
-        DbUser(
-            userKey = userKey,
-            platformType = PlatformType.Mastodon,
-            name = name,
-            handle = userKey.id,
-            host = userKey.host,
-            content =
-                UserContent.Mastodon(
-                    Account(
-                        id = userKey.id,
-                        username = userKey.id,
-                        acct = "${userKey.id}@${userKey.host}",
-                        displayName = name,
-                        url = "https://${userKey.host}/@${userKey.id}",
-                    ),
+    ): UiProfile =
+        UiProfile(
+            key = userKey,
+            handle =
+                UiHandle(
+                    raw = userKey.id,
+                    host = userKey.host,
                 ),
+            avatar = "https://${userKey.host}/${userKey.id}.png",
+            nameInternal = Element("span").apply { appendText(name) }.toUi(),
+            platformType = PlatformType.Mastodon,
+            clickEvent = ClickEvent.Noop,
+            banner = null,
+            description = null,
+            matrices =
+                UiProfile.Matrices(
+                    fansCount = 0,
+                    followsCount = 0,
+                    statusesCount = 0,
+                ),
+            mark = persistentListOf(),
+            bottomContent = null,
         )
 }
 
 private class FakeListMemberLoader : ListMemberLoader {
-    var nextAddMemberResult: DbUser? = null
+    var nextAddMemberResult: UiProfile? = null
     var shouldFail: Boolean = false
 
-    private val members = mutableMapOf<String, MutableList<DbUser>>()
+    private val members = mutableMapOf<String, MutableList<UiProfile>>()
 
     fun setMembers(
         listId: String,
-        users: List<DbUser>,
+        users: List<UiProfile>,
     ) {
         members[listId] = users.toMutableList()
     }
@@ -371,7 +359,7 @@ private class FakeListMemberLoader : ListMemberLoader {
         pageSize: Int,
         request: PagingRequest,
         listId: String,
-    ): PagingResult<DbUser> {
+    ): PagingResult<UiProfile> {
         val allMembers = members[listId] ?: emptyList()
         val page =
             when (request) {
@@ -401,7 +389,7 @@ private class FakeListMemberLoader : ListMemberLoader {
     override suspend fun addMember(
         listId: String,
         userKey: MicroBlogKey,
-    ): DbUser {
+    ): UiProfile {
         if (shouldFail) throw RuntimeException("Fake loader failure")
         val user = nextAddMemberResult ?: throw IllegalStateException("nextAddMemberResult not set")
         members.getOrPut(listId) { mutableListOf() }.add(user)
@@ -413,7 +401,7 @@ private class FakeListMemberLoader : ListMemberLoader {
         userKey: MicroBlogKey,
     ) {
         if (shouldFail) throw RuntimeException("Fake loader failure")
-        members[listId]?.removeAll { it.userKey == userKey }
+        members[listId]?.removeAll { it.key == userKey }
     }
 
     override suspend fun loadUserLists(

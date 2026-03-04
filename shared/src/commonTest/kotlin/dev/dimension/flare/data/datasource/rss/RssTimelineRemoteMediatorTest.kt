@@ -1,42 +1,20 @@
 package dev.dimension.flare.data.datasource.rss
 
-import androidx.room.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
-import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.network.rss.model.Feed
-import dev.dimension.flare.memoryDatabaseBuilder
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.parseRssDateToInstant
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RssTimelineRemoteMediatorTest : RobolectricTest() {
-    private lateinit var cacheDb: CacheDatabase
-
-    @BeforeTest
-    fun setup() {
-        cacheDb =
-            Room
-                .memoryDatabaseBuilder<CacheDatabase>()
-                .setDriver(BundledSQLiteDriver())
-                .setQueryCoroutineContext(Dispatchers.Unconfined)
-                .build()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        cacheDb.close()
-    }
-
     @Test
-    fun sortIdFollowsPublicationDate() =
+    fun feedItemsUsePublicationDateAsCreatedAt() =
         runTest {
             val middleDate = "Wed, 03 Jan 2024 10:00:00 +0000"
             val newestDate = "Fri, 05 Jan 2024 10:00:00 +0000"
@@ -77,29 +55,34 @@ class RssTimelineRemoteMediatorTest : RobolectricTest() {
             val mediator =
                 RssTimelineRemoteMediator(
                     url = "https://example.com/rss",
-                    cacheDatabase = cacheDb,
                     fetchFeed = { feed },
                     fetchIcon = { _ -> null },
                     fetchSource = { _ -> null },
                 )
 
             val result =
-                mediator.timeline(
+                mediator.load(
                     pageSize = 10,
                     request = PagingRequest.Refresh,
                 )
 
-            val sortIds = result.data.map { it.timeline.sortId }.sortedDescending()
-            val expectedSortIds =
-                listOf(newestDate, middleDate, oldestDate).map {
-                    requireNotNull(parseRssDateToInstant(it)).toEpochMilliseconds()
-                }
+            val byTitle = result.data.filterIsInstance<UiTimelineV2.Feed>().associateBy { it.title }
+            assertEquals(3, byTitle.size)
 
-            assertEquals(expectedSortIds, sortIds)
             assertEquals(
-                expectedSortIds,
-                sortIds,
-                "sortId should follow publication date for correct timeline ordering",
+                requireNotNull(parseRssDateToInstant(middleDate)).toEpochMilliseconds(),
+                byTitle["Middle"]?.createdAt?.value?.toEpochMilliseconds(),
             )
+            assertEquals(
+                requireNotNull(parseRssDateToInstant(newestDate)).toEpochMilliseconds(),
+                byTitle["Newest"]?.createdAt?.value?.toEpochMilliseconds(),
+            )
+            assertEquals(
+                requireNotNull(parseRssDateToInstant(oldestDate)).toEpochMilliseconds(),
+                byTitle["Oldest"]?.createdAt?.value?.toEpochMilliseconds(),
+            )
+            assertNotNull(byTitle["Middle"])
+            assertNotNull(byTitle["Newest"])
+            assertNotNull(byTitle["Oldest"])
         }
 }

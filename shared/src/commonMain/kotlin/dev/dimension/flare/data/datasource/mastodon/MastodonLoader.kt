@@ -8,6 +8,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -26,12 +27,9 @@ internal class MastodonLoader(
     PostLoader,
     RelationLoader,
     EmojiLoader {
-    override suspend fun userByHandleAndHost(
-        handle: String,
-        host: String,
-    ): UiProfile =
+    override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile =
         service
-            .lookupUserByAcct("$handle@$host")
+            .lookupUserByAcct("${uiHandle.normalizedRaw}@${uiHandle.normalizedHost}")
             ?.render(
                 accountKey = accountKey,
                 host = accountKey.host,

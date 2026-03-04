@@ -21,6 +21,7 @@ import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
@@ -413,7 +414,14 @@ public class ProfileWithUserNameAndHostPresenter(
                 repository = accountRepository,
             ).flatMap { service ->
                 remember(service) {
-                    (service as UserDataSource).userHandler.userByHandleAndHost(userName, host)
+                    (service as UserDataSource)
+                        .userHandler
+                        .userByHandleAndHost(
+                            UiHandle(
+                                raw = userName,
+                                host = host,
+                            ),
+                        )
                 }.collectAsState().toUi()
             }
         return object : UserState {

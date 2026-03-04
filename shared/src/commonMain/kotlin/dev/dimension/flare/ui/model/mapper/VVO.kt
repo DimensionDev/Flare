@@ -17,6 +17,7 @@ import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.vvoHostLong
 import dev.dimension.flare.model.vvoHostShort
 import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
@@ -152,7 +153,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
 
     val user = this.user?.render(accountKey)
     val isFromMe = user?.key == accountKey
-    val displayUser = user?.copy(handle = regionName ?: source ?: user.handle)
+    val displayUser = user
     val statusKey = MicroBlogKey(id = id, host = vvoHost)
     val canReblog = visible?.type == null || visible.type == 0L
     val url =
@@ -251,7 +252,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
                             *userActionsMenu(
                                 accountKey = accountKey,
                                 userKey = user?.key ?: statusKey,
-                                handle = user?.handle ?: "",
+                                handle = user?.handle?.canonical ?: "",
                             ).toTypedArray(),
                         ).toImmutableList(),
                 ),
@@ -283,7 +284,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post 
             ?.get("mid")
     val user = this.user?.render(accountKey)
     val isFromMe = user?.key == accountKey
-    val displayUser = user?.copy(handle = source ?: user.handle)
+    // val displayUser = user?.copy(handle = source ?: user.handle)
     val url =
         buildString {
             append("https://$vvoHostLong/")
@@ -331,7 +332,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post 
         images = media.toImmutableList(),
         sensitive = false,
         contentWarning = null,
-        user = displayUser,
+        user = user,
         quote = quote,
         content = renderVVOText(text.orEmpty(), accountKey).toUi(),
         actions =
@@ -427,7 +428,11 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
     return UiProfile(
         key = userKey,
         avatar = avatarHD ?: profileImageURL ?: "",
-        handle = "@$screenName@${vvoHost.removePrefix("m.")}",
+        handle =
+            UiHandle(
+                raw = screenName.orEmpty(),
+                host = vvoHost.removePrefix("m."),
+            ),
         nameInternal =
             Element("span")
                 .apply {

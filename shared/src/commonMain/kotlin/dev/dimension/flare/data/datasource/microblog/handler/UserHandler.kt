@@ -5,6 +5,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiHandle
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
@@ -16,24 +17,24 @@ internal class UserHandler(
 ) : KoinComponent {
     private val database: CacheDatabase by inject()
 
-    fun userByHandleAndHost(
-        handle: String,
-        host: String,
-    ) = Cacheable(
-        fetchSource = {
-            val user = loader.userByHandleAndHost(handle, host)
-            database.userDao().insert(
-                user.toDbUser(),
-            )
-        },
-        cacheSource = {
-            database
-                .userDao()
-                .findByHandleAndHost(handle, host)
-                .distinctUntilChanged()
-                .mapNotNull { it?.content }
-        },
-    )
+    fun userByHandleAndHost(uiHandle: UiHandle) =
+        Cacheable(
+            fetchSource = {
+                val user = loader.userByHandleAndHost(uiHandle)
+                database.userDao().insert(
+                    user.toDbUser(),
+                )
+            },
+            cacheSource = {
+                database
+                    .userDao()
+                    .findByCanonicalHandleAndHost(
+                        canonicalHandle = uiHandle.canonical,
+                        host = uiHandle.normalizedHost,
+                    ).distinctUntilChanged()
+                    .mapNotNull { it?.content }
+            },
+        )
 
     fun userById(id: String) =
         Cacheable(

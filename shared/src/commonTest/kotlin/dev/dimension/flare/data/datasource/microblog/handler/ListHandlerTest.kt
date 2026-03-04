@@ -1,11 +1,12 @@
-package dev.dimension.flare.data.datasource.microblog.list
+package dev.dimension.flare.data.datasource.microblog.handler
 
 import androidx.paging.testing.asSnapshot
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.datasource.microblog.handler.ListHandler
+import dev.dimension.flare.data.datasource.microblog.list.ListMetaData
+import dev.dimension.flare.data.datasource.microblog.list.ListMetaDataType
 import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -22,6 +23,7 @@ import kotlinx.coroutines.test.runTest
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
+import kotlin.experimental.ExperimentalNativeApi
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -129,7 +131,10 @@ class ListHandlerTest : RobolectricTest() {
                 )
             fakeLoader.nextUpdateResult = updatedResult
 
-            handler.update("list-2", ListMetaData(title = "Updated Title", description = "Updated Desc"))
+            handler.update(
+                "list-2",
+                ListMetaData(title = "Updated Title", description = "Updated Desc"),
+            )
 
             // Verify the database content was updated
             val listKey = MicroBlogKey("list-2", accountKey.host)
@@ -358,7 +363,7 @@ private class FakeListLoader : ListLoader {
         return nextCreateResult
     }
 
-    @OptIn(kotlin.experimental.ExperimentalNativeApi::class)
+    @OptIn(ExperimentalNativeApi::class)
     override suspend fun update(
         listId: String,
         metaData: ListMetaData,

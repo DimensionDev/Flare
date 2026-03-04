@@ -12,6 +12,7 @@ import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -43,11 +44,8 @@ internal class VVOLoader(
         return (mention + comment + like).toInt()
     }
 
-    override suspend fun userByHandleAndHost(
-        handle: String,
-        host: String,
-    ): UiProfile {
-        val uid = service.getUid(handle) ?: error("user not found")
+    override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile {
+        val uid = service.getUid(uiHandle.normalizedRaw) ?: error("user not found")
         return userById(uid)
     }
 

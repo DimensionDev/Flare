@@ -12,6 +12,7 @@ import dev.dimension.flare.data.network.xqt.model.PostDeleteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -28,16 +29,13 @@ internal class XQTLoader(
     RelationLoader {
     override suspend fun notificationBadgeCount(): Int = service.getBadgeCount().ntabUnreadCount?.toInt() ?: 0
 
-    override suspend fun userByHandleAndHost(
-        handle: String,
-        host: String,
-    ): UiProfile {
-        require(host == accountKey.host) {
-            "Cross-host lookup is unsupported for XQT: $host"
+    override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile {
+        require(uiHandle.normalizedHost == accountKey.host) {
+            "Cross-host lookup is unsupported for XQT: ${uiHandle.normalizedHost}"
         }
         val user =
             service
-                .userByScreenName(handle)
+                .userByScreenName(uiHandle.normalizedRaw)
                 .body()
                 ?.data
                 ?.user

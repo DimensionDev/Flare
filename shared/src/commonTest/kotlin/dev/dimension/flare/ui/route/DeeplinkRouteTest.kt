@@ -8,6 +8,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class DeeplinkRouteTest {
+    private val activeAccountType = AccountType.Specific(MicroBlogKey("active", "example.com"))
+
     @Test
     fun testLogin() {
         val route = DeeplinkRoute.Login
@@ -24,7 +26,7 @@ class DeeplinkRouteTest {
         val route =
             DeeplinkRoute.Status.Detail(
                 statusKey = MicroBlogKey("status123", "example.com"),
-                accountType = AccountType.Active,
+                accountType = activeAccountType,
             )
         val uri = route.toUri()
         val parsed = DeeplinkRoute.parse(uri)
@@ -48,7 +50,7 @@ class DeeplinkRouteTest {
         val route =
             DeeplinkRoute.Status.VVOStatus(
                 statusKey = MicroBlogKey("status456", "example.com"),
-                accountType = AccountType.Active,
+                accountType = activeAccountType,
             )
         val uri = route.toUri()
         val parsed = DeeplinkRoute.parse(uri)
@@ -60,7 +62,7 @@ class DeeplinkRouteTest {
         val route =
             DeeplinkRoute.Status.AddReaction(
                 statusKey = MicroBlogKey("status789", "example.com"),
-                accountType = AccountType.Active,
+                accountType = activeAccountType,
             )
         val uri = route.toUri()
         val parsed = DeeplinkRoute.parse(uri)
@@ -80,7 +82,7 @@ class DeeplinkRouteTest {
         val route =
             DeeplinkRoute.Status.BlueskyReport(
                 statusKey = MicroBlogKey("statusBS", "bsky.app"),
-                accountType = AccountType.Active,
+                accountType = activeAccountType,
             )
         val uri = route.toUri()
         val parsed = DeeplinkRoute.parse(uri)
@@ -92,7 +94,7 @@ class DeeplinkRouteTest {
         val route =
             DeeplinkRoute.Status.DeleteConfirm(
                 statusKey = MicroBlogKey("delStatus", "example.com"),
-                accountType = AccountType.Active,
+                accountType = activeAccountType,
             )
         val uri = route.toUri()
         val parsed = DeeplinkRoute.parse(uri)
@@ -105,7 +107,7 @@ class DeeplinkRouteTest {
             DeeplinkRoute.Status.MastodonReport(
                 userKey = MicroBlogKey("user1", "mstdn.io"),
                 statusKey = MicroBlogKey("status1", "mstdn.io"),
-                accountType = AccountType.Active,
+                accountType = activeAccountType,
             )
         val uri = route.toUri()
         val parsed = DeeplinkRoute.parse(uri)
@@ -137,7 +139,7 @@ class DeeplinkRouteTest {
     fun testSearch() {
         val route =
             DeeplinkRoute.Search(
-                accountType = AccountType.Active,
+                accountType = activeAccountType,
                 query = "kotlin",
             )
         val uri = route.toUri()
@@ -147,7 +149,7 @@ class DeeplinkRouteTest {
 
     @Test
     fun testComposeNew() {
-        val route = DeeplinkRoute.Compose.New(accountType = AccountType.Active)
+        val route = DeeplinkRoute.Compose.New(accountType = activeAccountType)
         val uri = route.toUri()
         val parsed = DeeplinkRoute.parse(uri)
         assertEquals(route, parsed)
@@ -207,7 +209,7 @@ class DeeplinkRouteTest {
         val route =
             DeeplinkRoute.Media.StatusMedia(
                 statusKey = MicroBlogKey("stMedia", "example.com"),
-                accountType = AccountType.Active,
+                accountType = activeAccountType,
                 index = 2,
                 preview = "preview_data",
             )
@@ -220,7 +222,7 @@ class DeeplinkRouteTest {
     fun testMediaPodcast() {
         val route =
             DeeplinkRoute.Media.Podcast(
-                accountType = AccountType.Active,
+                accountType = activeAccountType,
                 id = "podcast123",
             )
         val uri = route.toUri()
@@ -232,7 +234,7 @@ class DeeplinkRouteTest {
     fun testProfileUser() {
         val route =
             DeeplinkRoute.Profile.User(
-                accountType = AccountType.Active,
+                accountType = activeAccountType,
                 userKey = MicroBlogKey("userP", "example.com"),
             )
         val uri = route.toUri()
@@ -244,7 +246,7 @@ class DeeplinkRouteTest {
     fun testProfileUserNameWithHost() {
         val route =
             DeeplinkRoute.Profile.UserNameWithHost(
-                accountType = AccountType.Active,
+                accountType = activeAccountType,
                 userName = "user",
                 host = "example.com",
             )

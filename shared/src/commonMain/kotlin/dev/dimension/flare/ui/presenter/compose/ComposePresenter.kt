@@ -163,7 +163,7 @@ public class ComposePresenter(
                                             val handleToAdd = mutableSetOf<String>()
                                             if (content.user?.key != selectedAccounts.firstOrNull()?.accountKey) {
                                                 content.user?.handle?.let {
-                                                    handleToAdd.add(it)
+                                                    handleToAdd.add(it.canonical)
                                                 }
                                             }
                                             content.content.data
@@ -179,9 +179,9 @@ public class ComposePresenter(
                                                             .split('/')
                                                     val userName = params.getOrNull(0)
                                                     val host = params.getOrNull(1)
-                                                    user.handle != "@$userName@$host"
+                                                    user.handle.canonical != "@$userName@$host"
                                                 }.filter {
-                                                    it.text() != content.user?.handle
+                                                    it.text() != content.user?.handle?.canonical
                                                 }.forEach {
                                                     handleToAdd.add(it.text())
                                                 }

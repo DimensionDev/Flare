@@ -40,6 +40,7 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
@@ -700,7 +701,7 @@ internal fun Tweet.renderStatus(
                                         userActionsMenu(
                                             accountKey = accountKey,
                                             userKey = user.key,
-                                            handle = user.handle,
+                                            handle = user.handle.canonical,
                                         ),
                                     )
                                     add(ActionMenu.Divider)
@@ -751,7 +752,11 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                 .apply {
                     addChildren(TextNode(name))
                 }.toUi(),
-        handle = "@$screenName@${accountKey.host}",
+        handle =
+            UiHandle(
+                raw = screenName,
+                host = accountKey.host,
+            ),
         banner = legacy.profileBannerUrl,
         description =
             legacy.description?.takeIf { it.isNotEmpty() }?.let {
@@ -1190,7 +1195,11 @@ private fun Admin.render(accountKey: MicroBlogKey): UiProfile {
                 .apply {
                     addChildren(TextNode(displayName.orEmpty()))
                 }.toUi(),
-        handle = "@$twitterScreenName@${accountKey.host}",
+        handle =
+            UiHandle(
+                raw = twitterScreenName.orEmpty(),
+                host = accountKey.host,
+            ),
         platformType = PlatformType.xQt,
         clickEvent =
             ClickEvent.Deeplink(

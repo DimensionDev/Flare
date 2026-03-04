@@ -23,6 +23,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiInstanceMetadata
@@ -579,7 +580,7 @@ private fun Status.renderStatus(
                                         userActionsMenu(
                                             accountKey = accountKey,
                                             userKey = actualUser.key,
-                                            handle = actualUser.handle,
+                                            handle = actualUser.handle.canonical,
                                         ),
                                     )
                                     add(ActionMenu.Divider)
@@ -837,7 +838,11 @@ internal fun Account.render(
     return UiProfile(
         avatar = avatar.orEmpty(),
         nameInternal = parseName(this).toUi(),
-        handle = "@$username@$remoteHost",
+        handle =
+            UiHandle(
+                raw = username.orEmpty(),
+                host = remoteHost,
+            ),
         key = userKey,
         banner = header,
         description =

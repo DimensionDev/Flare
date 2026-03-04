@@ -5,31 +5,39 @@ import androidx.paging.PagingSource
 import androidx.paging.testing.TestPager
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.RobolectricTest
+import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.database.cache.model.DbStatus
-import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
-import dev.dimension.flare.data.database.cache.model.DbUser
-import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.database.cache.model.UserContent
+import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.ui.humanizer.PlatformFormatter
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.render.toUi
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlin.time.Clock
-import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MicroblogTest : RobolectricTest() {
@@ -37,310 +45,247 @@ class MicroblogTest : RobolectricTest() {
 
     @BeforeTest
     fun setup() {
-        val db =
+        db =
             Room
                 .memoryDatabaseBuilder<CacheDatabase>()
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
-        this.db = db
+
+        startKoin {
+            modules(
+                module {
+                    single { db }
+                    single<PlatformFormatter> { TestFormatter() }
+                },
+            )
+        }
     }
 
     @AfterTest
     fun tearDown() {
         db.close()
+        stopKoin()
     }
 
     @Test
-    fun testSaveToDatabaseWithTestContent() =
+    fun saveToDatabasePersistsUserAndStatus() =
         runTest {
-            val userKey = MicroBlogKey(id = Uuid.random().toString(), host = "test.com")
-            val statusKey = MicroBlogKey(id = Uuid.random().toString(), host = "test.com")
-            val accountKey = MicroBlogKey(id = Uuid.random().toString(), host = "test.com")
-
-            val userContent = UserContent.Test("test user content")
-            val statusContent = StatusContent.Test("test status content")
-
-            val user =
-                DbUser(
-                    userKey = userKey,
-                    platformType = PlatformType.Mastodon,
-                    name = "Test User",
-                    handle = "testuser",
-                    host = "test.com",
-                    content = userContent,
-                )
-
-            val status =
-                DbStatus(
-                    statusKey = statusKey,
-                    accountType = AccountType.Specific(accountKey),
-                    userKey = userKey,
-                    content = statusContent,
-                    text = "test status text",
-                    createdAt = Clock.System.now(),
-                )
-
-            val statusWithUser =
-                DbStatusWithUser(
-                    data = status,
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "user-1", host = "test.com"), "User One")
+            val post =
+                createPost(
+                    accountKey = accountKey,
                     user = user,
+                    statusKey = MicroBlogKey(id = "status-1", host = "test.com"),
+                    text = "status text",
                 )
 
-            val timelineItem =
-                createDbPagingTimelineWithStatus(
-                    accountKey = accountKey,
-                    pagingKey = "home",
-                    sortId = 1L,
-                    status = statusWithUser,
-                    references = emptyMap(),
-                )
-
+            val timelineItem = TimelinePagingMapper.toDb(post, pagingKey = "home")
             saveToDatabase(db, listOf(timelineItem))
 
-            // Verify User
-            val savedUser =
-                db
-                    .userDao()
-                    .findByKey(userKey)
-                    .first()
+            val savedUser = db.userDao().findByKey(user.key).first()
             assertNotNull(savedUser)
-            assertEquals(userContent, savedUser.content)
+            assertEquals(user.key, savedUser.userKey)
+            assertEquals("User One", savedUser.content.name.raw)
 
-            // Verify Status
-            val savedStatus =
-                db
-                    .statusDao()
-                    .get(statusKey, AccountType.Specific(accountKey))
-                    .first()
+            val savedStatus = db.statusDao().get(post.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedStatus)
-            assertEquals(statusContent, savedStatus.content)
+            assertEquals(post.statusKey, savedStatus.content.statusKey)
+            requireNotNull(savedStatus.text)
+            kotlin.test.assertTrue(savedStatus.text.contains("status text"))
         }
 
     @Test
-    fun testSaveToDatabaseWithReference() =
-        runTest {
-            val accountKey = MicroBlogKey(id = Uuid.random().toString(), host = "test.com")
-
-            // Main Status
-            val mainUserKey = MicroBlogKey(id = Uuid.random().toString(), host = "test.com")
-            val mainStatusKey = MicroBlogKey(id = Uuid.random().toString(), host = "test.com")
-            val mainUserContent = UserContent.Test("main user content")
-            val mainStatusContent = StatusContent.Test("main status content")
-
-            val mainUser =
-                DbUser(
-                    userKey = mainUserKey,
-                    platformType = PlatformType.Mastodon,
-                    name = "Main User",
-                    handle = "mainuser",
-                    host = "test.com",
-                    content = mainUserContent,
-                )
-
-            val mainStatus =
-                DbStatus(
-                    statusKey = mainStatusKey,
-                    accountType = AccountType.Specific(accountKey),
-                    userKey = mainUserKey,
-                    content = mainStatusContent,
-                    text = "main status text",
-                    createdAt = Clock.System.now(),
-                )
-
-            val mainStatusWithUser =
-                DbStatusWithUser(
-                    data = mainStatus,
-                    user = mainUser,
-                )
-
-            // Referenced Status
-            val refUserKey = MicroBlogKey(id = Uuid.random().toString(), host = "test.com")
-            val refStatusKey = MicroBlogKey(id = Uuid.random().toString(), host = "test.com")
-            val refUserContent = UserContent.Test("ref user content")
-            val refStatusContent = StatusContent.Test("ref status content")
-
-            val refUser =
-                DbUser(
-                    userKey = refUserKey,
-                    platformType = PlatformType.Mastodon,
-                    name = "Ref User",
-                    handle = "refuser",
-                    host = "test.com",
-                    content = refUserContent,
-                )
-
-            val refStatus =
-                DbStatus(
-                    statusKey = refStatusKey,
-                    accountType = AccountType.Specific(accountKey),
-                    userKey = refUserKey,
-                    content = refStatusContent,
-                    text = "ref status text",
-                    createdAt = Clock.System.now(),
-                )
-
-            val refStatusWithUser =
-                DbStatusWithUser(
-                    data = refStatus,
-                    user = refUser,
-                )
-
-            val references = mapOf(ReferenceType.Reply to listOf(refStatusWithUser))
-
-            val timelineItem =
-                createDbPagingTimelineWithStatus(
-                    accountKey = accountKey,
-                    pagingKey = "home",
-                    sortId = 1L,
-                    status = mainStatusWithUser,
-                    references = references,
-                )
-
-            saveToDatabase(db, listOf(timelineItem))
-
-            // Verify Main Status
-            val savedMainStatus =
-                db
-                    .statusDao()
-                    .get(mainStatusKey, AccountType.Specific(accountKey))
-                    .first()
-            assertNotNull(savedMainStatus)
-            assertEquals(mainStatusContent, savedMainStatus.content)
-
-            // Verify Referenced Status
-            val savedRefStatus =
-                db
-                    .statusDao()
-                    .get(refStatusKey, AccountType.Specific(accountKey))
-                    .first()
-            assertNotNull(savedRefStatus)
-            assertEquals(refStatusContent, savedRefStatus.content)
-
-            // Verify Reference
-            val savedReferences = db.statusReferenceDao().getByStatusKey(mainStatusKey)
-            assertEquals(1, savedReferences.size)
-            val savedRef = savedReferences.first()
-            assertEquals(ReferenceType.Reply, savedRef.referenceType)
-            assertEquals(refStatusKey, savedRef.referenceStatusKey)
-        }
-
-    @Test
-    fun testReferencesClearedWhenMissingInSubsequentInsert() =
+    fun saveToDatabasePersistsReferences() =
         runTest {
             val accountKey = MicroBlogKey(id = "account", host = "test.com")
 
-            val mainUserKey = MicroBlogKey(id = "main_user", host = "test.com")
-            val mainStatusKey = MicroBlogKey(id = "main_status", host = "test.com")
-            val mainUserContent = UserContent.Test("main user content")
-            val mainStatusContent = StatusContent.Test("main status content")
-
-            val mainUser =
-                DbUser(
-                    userKey = mainUserKey,
-                    platformType = PlatformType.Mastodon,
-                    name = "Main User",
-                    handle = "mainuser",
-                    host = "test.com",
-                    content = mainUserContent,
-                )
-
-            val mainStatus =
-                DbStatus(
-                    statusKey = mainStatusKey,
-                    accountType = AccountType.Specific(accountKey),
-                    userKey = mainUserKey,
-                    content = mainStatusContent,
-                    text = "main status text",
-                    createdAt = Clock.System.now(),
-                )
-
-            val mainStatusWithUser =
-                DbStatusWithUser(
-                    data = mainStatus,
-                    user = mainUser,
-                )
-
-            val refUserKey = MicroBlogKey(id = "ref_user", host = "test.com")
-            val refStatusKey = MicroBlogKey(id = "ref_status", host = "test.com")
-            val refUserContent = UserContent.Test("ref user content")
-            val refStatusContent = StatusContent.Test("ref status content")
-
-            val refUser =
-                DbUser(
-                    userKey = refUserKey,
-                    platformType = PlatformType.Mastodon,
-                    name = "Ref User",
-                    handle = "refuser",
-                    host = "test.com",
-                    content = refUserContent,
-                )
-
-            val refStatus =
-                DbStatus(
-                    statusKey = refStatusKey,
-                    accountType = AccountType.Specific(accountKey),
-                    userKey = refUserKey,
-                    content = refStatusContent,
-                    text = "ref status text",
-                    createdAt = Clock.System.now(),
-                )
-
-            val refStatusWithUser =
-                DbStatusWithUser(
-                    data = refStatus,
+            val refUser = createUser(MicroBlogKey(id = "ref-user", host = "test.com"), "Ref User")
+            val refPost =
+                createPost(
+                    accountKey = accountKey,
                     user = refUser,
+                    statusKey = MicroBlogKey(id = "ref-status", host = "test.com"),
+                    text = "ref status",
                 )
 
-            val initialReferences = mapOf(ReferenceType.Reply to listOf(refStatusWithUser))
-
-            val initialTimelineItem =
-                createDbPagingTimelineWithStatus(
+            val mainUser = createUser(MicroBlogKey(id = "main-user", host = "test.com"), "Main User")
+            val mainPost =
+                createPost(
                     accountKey = accountKey,
-                    pagingKey = "home",
-                    sortId = 1L,
-                    status = mainStatusWithUser,
-                    references = initialReferences,
+                    user = mainUser,
+                    statusKey = MicroBlogKey(id = "main-status", host = "test.com"),
+                    text = "main status",
+                    parents = persistentListOf(refPost),
                 )
 
-            saveToDatabase(db, listOf(initialTimelineItem))
+            val timelineItem = TimelinePagingMapper.toDb(mainPost, pagingKey = "home")
+            saveToDatabase(db, listOf(timelineItem))
 
-            val savedRefsBefore = db.statusReferenceDao().getByStatusKey(mainStatusKey)
-            assertEquals(1, savedRefsBefore.size)
-
-            val updatedTimelineItem =
-                createDbPagingTimelineWithStatus(
-                    accountKey = accountKey,
-                    pagingKey = "home",
-                    sortId = 2L,
-                    status = mainStatusWithUser,
-                    references = emptyMap(),
-                )
-
-            saveToDatabase(db, listOf(updatedTimelineItem))
-
-            val savedRefsAfter = db.statusReferenceDao().getByStatusKey(mainStatusKey)
-            assertEquals(1, savedRefsAfter.size)
-
-            val savedMainStatus =
-                db
-                    .statusDao()
-                    .get(mainStatusKey, AccountType.Specific(accountKey))
-                    .first()
+            val savedMainStatus = db.statusDao().get(mainPost.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedMainStatus)
-            assertEquals(mainStatusContent, savedMainStatus.content)
-
-            val savedRefStatus =
-                db
-                    .statusDao()
-                    .get(refStatusKey, AccountType.Specific(accountKey))
-                    .first()
+            val savedRefStatus = db.statusDao().get(refPost.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedRefStatus)
-            assertEquals(refStatusContent, savedRefStatus.content)
+
+            val savedReferences = db.statusReferenceDao().getByStatusKey(mainPost.statusKey)
+            assertEquals(1, savedReferences.size)
+            assertEquals(refPost.statusKey, savedReferences.first().referenceStatusKey)
+        }
+
+    @Test
+    fun referencesRemainWhenSubsequentInsertHasNoReferences() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+
+            val refUser = createUser(MicroBlogKey(id = "ref-user", host = "test.com"), "Ref User")
+            val refPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = refUser,
+                    statusKey = MicroBlogKey(id = "ref-status", host = "test.com"),
+                    text = "ref status",
+                )
+
+            val mainUser = createUser(MicroBlogKey(id = "main-user", host = "test.com"), "Main User")
+            val withRef =
+                createPost(
+                    accountKey = accountKey,
+                    user = mainUser,
+                    statusKey = MicroBlogKey(id = "main-status", host = "test.com"),
+                    text = "main status",
+                    parents = persistentListOf(refPost),
+                )
+
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withRef, pagingKey = "home")))
+            assertEquals(1, db.statusReferenceDao().getByStatusKey(withRef.statusKey).size)
+
+            val withoutRef = withRef.copy(parents = persistentListOf())
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withoutRef, pagingKey = "home")))
+
+            val refsAfter = db.statusReferenceDao().getByStatusKey(withRef.statusKey)
+            assertEquals(1, refsAfter.size)
 
             val paging = db.pagingTimelineDao().getPagingSource("home")
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(refreshResult)
         }
+
+    @Test
+    fun toDbMapsReplyReference() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val rootUser = createUser(MicroBlogKey(id = "root-user", host = "test.com"), "Root User")
+            val parentUser = createUser(MicroBlogKey(id = "parent-user", host = "test.com"), "Parent User")
+            val parentPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = parentUser,
+                    statusKey = MicroBlogKey(id = "parent-status", host = "test.com"),
+                    text = "parent",
+                )
+            val rootPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = rootUser,
+                    statusKey = MicroBlogKey(id = "root-status", host = "test.com"),
+                    text = "root",
+                    parents = listOf(parentPost),
+                )
+
+            val mapped = TimelinePagingMapper.toDb(rootPost, pagingKey = "home")
+            assertEquals(rootPost.statusKey, mapped.timeline.statusKey)
+            assertEquals(1, mapped.status.references.size)
+            val reference =
+                mapped.status.references
+                    .first()
+                    .reference
+            assertEquals(ReferenceType.Reply, reference.referenceType)
+            assertEquals(rootPost.statusKey, reference.statusKey)
+            assertEquals(parentPost.statusKey, reference.referenceStatusKey)
+        }
+
+    @Test
+    fun toUiSetsExtraKeyForRootAndReferences() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val rootUser = createUser(MicroBlogKey(id = "root-user", host = "test.com"), "Root User")
+            val parentUser = createUser(MicroBlogKey(id = "parent-user", host = "test.com"), "Parent User")
+            val parentPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = parentUser,
+                    statusKey = MicroBlogKey(id = "parent-status", host = "test.com"),
+                    text = "parent",
+                )
+            val rootPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = rootUser,
+                    statusKey = MicroBlogKey(id = "root-status", host = "test.com"),
+                    text = "root",
+                    parents = listOf(parentPost),
+                )
+
+            val mapped = TimelinePagingMapper.toDb(rootPost, pagingKey = "home")
+            val ui = TimelinePagingMapper.toUi(mapped, pagingKey = "home", useDbKeyInItemKey = true)
+            val post = assertIs<UiTimelineV2.Post>(ui)
+            assertEquals("home", post.extraKey)
+            assertEquals(1, post.parents.size)
+            assertEquals("home", post.parents.first().extraKey)
+            assertEquals(parentPost.statusKey, post.parents.first().statusKey)
+        }
+
+    private fun createUser(
+        key: MicroBlogKey,
+        name: String,
+    ): UiProfile =
+        UiProfile(
+            key = key,
+            handle =
+                UiHandle(
+                    raw = key.id,
+                    host = key.host,
+                ),
+            avatar = "https://${key.host}/${key.id}.png",
+            nameInternal = Element("span").apply { appendText(name) }.toUi(),
+            platformType = dev.dimension.flare.model.PlatformType.Mastodon,
+            clickEvent = ClickEvent.Noop,
+            banner = null,
+            description = null,
+            matrices = UiProfile.Matrices(fansCount = 0, followsCount = 0, statusesCount = 0, platformFansCount = "0"),
+            mark = persistentListOf(),
+            bottomContent = null,
+        )
+
+    private fun createPost(
+        accountKey: MicroBlogKey,
+        user: UiProfile,
+        statusKey: MicroBlogKey,
+        text: String,
+        parents: List<UiTimelineV2.Post> = emptyList(),
+    ): UiTimelineV2.Post =
+        UiTimelineV2.Post(
+            message = null,
+            platformType = dev.dimension.flare.model.PlatformType.Mastodon,
+            images = persistentListOf(),
+            sensitive = false,
+            contentWarning = null,
+            user = user,
+            quote = persistentListOf(),
+            content = Element("span").apply { appendText(text) }.toUi(),
+            actions = persistentListOf(),
+            poll = null,
+            statusKey = statusKey,
+            card = null,
+            createdAt = Clock.System.now().toUi(),
+            emojiReactions = persistentListOf(),
+            sourceChannel = null,
+            visibility = null,
+            replyToHandle = null,
+            parents = parents.toPersistentList(),
+            clickEvent = ClickEvent.Noop,
+            accountType = AccountType.Specific(accountKey),
+        )
 }

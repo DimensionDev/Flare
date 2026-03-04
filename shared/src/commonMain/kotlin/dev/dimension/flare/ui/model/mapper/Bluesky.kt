@@ -42,6 +42,7 @@ import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
@@ -808,7 +809,7 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                     userActionsMenu(
                                         accountKey = accountKey,
                                         userKey = user.key,
-                                        handle = user.handle,
+                                        handle = user.handle.canonical,
                                     ),
                                 )
                                 add(ActionMenu.Divider)
@@ -968,7 +969,11 @@ internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): 
                 .apply {
                     addChildren(TextNode(displayName.orEmpty()))
                 }.toUi(),
-        handle = "@${handle.handle}",
+        handle =
+            UiHandle(
+                raw = handle.handle,
+                host = accountKey.host,
+            ),
         key = userKey,
         banner = null,
         description = null,
@@ -1005,7 +1010,11 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
                 .apply {
                     addChildren(TextNode(displayName.orEmpty()))
                 }.toUi(),
-        handle = "@${handle.handle}",
+        handle =
+            UiHandle(
+                raw = handle.handle,
+                host = accountKey.host,
+            ),
         key = userKey,
         banner = null,
         description = null,
@@ -1042,7 +1051,11 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
                 .apply {
                     addChildren(TextNode(displayName.orEmpty()))
                 }.toUi(),
-        handle = "@${handle.handle}",
+        handle =
+            UiHandle(
+                raw = handle.handle,
+                host = accountKey.host,
+            ),
         key = userKey,
         banner = null,
         description = description?.let { parser.parse(it) }?.toHtml(accountKey)?.toUi(),
@@ -1079,7 +1092,11 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
                 .apply {
                     addChildren(TextNode(displayName.orEmpty()))
                 }.toUi(),
-        handle = "@${handle.handle}",
+        handle =
+            UiHandle(
+                raw = handle.handle,
+                host = accountKey.host,
+            ),
         key = userKey,
         banner = banner?.uri,
         description = description?.let { parser.parse(it) }?.toHtml(accountKey)?.toUi(),

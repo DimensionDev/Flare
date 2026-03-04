@@ -14,6 +14,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -33,12 +34,9 @@ internal class BlueskyLoader(
     UserLoader,
     PostLoader,
     RelationLoader {
-    override suspend fun userByHandleAndHost(
-        handle: String,
-        host: String,
-    ): UiProfile =
+    override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile =
         service
-            .getProfile(GetProfileQueryParams(actor = Handle(handle = handle)))
+            .getProfile(GetProfileQueryParams(actor = Handle(handle = uiHandle.normalizedRaw)))
             .requireResponse()
             .render(accountKey)
 

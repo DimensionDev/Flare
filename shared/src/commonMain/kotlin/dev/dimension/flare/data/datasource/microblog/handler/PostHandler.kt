@@ -5,13 +5,12 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
-import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapNotNull
@@ -33,7 +32,7 @@ internal class PostHandler(
                 val result = loader.status(postKey)
                 database.connect {
                     val item =
-                        TimelineRemoteMediator.mapping(
+                        TimelinePagingMapper.toDb(
                             result,
                             pagingKey,
                         )
@@ -47,7 +46,7 @@ internal class PostHandler(
                     .distinctUntilChanged()
                     .mapNotNull {
                         it?.let {
-                            TimelinePresenter.mapping(it, pagingKey, false)
+                            TimelinePagingMapper.toUi(it, pagingKey, false)
                         }
                     }
             },

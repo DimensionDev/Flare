@@ -12,10 +12,10 @@ internal class PleromaDataSource(
         instance = instance,
     ),
     ReactionDataSource {
-    override fun react(
-        statusKey: MicroBlogKey,
-        hasReacted: Boolean,
-        reaction: String,
-    ) {
-    }
+//    override fun react(
+//        statusKey: MicroBlogKey,
+//        hasReacted: Boolean,
+//        reaction: String,
+//    ) {
+//    }
 }

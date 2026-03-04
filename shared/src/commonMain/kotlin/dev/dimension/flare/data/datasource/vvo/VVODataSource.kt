@@ -407,7 +407,7 @@ internal class VVODataSource(
         )
 
     fun comment(statusKey: MicroBlogKey): CacheData<UiTimelineV2> =
-        MemCacheable("vvo_comment_$accountKey_$statusKey") {
+        MemCacheable("vvo_comment_${accountKey}_$statusKey") {
             service
                 .getHotFlowChild(statusKey.id)
                 .rootComment

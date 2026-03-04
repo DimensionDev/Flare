@@ -2,43 +2,38 @@ package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.cursor
-import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
 internal class UserMediaTimelineRemoteMediator(
     private val userKey: MicroBlogKey,
     private val service: XQTService,
-    private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
-    override val pagingKey = "user_media_${userKey}_$accountKey"
+) : CacheableRemoteLoader<UiTimelineV2> {
+    override val pagingKey: String = "user_media_${userKey}_$accountKey"
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
-                    service
-                        .getUserMedia(
-                            variables =
-                                UserTimelineRequest(
-                                    userID = userKey.id,
-                                    count = pageSize.toLong(),
-                                ).encodeJson(),
-                        )
+                    service.getUserMedia(
+                        variables =
+                            UserTimelineRequest(
+                                userID = userKey.id,
+                                count = pageSize.toLong(),
+                            ).encodeJson(),
+                    )
                 }
 
                 is PagingRequest.Prepend -> {
@@ -72,20 +67,9 @@ internal class UserMediaTimelineRemoteMediator(
                 includePin = request is PagingRequest.Refresh,
             )
 
-        val data =
-            tweet.mapNotNull {
-                it.toDbPagingTimeline(
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                    sortIdProvider = { tweet ->
-                        tweet.id?.toLong() ?: tweet.sortedIndex
-                    },
-                )
-            }
-
         return PagingResult(
             endOfPaginationReached = tweet.isEmpty(),
-            data = data,
+            data = tweet.mapNotNull { it.render(accountKey) },
             nextKey = instructions.cursor(),
         )
     }

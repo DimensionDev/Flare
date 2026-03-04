@@ -5,15 +5,14 @@ import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimelineWithRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageItemWithUser
 import dev.dimension.flare.data.database.cache.model.MessageContent
-import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.render.toUi
-import kotlinx.collections.immutable.toImmutableList
 import kotlin.time.Instant
+import kotlinx.collections.immutable.toImmutableList
 
 // internal fun DbPagingTimelineWithStatus.render(
 //    event: StatusEvent?,
@@ -145,14 +144,13 @@ import kotlin.time.Instant
 internal fun DbDirectMessageTimelineWithRoom.render(
     accountKey: MicroBlogKey,
     credential: UiAccount.Credential,
-    statusEvent: StatusEvent,
 ) = UiDMRoom(
     key = room.room.roomKey,
-    lastMessage = room.lastMessage?.render(accountKey, credential, statusEvent),
+    lastMessage = room.lastMessage?.render(accountKey, credential),
     users =
         room.users
             .filter { it.reference.userKey != accountKey }
-            .map { it.user.render(accountKey) }
+            .map { it.user.content }
             .toImmutableList(),
     unreadCount = timeline.unreadCount,
 )
@@ -160,10 +158,9 @@ internal fun DbDirectMessageTimelineWithRoom.render(
 internal fun DbMessageItemWithUser.render(
     accountKey: MicroBlogKey,
     credential: UiAccount.Credential,
-    statusEvent: StatusEvent,
 ) = UiDMItem(
     key = message.messageKey,
-    user = user.render(accountKey),
+    user = user.content,
     timestamp = Instant.fromEpochMilliseconds(message.timestamp).toUi(),
     content =
         when (val content = message.content) {
@@ -172,7 +169,6 @@ internal fun DbMessageItemWithUser.render(
                 content.render(
                     accountKey = accountKey,
                     credential = credential,
-                    statusEvent = statusEvent,
                 )
 
             is MessageContent.Local ->

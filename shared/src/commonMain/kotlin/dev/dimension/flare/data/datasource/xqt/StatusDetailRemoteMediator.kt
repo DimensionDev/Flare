@@ -2,25 +2,19 @@ package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.isBottomEnd
-import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
-import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.StatusEvent
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import kotlinx.coroutines.flow.firstOrNull
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -29,13 +23,9 @@ import kotlinx.serialization.Serializable
 internal class StatusDetailRemoteMediator(
     private val statusKey: MicroBlogKey,
     private val service: XQTService,
-    private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val event: StatusEvent.XQT,
     private val statusOnly: Boolean,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
+) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String =
         buildString {
             append("status_detail_")
@@ -46,16 +36,17 @@ internal class StatusDetailRemoteMediator(
             append("_")
             append(accountKey.toString())
         }
+
     private var conversationId: String? = null
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> =
         when (request) {
             is PagingRequest.Append -> {
                 if (statusOnly) {
-                    return PagingResult(
+                    PagingResult(
                         endOfPaginationReached = true,
                     )
                 } else {
@@ -108,40 +99,25 @@ internal class StatusDetailRemoteMediator(
                                     is TweetWithVisibilityResults -> result.tweet.legacy?.conversationIdStr == conversationId
                                 }
                             }
-                    val result = actualTweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
 
-                    return PagingResult(
+                    PagingResult(
                         endOfPaginationReached = response.isBottomEnd() || actualTweet.size == 1 || response.cursor() == null,
-                        data = result,
+                        data =
+                            actualTweet.mapNotNull {
+                                it.render(accountKey)
+                            },
                         nextKey = response.cursor(),
                     )
                 }
             }
+
             is PagingRequest.Prepend -> {
-                return PagingResult(
+                PagingResult(
                     endOfPaginationReached = true,
                 )
             }
-            PagingRequest.Refresh -> {
-                if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
-                    database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
-                        database.connect {
-                            database
-                                .pagingTimelineDao()
-                                .insertAll(
-                                    listOf(
-                                        DbPagingTimeline(
-                                            accountType = AccountType.Specific(accountKey),
-                                            statusKey = statusKey,
-                                            pagingKey = pagingKey,
-                                            sortId = 0,
-                                        ),
-                                    ),
-                                )
-                        }
-                    }
-                }
 
+            PagingRequest.Refresh -> {
                 val response =
                     service
                         .getTweetDetail(
@@ -157,16 +133,17 @@ internal class StatusDetailRemoteMediator(
                         .orEmpty()
                 val tweet = response.tweets()
                 val item = tweet.firstOrNull { it.id == statusKey.id }
-                val result = listOf(item).mapNotNull { it?.toDbPagingTimeline(accountKey, pagingKey) }
 
-                return PagingResult(
+                PagingResult(
                     endOfPaginationReached = statusOnly,
-                    data = result,
-                    nextKey = "",
+                    data =
+                        listOfNotNull(item).mapNotNull {
+                            it.render(accountKey)
+                        },
+                    nextKey = if (statusOnly) null else "",
                 )
             }
         }
-    }
 }
 
 @Serializable
@@ -186,7 +163,6 @@ internal data class TweetDetailRequest(
     @SerialName("focalTweetId")
     val focalTweetID: String,
     val cursor: String? = null,
-    // tweet/profile/home
     @Required
     val referrer: String = "tweet",
     @SerialName("with_rux_injections")

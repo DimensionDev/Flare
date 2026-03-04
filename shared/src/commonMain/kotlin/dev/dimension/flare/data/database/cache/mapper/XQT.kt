@@ -5,13 +5,8 @@ import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
 import dev.dimension.flare.data.database.cache.model.DbMessageRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.database.cache.model.DbStatus
-import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.MessageContent
-import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.network.xqt.model.CursorType
 import dev.dimension.flare.data.network.xqt.model.InboxConversation
 import dev.dimension.flare.data.network.xqt.model.InboxTimelineEntry
@@ -30,7 +25,6 @@ import dev.dimension.flare.data.network.xqt.model.TimelineTweet
 import dev.dimension.flare.data.network.xqt.model.TimelineUser
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
-import dev.dimension.flare.data.network.xqt.model.TweetUnion
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserLegacy
@@ -41,25 +35,9 @@ import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.ReferenceType
-import dev.dimension.flare.ui.model.mapper.name
-import dev.dimension.flare.ui.model.mapper.parseXQTCustomDateTime
-import dev.dimension.flare.ui.model.mapper.screenName
-import kotlin.time.Clock
+import dev.dimension.flare.ui.model.mapper.render
 
 internal object XQT {
-    suspend fun save(
-        accountKey: MicroBlogKey,
-        pagingKey: String,
-        database: CacheDatabase,
-        tweet: List<XQTTimeline>,
-        sortIdProvider: (XQTTimeline) -> Long = { it.sortedIndex },
-    ) {
-        val items =
-            tweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider) }
-        saveToDatabase(database, items)
-    }
-
     suspend fun saveDM(
         accountKey: MicroBlogKey,
         database: CacheDatabase,
@@ -180,7 +158,15 @@ private fun List<InboxUser>.toDbUser(accountKey: MicroBlogKey): List<DbUser> {
                 },
             isBlueVerified = it.isBlueVerified == true,
             restId = it.idStr,
-        ).toDbUser(accountKey)
+        ).render(accountKey).let { data ->
+            DbUser(
+                userKey = data.key,
+                name = data.name.raw,
+                handle = data.handle,
+                host = accountKey.host,
+                content = data,
+            )
+        }
     }
 }
 
@@ -200,113 +186,6 @@ private fun InboxTimelineEntry.toDbMessageItem(
         showSender = showSender,
     )
 }
-
-private fun TweetUnion.getRetweet(): TweetUnion? =
-    when (this) {
-        is Tweet -> this.legacy?.retweetedStatusResult?.result
-        is TweetTombstone -> null
-        is TweetWithVisibilityResults ->
-            this.tweet.legacy
-                ?.retweetedStatusResult
-                ?.result
-    }
-
-private fun TweetUnion.getQuoted(): TweetUnion? =
-    when (this) {
-        is Tweet -> this.quotedStatusResult?.result
-        is TweetTombstone -> null
-        is TweetWithVisibilityResults -> this.tweet.quotedStatusResult?.result
-    }
-
-internal fun XQTTimeline.toDbPagingTimeline(
-    accountKey: MicroBlogKey,
-    pagingKey: String,
-    sortIdProvider: (XQTTimeline) -> Long = { sortedIndex },
-): DbPagingTimelineWithStatus? =
-    tweets.toDbStatusWithUser(accountKey)?.let { tweet ->
-        createDbPagingTimelineWithStatus(
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            sortId = sortIdProvider(this),
-            status = tweet,
-            references =
-                listOfNotNull(
-                    tweets.tweetResults.result?.getRetweet()?.toDbStatusWithUser(accountKey)?.let {
-                        ReferenceType.Retweet to listOfNotNull(it)
-                    },
-                    (
-                        tweets.tweetResults.result
-                            ?.getRetweet()
-                            ?.getQuoted() ?: tweets.tweetResults.result?.getQuoted()
-                    )?.toDbStatusWithUser(accountKey)
-                        ?.let {
-                            ReferenceType.Quote to listOfNotNull(it)
-                        },
-                    parents
-                        .mapNotNull { it.tweets.toDbStatusWithUser(accountKey) }
-                        .takeIf { it.isNotEmpty() }
-                        ?.let { ReferenceType.Reply to it },
-                ).toMap(),
-        )
-    }
-
-private fun TimelineTweet.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser? =
-    tweetResults.result?.toDbStatusWithUser(accountKey)
-
-private fun TweetUnion.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser? =
-    when (this) {
-        is Tweet -> toDbStatusWithUser(this, accountKey)
-        // You’re unable to view this Post because
-        // this account owner limits who can view their Posts. Learn more
-        // throw IllegalStateException("Tweet tombstone should not be saved")
-        is TweetTombstone -> null
-        is TweetWithVisibilityResults -> toDbStatusWithUser(this.tweet, accountKey)
-    }
-
-private fun toDbStatusWithUser(
-    tweet: Tweet,
-    accountKey: MicroBlogKey,
-): DbStatusWithUser? {
-    val user =
-        tweet.core
-            ?.userResults
-            ?.result
-            ?.let {
-                it as? User
-            }?.toDbUser(accountKey) ?: return null
-    return DbStatusWithUser(
-        data =
-            DbStatus(
-                statusKey =
-                    MicroBlogKey(
-                        id = tweet.restId,
-                        host = accountKey.host,
-                    ),
-                content = StatusContent.XQT(tweet),
-                userKey = user.userKey,
-                accountType = AccountType.Specific(accountKey),
-                text = tweet.legacy?.fullText,
-                createdAt =
-                    tweet.legacy?.createdAt?.let { parseXQTCustomDateTime(it) }
-                        ?: Clock.System.now(),
-            ),
-        user = user,
-    )
-}
-
-internal fun User.toDbUser(accountKey: MicroBlogKey) =
-    DbUser(
-        userKey =
-            MicroBlogKey(
-                id = restId,
-                host = accountKey.host,
-            ),
-        platformType = PlatformType.xQt,
-        name = name,
-        handle = screenName,
-        host = accountKey.host,
-        content = UserContent.XQT(this),
-    )
 
 internal data class XQTTimeline(
     val parents: List<XQTTimeline>,

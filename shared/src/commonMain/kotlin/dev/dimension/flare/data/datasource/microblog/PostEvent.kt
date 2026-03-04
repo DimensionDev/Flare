@@ -14,6 +14,9 @@ import dev.dimension.flare.ui.model.mapper.misskeyRenote
 import dev.dimension.flare.ui.model.mapper.vvoFavorite
 import dev.dimension.flare.ui.model.mapper.vvoLike
 import dev.dimension.flare.ui.model.mapper.vvoLikeComment
+import dev.dimension.flare.ui.model.mapper.xqtBookmark
+import dev.dimension.flare.ui.model.mapper.xqtLike
+import dev.dimension.flare.ui.model.mapper.xqtRetweet
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
 
@@ -272,19 +275,52 @@ internal sealed interface PostEvent {
         data class Retweet(
             override val postKey: MicroBlogKey,
             val retweeted: Boolean,
-        ) : XQT
+            val count: Long = 0,
+            val accountKey: MicroBlogKey,
+        ) : XQT,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.xqtRetweet(
+                    statusKey = postKey,
+                    retweeted = !retweeted,
+                    count = (count + if (!retweeted) 1 else -1).coerceAtLeast(0),
+                    accountKey = accountKey,
+                )
+        }
 
         @Serializable
         data class Like(
             override val postKey: MicroBlogKey,
             val liked: Boolean,
-        ) : XQT
+            val count: Long = 0,
+            val accountKey: MicroBlogKey,
+        ) : XQT,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.xqtLike(
+                    statusKey = postKey,
+                    liked = !liked,
+                    count = (count + if (!liked) 1 else -1).coerceAtLeast(0),
+                    accountKey = accountKey,
+                )
+        }
 
         @Serializable
         data class Bookmark(
             override val postKey: MicroBlogKey,
             val bookmarked: Boolean,
-        ) : XQT
+            val count: Long = 0,
+            val accountKey: MicroBlogKey,
+        ) : XQT,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.xqtBookmark(
+                    statusKey = postKey,
+                    bookmarked = !bookmarked,
+                    count = (count + if (!bookmarked) 1 else -1).coerceAtLeast(0),
+                    accountKey = accountKey,
+                )
+        }
     }
 
     @Serializable

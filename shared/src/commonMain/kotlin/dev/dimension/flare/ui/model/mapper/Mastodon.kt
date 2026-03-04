@@ -680,7 +680,7 @@ internal fun ActionMenu.Companion.mastodonLike(
     statusKey: MicroBlogKey,
 ): ActionMenu.Item =
     ActionMenu.Item(
-        updateKey = "like",
+        updateKey = "mastodon_like_$statusKey",
         icon = if (favourited) UiIcon.Unlike else UiIcon.Like,
         text =
             ActionMenu.Item.Text.Localized(
@@ -695,11 +695,14 @@ internal fun ActionMenu.Companion.mastodonLike(
         clickEvent =
             ClickEvent.event(
                 accountKey,
+            ) { accountKey ->
                 PostEvent.Mastodon.Like(
                     postKey = statusKey,
                     liked = favourited,
-                ),
-            ),
+                    accountKey = accountKey,
+                    count = favouritesCount,
+                )
+            },
     )
 
 internal fun ActionMenu.Companion.mastodonRepost(
@@ -709,7 +712,7 @@ internal fun ActionMenu.Companion.mastodonRepost(
     statusKey: MicroBlogKey,
 ): ActionMenu.Item =
     ActionMenu.Item(
-        updateKey = "reblog",
+        updateKey = "mastodon_repost_$statusKey",
         icon = if (reblogged) UiIcon.Unretweet else UiIcon.Retweet,
         text =
             ActionMenu.Item.Text.Localized(
@@ -724,11 +727,14 @@ internal fun ActionMenu.Companion.mastodonRepost(
         clickEvent =
             ClickEvent.event(
                 accountKey,
+            ) { accountKey ->
                 PostEvent.Mastodon.Reblog(
                     postKey = statusKey,
                     reblogged = reblogged,
-                ),
-            ),
+                    count = reblogsCount,
+                    accountKey = accountKey,
+                )
+            },
     )
 
 internal fun ActionMenu.Companion.mastodonBookmark(
@@ -737,7 +743,7 @@ internal fun ActionMenu.Companion.mastodonBookmark(
     statusKey: MicroBlogKey,
 ): ActionMenu.Item =
     ActionMenu.Item(
-        updateKey = "bookmark",
+        updateKey = "mastodon_bookmark_$statusKey",
         icon =
             if (bookmarked) {
                 UiIcon.Unbookmark
@@ -756,11 +762,13 @@ internal fun ActionMenu.Companion.mastodonBookmark(
         clickEvent =
             ClickEvent.event(
                 accountKey,
+            ) { accountKey ->
                 PostEvent.Mastodon.Bookmark(
                     postKey = statusKey,
                     bookmarked = bookmarked,
-                ),
-            ),
+                    accountKey = accountKey,
+                )
+            },
     )
 
 private fun Attachment.toUi(sensitive: Boolean): UiMedia? =

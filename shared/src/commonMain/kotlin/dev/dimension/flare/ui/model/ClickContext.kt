@@ -37,6 +37,20 @@ internal sealed interface ClickEvent {
                 ),
             )
         }
+
+        inline fun event(
+            accountKey: MicroBlogKey?,
+            eventCreator: (accountKey: MicroBlogKey) -> PostEvent,
+        ) = if (accountKey == null) {
+            Noop
+        } else {
+            Deeplink(
+                DeeplinkEvent(
+                    accountKey = accountKey,
+                    postEvent = eventCreator.invoke(accountKey),
+                ),
+            )
+        }
     }
 }
 

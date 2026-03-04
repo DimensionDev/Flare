@@ -16,7 +16,6 @@ import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Post
 import app.bsky.feed.PostEmbedUnion
 import app.bsky.feed.PostReplyRef
-import app.bsky.feed.ViewerState
 import app.bsky.unspecced.GetPopularFeedGeneratorsQueryParams
 import chat.bsky.convo.DeleteMessageForSelfRequest
 import chat.bsky.convo.DeletedMessageView
@@ -48,8 +47,7 @@ import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.MessageContent
-import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
@@ -93,6 +91,8 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.blueskyLike
+import dev.dimension.flare.ui.model.mapper.blueskyReblog
 import dev.dimension.flare.ui.model.mapper.bskyJson
 import dev.dimension.flare.ui.model.mapper.parseBskyFacets
 import dev.dimension.flare.ui.model.mapper.render
@@ -222,6 +222,15 @@ internal class BlueskyDataSource(
         event: PostEvent,
         updater: DatabaseUpdater,
     ) {
+        require(event is PostEvent.Bluesky)
+        when (event) {
+            is PostEvent.Bluesky.Bookmark ->
+                bookmark(event, updater)
+            is PostEvent.Bluesky.Like ->
+                like(event, updater)
+            is PostEvent.Bluesky.Reblog ->
+                reblog(event, updater)
+        }
     }
 
     override fun homeTimeline() =
@@ -433,207 +442,112 @@ internal class BlueskyDataSource(
         }
     }
 
-    override fun reblog(
-        statusKey: MicroBlogKey,
-        cid: String,
-        uri: String,
-        repostUri: String?,
+    suspend fun reblog(
+        event: PostEvent.Bluesky.Reblog,
+        updater: DatabaseUpdater,
     ) {
-        coroutineScope.launch {
-            updateStatusUseCase<StatusContent.Bluesky>(
-                statusKey = statusKey,
-                accountKey = accountKey,
-                cacheDatabase = database,
-            ) { content ->
-                val newUri =
-                    if (repostUri != null) {
-                        null
-                    } else {
-                        AtUri("")
-                    }
-                val count =
-                    if (repostUri != null) {
-                        (content.data.repostCount ?: 0) - 1
-                    } else {
-                        (content.data.repostCount ?: 0) + 1
-                    }.coerceAtLeast(0)
-                content.copy(
-                    data =
-                        content.data.copy(
-                            viewer =
-                                content.data.viewer?.copy(
-                                    repost = newUri,
-                                ) ?: ViewerState(
-                                    repost = newUri,
-                                ),
-                            repostCount = count,
-                        ),
+        val cid = event.cid
+        val uri = event.uri
+        val repostUri = event.repostUri
+        if (repostUri != null) {
+            if (repostUri.isEmpty()) {
+                // pending event, do nothing
+            } else {
+                service.deleteRecord(
+                    DeleteRecordRequest(
+                        repo = Did(did = accountKey.id),
+                        collection = Nsid("app.bsky.feed.repost"),
+                        rkey = RKey(repostUri.substringAfterLast('/')),
+                    ),
                 )
             }
-            tryRun {
-                if (repostUri != null) {
-                    service.deleteRecord(
-                        DeleteRecordRequest(
+        } else {
+            val response =
+                service
+                    .createRecord(
+                        CreateRecordRequest(
                             repo = Did(did = accountKey.id),
                             collection = Nsid("app.bsky.feed.repost"),
-                            rkey = RKey(repostUri.substringAfterLast('/')),
+                            record =
+                                app.bsky.feed
+                                    .Repost(
+                                        subject =
+                                            StrongRef(
+                                                uri = AtUri(uri),
+                                                cid = Cid(cid),
+                                            ),
+                                        createdAt =
+                                            Clock.System
+                                                .now(),
+                                    ).bskyJson(),
                         ),
-                    )
-                } else {
-                    val result =
-                        service
-                            .createRecord(
-                                CreateRecordRequest(
-                                    repo = Did(did = accountKey.id),
-                                    collection = Nsid("app.bsky.feed.repost"),
-                                    record =
-                                        app.bsky.feed
-                                            .Repost(
-                                                subject =
-                                                    StrongRef(
-                                                        uri = AtUri(uri),
-                                                        cid = Cid(cid),
-                                                    ),
-                                                createdAt =
-                                                    Clock.System
-                                                        .now(),
-                                            ).bskyJson(),
-                                ),
-                            ).requireResponse()
-                    updateStatusUseCase<StatusContent.Bluesky>(
-                        statusKey = statusKey,
+                    ).requireResponse()
+            updater.updateActionMenu(
+                postKey = event.postKey,
+                newActionMenu =
+                    ActionMenu.blueskyReblog(
                         accountKey = accountKey,
-                        cacheDatabase = database,
-                    ) { content ->
-                        content.copy(
-                            data =
-                                content.data.copy(
-                                    viewer =
-                                        content.data.viewer?.copy(
-                                            repost = AtUri(result.uri.atUri),
-                                        ) ?: ViewerState(
-                                            repost = AtUri(result.uri.atUri),
-                                        ),
-                                ),
-                        )
-                    }
-                }
-            }.onFailure {
-                updateStatusUseCase<StatusContent.Bluesky>(
-                    statusKey = statusKey,
-                    accountKey = accountKey,
-                    cacheDatabase = database,
-                ) { content ->
-                    val count =
-                        if (repostUri != null) {
-                            (content.data.repostCount ?: 0) + 1
-                        } else {
-                            (content.data.repostCount ?: 0) - 1
-                        }.coerceAtLeast(0)
-                    content.copy(
-                        data =
-                            content.data.copy(
-                                viewer =
-                                    content.data.viewer?.copy(
-                                        repost = repostUri?.let { it1 -> AtUri(it1) },
-                                    ) ?: ViewerState(
-                                        repost = repostUri?.let { it1 -> AtUri(it1) },
-                                    ),
-                                repostCount = count,
-                            ),
-                    )
-                }
-            }
+                        postKey = event.postKey,
+                        cid = cid,
+                        uri = uri,
+                        count = event.count + 1,
+                        repostUri = response.uri.atUri,
+                    ),
+            )
         }
     }
 
-    override fun like(
-        statusKey: MicroBlogKey,
-        cid: String,
-        uri: String,
-        likedUri: String?,
+    suspend fun like(
+        event: PostEvent.Bluesky.Like,
+        updater: DatabaseUpdater,
     ) {
-        coroutineScope.launch {
-            updateStatusUseCase<StatusContent.Bluesky>(
-                statusKey = statusKey,
-                accountKey = accountKey,
-                cacheDatabase = database,
-            ) { content ->
-                val newUri =
-                    if (likedUri != null) {
-                        null
-                    } else {
-                        AtUri("")
-                    }
-                val count =
-                    if (likedUri != null) {
-                        (content.data.likeCount ?: 0) - 1
-                    } else {
-                        (content.data.likeCount ?: 0) + 1
-                    }.coerceAtLeast(0)
-                content.copy(
-                    data =
-                        content.data.copy(
-                            viewer =
-                                content.data.viewer?.copy(
-                                    like = newUri,
-                                ) ?: ViewerState(
-                                    like = newUri,
-                                ),
-                            likeCount = count,
-                        ),
-                )
+        val cid = event.cid
+        val uri = event.uri
+        val likedUri = event.likedUri
+        if (likedUri != null) {
+            if (likedUri.isEmpty()) {
+                // pending event, do nothing
+            } else {
+                deleteLikeRecord(likedUri)
             }
-            tryRun {
-                if (likedUri != null) {
-                    deleteLikeRecord(likedUri)
-                } else {
-                    val result =
-                        createLikeRecord(cid, uri)
-                    updateStatusUseCase<StatusContent.Bluesky>(
-                        statusKey = statusKey,
+        } else {
+            val response = createLikeRecord(cid, uri)
+            updater.updateActionMenu(
+                postKey = event.postKey,
+                newActionMenu =
+                    ActionMenu.blueskyLike(
                         accountKey = accountKey,
-                        cacheDatabase = database,
-                    ) { content ->
-                        content.copy(
-                            data =
-                                content.data.copy(
-                                    viewer =
-                                        content.data.viewer?.copy(
-                                            like = AtUri(result.uri.atUri),
-                                        ) ?: ViewerState(
-                                            like = AtUri(result.uri.atUri),
-                                        ),
-                                ),
-                        )
-                    }
-                }
-            }.onFailure {
-                updateStatusUseCase<StatusContent.Bluesky>(
-                    statusKey = statusKey,
-                    accountKey = accountKey,
-                    cacheDatabase = database,
-                ) { content ->
-                    val count =
-                        if (likedUri != null) {
-                            (content.data.likeCount ?: 0) + 1
-                        } else {
-                            (content.data.likeCount ?: 0) - 1
-                        }.coerceAtLeast(0)
-                    content.copy(
-                        data =
-                            content.data.copy(
-                                viewer =
-                                    content.data.viewer?.copy(
-                                        like = likedUri?.let { it1 -> AtUri(it1) },
-                                    ) ?: ViewerState(
-                                        like = likedUri?.let { it1 -> AtUri(it1) },
-                                    ),
-                                likeCount = count,
-                            ),
-                    )
-                }
-            }
+                        postKey = event.postKey,
+                        cid = cid,
+                        uri = uri,
+                        count = event.count + 1,
+                        likedUri = response.uri.atUri,
+                    ),
+            )
+        }
+    }
+
+    suspend fun bookmark(
+        event: PostEvent.Bluesky.Bookmark,
+        updater: DatabaseUpdater,
+    ) {
+        val cid = event.cid
+        val uri = event.uri
+        if (event.bookmarked) {
+            service
+                .deleteBookmark(
+                    DeleteBookmarkRequest(
+                        uri = AtUri(uri),
+                    ),
+                ).requireResponse()
+        } else {
+            service
+                .createBookmark(
+                    CreateBookmarkRequest(
+                        uri = AtUri(uri),
+                        cid = Cid(cid),
+                    ),
+                ).requireResponse()
         }
     }
 
@@ -1262,94 +1176,6 @@ internal class BlueskyDataSource(
             service = service,
             accountKey = accountKey,
         )
-
-    override fun bookmark(
-        statusKey: MicroBlogKey,
-        uri: String,
-        cid: String,
-    ) {
-        coroutineScope.launch {
-            updateStatusUseCase<StatusContent.Bluesky>(
-                statusKey = statusKey,
-                accountKey = accountKey,
-                cacheDatabase = database,
-            ) { content ->
-                content.copy(
-                    data =
-                        content.data.copy(
-                            viewer = content.data.viewer?.copy(bookmarked = true),
-                        ),
-                )
-            }
-            tryRun {
-                service
-                    .createBookmark(
-                        CreateBookmarkRequest(
-                            uri = AtUri(uri),
-                            cid = Cid(cid),
-                        ),
-                    ).requireResponse()
-            }.onFailure {
-                it.printStackTrace()
-                // rollback
-                updateStatusUseCase<StatusContent.Bluesky>(
-                    statusKey = statusKey,
-                    accountKey = accountKey,
-                    cacheDatabase = database,
-                ) { content ->
-                    content.copy(
-                        data =
-                            content.data.copy(
-                                viewer = content.data.viewer?.copy(bookmarked = false),
-                            ),
-                    )
-                }
-            }
-        }
-    }
-
-    override fun unbookmark(
-        statusKey: MicroBlogKey,
-        uri: String,
-    ) {
-        coroutineScope.launch {
-            updateStatusUseCase<StatusContent.Bluesky>(
-                statusKey = statusKey,
-                accountKey = accountKey,
-                cacheDatabase = database,
-            ) { content ->
-                content.copy(
-                    data =
-                        content.data.copy(
-                            viewer = content.data.viewer?.copy(bookmarked = false),
-                        ),
-                )
-            }
-            tryRun {
-                service
-                    .deleteBookmark(
-                        DeleteBookmarkRequest(
-                            uri = AtUri(uri),
-                        ),
-                    ).requireResponse()
-            }.onFailure {
-                it.printStackTrace()
-                // rollback
-                updateStatusUseCase<StatusContent.Bluesky>(
-                    statusKey = statusKey,
-                    accountKey = accountKey,
-                    cacheDatabase = database,
-                ) { content ->
-                    content.copy(
-                        data =
-                            content.data.copy(
-                                viewer = content.data.viewer?.copy(bookmarked = true),
-                            ),
-                    )
-                }
-            }
-        }
-    }
 }
 
 internal inline fun <reified T : Any> T.bskyJson(): JsonContent = bskyJson.encodeAsJsonContent(this)

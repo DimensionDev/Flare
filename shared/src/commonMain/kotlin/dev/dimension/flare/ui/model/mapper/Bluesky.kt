@@ -717,37 +717,13 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
                         ),
                     actions =
                         listOfNotNull(
-                            ActionMenu.Item(
-                                icon =
-                                    if (viewer?.repost?.atUri !=
-                                        null
-                                    ) {
-                                        UiIcon.Unretweet
-                                    } else {
-                                        UiIcon.Retweet
-                                    },
-                                text =
-                                    ActionMenu.Item.Text.Localized(
-                                        if (viewer?.repost?.atUri !=
-                                            null
-                                        ) {
-                                            ActionMenu.Item.Text.Localized.Type.Unretweet
-                                        } else {
-                                            ActionMenu.Item.Text.Localized.Type.Retweet
-                                        },
-                                    ),
-                                count = UiNumber(repostCount ?: 0),
-                                color = if (viewer?.repost?.atUri != null) ActionMenu.Item.Color.PrimaryColor else null,
-                                clickEvent =
-                                    ClickEvent.event(
-                                        accountKey,
-                                        PostEvent.Bluesky.Reblog(
-                                            postKey = statusKey,
-                                            cid = cid.cid,
-                                            uri = uri.atUri,
-                                            repostUri = viewer?.repost?.atUri,
-                                        ),
-                                    ),
+                            ActionMenu.blueskyReblog(
+                                accountKey = accountKey,
+                                postKey = statusKey,
+                                cid = cid.cid,
+                                uri = uri.atUri,
+                                count = repostCount ?: 0,
+                                repostUri = viewer?.repost?.atUri,
                             ),
                             ActionMenu.Item(
                                 icon = UiIcon.Quote,
@@ -764,30 +740,13 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
                             ),
                         ).toImmutableList(),
                 ),
-                ActionMenu.Item(
-                    icon = if (viewer?.like?.atUri != null) UiIcon.Unlike else UiIcon.Like,
-                    text =
-                        ActionMenu.Item.Text.Localized(
-                            if (viewer?.like?.atUri !=
-                                null
-                            ) {
-                                ActionMenu.Item.Text.Localized.Type.Unlike
-                            } else {
-                                ActionMenu.Item.Text.Localized.Type.Like
-                            },
-                        ),
-                    count = UiNumber(likeCount ?: 0),
-                    color = if (viewer?.like?.atUri != null) ActionMenu.Item.Color.Red else null,
-                    clickEvent =
-                        ClickEvent.event(
-                            accountKey,
-                            PostEvent.Bluesky.Like(
-                                postKey = statusKey,
-                                cid = cid.cid,
-                                uri = uri.atUri,
-                                likedUri = viewer?.like?.atUri,
-                            ),
-                        ),
+                ActionMenu.blueskyLike(
+                    accountKey = accountKey,
+                    postKey = statusKey,
+                    cid = cid.cid,
+                    uri = uri.atUri,
+                    count = likeCount ?: 0,
+                    likedUri = viewer?.like?.atUri,
                 ),
                 ActionMenu.Group(
                     displayItem =
@@ -798,36 +757,13 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
                     actions =
                         buildList {
                             add(
-                                ActionMenu.Item(
-                                    icon =
-                                        if (viewer?.bookmarked ==
-                                            true
-                                        ) {
-                                            UiIcon.Unbookmark
-                                        } else {
-                                            UiIcon.Bookmark
-                                        },
-                                    text =
-                                        ActionMenu.Item.Text.Localized(
-                                            if (viewer?.bookmarked ==
-                                                true
-                                            ) {
-                                                ActionMenu.Item.Text.Localized.Type.Unbookmark
-                                            } else {
-                                                ActionMenu.Item.Text.Localized.Type.Bookmark
-                                            },
-                                        ),
-                                    count = UiNumber(bookmarkCount ?: 0),
-                                    clickEvent =
-                                        ClickEvent.event(
-                                            accountKey,
-                                            PostEvent.Bluesky.Bookmark(
-                                                postKey = statusKey,
-                                                uri = uri.atUri,
-                                                cid = cid.cid,
-                                                bookmarked = viewer?.bookmarked == true,
-                                            ),
-                                        ),
+                                ActionMenu.blueskyBookmark(
+                                    accountKey = accountKey,
+                                    postKey = statusKey,
+                                    cid = cid.cid,
+                                    uri = uri.atUri,
+                                    count = bookmarkCount ?: 0,
+                                    bookmarked = viewer?.bookmarked == true,
                                 ),
                             )
                             add(
@@ -907,6 +843,150 @@ internal fun PostView.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
                     .Detail(
                         statusKey = statusKey,
                         accountType = AccountType.Specific(accountKey),
+                    ),
+            ),
+    )
+}
+
+internal fun ActionMenu.Companion.blueskyReblog(
+    accountKey: MicroBlogKey,
+    postKey: MicroBlogKey,
+    count: Long,
+    cid: String,
+    uri: String,
+    repostUri: String?,
+): ActionMenu.Item =
+    ActionMenu.Item(
+        updateKey = "bluesky_reblog_$postKey",
+        icon = if (repostUri != null) UiIcon.Unretweet else UiIcon.Retweet,
+        text =
+            ActionMenu.Item.Text.Localized(
+                if (repostUri != null) {
+                    ActionMenu.Item.Text.Localized.Type.Unretweet
+                } else {
+                    ActionMenu.Item.Text.Localized.Type.Retweet
+                },
+            ),
+        count = UiNumber(count),
+        color = if (repostUri != null) ActionMenu.Item.Color.PrimaryColor else null,
+        clickEvent =
+            ClickEvent.event(
+                accountKey,
+            ) { accountKey ->
+                PostEvent.Bluesky.Reblog(
+                    postKey = postKey,
+                    cid = cid,
+                    uri = uri,
+                    repostUri = repostUri,
+                    count = count,
+                    accountKey = accountKey,
+                )
+            },
+    )
+
+internal fun ActionMenu.Companion.blueskyLike(
+    accountKey: MicroBlogKey,
+    postKey: MicroBlogKey,
+    count: Long,
+    cid: String,
+    uri: String,
+    likedUri: String?,
+): ActionMenu.Item =
+    ActionMenu.Item(
+        updateKey = "bluesky_like_$postKey",
+        icon = if (likedUri != null) UiIcon.Unlike else UiIcon.Like,
+        text =
+            ActionMenu.Item.Text.Localized(
+                if (likedUri != null) {
+                    ActionMenu.Item.Text.Localized.Type.Unlike
+                } else {
+                    ActionMenu.Item.Text.Localized.Type.Like
+                },
+            ),
+        color = if (likedUri != null) ActionMenu.Item.Color.Red else null,
+        count = UiNumber(count), // like count is updated via websocket, so we don't update it here
+        clickEvent =
+            ClickEvent.event(
+                accountKey,
+            ) { accountKey ->
+                PostEvent.Bluesky.Like(
+                    postKey = postKey,
+                    cid = cid,
+                    uri = uri,
+                    likedUri = likedUri,
+                    count = count,
+                    accountKey = accountKey,
+                )
+            },
+    )
+
+internal fun ActionMenu.Companion.blueskyBookmark(
+    accountKey: MicroBlogKey,
+    postKey: MicroBlogKey,
+    uri: String,
+    cid: String,
+    count: Long,
+    bookmarked: Boolean,
+): ActionMenu.Item =
+    ActionMenu.Item(
+        updateKey = "bluesky_bookmark_$postKey",
+        icon = if (bookmarked) UiIcon.Unbookmark else UiIcon.Bookmark,
+        text =
+            ActionMenu.Item.Text.Localized(
+                if (bookmarked) {
+                    ActionMenu.Item.Text.Localized.Type.Unbookmark
+                } else {
+                    ActionMenu.Item.Text.Localized.Type.Bookmark
+                },
+            ),
+        count = UiNumber(count),
+        clickEvent =
+            ClickEvent.event(
+                accountKey,
+            ) { accountKey ->
+                PostEvent.Bluesky.Bookmark(
+                    postKey = postKey,
+                    uri = uri,
+                    cid = cid,
+                    bookmarked = bookmarked,
+                    accountKey = accountKey,
+                    count = count,
+                )
+            },
+    )
+
+internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
+    val userKey =
+        MicroBlogKey(
+            id = did.did,
+            host = accountKey.host,
+        )
+    return UiProfile(
+        avatar = avatar?.uri.orEmpty(),
+        nameInternal =
+            Element("span")
+                .apply {
+                    addChildren(TextNode(displayName.orEmpty()))
+                }.toUi(),
+        handle = "@${handle.handle}",
+        key = userKey,
+        banner = null,
+        description = null,
+        matrices =
+            UiProfile.Matrices(
+                fansCount = 0,
+                followsCount = 0,
+                statusesCount = 0,
+            ),
+        mark = persistentListOf(),
+        bottomContent = null,
+        platformType = PlatformType.Bluesky,
+        clickEvent =
+            ClickEvent.Deeplink(
+                DeeplinkRoute.Profile
+                    .User(
+                        accountType = AccountType.Specific(accountKey),
+                        userKey = userKey,
                     ),
             ),
     )
@@ -1333,20 +1413,13 @@ private fun render(
                                 ),
                             actions =
                                 listOfNotNull(
-                                    ActionMenu.Item(
-                                        icon = UiIcon.Retweet,
-                                        text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Retweet),
-                                        count = UiNumber(record.value.repostCount ?: 0),
-                                        clickEvent =
-                                            ClickEvent.event(
-                                                accountKey,
-                                                PostEvent.Bluesky.Reblog(
-                                                    postKey = statusKey,
-                                                    cid = record.value.cid.cid,
-                                                    uri = record.value.uri.atUri,
-                                                    repostUri = null,
-                                                ),
-                                            ),
+                                    ActionMenu.blueskyReblog(
+                                        accountKey = accountKey,
+                                        postKey = statusKey,
+                                        cid = record.value.cid.cid,
+                                        uri = record.value.uri.atUri,
+                                        count = record.value.repostCount ?: 0,
+                                        repostUri = null,
                                     ),
                                     ActionMenu.Item(
                                         icon = UiIcon.Quote,
@@ -1363,20 +1436,13 @@ private fun render(
                                     ),
                                 ).toImmutableList(),
                         ),
-                        ActionMenu.Item(
-                            icon = UiIcon.Like,
-                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Like),
-                            count = UiNumber(record.value.likeCount ?: 0),
-                            clickEvent =
-                                ClickEvent.event(
-                                    accountKey,
-                                    PostEvent.Bluesky.Like(
-                                        postKey = statusKey,
-                                        cid = record.value.cid.cid,
-                                        uri = record.value.uri.atUri,
-                                        likedUri = null,
-                                    ),
-                                ),
+                        ActionMenu.blueskyLike(
+                            accountKey = accountKey,
+                            postKey = statusKey,
+                            cid = record.value.cid.cid,
+                            uri = record.value.uri.atUri,
+                            count = record.value.likeCount ?: 0,
+                            likedUri = null,
                         ),
                         ActionMenu.Group(
                             displayItem =

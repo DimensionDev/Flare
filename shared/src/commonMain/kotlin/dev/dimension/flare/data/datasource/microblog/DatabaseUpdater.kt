@@ -10,4 +10,9 @@ internal interface DatabaseUpdater {
     )
 
     suspend fun deleteFromCache(postKey: MicroBlogKey)
+
+    suspend fun updateActionMenu(
+        postKey: MicroBlogKey,
+        newActionMenu: ActionMenu.Item,
+    )
 }

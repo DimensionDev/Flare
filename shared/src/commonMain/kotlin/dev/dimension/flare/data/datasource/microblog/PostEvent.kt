@@ -2,6 +2,12 @@ package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.mapper.blueskyBookmark
+import dev.dimension.flare.ui.model.mapper.blueskyLike
+import dev.dimension.flare.ui.model.mapper.blueskyReblog
+import dev.dimension.flare.ui.model.mapper.mastodonBookmark
+import dev.dimension.flare.ui.model.mapper.mastodonLike
+import dev.dimension.flare.ui.model.mapper.mastodonRepost
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
 
@@ -23,19 +29,50 @@ internal sealed interface PostEvent {
         data class Reblog(
             override val postKey: MicroBlogKey,
             val reblogged: Boolean,
-        ) : Mastodon
+            val count: Long,
+            val accountKey: MicroBlogKey,
+        ) : Mastodon,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.mastodonRepost(
+                    reblogged = !reblogged,
+                    reblogsCount = count + if (!reblogged) 1 else -1,
+                    accountKey = accountKey,
+                    statusKey = postKey,
+                )
+        }
 
         @Serializable
         data class Like(
             override val postKey: MicroBlogKey,
             val liked: Boolean,
-        ) : Mastodon
+            val accountKey: MicroBlogKey,
+            val count: Long,
+        ) : Mastodon,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.mastodonLike(
+                    favourited = !liked,
+                    favouritesCount = count + if (!liked) 1 else -1,
+                    accountKey = accountKey,
+                    statusKey = postKey,
+                )
+        }
 
         @Serializable
         data class Bookmark(
             override val postKey: MicroBlogKey,
             val bookmarked: Boolean,
-        ) : Mastodon
+            val accountKey: MicroBlogKey,
+        ) : Mastodon,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.mastodonBookmark(
+                    bookmarked = !bookmarked,
+                    accountKey = accountKey,
+                    statusKey = postKey,
+                )
+        }
 
         @Serializable
         data class Vote(
@@ -121,10 +158,28 @@ internal sealed interface PostEvent {
         @Serializable
         data class Reblog(
             override val postKey: MicroBlogKey,
+            val count: Long,
             val cid: String,
             val uri: String,
             val repostUri: String?,
-        ) : Bluesky
+            val accountKey: MicroBlogKey,
+        ) : Bluesky,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.blueskyReblog(
+                    accountKey = accountKey,
+                    postKey = postKey,
+                    cid = cid,
+                    uri = uri,
+                    count = count + if (repostUri == null) 1 else -1,
+                    repostUri =
+                        if (repostUri == null) {
+                            ""
+                        } else {
+                            null
+                        },
+                )
+        }
 
         @Serializable
         data class Like(
@@ -132,7 +187,25 @@ internal sealed interface PostEvent {
             val cid: String,
             val uri: String,
             val likedUri: String?,
-        ) : Bluesky
+            val count: Long,
+            val accountKey: MicroBlogKey,
+        ) : Bluesky,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.blueskyLike(
+                    accountKey = accountKey,
+                    postKey = postKey,
+                    cid = cid,
+                    uri = uri,
+                    count = count + if (likedUri == null) 1 else -1,
+                    likedUri =
+                        if (likedUri == null) {
+                            ""
+                        } else {
+                            null
+                        },
+                )
+        }
 
         @Serializable
         data class Bookmark(
@@ -140,7 +213,20 @@ internal sealed interface PostEvent {
             val uri: String,
             val cid: String,
             val bookmarked: Boolean,
-        ) : Bluesky
+            val accountKey: MicroBlogKey,
+            val count: Long,
+        ) : Bluesky,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.blueskyBookmark(
+                    accountKey = accountKey,
+                    postKey = postKey,
+                    cid = cid,
+                    uri = uri,
+                    bookmarked = !bookmarked,
+                    count = count + if (!bookmarked) 1 else -1,
+                )
+        }
     }
 
     @Serializable
@@ -184,4 +270,8 @@ internal sealed interface PostEvent {
             val favorited: Boolean,
         ) : VVO
     }
+}
+
+internal interface UpdatePostActionMenuEvent : PostEvent {
+    fun nextActionMenu(): ActionMenu.Item
 }

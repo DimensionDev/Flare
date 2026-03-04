@@ -8,10 +8,12 @@ import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
 import dev.dimension.flare.data.database.cache.model.DbMessageRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
+import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.mapper.render
 
 internal object Bluesky {
     suspend fun saveDM(
@@ -26,7 +28,19 @@ internal object Bluesky {
                 it.lastMessage?.toDbMessageItem(it.toDbMessageRoom(accountKey.host).roomKey)
             }
         val timeline = data.map { it.toDbDirectMessageTimeline(accountKey) }
-        val users = data.flatMap { it.members }.map { it.toDbUser(accountKey.host) }
+        val users =
+            data
+                .flatMap { it.members }
+                .map {
+                    val data = it.render(accountKey)
+                    DbUser(
+                        userKey = data.key,
+                        name = data.name.raw,
+                        handle = data.handle,
+                        host = accountKey.host,
+                        content = data,
+                    )
+                }
         database.userDao().insertAll(users)
         database.messageDao().insertMessages(messages)
         database.messageDao().insertReferences(references)

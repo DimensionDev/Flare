@@ -2,7 +2,6 @@ package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.common.FileType
-import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
@@ -42,16 +41,11 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
-import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.mapper.mastodonBookmark
-import dev.dimension.flare.ui.model.mapper.mastodonLike
-import dev.dimension.flare.ui.model.mapper.mastodonRepost
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
@@ -322,36 +316,6 @@ internal open class MastodonDataSource(
     ) {
         val statusKey = event.postKey
         val liked = event.liked
-        val newButton =
-            ActionMenu.mastodonLike(
-                favourited = !liked,
-                favouritesCount = 0,
-                accountKey = accountKey,
-                statusKey = statusKey,
-            )
-        updater.updateCache(event.postKey) { item ->
-            require(item is UiTimelineV2.Post)
-            item.copy(
-                actions =
-                    item.actions
-                        .map {
-                            if (it is ActionMenu.Item && it.updateKey == newButton.updateKey) {
-                                newButton.copy(
-                                    count =
-                                        if (!liked) {
-                                            it.count?.value?.plus(1)
-                                        } else {
-                                            it.count?.value?.minus(1)
-                                        }.let {
-                                            UiNumber(it ?: 0)
-                                        },
-                                )
-                            } else {
-                                it
-                            }
-                        }.toImmutableList(),
-            )
-        }
         if (liked) {
             service.unfavourite(statusKey.id)
         } else {
@@ -365,36 +329,6 @@ internal open class MastodonDataSource(
     ) {
         val statusKey = event.postKey
         val reblogged = event.reblogged
-        val newButton =
-            ActionMenu.mastodonRepost(
-                reblogged = !reblogged,
-                reblogsCount = 0,
-                accountKey = accountKey,
-                statusKey = statusKey,
-            )
-        updater.updateCache(event.postKey) { item ->
-            require(item is UiTimelineV2.Post)
-            item.copy(
-                actions =
-                    item.actions
-                        .map {
-                            if (it is ActionMenu.Item && it.updateKey == newButton.updateKey) {
-                                newButton.copy(
-                                    count =
-                                        if (!reblogged) {
-                                            it.count?.value?.plus(1)
-                                        } else {
-                                            it.count?.value?.minus(1)
-                                        }.let {
-                                            UiNumber(it ?: 0)
-                                        },
-                                )
-                            } else {
-                                it
-                            }
-                        }.toImmutableList(),
-            )
-        }
         if (reblogged) {
             service.unreblog(statusKey.id)
         } else {
@@ -408,26 +342,6 @@ internal open class MastodonDataSource(
     ) {
         val statusKey = event.postKey
         val bookmarked = event.bookmarked
-        val newBookmark =
-            ActionMenu.mastodonBookmark(
-                bookmarked = !bookmarked,
-                accountKey = accountKey,
-                statusKey = statusKey,
-            )
-        updater.updateCache(event.postKey) { item ->
-            require(item is UiTimelineV2.Post)
-            item.copy(
-                actions =
-                    item.actions
-                        .map {
-                            if (it is ActionMenu.Item && it.updateKey == newBookmark.updateKey) {
-                                newBookmark
-                            } else {
-                                it
-                            }
-                        }.toImmutableList(),
-            )
-        }
         if (bookmarked) {
             service.unbookmark(statusKey.id)
         } else {
@@ -543,31 +457,6 @@ internal open class MastodonDataSource(
         updater: DatabaseUpdater,
     ) {
         val options = event.options
-        val postKey = event.postKey
-        updater.updateCache(postKey) {
-            require(it is UiTimelineV2.Post)
-            it.copy(
-                poll =
-                    it.poll?.copy(
-                        ownVotes = options,
-                        options =
-                            it.poll.options
-                                .mapIndexed { index, option ->
-                                    if (options.contains(index)) {
-                                        option.copy(
-                                            votesCount =
-                                                option.votesCount.plus(
-                                                    1,
-                                                ),
-                                        )
-                                    } else {
-                                        option
-                                    }
-                                }.toImmutableList(),
-                    ),
-            )
-        }
-
         service.vote(id = event.id, data = PostVote(choices = options.map { it.toString() }))
     }
 

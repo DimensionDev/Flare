@@ -15,6 +15,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
+import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountProvider
@@ -27,7 +28,7 @@ import dev.dimension.flare.ui.model.EmojiData
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
@@ -84,7 +85,7 @@ public class ComposePresenter(
                     .flatMap { current ->
                         statusState
                             ?.mapNotNull {
-                                it.content as? UiTimeline.ItemContent.Status
+                                it as? UiTimelineV2.Post
                             }?.map {
                                 current to listOf(it.platformType)
                             } ?: UiState.Success(current to PlatformType.entries.toList())
@@ -100,7 +101,7 @@ public class ComposePresenter(
                                     repository = accountRepository,
                                 ).flatMap { service ->
                                     remember(account.accountKey) {
-                                        service.userById(account.accountKey.id)
+                                        (service as UserDataSource).userHandler.userById(account.accountKey.id)
                                     }.collectAsState()
                                         .toUi()
                                 } to account
@@ -120,10 +121,8 @@ public class ComposePresenter(
             }
         val replyState =
             statusState?.map {
-                if (it.content is UiTimeline.ItemContent.Status && it.content.platformType == PlatformType.VVo) {
-                    it.copy(
-                        content = it.content.quote.firstOrNull() ?: it.content,
-                    )
+                if (it is UiTimelineV2.Post && it.platformType == PlatformType.VVo) {
+                    it.quote.firstOrNull() ?: it
                 } else {
                     it
                 }
@@ -146,8 +145,8 @@ public class ComposePresenter(
                 userState.flatMap { user ->
                     remember(statusState) {
                         statusState.mapNotNull { timeline ->
-                            val content = timeline.content
-                            if (content is UiTimeline.ItemContent.Status) {
+                            val content = timeline
+                            if (content is UiTimelineV2.Post) {
                                 when (content.platformType) {
                                     PlatformType.VVo -> {
                                         if (content.quote.any() && status is ComposeStatus.Quote) {
@@ -330,7 +329,7 @@ public class ComposePresenter(
             mutableStateOf(false)
         }
         var visibility by remember {
-            mutableStateOf(UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public)
+            mutableStateOf(UiTimelineV2.Post.Visibility.Public)
         }
         LaunchedEffect(appDataStore.composeConfigData.data) {
             appDataStore.composeConfigData.data.collect {
@@ -342,10 +341,10 @@ public class ComposePresenter(
 
             override val allVisibilities =
                 persistentListOf(
-                    UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public,
-                    UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home,
-                    UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers,
-                    UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified,
+                    UiTimelineV2.Post.Visibility.Public,
+                    UiTimelineV2.Post.Visibility.Home,
+                    UiTimelineV2.Post.Visibility.Followers,
+                    UiTimelineV2.Post.Visibility.Specified,
                 )
 
             override val showVisibilityMenu: Boolean
@@ -359,12 +358,12 @@ public class ComposePresenter(
                 showVisibilityMenu = false
             }
 
-            override fun setVisibility(value: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type) {
+            override fun setVisibility(value: UiTimelineV2.Post.Visibility) {
                 visibility = value
             }
 
             override fun clear() {
-                visibility = UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public
+                visibility = UiTimelineV2.Post.Visibility.Public
                 showVisibilityMenu = false
             }
         }
@@ -373,15 +372,15 @@ public class ComposePresenter(
 
 @Immutable
 public interface VisibilityState {
-    public val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type
-    public val allVisibilities: ImmutableList<UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type>
+    public val visibility: UiTimelineV2.Post.Visibility
+    public val allVisibilities: ImmutableList<UiTimelineV2.Post.Visibility>
     public val showVisibilityMenu: Boolean
 
     public fun showVisibilityMenu()
 
     public fun hideVisibilityMenu()
 
-    public fun setVisibility(value: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type)
+    public fun setVisibility(value: UiTimelineV2.Post.Visibility)
 
     public fun clear()
 }
@@ -408,7 +407,7 @@ public sealed class ComposeStatus {
 public abstract class ComposeState(
     public val canSend: Boolean,
     public val visibilityState: UiState<VisibilityState>,
-    public val replyState: UiState<UiTimeline>?,
+    public val replyState: UiState<UiTimelineV2>?,
     public val initialTextState: UiState<InitialText>?,
     public val emojiState: UiState<EmojiData>,
     public val composeConfig: UiState<ComposeConfig>,

@@ -7,14 +7,13 @@ import app.bsky.graph.Listitem
 import com.atproto.repo.CreateRecordRequest
 import com.atproto.repo.DeleteRecordRequest
 import com.atproto.repo.ListRecordsQueryParams
-import dev.dimension.flare.data.database.cache.mapper.toDbUser
-import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 import sh.christian.ozone.api.AtUri
 import sh.christian.ozone.api.Did
@@ -30,7 +29,7 @@ internal class BlueskyListMemberLoader(
         pageSize: Int,
         request: PagingRequest,
         listId: String,
-    ): PagingResult<DbUser> {
+    ): PagingResult<UiProfile> {
         val cursor =
             when (request) {
                 is PagingRequest.Append -> request.nextKey
@@ -50,7 +49,7 @@ internal class BlueskyListMemberLoader(
         val users =
             response.items
                 .map {
-                    it.subject.toDbUser(accountKey.host)
+                    it.subject.render(accountKey)
                 }
         return PagingResult(
             data = users,
@@ -61,7 +60,7 @@ internal class BlueskyListMemberLoader(
     override suspend fun addMember(
         listId: String,
         userKey: MicroBlogKey,
-    ): DbUser {
+    ): UiProfile {
         val user =
             service
                 .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
@@ -80,7 +79,7 @@ internal class BlueskyListMemberLoader(
                         ).bskyJson(),
             ),
         )
-        return user.toDbUser(accountKey.host)
+        return user.render(accountKey)
     }
 
     override suspend fun removeMember(

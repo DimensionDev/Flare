@@ -50,7 +50,7 @@ public data class UiDMItem internal constructor(
         ) : Message
 
         public data class Status(
-            val status: UiTimeline.ItemContent.Status,
+            val status: UiTimelineV2.Post,
         ) : Message
 
         public data object Deleted : Message

@@ -425,6 +425,13 @@ internal class VVODataSource(
             response.data?.longTextContent.orEmpty()
         }.toUi()
 
+    fun status(statusKey: MicroBlogKey): Flow<UiState<UiTimelineV2>> =
+        MemCacheable(
+            "vvo_status_$statusKey",
+        ) {
+            loadStatusDetail(statusKey)
+        }.toUi()
+
     private suspend fun uploadMedia(
         fileItem: FileItem,
         st: String,

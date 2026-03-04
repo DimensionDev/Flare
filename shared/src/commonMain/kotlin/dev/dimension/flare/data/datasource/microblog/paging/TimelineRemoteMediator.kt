@@ -4,6 +4,7 @@ import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
@@ -13,7 +14,6 @@ import dev.dimension.flare.data.database.cache.model.DbStatusUserReference
 import dev.dimension.flare.data.database.cache.model.DbStatusUserReferenceWithUser
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
-import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
@@ -148,14 +148,7 @@ internal class TimelineRemoteMediator(
                                     _id = Uuid.random().toString(),
                                 ),
                             user =
-                                DbUser(
-                                    userKey = it.key,
-                                    platformType = it.platformType,
-                                    name = it.name.raw,
-                                    handle = it.handle,
-                                    host = it.host ?: it.key.host,
-                                    content = it,
-                                ),
+                                it.toDbUser(),
                         )
                     },
             )

@@ -8,7 +8,6 @@ import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
 import dev.dimension.flare.data.database.cache.model.DbMessageRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
-import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -32,14 +31,7 @@ internal object Bluesky {
             data
                 .flatMap { it.members }
                 .map {
-                    val data = it.render(accountKey)
-                    DbUser(
-                        userKey = data.key,
-                        name = data.name.raw,
-                        handle = data.handle,
-                        host = accountKey.host,
-                        content = data,
-                    )
+                    it.render(accountKey).toDbUser(host = accountKey.host)
                 }
         database.userDao().insertAll(users)
         database.messageDao().insertMessages(messages)

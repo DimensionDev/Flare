@@ -758,12 +758,12 @@ private fun TranslationComponent(
 
 @Composable
 public fun StatusVisibilityComponent(
-    visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type,
+    visibility: UiTimelineV2.Post.Visibility,
     tint: Color = PlatformContentColor.current,
     modifier: Modifier = Modifier,
 ) {
     when (visibility) {
-        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
+        UiTimelineV2.Post.Visibility.Public ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Globe,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_public),
@@ -771,7 +771,7 @@ public fun StatusVisibilityComponent(
                 tint = tint,
             )
 
-        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
+        UiTimelineV2.Post.Visibility.Home ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.LockOpen,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_unlisted),
@@ -779,7 +779,7 @@ public fun StatusVisibilityComponent(
                 tint = tint,
             )
 
-        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
+        UiTimelineV2.Post.Visibility.Followers ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Lock,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_private),
@@ -787,7 +787,7 @@ public fun StatusVisibilityComponent(
                 tint = tint,
             )
 
-        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
+        UiTimelineV2.Post.Visibility.Specified ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.At,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_direct),
@@ -795,7 +795,7 @@ public fun StatusVisibilityComponent(
                 tint = tint,
             )
 
-        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel ->
+        UiTimelineV2.Post.Visibility.Channel ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Tv,
                 contentDescription = stringResource(resource = Res.string.channel_title),
@@ -1001,30 +1001,30 @@ private fun ActionMenu.Item.Color.toComposeColor(): Color =
         ActionMenu.Item.Color.PrimaryColor -> PlatformTheme.colorScheme.retweetColor
     }
 
-private fun ActionMenu.Item.Icon.toImageVector(): ImageVector =
+private fun UiIcon.toImageVector(): ImageVector =
     when (this) {
-        ActionMenu.Item.Icon.Like -> FontAwesomeIcons.Regular.Heart
-        ActionMenu.Item.Icon.Unlike -> FontAwesomeIcons.Solid.Heart
-        ActionMenu.Item.Icon.Retweet -> FontAwesomeIcons.Solid.Retweet
-        ActionMenu.Item.Icon.Unretweet -> FontAwesomeIcons.Solid.Retweet
-        ActionMenu.Item.Icon.Reply -> FontAwesomeIcons.Solid.Reply
-        ActionMenu.Item.Icon.Comment -> FontAwesomeIcons.Regular.CommentDots
-        ActionMenu.Item.Icon.Quote -> FontAwesomeIcons.Solid.QuoteLeft
-        ActionMenu.Item.Icon.Bookmark -> FontAwesomeIcons.Regular.Bookmark
-        ActionMenu.Item.Icon.Unbookmark -> FontAwesomeIcons.Solid.Bookmark
-        ActionMenu.Item.Icon.More -> FontAwesomeIcons.Solid.Ellipsis
-        ActionMenu.Item.Icon.Delete -> FontAwesomeIcons.Solid.Trash
-        ActionMenu.Item.Icon.Report -> FontAwesomeIcons.Solid.CircleInfo
-        ActionMenu.Item.Icon.React -> FontAwesomeIcons.Solid.Plus
-        ActionMenu.Item.Icon.UnReact -> FontAwesomeIcons.Solid.Minus
-        ActionMenu.Item.Icon.Share -> FontAwesomeIcons.Solid.ShareNodes
-        ActionMenu.Item.Icon.MoreVerticel -> FontAwesomeIcons.Solid.EllipsisVertical
-        ActionMenu.Item.Icon.List -> FontAwesomeIcons.Solid.List
-        ActionMenu.Item.Icon.ChatMessage -> FontAwesomeIcons.Solid.Message
-        ActionMenu.Item.Icon.Mute -> FontAwesomeIcons.Solid.VolumeXmark
-        ActionMenu.Item.Icon.UnMute -> FontAwesomeIcons.Solid.VolumeXmark
-        ActionMenu.Item.Icon.Block -> FontAwesomeIcons.Solid.UserSlash
-        ActionMenu.Item.Icon.UnBlock -> FontAwesomeIcons.Solid.UserSlash
+        UiIcon.Like -> FontAwesomeIcons.Regular.Heart
+        UiIcon.Unlike -> FontAwesomeIcons.Solid.Heart
+        UiIcon.Retweet -> FontAwesomeIcons.Solid.Retweet
+        UiIcon.Unretweet -> FontAwesomeIcons.Solid.Retweet
+        UiIcon.Reply -> FontAwesomeIcons.Solid.Reply
+        UiIcon.Comment -> FontAwesomeIcons.Regular.CommentDots
+        UiIcon.Quote -> FontAwesomeIcons.Solid.QuoteLeft
+        UiIcon.Bookmark -> FontAwesomeIcons.Regular.Bookmark
+        UiIcon.Unbookmark -> FontAwesomeIcons.Solid.Bookmark
+        UiIcon.More -> FontAwesomeIcons.Solid.Ellipsis
+        UiIcon.Delete -> FontAwesomeIcons.Solid.Trash
+        UiIcon.Report -> FontAwesomeIcons.Solid.CircleInfo
+        UiIcon.React -> FontAwesomeIcons.Solid.Plus
+        UiIcon.UnReact -> FontAwesomeIcons.Solid.Minus
+        UiIcon.Share -> FontAwesomeIcons.Solid.ShareNodes
+        UiIcon.MoreVerticel -> FontAwesomeIcons.Solid.EllipsisVertical
+        UiIcon.List -> FontAwesomeIcons.Solid.List
+        UiIcon.ChatMessage -> FontAwesomeIcons.Solid.Message
+        UiIcon.Mute -> FontAwesomeIcons.Solid.VolumeXmark
+        UiIcon.UnMute -> FontAwesomeIcons.Solid.VolumeXmark
+        UiIcon.Block -> FontAwesomeIcons.Solid.UserSlash
+        UiIcon.UnBlock -> FontAwesomeIcons.Solid.UserSlash
     }
 
 @Composable

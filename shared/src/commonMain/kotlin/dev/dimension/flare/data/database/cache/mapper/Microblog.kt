@@ -23,7 +23,7 @@ internal suspend fun saveToDatabase(
                 post.references.map { it.reference }
             }
     database.userDao().insertAll(users)
-    database.userDao().insertAll(userReferences)
+    database.userDao().insertAllReferences(userReferences)
 
 //    (
 //            items.flatMap { it.status.status.references.mapNotNull { it.user } } +

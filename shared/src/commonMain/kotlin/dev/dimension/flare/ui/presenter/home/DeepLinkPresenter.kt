@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
@@ -63,7 +64,7 @@ public class DeepLinkPresenter(
                             repository = accountRepository,
                         ).collect { service ->
                             if (service is AuthenticatedMicroblogDataSource) {
-                                service.postEventHandler.handleEvent(event.postEvent)
+                                (service as PostDataSource).postEventHandler.handleEvent(event.postEvent)
                             }
                         }
                     }

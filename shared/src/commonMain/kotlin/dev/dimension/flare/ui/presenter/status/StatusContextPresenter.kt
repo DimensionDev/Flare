@@ -4,13 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.onSuccess
@@ -40,7 +40,7 @@ public class StatusContextPresenter(
     KoinComponent {
     @Immutable
     public interface State : TimelineState {
-        public val current: UiState<UiTimeline.ItemContent.Status>
+        public val current: UiState<UiTimelineV2>
     }
 
     private val accountRepository: AccountRepository by inject()
@@ -50,56 +50,45 @@ public class StatusContextPresenter(
             accountType = accountType,
             repository = accountRepository,
         ).flatMapLatest { service ->
-            service.status(statusKey).toUi()
+            (service as PostDataSource).postHandler.post(statusKey).toUi()
         }.mapNotNull { it.takeSuccess() }
-            .mapNotNull {
-                it.content as? UiTimeline.ItemContent.Status
-            }.distinctUntilChanged()
+            .distinctUntilChanged()
     }
 
     private val timelinePresenter by lazy {
         object : TimelinePresenter() {
             override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
                 currentStatusFlow
-                    .map {
-                        it.statusKey
-                    }.distinctUntilChanged()
-                    .flatMapLatest { statusKey ->
+                    .map { statusKey }
+                    .distinctUntilChanged()
+                    .flatMapLatest { key ->
                         accountServiceFlow(
                             accountType = accountType,
                             repository = accountRepository,
                         ).map { service ->
-                            service.context(statusKey)
+                            service.context(key)
                         }
                     }
             }
 
-            override suspend fun transform(data: UiTimeline): UiTimeline {
+            override suspend fun transform(data: UiTimelineV2): UiTimelineV2 {
                 val currentCreatedAt = currentStatusFlow.firstOrNull()?.createdAt
-                return data.copy(
-                    content =
-                        when (val content = data.content) {
-                            is UiTimeline.ItemContent.Status -> {
-                                if (currentCreatedAt != null && content.createdAt <= currentCreatedAt) {
-                                    content.copy(
-                                        parents = persistentListOf(),
-                                    )
-                                } else if (currentCreatedAt != null) {
-                                    content.copy(
-                                        parents =
-                                            content.parents
-                                                .filter {
-                                                    it.createdAt > currentCreatedAt
-                                                }.toPersistentList(),
-                                    )
-                                } else {
-                                    content
-                                }
-                            }
-
-                            else -> content
-                        },
-                )
+                if (data !is UiTimelineV2.Post || currentCreatedAt == null) {
+                    return data
+                }
+                return if (data.createdAt <= currentCreatedAt) {
+                    data.copy(
+                        parents = persistentListOf(),
+                    )
+                } else {
+                    data.copy(
+                        parents =
+                            data.parents
+                                .filter {
+                                    it.createdAt > currentCreatedAt
+                                }.toPersistentList(),
+                    )
+                }
             }
         }
     }
@@ -112,7 +101,7 @@ public class StatusContextPresenter(
             remember {
                 LogStatusHistoryPresenter(
                     accountType = accountType,
-                    statusKey = it.statusKey,
+                    statusKey = statusKey,
                 )
             }.body()
         }

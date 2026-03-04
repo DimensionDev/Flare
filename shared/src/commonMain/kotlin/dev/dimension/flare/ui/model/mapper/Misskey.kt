@@ -59,11 +59,14 @@ import moe.tlaster.mfm.parser.tree.SearchNode
 import moe.tlaster.mfm.parser.tree.SmallNode
 import moe.tlaster.mfm.parser.tree.StrikeNode
 import moe.tlaster.mfm.parser.tree.UrlNode
+import kotlin.jvm.JvmName
 import kotlin.math.roundToLong
 import kotlin.time.Instant
 
+@JvmName("renderMisskeyNotes")
 internal fun List<Note>.render(accountKey: MicroBlogKey): List<UiTimelineV2> = map { it.render(accountKey) }
 
+@JvmName("renderMisskeyNotifications")
 internal fun List<Notification>.render(accountKey: MicroBlogKey): List<UiTimelineV2> = map { it.render(accountKey) }
 
 internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {

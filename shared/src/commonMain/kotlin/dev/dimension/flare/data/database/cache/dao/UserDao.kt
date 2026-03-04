@@ -25,7 +25,7 @@ internal interface UserDao {
     suspend fun insertAll(users: List<DbUser>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(users: List<DbStatusUserReference>)
+    suspend fun insertAllReferences(references: List<DbStatusUserReference>)
 
     @Query("UPDATE DbUser SET content = :content WHERE userKey = :userKey")
     suspend fun update(

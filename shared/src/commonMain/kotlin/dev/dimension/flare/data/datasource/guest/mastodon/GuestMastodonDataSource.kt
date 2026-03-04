@@ -1,38 +1,22 @@
 package dev.dimension.flare.data.datasource.guest.mastodon
 
-import androidx.paging.Pager
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import dev.dimension.flare.common.CacheData
-import dev.dimension.flare.common.Cacheable
-import dev.dimension.flare.common.MemCacheable
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.toDbUser
-import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.datasource.mastodon.MastodonFansPagingSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonFollowingPagingSource
 import dev.dimension.flare.data.datasource.mastodon.SearchUserPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendHashtagPagingSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelinePagingSourceFactory
-import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.mapper.render
-import dev.dimension.flare.ui.model.mapper.renderGuest
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 internal class GuestMastodonDataSource(
     private val host: String,
@@ -42,195 +26,100 @@ internal class GuestMastodonDataSource(
     private val service by lazy {
         GuestMastodonService("https://$host/", locale)
     }
-    private val database: CacheDatabase by inject()
 
-    override fun homeTimeline() =
-        BaseTimelinePagingSourceFactory {
-            GuestTimelinePagingSource(host = host, service = service)
-        }
-
-    override fun userByAcct(acct: String): CacheData<UiProfile> {
-        val (name, host) = MicroBlogKey.valueOf(acct)
-        return Cacheable(
-            fetchSource = {
-                val user =
-                    service
-                        .lookupUserByAcct("$name@$host")
-                        ?.toDbUser(host) ?: throw Exception("User not found")
-                database.userDao().insert(user)
-            },
-            cacheSource = {
-                database
-                    .userDao()
-                    .findByHandleAndHost(name, host, PlatformType.Mastodon)
-                    .distinctUntilChanged()
-                    .mapNotNull {
-                        val content = it?.content
-                        if (content is UserContent.Mastodon) {
-                            content.data.render(null, host = host)
-                        } else {
-                            null
-                        }
-                    }
-            },
-        )
-    }
-
-    override fun userById(id: String): CacheData<UiProfile> {
-        val userKey = MicroBlogKey(id, host)
-        return Cacheable(
-            fetchSource = {
-                val user = service.lookupUser(id).toDbUser(host)
-                database.userDao().insert(user)
-            },
-            cacheSource = {
-                database
-                    .userDao()
-                    .findByKey(userKey)
-                    .distinctUntilChanged()
-                    .mapNotNull {
-                        val content = it?.content
-                        if (content is UserContent.Mastodon) {
-                            content.data.render(null, host = host)
-                        } else {
-                            null
-                        }
-                    }
-            },
-        )
-    }
+    override fun homeTimeline(): RemoteLoader<UiTimelineV2> = GuestTimelinePagingSource(service = service, host = host)
 
     override fun userTimeline(
         userKey: MicroBlogKey,
         mediaOnly: Boolean,
-    ) = BaseTimelinePagingSourceFactory {
+    ): RemoteLoader<UiTimelineV2> =
         GuestUserTimelinePagingSource(
+            service = service,
             host = host,
             userId = userKey.id,
             onlyMedia = mediaOnly,
+        )
+
+    override fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+        GuestStatusDetailPagingSource(
             service = service,
+            host = host,
+            statusKey = statusKey,
+            statusOnly = false,
         )
-    }
 
-    override fun context(statusKey: MicroBlogKey) =
-        BaseTimelinePagingSourceFactory {
-            GuestStatusDetailPagingSource(
-                host = host,
-                statusKey = statusKey,
-                statusOnly = false,
-                service = service,
-            )
+    override fun searchStatus(query: String): RemoteLoader<UiTimelineV2> =
+        GuestSearchStatusPagingSource(
+            service = service,
+            host = host,
+            query = query,
+        )
+
+    override fun searchUser(query: String): RemoteLoader<UiProfile> =
+        SearchUserPagingSource(
+            service = service,
+            host = host,
+            accountKey = null,
+            query = query,
+        )
+
+    override fun discoverUsers(): RemoteLoader<UiProfile> =
+        object : RemoteLoader<UiProfile> {
+            override suspend fun load(
+                pageSize: Int,
+                request: PagingRequest,
+            ): PagingResult<UiProfile> =
+                PagingResult(
+                    endOfPaginationReached = true,
+                    data = emptyList(),
+                )
         }
 
-    override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
-        val pagingKey = "status_only_$statusKey"
-        return MemCacheable(
-            key = pagingKey,
-            fetchSource = {
-                service
-                    .lookupStatus(
-                        statusKey.id,
-                    ).renderGuest(host)
-            },
+    override fun discoverStatuses(): RemoteLoader<UiTimelineV2> =
+        GuestDiscoverStatusPagingSource(
+            service = service,
+            host = host,
         )
-    }
 
-    override fun searchStatus(query: String) =
-        BaseTimelinePagingSourceFactory {
-            GuestSearchStatusPagingSource(host = host, query = query, service = service)
-        }
+    override fun discoverHashtags(): RemoteLoader<UiHashtag> = TrendHashtagPagingSource(service)
 
-    override fun searchUser(
-        query: String,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            SearchUserPagingSource(
-                service = service,
-                host = host,
-                accountKey = null,
-                query,
-            )
-        }.flow
+    override fun following(userKey: MicroBlogKey): RemoteLoader<UiProfile> =
+        MastodonFollowingPagingSource(
+            service = service,
+            accountKey = null,
+            host = host,
+            userKey = userKey,
+        )
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiProfile>> {
-        // not supported
-        throw UnsupportedOperationException("Discover users not supported")
-    }
-
-    override fun discoverStatuses() = TODO()
-//        Pager(pagingConfig) {
-//            GuestDiscoverStatusPagingSource(host = host, service = service)
-//        }.flow.cachedIn(scope)
-
-    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            TrendHashtagPagingSource(
-                service,
-            )
-        }.flow
-
-    override fun following(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            MastodonFollowingPagingSource(
-                service = service,
-                host = host,
-                userKey = userKey,
-                accountKey = null,
-            )
-        }.flow.cachedIn(scope)
-
-    override fun fans(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            MastodonFansPagingSource(
-                service = service,
-                host = host,
-                userKey = userKey,
-                accountKey = null,
-            )
-        }.flow.cachedIn(scope)
+    override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> =
+        MastodonFansPagingSource(
+            service = service,
+            accountKey = null,
+            host = host,
+            userKey = userKey,
+        )
 
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         persistentListOf(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
                 loader =
-                    BaseTimelinePagingSourceFactory {
-                        GuestUserTimelinePagingSource(
-                            host = host,
-                            userId = userKey.id,
-                            service = service,
-                            withPinned = true,
-                        )
-                    },
+                    GuestUserTimelinePagingSource(
+                        service = service,
+                        host = host,
+                        userId = userKey.id,
+                        withPinned = true,
+                    ),
             ),
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.StatusWithReplies,
                 loader =
-                    BaseTimelinePagingSourceFactory {
-                        GuestUserTimelinePagingSource(
-                            host = host,
-                            userId = userKey.id,
-                            withReply = true,
-                            service = service,
-                        )
-                    },
+                    GuestUserTimelinePagingSource(
+                        service = service,
+                        host = host,
+                        userId = userKey.id,
+                        withReply = true,
+                    ),
             ),
             ProfileTab.Media,
         )

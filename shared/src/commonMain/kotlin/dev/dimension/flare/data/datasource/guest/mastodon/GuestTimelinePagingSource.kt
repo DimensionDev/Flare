@@ -1,31 +1,34 @@
 package dev.dimension.flare.data.datasource.guest.mastodon
 
-import SnowflakeIdGenerator
-import androidx.paging.PagingState
-import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.mastodon.api.TrendsResources
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.mapper.renderGuest
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 
 internal class GuestTimelinePagingSource(
     private val service: TrendsResources,
     private val host: String,
-) : BasePagingSource<Int, UiTimeline>() {
-    override fun getRefreshKey(state: PagingState<Int, UiTimeline>): Int? = null
+) : RemoteLoader<UiTimelineV2> {
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiTimelineV2> {
+        val offset =
+            when (request) {
+                PagingRequest.Refresh -> 0
+                is PagingRequest.Append -> request.nextKey.toIntOrNull() ?: 0
+                is PagingRequest.Prepend -> {
+                    return PagingResult(endOfPaginationReached = true)
+                }
+            }
 
-    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiTimeline> {
-        val offset = params.key ?: 0
-        val limit = params.loadSize
-        val statuses = service.trendsStatuses(limit = limit, offset = offset).distinctBy { it.id }
-        return LoadResult.Page(
-            data =
-                statuses.map {
-                    it
-                        .renderGuest(host = host)
-                        .copy(dbKey = "guest_${SnowflakeIdGenerator.nextId()}")
-                },
-            prevKey = null,
-            nextKey = offset + limit,
+        val statuses = service.trendsStatuses(limit = pageSize, offset = offset).distinctBy { it.id }
+        return PagingResult(
+            endOfPaginationReached = statuses.size < pageSize,
+            data = statuses.map { it.render(host = host, accountKey = null) },
+            nextKey = (offset + pageSize).toString(),
         )
     }
 }

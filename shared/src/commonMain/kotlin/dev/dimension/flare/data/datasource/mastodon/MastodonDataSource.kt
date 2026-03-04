@@ -42,7 +42,6 @@ import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
@@ -274,11 +273,11 @@ internal open class MastodonDataSource(
                 status = data.content,
                 visibility =
                     when (data.visibility) {
-                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public -> Visibility.Public
-                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home -> Visibility.Unlisted
-                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers -> Visibility.Private
-                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified -> Visibility.Direct
-                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel -> Visibility.Public
+                        UiTimelineV2.Post.Visibility.Public -> Visibility.Public
+                        UiTimelineV2.Post.Visibility.Home -> Visibility.Unlisted
+                        UiTimelineV2.Post.Visibility.Followers -> Visibility.Private
+                        UiTimelineV2.Post.Visibility.Specified -> Visibility.Direct
+                        UiTimelineV2.Post.Visibility.Channel -> Visibility.Public
                     },
                 inReplyToID = inReplyToID,
                 mediaIDS = mediaIds.takeIf { it.isNotEmpty() },

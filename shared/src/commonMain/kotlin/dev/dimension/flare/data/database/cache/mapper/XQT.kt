@@ -158,15 +158,7 @@ private fun List<InboxUser>.toDbUser(accountKey: MicroBlogKey): List<DbUser> {
                 },
             isBlueVerified = it.isBlueVerified == true,
             restId = it.idStr,
-        ).render(accountKey).let { data ->
-            DbUser(
-                userKey = data.key,
-                name = data.name.raw,
-                handle = data.handle,
-                host = accountKey.host,
-                content = data,
-            )
-        }
+        ).render(accountKey).toDbUser(host = accountKey.host)
     }
 }
 

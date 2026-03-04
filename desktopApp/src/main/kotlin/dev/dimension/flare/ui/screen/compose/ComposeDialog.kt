@@ -1023,7 +1023,7 @@ private fun composePresenter(
                                 ?.toString(),
                         visibility =
                             state.visibilityState.takeSuccess()?.visibility
-                                ?: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public,
+                                ?: UiTimelineV2.Post.Visibility.Public,
                         account = it,
                         referenceStatus =
                             status?.let {
@@ -1253,40 +1253,40 @@ internal enum class PollExpiration(
     Days7(Res.string.compose_poll_expiration_7_days, 7.days),
 }
 
-internal val UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.localName: StringResource
+internal val UiTimelineV2.Post.Visibility.localName: StringResource
     get() =
         when (this) {
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
+            UiTimelineV2.Post.Visibility.Public ->
                 Res.string.misskey_visibility_public
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
+            UiTimelineV2.Post.Visibility.Home ->
                 Res.string.misskey_visibility_home
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
+            UiTimelineV2.Post.Visibility.Followers ->
                 Res.string.misskey_visibility_followers
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
+            UiTimelineV2.Post.Visibility.Specified ->
                 Res.string.misskey_visibility_specified
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel ->
+            UiTimelineV2.Post.Visibility.Channel ->
                 Res.string.misskey_visibility_public
         }
 
-internal val UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.localDescription: StringResource
+internal val UiTimelineV2.Post.Visibility.localDescription: StringResource
     get() =
         when (this) {
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
+            UiTimelineV2.Post.Visibility.Public ->
                 Res.string.misskey_visibility_public_description
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
+            UiTimelineV2.Post.Visibility.Home ->
                 Res.string.misskey_visibility_home_description
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
+            UiTimelineV2.Post.Visibility.Followers ->
                 Res.string.misskey_visibility_followers_description
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
+            UiTimelineV2.Post.Visibility.Specified ->
                 Res.string.misskey_visibility_specified_description
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel ->
+            UiTimelineV2.Post.Visibility.Channel ->
                 Res.string.misskey_visibility_public_description
         }

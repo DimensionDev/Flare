@@ -15,7 +15,6 @@ import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -131,7 +130,7 @@ public class MisskeyChannelPresenter(
 @Immutable
 public interface MisskeyChannelState {
     public val info: UiState<UiList.Channel>
-    public val timeline: PagingState<UiTimeline>
+    public val timeline: PagingState<UiTimelineV2>
     public val followed: UiState<Boolean>
 
     public suspend fun refreshSuspend()

@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.datasource.rss
 
-import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest

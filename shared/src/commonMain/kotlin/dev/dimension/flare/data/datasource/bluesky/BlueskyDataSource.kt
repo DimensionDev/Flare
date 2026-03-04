@@ -779,7 +779,7 @@ internal class BlueskyDataSource(
             .cachedIn(scope)
             .combine(credentialFlow) { paging, credential ->
                 paging.map {
-                    it.render(accountKey = accountKey, credential = credential, statusEvent = this)
+                    it.render(accountKey = accountKey, credential = credential)
                 }
             }.cachedIn(scope)
 
@@ -809,7 +809,6 @@ internal class BlueskyDataSource(
                     it.render(
                         accountKey = accountKey,
                         credential = credential,
-                        statusEvent = this,
                     )
                 }
             }.cachedIn(scope)
@@ -840,7 +839,6 @@ internal class BlueskyDataSource(
                         room?.render(
                             accountKey = accountKey,
                             credential = credential,
-                            statusEvent = this,
                         )
                     }.mapNotNull { it }
             },

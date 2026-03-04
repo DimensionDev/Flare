@@ -6,6 +6,7 @@ import androidx.paging.map
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.DbList
 import dev.dimension.flare.data.database.cache.model.DbListMember
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
@@ -16,7 +17,6 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -55,11 +55,11 @@ internal class ListMemberHandler(
                             data.map { item ->
                                 DbListMember(
                                     listKey = listKey,
-                                    memberKey = item.userKey,
+                                    memberKey = item.key,
                                 )
                             },
                         )
-                        database.userDao().insertAll(data)
+                        database.userDao().insertAll(data.map { it.toDbUser() })
                     },
                 ),
             pagingSourceFactory = {
@@ -69,7 +69,7 @@ internal class ListMemberHandler(
             },
         ).flow.map {
             it.map {
-                it.user.render(accountKey)
+                it.user.content
             }
         }
 
@@ -80,7 +80,7 @@ internal class ListMemberHandler(
                 listKey = MicroBlogKey(listId, accountKey.host),
             ).map { members ->
                 members.map { member ->
-                    member.user.render(accountKey)
+                    member.user.content
                 }
             }
 
@@ -102,7 +102,7 @@ internal class ListMemberHandler(
                     ),
                 )
                 database.userDao().insertAll(
-                    listOf(user),
+                    listOf(user.toDbUser()),
                 )
             }
         }

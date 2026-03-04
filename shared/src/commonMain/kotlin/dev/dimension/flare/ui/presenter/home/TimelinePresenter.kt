@@ -91,78 +91,82 @@ public abstract class TimelinePresenter :
             },
         ).flow.map { pagingData ->
             pagingData.map { item ->
-                mapping(item, loader.pagingKey)
+                mapping(item, loader.pagingKey, useDbKeyInItemKey)
             }
         }
 
-    private fun mapping(
-        item: DbPagingTimelineWithStatus,
-        pagingKey: String,
-    ): UiTimelineV2 {
-        val root = mappingDbStatusWithUser(item.status.status, pagingKey)
-        val references =
-            item.status.references
-                .mapNotNull { it.status }
-                .map { mappingDbStatusWithUser(it, pagingKey) }
-        return when (root) {
-            is UiTimelineV2.Feed -> root
-            is UiTimelineV2.Message -> root
-            is UiTimelineV2.Post ->
-                root.copy(
-                    parents =
-                        root.parents
-                            .map { parent ->
-                                references.find { it.statusKey == parent.statusKey } as? UiTimelineV2.Post ?: parent
-                            }.toImmutableList(),
-                    quote =
-                        root.quote
-                            .map { quote ->
-                                references.find { it.statusKey == quote.statusKey } as? UiTimelineV2.Post ?: quote
-                            }.toImmutableList(),
-                )
-            is UiTimelineV2.User -> root
-            is UiTimelineV2.UserList ->
-                root.copy(
-                    post =
-                        root.post?.let { post ->
-                            references.find { it.statusKey == post.statusKey } as? UiTimelineV2.Post ?: post
-                        },
-                )
+    internal companion object {
+        fun mapping(
+            item: DbPagingTimelineWithStatus,
+            pagingKey: String,
+            useDbKeyInItemKey: Boolean,
+        ): UiTimelineV2 {
+            val root = mappingDbStatusWithUser(item.status.status, pagingKey, useDbKeyInItemKey)
+            val references =
+                item.status.references
+                    .mapNotNull { it.status }
+                    .map { mappingDbStatusWithUser(it, pagingKey, useDbKeyInItemKey) }
+            return when (root) {
+                is UiTimelineV2.Feed -> root
+                is UiTimelineV2.Message -> root
+                is UiTimelineV2.Post ->
+                    root.copy(
+                        parents =
+                            root.parents
+                                .map { parent ->
+                                    references.find { it.statusKey == parent.statusKey } as? UiTimelineV2.Post ?: parent
+                                }.toImmutableList(),
+                        quote =
+                            root.quote
+                                .map { quote ->
+                                    references.find { it.statusKey == quote.statusKey } as? UiTimelineV2.Post ?: quote
+                                }.toImmutableList(),
+                    )
+                is UiTimelineV2.User -> root
+                is UiTimelineV2.UserList ->
+                    root.copy(
+                        post =
+                            root.post?.let { post ->
+                                references.find { it.statusKey == post.statusKey } as? UiTimelineV2.Post ?: post
+                            },
+                    )
+            }
         }
-    }
 
-    private fun mappingDbStatusWithUser(
-        data: DbStatusWithUser,
-        pagingKey: String,
-    ): UiTimelineV2 {
-        val root = data.data.content
-        val users = data.references.mapNotNull { it.user?.content }
-        return when (root) {
-            is UiTimelineV2.Feed -> root
-            is UiTimelineV2.Message ->
-                root.copy(
-                    user = users.find { root.user?.key == it.key },
-                    extraKey = if (useDbKeyInItemKey) pagingKey else null,
-                )
-            is UiTimelineV2.Post ->
-                root.copy(
-                    user = users.find { root.user?.key == it.key },
-                    extraKey = if (useDbKeyInItemKey) pagingKey else null,
-                )
-            is UiTimelineV2.User ->
-                root.copy(
-                    value = users.find { root.value.key == it.key } ?: root.value,
-                    extraKey = if (useDbKeyInItemKey) pagingKey else null,
-                )
-            is UiTimelineV2.UserList ->
-                root.copy(
-                    users =
-                        root.users
-                            .map { user ->
-                                users.find { user.key == it.key } ?: user
-                            }.toImmutableList(),
-                    extraKey = if (useDbKeyInItemKey) pagingKey else null,
-                )
+        private fun mappingDbStatusWithUser(
+            data: DbStatusWithUser,
+            pagingKey: String,
+            useDbKeyInItemKey: Boolean,
+        ): UiTimelineV2 {
+            val root = data.data.content
+            val users = data.references.mapNotNull { it.user?.content }
+            return when (root) {
+                is UiTimelineV2.Feed -> root
+                is UiTimelineV2.Message ->
+                    root.copy(
+                        user = users.find { root.user?.key == it.key },
+                        extraKey = if (useDbKeyInItemKey) pagingKey else null,
+                    )
+                is UiTimelineV2.Post ->
+                    root.copy(
+                        user = users.find { root.user?.key == it.key },
+                        extraKey = if (useDbKeyInItemKey) pagingKey else null,
+                    )
+                is UiTimelineV2.User ->
+                    root.copy(
+                        value = users.find { root.value.key == it.key } ?: root.value,
+                        extraKey = if (useDbKeyInItemKey) pagingKey else null,
+                    )
+                is UiTimelineV2.UserList ->
+                    root.copy(
+                        users =
+                            root.users
+                                .map { user ->
+                                    users.find { user.key == it.key } ?: user
+                                }.toImmutableList(),
+                        extraKey = if (useDbKeyInItemKey) pagingKey else null,
+                    )
+            }
         }
     }
 

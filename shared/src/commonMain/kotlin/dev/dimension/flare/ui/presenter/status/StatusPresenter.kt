@@ -4,12 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -29,18 +30,18 @@ public class StatusPresenter(
         val accountServiceState =
             serviceState.flatMap { service ->
                 remember(service, statusKey) {
-                    service.status(statusKey)
+                    (service as PostDataSource).postHandler.post(statusKey)
                 }.collectAsState().toUi()
             }
         remember { LogStatusHistoryPresenter(accountType = accountType, statusKey = statusKey) }.body()
 
         return object : StatusState {
-            override val status: UiState<UiTimeline> = accountServiceState
+            override val status: UiState<UiTimelineV2> = accountServiceState
         }
     }
 }
 
 @Immutable
 public interface StatusState {
-    public val status: UiState<UiTimeline>
+    public val status: UiState<UiTimelineV2>
 }

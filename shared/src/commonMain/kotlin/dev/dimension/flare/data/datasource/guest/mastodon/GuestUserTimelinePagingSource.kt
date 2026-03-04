@@ -1,10 +1,11 @@
 package dev.dimension.flare.data.datasource.guest.mastodon
 
-import androidx.paging.PagingState
-import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.mastodon.api.TimelineResources
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.mapper.renderGuest
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 
 internal class GuestUserTimelinePagingSource(
     private val service: TimelineResources,
@@ -13,14 +14,18 @@ internal class GuestUserTimelinePagingSource(
     private val withReply: Boolean = false,
     private val onlyMedia: Boolean = false,
     private val withPinned: Boolean = false,
-) : BasePagingSource<String, UiTimeline>() {
-    override fun getRefreshKey(state: PagingState<String, UiTimeline>): String? = null
+) : RemoteLoader<UiTimelineV2> {
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiTimelineV2> {
+        val maxId = (request as? PagingRequest.Append)?.nextKey
+        if (request is PagingRequest.Prepend) {
+            return PagingResult(endOfPaginationReached = true)
+        }
 
-    override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiTimeline> {
-        val maxId = params.key
-        val limit = params.loadSize
         val pinned =
-            if (withPinned && maxId == null) {
+            if (withPinned && request == PagingRequest.Refresh) {
                 service.userTimeline(
                     user_id = userId,
                     pinned = true,
@@ -28,11 +33,12 @@ internal class GuestUserTimelinePagingSource(
             } else {
                 emptyList()
             }
+
         val statuses =
             service
                 .userTimeline(
                     user_id = userId,
-                    limit = limit,
+                    limit = pageSize,
                     max_id = maxId,
                     only_media = onlyMedia,
                     exclude_replies = !withReply,
@@ -43,17 +49,11 @@ internal class GuestUserTimelinePagingSource(
                     } else {
                         it
                     }
-                }.distinctBy {
-                    it.id
-                }
-        return LoadResult.Page(
-            data =
-                statuses.map {
-                    it
-                        .renderGuest(host = host)
-                        .copy(dbKey = "guest_${SnowflakeIdGenerator.nextId()}")
-                },
-            prevKey = null,
+                }.distinctBy { it.id }
+
+        return PagingResult(
+            endOfPaginationReached = statuses.isEmpty(),
+            data = statuses.map { it.render(host = host, accountKey = null) },
             nextKey = statuses.lastOrNull()?.id,
         )
     }

@@ -1,9 +1,7 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import dev.dimension.flare.data.database.cache.mapper.cursor
-import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.mapper.users
-import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -14,6 +12,7 @@ import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
 internal class XQTListMemberLoader(
@@ -24,7 +23,7 @@ internal class XQTListMemberLoader(
         pageSize: Int,
         request: PagingRequest,
         listId: String,
-    ): PagingResult<DbUser> {
+    ): PagingResult<UiProfile> {
         val cursor = (request as? PagingRequest.Append)?.nextKey
         val response =
             service
@@ -47,8 +46,8 @@ internal class XQTListMemberLoader(
         val nextCursor = response?.cursor()
 
         val result =
-            response?.users().orEmpty().map {
-                it.toDbUser(accountKey = accountKey)
+            response?.users().orEmpty().mapNotNull {
+                it.render(accountKey = accountKey)
             }
 
         return PagingResult(
@@ -60,7 +59,7 @@ internal class XQTListMemberLoader(
     override suspend fun addMember(
         listId: String,
         userKey: MicroBlogKey,
-    ): DbUser {
+    ): UiProfile {
         service.addMember(
             request =
                 AddMemberRequest(
@@ -82,7 +81,7 @@ internal class XQTListMemberLoader(
                     is User -> it
                     is UserUnavailable -> null
                 }
-            }?.toDbUser(accountKey)
+            }?.render(accountKey)
             ?: throw Exception("User not found")
     }
 

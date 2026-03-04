@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.home
 
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
@@ -37,7 +38,12 @@ public class SearchStatusTimelinePresenter(
         ).flatMapLatest { service ->
             queryFlow.map { query ->
                 if (query.isEmpty()) {
-                    BaseTimelineLoader.NotSupported
+                    object : RemoteLoader<UiTimelineV2> {
+                        override suspend fun load(
+                            pageSize: Int,
+                            request: PagingRequest,
+                        ): PagingResult<UiTimelineV2> = PagingResult(data = emptyList())
+                    }
                 } else {
                     service.searchStatus(query)
                 }

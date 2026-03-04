@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.model.mapper
 
 import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.data.network.rss.model.Feed
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -74,6 +75,7 @@ internal fun Feed.Atom.Entry.render(
             (published ?: updated)
                 ?.let { input -> parseRssDateToInstant(input) }
                 ?.toUi() ?: Instant.fromEpochMilliseconds(0L).toUi(),
+        accountType = AccountType.Guest,
     )
 }
 
@@ -111,6 +113,7 @@ internal fun Feed.Rss20.Item.render(
             pubDate
                 ?.let { input -> parseRssDateToInstant(input) }
                 ?.toUi() ?: Instant.fromEpochMilliseconds(0L).toUi(),
+        accountType = AccountType.Guest,
     )
 }
 
@@ -148,6 +151,7 @@ internal fun Feed.RDF.Item.render(
             date
                 ?.let { input -> parseRssDateToInstant(input) }
                 ?.toUi() ?: Instant.fromEpochMilliseconds(0L).toUi(),
+        accountType = AccountType.Guest,
     )
 }
 

@@ -17,7 +17,6 @@ import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
-import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
@@ -75,13 +74,12 @@ private class MediaTimelinePresenter(
     fun createTransformedPager(scope: CoroutineScope): Flow<PagingData<ProfileMedia>> =
         createPager(scope).map { data ->
             data.flatMap { status ->
-                val content = status.content
-                if (content is UiTimeline.ItemContent.Status) {
-                    content.images.map {
+                if (status is UiTimelineV2.Post) {
+                    status.images.map {
                         ProfileMedia(
                             it,
                             status,
-                            content.images.indexOf(it),
+                            status.images.indexOf(it),
                         )
                     }
                 } else {
@@ -99,6 +97,6 @@ public interface ProfileMediaState {
 @Immutable
 public data class ProfileMedia internal constructor(
     val media: UiMedia,
-    val status: UiTimeline,
+    val status: UiTimelineV2,
     val index: Int,
 )

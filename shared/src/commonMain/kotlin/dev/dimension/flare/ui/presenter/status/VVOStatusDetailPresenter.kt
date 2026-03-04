@@ -22,7 +22,6 @@ import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapper.renderVVOText
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
@@ -45,8 +44,8 @@ public class VVOStatusDetailPresenter(
                 .flatMap {
                     remember(statusKey, accountType) {
                         require(it is VVODataSource)
-                        it.postHandler.post(statusKey)
-                    }.collectAsState().toUi()
+                        it.status(statusKey)
+                    }.collectAsState(UiState.Loading()).value
                 }
 
         remember { LogStatusHistoryPresenter(accountType = accountType, statusKey = statusKey) }.body()

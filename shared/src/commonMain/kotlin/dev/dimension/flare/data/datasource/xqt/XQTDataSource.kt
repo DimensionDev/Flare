@@ -73,7 +73,6 @@ import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
@@ -382,7 +381,7 @@ internal class XQTDataSource(
                 ?.let {
                     it as? ComposeStatus.Quote
                 }?.let {
-                    data.referenceStatus.data?.content as? UiTimeline.ItemContent.Status
+                    data.referenceStatus.data as? UiTimelineV2.Post
                 }?.user
                 ?.handle
                 ?.removePrefix("@")

@@ -15,7 +15,6 @@ import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -134,7 +133,7 @@ public class BlueskyFeedPresenter(
 @Immutable
 public interface BlueskyFeedState {
     public val info: UiState<UiList.Feed>
-    public val timeline: PagingState<UiTimeline>
+    public val timeline: PagingState<UiTimelineV2>
     public val subscribed: UiState<Boolean>
 
     public suspend fun refreshSuspend()

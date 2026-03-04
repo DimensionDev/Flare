@@ -80,7 +80,6 @@ internal class StatusDetailRemoteMediator(
                                     .insertAll(
                                         listOf(
                                             DbPagingTimeline(
-                                                accountType = AccountType.Specific(accountKey),
                                                 statusKey = statusKey,
                                                 pagingKey = pagingKey,
                                                 sortId = 0,

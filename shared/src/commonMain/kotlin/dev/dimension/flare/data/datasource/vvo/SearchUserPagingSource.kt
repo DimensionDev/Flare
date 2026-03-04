@@ -39,7 +39,7 @@ internal class SearchUserPagingSource(
                         endOfPaginationReached = true,
                     )
                 }
-                is PagingRequest.Append -> request.nextKey?.toIntOrNull()
+                is PagingRequest.Append -> request.nextKey.toIntOrNull()
             }
 
         val response =

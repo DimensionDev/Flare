@@ -18,13 +18,6 @@ public sealed class AccountType {
         override fun toString(): String = "specific_$accountKey"
     }
 
-    @Deprecated("Use Specific with the current account's key instead")
-    @Serializable
-    @Immutable
-    public data object Active : AccountType() {
-        override fun toString(): String = "active"
-    }
-
     @Serializable
     @Immutable
     public data object Guest : AccountType(), DbAccountType {

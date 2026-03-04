@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -37,7 +38,7 @@ public class NotificationBadgePresenter(
         val countState =
             serviceState.map { service ->
                 remember(service) {
-                    service.notificationBadgeCount()
+                    (service as NotificationDataSource).notificationHandler.notificationBadgeCount
                 }.collectAsState()
             }
         if (autoRefresh) {

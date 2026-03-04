@@ -2,7 +2,7 @@ package dev.dimension.flare.data.datasource.microblog.handler
 
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbUser
+import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -23,13 +23,7 @@ internal class UserHandler(
         fetchSource = {
             val user = loader.userByHandleAndHost(handle, host)
             database.userDao().insert(
-                DbUser(
-                    userKey = user.key,
-                    name = user.name.raw,
-                    handle = user.handle,
-                    host = user.key.host,
-                    content = user,
-                ),
+                user.toDbUser(),
             )
         },
         cacheSource = {
@@ -46,13 +40,7 @@ internal class UserHandler(
             fetchSource = {
                 val user = loader.userById(id)
                 database.userDao().insert(
-                    DbUser(
-                        userKey = user.key,
-                        name = user.name.raw,
-                        handle = user.handle,
-                        host = user.key.host,
-                        content = user,
-                    ),
+                    user.toDbUser(),
                 )
             },
             cacheSource = {

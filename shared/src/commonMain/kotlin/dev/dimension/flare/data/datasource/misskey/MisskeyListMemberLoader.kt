@@ -1,7 +1,5 @@
 package dev.dimension.flare.data.datasource.misskey
 
-import dev.dimension.flare.data.database.cache.mapper.toDbUser
-import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -12,6 +10,7 @@ import dev.dimension.flare.data.network.misskey.api.model.UsersListsPullRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.collections.immutable.toImmutableList
 
@@ -23,7 +22,7 @@ internal class MisskeyListMemberLoader(
         pageSize: Int,
         request: PagingRequest,
         listId: String,
-    ): PagingResult<DbUser> {
+    ): PagingResult<UiProfile> {
         val cursor =
             when (request) {
                 is PagingRequest.Append -> request.nextKey
@@ -43,7 +42,7 @@ internal class MisskeyListMemberLoader(
 
         val users =
             response.map {
-                it.user.toDbUser(accountKey.host)
+                it.user.render(accountKey)
             }
 
         return PagingResult(
@@ -55,7 +54,7 @@ internal class MisskeyListMemberLoader(
     override suspend fun addMember(
         listId: String,
         userKey: MicroBlogKey,
-    ): DbUser {
+    ): UiProfile {
         service.usersListsPush(
             UsersListsPullRequest(
                 listId = listId,
@@ -67,7 +66,7 @@ internal class MisskeyListMemberLoader(
                 UsersShowRequest(
                     userId = userKey.id,
                 ),
-            ).toDbUser(accountKey.host)
+            ).render(accountKey)
     }
 
     override suspend fun removeMember(

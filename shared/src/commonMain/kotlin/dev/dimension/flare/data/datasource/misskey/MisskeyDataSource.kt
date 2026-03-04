@@ -55,7 +55,6 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
@@ -459,11 +458,11 @@ internal class MisskeyDataSource(
                 text = data.content.takeIf { it.isNotEmpty() && it.isNotBlank() },
                 visibility =
                     when (data.visibility) {
-                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public -> "public"
-                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home -> "home"
-                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers -> "followers"
-                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified -> "specified"
-                        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel -> "public"
+                        UiTimelineV2.Post.Visibility.Public -> "public"
+                        UiTimelineV2.Post.Visibility.Home -> "home"
+                        UiTimelineV2.Post.Visibility.Followers -> "followers"
+                        UiTimelineV2.Post.Visibility.Specified -> "specified"
+                        UiTimelineV2.Post.Visibility.Channel -> "public"
                     },
                 renoteId = renoteId,
                 replyId = inReplyToID,

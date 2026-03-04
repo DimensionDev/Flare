@@ -11,8 +11,8 @@ import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.render.toUi
-import kotlin.time.Instant
 import kotlinx.collections.immutable.toImmutableList
+import kotlin.time.Instant
 
 // internal fun DbPagingTimelineWithStatus.render(
 //    event: StatusEvent?,

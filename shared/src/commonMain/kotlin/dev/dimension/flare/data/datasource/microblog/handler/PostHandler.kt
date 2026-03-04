@@ -10,8 +10,8 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.mapper.render
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapNotNull
@@ -26,7 +26,7 @@ internal class PostHandler(
     private val database: CacheDatabase by inject()
     private val coroutineScope: CoroutineScope by inject()
 
-    fun post(postKey: MicroBlogKey): Cacheable<UiTimeline> {
+    fun post(postKey: MicroBlogKey): Cacheable<UiTimelineV2> {
         val pagingKey = "post_only_$postKey"
         return Cacheable(
             fetchSource = {
@@ -36,7 +36,6 @@ internal class PostHandler(
                         TimelineRemoteMediator.mapping(
                             result,
                             pagingKey,
-                            accountType = accountType as DbAccountType,
                         )
                     saveToDatabase(database, listOf(item))
                 }
@@ -47,7 +46,9 @@ internal class PostHandler(
                     .get(pagingKey, accountType = accountType as DbAccountType)
                     .distinctUntilChanged()
                     .mapNotNull {
-                        it?.render(this)
+                        it?.let {
+                            TimelinePresenter.mapping(it, pagingKey, false)
+                        }
                     }
             },
         )

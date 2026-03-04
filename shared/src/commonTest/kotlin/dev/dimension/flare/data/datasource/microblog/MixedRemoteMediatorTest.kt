@@ -159,8 +159,8 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             assertEquals(1, healthy.requests.size)
             assertEquals(1, result.data.size)
             assertEquals("https://example.com/healthy", (result.data.first() as UiTimelineV2.Feed).url)
-            assertNotNull(db.pagingTimelineDao().getPagingKey("failing"))
-            assertNotNull(db.pagingTimelineDao().getPagingKey("healthy"))
+            assertNotNull(db.pagingTimelineDao().getPagingKey("mixed_failing"))
+            assertNotNull(db.pagingTimelineDao().getPagingKey("mixed_healthy"))
         }
 
     @OptIn(ExperimentalPagingApi::class)

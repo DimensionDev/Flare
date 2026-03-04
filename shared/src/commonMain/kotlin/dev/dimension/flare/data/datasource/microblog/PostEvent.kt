@@ -8,6 +8,9 @@ import dev.dimension.flare.ui.model.mapper.blueskyReblog
 import dev.dimension.flare.ui.model.mapper.mastodonBookmark
 import dev.dimension.flare.ui.model.mapper.mastodonLike
 import dev.dimension.flare.ui.model.mapper.mastodonRepost
+import dev.dimension.flare.ui.model.mapper.misskeyFavourite
+import dev.dimension.flare.ui.model.mapper.misskeyReact
+import dev.dimension.flare.ui.model.mapper.misskeyRenote
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
 
@@ -115,12 +118,34 @@ internal sealed interface PostEvent {
             override val postKey: MicroBlogKey,
             val hasReacted: Boolean,
             val reaction: String,
-        ) : Misskey
+            val count: Long = 0,
+            val accountKey: MicroBlogKey? = null,
+        ) : Misskey,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.misskeyReact(
+                    postKey = postKey,
+                    hasReacted = !hasReacted,
+                    reaction = reaction,
+                    count = (count + if (!hasReacted) 1 else -1).coerceAtLeast(0),
+                    accountKey = accountKey,
+                )
+        }
 
         @Serializable
         data class Renote(
             override val postKey: MicroBlogKey,
-        ) : Misskey
+            val count: Long = 0,
+            val accountKey: MicroBlogKey? = null,
+        ) : Misskey,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.misskeyRenote(
+                    postKey = postKey,
+                    count = count + 1,
+                    accountKey = accountKey,
+                )
+        }
 
         @Serializable
         data class Vote(
@@ -136,7 +161,16 @@ internal sealed interface PostEvent {
         data class Favourite(
             override val postKey: MicroBlogKey,
             val favourited: Boolean,
-        ) : Misskey
+            val accountKey: MicroBlogKey? = null,
+        ) : Misskey,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.misskeyFavourite(
+                    postKey = postKey,
+                    favourited = !favourited,
+                    accountKey = accountKey,
+                )
+        }
 
         @Serializable
         data class AcceptFollowRequest(

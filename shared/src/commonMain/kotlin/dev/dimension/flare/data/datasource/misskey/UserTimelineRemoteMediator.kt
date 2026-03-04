@@ -1,30 +1,25 @@
 package dev.dimension.flare.data.datasource.misskey
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.UsersNotesRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.model.MicroBlogKey
-import kotlin.time.Instant
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
 internal class UserTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
     private val userKey: MicroBlogKey,
-    database: CacheDatabase,
     private val onlyMedia: Boolean = false,
     private val withReplies: Boolean = false,
     private val withPinned: Boolean = false,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
+) : CacheableRemoteLoader<UiTimelineV2> {
     var pinnedIds = emptyList<String>()
 
     override val pagingKey: String
@@ -44,10 +39,10 @@ internal class UserTimelineRemoteMediator(
                 append(userKey.toString())
             }
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         val response =
             when (request) {
                 is PagingRequest.Prepend -> return PagingResult(
@@ -123,20 +118,7 @@ internal class UserTimelineRemoteMediator(
         return PagingResult(
             endOfPaginationReached = response.isEmpty(),
             data =
-                response.toDbPagingTimeline(
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                    sortIdProvider = {
-                        if (it.id in pinnedIds) {
-                            Long.MAX_VALUE
-                        } else {
-                            Instant.parse(it.createdAt).toEpochMilliseconds()
-                        }
-                    },
-                    pinnedProvider = {
-                        it.id in pinnedIds
-                    },
-                ),
+                response.render(accountKey),
             nextKey = response.lastOrNull()?.id,
         )
     }

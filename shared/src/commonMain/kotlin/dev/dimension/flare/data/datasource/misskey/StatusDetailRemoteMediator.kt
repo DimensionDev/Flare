@@ -1,13 +1,10 @@
 package dev.dimension.flare.data.datasource.misskey
 
-import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.misskey.MisskeyService
@@ -15,18 +12,22 @@ import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.coroutines.flow.firstOrNull
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import kotlin.getValue
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
     private val statusKey: MicroBlogKey,
-    private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
     private val statusOnly: Boolean,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
+) : CacheableRemoteLoader<UiTimelineV2>,
+    KoinComponent {
+    private val database: CacheDatabase by inject()
     override val pagingKey: String =
         buildString {
             append("status_detail_")
@@ -38,10 +39,10 @@ internal class StatusDetailRemoteMediator(
             append(accountKey.toString())
         }
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         val result =
             when (request) {
                 is PagingRequest.Append -> {
@@ -105,13 +106,7 @@ internal class StatusDetailRemoteMediator(
         return PagingResult(
             endOfPaginationReached = statusOnly || result.isEmpty(),
             data =
-                result.toDbPagingTimeline(
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                    sortIdProvider = {
-                        -SnowflakeIdGenerator.nextId()
-                    },
-                ),
+                result.render(accountKey),
             nextKey =
                 if (request == PagingRequest.Refresh) {
                     ""

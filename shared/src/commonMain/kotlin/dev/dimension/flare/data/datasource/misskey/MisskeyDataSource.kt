@@ -3,82 +3,70 @@ package dev.dimension.flare.data.datasource.misskey
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingData
-import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import androidx.paging.map
-import dev.dimension.flare.common.BasePagingSource
-import dev.dimension.flare.common.CacheData
-import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileType
-import dev.dimension.flare.common.MemCacheable
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.Misskey
-import dev.dimension.flare.data.database.cache.mapper.toDb
-import dev.dimension.flare.data.database.cache.mapper.toDbUser
-import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
+import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.ReactionDataSource
-import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.handler.EmojiHandler
 import dev.dimension.flare.data.datasource.microblog.handler.ListHandler
 import dev.dimension.flare.data.datasource.microblog.handler.ListMemberHandler
+import dev.dimension.flare.data.datasource.microblog.handler.NotificationHandler
+import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
+import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
+import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
+import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
-import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
-import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
-import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFeaturedRequest
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsFollowRequest
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
-import dev.dimension.flare.data.network.misskey.api.model.MuteCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
 import dev.dimension.flare.data.network.misskey.api.model.NotesPollsVoteRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesReactionsCreateRequest
-import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.shared.image.ImageCompressor
+import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
-import dev.dimension.flare.ui.model.mapper.toUi
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -87,14 +75,14 @@ internal class MisskeyDataSource(
     override val accountKey: MicroBlogKey,
     private val host: String,
 ) : AuthenticatedMicroblogDataSource,
+    NotificationDataSource,
+    UserDataSource,
+    PostDataSource,
     KoinComponent,
-    StatusEvent.Misskey,
     ListDataSource,
     ReactionDataSource,
-    RelationLoader {
-    private val database: CacheDatabase by inject()
-    private val localFilterRepository: LocalFilterRepository by inject()
-    private val coroutineScope: CoroutineScope by inject()
+    RelationDataSource,
+    PostEventHandler.Handler {
     private val accountRepository: AccountRepository by inject()
     private val imageCompressor: ImageCompressor by inject()
     private val service by lazy {
@@ -108,86 +96,256 @@ internal class MisskeyDataSource(
         )
     }
 
+    private val loader by lazy {
+        MisskeyLoader(
+            accountKey = accountKey,
+            service = service,
+        )
+    }
+
+    private val emojiHandler by lazy {
+        EmojiHandler(
+            host = accountKey.host,
+            loader = loader,
+        )
+    }
+
+    override val notificationHandler by lazy {
+        NotificationHandler(
+            accountKey = accountKey,
+            loader = loader,
+        )
+    }
+
+    override val userHandler by lazy {
+        UserHandler(
+            accountKey = accountKey,
+            loader = loader,
+        )
+    }
+
+    override val postHandler by lazy {
+        PostHandler(
+            accountType = AccountType.Specific(accountKey),
+            loader = loader,
+        )
+    }
+
+    override val relationHandler by lazy {
+        RelationHandler(
+            dataSource = loader,
+        )
+    }
+
+    override val postEventHandler by lazy {
+        PostEventHandler(
+            accountKey = accountKey,
+            handler = this,
+        )
+    }
+
+    override suspend fun handle(
+        event: PostEvent,
+        updater: DatabaseUpdater,
+    ) {
+        require(event is PostEvent.Misskey)
+        when (event) {
+            is PostEvent.Misskey.React -> {
+                val reacted = !event.hasReacted
+                val nextActionCount = (event.count + if (reacted) 1 else -1).coerceAtLeast(0)
+                updater.updateCache(event.postKey) { current ->
+                    if (current !is UiTimelineV2.Post) {
+                        return@updateCache current
+                    }
+                    val updatedReactions =
+                        current.emojiReactions
+                            .toMutableList()
+                            .let { reactions ->
+                                val index = reactions.indexOfFirst { it.name == event.reaction }
+                                if (reacted) {
+                                    if (index >= 0) {
+                                        val original = reactions[index]
+                                        reactions[index] =
+                                            original.copy(
+                                                count = UiNumber(original.count.value + 1),
+                                                me = true,
+                                                clickEvent =
+                                                    ClickEvent.event(
+                                                        accountKey,
+                                                        PostEvent.Misskey.React(
+                                                            postKey = event.postKey,
+                                                            hasReacted = true,
+                                                            reaction = event.reaction,
+                                                            count = nextActionCount,
+                                                            accountKey = accountKey,
+                                                        ),
+                                                    ),
+                                            )
+                                    } else {
+                                        reactions.add(
+                                            UiTimelineV2.Post.EmojiReaction(
+                                                name = event.reaction,
+                                                url = "",
+                                                count = UiNumber(1),
+                                                clickEvent =
+                                                    ClickEvent.event(
+                                                        accountKey,
+                                                        PostEvent.Misskey.React(
+                                                            postKey = event.postKey,
+                                                            hasReacted = true,
+                                                            reaction = event.reaction,
+                                                            count = nextActionCount,
+                                                            accountKey = accountKey,
+                                                        ),
+                                                    ),
+                                                isUnicode = !event.reaction.startsWith(':') && !event.reaction.endsWith(':'),
+                                                me = true,
+                                            ),
+                                        )
+                                    }
+                                } else if (index >= 0) {
+                                    val original = reactions[index]
+                                    val newCount = (original.count.value - 1).coerceAtLeast(0)
+                                    if (newCount == 0L) {
+                                        reactions.removeAt(index)
+                                    } else {
+                                        reactions[index] =
+                                            original.copy(
+                                                count = UiNumber(newCount),
+                                                me = false,
+                                                clickEvent =
+                                                    ClickEvent.event(
+                                                        accountKey,
+                                                        PostEvent.Misskey.React(
+                                                            postKey = event.postKey,
+                                                            hasReacted = false,
+                                                            reaction = event.reaction,
+                                                            count = nextActionCount,
+                                                            accountKey = accountKey,
+                                                        ),
+                                                    ),
+                                            )
+                                    }
+                                }
+                                reactions
+                            }.sortedByDescending { it.count.value }
+                            .toImmutableList()
+                    current.copy(
+                        emojiReactions = updatedReactions,
+                    )
+                }
+                if (event.hasReacted) {
+                    service.notesReactionsDelete(IPinRequest(noteId = event.postKey.id))
+                } else {
+                    service.notesReactionsCreate(
+                        NotesReactionsCreateRequest(
+                            noteId = event.postKey.id,
+                            reaction = event.reaction,
+                        ),
+                    )
+                }
+            }
+
+            is PostEvent.Misskey.Renote ->
+                service.notesCreate(
+                    NotesCreateRequest(
+                        renoteId = event.postKey.id,
+                    ),
+                )
+
+            is PostEvent.Misskey.Vote ->
+                event.options.forEach {
+                    service.notesPollsVote(
+                        notesPollsVoteRequest =
+                            NotesPollsVoteRequest(
+                                noteId = event.postKey.id,
+                                choice = it,
+                            ),
+                    )
+                }
+
+            is PostEvent.Misskey.Favourite -> {
+                if (event.favourited) {
+                    service.notesFavoritesDelete(IPinRequest(noteId = event.postKey.id))
+                } else {
+                    service.notesFavoritesCreate(IPinRequest(noteId = event.postKey.id))
+                }
+            }
+
+            is PostEvent.Misskey.AcceptFollowRequest -> {
+                service.followingRequestsAccept(
+                    adminAccountsDeleteRequest = AdminAccountsDeleteRequest(userId = event.userKey.id),
+                )
+                updater.deleteFromCache(event.notificationStatusKey)
+                relationHandler.approveFollowRequest(event.userKey)
+            }
+
+            is PostEvent.Misskey.RejectFollowRequest -> {
+                service.followingRequestsReject(
+                    adminAccountsDeleteRequest = AdminAccountsDeleteRequest(userId = event.userKey.id),
+                )
+                updater.deleteFromCache(event.notificationStatusKey)
+                relationHandler.rejectFollowRequest(event.userKey)
+            }
+        }
+    }
+
     override fun homeTimeline() =
         HomeTimelineRemoteMediator(
             accountKey,
             service,
-            database,
-        )
-
-    fun localTimeline(
-        pageSize: Int = 20,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator = localTimelineLoader(),
         )
 
     fun localTimelineLoader() =
         LocalTimelineRemoteMediator(
             accountKey,
             service,
-            database,
         )
 
     fun hybridTimelineLoader() =
         HybridTimelineRemoteMediator(
             accountKey,
             service,
-            database,
-        )
-
-    fun publicTimeline(
-        pageSize: Int = 20,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator = publicTimelineLoader(),
         )
 
     fun publicTimelineLoader() =
         PublicTimelineRemoteMediator(
             accountKey,
             service,
-            database,
         )
 
     fun featuredChannels(scope: CoroutineScope): Flow<PagingData<UiList>> =
         Pager(
             config = pagingConfig,
         ) {
-            object : BasePagingSource<String, UiList>() {
-                override fun getRefreshKey(state: PagingState<String, UiList>): String? = null
-
-                override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiList> {
-                    val result =
-                        service
-                            .channelsFeatured(
-                                request =
-                                    ChannelsFeaturedRequest(
-                                        limit = params.loadSize,
-                                    ),
+            object : RemoteLoader<UiList> {
+                override suspend fun load(
+                    pageSize: Int,
+                    request: PagingRequest,
+                ): PagingResult<UiList> =
+                    when (request) {
+                        is PagingRequest.Prepend,
+                        is PagingRequest.Append,
+                        ->
+                            PagingResult<UiList>(
+                                endOfPaginationReached = true,
                             )
-                    return LoadResult.Page(
-                        data =
-                            result.map {
-                                it.render(accountKey)
-                            },
-                        prevKey = null,
-                        nextKey = null,
-                    )
-                }
-            }
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                endOfPaginationReached = true,
+                                data =
+                                    service
+                                        .channelsFeatured(
+                                            request =
+                                                ChannelsFeaturedRequest(
+                                                    limit = pageSize,
+                                                ),
+                                        ).map {
+                                            it.render(accountKey)
+                                        },
+                            )
+                    }
+            }.toPagingSource()
         }.flow
             .cachedIn(scope)
             .let { channels ->
@@ -207,36 +365,22 @@ internal class MisskeyDataSource(
                 }
             }.cachedIn(scope)
 
-    override fun notification(
-        type: NotificationFilter,
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forNotification = true),
-            accountRepository = accountRepository,
-            mediator =
-                when (type) {
-                    NotificationFilter.All ->
-                        NotificationRemoteMediator(
-                            accountKey,
-                            service,
-                            database,
-                        )
+    override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
+        when (type) {
+            NotificationFilter.All ->
+                NotificationRemoteMediator(
+                    accountKey,
+                    service,
+                )
 
-                    NotificationFilter.Mention ->
-                        MentionTimelineRemoteMediator(
-                            accountKey,
-                            service,
-                            database,
-                        )
+            NotificationFilter.Mention ->
+                MentionTimelineRemoteMediator(
+                    accountKey,
+                    service,
+                )
 
-                    else -> throw IllegalStateException("Unsupported notification type")
-                },
-        )
+            else -> throw IllegalStateException("Unsupported notification type")
+        }
 
     override val supportedNotificationFilter: List<NotificationFilter>
         get() =
@@ -245,63 +389,6 @@ internal class MisskeyDataSource(
                 NotificationFilter.Mention,
             )
 
-    override fun userByAcct(acct: String): CacheData<UiProfile> {
-        val (name, host) = MicroBlogKey.valueOf(acct)
-        return Cacheable(
-            fetchSource = {
-                val user =
-                    service
-                        .usersShow(UsersShowRequest(username = name, host = host))
-                        .toDbUser(accountKey.host)
-                database.userDao().insert(user)
-            },
-            cacheSource = {
-                database
-                    .userDao()
-                    .findByHandleAndHost(name, host, PlatformType.Misskey)
-                    .distinctUntilChanged()
-                    .mapNotNull { it?.render(accountKey) }
-            },
-        )
-    }
-
-    override fun userById(id: String): CacheData<UiProfile> {
-        val userKey = MicroBlogKey(id, accountKey.host)
-        return Cacheable(
-            fetchSource = {
-                val user =
-                    service
-                        .usersShow(UsersShowRequest(userId = id))
-                        .toDbUser(accountKey.host)
-                database.userDao().insert(user)
-            },
-            cacheSource = {
-                database
-                    .userDao()
-                    .findByKey(userKey)
-                    .distinctUntilChanged()
-                    .mapNotNull { it?.render(accountKey) }
-            },
-        )
-    }
-
-    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> =
-        MemCacheable<UiRelation>(
-            relationKeyWithUserKey(userKey),
-        ) {
-            val user =
-                service
-                    .usersShow(UsersShowRequest(userId = userKey.id))
-            UiRelation(
-                following = user.isFollowing ?: false,
-                isFans = user.isFollowed ?: false,
-                blocking = user.isBlocking ?: false,
-                muted = user.isMuted ?: false,
-                hasPendingFollowRequestFromYou = user.hasPendingFollowRequestFromYou ?: false,
-                hasPendingFollowRequestToYou = user.hasPendingFollowRequestToYou ?: false,
-            )
-        }.toUi()
-
     override fun userTimeline(
         userKey: MicroBlogKey,
         mediaOnly: Boolean,
@@ -309,72 +396,15 @@ internal class MisskeyDataSource(
         accountKey,
         service,
         userKey,
-        database,
         onlyMedia = mediaOnly,
     )
 
     override fun context(statusKey: MicroBlogKey) =
         StatusDetailRemoteMediator(
             statusKey,
-            database,
             accountKey,
             service,
             statusOnly = false,
-        )
-
-    override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
-        val pagingKey = "status_only_$statusKey"
-        return Cacheable(
-            fetchSource = {
-                val result =
-                    service
-                        .notesShow(
-                            IPinRequest(noteId = statusKey.id),
-                        )
-                Misskey.save(
-                    database = database,
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                    data = listOfNotNull(result),
-                )
-            },
-            cacheSource = {
-                database
-                    .statusDao()
-                    .get(statusKey, AccountType.Specific(accountKey))
-                    .distinctUntilChanged()
-                    .mapNotNull { it?.content?.render(this) }
-            },
-        )
-    }
-
-    override fun emoji(): Cacheable<ImmutableMap<String, ImmutableList<UiEmoji>>> =
-        Cacheable(
-            fetchSource = {
-                val emojis =
-                    service
-                        .emojis()
-                        .emojis
-                        .orEmpty()
-                        .toImmutableList()
-                database.emojiDao().insert(
-                    emojis.toDb(accountKey.host),
-                )
-            },
-            cacheSource = {
-                database
-                    .emojiDao()
-                    .get(accountKey.host)
-                    .distinctUntilChanged()
-                    .mapNotNull {
-                        it
-                            ?.toUi()
-                            ?.groupBy { it.category }
-                            ?.map { it.key to it.value.toImmutableList() }
-                            ?.toMap()
-                            ?.toImmutableMap()
-                    }
-            },
         )
 
     override suspend fun compose(
@@ -453,144 +483,6 @@ internal class MisskeyDataSource(
 //        progress(ComposeProgress(maxProgress, maxProgress))
     }
 
-    override fun renote(statusKey: MicroBlogKey) {
-        coroutineScope.launch {
-            updateStatusUseCase<StatusContent.Misskey>(
-                statusKey = statusKey,
-                accountKey = accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(
-                        data =
-                            it.data.copy(
-                                renoteCount = it.data.renoteCount + 1,
-                            ),
-                    )
-                },
-            )
-            tryRun {
-                service.notesCreate(
-                    NotesCreateRequest(
-                        renoteId = statusKey.id,
-                    ),
-                )
-            }.onFailure {
-                updateStatusUseCase<StatusContent.Misskey>(
-                    statusKey = statusKey,
-                    accountKey = accountKey,
-                    cacheDatabase = database,
-                    update = {
-                        it.copy(
-                            data =
-                                it.data.copy(
-                                    renoteCount = it.data.renoteCount - 1,
-                                ),
-                        )
-                    },
-                )
-            }
-        }
-    }
-
-    override suspend fun deleteStatus(statusKey: MicroBlogKey) {
-        tryRun {
-            service.notesDelete(
-                IPinRequest(
-                    noteId = statusKey.id,
-                ),
-            )
-
-            // delete status from cache
-            database.connect {
-                database.statusDao().delete(
-                    statusKey = statusKey,
-                    accountType = AccountType.Specific(accountKey),
-                )
-                database.statusReferenceDao().delete(statusKey)
-                database.pagingTimelineDao().deleteStatus(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                )
-            }
-        }
-    }
-
-    override fun react(
-        statusKey: MicroBlogKey,
-        hasReacted: Boolean,
-        reaction: String,
-    ) {
-        coroutineScope.launch {
-            updateStatusUseCase<StatusContent.Misskey>(
-                statusKey,
-                accountKey,
-                database,
-            ) {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            myReaction = if (hasReacted) null else reaction,
-                            reactions =
-                                it.data.reactions.toMutableMap().apply {
-                                    if (hasReacted) {
-                                        val current = it.data.reactions[reaction] ?: 0
-                                        if (current > 1) {
-                                            put(reaction, current - 1)
-                                        } else {
-                                            remove(reaction)
-                                        }
-                                    } else {
-                                        put(reaction, it.data.reactions[reaction]?.plus(1) ?: 1)
-                                    }
-                                },
-                        ),
-                )
-            }
-            tryRun {
-                if (hasReacted) {
-                    service.notesReactionsDelete(
-                        IPinRequest(
-                            noteId = statusKey.id,
-                        ),
-                    )
-                } else {
-                    service.notesReactionsCreate(
-                        NotesReactionsCreateRequest(
-                            noteId = statusKey.id,
-                            reaction = reaction,
-                        ),
-                    )
-                }
-            }.onFailure {
-                updateStatusUseCase<StatusContent.Misskey>(
-                    statusKey,
-                    accountKey,
-                    database,
-                ) {
-                    it.copy(
-                        data =
-                            it.data.copy(
-                                myReaction = if (hasReacted) reaction else null,
-                                reactions =
-                                    it.data.reactions.toMutableMap().apply {
-                                        if (hasReacted) {
-                                            put(reaction, it.data.reactions[reaction]?.plus(1) ?: 1)
-                                        } else {
-                                            val current = it.data.reactions[reaction] ?: 0
-                                            if (current > 1) {
-                                                put(reaction, current - 1)
-                                            } else {
-                                                remove(reaction)
-                                            }
-                                        }
-                                    },
-                            ),
-                    )
-                }
-            }
-        }
-    }
-
     suspend fun report(
         userKey: MicroBlogKey,
         statusKey: MicroBlogKey?,
@@ -629,185 +521,36 @@ internal class MisskeyDataSource(
         }
     }
 
-    suspend fun unfollow(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                following = false,
-            )
-        }
-        tryRun {
-            service.followingDelete(AdminAccountsDeleteRequest(userId = userKey.id))
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    following = true,
-                )
-            }
-        }
-    }
-
-    suspend fun follow(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                following = true,
-            )
-        }
-        tryRun {
-            service.followingCreate(AdminAccountsDeleteRequest(userId = userKey.id))
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    following = false,
-                )
-            }
-        }
-    }
-
-    override suspend fun block(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                blocking = true,
-            )
-        }
-        tryRun {
-            service.blockingCreate(AdminAccountsDeleteRequest(userId = userKey.id))
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    blocking = false,
-                )
-            }
-        }
-    }
-
-    suspend fun unblock(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                blocking = false,
-            )
-        }
-        tryRun {
-            service.blockingDelete(AdminAccountsDeleteRequest(userId = userKey.id))
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    blocking = true,
-                )
-            }
-        }
-    }
-
-    override suspend fun mute(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                muted = true,
-            )
-        }
-        tryRun {
-            service.muteCreate(MuteCreateRequest(userId = userKey.id))
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    muted = false,
-                )
-            }
-        }
-    }
-
-    suspend fun unmute(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                muted = false,
-            )
-        }
-        tryRun {
-            service.muteDelete(AdminAccountsDeleteRequest(userId = userKey.id))
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    muted = true,
-                )
-            }
-        }
-    }
-
     override fun searchStatus(query: String) =
         SearchStatusRemoteMediator(
             service,
-            database,
             accountKey,
             query,
         )
 
-    override fun searchUser(
-        query: String,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            SearchUserPagingSource(
-                service,
-                accountKey,
-                query,
-            )
-        }.flow
+    override fun searchUser(query: String): RemoteLoader<UiProfile> =
+        SearchUserPagingSource(
+            service,
+            accountKey,
+            query,
+        )
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            TrendsUserPagingSource(
-                service,
-                accountKey,
-            )
-        }.flow
+    override fun discoverUsers(): RemoteLoader<UiProfile> =
+        TrendsUserPagingSource(
+            service,
+            accountKey,
+        )
 
     override fun discoverStatuses() =
         DiscoverStatusRemoteMediator(
             service,
-            database,
             accountKey,
         )
 
-    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            TrendHashtagPagingSource(
-                service,
-            )
-        }.flow
+    override fun discoverHashtags(): RemoteLoader<UiHashtag> =
+        TrendHashtagPagingSource(
+            service,
+        )
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
@@ -820,149 +563,12 @@ internal class MisskeyDataSource(
                     allowMediaOnly = true,
                 ),
             poll = ComposeConfig.Poll(9),
-            emoji = ComposeConfig.Emoji(emoji(), "misskey@${accountKey.host}"),
+            emoji = ComposeConfig.Emoji(emojiHandler.emoji, "misskey@${accountKey.host}"),
             contentWarning = ComposeConfig.ContentWarning,
             visibility = ComposeConfig.Visibility,
         )
 
-    override suspend fun follow(
-        userKey: MicroBlogKey,
-        relation: UiRelation,
-    ) {
-        when {
-            relation.following -> unfollow(userKey)
-            relation.blocking -> unblock(userKey)
-            relation.hasPendingFollowRequestFromYou -> Unit // TODO: cancel follow request
-            else -> follow(userKey)
-        }
-    }
-
-    override fun profileActions(): List<ProfileAction> =
-        listOf(
-            object : ProfileAction.Mute {
-                override suspend fun invoke(
-                    userKey: MicroBlogKey,
-                    relation: UiRelation,
-                ) {
-                    if (relation.muted) {
-                        unmute(userKey)
-                    } else {
-                        mute(userKey)
-                    }
-                }
-
-                override fun relationState(relation: UiRelation): Boolean = relation.muted
-            },
-            object : ProfileAction.Block {
-                override suspend fun invoke(
-                    userKey: MicroBlogKey,
-                    relation: UiRelation,
-                ) {
-                    if (relation.blocking) {
-                        unblock(userKey)
-                    } else {
-                        block(userKey)
-                    }
-                }
-
-                override fun relationState(relation: UiRelation): Boolean = relation.blocking
-            },
-        )
-
-    override fun vote(
-        statusKey: MicroBlogKey,
-        options: List<Int>,
-    ) {
-        coroutineScope.launch {
-            updateStatusUseCase<StatusContent.Misskey>(
-                statusKey,
-                accountKey,
-                database,
-            ) {
-                it.copy(
-                    data =
-                        it.data.copy(
-                            poll =
-                                it.data.poll?.copy(
-                                    choices =
-                                        it.data.poll.choices.mapIndexed { index, choice ->
-                                            if (options.contains(index)) {
-                                                choice.copy(
-                                                    votes = choice.votes + 1,
-                                                    isVoted = true,
-                                                )
-                                            } else {
-                                                choice
-                                            }
-                                        },
-                                ),
-                        ),
-                )
-            }
-            tryRun {
-                options.forEach {
-                    service.notesPollsVote(
-                        notesPollsVoteRequest =
-                            NotesPollsVoteRequest(
-                                noteId = statusKey.id,
-                                choice = it,
-                            ),
-                    )
-                }
-            }.onFailure {
-                updateStatusUseCase<StatusContent.Misskey>(
-                    statusKey,
-                    accountKey,
-                    database,
-                ) {
-                    it.copy(
-                        data =
-                            it.data.copy(
-                                poll =
-                                    it.data.poll?.copy(
-                                        choices =
-                                            it.data.poll.choices.mapIndexed { index, choice ->
-                                                if (options.contains(index)) {
-                                                    choice.copy(
-                                                        votes = choice.votes - 1,
-                                                        isVoted = false,
-                                                    )
-                                                } else {
-                                                    choice
-                                                }
-                                            },
-                                    ),
-                            ),
-                    )
-                }
-            }
-        }
-    }
-
-    override fun favourite(
-        statusKey: MicroBlogKey,
-        favourited: Boolean,
-    ) {
-        coroutineScope.launch {
-            tryRun {
-                if (favourited) {
-                    service.notesFavoritesDelete(
-                        IPinRequest(
-                            noteId = statusKey.id,
-                        ),
-                    )
-                } else {
-                    service.notesFavoritesCreate(
-                        IPinRequest(
-                            noteId = statusKey.id,
-                        ),
-                    )
-                }
-            }
-        }
-    }
-
-    override fun favouriteState(statusKey: MicroBlogKey): Flow<Boolean> =
+    fun favouriteState(statusKey: MicroBlogKey): Flow<Boolean> =
         flow {
             tryRun {
                 service.notesState(
@@ -980,35 +586,19 @@ internal class MisskeyDataSource(
             )
         }
 
-    override fun following(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            FollowingPagingSource(
-                service = service,
-                userKey = userKey,
-                accountKey = accountKey,
-            )
-        }.flow.cachedIn(scope)
+    override fun following(userKey: MicroBlogKey): RemoteLoader<UiProfile> =
+        FollowingPagingSource(
+            service = service,
+            userKey = userKey,
+            accountKey = accountKey,
+        )
 
-    override fun fans(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            FansPagingSource(
-                service = service,
-                userKey = userKey,
-                accountKey = accountKey,
-            )
-        }.flow.cachedIn(scope)
+    override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> =
+        FansPagingSource(
+            service = service,
+            userKey = userKey,
+            accountKey = accountKey,
+        )
 
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         listOfNotNull(
@@ -1019,7 +609,6 @@ internal class MisskeyDataSource(
                         accountKey = accountKey,
                         service = service,
                         userKey = userKey,
-                        database = database,
                         withPinned = true,
                     ),
             ),
@@ -1029,7 +618,6 @@ internal class MisskeyDataSource(
                     UserTimelineRemoteMediator(
                         service = service,
                         accountKey = accountKey,
-                        database = database,
                         userKey = userKey,
                         withReplies = true,
                     ),
@@ -1037,23 +625,9 @@ internal class MisskeyDataSource(
             ProfileTab.Media,
         ).toPersistentList()
 
-    fun favouriteTimeline(
-        pageSize: Int = 20,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator = favouriteTimelineLoader(),
-        )
-
     fun favouriteTimelineLoader() =
         FavouriteTimelineRemoteMediator(
             service = service,
-            database = database,
             accountKey = accountKey,
         )
 
@@ -1064,7 +638,6 @@ internal class MisskeyDataSource(
         ListTimelineRemoteMediator(
             listId,
             service,
-            database,
             accountKey,
         )
 
@@ -1173,95 +746,18 @@ internal class MisskeyDataSource(
         }
     }
 
-    override fun acceptFollowRequest(
-        userKey: MicroBlogKey,
-        notificationStatusKey: MicroBlogKey,
-    ) {
-        coroutineScope.launch {
-            tryRun {
-                MemCacheable.updateWith<UiRelation>(
-                    key = relationKeyWithUserKey(userKey),
-                ) {
-                    it.copy(
-                        hasPendingFollowRequestToYou = false,
-                        isFans = true,
-                    )
-                }
-                service.followingRequestsAccept(
-                    adminAccountsDeleteRequest =
-                        AdminAccountsDeleteRequest(
-                            userId = userKey.id,
-                        ),
-                )
-            }.onFailure {
-                MemCacheable.updateWith<UiRelation>(
-                    key = relationKeyWithUserKey(userKey),
-                ) {
-                    it.copy(
-                        hasPendingFollowRequestToYou = true,
-                        isFans = false,
-                    )
-                }
-            }.onSuccess {
-                database.pagingTimelineDao().deleteStatus(
-                    accountKey = accountKey,
-                    statusKey = notificationStatusKey,
-                )
-            }
-        }
-    }
-
-    override fun rejectFollowRequest(
-        userKey: MicroBlogKey,
-        notificationStatusKey: MicroBlogKey,
-    ) {
-        coroutineScope.launch {
-            tryRun {
-                MemCacheable.updateWith<UiRelation>(
-                    key = relationKeyWithUserKey(userKey),
-                ) {
-                    it.copy(
-                        hasPendingFollowRequestToYou = false,
-                        isFans = false,
-                    )
-                }
-                service.followingRequestsReject(
-                    adminAccountsDeleteRequest =
-                        AdminAccountsDeleteRequest(
-                            userId = userKey.id,
-                        ),
-                )
-            }.onFailure {
-                MemCacheable.updateWith<UiRelation>(
-                    key = relationKeyWithUserKey(userKey),
-                ) {
-                    it.copy(
-                        hasPendingFollowRequestToYou = true,
-                        isFans = false,
-                    )
-                }
-            }.onSuccess {
-                database.pagingTimelineDao().deleteStatus(
-                    accountKey = accountKey,
-                    statusKey = notificationStatusKey,
-                )
-            }
-        }
-    }
-
     fun antennasList(): Flow<PagingData<UiList>> =
         Pager(
             config = pagingConfig,
         ) {
             AntennasListPagingSource(
                 service = service,
-            )
+            ).toPagingSource()
         }.flow
 
     fun antennasTimelineLoader(id: String) =
         AntennasTimelineRemoteMediator(
             service = service,
-            database = database,
             accountKey = accountKey,
             id = id,
         )
@@ -1269,7 +765,6 @@ internal class MisskeyDataSource(
     fun channelTimelineLoader(id: String) =
         ChannelTimelineRemoteMediator(
             service = service,
-            database = database,
             accountKey = accountKey,
             id = id,
         )

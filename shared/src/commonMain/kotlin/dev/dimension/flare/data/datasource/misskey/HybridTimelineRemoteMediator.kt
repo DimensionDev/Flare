@@ -1,28 +1,24 @@
 package dev.dimension.flare.data.datasource.misskey
 
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.NotesHybridTimelineRequest
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 
 internal class HybridTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
-    database: CacheDatabase,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
+) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey = "hybrid_timeline_$accountKey"
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         val response =
             when (request) {
                 is PagingRequest.Prepend -> return PagingResult(
@@ -49,10 +45,7 @@ internal class HybridTimelineRemoteMediator(
         return PagingResult(
             endOfPaginationReached = response.isEmpty(),
             data =
-                response.toDbPagingTimeline(
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                ),
+                response.render(accountKey),
             nextKey = response.lastOrNull()?.id,
         )
     }

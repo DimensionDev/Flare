@@ -1,7 +1,8 @@
 package dev.dimension.flare.data.datasource.misskey
 
-import androidx.paging.PagingState
-import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.UsersFollowersRequest
 import dev.dimension.flare.model.MicroBlogKey
@@ -12,28 +13,36 @@ internal class FansPagingSource(
     private val service: MisskeyService,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
-) : BasePagingSource<String, UiProfile>() {
-    override fun getRefreshKey(state: PagingState<String, UiProfile>): String? = null
-
-    override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiProfile> {
-        val maxId = params.key
-        val limit = params.loadSize
+) : RemoteLoader<UiProfile> {
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiProfile> {
+        val maxId =
+            when (request) {
+                PagingRequest.Refresh -> null
+                is PagingRequest.Prepend -> {
+                    return PagingResult(
+                        endOfPaginationReached = true,
+                    )
+                }
+                is PagingRequest.Append -> request.nextKey
+            }
         val response =
             service
                 .usersFollowers(
                     usersFollowersRequest =
                         UsersFollowersRequest(
                             untilId = maxId,
-                            limit = limit,
+                            limit = pageSize,
                             userId = userKey.id,
                         ),
-                )
-        return LoadResult.Page(
+                ).orEmpty()
+        return PagingResult(
             data =
-                response.orEmpty().mapNotNull {
+                response.mapNotNull {
                     it.follower?.render(accountKey = accountKey)
                 },
-            prevKey = null,
             nextKey = response.lastOrNull()?.id,
         )
     }

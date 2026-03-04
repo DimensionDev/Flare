@@ -1,7 +1,8 @@
 package dev.dimension.flare.data.datasource.misskey
 
-import androidx.paging.PagingState
-import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.ui.model.UiList
@@ -9,24 +10,25 @@ import dev.dimension.flare.ui.model.mapper.render
 
 internal class AntennasListPagingSource(
     private val service: MisskeyService,
-) : BasePagingSource<Int, UiList>() {
-    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiList> =
-        tryRun {
-            service.antennasList().map {
-                it.render()
-            }
-        }.fold(
-            onSuccess = { antennas ->
-                LoadResult.Page(
-                    data = antennas,
-                    prevKey = null,
-                    nextKey = null,
-                )
-            },
-            onFailure = { error ->
-                LoadResult.Error(error)
-            },
+) : RemoteLoader<UiList> {
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiList> {
+        if (request is PagingRequest.Prepend || request is PagingRequest.Append) {
+            return PagingResult(
+                endOfPaginationReached = true,
+            )
+        }
+        val data =
+            tryRun {
+                service.antennasList().map {
+                    it.render()
+                }
+            }.getOrThrow()
+        return PagingResult(
+            endOfPaginationReached = true,
+            data = data,
         )
-
-    override fun getRefreshKey(state: PagingState<Int, UiList>): Int? = null
+    }
 }

@@ -137,6 +137,7 @@ class MastodonRenderTest {
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("reblogger-user", message.user?.handle?.raw)
         assertEquals("original content", rendered.content.innerText)
+        assertEquals("reblog-wrapper-1", rendered.statusKey.id)
     }
 
     @Test
@@ -169,6 +170,7 @@ class MastodonRenderTest {
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("reblogger-user", message.user?.handle?.raw)
         assertEquals("original content", rendered.content.innerText)
+        assertEquals("reblog-wrapper-2", rendered.statusKey.id)
         assertEquals(1, rendered.quote.size)
         assertEquals(
             "quoted content",

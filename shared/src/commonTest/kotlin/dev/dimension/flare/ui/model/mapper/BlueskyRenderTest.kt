@@ -201,6 +201,7 @@ class BlueskyRenderTest {
         assertEquals("did:plc:reposter", message.user?.key?.id)
         assertEquals("did:plc:original", rendered.user?.key?.id)
         assertEquals("original post content", rendered.content.innerText)
+        assertEquals(message.statusKey.id, rendered.statusKey.id)
     }
 
     @Test
@@ -243,6 +244,7 @@ class BlueskyRenderTest {
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("original payload", rendered.content.innerText)
+        assertEquals(message.statusKey.id, rendered.statusKey.id)
         assertEquals(1, rendered.quote.size)
         assertEquals(
             "quoted payload",

@@ -168,6 +168,7 @@ class MisskeyRenderTest {
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("user-reposter", message.user?.key?.id)
         assertEquals("original content", rendered.content.innerText)
+        assertEquals("note-repost-wrapper", rendered.statusKey.id)
     }
 
     @Test
@@ -199,6 +200,7 @@ class MisskeyRenderTest {
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("original payload", rendered.content.innerText)
+        assertEquals("note-repost-wrapper-2", rendered.statusKey.id)
         assertEquals(1, rendered.quote.size)
         assertEquals(
             "quoted payload",

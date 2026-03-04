@@ -302,13 +302,19 @@ public enum class MisskeyAchievement(
 }
 
 internal fun Note.render(accountKey: MicroBlogKey): UiTimelineV2 {
+    val wrapperStatus = this.renderStatus(accountKey)
     val actualStatus =
         if (!text.isNullOrEmpty() || !files.isNullOrEmpty() || poll != null || cw != null) {
             this
         } else {
             renote ?: this
         }
-    val status = actualStatus.renderStatus(accountKey)
+    val status =
+        if (actualStatus !== this) {
+            actualStatus.renderStatus(accountKey).copy(statusKey = wrapperStatus.statusKey)
+        } else {
+            wrapperStatus
+        }
     val topMessage =
         if (actualStatus !== this) {
             val user = user.render(accountKey)

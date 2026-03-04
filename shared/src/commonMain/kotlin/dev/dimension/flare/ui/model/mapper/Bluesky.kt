@@ -627,6 +627,11 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
 
             else -> null
         }
+    val postForTimeline =
+        when (reason) {
+            is FeedViewPostReasonUnion.ReasonRepost -> renderedPost.copy(statusKey = message?.statusKey ?: renderedPost.statusKey)
+            else -> renderedPost
+        }
 
     val reply =
         when (val reply = reply?.parent) {
@@ -639,7 +644,7 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
 
             else -> null
         }?.render(accountKey)
-    return renderedPost.copy(
+    return postForTimeline.copy(
         message = message,
         parents = listOfNotNull(reply).toImmutableList(),
     )

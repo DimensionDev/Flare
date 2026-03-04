@@ -136,8 +136,7 @@ internal class MixedRemoteMediator(
         }
     }
 
-    private fun subKey(mediator: CacheableRemoteLoader<UiTimelineV2>) =
-        "mixed_${mediator.pagingKey}"
+    private fun subKey(mediator: CacheableRemoteLoader<UiTimelineV2>) = "mixed_${mediator.pagingKey}"
 
     private data class SubRequest(
         val mediator: CacheableRemoteLoader<UiTimelineV2>,

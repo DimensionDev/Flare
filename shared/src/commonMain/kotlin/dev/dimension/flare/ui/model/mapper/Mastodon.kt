@@ -194,9 +194,9 @@ internal fun Status.render(
     accountKey: MicroBlogKey?,
 ): UiTimelineV2 {
     requireNotNull(account) { "account is null" }
+    val currentStatus = this.renderStatus(host, accountKey)
     val topMessage =
         if (pinned == true) {
-            val currentStatus = this.renderStatus(host, accountKey)
             UiTimelineV2.Message(
                 user = null,
                 icon = UiIcon.Pin,
@@ -210,7 +210,6 @@ internal fun Status.render(
                 accountType = accountKey.toAccountType(),
             )
         } else if (reblog != null) {
-            val currentStatus = this.renderStatus(host, accountKey)
             val userKey = currentStatus.user?.key
             UiTimelineV2.Message(
                 user = currentStatus.user,
@@ -238,13 +237,17 @@ internal fun Status.render(
         } else {
             null
         }
-    return (this.reblog ?: this)
-        .renderStatus(
-            host = host,
-            accountKey = accountKey,
-        ).copy(
-            message = topMessage,
-        )
+    val actualStatus =
+        if (reblog != null) {
+            reblog
+                .renderStatus(
+                    host = host,
+                    accountKey = accountKey,
+                ).copy(statusKey = currentStatus.statusKey)
+        } else {
+            currentStatus
+        }
+    return actualStatus.copy(message = topMessage)
 }
 
 private fun Status.renderStatus(

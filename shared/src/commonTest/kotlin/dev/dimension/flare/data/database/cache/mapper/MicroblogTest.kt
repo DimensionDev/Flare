@@ -237,6 +237,148 @@ class MicroblogTest : RobolectricTest() {
             assertEquals(parentPost.statusKey, post.parents.first().statusKey)
         }
 
+    @Test
+    fun timelinePagingMapperKeepsPostMessageAfterRoundTrip() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val postUser = createUser(MicroBlogKey(id = "post-user", host = "test.com"), "Post User")
+            val post =
+                createPost(
+                    accountKey = accountKey,
+                    user = postUser,
+                    statusKey = MicroBlogKey(id = "post-status", host = "test.com"),
+                    text = "post content",
+                ).copy(
+                    message =
+                        UiTimelineV2.Message(
+                            user = null,
+                            statusKey = MicroBlogKey(id = "message-status", host = "test.com"),
+                            icon = dev.dimension.flare.ui.model.UiIcon.Retweet,
+                            type =
+                                UiTimelineV2.Message.Type.Localized(
+                                    UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                                ),
+                            createdAt = Clock.System.now().toUi(),
+                            clickEvent = ClickEvent.Noop,
+                            accountType = AccountType.Specific(accountKey),
+                        ),
+                )
+
+            val mapped = TimelinePagingMapper.toDb(post, pagingKey = "home")
+            val roundTrip = TimelinePagingMapper.toUi(mapped, pagingKey = "home", useDbKeyInItemKey = false)
+            val rendered = assertIs<UiTimelineV2.Post>(roundTrip)
+            val message = assertNotNull(rendered.message)
+            val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
+
+            assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
+        }
+
+    @Test
+    fun quoteAndRetweetTogetherKeepsRetweetMessageOnSharedStatus() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "x.com")
+            val originalUser = createUser(MicroBlogKey(id = "u-original", host = "x.com"), "Original")
+            val wrapperUser = createUser(MicroBlogKey(id = "u-wrapper", host = "x.com"), "Wrapper")
+            val original =
+                createPost(
+                    accountKey = accountKey,
+                    user = originalUser,
+                    statusKey = MicroBlogKey(id = "fake-original-shared", host = "x.com"),
+                    text = "original content",
+                )
+            val quoteWrapper =
+                createPost(
+                    accountKey = accountKey,
+                    user = wrapperUser,
+                    statusKey = MicroBlogKey(id = "fake-quote-wrapper", host = "x.com"),
+                    text = "quote wrapper",
+                    quote = listOf(original),
+                )
+            val retweetMessage =
+                UiTimelineV2.Message(
+                    user = wrapperUser,
+                    statusKey = MicroBlogKey(id = "fake-retweet-wrapper", host = "x.com"),
+                    icon = dev.dimension.flare.ui.model.UiIcon.Retweet,
+                    type =
+                        UiTimelineV2.Message.Type.Localized(
+                            UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                        ),
+                    createdAt = Clock.System.now().toUi(),
+                    clickEvent = ClickEvent.Noop,
+                    accountType = AccountType.Specific(accountKey),
+                )
+            val retweetItem =
+                original.copy(
+                    statusKey = retweetMessage.statusKey,
+                    message = retweetMessage,
+                )
+
+            val items =
+                listOf(
+                    TimelinePagingMapper.toDb(quoteWrapper, pagingKey = "home"),
+                    TimelinePagingMapper.toDb(retweetItem, pagingKey = "home"),
+                )
+            saveToDatabase(db, items)
+
+            val savedRetweet =
+                db
+                    .statusDao()
+                    .get(
+                        retweetMessage.statusKey,
+                        AccountType.Specific(accountKey),
+                    ).first()
+            val savedPost = assertIs<UiTimelineV2.Post>(assertNotNull(savedRetweet).content)
+            val savedMessage = assertNotNull(savedPost.message)
+            val savedType = assertIs<UiTimelineV2.Message.Type.Localized>(savedMessage.type)
+            assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, savedType.data)
+            assertEquals(retweetMessage.statusKey, savedPost.statusKey)
+        }
+
+    @Test
+    fun detailRefreshDoesNotRemoveExistingRetweetMessage() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "x.com")
+            val originalUser = createUser(MicroBlogKey(id = "u-original", host = "x.com"), "Original")
+            val wrapperUser = createUser(MicroBlogKey(id = "u-wrapper", host = "x.com"), "Wrapper")
+            val statusKey = MicroBlogKey(id = "fake-original-detail", host = "x.com")
+            val original =
+                createPost(
+                    accountKey = accountKey,
+                    user = originalUser,
+                    statusKey = statusKey,
+                    text = "original content",
+                )
+            val retweetMessage =
+                UiTimelineV2.Message(
+                    user = wrapperUser,
+                    statusKey = MicroBlogKey(id = "fake-retweet-detail-wrapper", host = "x.com"),
+                    icon = dev.dimension.flare.ui.model.UiIcon.Retweet,
+                    type =
+                        UiTimelineV2.Message.Type.Localized(
+                            UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                        ),
+                    createdAt = Clock.System.now().toUi(),
+                    clickEvent = ClickEvent.Noop,
+                    accountType = AccountType.Specific(accountKey),
+                )
+            val homeRetweetView =
+                original.copy(
+                    statusKey = retweetMessage.statusKey,
+                    message = retweetMessage,
+                )
+            val detailView = original.copy(message = null)
+
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(homeRetweetView, pagingKey = "home")))
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(detailView, pagingKey = "post_only_$statusKey")))
+
+            val saved =
+                db.statusDao().get(retweetMessage.statusKey, AccountType.Specific(accountKey)).first()
+            val savedPost = assertIs<UiTimelineV2.Post>(assertNotNull(saved).content)
+            val savedMessage = assertNotNull(savedPost.message)
+            val savedType = assertIs<UiTimelineV2.Message.Type.Localized>(savedMessage.type)
+            assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, savedType.data)
+        }
+
     private fun createUser(
         key: MicroBlogKey,
         name: String,
@@ -264,6 +406,7 @@ class MicroblogTest : RobolectricTest() {
         user: UiProfile,
         statusKey: MicroBlogKey,
         text: String,
+        quote: List<UiTimelineV2.Post> = emptyList(),
         parents: List<UiTimelineV2.Post> = emptyList(),
     ): UiTimelineV2.Post =
         UiTimelineV2.Post(
@@ -273,7 +416,7 @@ class MicroblogTest : RobolectricTest() {
             sensitive = false,
             contentWarning = null,
             user = user,
-            quote = persistentListOf(),
+            quote = quote.toPersistentList(),
             content = Element("span").apply { appendText(text) }.toUi(),
             actions = persistentListOf(),
             poll = null,

@@ -167,7 +167,7 @@ class XQTRenderTest {
         assertEquals("user-reposter", message.user?.key?.id)
         assertEquals("original content", rendered.content.innerText)
         assertEquals("user-original", rendered.user?.key?.id)
-        assertEquals("status-original", rendered.statusKey.id)
+        assertEquals("status-repost-wrapper", rendered.statusKey.id)
     }
 
     @Test
@@ -198,6 +198,7 @@ class XQTRenderTest {
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
+        assertEquals("status-repost-wrapper-2", rendered.statusKey.id)
         assertEquals("original payload", rendered.content.innerText)
         assertEquals(1, rendered.quote.size)
         assertEquals(

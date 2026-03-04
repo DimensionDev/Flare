@@ -77,7 +77,7 @@ internal class MixedRemoteMediator(
 
                 PagingResult(
                     endOfPaginationReached = currentMediators.isEmpty(),
-                    data = mixedTimelineResult + timelineResult,
+                    data = mixedTimelineResult,
                     nextKey = if (currentMediators.isEmpty()) null else "mixed_next_key",
                     previousKey = null,
                 )
@@ -92,7 +92,7 @@ internal class MixedRemoteMediator(
             is PagingRequest.Append -> {
                 database
                     .pagingTimelineDao()
-                    .getPagingKey(mediator.pagingKey)
+                    .getPagingKey(subKey(mediator))
                     ?.nextKey
                     ?.let(PagingRequest::Append)
             }
@@ -100,7 +100,7 @@ internal class MixedRemoteMediator(
             is PagingRequest.Prepend ->
                 database
                     .pagingTimelineDao()
-                    .getPagingKey(mediator.pagingKey)
+                    .getPagingKey(subKey(mediator))
                     ?.prevKey
                     ?.let(PagingRequest::Prepend)
 
@@ -116,25 +116,28 @@ internal class MixedRemoteMediator(
         val (mediator, result) = subResponse
         if (request is PagingRequest.Prepend && result.previousKey != null) {
             database.pagingTimelineDao().updatePagingKeyPrevKey(
-                pagingKey = mediator.pagingKey,
+                pagingKey = subKey(mediator),
                 prevKey = result.previousKey,
             )
         } else if (request is PagingRequest.Append && result.nextKey != null) {
             database.pagingTimelineDao().updatePagingKeyNextKey(
-                pagingKey = mediator.pagingKey,
+                pagingKey = subKey(mediator),
                 nextKey = result.nextKey,
             )
         } else if (request is PagingRequest.Refresh) {
-            database.pagingTimelineDao().deletePagingKey(mediator.pagingKey)
+            database.pagingTimelineDao().deletePagingKey(subKey(mediator))
             database.pagingTimelineDao().insertPagingKey(
                 dev.dimension.flare.data.database.cache.model.DbPagingKey(
-                    pagingKey = mediator.pagingKey,
+                    pagingKey = subKey(mediator),
                     nextKey = result.nextKey,
                     prevKey = result.previousKey,
                 ),
             )
         }
     }
+
+    private fun subKey(mediator: CacheableRemoteLoader<UiTimelineV2>) =
+        "mixed_${mediator.pagingKey}"
 
     private data class SubRequest(
         val mediator: CacheableRemoteLoader<UiTimelineV2>,

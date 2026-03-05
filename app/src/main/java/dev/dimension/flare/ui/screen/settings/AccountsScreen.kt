@@ -242,7 +242,7 @@ fun AccountItem(
         RichText(text = it.name, maxLines = 1)
     },
     supportingContent: @Composable (UiProfile) -> Unit = {
-        Text(text = it.handle, maxLines = 1)
+        Text(text = it.handle.canonical, maxLines = 1)
     },
     avatarSize: Dp = AvatarComponentDefaults.size,
     colors: ListItemColors = ListItemDefaults.segmentedColors(),

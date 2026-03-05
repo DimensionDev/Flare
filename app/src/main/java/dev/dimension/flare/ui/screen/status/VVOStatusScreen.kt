@@ -53,7 +53,7 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -156,13 +156,13 @@ internal fun VVOStatusScreen(
 
 @Composable
 private fun StatusContent(
-    statusState: UiState<UiTimeline>,
+    statusState: UiState<UiTimelineV2>,
     detailStatusKey: MicroBlogKey,
     modifier: Modifier = Modifier,
 ) {
     statusState
         .onSuccess { status ->
-            key(status.itemKey, status.content) {
+            key(status.itemKey) {
                 StatusItem(
                     item = status,
                     detailStatusKey = detailStatusKey,
@@ -207,8 +207,8 @@ private fun StatusContent(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun LazyStaggeredGridScope.reactionContent(
-    comment: PagingState<UiTimeline>,
-    repost: PagingState<UiTimeline>,
+    comment: PagingState<UiTimelineV2>,
+    repost: PagingState<UiTimelineV2>,
     detailType: DetailType,
     onDetailTypeChange: (DetailType) -> Unit,
 ) {

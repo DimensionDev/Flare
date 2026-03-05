@@ -50,7 +50,7 @@ import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiSearchHistory
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.SearchHistoryPresenter
 import dev.dimension.flare.ui.presenter.home.SearchHistoryState
@@ -166,7 +166,7 @@ private fun SearchContent(
 
 internal fun LazyStaggeredGridScope.searchContent(
     searchUsers: PagingState<UiProfile>,
-    searchStatus: PagingState<UiTimeline>,
+    searchStatus: PagingState<UiTimelineV2>,
     toUser: (MicroBlogKey) -> Unit,
 ) {
     searchUsers

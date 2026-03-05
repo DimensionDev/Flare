@@ -183,7 +183,7 @@ public sealed class UiTimelineV2 {
         val content: UiRichText,
         val actions: SerializableImmutableList<ActionMenu>,
         val poll: UiPoll?,
-        override val statusKey: MicroBlogKey,
+        public override val statusKey: MicroBlogKey,
         val card: UiCard?,
         override val createdAt: UiDateTime,
         val emojiReactions: SerializableImmutableList<EmojiReaction> = persistentListOf(),
@@ -194,7 +194,7 @@ public sealed class UiTimelineV2 {
         internal val internalRepost: Post? = null,
         internal val clickEvent: ClickEvent,
         override val extraKey: String? = null,
-        override val accountType: AccountType,
+        public override val accountType: AccountType,
     ) : UiTimelineV2() {
         override val searchText: String =
             buildString {

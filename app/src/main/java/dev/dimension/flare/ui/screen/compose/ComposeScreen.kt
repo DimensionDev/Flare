@@ -105,7 +105,7 @@ import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onError
@@ -113,6 +113,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -132,19 +133,33 @@ fun ShortcutComposeRoute(
     initialText: String = "",
     initialMedias: ImmutableList<Uri> = persistentListOf(),
 ) {
+    val activeAccountState by producePresenter(key = "shortcut_compose_active_account") {
+        activeAccountPresenter()
+    }
+    val accountType =
+        activeAccountState.user
+            .takeSuccess()
+            ?.let { AccountType.Specific(it.key) }
+            ?: AccountType.Guest
     FlareTheme {
         CompositionLocalProvider(
             LocalContentColor provides MaterialTheme.colorScheme.onBackground,
         ) {
             ComposeScreen(
                 onBack = onBack,
-                accountType = AccountType.Active,
+                accountType = accountType,
                 initialText = initialText,
                 initialMedias = initialMedias,
             )
         }
     }
 }
+
+@Composable
+private fun activeAccountPresenter() =
+    run {
+        remember { ActiveAccountPresenter() }.invoke()
+    }
 
 @OptIn(
     ExperimentalMaterial3Api::class,
@@ -255,7 +270,7 @@ internal fun ComposeScreen(
                                     state.state.selectAccount(account)
                                 },
                                 label = {
-                                    Text(it.handle)
+                                    Text(it.handle.canonical)
                                 },
                                 leadingIcon = {
                                     AvatarComponent(it.avatar, size = 24.dp)
@@ -285,7 +300,7 @@ internal fun ComposeScreen(
                                             user.onSuccess { data ->
                                                 DropdownMenuItem(
                                                     text = {
-                                                        Text(text = data.handle)
+                                                        Text(text = data.handle.canonical)
                                                     },
                                                     onClick = {
                                                         state.state.selectAccount(account)
@@ -616,8 +631,8 @@ internal fun ComposeScreen(
 
             state.state.replyState?.let { replyState ->
                 replyState.onSuccess { state ->
-                    val content = state.content
-                    if (content is UiTimeline.ItemContent.Status) {
+                    val content = state as? UiTimelineV2.Post
+                    if (content is UiTimelineV2.Post) {
                         Card {
                             CompositionLocalProvider(
                                 LocalComponentAppearance provides

@@ -152,7 +152,7 @@ internal fun TabAddBottomSheet(
                                         overflow = TextOverflow.Ellipsis,
                                     )
                                     Text(
-                                        text = tab.profile.handle,
+                                        text = tab.profile.handle.canonical,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.outline,
                                         maxLines = 1,
@@ -369,7 +369,8 @@ internal fun allTabsPresenter(filterIsTimeline: Boolean = false): AllTabsState =
 
         object : AllTabsState {
             override val defaultTabs =
-                TimelineTabItem.mainSidePanel
+                TimelineTabItem
+                    .mainSidePanel(null)
                     .let {
                         if (filterIsTimeline) {
                             it.filterIsInstance<TimelineTabItem>()

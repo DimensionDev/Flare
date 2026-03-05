@@ -89,6 +89,7 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTabsPresenter
+import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.AllNotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
@@ -136,7 +137,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 }
 
             val currentRoute = topLevelBackStack.topLevelKey
-            val accountType = currentRoute.accountTypeOr(AccountType.Active)
+            val accountType = currentRoute.accountTypeOr(state.defaultAccountType)
             val userState by producePresenter(key = "home_account_type_$accountType") {
                 userPresenter(accountType)
             }
@@ -167,6 +168,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                             userState,
                             layoutType,
                             currentRoute,
+                            state.defaultAccountType,
                             navigate,
                         )
                     },
@@ -314,6 +316,7 @@ private fun HomeRailHeader(
     userState: UiState<UiProfile>,
     layoutType: NavigationSuiteType,
     currentRoute: Route,
+    defaultAccountType: AccountType,
     navigate: (Route) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -418,7 +421,7 @@ private fun HomeRailHeader(
                                         textStyle = MaterialTheme.typography.titleMedium,
                                     )
                                     Text(
-                                        user.handle,
+                                        user.handle.canonical,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.outline,
                                     )
@@ -456,7 +459,7 @@ private fun HomeRailHeader(
                                     navigate(
                                         Route.Compose.New(
                                             currentRoute.accountTypeOr(
-                                                AccountType.Active,
+                                                defaultAccountType,
                                             ),
                                         ),
                                     )
@@ -484,7 +487,7 @@ private fun HomeRailHeader(
                                     navigate(
                                         Route.Compose.New(
                                             currentRoute.accountTypeOr(
-                                                AccountType.Active,
+                                                defaultAccountType,
                                             ),
                                         ),
                                     )
@@ -542,6 +545,7 @@ private fun getDirection(
 @Composable
 private fun presenter() =
     run {
+        val activeAccountState = remember { ActiveAccountPresenter() }.invoke()
         val navigationState =
             remember {
                 NavigationState()
@@ -563,6 +567,11 @@ private fun presenter() =
             val tabs = tabs.tabs
             val navigationState = navigationState
             val scrollToTopRegistry = scrollToTopRegistry
+            val defaultAccountType: AccountType =
+                activeAccountState.user
+                    .takeSuccess()
+                    ?.let { AccountType.Specific(it.key) }
+                    ?: AccountType.Guest
         }
     }
 

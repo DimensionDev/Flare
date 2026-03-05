@@ -118,7 +118,7 @@ internal fun DiscoverScreen(onUserClick: (AccountType, MicroBlogKey) -> Unit) {
                                                 state.setAccount(profile)
                                             },
                                             label = {
-                                                Text(profile.handle)
+                                                Text(profile.handle.canonical)
                                             },
                                             leadingIcon = {
                                                 AvatarComponent(

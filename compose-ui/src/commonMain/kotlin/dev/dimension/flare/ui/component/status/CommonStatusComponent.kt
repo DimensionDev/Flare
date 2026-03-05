@@ -158,6 +158,8 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableList
@@ -357,7 +359,21 @@ public fun CommonStatusComponent(
                 StatusMediasComponent(
                     item,
                     onMediaClick = { media ->
-                        uriHandler.openUri(media.url)
+                        val index = item.images.indexOf(media)
+                        val link =
+                            DeeplinkRoute.Media.StatusMedia(
+                                statusKey = item.statusKey,
+                                accountType = item.accountType,
+                                index = index,
+                                preview =
+                                    when (media) {
+                                        is UiMedia.Image -> media.previewUrl
+                                        is UiMedia.Video -> media.thumbnailUrl
+                                        is UiMedia.Gif -> media.previewUrl
+                                        is UiMedia.Audio -> null
+                                    },
+                            )
+                        uriHandler.openUri(link.toUri())
                     },
                 )
             }

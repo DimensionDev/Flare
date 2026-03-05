@@ -4,11 +4,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -43,6 +48,7 @@ public class StatusContextPresenter(
         public val current: UiState<UiTimelineV2>
     }
 
+    private val database: CacheDatabase by inject()
     private val accountRepository: AccountRepository by inject()
 
     private val currentStatusFlow by lazy {
@@ -66,7 +72,30 @@ public class StatusContextPresenter(
                             accountType = accountType,
                             repository = accountRepository,
                         ).map { service ->
-                            service.context(key)
+                            val loader = service.context(key)
+                            if (loader is CacheableRemoteLoader<UiTimelineV2>) {
+                                val pagingKey = loader.pagingKey
+                                val exists = database.pagingTimelineDao().existsPaging(accountType as DbAccountType, pagingKey)
+                                if (!exists) {
+                                    val status = database.statusDao().get(statusKey, accountType).firstOrNull()
+                                    status?.let {
+                                        database.connect {
+                                            database
+                                                .pagingTimelineDao()
+                                                .insertAll(
+                                                    listOf(
+                                                        DbPagingTimeline(
+                                                            statusKey = statusKey,
+                                                            pagingKey = pagingKey,
+                                                            sortId = 0,
+                                                        ),
+                                                    ),
+                                                )
+                                        }
+                                    }
+                                }
+                            }
+                            loader
                         }
                     }
             }

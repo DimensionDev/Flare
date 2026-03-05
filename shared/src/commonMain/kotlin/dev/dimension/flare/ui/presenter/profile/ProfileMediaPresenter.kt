@@ -79,6 +79,7 @@ private class MediaTimelinePresenter(
                         ProfileMedia(
                             it,
                             status,
+                            status.statusKey,
                             status.images.indexOf(it),
                         )
                     }
@@ -98,5 +99,6 @@ public interface ProfileMediaState {
 public data class ProfileMedia internal constructor(
     val media: UiMedia,
     val status: UiTimelineV2,
+    val statusKey: MicroBlogKey,
     val index: Int,
 )

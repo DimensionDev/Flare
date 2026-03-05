@@ -11,13 +11,10 @@ import app.bsky.feed.ReplyRefRootUnion
 import app.bsky.feed.ThreadViewPost
 import app.bsky.feed.ThreadViewPostParentUnion
 import app.bsky.feed.ThreadViewPostReplieUnion
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
@@ -30,7 +27,6 @@ internal class StatusDetailRemoteMediator(
     private val statusKey: MicroBlogKey,
     private val service: BlueskyService,
     private val accountKey: MicroBlogKey,
-    private val database: CacheDatabase,
     private val statusOnly: Boolean,
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String =
@@ -136,22 +132,6 @@ internal class StatusDetailRemoteMediator(
                     )
                 }
                 PagingRequest.Refresh -> {
-                    if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
-                        database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
-                            database
-                                .pagingTimelineDao()
-                                .insertAll(
-                                    listOf(
-                                        DbPagingTimeline(
-                                            statusKey = statusKey,
-                                            pagingKey = pagingKey,
-                                            sortId = 0,
-                                        ),
-                                    ),
-                                )
-                        }
-                    }
-
                     val current =
                         service
                             .getPosts(

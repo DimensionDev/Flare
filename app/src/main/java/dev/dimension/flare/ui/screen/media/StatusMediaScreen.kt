@@ -110,7 +110,7 @@ import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.getFileName
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onLoading
@@ -438,8 +438,8 @@ internal fun StatusMediaScreen(
                         }
 
                         state.status.onSuccess { status ->
-                            val content = status.content
-                            if (content is UiTimeline.ItemContent.Status) {
+                            val content = status as? UiTimelineV2.Post
+                            if (content is UiTimelineV2.Post) {
                                 androidx.compose.animation.AnimatedVisibility(
                                     visible = state.showUi,
                                     modifier =
@@ -563,8 +563,8 @@ internal fun StatusMediaScreen(
                                 contentColor = MaterialTheme.colorScheme.onSurface,
                             ) {
                                 state.status.onSuccess {
-                                    val content = it.content
-                                    if (content is UiTimeline.ItemContent.Status) {
+                                    val content = it as? UiTimelineV2.Post
+                                    if (content is UiTimelineV2.Post) {
                                         CompositionLocalProvider(
                                             LocalComponentAppearance provides
                                                 LocalComponentAppearance.current.copy(
@@ -866,7 +866,7 @@ private fun statusMediaPresenter(
                 .onSuccess {
                     medias =
                         UiState.Success(
-                            (it.content as? UiTimeline.ItemContent.Status)
+                            (it as? UiTimelineV2.Post)
                                 ?.images
                                 .orEmpty()
                                 .toImmutableList(),
@@ -904,11 +904,11 @@ private fun statusMediaPresenter(
         }
 
         fun save(data: UiMedia) {
-            val status = (state.status.takeSuccess()?.content as? UiTimeline.ItemContent.Status)
+            val status = (state.status.takeSuccess() as? UiTimelineV2.Post)
             if (status != null) {
-                val statusKey = status.statusKey.toString()
-                val userHandle = status.user?.handle ?: "unknown"
-                val fileName = data.getFileName(statusKey, userHandle)
+                val statusKeyString = statusKey.toString()
+                val userHandle = status.user?.handle?.canonical ?: "unknown"
+                val fileName = data.getFileName(statusKeyString, userHandle)
 
                 when (data) {
                     is UiMedia.Audio -> download(data.url, fileName)

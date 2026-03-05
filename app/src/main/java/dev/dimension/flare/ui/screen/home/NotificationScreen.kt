@@ -104,7 +104,7 @@ internal fun NotificationScreen() {
                                     },
                                     text = {
                                         Text(
-                                            text = account.handle,
+                                            text = account.handle.canonical,
                                             maxLines = 1,
                                         )
                                     },

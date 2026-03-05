@@ -2,6 +2,9 @@ package dev.dimension.flare.data.database.cache.mapper
 
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbStatus
+import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlinx.coroutines.flow.firstOrNull
 
 internal suspend fun saveToDatabase(
     database: CacheDatabase,
@@ -96,19 +99,39 @@ internal suspend fun saveToDatabase(
 //                )
 //            })
 //        }
-    (
+    val statuses =
         items.map { it.status.status.data } +
             items
                 .flatMap { it.status.references }
                 .mapNotNull { it.status?.data }
-    ).let {
-        database.statusDao().insertAll(it)
-    }
+    val mergedStatuses = statuses.map { mergeWithExistingPostParents(database, it) }
+    database.statusDao().insertAll(mergedStatuses)
     items.flatMap { it.status.references }.map { it.reference }.let {
         // TODO: delete old references
         database.statusReferenceDao().insertAll(it)
     }
     database.pagingTimelineDao().insertAll(items.map { it.timeline })
+}
+
+private suspend fun mergeWithExistingPostParents(
+    database: CacheDatabase,
+    incoming: DbStatus,
+): DbStatus {
+    val incomingPost = incoming.content as? UiTimelineV2.Post ?: return incoming
+    if (incomingPost.parents.isNotEmpty()) {
+        return incoming
+    }
+    val existingPost =
+        database
+            .statusDao()
+            .get(incoming.statusKey, incoming.accountType)
+            .firstOrNull()
+            ?.content as? UiTimelineV2.Post
+    return if (existingPost?.parents?.isNotEmpty() == true) {
+        incoming.copy(content = incomingPost.copy(parents = existingPost.parents))
+    } else {
+        incoming
+    }
 }
 
 // internal fun createDbPagingTimelineWithStatus(

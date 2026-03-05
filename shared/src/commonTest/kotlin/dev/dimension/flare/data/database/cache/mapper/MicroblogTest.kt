@@ -173,6 +173,40 @@ class MicroblogTest : RobolectricTest() {
         }
 
     @Test
+    fun postContentParentsRemainWhenSubsequentInsertHasNoParents() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+
+            val refUser = createUser(MicroBlogKey(id = "ref-user", host = "test.com"), "Ref User")
+            val refPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = refUser,
+                    statusKey = MicroBlogKey(id = "ref-status-2", host = "test.com"),
+                    text = "ref status",
+                )
+
+            val mainUser = createUser(MicroBlogKey(id = "main-user", host = "test.com"), "Main User")
+            val withParents =
+                createPost(
+                    accountKey = accountKey,
+                    user = mainUser,
+                    statusKey = MicroBlogKey(id = "main-status-2", host = "test.com"),
+                    text = "main status",
+                    parents = persistentListOf(refPost),
+                )
+
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withParents, pagingKey = "home")))
+            val withoutParents = withParents.copy(parents = persistentListOf())
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withoutParents, pagingKey = "post_only_${withParents.statusKey}")))
+
+            val saved = db.statusDao().get(withParents.statusKey, AccountType.Specific(accountKey)).first()
+            val savedPost = assertIs<UiTimelineV2.Post>(assertNotNull(saved).content)
+            assertEquals(1, savedPost.parents.size)
+            assertEquals(refPost.statusKey, savedPost.parents.first().statusKey)
+        }
+
+    @Test
     fun toDbMapsReplyReference() =
         runTest {
             val accountKey = MicroBlogKey(id = "account", host = "test.com")

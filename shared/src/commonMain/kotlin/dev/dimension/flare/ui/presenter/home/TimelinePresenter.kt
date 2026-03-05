@@ -71,15 +71,18 @@ public abstract class TimelinePresenter :
                     }
                 }.flatMapLatest { pager ->
                     filterFlow.map { filterList ->
-                        pager.filter { item ->
-                            if (filterList.isEmpty()) {
-                                true
-                            } else {
-                                !filterList.any { filter ->
-                                    item.searchText.orEmpty().contains(filter, ignoreCase = true)
+                        pager
+                            .filter { item ->
+                                if (filterList.isEmpty()) {
+                                    true
+                                } else {
+                                    !filterList.any { filter ->
+                                        item.searchText.orEmpty().contains(filter, ignoreCase = true)
+                                    }
                                 }
+                            }.map {
+                                transform(it)
                             }
-                        }
                     }
                 }
             }.catch {

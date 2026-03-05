@@ -19,6 +19,7 @@ import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -106,6 +107,81 @@ class PostHandlerTest : RobolectricTest() {
             assertEquals(postKey, savedStatus.statusKey)
             val pagingExists = db.pagingTimelineDao().existsPaging(accountKey, "post_only_$postKey")
             assertTrue(pagingExists)
+        }
+
+    @Test
+    fun postRefreshKeepsLocalParentsWhenRemoteParentsIsEmpty() =
+        runTest {
+            startKoin {
+                modules(
+                    module {
+                        single { db }
+                        single<CoroutineScope> { this@runTest }
+                        single<PlatformFormatter> { TestFormatter() }
+                    },
+                )
+            }
+
+            val parentKey = MicroBlogKey(id = "parent-1", host = "test.social")
+            val localWithParents = createPost(statusKey = postKey, parents = persistentListOf(createPost(statusKey = parentKey)))
+            db.statusDao().insert(
+                DbStatus(
+                    statusKey = postKey,
+                    accountType = accountType,
+                    content = localWithParents,
+                    text = "text",
+                ),
+            )
+            fakeLoader.nextStatus = createPost(statusKey = postKey, parents = persistentListOf())
+
+            val handler = PostHandler(accountType = accountType, loader = fakeLoader)
+            val cacheable = handler.post(postKey)
+            val refreshState = cacheable.refreshState.drop(1).first()
+            assertTrue(refreshState is androidx.paging.LoadState.NotLoading)
+
+            val savedStatus = db.statusDao().get(postKey, accountType).first()
+            val savedPost = savedStatus?.content as? UiTimelineV2.Post
+            assertNotNull(savedPost)
+            assertEquals(1, savedPost.parents.size)
+            assertEquals(parentKey, savedPost.parents.first().statusKey)
+        }
+
+    @Test
+    fun postRefreshUsesRemoteParentsWhenRemoteParentsIsNotEmpty() =
+        runTest {
+            startKoin {
+                modules(
+                    module {
+                        single { db }
+                        single<CoroutineScope> { this@runTest }
+                        single<PlatformFormatter> { TestFormatter() }
+                    },
+                )
+            }
+
+            val localParentKey = MicroBlogKey(id = "local-parent", host = "test.social")
+            val remoteParentKey = MicroBlogKey(id = "remote-parent", host = "test.social")
+            val local = createPost(statusKey = postKey, parents = persistentListOf(createPost(statusKey = localParentKey)))
+            db.statusDao().insert(
+                DbStatus(
+                    statusKey = postKey,
+                    accountType = accountType,
+                    content = local,
+                    text = "text",
+                ),
+            )
+            fakeLoader.nextStatus = createPost(statusKey = postKey, parents = persistentListOf(createPost(statusKey = remoteParentKey)))
+
+            val handler = PostHandler(accountType = accountType, loader = fakeLoader)
+            val cacheable = handler.post(postKey)
+            val refreshState = cacheable.refreshState.drop(1).first()
+            assertTrue(refreshState is androidx.paging.LoadState.NotLoading)
+
+            val savedStatus = db.statusDao().get(postKey, accountType).first()
+            val savedPost = savedStatus?.content as? UiTimelineV2.Post
+            assertNotNull(savedPost)
+            assertEquals(1, savedPost.parents.size)
+            assertEquals(remoteParentKey, savedPost.parents.first().statusKey)
         }
 
     @Test
@@ -205,7 +281,10 @@ class PostHandlerTest : RobolectricTest() {
             assertTrue(pagingExists)
         }
 
-    private fun createPost(statusKey: MicroBlogKey): UiTimelineV2.Post =
+    private fun createPost(
+        statusKey: MicroBlogKey,
+        parents: PersistentList<UiTimelineV2.Post> = persistentListOf(),
+    ): UiTimelineV2.Post =
         UiTimelineV2.Post(
             message = null,
             platformType = PlatformType.Mastodon,
@@ -227,7 +306,7 @@ class PostHandlerTest : RobolectricTest() {
             sourceChannel = null,
             visibility = null,
             replyToHandle = null,
-            parents = persistentListOf(),
+            parents = parents,
             clickEvent = ClickEvent.Noop,
             accountType = accountType,
         )

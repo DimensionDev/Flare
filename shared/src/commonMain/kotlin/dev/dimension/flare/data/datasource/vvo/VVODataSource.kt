@@ -150,7 +150,7 @@ internal class VVODataSource(
                     service = service,
                     accountKey = accountKey,
                     onClearMarker = {
-                        MemCacheable.update(notificationMarkerMentionKey, 0)
+                        notificationHandler.clear()
                     },
                 )
 
@@ -159,7 +159,7 @@ internal class VVODataSource(
                     service = service,
                     accountKey = accountKey,
                     onClearMarker = {
-                        MemCacheable.update(notificationMarkerCommentKey, 0)
+                        notificationHandler.clear()
                     },
                 )
 
@@ -168,7 +168,7 @@ internal class VVODataSource(
                     service = service,
                     accountKey = accountKey,
                     onClearMarker = {
-                        MemCacheable.update(notificationMarkerLikeKey, 0)
+                        notificationHandler.clear()
                     },
                 )
         }
@@ -487,13 +487,4 @@ internal class VVODataSource(
 
         return json.firstOrNull()?.status?.render(accountKey) ?: throw Exception("status not found")
     }
-
-    private val notificationMarkerMentionKey: String
-        get() = "notificationBadgeCount_mention_$accountKey"
-
-    private val notificationMarkerCommentKey: String
-        get() = "notificationBadgeCount_comment_$accountKey"
-
-    private val notificationMarkerLikeKey: String
-        get() = "notificationBadgeCount_like_$accountKey"
 }

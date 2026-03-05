@@ -207,6 +207,37 @@ class MicroblogTest : RobolectricTest() {
         }
 
     @Test
+    fun toDbMapsRetweetReferenceFromInternalRepost() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val wrapperUser = createUser(MicroBlogKey(id = "wrapper-user", host = "test.com"), "Wrapper User")
+            val repostUser = createUser(MicroBlogKey(id = "repost-user", host = "test.com"), "Repost User")
+            val repostPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = repostUser,
+                    statusKey = MicroBlogKey(id = "repost-status", host = "test.com"),
+                    text = "repost",
+                )
+            val wrapperPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = wrapperUser,
+                    statusKey = MicroBlogKey(id = "wrapper-status", host = "test.com"),
+                    text = "wrapper",
+                ).copy(
+                    internalRepost = repostPost,
+                )
+
+            val mapped = TimelinePagingMapper.toDb(wrapperPost, pagingKey = "home")
+            val retweetReference =
+                mapped.status.references.find { it.reference.referenceType == ReferenceType.Retweet }
+            assertNotNull(retweetReference)
+            assertEquals(wrapperPost.statusKey, retweetReference.reference.statusKey)
+            assertEquals(repostPost.statusKey, retweetReference.reference.referenceStatusKey)
+        }
+
+    @Test
     fun toUiSetsExtraKeyForRootAndReferences() =
         runTest {
             val accountKey = MicroBlogKey(id = "account", host = "test.com")
@@ -271,6 +302,150 @@ class MicroblogTest : RobolectricTest() {
             val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
 
             assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
+        }
+
+    @Test
+    fun toUiFlattensInternalRepostButKeepsReferencePayload() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val wrapperUser = createUser(MicroBlogKey(id = "wrapper-user", host = "test.com"), "Wrapper User")
+            val repostUser = createUser(MicroBlogKey(id = "repost-user", host = "test.com"), "Repost User")
+            val repostPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = repostUser,
+                    statusKey = MicroBlogKey(id = "repost-status", host = "test.com"),
+                    text = "repost content",
+                )
+            val repostMessage =
+                UiTimelineV2.Message(
+                    user = wrapperUser,
+                    statusKey = MicroBlogKey(id = "wrapper-status", host = "test.com"),
+                    icon = dev.dimension.flare.ui.model.UiIcon.Retweet,
+                    type =
+                        UiTimelineV2.Message.Type.Localized(
+                            UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                        ),
+                    createdAt = Clock.System.now().toUi(),
+                    clickEvent = ClickEvent.Noop,
+                    accountType = AccountType.Specific(accountKey),
+                )
+            val wrapperPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = wrapperUser,
+                    statusKey = MicroBlogKey(id = "wrapper-status", host = "test.com"),
+                    text = "wrapper content",
+                ).copy(
+                    message = repostMessage,
+                    internalRepost = repostPost,
+                )
+
+            val mapped = TimelinePagingMapper.toDb(wrapperPost, pagingKey = "home")
+            saveToDatabase(db, listOf(mapped))
+
+            val savedWrapper = db.statusDao().get(wrapperPost.statusKey, AccountType.Specific(accountKey)).first()
+            val savedRepost = db.statusDao().get(repostPost.statusKey, AccountType.Specific(accountKey)).first()
+            assertNotNull(savedWrapper)
+            assertNotNull(savedRepost)
+
+            val roundTrip = TimelinePagingMapper.toUi(mapped, pagingKey = "home", useDbKeyInItemKey = false)
+            val rendered = assertIs<UiTimelineV2.Post>(roundTrip)
+            val internalRepost = assertNotNull(rendered.internalRepost)
+
+            assertEquals(wrapperPost.statusKey, rendered.statusKey)
+            assertEquals(repostPost.statusKey, internalRepost.statusKey)
+            assertEquals(repostPost.content.raw, rendered.content.raw)
+            assertEquals(repostPost.user?.key, rendered.user?.key)
+            assertEquals(repostPost.content.raw, internalRepost.content.raw)
+
+            val message = assertNotNull(rendered.message)
+            val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
+            assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
+        }
+
+    @Test
+    fun repostWithQuoteChainIsStoredSeparatedAndFlattenedOnToUi() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val userA = createUser(MicroBlogKey(id = "user-a", host = "test.com"), "User A")
+            val userB = createUser(MicroBlogKey(id = "user-b", host = "test.com"), "User B")
+            val userC = createUser(MicroBlogKey(id = "user-c", host = "test.com"), "User C")
+
+            val postC =
+                createPost(
+                    accountKey = accountKey,
+                    user = userC,
+                    statusKey = MicroBlogKey(id = "status-c", host = "test.com"),
+                    text = "content-c",
+                )
+            val postB =
+                createPost(
+                    accountKey = accountKey,
+                    user = userB,
+                    statusKey = MicroBlogKey(id = "status-b", host = "test.com"),
+                    text = "content-b",
+                    quote = listOf(postC),
+                )
+            val postA =
+                createPost(
+                    accountKey = accountKey,
+                    user = userA,
+                    statusKey = MicroBlogKey(id = "status-a", host = "test.com"),
+                    text = "content-a",
+                ).copy(
+                    internalRepost = postB,
+                    message =
+                        UiTimelineV2.Message(
+                            user = userA,
+                            statusKey = MicroBlogKey(id = "status-a", host = "test.com"),
+                            icon = dev.dimension.flare.ui.model.UiIcon.Retweet,
+                            type =
+                                UiTimelineV2.Message.Type.Localized(
+                                    UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                                ),
+                            createdAt = Clock.System.now().toUi(),
+                            clickEvent = ClickEvent.Noop,
+                            accountType = AccountType.Specific(accountKey),
+                        ),
+                )
+
+            val mapped = TimelinePagingMapper.toDb(postA, pagingKey = "home")
+            val retweetRefs = mapped.status.references.filter { it.reference.referenceType == ReferenceType.Retweet }
+            val quoteRefs = mapped.status.references.filter { it.reference.referenceType == ReferenceType.Quote }
+            assertEquals(1, retweetRefs.size)
+            assertEquals(postB.statusKey, retweetRefs.first().reference.referenceStatusKey)
+            assertTrue(quoteRefs.isEmpty())
+
+            saveToDatabase(db, listOf(mapped))
+            val savedA = db.statusDao().get(postA.statusKey, AccountType.Specific(accountKey)).first()
+            val savedB = db.statusDao().get(postB.statusKey, AccountType.Specific(accountKey)).first()
+            assertNotNull(savedA)
+            assertNotNull(savedB)
+
+            val ui = TimelinePagingMapper.toUi(mapped, pagingKey = "home", useDbKeyInItemKey = false)
+            val rendered = assertIs<UiTimelineV2.Post>(ui)
+            val repost = assertNotNull(rendered.internalRepost)
+
+            assertEquals(postA.statusKey, rendered.statusKey)
+            assertEquals("content-b", rendered.content.raw)
+            assertEquals("content-b", repost.content.raw)
+            assertEquals(postB.statusKey, repost.statusKey)
+            assertEquals(1, rendered.quote.size)
+            assertEquals(
+                "content-c",
+                rendered.quote
+                    .first()
+                    .content.raw,
+            )
+            assertEquals(1, repost.quote.size)
+            assertEquals(
+                "content-c",
+                repost.quote
+                    .first()
+                    .content.raw,
+            )
+            assertEquals(postC.statusKey, repost.quote.first().statusKey)
         }
 
     @Test

@@ -629,7 +629,11 @@ private fun FeedViewPost.render(accountKey: MicroBlogKey): UiTimelineV2 {
         }
     val postForTimeline =
         when (reason) {
-            is FeedViewPostReasonUnion.ReasonRepost -> renderedPost.copy(statusKey = message?.statusKey ?: renderedPost.statusKey)
+            is FeedViewPostReasonUnion.ReasonRepost ->
+                renderedPost.copy(
+                    statusKey = message?.statusKey ?: renderedPost.statusKey,
+                    internalRepost = renderedPost,
+                )
             else -> renderedPost
         }
 

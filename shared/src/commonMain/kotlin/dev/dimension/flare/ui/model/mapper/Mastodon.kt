@@ -237,17 +237,18 @@ internal fun Status.render(
         } else {
             null
         }
-    val actualStatus =
-        if (reblog != null) {
-            reblog
-                .renderStatus(
+    return if (reblog != null) {
+        currentStatus.copy(
+            message = topMessage,
+            internalRepost =
+                reblog.renderStatus(
                     host = host,
                     accountKey = accountKey,
-                ).copy(statusKey = currentStatus.statusKey)
-        } else {
-            currentStatus
-        }
-    return actualStatus.copy(message = topMessage)
+                ),
+        )
+    } else {
+        currentStatus.copy(message = topMessage)
+    }
 }
 
 private fun Status.renderStatus(

@@ -73,10 +73,7 @@ public class AddReactionPresenter(
                             if (status is UiTimelineV2.Post) {
                                 val hasReacted = status.emojiReactions.any { it.me && it.name == emoji.shortcode }
                                 val count =
-                                    status.emojiReactions
-                                        .firstOrNull { it.name == emoji.shortcode }
-                                        ?.count
-                                        ?.value ?: 0L
+                                    status.emojiReactions.sumOf { it.count.value }
                                 postDataSource.postEventHandler.handleEvent(
                                     PostEvent.Misskey.React(
                                         postKey = statusKey,

@@ -181,7 +181,14 @@ internal class PostEventHandler(
                 if (it is ActionMenu.Item && it.updateKey.isNotEmpty() && it.updateKey == newActionMenu.updateKey) {
                     newActionMenu
                 } else if (it is ActionMenu.Group) {
+                    val updatedDisplayItem =
+                        if (it.displayItem.updateKey.isNotEmpty() && it.displayItem.updateKey == newActionMenu.updateKey) {
+                            newActionMenu
+                        } else {
+                            it.displayItem
+                        }
                     it.copy(
+                        displayItem = updatedDisplayItem,
                         actions = findAndReplaceActionMenu(it.actions, newActionMenu),
                     )
                 } else {

@@ -286,7 +286,12 @@ internal fun Tweet.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
     val quote = quoteUnion?.toTweetOrNull()?.renderStatus(accountKey = accountKey)
     val retweet = retweetUnion?.toTweetOrNull()?.renderStatus(accountKey, quote = quote)
     val currentTweet = renderStatus(accountKey, quote = quote)
-    val actualTweet = if (retweet != null) retweet.copy(statusKey = currentTweet.statusKey) else currentTweet
+    val actualTweet =
+        if (retweet != null) {
+            currentTweet.copy(internalRepost = retweet)
+        } else {
+            currentTweet
+        }
     val user = currentTweet.user
     val message =
         if (retweet != null && user != null) {
@@ -347,7 +352,12 @@ internal fun XQTTimeline.render(accountKey: MicroBlogKey): UiTimelineV2? {
                 accountKey = accountKey,
                 quote = quote,
             )
-    val actualTweet = if (retweet != null) retweet.copy(statusKey = currentTweet.statusKey) else currentTweet
+    val actualTweet =
+        if (retweet != null) {
+            currentTweet.copy(internalRepost = retweet)
+        } else {
+            currentTweet
+        }
     val user = currentTweet.user
     val message =
         if (retweet != null && user != null) {

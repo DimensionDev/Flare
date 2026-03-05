@@ -74,6 +74,7 @@ import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
@@ -250,7 +251,7 @@ internal class BlueskyDataSource(
                     },
                 )
 
-            else -> throw IllegalArgumentException("Unsupported notification filter")
+            else -> notSupported()
         }
 
     override val supportedNotificationFilter: List<NotificationFilter>
@@ -757,9 +758,6 @@ internal class BlueskyDataSource(
             loader = listMemberLoader,
         )
     }
-
-    private val notificationMarkerKey: String
-        get() = "notificationBadgeCount_$accountKey"
 
     override fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
         Pager(

@@ -10,6 +10,15 @@ internal interface RemoteLoader<T : Any> {
     ): PagingResult<T>
 }
 
+internal fun <T : Any> notSupported(): RemoteLoader<T> = NotSupportRemoteLoader()
+
+internal class NotSupportRemoteLoader<T : Any> : RemoteLoader<T> {
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<T> = PagingResult(endOfPaginationReached = true)
+}
+
 internal fun <T : Any> RemoteLoader<T>.toPagingSource() =
     object : PagingSource<String, T>() {
         override suspend fun load(params: LoadParams<String>): LoadResult<String, T> {

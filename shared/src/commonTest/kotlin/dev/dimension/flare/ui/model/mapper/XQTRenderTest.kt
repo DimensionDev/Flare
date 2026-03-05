@@ -162,12 +162,16 @@ class XQTRenderTest {
         val rendered = assertIs<UiTimelineV2.Post>(createTimeline(repostWrapper).render(accountKey))
         val message = assertNotNull(rendered.message)
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
+        val repostInternal = assertNotNull(rendered.internalRepost)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("user-reposter", message.user?.key?.id)
-        assertEquals("original content", rendered.content.innerText)
-        assertEquals("user-original", rendered.user?.key?.id)
+        assertEquals("wrapper content", rendered.content.innerText)
+        assertEquals("user-reposter", rendered.user?.key?.id)
         assertEquals("status-repost-wrapper", rendered.statusKey.id)
+        assertEquals("original content", repostInternal.content.innerText)
+        assertEquals("user-original", repostInternal.user?.key?.id)
+        assertEquals("status-original", repostInternal.statusKey.id)
     }
 
     @Test
@@ -196,14 +200,17 @@ class XQTRenderTest {
         val rendered = assertIs<UiTimelineV2.Post>(createTimeline(repostWrapper).render(accountKey))
         val message = assertNotNull(rendered.message)
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
+        val repostInternal = assertNotNull(rendered.internalRepost)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("status-repost-wrapper-2", rendered.statusKey.id)
-        assertEquals("original payload", rendered.content.innerText)
+        assertEquals("wrapper payload", rendered.content.innerText)
         assertEquals(1, rendered.quote.size)
+        assertEquals("original payload", repostInternal.content.innerText)
+        assertEquals(1, repostInternal.quote.size)
         assertEquals(
             "quoted payload",
-            rendered.quote
+            repostInternal.quote
                 .first()
                 .content.innerText,
         )

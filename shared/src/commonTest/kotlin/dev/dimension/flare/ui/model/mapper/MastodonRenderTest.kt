@@ -133,11 +133,14 @@ class MastodonRenderTest {
         val rendered = assertIs<UiTimelineV2.Post>(reblogWrapper.render(host = accountKey.host, accountKey = accountKey))
         val message = assertNotNull(rendered.message)
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
+        val repost = assertNotNull(rendered.internalRepost)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("reblogger-user", message.user?.handle?.raw)
-        assertEquals("original content", rendered.content.innerText)
+        assertEquals("wrapper content", rendered.content.innerText)
         assertEquals("reblog-wrapper-1", rendered.statusKey.id)
+        assertEquals("original content", repost.content.innerText)
+        assertEquals("original-1", repost.statusKey.id)
     }
 
     @Test
@@ -166,15 +169,18 @@ class MastodonRenderTest {
         val rendered = assertIs<UiTimelineV2.Post>(reblogWrapper.render(host = accountKey.host, accountKey = accountKey))
         val message = assertNotNull(rendered.message)
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
+        val repost = assertNotNull(rendered.internalRepost)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
         assertEquals("reblogger-user", message.user?.handle?.raw)
-        assertEquals("original content", rendered.content.innerText)
+        assertEquals("wrapper", rendered.content.innerText)
         assertEquals("reblog-wrapper-2", rendered.statusKey.id)
-        assertEquals(1, rendered.quote.size)
+        assertTrue(rendered.quote.isEmpty())
+        assertEquals("original content", repost.content.innerText)
+        assertEquals(1, repost.quote.size)
         assertEquals(
             "quoted content",
-            rendered.quote
+            repost.quote
                 .first()
                 .content.innerText,
         )

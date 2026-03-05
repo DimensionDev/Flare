@@ -195,6 +195,7 @@ class BlueskyRenderTest {
 
         val rendered = assertIs<UiTimelineV2.Post>(listOf(feed).render(accountKey).single())
         val message = assertNotNull(rendered.message)
+        val repost = assertNotNull(rendered.internalRepost)
 
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
@@ -202,6 +203,8 @@ class BlueskyRenderTest {
         assertEquals("did:plc:original", rendered.user?.key?.id)
         assertEquals("original post content", rendered.content.innerText)
         assertEquals(message.statusKey.id, rendered.statusKey.id)
+        assertEquals("original post content", repost.content.innerText)
+        assertEquals("did:plc:original", repost.user?.key?.id)
     }
 
     @Test
@@ -240,6 +243,7 @@ class BlueskyRenderTest {
 
         val rendered = assertIs<UiTimelineV2.Post>(listOf(feed).render(accountKey).single())
         val message = assertNotNull(rendered.message)
+        val repost = assertNotNull(rendered.internalRepost)
         val type = assertIs<UiTimelineV2.Message.Type.Localized>(message.type)
 
         assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, type.data)
@@ -249,6 +253,14 @@ class BlueskyRenderTest {
         assertEquals(
             "quoted payload",
             rendered.quote
+                .first()
+                .content.innerText,
+        )
+        assertEquals("original payload", repost.content.innerText)
+        assertEquals(1, repost.quote.size)
+        assertEquals(
+            "quoted payload",
+            repost.quote
                 .first()
                 .content.innerText,
         )

@@ -32,6 +32,7 @@ import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
@@ -368,7 +369,7 @@ internal class MisskeyDataSource(
                     service,
                 )
 
-            else -> throw IllegalStateException("Unsupported notification type")
+            else -> notSupported()
         }
 
     override val supportedNotificationFilter: List<NotificationFilter>

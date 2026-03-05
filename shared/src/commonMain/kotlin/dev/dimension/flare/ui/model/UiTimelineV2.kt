@@ -11,6 +11,7 @@ import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 
@@ -45,6 +46,7 @@ public sealed class UiTimelineV2 {
         val user: UiProfile? = null,
         override val statusKey: MicroBlogKey,
         val icon: UiIcon,
+        @SerialName("messageType")
         val type: Type,
         override val createdAt: UiDateTime,
         private val clickEvent: ClickEvent,
@@ -189,7 +191,8 @@ public sealed class UiTimelineV2 {
         val visibility: Visibility? = null,
         val replyToHandle: String? = null,
         val parents: SerializableImmutableList<Post> = persistentListOf(),
-        private val clickEvent: ClickEvent,
+        internal val internalRepost: Post? = null,
+        internal val clickEvent: ClickEvent,
         override val extraKey: String? = null,
         override val accountType: AccountType,
     ) : UiTimelineV2() {

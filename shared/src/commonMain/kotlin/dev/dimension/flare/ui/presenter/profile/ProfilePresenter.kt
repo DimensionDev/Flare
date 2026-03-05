@@ -203,7 +203,7 @@ public class ProfilePresenter(
                     emptyList()
                 } else {
                     listOfNotNull(
-                        if (accountKey != null && userKey != null) {
+                        if (accountKey != null && userKey != null && service is ListDataSource) {
                             ActionMenu.Item(
                                 icon = UiIcon.List,
                                 text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.EditUserList),

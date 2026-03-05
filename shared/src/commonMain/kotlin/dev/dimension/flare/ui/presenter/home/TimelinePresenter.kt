@@ -18,6 +18,7 @@ import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
@@ -52,14 +53,22 @@ public abstract class TimelinePresenter :
     internal fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimelineV2>> =
         loader
             .flatMapLatest {
-                if (it is CacheableRemoteLoader<UiTimelineV2>) {
-                    cachePager(
-                        loader = it,
-                    ).cachedIn(scope)
-                } else {
-                    networkPager(
-                        loader = it,
-                    ).cachedIn(scope)
+                when (it) {
+                    is NotSupportRemoteLoader<UiTimelineV2> -> {
+                        PagingData.emptyFlow(isError = false)
+                    }
+
+                    is CacheableRemoteLoader<UiTimelineV2> -> {
+                        cachePager(
+                            loader = it,
+                        ).cachedIn(scope)
+                    }
+
+                    else -> {
+                        networkPager(
+                            loader = it,
+                        ).cachedIn(scope)
+                    }
                 }.flatMapLatest { pager ->
                     filterFlow.map { filterList ->
                         pager.filter { item ->

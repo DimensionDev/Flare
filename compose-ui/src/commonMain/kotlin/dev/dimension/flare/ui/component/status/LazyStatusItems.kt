@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -225,13 +224,12 @@ public fun StatusItem(
     item: UiTimelineV2?,
     modifier: Modifier = Modifier,
     detailStatusKey: MicroBlogKey? = null,
-    horizontalPadding: Dp = screenHorizontalPadding,
 ) {
     if (item == null) {
         Column(
             modifier =
                 modifier.padding(
-                    horizontal = horizontalPadding,
+                    horizontal = screenHorizontalPadding,
                     vertical = 8.dp,
                 ),
         ) {
@@ -242,7 +240,6 @@ public fun StatusItem(
             item = item,
             detailStatusKey = detailStatusKey,
             modifier = modifier,
-            horizontalPadding = screenHorizontalPadding,
         )
     }
 }

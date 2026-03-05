@@ -5,23 +5,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
-import androidx.paging.Pager
-import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.common.refreshSuspend
-import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
-import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
-import dev.dimension.flare.data.datasource.microblog.pagingConfig
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
@@ -37,8 +30,10 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -50,6 +45,8 @@ public class AllNotificationPresenter :
     PresenterBase<AllNotificationPresenter.State>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
+    private val selectedAccountFlow = MutableStateFlow<UiProfile?>(null)
+    private val selectedNotificationFilterFlow = MutableStateFlow<NotificationFilter?>(null)
 
     @androidx.compose.runtime.Immutable
     public interface State {
@@ -117,63 +114,71 @@ public class AllNotificationPresenter :
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
+    private val notificationFiltersFlow by lazy {
+        selectedAccountFlow
+            .filterNotNull()
+            .distinctUntilChanged()
+            .flatMapLatest {
+                accountServiceFlow(AccountType.Specific(it.key), accountRepository)
+            }.map {
+                require(it is AuthenticatedMicroblogDataSource)
+                it.supportedNotificationFilter.toImmutableList()
+            }.distinctUntilChanged()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val timelinePresenter by lazy {
+        object : TimelinePresenter() {
+            override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
+                combine(
+                    selectedNotificationFilterFlow.filterNotNull(),
+                    selectedAccountFlow.filterNotNull(),
+                ) { filter, profile -> filter to profile.key }
+                    .distinctUntilChanged()
+                    .flatMapLatest { (filter, accountKey) ->
+                        accountServiceFlow(AccountType.Specific(accountKey), accountRepository)
+                            .map {
+                                require(it is AuthenticatedMicroblogDataSource)
+                                it.notification(filter)
+                            }.distinctUntilChanged()
+                    }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     override fun body(): State {
         val notifications by accountsNotificationFlow.collectAsState(persistentMapOf())
-        var selectedAccount by remember {
-            mutableStateOf<UiProfile?>(null)
-        }
+        val selectedAccount by selectedAccountFlow.collectAsState()
         val selectedAccountIndex by remember {
             derivedStateOf {
                 val maxIndex = (notifications.size - 1).coerceAtLeast(0)
                 selectedAccount?.let { profile ->
-                    notifications.keys.indexOf(profile).coerceIn(0, maxIndex)
+                    notifications.keys
+                        .map { it.key }
+                        .indexOf(profile.key)
+                        .coerceIn(0, maxIndex)
                 } ?: 0
             }
         }
-        var selectedNotificationFilter by remember {
-            mutableStateOf<NotificationFilter?>(null)
-        }
-
-        val notificationFilters by remember {
-            snapshotFlow { selectedAccount }
-                .filterNotNull()
-                .flatMapLatest {
-                    accountServiceFlow(AccountType.Specific(it.key), accountRepository)
-                }.map {
-                    require(it is AuthenticatedMicroblogDataSource)
-                    it.supportedNotificationFilter.toImmutableList()
-                }
-        }.collectAsUiState()
+        val selectedNotificationFilter by selectedNotificationFilterFlow.collectAsState()
+        val notificationFilters by notificationFiltersFlow.collectAsUiState()
 
         notificationFilters.onSuccess {
             LaunchedEffect(it) {
-                selectedNotificationFilter = it.firstOrNull()
+                selectedNotificationFilterFlow.value = it.firstOrNull()
             }
         }
 
-        LaunchedEffect(notifications.size) {
-            selectedAccount = notifications.keys.firstOrNull()
+        LaunchedEffect(notifications) {
+            val current = selectedAccountFlow.value
+            if (current == null || current.key !in notifications.keys.map { it.key }) {
+                selectedAccountFlow.value = notifications.keys.firstOrNull()
+            }
         }
 
-        val listState =
-            remember {
-                combine(
-                    snapshotFlow { selectedNotificationFilter }.filterNotNull(),
-                    snapshotFlow { selectedAccount }.filterNotNull(),
-                ) { filter, profile -> filter to profile }
-                    .flatMapLatest { (filter, profile) ->
-                        accountServiceFlow(AccountType.Specific(profile.key), accountRepository)
-                            .flatMapLatest {
-                                require(it is AuthenticatedMicroblogDataSource)
-                                runCatching {
-                                    Pager(config = pagingConfig) {
-                                        it.notification(filter).toPagingSource()
-                                    }.flow
-                                }.getOrDefault(emptyFlow())
-                            }
-                    }
-            }.collectAsLazyPagingItems().toPagingState()
+        val listState = timelinePresenter.body().listState
 
         return object : State {
             override val notifications = notifications
@@ -184,11 +189,11 @@ public class AllNotificationPresenter :
             override val selectedAccountIndex = selectedAccountIndex
 
             override fun setAccount(profile: UiProfile) {
-                selectedAccount = profile
+                selectedAccountFlow.value = profile
             }
 
             override fun setFilter(filter: NotificationFilter) {
-                selectedNotificationFilter = filter
+                selectedNotificationFilterFlow.value = filter
             }
 
             override suspend fun refreshSuspend() {

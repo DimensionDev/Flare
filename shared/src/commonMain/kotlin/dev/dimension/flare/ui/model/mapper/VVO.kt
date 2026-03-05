@@ -5,7 +5,6 @@ import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostEvent
-import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.vvo.model.Attitude
 import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
@@ -163,8 +162,27 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
             append('/')
             append(bid)
         }
+    val message =
+        title?.text?.let {
+            UiTimelineV2.Message(
+                user = displayUser,
+                statusKey = statusKey,
+                icon = UiIcon.Info,
+                type = UiTimelineV2.Message.Type.Raw(it),
+                createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
+                clickEvent =
+                    ClickEvent.Deeplink(
+                        DeeplinkRoute.Status.VVOStatus(
+                            statusKey = statusKey,
+                            accountType = AccountType.Specific(accountKey),
+                        ),
+                    ),
+                accountType = AccountType.Specific(accountKey),
+            )
+        }
 
     return UiTimelineV2.Post(
+        message = message,
         platformType = PlatformType.VVo,
         images = actualMedia.toImmutableList(),
         sensitive = false,
@@ -247,13 +265,13 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                         ),
                                 )
                             } else {
-                                null
+                                ActionMenu.Item(
+                                    icon = UiIcon.Report,
+                                    text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                    color = ActionMenu.Item.Color.Red,
+                                    clickEvent = ClickEvent.Noop,
+                                )
                             },
-                            *userActionsMenu(
-                                accountKey = accountKey,
-                                userKey = user?.key ?: statusKey,
-                                handle = user?.handle?.canonical ?: "",
-                            ).toTypedArray(),
                         ).toImmutableList(),
                 ),
             ).toImmutableList(),

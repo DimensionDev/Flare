@@ -59,6 +59,7 @@ import compose.icons.fontawesomeicons.regular.CommentDots
 import compose.icons.fontawesomeicons.regular.Heart
 import compose.icons.fontawesomeicons.solid.At
 import compose.icons.fontawesomeicons.solid.Bookmark
+import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.Ellipsis
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
@@ -70,13 +71,16 @@ import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.LockOpen
 import compose.icons.fontawesomeicons.solid.Message
 import compose.icons.fontawesomeicons.solid.Minus
+import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
-import compose.icons.fontawesomeicons.solid.QuoteLeft
 import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
 import compose.icons.fontawesomeicons.solid.ShareNodes
+import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
+import compose.icons.fontawesomeicons.solid.Thumbtack
 import compose.icons.fontawesomeicons.solid.Trash
 import compose.icons.fontawesomeicons.solid.Tv
+import compose.icons.fontawesomeicons.solid.UserPlus
 import compose.icons.fontawesomeicons.solid.UserSlash
 import compose.icons.fontawesomeicons.solid.VolumeXmark
 import dev.dimension.flare.compose.ui.Res
@@ -941,7 +945,7 @@ private fun ActionMenu.Item.Color.toComposeColor(): Color =
         ActionMenu.Item.Color.PrimaryColor -> PlatformTheme.colorScheme.retweetColor
     }
 
-private fun UiIcon.toImageVector(): ImageVector =
+internal fun UiIcon.toImageVector(): ImageVector =
     when (this) {
         UiIcon.Like -> FontAwesomeIcons.Regular.Heart
         UiIcon.Unlike -> FontAwesomeIcons.Solid.Heart
@@ -949,7 +953,7 @@ private fun UiIcon.toImageVector(): ImageVector =
         UiIcon.Unretweet -> FontAwesomeIcons.Solid.Retweet
         UiIcon.Reply -> FontAwesomeIcons.Solid.Reply
         UiIcon.Comment -> FontAwesomeIcons.Regular.CommentDots
-        UiIcon.Quote -> FontAwesomeIcons.Solid.QuoteLeft
+        UiIcon.Quote -> FontAwesomeIcons.Solid.Reply
         UiIcon.Bookmark -> FontAwesomeIcons.Regular.Bookmark
         UiIcon.Unbookmark -> FontAwesomeIcons.Solid.Bookmark
         UiIcon.More -> FontAwesomeIcons.Solid.Ellipsis
@@ -965,7 +969,14 @@ private fun UiIcon.toImageVector(): ImageVector =
         UiIcon.UnMute -> FontAwesomeIcons.Solid.VolumeXmark
         UiIcon.Block -> FontAwesomeIcons.Solid.UserSlash
         UiIcon.UnBlock -> FontAwesomeIcons.Solid.UserSlash
-        else -> FontAwesomeIcons.Solid.Ellipsis
+        UiIcon.Follow -> FontAwesomeIcons.Solid.UserPlus
+        UiIcon.Favourite -> FontAwesomeIcons.Solid.Heart
+        UiIcon.Mention -> FontAwesomeIcons.Solid.At
+        UiIcon.Poll -> FontAwesomeIcons.Solid.SquarePollHorizontal
+        UiIcon.Edit -> FontAwesomeIcons.Solid.Pen
+        UiIcon.Info -> FontAwesomeIcons.Solid.CircleInfo
+        UiIcon.Pin -> FontAwesomeIcons.Solid.Thumbtack
+        UiIcon.Check -> FontAwesomeIcons.Solid.Check
     }
 
 @Composable

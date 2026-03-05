@@ -4,10 +4,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -18,26 +16,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.zIndex
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.At
 import compose.icons.fontawesomeicons.solid.Check
-import compose.icons.fontawesomeicons.solid.CircleInfo
-import compose.icons.fontawesomeicons.solid.Heart
-import compose.icons.fontawesomeicons.solid.Pen
-import compose.icons.fontawesomeicons.solid.QuoteLeft
-import compose.icons.fontawesomeicons.solid.Reply
-import compose.icons.fontawesomeicons.solid.Retweet
-import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
-import compose.icons.fontawesomeicons.solid.Thumbtack
-import compose.icons.fontawesomeicons.solid.UserPlus
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.bluesky_notification_item_starterpack_joined
@@ -226,7 +212,6 @@ import dev.dimension.flare.ui.component.platform.PlatformFilledTonalButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.model.ClickContext
-import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
 import dev.dimension.flare.ui.theme.PlatformContentColor
@@ -235,221 +220,37 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-// @Composable
-// internal fun UiTimelineComponent(
-//    item: UiTimelineV2,
-//    modifier: Modifier = Modifier,
-//    detailStatusKey: MicroBlogKey? = null,
-//    horizontalPadding: Dp = screenHorizontalPadding,
-// ) {
-//    val bigScreen = isBigScreen()
-//    val appearance = LocalComponentAppearance.current
-//    Column(
-//        modifier = modifier,
-//    ) {
-//        val message =
-//            when (item) {
-//                is UiTimelineV2.Post -> item.message
-//                is UiTimelineV2.User -> item.message
-//                is UiTimelineV2.UserList -> item.message
-//                is UiTimelineV2.Message -> item
-//                is UiTimelineV2.Feed -> null
-//            }
-//        val hasContent = item !is UiTimelineV2.Message
-//        message?.let {
-//            TopMessageComponent(
-//                data = it,
-//                topMessageOnly = !hasContent,
-//                modifier =
-//                    Modifier
-//                        .padding(horizontal = horizontalPadding)
-//                        .let {
-//                            if (!hasContent) {
-//                                it.padding(vertical = 8.dp)
-//                            } else {
-//                                if (!appearance.fullWidthPost) {
-//                                    it.padding(
-//                                        top = 8.dp,
-//                                        start = AvatarComponentDefaults.size - PlatformTheme.typography.caption.fontSize.value.dp,
-//                                    )
-//                                } else {
-//                                    it.padding(top = 8.dp)
-//                                }
-//                            }
-//                        }.fillMaxWidth(),
-//            )
-//        }
-//        if (hasContent) {
-//            val padding =
-//                if (message == null) {
-//                    PaddingValues(
-//                        start = horizontalPadding,
-//                        end = horizontalPadding,
-//                        bottom = 8.dp,
-//                        top = if (bigScreen) 16.dp else 8.dp,
-//                    )
-//                } else {
-//                    PaddingValues(
-//                        start = horizontalPadding,
-//                        end = horizontalPadding,
-//                        bottom = 8.dp,
-//                        top = 8.dp,
-//                    )
-//                }
-//            ItemContentComponent(
-//                item = item,
-//                detailStatusKey = detailStatusKey,
-//                paddingValues = padding,
-//            )
-//        }
-//    }
-// }
-
 @Composable
 internal fun UiTimelineComponent(
     item: UiTimelineV2,
     modifier: Modifier = Modifier,
     detailStatusKey: MicroBlogKey? = null,
-    horizontalPadding: Dp = screenHorizontalPadding,
 ) {
-    val uriHandler = LocalUriHandler.current
     when (item) {
         is UiTimelineV2.Post ->
             StatusContent(
                 data = item,
                 detailStatusKey = detailStatusKey,
-                paddingValues =
-                    PaddingValues(
-                        start = horizontalPadding,
-                        end = horizontalPadding,
-                        bottom = 8.dp,
-                        top = 8.dp,
-                    ),
                 modifier = modifier,
             )
 
         is UiTimelineV2.User -> {
-            Column(
+            UserContent(
+                item,
                 modifier =
-                    modifier
-                        .padding(
-                            PaddingValues(
-                                start = horizontalPadding,
-                                end = horizontalPadding,
-                                bottom = 8.dp,
-                                top = 8.dp,
-                            ),
-                        ),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                item.message?.let { message ->
-                    TopMessageComponent(
-                        data = message,
-                        topMessageOnly = false,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp),
-                    )
-                }
-                CommonStatusHeaderComponent(
-                    data = item.value,
-                    onUserClick = {
-                        item.value.onClicked.invoke(
-                            ClickContext(
-                                launcher = {
-                                    uriHandler.openUri(it)
-                                },
-                            ),
-                        )
-                    },
-                )
-                if (item.button.isNotEmpty()) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        item.button.fastForEach { button ->
-                            when ((button.text as? ActionMenu.Item.Text.Localized)?.type) {
-                                ActionMenu.Item.Text.Localized.Type.AcceptFollowRequest ->
-                                    PlatformFilledTonalButton(
-                                        onClick = {
-                                            button.onClicked.invoke(
-                                                ClickContext(
-                                                    launcher = {
-                                                        uriHandler.openUri(it)
-                                                    },
-                                                ),
-                                            )
-                                        },
-                                    ) {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.Check,
-                                            contentDescription =
-                                                stringResource(
-                                                    Res.string.notification_item_accept_follow_request,
-                                                ),
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        PlatformText(
-                                            text =
-                                                stringResource(
-                                                    Res.string.notification_item_accept_follow_request,
-                                                ),
-                                        )
-                                    }
-                                ActionMenu.Item.Text.Localized.Type.RejectFollowRequest -> {
-                                    PlatformButton(
-                                        onClick = {
-                                            button.onClicked.invoke(
-                                                ClickContext(
-                                                    launcher = {
-                                                        uriHandler.openUri(it)
-                                                    },
-                                                ),
-                                            )
-                                        },
-                                        content = {
-                                            FAIcon(
-                                                FontAwesomeIcons.Solid.Xmark,
-                                                contentDescription =
-                                                    stringResource(
-                                                        Res.string.notification_item_reject_follow_request,
-                                                    ),
-                                                tint = PlatformTheme.colorScheme.error,
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            PlatformText(
-                                                text =
-                                                    stringResource(
-                                                        Res.string.notification_item_reject_follow_request,
-                                                    ),
-                                                color = PlatformTheme.colorScheme.error,
-                                            )
-                                        },
-                                    )
-                                }
-
-                                else -> Unit
-                            }
-                        }
-                    }
-                }
-            }
+                    Modifier
+                        .padding(horizontal = screenHorizontalPadding)
+                        .padding(vertical = 8.dp),
+            )
         }
 
         is UiTimelineV2.UserList ->
             UserListContent(
                 data = item,
                 modifier =
-                    modifier
-                        .padding(
-                            PaddingValues(
-                                start = horizontalPadding,
-                                end = horizontalPadding,
-                                bottom = 8.dp,
-                                top = 8.dp,
-                            ),
-                        ),
+                    Modifier
+                        .padding(horizontal = screenHorizontalPadding)
+                        .padding(vertical = 8.dp),
             )
 
         is UiTimelineV2.Feed -> {
@@ -465,10 +266,115 @@ internal fun UiTimelineComponent(
                 topMessageOnly = true,
                 modifier =
                     Modifier
-                        .padding(horizontal = horizontalPadding)
+                        .padding(horizontal = screenHorizontalPadding)
                         .padding(vertical = 8.dp)
                         .fillMaxWidth(),
             )
+    }
+}
+
+@Composable
+private fun UserContent(
+    item: UiTimelineV2.User,
+    modifier: Modifier = Modifier,
+) {
+    val uriHandler = LocalUriHandler.current
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item.message?.let { message ->
+            TopMessageComponent(
+                data = message,
+                topMessageOnly = false,
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
+            )
+        }
+        CommonStatusHeaderComponent(
+            data = item.value,
+            onUserClick = {
+                item.value.onClicked.invoke(
+                    ClickContext(
+                        launcher = {
+                            uriHandler.openUri(it)
+                        },
+                    ),
+                )
+            },
+        )
+        if (item.button.isNotEmpty()) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                item.button.fastForEach { button ->
+                    when ((button.text as? ActionMenu.Item.Text.Localized)?.type) {
+                        ActionMenu.Item.Text.Localized.Type.AcceptFollowRequest ->
+                            PlatformFilledTonalButton(
+                                onClick = {
+                                    button.onClicked.invoke(
+                                        ClickContext(
+                                            launcher = {
+                                                uriHandler.openUri(it)
+                                            },
+                                        ),
+                                    )
+                                },
+                            ) {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.Check,
+                                    contentDescription =
+                                        stringResource(
+                                            Res.string.notification_item_accept_follow_request,
+                                        ),
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                PlatformText(
+                                    text =
+                                        stringResource(
+                                            Res.string.notification_item_accept_follow_request,
+                                        ),
+                                )
+                            }
+
+                        ActionMenu.Item.Text.Localized.Type.RejectFollowRequest -> {
+                            PlatformButton(
+                                onClick = {
+                                    button.onClicked.invoke(
+                                        ClickContext(
+                                            launcher = {
+                                                uriHandler.openUri(it)
+                                            },
+                                        ),
+                                    )
+                                },
+                                content = {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Xmark,
+                                        contentDescription =
+                                            stringResource(
+                                                Res.string.notification_item_reject_follow_request,
+                                            ),
+                                        tint = PlatformTheme.colorScheme.error,
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    PlatformText(
+                                        text =
+                                            stringResource(
+                                                Res.string.notification_item_reject_follow_request,
+                                            ),
+                                        color = PlatformTheme.colorScheme.error,
+                                    )
+                                },
+                            )
+                        }
+
+                        else -> Unit
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -489,7 +395,7 @@ private fun UserListContent(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
+                        .padding(),
             )
         }
         LazyRow(
@@ -547,7 +453,6 @@ private fun StatusContent(
     data: UiTimelineV2.Post,
     detailStatusKey: MicroBlogKey?,
     modifier: Modifier = Modifier,
-    paddingValues: PaddingValues = PaddingValues(0.dp),
 ) {
     Column(
         modifier = modifier,
@@ -557,7 +462,10 @@ private fun StatusContent(
             Layout(
                 content = {
                     CompositionLocalProvider(
-                        LocalComponentAppearance provides LocalComponentAppearance.current.copy(fullWidthPost = false),
+                        LocalComponentAppearance provides
+                            LocalComponentAppearance.current.copy(
+                                fullWidthPost = false,
+                            ),
                     ) {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -566,7 +474,11 @@ private fun StatusContent(
                                 CommonStatusComponent(
                                     item = it,
                                     isDetail = false,
-                                    modifier = Modifier.padding(paddingValues),
+                                    modifier =
+                                        Modifier.padding(
+                                            horizontal = screenHorizontalPadding,
+                                            vertical = 8.dp,
+                                        ),
                                 )
                             }
                         }
@@ -576,7 +488,7 @@ private fun StatusContent(
                             Modifier
                                 .zIndex(-1f)
                                 .padding(
-                                    start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
+                                    start = screenHorizontalPadding,
                                 ).padding(start = AvatarComponentDefaults.size / 2)
                                 .offset(y = AvatarComponentDefaults.size / 2),
                     )
@@ -615,13 +527,21 @@ private fun StatusContent(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp, bottom = 4.dp),
+                            .padding(top = 8.dp)
+                            .padding(
+                                horizontal = screenHorizontalPadding,
+                            ),
                 )
             }
             CommonStatusComponent(
                 item = data,
                 isDetail = detailStatusKey?.toString()?.let(data.itemKey::contains) == true,
-                modifier = Modifier.padding(paddingValues),
+                modifier =
+                    Modifier
+                        .padding(
+                            horizontal = screenHorizontalPadding,
+                            vertical = 8.dp,
+                        ),
             )
         }
     }
@@ -635,7 +555,7 @@ private fun TopMessageComponent(
 ) {
     val appearance = LocalComponentAppearance.current
     val uriHandler = LocalUriHandler.current
-    val icon = data.icon.toTopMessageIcon()
+    val icon = data.icon.toImageVector()
     val text: String? =
         when (val type = data.type) {
             is UiTimelineV2.Message.Type.Raw -> type.content
@@ -684,8 +604,8 @@ private fun TopMessageComponent(
                         }.getOrNull()?.let { achievement ->
                             stringResource(
                                 resource = Res.string.misskey_notification_item_achievement_earned,
-                                achievement.titleResId,
-                                achievement.descriptionResId,
+                                stringResource(achievement.titleResId),
+                                stringResource(achievement.descriptionResId),
                             )
                         }
                             ?: stringResource(
@@ -746,21 +666,6 @@ private fun TopMessageComponent(
         )
     }
 }
-
-private fun UiIcon.toTopMessageIcon() =
-    when (this) {
-        UiIcon.Retweet -> FontAwesomeIcons.Solid.Retweet
-        UiIcon.Follow -> FontAwesomeIcons.Solid.UserPlus
-        UiIcon.Favourite -> FontAwesomeIcons.Solid.Heart
-        UiIcon.Mention -> FontAwesomeIcons.Solid.At
-        UiIcon.Poll -> FontAwesomeIcons.Solid.SquarePollHorizontal
-        UiIcon.Edit -> FontAwesomeIcons.Solid.Pen
-        UiIcon.Info -> FontAwesomeIcons.Solid.CircleInfo
-        UiIcon.Reply -> FontAwesomeIcons.Solid.Reply
-        UiIcon.Quote -> FontAwesomeIcons.Solid.QuoteLeft
-        UiIcon.Pin -> FontAwesomeIcons.Solid.Thumbtack
-        else -> FontAwesomeIcons.Solid.CircleInfo
-    }
 
 private val MisskeyAchievement.titleResId: StringResource
     get() =
@@ -910,6 +815,7 @@ private val MisskeyAchievement.descriptionResId: StringResource
             MisskeyAchievement.VIEW_INSTANCE_CHART -> Res.string.misskey_achievement_view_instance_chart_description
             MisskeyAchievement.OUTPUT_HELLO_WORLD_ON_SCRATCHPAD ->
                 Res.string.misskey_achievement_output_hello_world_on_scratchpad_description
+
             MisskeyAchievement.OPEN3WINDOWS -> Res.string.misskey_achievement_open3windows_description
             MisskeyAchievement.DRIVE_FOLDER_CIRCULAR_REFERENCE -> Res.string.misskey_achievement_drive_folder_circular_reference_description
             MisskeyAchievement.REACT_WITHOUT_READ -> Res.string.misskey_achievement_react_without_read_description

@@ -51,7 +51,16 @@ internal object TimelinePagingMapper {
                                             referenceType = ReferenceType.Reply,
                                             rootStatusKey = data.statusKey,
                                         )
-                                    }
+                                    } +
+                                    listOfNotNull(
+                                        data.internalRepost?.let {
+                                            uiTimelineToDbStatusReferenceWithStatus(
+                                                data = it,
+                                                referenceType = ReferenceType.Retweet,
+                                                rootStatusKey = data.statusKey,
+                                            )
+                                        },
+                                    )
 
                             is UiTimelineV2.User -> emptyList()
                             is UiTimelineV2.UserList ->
@@ -75,35 +84,75 @@ internal object TimelinePagingMapper {
     ): UiTimelineV2 {
         val root = dbStatusWithUserToUiTimeline(item.status.status, pagingKey, useDbKeyInItemKey)
         val references =
-            item.status.references
-                .mapNotNull { it.status }
-                .map { dbStatusWithUserToUiTimeline(it, pagingKey, useDbKeyInItemKey) }
+            item.status.references.mapNotNull { reference ->
+                reference.status?.let {
+                    reference.reference.referenceType to
+                        dbStatusWithUserToUiTimeline(
+                            it,
+                            pagingKey,
+                            useDbKeyInItemKey,
+                        )
+                }
+            }
         return when (root) {
             is UiTimelineV2.Feed -> root
             is UiTimelineV2.Message -> root
-            is UiTimelineV2.Post ->
-                root.copy(
-                    parents =
-                        root.parents
-                            .map { parent ->
-                                references.find { it.statusKey == parent.statusKey } as? UiTimelineV2.Post ?: parent
-                            }.toImmutableList(),
-                    quote =
-                        root.quote
-                            .map { quote ->
-                                references.find { it.statusKey == quote.statusKey } as? UiTimelineV2.Post ?: quote
-                            }.toImmutableList(),
-                )
+            is UiTimelineV2.Post -> {
+                val resolvedRoot =
+                    root.resolveReferences(
+                        references = references,
+                    )
+                val repost =
+                    (references.find { it.first == ReferenceType.Retweet }?.second as? UiTimelineV2.Post)
+                        ?: resolvedRoot.internalRepost
+                val resolvedRepost =
+                    repost?.resolveReferences(
+                        references = references,
+                    )
+                if (resolvedRepost != null) {
+                    resolvedRepost.copy(
+                        internalRepost = resolvedRepost,
+                        statusKey = resolvedRoot.statusKey,
+                        message = resolvedRoot.message,
+                    )
+                } else {
+                    resolvedRoot
+                }
+            }
             is UiTimelineV2.User -> root
             is UiTimelineV2.UserList ->
                 root.copy(
                     post =
                         root.post?.let { post ->
-                            references.find { it.statusKey == post.statusKey } as? UiTimelineV2.Post ?: post
+                            references.map { it.second }.find { it.statusKey == post.statusKey } as? UiTimelineV2.Post ?: post
                         },
                 )
         }
     }
+
+    private fun UiTimelineV2.Post.resolveReferences(references: List<Pair<ReferenceType, UiTimelineV2>>): UiTimelineV2.Post =
+        copy(
+            parents =
+                parents
+                    .map { parent ->
+                        references
+                            .find { it.first == ReferenceType.Reply && it.second.statusKey == parent.statusKey }
+                            ?.second as? UiTimelineV2.Post ?: parent
+                    }.toImmutableList(),
+            quote =
+                quote
+                    .map { quote ->
+                        references
+                            .find { it.first == ReferenceType.Quote && it.second.statusKey == quote.statusKey }
+                            ?.second as? UiTimelineV2.Post ?: quote
+                    }.toImmutableList(),
+            internalRepost =
+                internalRepost?.let { repost ->
+                    references
+                        .find { it.first == ReferenceType.Retweet && it.second.statusKey == repost.statusKey }
+                        ?.second as? UiTimelineV2.Post ?: repost
+                },
+        )
 
     private fun uiTimelineToDbStatusReferenceWithStatus(
         data: UiTimelineV2,

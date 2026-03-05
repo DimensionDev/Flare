@@ -82,29 +82,40 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
         when (notificationType) {
             NotificationType.Follow ->
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Follow)
+
             NotificationType.Mention ->
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Mention)
+
             NotificationType.Reply ->
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Reply)
+
             NotificationType.Renote ->
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Repost)
+
             NotificationType.Quote ->
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Quote)
+
             NotificationType.Reaction ->
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Reaction)
+
             NotificationType.PollEnded ->
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.PollEnded)
+
             NotificationType.ReceiveFollowRequest ->
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.FollowRequest)
+
             NotificationType.FollowRequestAccepted ->
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.FollowRequestAccepted)
+
             NotificationType.AchievementEarned ->
                 UiTimelineV2.Message.Type.Localized(
                     UiTimelineV2.Message.Type.Localized.MessageId.AchievementEarned,
-                    listOfNotNull(achievement).toPersistentList(),
+                    listOfNotNull(achievement?.let { MisskeyAchievement.fromString(it) }?.name).toPersistentList(),
                 )
+
             NotificationType.App ->
                 UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.App)
+
             else -> UiTimelineV2.Message.Type.Unknown(rawType = type)
         }
     val message =
@@ -140,7 +151,13 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
             accountType = accountKey.toAccountType(),
         )
 
-    if (notificationType in listOf(NotificationType.Follow, NotificationType.FollowRequestAccepted) && user != null) {
+    if (notificationType in
+        listOf(
+            NotificationType.Follow,
+            NotificationType.FollowRequestAccepted,
+        ) &&
+        user != null
+    ) {
         return UiTimelineV2.User(
             message = message,
             value = user,
@@ -309,12 +326,6 @@ internal fun Note.render(accountKey: MicroBlogKey): UiTimelineV2 {
         } else {
             renote ?: this
         }
-    val status =
-        if (actualStatus !== this) {
-            actualStatus.renderStatus(accountKey).copy(statusKey = wrapperStatus.statusKey)
-        } else {
-            wrapperStatus
-        }
     val topMessage =
         if (actualStatus !== this) {
             val user = user.render(accountKey)
@@ -322,8 +333,8 @@ internal fun Note.render(accountKey: MicroBlogKey): UiTimelineV2 {
                 user = user,
                 icon = UiIcon.Retweet,
                 type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Repost),
-                statusKey = status.statusKey,
-                createdAt = status.createdAt,
+                statusKey = wrapperStatus.statusKey,
+                createdAt = wrapperStatus.createdAt,
                 clickEvent =
                     ClickEvent.Deeplink(
                         DeeplinkRoute.Profile.User(
@@ -336,7 +347,14 @@ internal fun Note.render(accountKey: MicroBlogKey): UiTimelineV2 {
         } else {
             null
         }
-    return status.copy(message = topMessage)
+    return if (actualStatus !== this) {
+        wrapperStatus.copy(
+            message = topMessage,
+            internalRepost = actualStatus.renderStatus(accountKey),
+        )
+    } else {
+        wrapperStatus.copy(message = topMessage)
+    }
 }
 
 private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
@@ -542,7 +560,10 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                             ClickEvent.Deeplink(
                                                 DeeplinkRoute.Status
                                                     .DeleteConfirm(
-                                                        accountType = AccountType.Specific(accountKey),
+                                                        accountType =
+                                                            AccountType.Specific(
+                                                                accountKey,
+                                                            ),
                                                         statusKey = statusKey,
                                                     ),
                                             ),
@@ -569,7 +590,10 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                                                     .MisskeyReport(
                                                         statusKey = statusKey,
                                                         userKey = user.key,
-                                                        accountType = AccountType.Specific(accountKey),
+                                                        accountType =
+                                                            AccountType.Specific(
+                                                                accountKey,
+                                                            ),
                                                     ),
                                             ),
                                     ),
@@ -682,7 +706,9 @@ internal fun ActionMenu.Companion.misskeyReact(
                     DeeplinkRoute.Status
                         .AddReaction(
                             statusKey = postKey,
-                            accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest,
+                            accountType =
+                                accountKey?.let { AccountType.Specific(it) }
+                                    ?: AccountType.Guest,
                         ),
                 )
             } else {

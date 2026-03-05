@@ -27,6 +27,7 @@ import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.ListLoader
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.PostPoll
@@ -193,7 +194,7 @@ internal open class MastodonDataSource(
                     accountKey,
                 )
 
-            else -> throw IllegalStateException("Unsupported notification type")
+            else -> notSupported()
         }
 
     override val supportedNotificationFilter: List<NotificationFilter>

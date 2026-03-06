@@ -94,26 +94,9 @@ struct StatusActionView: View {
                 }
                 .buttonStyle(.plain)
             }
-        case .asyncActionMenuItem(let asyncItem):
-            EmptyView()
-//            AsyncStatusActionView(data: asyncItem)
         case .divider:
             Divider()
         }
-    }
-}
-
-struct AsyncStatusActionView: View {
-    let data: ActionMenuAsyncActionMenuItem
-    var body: some View {
-        // TODO: Not supported yet
-//        Button {
-//
-//        } label: {
-//
-//        }
-//        .onAppear {
-//        }
     }
 }
 
@@ -121,16 +104,14 @@ struct StatusActionItemView: View {
     @Environment(\.appearanceSettings.showNumbers) private var showNumbers
     @Environment(\.openURL) private var openURL
     @ScaledMetric(relativeTo: .footnote) var fontSize = 13
-    let data: ActionMenuItem
+    let data: ActionMenu.Item
     let useText: Bool
     let isFixedWidth: Bool
     var body: some View {
         Button(
             role: data.color?.role
         ) {
-            if let onClicked = data.onClicked {
-                onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-            }
+            data.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
         } label: {
             if useText, let text = data.text?.resolvedString {
                 Label {
@@ -182,7 +163,7 @@ struct StatusActionItemView: View {
     }
 }
 
-extension ActionMenuItem.Color {
+extension ActionMenu.ItemColor {
     var swiftColor: Color? {
         switch self {
         case .red: return .red
@@ -239,22 +220,28 @@ extension ActionMenuItemText {
             case .unBlock: return "unblock"
             case .blockWithHandleParameter: return "block_user_with_handle \(localized.parameters.first ?? "")"
             case .muteWithHandleParameter: return "mute_user_with_handle \(localized.parameters.first ?? "")"
+            case .acceptFollowRequest: return "accept_follow_request"
+            case .rejectFollowRequest: return "reject_follow_request"
             }
         }
     }
 }
 
 struct StatusActionIcon: View {
-    let icon: ActionMenuItem.Icon?
+    let icon: UiIcon?
 
     var body: some View {
         if let icon = icon {
-            Image(icon.imageName)
+            icon.image
         }
     }
 }
 
-extension ActionMenuItem.Icon {
+extension UiIcon {
+    var image: Image {
+        Image(imageName)
+    }
+
     var imageName: String {
         switch self {
         case .bookmark: return "fa-bookmark"
@@ -263,7 +250,7 @@ extension ActionMenuItem.Icon {
         case .like: return "fa-heart"
         case .unlike: return "fa-heart.fill"
         case .more: return "fa-ellipsis"
-        case .quote: return "fa-quote-left"
+        case .quote: return "fa-reply"
         case .react: return "fa-plus"
         case .unReact: return "fa-minus"
         case .reply: return "fa-reply"
@@ -279,6 +266,14 @@ extension ActionMenuItem.Icon {
         case .unMute: return "fa-volume-xmark"
         case .block: return "fa-user-slash"
         case .unBlock: return "fa-user-slash"
+        case .follow: return "fa-user-plus"
+        case .favourite: return "fa-heart"
+        case .mention: return "fa-at"
+        case .poll: return "fa-square-poll-horizontal"
+        case .edit: return "fa-pen"
+        case .info: return "fa-circle-info"
+        case .pin: return "fa-thumbtack"
+        case .check: return "fa-check"
         }
     }
 }

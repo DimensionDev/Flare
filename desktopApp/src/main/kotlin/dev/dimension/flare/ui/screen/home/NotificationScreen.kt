@@ -57,7 +57,9 @@ internal fun NotificationScreen() {
                     span = StaggeredGridItemSpan.FullLine,
                 ) {
                     LiteFilter {
-                        state.notifications.forEach { (profile, badge) ->
+                        state.notifications.forEach { item ->
+                            val profile = item.profile
+                            val badge = item.badge
                             PillButton(
                                 selected = state.selectedAccount?.key == profile.key,
                                 onSelectedChanged = {
@@ -99,7 +101,7 @@ internal fun NotificationScreen() {
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
                         LiteFilter {
-                            types.forEachIndexed { index, type ->
+                            types.forEach { type ->
                                 PillButton(
                                     selected = state.selectedFilter == type,
                                     onSelectedChanged = {

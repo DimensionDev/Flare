@@ -20,7 +20,7 @@ struct UserCompatView<TrailingContent: View>: View {
                 alignment: .leading
             ) {
                 RichText(text: data.name)
-                Text(data.handle)
+                Text(data.handle.canonical)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

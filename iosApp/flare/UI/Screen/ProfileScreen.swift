@@ -4,6 +4,7 @@ import SwiftUIBackports
 
 struct ProfileScreen: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.openURL) private var openURL
     let accountType: AccountType
     let userKey: MicroBlogKey?
     let onFollowingClick: (MicroBlogKey) -> Void
@@ -82,7 +83,7 @@ struct ProfileScreen: View {
                         relation: presenter.state.relationState,
                         isMe: presenter.state.isMe,
                         onFollowClick: { user, relation in
-                            presenter.state.follow(userKey: user.key, data: relation)
+                            handleFollowAction(user: user, relation: relation)
                         },
                         onFollowingClick: onFollowingClick,
                         onFansClick: onFansClick
@@ -114,7 +115,7 @@ struct ProfileScreen: View {
                 relation: presenter.state.relationState,
                 isMe: presenter.state.isMe,
                 onFollowClick: { user, relation in
-                    presenter.state.follow(userKey: user.key, data: relation)
+                    handleFollowAction(user: user, relation: relation)
                 },
                 onFollowingClick: onFollowingClick,
                 onFansClick: onFansClick
@@ -163,6 +164,21 @@ struct ProfileScreen: View {
         .listRowSpacing(2)
         .listStyle(.plain)
         .edgesIgnoringSafeArea(.top)
+    }
+
+    private func handleFollowAction(user: UiProfile, relation: UiRelation) {
+        if relation.blocking {
+            if case .success(let state) = onEnum(of: presenter.state.myAccountKey) {
+                let route = DeeplinkRoute.UnblockUser(accountKey: state.data, userKey: user.key)
+                if let url = URL(string: route.toUri()) {
+                    openURL(url)
+                }
+            }
+        } else if relation.following || relation.hasPendingFollowRequestFromYou {
+            presenter.state.unfollow(userKey: user.key)
+        } else {
+            presenter.state.follow(userKey: user.key)
+        }
     }
 }
 

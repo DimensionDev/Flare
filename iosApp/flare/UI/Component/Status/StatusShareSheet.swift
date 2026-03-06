@@ -117,7 +117,7 @@ struct StatusShareSheet: View {
     }
     
     @ViewBuilder
-    private func previewView(data: UiTimeline) -> some View {
+    private func previewView(data: UiTimelineV2) -> some View {
         TimelineView(data: data, detailStatusKey: statusKey, showTranslate: false)
             .frame(width: 360)
             .padding()
@@ -132,11 +132,11 @@ struct StatusShareSheet: View {
     }
     
     
-    private func renderImage(data: UiTimeline) async -> UIImage? {
+    private func renderImage(data: UiTimelineV2) async -> UIImage? {
         return await previewView(data: data).snapshot()
     }
     
-    private func saveImage(data: UiTimeline) async {
+    private func saveImage(data: UiTimelineV2) async {
         guard let image = image else { return }
         UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
         dismiss()

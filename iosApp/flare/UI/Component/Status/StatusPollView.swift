@@ -3,6 +3,7 @@ import KotlinSharedUI
 import SwiftUIBackports
 
 struct StatusPollView: View {
+    @Environment(\.openURL) private var openURL
     let data: UiPoll
     @State private var selectedOption: [Int] = []
     var body: some View {
@@ -82,7 +83,10 @@ struct StatusPollView: View {
             
             if data.canVote {
                 Button {
-                    data.onVote(selectedOption.map { KotlinInt(value: Int32($0)) } )
+                    data.onVote(
+                        ClickContext(launcher: AppleUriLauncher(openUrl: openURL)),
+                        selectedOption.map { KotlinInt(value: Int32($0)) }
+                    )
                 } label: {
                     Text("poll_vote")
                 }
@@ -92,4 +96,3 @@ struct StatusPollView: View {
         }
     }
 }
-

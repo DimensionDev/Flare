@@ -92,7 +92,7 @@ struct SearchScreen: View {
                                     HStack {
                                         AvatarView(data: account.avatar)
                                             .frame(width: 18, height: 18)
-                                        Text(account.handle).font(.caption)
+                                        Text(account.handle.canonical).font(.caption)
                                     }
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)

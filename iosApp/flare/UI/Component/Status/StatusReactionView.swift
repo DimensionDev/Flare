@@ -2,13 +2,14 @@ import SwiftUI
 import KotlinSharedUI
 
 struct StatusReactionView: View {
-    let data: UiTimeline.ItemContentStatusBottomContentReaction
+    @Environment(\.openURL) private var openURL
+    let data: [UiTimelineV2.PostEmojiReaction]
     var body: some View {
         ScrollView(.horizontal) {
             LazyHStack {
-                ForEach(data.emojiReactions, id: \.name) { item in
+                ForEach(data, id: \.name) { item in
                     Button {
-                        item.onClicked()
+                        item.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
                     } label: {
                         Label {
                             Text(item.count.humanized)

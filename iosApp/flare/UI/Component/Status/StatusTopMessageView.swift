@@ -3,10 +3,10 @@ import KotlinSharedUI
 
 struct StatusTopMessageView: View {
     @Environment(\.openURL) private var openURL
-    let topMessage: UiTimeline.TopMessage
+    let topMessage: UiTimelineV2.Message
     var body: some View {
         HStack {
-            topMessage.icon.awesomeImage
+            topMessage.icon.image
             if let user = topMessage.user {
                 RichText(text: user.name)
             }
@@ -21,98 +21,150 @@ struct StatusTopMessageView: View {
     }
 }
 
-extension UiTimeline.TopMessageIcon {
-    var awesomeImage: Image {
-        switch self {
-        case .retweet:
-            return Image("fa-retweet")
-        case .follow:
-            return Image("fa-user-plus")
-        case .favourite:
-            return Image("fa-heart")
-        case .mention:
-            return Image("fa-at")
-        case .poll:
-            return Image("fa-square-poll-horizontal")
-        case .edit:
-            return Image("fa-pen")
-        case .info:
-            return Image("fa-circle-info")
-        case .reply:
-            return Image("fa-reply")
-        case .quote:
-            return Image("fa-quote-left")
-        case .pin:
-            return Image("fa-thumbtack")
-        }
-    }
-}
-
-extension UiTimeline.TopMessageMessageType {
+extension UiTimelineV2.MessageType {
     var localizedText: String? {
-        switch onEnum(of: self) {
-        case .bluesky(let data):
-            switch onEnum(of: data) {
-            case .follow: String(localized: "bluesky_notification_follow")
-            case .like: String(localized: "bluesky_notification_like")
-            case .mention: String(localized: "bluesky_notification_mention")
-            case .quote: String(localized: "bluesky_notification_quote")
-            case .reply: String(localized: "bluesky_notification_reply")
-            case .repost: String(localized: "bluesky_notification_repost")
-            case .unKnown: String(localized: "bluesky_notification_unKnown")
-            case .starterpackJoined: String(localized: "bluesky_notification_starterpackJoined")
-            case .pinned: String(localized: "bluesky_notification_item_pin")
-            }
-        case .mastodon(let data):
-            switch onEnum(of: data) {
-            case .favourite: String(localized: "mastodon_notification_favourite")
-            case .follow: String(localized: "mastodon_notification_follow")
-            case .followRequest: String(localized: "mastodon_notification_follow_request")
-            case .mention: String(localized: "mastodon_notification_mention")
-            case .poll: String(localized: "mastodon_notification_poll")
-            case .reblogged: String(localized: "mastodon_notification_reblog")
-            case .status: String(localized: "mastodon_notification_status")
-            case .update: String(localized: "mastodon_notification_update")
-            case .pinned: String(localized: "mastodon_item_pinned")
-            case .unKnown: nil
-            }
-        case .misskey(let data):
-            switch onEnum(of: data) {
-            case .achievementEarned(let achive):
-                String(
-                    format: NSLocalizedString("misskey_notification_achievement_earned", comment: ""),
-                    String(localized: achive.achievement?.titleKey ?? ""),
-                    String(localized: achive.achievement?.descriptionKey ?? "")
-                )
-            case .app: String(localized: "misskey_notification_app")
-            case .follow: String(localized: "misskey_notification_follow")
-            case .followRequestAccepted: String(localized: "misskey_notification_follow_request_accepted")
-            case .mention: String(localized: "misskey_notification_mention")
-            case .pollEnded: String(localized: "misskey_notification_poll_ended")
-            case .quote: String(localized: "misskey_notification_quote")
-            case .reaction: String(localized: "misskey_notification_reaction")
-            case .receiveFollowRequest: String(localized: "misskey_notification_receive_follow_request")
-            case .renote: String(localized: "misskey_notification_renote")
-            case .reply: String(localized: "misskey_notification_reply")
-            case .pinned: String(localized: "mastodon_item_pinned")
-            case .unKnown(let type): String(format: NSLocalizedString("misskey_notification_unknwon", comment: ""), type.type)
-            }
-        case .vVO(let data):
-            switch onEnum(of: data) {
-            case .custom(let message): message.message
-            case .like: String(localized: "vvo_notification_like")
-            }
-        case .xQT(let data):
-            switch onEnum(of: data) {
-            case .custom(let message): message.message
-            case .mention: String(localized: "xqt_notification_mention")
-            case .retweet: String(localized: "xqt_notification_retweet")
+        if let data = self as? UiTimelineV2.MessageTypeRaw {
+            return data.content
+        }
+        if let data = self as? UiTimelineV2.MessageTypeUnknown {
+            return data.rawType.isEmpty ? nil : data.rawType
+        }
+        if let data = self as? UiTimelineV2.MessageTypeLocalized {
+            return switch data.data {
+            case .mention:
+                String(localized: "mastodon_notification_mention")
+            case .newPost:
+                String(localized: "mastodon_notification_status")
+            case .repost:
+                String(localized: "mastodon_notification_reblog")
+            case .follow:
+                String(localized: "mastodon_notification_follow")
+            case .followRequest:
+                String(localized: "mastodon_notification_follow_request")
+            case .favourite:
+                String(localized: "mastodon_notification_favourite")
+            case .pollEnded:
+                String(localized: "mastodon_notification_poll")
+            case .postUpdated:
+                String(localized: "mastodon_notification_update")
+            case .reply:
+                String(localized: "misskey_notification_reply")
+            case .quote:
+                String(localized: "misskey_notification_quote")
+            case .reaction:
+                String(localized: "misskey_notification_reaction")
+            case .followRequestAccepted:
+                String(localized: "misskey_notification_follow_request_accepted")
+            case .achievementEarned:
+                if let rawAchievement = data.args.first,
+                   let achievement = MisskeyAchievement.from(rawAchievement) {
+                    String(
+                        localized: "misskey_notification_achievement_earned \(String(localized: achievement.titleKey)) \(String(localized: achievement.descriptionKey))"
+                    )
+                } else {
+                    String(
+                        format: NSLocalizedString("misskey_notification_achievement_earned", comment: ""),
+                        data.args.first ?? "",
+                        ""
+                    )
+                }
+            case .app:
+                String(localized: "misskey_notification_app")
+            case .starterpackJoined:
+                String(localized: "bluesky_notification_starterpackJoined")
+            case .pinned:
+                String(localized: "mastodon_item_pinned")
             }
         }
+        return nil
     }
 }
 
 extension MisskeyAchievement {
+    static func from(_ rawValue: String) -> MisskeyAchievement? {
+        switch rawValue {
+        case "notes1": return .notes1
+        case "notes10": return .notes10
+        case "notes100": return .notes100
+        case "notes500": return .notes500
+        case "notes1000": return .notes1000
+        case "notes5000": return .notes5000
+        case "notes10000": return .notes10000
+        case "notes20000": return .notes20000
+        case "notes30000": return .notes30000
+        case "notes40000": return .notes40000
+        case "notes50000": return .notes50000
+        case "notes60000": return .notes60000
+        case "notes70000": return .notes70000
+        case "notes80000": return .notes80000
+        case "notes90000": return .notes90000
+        case "notes100000": return .notes100000
+        case "login3": return .login3
+        case "login7": return .login7
+        case "login15": return .login15
+        case "login30": return .login30
+        case "login60": return .login60
+        case "login100": return .login100
+        case "login200": return .login200
+        case "login300": return .login300
+        case "login400": return .login400
+        case "login500": return .login500
+        case "login600": return .login600
+        case "login700": return .login700
+        case "login800": return .login800
+        case "login900": return .login900
+        case "login1000": return .login1000
+        case "noteClipped1": return .noteClipped1
+        case "noteFavorited1": return .noteFavorited1
+        case "myNoteFavorited1": return .myNoteFavorited1
+        case "profileFilled": return .profileFilled
+        case "markedAsCat": return .markedAsCat
+        case "following1": return .following1
+        case "following10": return .following10
+        case "following50": return .following50
+        case "following100": return .following100
+        case "following300": return .following300
+        case "followers1": return .followers1
+        case "followers10": return .followers10
+        case "followers50": return .followers50
+        case "followers100": return .followers100
+        case "followers300": return .followers300
+        case "followers500": return .followers500
+        case "followers1000": return .followers1000
+        case "collectAchievements30": return .collectAchievements30
+        case "viewAchievements3Min": return .viewAchievements3Min
+        case "iLoveMisskey": return .iLoveMisskey
+        case "foundTreasure": return .foundTreasure
+        case "client30Min": return .client30Min
+        case "client60Min": return .client60Min
+        case "noteDeletedWithin1Min": return .noteDeletedWithin1Min
+        case "postedAtLateNight": return .postedAtLateNight
+        case "postedAt0Min0Sec": return .postedAt0Min0Sec
+        case "selfQuote": return .selfQuote
+        case "htl20Npm": return .htl20Npm
+        case "viewInstanceChart": return .viewInstanceChart
+        case "outputHelloWorldOnScratchpad": return .outputHelloWorldOnScratchpad
+        case "open3Windows": return .open3Windows
+        case "driveFolderCircularReference": return .driveFolderCircularReference
+        case "reactWithoutRead": return .reactWithoutRead
+        case "clickedClickHere": return .clickedClickHere
+        case "justPlainLucky": return .justPlainLucky
+        case "setNameToSyuilo": return .setNameToSyuilo
+        case "passedSinceAccountCreated1": return .passedSinceAccountCreated1
+        case "passedSinceAccountCreated2": return .passedSinceAccountCreated2
+        case "passedSinceAccountCreated3": return .passedSinceAccountCreated3
+        case "loggedInOnBirthday": return .loggedInOnBirthday
+        case "loggedInOnNewYearsDay": return .loggedInOnNewYearsDay
+        case "cookieClicked": return .cookieClicked
+        case "brainDiver": return .brainDiver
+        case "smashTestNotificationButton": return .smashTestNotificationButton
+        case "tutorialCompleted": return .tutorialCompleted
+        case "bubbleGameExplodingHead": return .bubbleGameExplodingHead
+        case "bubbleGameDoubleExplodingHead": return .bubbleGameDoubleExplodingHead
+        default: return nil
+        }
+    }
+
     var titleKey: LocalizedStringResource {
         switch self {
         case .notes1:      return "misskey_achievement_notes1_title"

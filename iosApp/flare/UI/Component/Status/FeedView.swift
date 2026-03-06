@@ -3,22 +3,26 @@ import KotlinSharedUI
 
 struct FeedView: View {
     @Environment(\.openURL) private var openURL
-    let data: UiTimeline.ItemContentFeed
+    let data: UiTimelineV2.Feed
 //    @State private var showDetail = false
+    private var descriptionText: String? {
+        let description = data.description_ ?? data.description
+        return description.isEmpty ? nil : description
+    }
     var body: some View {
         VStack(
             alignment: .leading
         ) {
             HStack {
-                if let sourceIcon = data.sourceIcon, !sourceIcon.isEmpty {
+                if let sourceIcon = data.source.icon, !sourceIcon.isEmpty {
                     NetworkImage(data: sourceIcon)
                         .frame(width: 20, height: 20)
                 }
-                Text(data.source)
+                Text(data.source.name)
                     .font(.footnote)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer()
-                if let date = data.createdAt {
+                if let date = data.actualCreatedAt {
                     DateTimeText(data: date)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -28,7 +32,7 @@ struct FeedView: View {
                 Text(title)
             }
             HStack {
-                if let desc = data.description_ {
+                if let desc = descriptionText {
                     Text(desc)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -36,8 +40,8 @@ struct FeedView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                if let image = data.image {
-                    NetworkImage(data: image, customHeader: data.imageHeaders)
+                if let image = data.media {
+                    NetworkImage(data: image.url, customHeader: image.customHeaders)
                         .frame(width: 72, height: 72)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }

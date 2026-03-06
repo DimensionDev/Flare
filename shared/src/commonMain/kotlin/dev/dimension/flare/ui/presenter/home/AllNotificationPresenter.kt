@@ -25,10 +25,7 @@ import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +38,12 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+public data class NotificationAccountItem(
+    val stableKey: String,
+    val profile: UiProfile,
+    val badge: Int,
+)
+
 public class AllNotificationPresenter :
     PresenterBase<AllNotificationPresenter.State>(),
     KoinComponent {
@@ -50,7 +53,7 @@ public class AllNotificationPresenter :
 
     @androidx.compose.runtime.Immutable
     public interface State {
-        public val notifications: ImmutableMap<UiProfile, Int>
+        public val notifications: ImmutableList<NotificationAccountItem>
         public val supportedNotificationFilters: UiState<ImmutableList<NotificationFilter>>
         public val timeline: PagingState<UiTimelineV2>
         public val selectedFilter: NotificationFilter?
@@ -106,10 +109,18 @@ public class AllNotificationPresenter :
             .map {
                 it
                     .filterNotNull()
-                    .sortedByDescending {
-                        it.second
-                    }.toMap()
-                    .toImmutableMap()
+                    .sortedWith(
+                        compareByDescending<Pair<UiProfile, Int>> { it.second }
+                            .thenBy { it.first.handle.canonical }
+                            .thenBy { it.first.key.host }
+                            .thenBy { it.first.key.id },
+                    ).map { (profile, badge) ->
+                        NotificationAccountItem(
+                            stableKey = "${profile.key.host}:${profile.key.id}",
+                            profile = profile,
+                            badge = badge,
+                        )
+                    }.toImmutableList()
             }
     }
 
@@ -149,15 +160,14 @@ public class AllNotificationPresenter :
     @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     override fun body(): State {
-        val notifications by accountsNotificationFlow.collectAsState(persistentMapOf())
+        val notifications by accountsNotificationFlow.collectAsState(emptyList<NotificationAccountItem>().toImmutableList())
         val selectedAccount by selectedAccountFlow.collectAsState()
         val selectedAccountIndex by remember {
             derivedStateOf {
                 val maxIndex = (notifications.size - 1).coerceAtLeast(0)
                 selectedAccount?.let { profile ->
-                    notifications.keys
-                        .map { it.key }
-                        .indexOf(profile.key)
+                    notifications
+                        .indexOfFirst { it.profile.key == profile.key }
                         .coerceIn(0, maxIndex)
                 } ?: 0
             }
@@ -173,8 +183,8 @@ public class AllNotificationPresenter :
 
         LaunchedEffect(notifications) {
             val current = selectedAccountFlow.value
-            if (current == null || current.key !in notifications.keys.map { it.key }) {
-                selectedAccountFlow.value = notifications.keys.firstOrNull()
+            if (current == null || notifications.none { it.profile.key == current.key }) {
+                selectedAccountFlow.value = notifications.firstOrNull()?.profile
             }
         }
 

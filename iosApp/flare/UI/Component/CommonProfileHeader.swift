@@ -110,7 +110,7 @@ struct CommonProfileHeader: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .textSelection(.enabled)
             HStack {
-                Text(user.handle)
+                Text(user.handle.canonical)
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .textSelection(.enabled)

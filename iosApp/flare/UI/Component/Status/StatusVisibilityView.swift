@@ -2,7 +2,7 @@ import SwiftUI
 import KotlinSharedUI
 
 struct StatusVisibilityView: View {
-    let data: UiTimeline.ItemContentStatusTopEndContentVisibilityType
+    let data: UiTimelineV2.PostVisibility
     var body: some View {
         switch data {
         case .public:    Image("fa-globe")

@@ -19,68 +19,7 @@ struct ComposeScreen: View {
         VStack(
             spacing: 8
         ) {
-            ScrollView(.horizontal) {
-                HStack {
-                    StateView(state: presenter.state.selectedUsers) { users in
-                        ForEach(0..<users.size, id: \.self) { index in
-                            let item = users.get(index: index)
-                            if let userState = item.first, let account = item.second {
-                                StateView(state: userState) { user in
-                                    Label {
-                                        Text(user.handle)
-                                    } icon: {
-                                        AvatarView(data: user.avatar)
-                                            .scaledToFit()
-                                            .frame(width: 20, height: 20)
-                                    }
-//                                    HStack {
-//                                        AvatarView(data: user.avatar)
-//                                            .scaledToFit()
-//                                            .frame(width: 20, height: 20)
-//                                        Text(user.handle)
-//                                    }
-                                    .padding(.horizontal)
-                                    .padding(.vertical, 8)
-                                    .background(Color(.secondarySystemBackground))
-                                    .clipShape(.rect(cornerRadius: 16))
-                                    .onTapGesture {
-                                        presenter.state.selectAccount(account: account)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    StateView(state: presenter.state.otherAccounts) { others in
-                        if (others.size > 0) {
-                            Menu {
-                                ForEach(0..<others.size, id: \.self) { index in
-                                    let item = others.get(index: index)
-                                    if let userState = item.first, let account = item.second {
-                                        StateView(state: userState) { user in
-                                            Button {
-                                                presenter.state.selectAccount(account: account)
-                                            } label: {
-                                                Label {
-                                                    Text(user.handle)
-                                                } icon: {
-                                                    AvatarView(data: user.avatar)
-                                                        .scaledToFit()
-                                                        .frame(maxWidth: 20, maxHeight: 20)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            } label: {
-                                Image("fa-plus")
-                            }
-
-                        }
-                    }
-                }
-                .padding(.horizontal)
-            }
-            .scrollIndicators(.hidden)
+            accountSelectionView
             ScrollView {
                 VStack(
                     spacing: 8
@@ -178,7 +117,7 @@ struct ComposeScreen: View {
                     }
                     if let replyState = presenter.state.replyState,
                        case .success(let reply) = onEnum(of: replyState),
-                       case .status(let content) = onEnum(of: reply.data.content) {
+                       let content = reply.data as? UiTimelineV2.Post {
                         StatusView(data: content, isQuote: true, showMedia: false, forceHideActions: true)
                             .padding()
                             .clipShape(.rect(cornerRadius: 16))
@@ -411,6 +350,64 @@ struct ComposeScreen: View {
             }
         }
     }
+
+    private var accountSelectionView: some View {
+        ScrollView(.horizontal) {
+            HStack {
+                StateView(state: presenter.state.selectedUsers) { users in
+                    ForEach(0..<users.size, id: \.self) { index in
+                        let item = users.get(index: index)
+                        if let userState = item.first, let account = item.second {
+                            StateView(state: userState) { user in
+                                Label {
+                                    Text(user.handle.canonical)
+                                } icon: {
+                                    AvatarView(data: user.avatar)
+                                        .scaledToFit()
+                                        .frame(width: 20, height: 20)
+                                }
+                                .padding(.horizontal)
+                                .padding(.vertical, 8)
+                                .background(Color(.secondarySystemBackground))
+                                .clipShape(.rect(cornerRadius: 16))
+                                .onTapGesture {
+                                    presenter.state.selectAccount(account: account)
+                                }
+                            }
+                        }
+                    }
+                }
+                StateView(state: presenter.state.otherAccounts) { others in
+                    if others.size > 0 {
+                        Menu {
+                            ForEach(0..<others.size, id: \.self) { index in
+                                let item = others.get(index: index)
+                                if let userState = item.first, let account = item.second {
+                                    StateView(state: userState) { user in
+                                        Button {
+                                            presenter.state.selectAccount(account: account)
+                                        } label: {
+                                            Label {
+                                                Text(user.handle.canonical)
+                                            } icon: {
+                                                AvatarView(data: user.avatar)
+                                                    .scaledToFit()
+                                                    .frame(maxWidth: 20, maxHeight: 20)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } label: {
+                            Image("fa-plus")
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal)
+        }
+        .scrollIndicators(.hidden)
+    }
     
     private func applyCursorIfPossible() {
         guard let textView = uiTextView, textView.isFirstResponder, let pendingCursor else { return }
@@ -472,7 +469,7 @@ struct ComposeScreen: View {
     }
     private func getReferenceStatus() -> ComposeData.ReferenceStatus? {
         return if let data = composeStatus {
-            ComposeData.ReferenceStatus(data: presenter.state.replyState?.takeSuccess() as? UiTimeline, composeStatus: data)
+            ComposeData.ReferenceStatus(data: presenter.state.replyState?.takeSuccess() as? UiTimelineV2, composeStatus: data)
         } else {
             nil
         }
@@ -484,10 +481,10 @@ struct ComposeScreen: View {
             nil
         }
     }
-    private func getVisibility() -> UiTimeline.ItemContentStatusTopEndContentVisibilityType {
+    private func getVisibility() -> UiTimelineV2.PostVisibility {
         switch onEnum(of: presenter.state.visibilityState) {
-        case .success(let success): return success.data.visibility
-        default: return .public
+            case .success(let success): return success.data.visibility
+            default: return .public
         }
     }
 
@@ -734,7 +731,7 @@ struct ComposeMediaItemView: View {
     }
 }
 
-extension UiTimeline.ItemContentStatusTopEndContentVisibilityType {
+extension UiTimelineV2.PostVisibility {
     var title: LocalizedStringResource {
         switch self {
         case .public:

@@ -9,7 +9,7 @@ struct StatusView: View {
     @Environment(\.appearanceSettings.postActionStyle) private var postActionStyle
     @Environment(\.appearanceSettings.showPlatformLogo) private var showPlatformLogo
     @Environment(\.openURL) private var openURL
-    let data: UiTimeline.ItemContentStatus
+    let data: UiTimelineV2.Post
     var isDetail: Bool = false
     var isQuote: Bool = false
     var withLeadingPadding: Bool = false
@@ -85,16 +85,13 @@ struct StatusView: View {
                         alignment: .leading,
                         spacing: 8,
                     ) {
-                        if let aboveTextContent = data.aboveTextContent {
-                            switch onEnum(of: aboveTextContent) {
-                            case .replyTo(let replyTo):
-                                HStack {
-                                    Image("fa-reply")
-                                    Text("Reply to \(replyTo.handle)")
-                                }
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                        if let replyToHandle = data.replyToHandle {
+                            HStack {
+                                Image("fa-reply")
+                                Text("Reply to \(replyToHandle)")
                             }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                         }
                         if let contentWarning = data.contentWarning, !contentWarning.isEmpty {
                             RichText(text: contentWarning)
@@ -158,7 +155,15 @@ struct StatusView: View {
                         
                         if !data.images.isEmpty, showMedia {
                             StatusMediaContent(data: data.images, sensitive: data.sensitive) { media, index in
-                                data.onMediaClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)), media, .init(int: .init(index)))
+                                let route = DeeplinkRoute.MediaStatusMedia(
+                                    statusKey: data.statusKey,
+                                    accountType: data.accountType,
+                                    index: Int32(index),
+                                    preview: nil as String?
+                                )
+                                if let url = URL(string: route.toUri()) {
+                                    openURL(url)
+                                }
                             }
                         }
 
@@ -187,8 +192,8 @@ struct StatusView: View {
                             )
                         }
 
-                        if case .reaction(let reaction) = onEnum(of: data.bottomContent), showMedia, !isQuote {
-                            if let channel = reaction.channel {
+                        if showMedia, !isQuote {
+                            if let channel = data.sourceChannel {
                                 HStack {
                                     Image(.faTv)
                                     Text(channel.name)
@@ -196,8 +201,8 @@ struct StatusView: View {
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                             }
-                            if !reaction.emojiReactions.isEmpty {
-                                StatusReactionView(data: reaction)
+                            if !data.emojiReactions.isEmpty {
+                                StatusReactionView(data: Array(data.emojiReactions))
                             }
                         }
 
@@ -234,13 +239,10 @@ struct StatusView: View {
     
     var topEndContent: some View {
         HStack {
-            switch onEnum(of: data.topEndContent) {
-            case .visibility(let visibility):
-                StatusVisibilityView(data: visibility.visibility)
+            if let visibility = data.visibility {
+                StatusVisibilityView(data: visibility)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-            case .none:
-                EmptyView()
             }
             if showPlatformLogo {
                 switch data.platformType {

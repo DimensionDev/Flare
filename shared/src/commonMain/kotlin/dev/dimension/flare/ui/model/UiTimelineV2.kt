@@ -13,6 +13,7 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlin.time.Instant
 
 @Serializable
@@ -31,6 +32,7 @@ public sealed class UiTimelineV2 {
 
     public abstract val itemKey: String
 
+    @Transient
     public val itemType: String =
         when (this) {
             is Feed -> "feed"
@@ -57,6 +59,8 @@ public sealed class UiTimelineV2 {
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
         }
+
+        @Transient
         override val itemKey: String =
             buildString {
                 append("Message_")
@@ -152,6 +156,8 @@ public sealed class UiTimelineV2 {
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
         }
+
+        @Transient
         override val itemKey: String =
             buildString {
                 append("Feed_")
@@ -220,6 +226,8 @@ public sealed class UiTimelineV2 {
         val onClicked: ClickContext.() -> Unit by lazy {
             clickEvent.onClicked
         }
+
+        @Transient
         override val itemKey: String =
             buildString {
                 append(platformType.name)
@@ -286,6 +294,8 @@ public sealed class UiTimelineV2 {
         override val accountType: AccountType,
     ) : UiTimelineV2() {
         override val searchText: String? = null
+
+        @Transient
         override val itemKey: String =
             buildString {
                 append("User_")
@@ -313,6 +323,8 @@ public sealed class UiTimelineV2 {
         override val accountType: AccountType,
     ) : UiTimelineV2() {
         override val searchText: String? = null
+
+        @Transient
         override val itemKey: String =
             buildString {
                 append("UserList_")

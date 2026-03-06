@@ -300,7 +300,7 @@ struct AddTabSheet: View {
                         ForEach(0..<tabs.count, id: \.self) { index in
                             let item = tabs[index]
                             Label {
-                                Text(item.profile.handle)
+                                Text(item.profile.handle.canonical)
                             } icon: {
                                 AvatarView(data: item.profile.avatar)
                                     .frame(width: 20, height: 20)

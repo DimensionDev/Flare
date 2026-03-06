@@ -93,7 +93,9 @@ internal fun NotificationScreen() {
                             },
                             minTabWidth = 48.dp,
                         ) {
-                            state.notifications.forEach { (account, badge) ->
+                            state.notifications.forEach { item ->
+                                val account = item.profile
+                                val badge = item.badge
                                 LeadingIconTab(
                                     modifier = Modifier.clip(CircleShape),
                                     selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,

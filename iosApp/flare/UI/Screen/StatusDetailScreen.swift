@@ -9,7 +9,7 @@ struct StatusDetailScreen: View {
     private var detailStatusKey: MicroBlogKey? {
         return switch onEnum(of: presenter.state.current) {
         case .success(let data):
-            data.data.statusKey
+            (data.data as? UiTimelineV2.Post)?.statusKey
         default:
             nil
         }

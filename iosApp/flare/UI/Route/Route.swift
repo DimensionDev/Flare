@@ -148,7 +148,9 @@ enum Route: Hashable, Identifiable {
     case appLog
     case deepLinkAccountPicker(String, [MicroBlogKey: Route])
     case blockUser(AccountType?, MicroBlogKey)
+    case unblockUser(AccountType?, MicroBlogKey)
     case muteUser(AccountType?, MicroBlogKey)
+    case unmuteUser(AccountType?, MicroBlogKey)
     case reportUser(AccountType?, MicroBlogKey)
     case editUserList(AccountType, MicroBlogKey)
     case userDirectMessages(AccountType, MicroBlogKey)
@@ -252,6 +254,12 @@ enum Route: Hashable, Identifiable {
             } else {
                 return .blockUser(nil, data.userKey)
             }
+        case .unblockUser(let data):
+            if let accountKey = data.accountKey {
+                return .unblockUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                return .unblockUser(nil, data.userKey)
+            }
         case .directMessage(let data):
             return .userDirectMessages(.Specific(accountKey: data.accountKey), data.userKey)
         case .editUserList(let data):
@@ -261,6 +269,12 @@ enum Route: Hashable, Identifiable {
                 return .muteUser(.Specific(accountKey: accountKey), data.userKey)
             } else {
                 return .muteUser(nil, data.userKey)
+            }
+        case .unmuteUser(let data):
+            if let accountKey = data.accountKey {
+                return .unmuteUser(.Specific(accountKey: accountKey), data.userKey)
+            } else {
+                return .unmuteUser(nil, data.userKey)
             }
         case .reportUser(let data):
             if let accountKey = data.accountKey {
@@ -283,8 +297,12 @@ enum Route: Hashable, Identifiable {
             return "mastodon_report_status_alert_title"
         case .blockUser:
             return "block_user_alert_title"
+        case .unblockUser:
+            return "unblock"
         case .muteUser:
             return "mute_user_alert_title"
+        case .unmuteUser:
+            return "unmute"
         default:
             return nil
         }
@@ -299,8 +317,12 @@ enum Route: Hashable, Identifiable {
              Text("mastodon_report_status_alert_message")
         case .blockUser:
             Text("block_user_alert_message")
+        case .unblockUser:
+            Text("unblock")
         case .muteUser:
             Text("mute_user_alert_message")
+        case .unmuteUser:
+            Text("unmute")
         default:
              EmptyView()
         }
@@ -334,14 +356,23 @@ enum Route: Hashable, Identifiable {
             Button("block", role: .destructive) {
                 BlockUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
             }
+        case .unblockUser(let accountType, let userKey):
+            Button("Cancel", role: .cancel) {}
+            Button("unblock", role: .destructive) {
+                UnblockUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
+            }
         case .muteUser(let accountType, let userKey):
             Button("Cancel", role: .cancel) {}
             Button("mute", role: .destructive) {
                 MuteUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
+            }
+        case .unmuteUser(let accountType, let userKey):
+            Button("Cancel", role: .cancel) {}
+            Button("unmute", role: .destructive) {
+                UnmuteUserPresenter(accountType: accountType, userKey: userKey).models.value.confirm()
             }
         default:
             EmptyView()
         }
     }
 }
-

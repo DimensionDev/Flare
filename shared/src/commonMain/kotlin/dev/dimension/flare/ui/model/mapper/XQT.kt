@@ -164,7 +164,7 @@ internal fun TopLevel.renderNotifications(accountKey: MicroBlogKey): List<UiTime
                     )
                 val clickEvent =
                     when {
-                        users.isNullOrEmpty() && post == null && url == "/2/notifications/device_follow.json" ->
+                        url == "/2/notifications/device_follow.json" ->
                             ClickEvent.Deeplink(
                                 DeeplinkRoute.Timeline
                                     .XQTDeviceFollow(
@@ -172,7 +172,7 @@ internal fun TopLevel.renderNotifications(accountKey: MicroBlogKey): List<UiTime
                                     ),
                             )
 
-                        users.isNullOrEmpty() && post == null && !url.isNullOrEmpty() && !url.startsWith("/") ->
+                        post == null && !url.isNullOrEmpty() && !url.startsWith("/") ->
                             ClickEvent.Deeplink(
                                 DeeplinkRoute.OpenLinkDirectly(url),
                             )

@@ -52,7 +52,9 @@ public data class UiRichText(
                     .mapNotNull { it.attr("target").ifEmpty { null } },
             ).toImmutableList()
 
-    public val platformText: PlatformText = renderPlatformText()
+    public val platformText: PlatformText by lazy {
+        renderPlatformText()
+    }
 }
 
 internal object UiRichTextSerializer : KSerializer<UiRichText> {

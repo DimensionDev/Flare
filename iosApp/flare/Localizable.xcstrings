@@ -5161,6 +5161,12 @@
             "value" : "Absolut tidsstämpel"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mutlak zaman damgası"
+          }
+        },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5289,6 +5295,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Visa absoluta tidsstämplar på inlägg"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gönderilere mutlak zaman damgaları ekle"
           }
         },
         "uk" : {
@@ -7195,6 +7207,12 @@
             "value" : "Full bredd inlägg"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tam genişlikte gönderi"
+          }
+        },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -7323,6 +7341,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Visa inlägget i full bredd"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gönderiyi tam genişlikte göster"
           }
         },
         "uk" : {
@@ -17855,6 +17879,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kanaler"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kanallar"
           }
         },
         "uk" : {
@@ -70232,6 +70262,12 @@
             "value" : "Favoriter"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favoriler"
+          }
+        },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -70742,6 +70778,12 @@
             "value" : "Ägd"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sahip olduklarım"
+          }
+        },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -70872,6 +70914,12 @@
             "value" : "Unfavourite"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favorilerden Çıkar"
+          }
+        },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -71000,6 +71048,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sluta följa"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Takibi bırak"
           }
         },
         "uk" : {
@@ -77254,6 +77308,12 @@
             "value" : "Importera från OPML"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OPML'den içe aktar"
+          }
+        },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -77382,6 +77442,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Importera från OPML"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OPML'den içe aktar"
           }
         },
         "uk" : {
@@ -84024,6 +84090,12 @@
             "value" : "Spara skärmdump"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran görüntüsünü kaydet"
+          }
+        },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -85821,6 +85893,12 @@
             "value" : "RSS-hantering"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSS Yönetimi"
+          }
+        },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -86851,6 +86929,12 @@
             "value" : "Dela länk"
           }
         },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlantıyı paylaş"
+          }
+        },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
@@ -86979,6 +87063,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dela skärmdump"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekran görüntüsünü paylaş"
           }
         },
         "uk" : {

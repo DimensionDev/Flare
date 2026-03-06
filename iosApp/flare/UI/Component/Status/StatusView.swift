@@ -155,11 +155,21 @@ struct StatusView: View {
                         
                         if !data.images.isEmpty, showMedia {
                             StatusMediaContent(data: data.images, sensitive: data.sensitive) { media, index in
+                                let preview: String? = switch onEnum(of: media) {
+                                case .image(let image):
+                                    image.previewUrl
+                                case .video(let video):
+                                    video.thumbnailUrl
+                                case .gif(let gif):
+                                    gif.previewUrl
+                                case .audio:
+                                    nil
+                                }
                                 let route = DeeplinkRoute.MediaStatusMedia(
                                     statusKey: data.statusKey,
                                     accountType: data.accountType,
                                     index: Int32(index),
-                                    preview: nil as String?
+                                    preview: preview
                                 )
                                 if let url = URL(string: route.toUri()) {
                                     openURL(url)

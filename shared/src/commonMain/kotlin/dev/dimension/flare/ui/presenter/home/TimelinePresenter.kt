@@ -28,12 +28,15 @@ import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -104,8 +107,10 @@ public abstract class TimelinePresenter :
                 )
             },
         ).flow.map { pagingData ->
-            pagingData.map { item ->
-                TimelinePagingMapper.toUi(item, loader.pagingKey, useDbKeyInItemKey)
+            withContext(Dispatchers.IO) {
+                pagingData.map { item ->
+                    TimelinePagingMapper.toUi(item, loader.pagingKey, useDbKeyInItemKey)
+                }
             }
         }
 

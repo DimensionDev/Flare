@@ -29,11 +29,20 @@ internal suspend fun CacheDatabase.upsertUsers(users: List<DbUser>) {
             .firstOrNull()
             .orEmpty()
             .associateBy { it.userKey }
-    userDao().insertAll(
-        distinctUsers.map { user ->
-            existingUsers[user.userKey]?.let { user.mergeWith(it) } ?: user
-        },
-    )
+    val changedUsers =
+        distinctUsers.mapNotNull { user ->
+            val existing = existingUsers[user.userKey]
+            val merged = existing?.let { user.mergeWith(it) } ?: user
+            if (merged == existing) {
+                null
+            } else {
+                merged
+            }
+        }
+    if (changedUsers.isEmpty()) {
+        return
+    }
+    userDao().insertAll(changedUsers)
 }
 
 private fun DbUser.mergeWith(existing: DbUser): DbUser =

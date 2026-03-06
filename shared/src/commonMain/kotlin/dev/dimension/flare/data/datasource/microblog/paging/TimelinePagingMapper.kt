@@ -1,20 +1,18 @@
 package dev.dimension.flare.data.datasource.microblog.paging
 
 import SnowflakeIdGenerator
-import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.DbStatusReferenceWithStatus
-import dev.dimension.flare.data.database.cache.model.DbStatusUserReference
-import dev.dimension.flare.data.database.cache.model.DbStatusUserReferenceWithUser
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlin.uuid.Uuid
 
@@ -32,7 +30,7 @@ internal object TimelinePagingMapper {
                 ),
             status =
                 DbStatusWithReference(
-                    status = uiTimelineToDbStatusWithUser(data),
+                    status = uiTimelineToDbStatusWithUser(data, sanitizePostReferences = true),
                     references =
                         when (data) {
                             is UiTimelineV2.Feed -> emptyList()
@@ -132,27 +130,38 @@ internal object TimelinePagingMapper {
 
     private fun UiTimelineV2.Post.resolveReferences(references: List<Pair<ReferenceType, UiTimelineV2>>): UiTimelineV2.Post =
         copy(
-            parents =
-                parents
-                    .map { parent ->
-                        references
-                            .find { it.first == ReferenceType.Reply && it.second.statusKey == parent.statusKey }
-                            ?.second as? UiTimelineV2.Post ?: parent
-                    }.toImmutableList(),
-            quote =
-                quote
-                    .map { quote ->
-                        references
-                            .find { it.first == ReferenceType.Quote && it.second.statusKey == quote.statusKey }
-                            ?.second as? UiTimelineV2.Post ?: quote
-                    }.toImmutableList(),
+            parents = resolveReferencePosts(ReferenceType.Reply, references, parents),
+            quote = resolveReferencePosts(ReferenceType.Quote, references, quote),
             internalRepost =
-                internalRepost?.let { repost ->
-                    references
-                        .find { it.first == ReferenceType.Retweet && it.second.statusKey == repost.statusKey }
-                        ?.second as? UiTimelineV2.Post ?: repost
-                },
+                resolveReferencePosts(
+                    type = ReferenceType.Retweet,
+                    references = references,
+                    current = internalRepost?.let(::listOf).orEmpty(),
+                ).firstOrNull(),
         )
+
+    private fun UiTimelineV2.Post.resolveReferencePosts(
+        type: ReferenceType,
+        references: List<Pair<ReferenceType, UiTimelineV2>>,
+        current: List<UiTimelineV2.Post>,
+    ) = if (current.isNotEmpty()) {
+        current
+            .map { currentPost ->
+                references
+                    .find { it.first == type && it.second.statusKey == currentPost.statusKey }
+                    ?.second as? UiTimelineV2.Post ?: currentPost
+            }.toImmutableList()
+    } else {
+        this.references
+            .asSequence()
+            .filter { it.type == type }
+            .mapNotNull { reference ->
+                references
+                    .find { it.first == type && it.second.statusKey == reference.statusKey }
+                    ?.second as? UiTimelineV2.Post
+            }.toList()
+            .toImmutableList()
+    }
 
     private fun uiTimelineToDbStatusReferenceWithStatus(
         data: UiTimelineV2,
@@ -166,43 +175,60 @@ internal object TimelinePagingMapper {
                 referenceStatusKey = data.statusKey,
                 _id = Uuid.random().toString(),
             ),
-        status = uiTimelineToDbStatusWithUser(data),
+        status = uiTimelineToDbStatusWithUser(data, sanitizePostReferences = false),
     )
 
-    private fun uiTimelineToDbStatusWithUser(data: UiTimelineV2): DbStatusWithUser {
-        val user =
-            if (data is UiTimelineV2.Post) {
-                listOfNotNull(data.user)
-            } else if (data is UiTimelineV2.User) {
-                listOfNotNull(data.value)
-            } else if (data is UiTimelineV2.UserList) {
-                data.users
-            } else {
-                emptyList()
-            }
-        return DbStatusWithUser(
+    private fun uiTimelineToDbStatusWithUser(
+        data: UiTimelineV2,
+        sanitizePostReferences: Boolean,
+    ): DbStatusWithUser =
+        DbStatusWithUser(
             data =
                 DbStatus(
                     statusKey = data.statusKey,
-                    content = data,
+                    content = if (sanitizePostReferences) data.sanitizeForDatabase() else data,
                     accountType = data.accountType as DbAccountType,
                     text = data.searchText,
                 ),
-            references =
-                user.map {
-                    DbStatusUserReferenceWithUser(
-                        reference =
-                            DbStatusUserReference(
-                                statusKey = data.statusKey,
-                                referenceUserKey = it.key,
-                                _id = Uuid.random().toString(),
-                            ),
-                        user =
-                            it.toDbUser(),
-                    )
-                },
         )
-    }
+
+    private fun UiTimelineV2.sanitizeForDatabase(): UiTimelineV2 =
+        when (this) {
+            is UiTimelineV2.Post ->
+                copy(
+                    references = directReferences(),
+                    quote = persistentListOf(),
+                    parents = persistentListOf(),
+                    internalRepost = null,
+                )
+            else -> this
+        }
+
+    private fun UiTimelineV2.Post.directReferences() =
+        (
+            references +
+                quote.map {
+                    UiTimelineV2.Post.Reference(
+                        statusKey = it.statusKey,
+                        type = ReferenceType.Quote,
+                    )
+                } +
+                parents.map {
+                    UiTimelineV2.Post.Reference(
+                        statusKey = it.statusKey,
+                        type = ReferenceType.Reply,
+                    )
+                } +
+                listOfNotNull(
+                    internalRepost?.let {
+                        UiTimelineV2.Post.Reference(
+                            statusKey = it.statusKey,
+                            type = ReferenceType.Retweet,
+                        )
+                    },
+                )
+        ).distinctBy { it.type to it.statusKey }
+            .toImmutableList()
 
     private fun dbStatusWithUserToUiTimeline(
         data: DbStatusWithUser,
@@ -210,31 +236,22 @@ internal object TimelinePagingMapper {
         useDbKeyInItemKey: Boolean,
     ): UiTimelineV2 {
         val root = data.data.content
-        val users = data.references.mapNotNull { it.user?.content }
         return when (root) {
             is UiTimelineV2.Feed -> root
             is UiTimelineV2.Message ->
                 root.copy(
-                    user = users.find { root.user?.key == it.key } ?: root.user,
                     extraKey = if (useDbKeyInItemKey) pagingKey else null,
                 )
             is UiTimelineV2.Post ->
                 root.copy(
-                    user = users.find { root.user?.key == it.key } ?: root.user,
                     extraKey = if (useDbKeyInItemKey) pagingKey else null,
                 )
             is UiTimelineV2.User ->
                 root.copy(
-                    value = users.find { root.value.key == it.key } ?: root.value,
                     extraKey = if (useDbKeyInItemKey) pagingKey else null,
                 )
             is UiTimelineV2.UserList ->
                 root.copy(
-                    users =
-                        root.users
-                            .map { user ->
-                                users.find { user.key == it.key } ?: user
-                            }.toImmutableList(),
                     extraKey = if (useDbKeyInItemKey) pagingKey else null,
                 )
         }

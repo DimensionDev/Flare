@@ -11,6 +11,11 @@ import dev.dimension.flare.model.ReferenceType
     indices = [
         Index(
             value = [
+                "statusKey",
+            ],
+        ),
+        Index(
+            value = [
                 "referenceType",
                 "statusKey",
                 "referenceStatusKey",

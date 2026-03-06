@@ -216,6 +216,33 @@ class XQTRenderTest {
         )
     }
 
+    @Test
+    fun repostMessageUserComesFromWrapperTweetUser() {
+        val original =
+            createTweet(
+                id = "2029481529815253017",
+                user = createUser("3656078773", "papeushikaeru"),
+                text = "恋人の聖地に行った時の写真です",
+            )
+        val repostWrapper =
+            createTweet(
+                id = "2029691916246515890",
+                user = createUser("128843027", "Moo_YOSHIO"),
+                text = "RT @papeushikaeru: 恋人の聖地に行った時の写真です",
+                retweetedStatus = original,
+            )
+
+        val rendered = assertIs<UiTimelineV2.Post>(createTimeline(repostWrapper).render(accountKey))
+        val message = assertNotNull(rendered.message)
+        val repostInternal = assertNotNull(rendered.internalRepost)
+
+        assertEquals("128843027", rendered.user?.key?.id)
+        assertEquals("128843027", message.user?.key?.id)
+        assertEquals("3656078773", repostInternal.user?.key?.id)
+        assertEquals("2029691916246515890", rendered.statusKey.id)
+        assertEquals("2029481529815253017", repostInternal.statusKey.id)
+    }
+
     private fun createTimeline(
         tweet: Tweet,
         parents: List<XQTTimeline> = emptyList(),

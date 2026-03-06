@@ -5,6 +5,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.repository.tryRun
@@ -13,8 +14,8 @@ import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -31,25 +32,6 @@ internal class PostHandler(
         val pagingKey = "post_only_$postKey"
         return Cacheable(
             fetchSource = {
-                val exists = database.pagingTimelineDao().existsPaging(accountType as DbAccountType, pagingKey)
-                if (!exists) {
-                    val status = database.statusDao().get(postKey, accountType).firstOrNull()
-                    status?.let {
-                        database.connect {
-                            database
-                                .pagingTimelineDao()
-                                .insertAll(
-                                    listOf(
-                                        DbPagingTimeline(
-                                            statusKey = postKey,
-                                            pagingKey = pagingKey,
-                                            sortId = 0,
-                                        ),
-                                    ),
-                                )
-                        }
-                    }
-                }
                 val result = loader.status(postKey)
                 database.connect {
                     val item =
@@ -61,15 +43,31 @@ internal class PostHandler(
                 }
             },
             cacheSource = {
+                val dbAccountType = accountType as DbAccountType
                 database
-                    .pagingTimelineDao()
-                    .get(pagingKey, accountType = accountType as DbAccountType)
-                    .distinctUntilChanged()
-                    .mapNotNull {
-                        it?.let {
-                            TimelinePagingMapper.toUi(it, pagingKey, false)
+                    .statusDao()
+                    .getWithReferences(postKey, dbAccountType)
+                    .combine(database.pagingTimelineDao().get(pagingKey, accountType = dbAccountType)) { status, paging ->
+                        when {
+                            paging != null -> TimelinePagingMapper.toUi(paging, pagingKey, false)
+                            status != null ->
+                                TimelinePagingMapper.toUi(
+                                    DbPagingTimelineWithStatus(
+                                        timeline =
+                                            DbPagingTimeline(
+                                                pagingKey = pagingKey,
+                                                statusKey = postKey,
+                                                sortId = 0,
+                                            ),
+                                        status = status,
+                                    ),
+                                    pagingKey,
+                                    false,
+                                )
+                            else -> null
                         }
-                    }
+                    }.distinctUntilChanged()
+                    .mapNotNull { it }
             },
         )
     }

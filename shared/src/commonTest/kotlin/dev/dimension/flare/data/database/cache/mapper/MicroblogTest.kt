@@ -97,6 +97,93 @@ class MicroblogTest : RobolectricTest() {
         }
 
     @Test
+    fun saveToDatabaseUpdatesUserWhenUserChanged() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val statusKey = MicroBlogKey(id = "status-user-update", host = "test.com")
+            val userKey = MicroBlogKey(id = "user-update", host = "test.com")
+            val initialUser = createUser(userKey, "Old Name")
+            val updatedUser = createUser(userKey, "New Name")
+
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(
+                        createPost(
+                            accountKey = accountKey,
+                            user = initialUser,
+                            statusKey = statusKey,
+                            text = "status text",
+                        ),
+                        pagingKey = "home",
+                    ),
+                ),
+            )
+
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(
+                        createPost(
+                            accountKey = accountKey,
+                            user = updatedUser,
+                            statusKey = statusKey,
+                            text = "status text",
+                        ),
+                        pagingKey = "home",
+                    ),
+                ),
+            )
+
+            val savedUser = db.userDao().findByKey(userKey).first()
+            assertNotNull(savedUser)
+            assertEquals("New Name", savedUser.content.name.raw)
+        }
+
+    @Test
+    fun saveToDatabaseUpdatesStatusWhenStatusChanged() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val statusKey = MicroBlogKey(id = "status-update", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "status-update-user", host = "test.com"), "Status User")
+
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(
+                        createPost(
+                            accountKey = accountKey,
+                            user = user,
+                            statusKey = statusKey,
+                            text = "old status text",
+                        ),
+                        pagingKey = "home",
+                    ),
+                ),
+            )
+
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(
+                        createPost(
+                            accountKey = accountKey,
+                            user = user,
+                            statusKey = statusKey,
+                            text = "new status text",
+                        ),
+                        pagingKey = "home",
+                    ),
+                ),
+            )
+
+            val savedStatus = db.statusDao().get(statusKey, AccountType.Specific(accountKey)).first()
+            assertNotNull(savedStatus)
+            requireNotNull(savedStatus.text)
+            assertTrue(savedStatus.text.contains("new status text"))
+        }
+
+    @Test
     fun saveToDatabasePersistsReferences() =
         runTest {
             val accountKey = MicroBlogKey(id = "account", host = "test.com")
@@ -125,12 +212,70 @@ class MicroblogTest : RobolectricTest() {
 
             val savedMainStatus = db.statusDao().get(mainPost.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedMainStatus)
+            val savedMainPost = assertIs<UiTimelineV2.Post>(savedMainStatus.content)
+            assertTrue(savedMainPost.parents.isEmpty())
+            assertEquals(1, savedMainPost.references.size)
+            assertEquals(ReferenceType.Reply, savedMainPost.references.first().type)
+            assertEquals(refPost.statusKey, savedMainPost.references.first().statusKey)
             val savedRefStatus = db.statusDao().get(refPost.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedRefStatus)
 
             val savedReferences = db.statusReferenceDao().getByStatusKey(mainPost.statusKey)
             assertEquals(1, savedReferences.size)
             assertEquals(refPost.statusKey, savedReferences.first().referenceStatusKey)
+        }
+
+    @Test
+    fun saveToDatabaseStillPersistsUsersForPostUserAndUserListTimeline() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val firstUser = createUser(MicroBlogKey(id = "user-1", host = "test.com"), "First User")
+            val secondUser = createUser(MicroBlogKey(id = "user-2", host = "test.com"), "Second User")
+            val postUser = createUser(MicroBlogKey(id = "user-3", host = "test.com"), "Post User")
+
+            val userTimeline =
+                UiTimelineV2.User(
+                    message = null,
+                    value = firstUser,
+                    createdAt = Clock.System.now().toUi(),
+                    statusKey = MicroBlogKey(id = "timeline-user", host = "test.com"),
+                    accountType = AccountType.Specific(accountKey),
+                )
+            val userListTimeline =
+                UiTimelineV2.UserList(
+                    message = null,
+                    users = persistentListOf(firstUser, secondUser),
+                    createdAt = Clock.System.now().toUi(),
+                    statusKey = MicroBlogKey(id = "timeline-user-list", host = "test.com"),
+                    post = null,
+                    accountType = AccountType.Specific(accountKey),
+                )
+            val postTimeline =
+                createPost(
+                    accountKey = accountKey,
+                    user = postUser,
+                    statusKey = MicroBlogKey(id = "timeline-post", host = "test.com"),
+                    text = "post timeline",
+                )
+
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(postTimeline, pagingKey = "home"),
+                    TimelinePagingMapper.toDb(userTimeline, pagingKey = "home"),
+                    TimelinePagingMapper.toDb(userListTimeline, pagingKey = "home"),
+                ),
+            )
+
+            val savedFirst = db.userDao().findByKey(firstUser.key).first()
+            val savedSecond = db.userDao().findByKey(secondUser.key).first()
+            val savedPostUser = db.userDao().findByKey(postUser.key).first()
+            assertNotNull(savedFirst)
+            assertNotNull(savedSecond)
+            assertNotNull(savedPostUser)
+            assertEquals("First User", savedFirst.content.name.raw)
+            assertEquals("Second User", savedSecond.content.name.raw)
+            assertEquals("Post User", savedPostUser.content.name.raw)
         }
 
     @Test
@@ -173,7 +318,7 @@ class MicroblogTest : RobolectricTest() {
         }
 
     @Test
-    fun postContentParentsRemainWhenSubsequentInsertHasNoParents() =
+    fun postContentReplyReferencesRemainWhenSubsequentInsertHasNoParents() =
         runTest {
             val accountKey = MicroBlogKey(id = "account", host = "test.com")
 
@@ -202,8 +347,9 @@ class MicroblogTest : RobolectricTest() {
 
             val saved = db.statusDao().get(withParents.statusKey, AccountType.Specific(accountKey)).first()
             val savedPost = assertIs<UiTimelineV2.Post>(assertNotNull(saved).content)
-            assertEquals(1, savedPost.parents.size)
-            assertEquals(refPost.statusKey, savedPost.parents.first().statusKey)
+            assertTrue(savedPost.parents.isEmpty())
+            assertEquals(1, savedPost.references.size)
+            assertEquals(refPost.statusKey, savedPost.references.first().statusKey)
         }
 
     @Test
@@ -339,6 +485,50 @@ class MicroblogTest : RobolectricTest() {
         }
 
     @Test
+    fun toUiUsesEmbeddedUserDataWithoutReadingUserJoin() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val user = createUser(MicroBlogKey(id = "user-join", host = "test.com"), "Embedded User")
+            val post =
+                createPost(
+                    accountKey = accountKey,
+                    user = user,
+                    statusKey = MicroBlogKey(id = "status-join", host = "test.com"),
+                    text = "post content",
+                )
+
+            val mapped = TimelinePagingMapper.toDb(post, pagingKey = "home")
+            saveToDatabase(db, listOf(mapped))
+
+            val overwrittenUser =
+                user.copy(
+                    nameInternal = Element("span").apply { appendText("Joined User") }.toUi(),
+                )
+            db.userDao().insert(overwrittenUser.toDbUser())
+
+            val paging = db.pagingTimelineDao().getPagingSource("home")
+            val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
+            val refreshResult = pager.refresh()
+            val page = assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(refreshResult)
+            val dbItem =
+                assertNotNull(
+                    page.data.firstOrNull {
+                        it.status.status.data.statusKey == post.statusKey
+                    },
+                )
+
+            val rendered =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        dbItem,
+                        pagingKey = "home",
+                        useDbKeyInItemKey = false,
+                    ),
+                )
+            assertEquals("Embedded User", rendered.user?.name?.raw)
+        }
+
+    @Test
     fun toUiFlattensInternalRepostButKeepsReferencePayload() =
         runTest {
             val accountKey = MicroBlogKey(id = "account", host = "test.com")
@@ -382,6 +572,12 @@ class MicroblogTest : RobolectricTest() {
             val savedRepost = db.statusDao().get(repostPost.statusKey, AccountType.Specific(accountKey)).first()
             assertNotNull(savedWrapper)
             assertNotNull(savedRepost)
+            val savedWrapperPost = assertIs<UiTimelineV2.Post>(savedWrapper.content)
+            assertTrue(savedWrapperPost.quote.isEmpty())
+            assertTrue(savedWrapperPost.parents.isEmpty())
+            kotlin.test.assertNull(savedWrapperPost.internalRepost)
+            assertEquals(1, savedWrapperPost.references.size)
+            assertEquals(ReferenceType.Retweet, savedWrapperPost.references.first().type)
 
             val roundTrip = TimelinePagingMapper.toUi(mapped, pagingKey = "home", useDbKeyInItemKey = false)
             val rendered = assertIs<UiTimelineV2.Post>(roundTrip)
@@ -694,6 +890,7 @@ class MicroblogTest : RobolectricTest() {
             sourceChannel = null,
             visibility = null,
             replyToHandle = null,
+            references = persistentListOf(),
             parents = parents.toPersistentList(),
             clickEvent = ClickEvent.Noop,
             accountType = AccountType.Specific(accountKey),

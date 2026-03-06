@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.mapper.fromRss
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
@@ -185,6 +186,7 @@ public sealed class UiTimelineV2 {
         val sensitive: Boolean,
         val contentWarning: UiRichText?,
         val user: UiProfile?,
+        @Transient
         val quote: SerializableImmutableList<Post> = persistentListOf(),
         val content: UiRichText,
         val actions: SerializableImmutableList<ActionMenu>,
@@ -196,7 +198,10 @@ public sealed class UiTimelineV2 {
         val sourceChannel: SourceChannel? = null,
         val visibility: Visibility? = null,
         val replyToHandle: String? = null,
+        internal val references: SerializableImmutableList<Reference> = persistentListOf(),
+        @Transient
         val parents: SerializableImmutableList<Post> = persistentListOf(),
+        @Transient
         internal val internalRepost: Post? = null,
         internal val clickEvent: ClickEvent,
         override val extraKey: String? = null,
@@ -271,6 +276,13 @@ public sealed class UiTimelineV2 {
                 name.startsWith(":") && name.endsWith(":")
             }
         }
+
+        @Serializable
+        @Immutable
+        internal data class Reference internal constructor(
+            val statusKey: MicroBlogKey,
+            val type: ReferenceType,
+        )
 
         @Serializable
         public enum class Visibility {

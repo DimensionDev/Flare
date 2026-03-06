@@ -17,6 +17,9 @@ import kotlin.uuid.Uuid
             value = ["statusKey", "pagingKey"],
             unique = true,
         ),
+        Index(
+            value = ["pagingKey", "sortId"],
+        ),
     ],
 )
 internal data class DbPagingTimeline(
@@ -49,45 +52,6 @@ internal data class DbPagingTimelineWithStatus(
 internal data class DbStatusWithUser(
     @Embedded
     val data: DbStatus,
-    @Relation(
-        parentColumn = "statusKey",
-        entityColumn = "statusKey",
-        entity = DbStatusUserReference::class,
-    )
-    val references: List<DbStatusUserReferenceWithUser>,
-)
-
-@Entity(
-    tableName = "status_user_reference",
-    indices = [
-        Index(
-            value = [
-                "statusKey",
-                "referenceUserKey",
-            ],
-            unique = true,
-        ),
-    ],
-)
-internal data class DbStatusUserReference(
-    /**
-     * Id that being used in the database
-     */
-    @PrimaryKey
-    val _id: String,
-    val statusKey: MicroBlogKey,
-    val referenceUserKey: MicroBlogKey,
-)
-
-internal data class DbStatusUserReferenceWithUser(
-    @Embedded
-    val reference: DbStatusUserReference,
-    @Relation(
-        parentColumn = "referenceUserKey",
-        entityColumn = "userKey",
-        entity = DbUser::class,
-    )
-    val user: DbUser?,
 )
 
 internal data class DbStatusReferenceWithStatus(

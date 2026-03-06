@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import dev.dimension.flare.data.database.cache.model.DbStatusUserReference
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.DbUserHistory
 import dev.dimension.flare.data.database.cache.model.DbUserHistoryWithUser
@@ -23,9 +22,6 @@ internal interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(users: List<DbUser>)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAllReferences(references: List<DbStatusUserReference>)
 
     @Query("UPDATE DbUser SET content = :content WHERE userKey = :userKey")
     suspend fun update(

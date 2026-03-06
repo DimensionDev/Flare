@@ -4,7 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import dev.dimension.flare.data.database.cache.model.DbStatus
+import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -23,6 +25,19 @@ internal interface StatusDao {
         statusKey: MicroBlogKey,
         accountType: DbAccountType,
     ): Flow<DbStatus?>
+
+    @Transaction
+    @Query("SELECT * FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")
+    fun getWithReferences(
+        statusKey: MicroBlogKey,
+        accountType: DbAccountType,
+    ): Flow<DbStatusWithReference?>
+
+    @Query("SELECT * FROM DbStatus WHERE accountType = :accountType AND statusKey IN (:statusKeys)")
+    suspend fun getByKeys(
+        statusKeys: List<MicroBlogKey>,
+        accountType: DbAccountType,
+    ): List<DbStatus>
 
     @Query("UPDATE DbStatus SET content = :content WHERE statusKey = :statusKey AND accountType = :accountType")
     suspend fun update(

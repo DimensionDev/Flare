@@ -7,6 +7,7 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbUserRelation
+import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
@@ -48,7 +49,7 @@ class RelationHandlerTest : RobolectricTest() {
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
 
-        loader = FakeRelationLoader(accountKey = accountKey)
+        loader = FakeRelationLoader(accountKey = accountKey, supportedTypes = RelationActionType.entries.toSet())
     }
 
     @AfterTest
@@ -193,6 +194,7 @@ class RelationHandlerTest : RobolectricTest() {
 
     private class FakeRelationLoader(
         override val accountKey: MicroBlogKey,
+        override val supportedTypes: Set<RelationActionType>,
     ) : RelationLoader {
         var nextRelation: UiRelation = UiRelation()
         var relationCallCount: Int = 0

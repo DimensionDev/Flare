@@ -42,6 +42,9 @@ internal class ListContentConverters {
 @Entity(
     indices = [
         Index(
+            value = ["pagingKey"],
+        ),
+        Index(
             value = ["accountType", "listKey", "pagingKey"],
             unique = true,
         ),
@@ -68,6 +71,9 @@ internal data class DbListWithContent(
 
 @Entity(
     indices = [
+        Index(
+            value = ["memberKey"],
+        ),
         Index(
             value = ["listKey", "memberKey"],
             unique = true,

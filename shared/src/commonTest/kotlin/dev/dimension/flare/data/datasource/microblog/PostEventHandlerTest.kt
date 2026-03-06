@@ -236,6 +236,7 @@ class PostEventHandlerTest : RobolectricTest() {
             sourceChannel = null,
             visibility = null,
             replyToHandle = null,
+            references = persistentListOf(),
             parents = persistentListOf(),
             clickEvent = ClickEvent.Noop,
             accountType = AccountType.Specific(accountKey),

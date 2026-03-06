@@ -64,6 +64,15 @@ internal interface PagingTimelineDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(timeline: List<DbPagingTimeline>)
 
+    @Query(
+        "SELECT * FROM DbPagingTimeline " +
+            "WHERE pagingKey = :pagingKey AND statusKey IN (:statusKeys)",
+    )
+    suspend fun getByPagingKeyAndStatusKeys(
+        pagingKey: String,
+        statusKeys: List<MicroBlogKey>,
+    ): List<DbPagingTimeline>
+
     @Delete
     suspend fun delete(timeline: List<DbPagingTimeline>)
 

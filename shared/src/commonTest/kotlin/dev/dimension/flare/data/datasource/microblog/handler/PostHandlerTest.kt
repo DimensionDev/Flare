@@ -7,14 +7,17 @@ import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
+import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -110,6 +113,92 @@ class PostHandlerTest : RobolectricTest() {
         }
 
     @Test
+    fun postUsesLocalStatusCacheBeforeRefreshCreatesPagingRow() =
+        runTest {
+            startKoin {
+                modules(
+                    module {
+                        single { db }
+                        single<CoroutineScope> { this@runTest }
+                        single<PlatformFormatter> { TestFormatter() }
+                    },
+                )
+            }
+
+            val local = createPost(statusKey = postKey)
+            db.statusDao().insert(
+                DbStatus(
+                    statusKey = postKey,
+                    accountType = accountType,
+                    content = local,
+                    text = "text",
+                ),
+            )
+
+            val handler = PostHandler(accountType = accountType, loader = fakeLoader)
+            val cacheable = handler.post(postKey)
+
+            val cached =
+                cacheable.data
+                    .filterIsInstance<CacheState.Success<UiTimelineV2>>()
+                    .first()
+                    .data
+
+            assertEquals(postKey, cached.statusKey)
+            assertEquals(0, fakeLoader.statusCallCount)
+        }
+
+    @Test
+    fun postUsesInnerRepostWhenOnlyLocalStatusCacheExists() =
+        runTest {
+            startKoin {
+                modules(
+                    module {
+                        single { db }
+                        single<CoroutineScope> { this@runTest }
+                        single<PlatformFormatter> { TestFormatter() }
+                    },
+                )
+            }
+
+            val repostKey = MicroBlogKey(id = "repost-1", host = "test.social")
+            val repost = createPost(statusKey = repostKey)
+            val wrapper =
+                createPost(statusKey = postKey).copy(
+                    content = Element("span").apply { appendText("wrapper content") }.toUi(),
+                    internalRepost = repost,
+                )
+
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(
+                        wrapper,
+                        pagingKey = "post_only_$postKey",
+                    ),
+                ),
+            )
+            db.pagingTimelineDao().delete("post_only_$postKey")
+
+            val handler = PostHandler(accountType = accountType, loader = fakeLoader)
+            val cacheable = handler.post(postKey)
+
+            val cached =
+                cacheable.data
+                    .filterIsInstance<CacheState.Success<UiTimelineV2>>()
+                    .first()
+                    .data
+
+            val cachedPost = assertNotNull(cached as? UiTimelineV2.Post)
+            val internalRepost = assertNotNull(cachedPost.internalRepost)
+            assertEquals(postKey, cachedPost.statusKey)
+            assertEquals(repostKey, internalRepost.statusKey)
+            assertEquals(repost.content.raw, cachedPost.content.raw)
+            assertEquals(repost.user?.key, cachedPost.user?.key)
+            assertEquals(0, fakeLoader.statusCallCount)
+        }
+
+    @Test
     fun postRefreshKeepsLocalParentsWhenRemoteParentsIsEmpty() =
         runTest {
             startKoin {
@@ -123,7 +212,16 @@ class PostHandlerTest : RobolectricTest() {
             }
 
             val parentKey = MicroBlogKey(id = "parent-1", host = "test.social")
-            val localWithParents = createPost(statusKey = postKey, parents = persistentListOf(createPost(statusKey = parentKey)))
+            val localWithParents =
+                createPost(statusKey = postKey).copy(
+                    references =
+                        persistentListOf(
+                            UiTimelineV2.Post.Reference(
+                                statusKey = parentKey,
+                                type = ReferenceType.Reply,
+                            ),
+                        ),
+                )
             db.statusDao().insert(
                 DbStatus(
                     statusKey = postKey,
@@ -142,8 +240,8 @@ class PostHandlerTest : RobolectricTest() {
             val savedStatus = db.statusDao().get(postKey, accountType).first()
             val savedPost = savedStatus?.content as? UiTimelineV2.Post
             assertNotNull(savedPost)
-            assertEquals(1, savedPost.parents.size)
-            assertEquals(parentKey, savedPost.parents.first().statusKey)
+            assertEquals(1, savedPost.references.size)
+            assertEquals(parentKey, savedPost.references.first().statusKey)
         }
 
     @Test
@@ -161,7 +259,16 @@ class PostHandlerTest : RobolectricTest() {
 
             val localParentKey = MicroBlogKey(id = "local-parent", host = "test.social")
             val remoteParentKey = MicroBlogKey(id = "remote-parent", host = "test.social")
-            val local = createPost(statusKey = postKey, parents = persistentListOf(createPost(statusKey = localParentKey)))
+            val local =
+                createPost(statusKey = postKey).copy(
+                    references =
+                        persistentListOf(
+                            UiTimelineV2.Post.Reference(
+                                statusKey = localParentKey,
+                                type = ReferenceType.Reply,
+                            ),
+                        ),
+                )
             db.statusDao().insert(
                 DbStatus(
                     statusKey = postKey,
@@ -180,8 +287,8 @@ class PostHandlerTest : RobolectricTest() {
             val savedStatus = db.statusDao().get(postKey, accountType).first()
             val savedPost = savedStatus?.content as? UiTimelineV2.Post
             assertNotNull(savedPost)
-            assertEquals(1, savedPost.parents.size)
-            assertEquals(remoteParentKey, savedPost.parents.first().statusKey)
+            assertEquals(1, savedPost.references.size)
+            assertEquals(remoteParentKey, savedPost.references.first().statusKey)
         }
 
     @Test
@@ -306,6 +413,7 @@ class PostHandlerTest : RobolectricTest() {
             sourceChannel = null,
             visibility = null,
             replyToHandle = null,
+            references = persistentListOf(),
             parents = parents,
             clickEvent = ClickEvent.Noop,
             accountType = accountType,

@@ -10,6 +10,7 @@ import dev.dimension.flare.ui.humanizer.Formatter.humanize
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -42,6 +43,31 @@ public data class UiProfile internal constructor(
     val onClicked: ClickContext.() -> Unit by lazy {
         clickEvent.onClicked
     }
+
+    internal fun mergeWith(existing: UiProfile): UiProfile =
+        UiProfile(
+            key = key,
+            handle =
+                if (handle.raw.isBlank()) {
+                    existing.handle
+                } else {
+                    handle
+                },
+            avatar = avatar.ifBlank { existing.avatar },
+            nameInternal =
+                if (name.raw.isBlank()) {
+                    existing.name
+                } else {
+                    name
+                },
+            platformType = platformType,
+            clickEvent = clickEvent,
+            banner = banner ?: existing.banner,
+            description = description ?: existing.description,
+            matrices = matrices.mergeWith(existing.matrices),
+            mark = (existing.mark + mark).distinct().toPersistentList(),
+            bottomContent = bottomContent ?: existing.bottomContent,
+        )
 
     @Serializable
     @Immutable
@@ -125,4 +151,12 @@ public fun createSampleUser(): UiProfile =
             ),
         mark = persistentListOf(),
         bottomContent = null,
+    )
+
+private fun UiProfile.Matrices.mergeWith(existing: UiProfile.Matrices): UiProfile.Matrices =
+    UiProfile.Matrices(
+        fansCount = fansCount.takeUnless { it == 0L && existing.fansCount > 0L } ?: existing.fansCount,
+        followsCount = followsCount.takeUnless { it == 0L && existing.followsCount > 0L } ?: existing.followsCount,
+        statusesCount = statusesCount.takeUnless { it == 0L && existing.statusesCount > 0L } ?: existing.statusesCount,
+        platformFansCount = platformFansCount ?: existing.platformFansCount,
     )

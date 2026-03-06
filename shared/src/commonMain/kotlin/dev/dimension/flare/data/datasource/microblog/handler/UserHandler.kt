@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.microblog.handler
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
+import dev.dimension.flare.data.database.cache.mapper.upsertUser
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHandle
@@ -21,7 +22,7 @@ internal class UserHandler(
         Cacheable(
             fetchSource = {
                 val user = loader.userByHandleAndHost(uiHandle)
-                database.userDao().insert(
+                database.upsertUser(
                     user.toDbUser(),
                 )
             },
@@ -40,7 +41,7 @@ internal class UserHandler(
         Cacheable(
             fetchSource = {
                 val user = loader.userById(id)
-                database.userDao().insert(
+                database.upsertUser(
                     user.toDbUser(),
                 )
             },

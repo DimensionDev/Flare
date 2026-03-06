@@ -7,6 +7,7 @@ import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
+import dev.dimension.flare.data.database.cache.mapper.upsertUsers
 import dev.dimension.flare.data.database.cache.model.DbList
 import dev.dimension.flare.data.database.cache.model.DbListMember
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
@@ -59,7 +60,7 @@ internal class ListMemberHandler(
                                 )
                             },
                         )
-                        database.userDao().insertAll(data.map { it.toDbUser() })
+                        database.upsertUsers(data.map { it.toDbUser() })
                     },
                 ),
             pagingSourceFactory = {
@@ -101,7 +102,7 @@ internal class ListMemberHandler(
                         ),
                     ),
                 )
-                database.userDao().insertAll(
+                database.upsertUsers(
                     listOf(user.toDbUser()),
                 )
             }

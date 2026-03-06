@@ -114,7 +114,7 @@ internal object XQT {
                 }
             database.messageDao().insert(rooms)
         }
-        database.userDao().insertAll(
+        database.upsertUsers(
             users
                 ?.values
                 .orEmpty()

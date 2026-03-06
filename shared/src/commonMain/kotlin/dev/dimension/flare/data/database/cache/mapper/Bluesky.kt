@@ -33,7 +33,7 @@ internal object Bluesky {
                 .map {
                     it.render(accountKey).toDbUser(host = accountKey.host)
                 }
-        database.userDao().insertAll(users)
+        database.upsertUsers(users)
         database.messageDao().insertMessages(messages)
         database.messageDao().insertReferences(references)
         database.messageDao().insert(rooms)

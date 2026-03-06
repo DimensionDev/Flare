@@ -588,6 +588,64 @@ class MicroblogTest : RobolectricTest() {
             assertEquals(UiTimelineV2.Message.Type.Localized.MessageId.Repost, savedType.data)
         }
 
+    @Test
+    fun richerUserSurvivesLaterPartialUpdate() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "bsky.social")
+            val userKey = MicroBlogKey(id = "did:plc:test-user", host = "bsky.social")
+            val detailedUser =
+                createUser(userKey, "Detailed").copy(
+                    platformType = dev.dimension.flare.model.PlatformType.Bluesky,
+                    banner = "https://bsky.social/banner.png",
+                    description = Element("span").apply { appendText("full profile") }.toUi(),
+                    matrices = UiProfile.Matrices(fansCount = 12, followsCount = 34, statusesCount = 56),
+                )
+            val partialUser =
+                createUser(userKey, "Partial").copy(
+                    platformType = dev.dimension.flare.model.PlatformType.Bluesky,
+                    banner = null,
+                    description = null,
+                    matrices = UiProfile.Matrices(fansCount = 0, followsCount = 0, statusesCount = 0),
+                )
+
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(
+                        createPost(
+                            accountKey = accountKey,
+                            user = detailedUser,
+                            statusKey = MicroBlogKey(id = "status-detailed", host = "bsky.social"),
+                            text = "detailed",
+                        ),
+                        pagingKey = "home",
+                    ),
+                ),
+            )
+            saveToDatabase(
+                db,
+                listOf(
+                    TimelinePagingMapper.toDb(
+                        createPost(
+                            accountKey = accountKey,
+                            user = partialUser,
+                            statusKey = MicroBlogKey(id = "status-partial", host = "bsky.social"),
+                            text = "partial",
+                        ),
+                        pagingKey = "home",
+                    ),
+                ),
+            )
+
+            val savedUser = db.userDao().findByKey(userKey).first()
+            val savedProfile = assertNotNull(savedUser).content
+            assertEquals("https://bsky.social/banner.png", savedProfile.banner)
+            assertEquals("full profile", savedProfile.description?.raw)
+            assertEquals(12, savedProfile.matrices.fansCount)
+            assertEquals(34, savedProfile.matrices.followsCount)
+            assertEquals(56, savedProfile.matrices.statusesCount)
+        }
+
     private fun createUser(
         key: MicroBlogKey,
         name: String,

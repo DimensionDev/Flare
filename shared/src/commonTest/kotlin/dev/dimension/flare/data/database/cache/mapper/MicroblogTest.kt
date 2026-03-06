@@ -645,7 +645,8 @@ class MicroblogTest : RobolectricTest() {
             val quoteRefs = mapped.status.references.filter { it.reference.referenceType == ReferenceType.Quote }
             assertEquals(1, retweetRefs.size)
             assertEquals(postB.statusKey, retweetRefs.first().reference.referenceStatusKey)
-            assertTrue(quoteRefs.isEmpty())
+            assertEquals(1, quoteRefs.size)
+            assertEquals(postC.statusKey, quoteRefs.first().reference.referenceStatusKey)
 
             saveToDatabase(db, listOf(mapped))
             val savedA = db.statusDao().get(postA.statusKey, AccountType.Specific(accountKey)).first()
@@ -676,6 +677,89 @@ class MicroblogTest : RobolectricTest() {
                     .content.raw,
             )
             assertEquals(postC.statusKey, repost.quote.first().statusKey)
+        }
+
+    @Test
+    fun databaseRoundTripKeepsQuoteOnInternalRepostForRetweetWrapper() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+            val wrapperUser = createUser(MicroBlogKey(id = "wrapper-user-quote", host = "test.com"), "Wrapper User")
+            val repostUser = createUser(MicroBlogKey(id = "repost-user-quote", host = "test.com"), "Repost User")
+            val quoteUser = createUser(MicroBlogKey(id = "quote-user", host = "test.com"), "Quote User")
+
+            val quotePost =
+                createPost(
+                    accountKey = accountKey,
+                    user = quoteUser,
+                    statusKey = MicroBlogKey(id = "quote-status", host = "test.com"),
+                    text = "quoted content",
+                )
+            val repostPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = repostUser,
+                    statusKey = MicroBlogKey(id = "repost-status-without-quote", host = "test.com"),
+                    text = "repost content",
+                    quote = listOf(quotePost),
+                )
+            val repostMessage =
+                UiTimelineV2.Message(
+                    user = wrapperUser,
+                    statusKey = MicroBlogKey(id = "wrapper-status-with-quote", host = "test.com"),
+                    icon = dev.dimension.flare.ui.model.UiIcon.Retweet,
+                    type =
+                        UiTimelineV2.Message.Type.Localized(
+                            UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                        ),
+                    createdAt = Clock.System.now().toUi(),
+                    clickEvent = ClickEvent.Noop,
+                    accountType = AccountType.Specific(accountKey),
+                )
+            val wrapperPost =
+                createPost(
+                    accountKey = accountKey,
+                    user = wrapperUser,
+                    statusKey = MicroBlogKey(id = "wrapper-status-with-quote", host = "test.com"),
+                    text = "wrapper content",
+                ).copy(
+                    message = repostMessage,
+                    internalRepost = repostPost,
+                )
+
+            val mapped = TimelinePagingMapper.toDb(wrapperPost, pagingKey = "home")
+            saveToDatabase(db, listOf(mapped))
+
+            val paging = db.pagingTimelineDao().getPagingSource("home")
+            val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
+            val refreshResult = pager.refresh()
+            val page = assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(refreshResult)
+            val dbItem =
+                assertNotNull(
+                    page.data.firstOrNull {
+                        it.status.status.data.statusKey == wrapperPost.statusKey
+                    },
+                )
+            val rendered =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        dbItem,
+                        pagingKey = "home",
+                        useDbKeyInItemKey = false,
+                    ),
+                )
+            val internalRepost = assertNotNull(rendered.internalRepost)
+
+            assertEquals(wrapperPost.statusKey, rendered.statusKey)
+            assertEquals(repostPost.content.raw, rendered.content.raw)
+            assertEquals(repostPost.statusKey, internalRepost.statusKey)
+            assertEquals(1, internalRepost.quote.size)
+            assertEquals(quotePost.statusKey, internalRepost.quote.first().statusKey)
+            assertEquals(
+                "quoted content",
+                internalRepost.quote
+                    .first()
+                    .content.raw,
+            )
         }
 
     @Test

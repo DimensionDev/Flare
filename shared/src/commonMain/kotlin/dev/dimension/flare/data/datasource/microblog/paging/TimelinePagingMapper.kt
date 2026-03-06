@@ -35,42 +35,20 @@ internal object TimelinePagingMapper {
                         when (data) {
                             is UiTimelineV2.Feed -> emptyList()
                             is UiTimelineV2.Message -> emptyList()
-                            is UiTimelineV2.Post ->
-                                data.quote.map {
-                                    uiTimelineToDbStatusReferenceWithStatus(
-                                        data = it,
-                                        referenceType = ReferenceType.Quote,
-                                        rootStatusKey = data.statusKey,
-                                    )
-                                } +
-                                    data.parents.map {
-                                        uiTimelineToDbStatusReferenceWithStatus(
-                                            data = it,
-                                            referenceType = ReferenceType.Reply,
-                                            rootStatusKey = data.statusKey,
-                                        )
-                                    } +
-                                    listOfNotNull(
-                                        data.internalRepost?.let {
-                                            uiTimelineToDbStatusReferenceWithStatus(
-                                                data = it,
-                                                referenceType = ReferenceType.Retweet,
-                                                rootStatusKey = data.statusKey,
-                                            )
-                                        },
-                                    )
+                            is UiTimelineV2.Post -> collectPostReferences(data, data.statusKey)
 
                             is UiTimelineV2.User -> emptyList()
                             is UiTimelineV2.UserList ->
-                                listOfNotNull(
-                                    data.post?.let {
-                                        uiTimelineToDbStatusReferenceWithStatus(
-                                            data = it,
-                                            referenceType = ReferenceType.Quote,
-                                            rootStatusKey = data.statusKey,
-                                        )
-                                    },
-                                )
+                                data.post
+                                    ?.let {
+                                        listOf(
+                                            uiTimelineToDbStatusReferenceWithStatus(
+                                                data = it,
+                                                referenceType = ReferenceType.Quote,
+                                                rootStatusKey = data.statusKey,
+                                            ),
+                                        ) + collectPostReferences(it, data.statusKey)
+                                    }.orEmpty()
                         },
                 ),
         )
@@ -175,8 +153,41 @@ internal object TimelinePagingMapper {
                 referenceStatusKey = data.statusKey,
                 _id = Uuid.random().toString(),
             ),
-        status = uiTimelineToDbStatusWithUser(data, sanitizePostReferences = false),
+        status = uiTimelineToDbStatusWithUser(data, sanitizePostReferences = true),
     )
+
+    private fun collectPostReferences(
+        data: UiTimelineV2.Post,
+        rootStatusKey: MicroBlogKey,
+    ): List<DbStatusReferenceWithStatus> {
+        val visited = mutableSetOf<MicroBlogKey>()
+
+        fun visit(post: UiTimelineV2.Post): List<DbStatusReferenceWithStatus> =
+            post.directReferencePosts().flatMap { (referenceType, referencedPost) ->
+                listOf(
+                    uiTimelineToDbStatusReferenceWithStatus(
+                        data = referencedPost,
+                        referenceType = referenceType,
+                        rootStatusKey = rootStatusKey,
+                    ),
+                ) +
+                    if (visited.add(referencedPost.statusKey)) {
+                        visit(referencedPost)
+                    } else {
+                        emptyList()
+                    }
+            }
+
+        return visit(data)
+            .distinctBy {
+                it.reference.referenceType to it.reference.referenceStatusKey
+            }
+    }
+
+    private fun UiTimelineV2.Post.directReferencePosts(): List<Pair<ReferenceType, UiTimelineV2.Post>> =
+        quote.map { ReferenceType.Quote to it } +
+            parents.map { ReferenceType.Reply to it } +
+            listOfNotNull(internalRepost?.let { ReferenceType.Retweet to it })
 
     private fun uiTimelineToDbStatusWithUser(
         data: UiTimelineV2,

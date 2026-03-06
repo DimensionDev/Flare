@@ -9,9 +9,11 @@ struct StatusTopMessageView: View {
             topMessage.icon.image
             if let user = topMessage.user {
                 RichText(text: user.name)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             if let text = topMessage.type.localizedText {
                 Text(text)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .onTapGesture {

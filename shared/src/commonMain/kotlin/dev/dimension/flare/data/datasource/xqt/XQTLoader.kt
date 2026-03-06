@@ -30,9 +30,6 @@ internal class XQTLoader(
     override suspend fun notificationBadgeCount(): Int = service.getBadgeCount().ntabUnreadCount?.toInt() ?: 0
 
     override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile {
-        require(uiHandle.normalizedHost == accountKey.host) {
-            "Cross-host lookup is unsupported for XQT: ${uiHandle.normalizedHost}"
-        }
         val user =
             service
                 .userByScreenName(uiHandle.normalizedRaw)

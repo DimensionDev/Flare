@@ -21,8 +21,7 @@ public data class UiRichText(
     public val innerText: String = data.wholeText()
     val raw: String by lazy {
         data
-            .nodeStream()
-            .map { node ->
+            .nodeStream().joinToString("") { node ->
                 when {
                     node is TextNode -> node.getWholeText()
                     node.nameIs("br") -> "\n"
@@ -30,9 +29,9 @@ public data class UiRichText(
                     node.nameIs("emoji") -> node.attr("alt")
                     else -> ""
                 }
-            }.joinToString("")
+            }
     }
-    val html: String = data.html()
+    val html: String = data.compactHtml()
     public val isEmpty: Boolean = raw.isEmpty() && data.getAllElements().size <= 1
     public val isLongText: Boolean = innerText.codePointCount() > 480
 
@@ -57,6 +56,14 @@ internal object UiRichTextSerializer : KSerializer<UiRichText> {
         val html = decoder.decodeString()
         return parseHtml(html).toUi()
     }
+}
+
+private fun Element.compactHtml(): String {
+    val root = clone()
+    val document = Ksoup.parse("")
+    document.outputSettings().prettyPrint(false)
+    document.body().appendChild(root)
+    return root.html()
 }
 
 internal fun Element.toUi(): UiRichText =

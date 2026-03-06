@@ -215,12 +215,12 @@ internal object TimelinePagingMapper {
             is UiTimelineV2.Feed -> root
             is UiTimelineV2.Message ->
                 root.copy(
-                    user = users.find { root.user?.key == it.key },
+                    user = users.find { root.user?.key == it.key } ?: root.user,
                     extraKey = if (useDbKeyInItemKey) pagingKey else null,
                 )
             is UiTimelineV2.Post ->
                 root.copy(
-                    user = users.find { root.user?.key == it.key },
+                    user = users.find { root.user?.key == it.key } ?: root.user,
                     extraKey = if (useDbKeyInItemKey) pagingKey else null,
                 )
             is UiTimelineV2.User ->

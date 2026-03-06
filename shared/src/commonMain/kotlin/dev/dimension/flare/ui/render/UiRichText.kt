@@ -21,7 +21,8 @@ public data class UiRichText(
     public val innerText: String = data.wholeText()
     val raw: String by lazy {
         data
-            .nodeStream().joinToString("") { node ->
+            .nodeStream()
+            .joinToString("") { node ->
                 when {
                     node is TextNode -> node.getWholeText()
                     node.nameIs("br") -> "\n"

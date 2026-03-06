@@ -4,6 +4,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.datasource.microblog.loader.EmojiLoader
 import dev.dimension.flare.data.datasource.microblog.loader.NotificationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
+import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.network.vvo.VVOService
@@ -31,6 +32,8 @@ internal class VVOLoader(
     RelationLoader,
     EmojiLoader,
     PostLoader {
+    override val supportedTypes: Set<RelationActionType> = setOf(RelationActionType.Follow)
+
     override suspend fun notificationBadgeCount(): Int {
         val st = ensureLogin()
         val response =

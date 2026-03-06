@@ -3,8 +3,15 @@ package dev.dimension.flare.data.datasource.microblog.loader
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation
 
+internal enum class RelationActionType {
+    Follow,
+    Block,
+    Mute,
+}
+
 internal interface RelationLoader {
     val accountKey: MicroBlogKey
+    val supportedTypes: Set<RelationActionType>
 
     suspend fun relation(userKey: MicroBlogKey): UiRelation
 

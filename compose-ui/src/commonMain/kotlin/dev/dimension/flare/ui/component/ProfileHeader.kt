@@ -1,5 +1,11 @@
 package dev.dimension.flare.ui.component
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,13 +47,16 @@ import dev.dimension.flare.compose.ui.profile_header_button_is_fans
 import dev.dimension.flare.compose.ui.profile_header_button_requested
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.placeholder
+import dev.dimension.flare.ui.component.platform.PlatformErrorButton
 import dev.dimension.flare.ui.component.platform.PlatformFilledTonalButton
+import dev.dimension.flare.ui.component.platform.PlatformOutlinedButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
@@ -80,7 +89,9 @@ public fun ProfileHeader(
                 modifier = modifier,
                 user = userState.data,
                 relationState = state.relationState,
+                myAccountKey = state.myAccountKey,
                 onFollowClick = state::follow,
+                onUnfollowClick = state::unfollow,
                 isMe = state.isMe,
                 menu = menu,
                 expandMatrices = isBigScreen,
@@ -97,7 +108,9 @@ public fun ProfileHeader(
 private fun ProfileHeaderSuccess(
     user: UiProfile,
     relationState: UiState<UiRelation>,
-    onFollowClick: (userKey: MicroBlogKey, UiRelation) -> Unit,
+    myAccountKey: UiState<MicroBlogKey>,
+    onFollowClick: (userKey: MicroBlogKey) -> Unit,
+    onUnfollowClick: (userKey: MicroBlogKey) -> Unit,
     onAvatarClick: () -> Unit,
     onBannerClick: () -> Unit,
     isMe: UiState<Boolean>,
@@ -136,32 +149,63 @@ private fun ProfileHeaderSuccess(
                         }
 
                         is UiState.Success -> {
+                            val relation = relationState.data
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                PlatformFilledTonalButton(onClick = {
-                                    onFollowClick.invoke(user.key, relationState.data)
-                                }) {
-                                    PlatformText(
-                                        text =
-                                            stringResource(
-                                                when {
-                                                    relationState.data.blocking ->
-                                                        Res.string.profile_header_button_blocked
-
-                                                    relationState.data.following ->
-                                                        Res.string.profile_header_button_following
-
-                                                    relationState.data.hasPendingFollowRequestFromYou ->
-                                                        Res.string.profile_header_button_requested
-
-                                                    else ->
-                                                        Res.string.profile_header_button_follow
+                                AnimatedContent(
+                                    targetState = FollowButtonState.from(relation),
+                                    transitionSpec = {
+                                        (fadeIn() + scaleIn(initialScale = 0.92f)) togetherWith
+                                            (fadeOut() + scaleOut(targetScale = 0.92f))
+                                    },
+                                    label = "profile_follow_button",
+                                ) { buttonState ->
+                                    when (buttonState) {
+                                        FollowButtonState.Blocked ->
+                                            PlatformErrorButton(
+                                                onClick = {
+                                                    uriLauncher.openUri(
+                                                        DeeplinkRoute
+                                                            .UnblockUser(
+                                                                accountKey = myAccountKey.takeSuccess(),
+                                                                userKey = user.key,
+                                                            ).toUri(),
+                                                    )
                                                 },
-                                            ),
-                                    )
+                                            ) {
+                                                PlatformText(text = stringResource(Res.string.profile_header_button_blocked))
+                                            }
+
+                                        FollowButtonState.Following ->
+                                            PlatformOutlinedButton(
+                                                onClick = {
+                                                    onUnfollowClick.invoke(user.key)
+                                                },
+                                            ) {
+                                                PlatformText(text = stringResource(Res.string.profile_header_button_following))
+                                            }
+
+                                        FollowButtonState.Requested ->
+                                            PlatformOutlinedButton(
+                                                onClick = {
+                                                    onUnfollowClick.invoke(user.key)
+                                                },
+                                            ) {
+                                                PlatformText(text = stringResource(Res.string.profile_header_button_requested))
+                                            }
+
+                                        FollowButtonState.Follow ->
+                                            PlatformFilledTonalButton(
+                                                onClick = {
+                                                    onFollowClick.invoke(user.key)
+                                                },
+                                            ) {
+                                                PlatformText(text = stringResource(Res.string.profile_header_button_follow))
+                                            }
+                                    }
                                 }
-                                if (relationState.data.isFans) {
+                                if (relation.isFans) {
                                     PlatformText(
                                         text = stringResource(Res.string.profile_header_button_is_fans),
                                         textAlign = TextAlign.Center,
@@ -278,6 +322,24 @@ private fun ProfileHeaderSuccess(
             )
         },
     )
+}
+
+private enum class FollowButtonState {
+    Follow,
+    Requested,
+    Following,
+    Blocked,
+    ;
+
+    companion object {
+        fun from(relation: UiRelation): FollowButtonState =
+            when {
+                relation.blocking -> Blocked
+                relation.following -> Following
+                relation.hasPendingFollowRequestFromYou -> Requested
+                else -> Follow
+            }
+    }
 }
 
 @Composable

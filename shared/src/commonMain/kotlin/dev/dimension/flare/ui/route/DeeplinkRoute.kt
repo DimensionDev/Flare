@@ -200,7 +200,19 @@ public sealed class DeeplinkRoute {
     ) : DeeplinkRoute()
 
     @Serializable
+    public data class UnblockUser(
+        val accountKey: MicroBlogKey?,
+        val userKey: MicroBlogKey,
+    ) : DeeplinkRoute()
+
+    @Serializable
     public data class MuteUser(
+        val accountKey: MicroBlogKey?,
+        val userKey: MicroBlogKey,
+    ) : DeeplinkRoute()
+
+    @Serializable
+    public data class UnmuteUser(
         val accountKey: MicroBlogKey?,
         val userKey: MicroBlogKey,
     ) : DeeplinkRoute()

@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.mastodon
 import dev.dimension.flare.data.datasource.microblog.loader.EmojiLoader
 import dev.dimension.flare.data.datasource.microblog.loader.NotificationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
+import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.network.mastodon.MastodonService
@@ -27,6 +28,13 @@ internal class MastodonLoader(
     PostLoader,
     RelationLoader,
     EmojiLoader {
+    override val supportedTypes: Set<RelationActionType> =
+        setOf(
+            RelationActionType.Follow,
+            RelationActionType.Block,
+            RelationActionType.Mute,
+        )
+
     override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile =
         service
             .lookupUserByAcct("${uiHandle.normalizedRaw}@${uiHandle.normalizedHost}")

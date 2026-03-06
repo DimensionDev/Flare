@@ -117,6 +117,9 @@ internal open class MastodonDataSource(
         )
     }
 
+    override val supportedRelationTypes: Set<dev.dimension.flare.data.datasource.microblog.loader.RelationActionType>
+        get() = loader.supportedTypes
+
     override val postEventHandler by lazy {
         PostEventHandler(
             accountKey = accountKey,

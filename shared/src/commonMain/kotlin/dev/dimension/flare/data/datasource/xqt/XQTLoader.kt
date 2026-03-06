@@ -4,6 +4,7 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.datasource.microblog.loader.NotificationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
+import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.network.xqt.XQTService
@@ -27,6 +28,13 @@ internal class XQTLoader(
     UserLoader,
     PostLoader,
     RelationLoader {
+    override val supportedTypes: Set<RelationActionType> =
+        setOf(
+            RelationActionType.Follow,
+            RelationActionType.Block,
+            RelationActionType.Mute,
+        )
+
     override suspend fun notificationBadgeCount(): Int = service.getBadgeCount().ntabUnreadCount?.toInt() ?: 0
 
     override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile {

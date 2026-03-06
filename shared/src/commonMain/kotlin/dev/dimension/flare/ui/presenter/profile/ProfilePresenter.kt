@@ -13,6 +13,7 @@ import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.NoActiveAccountException
@@ -165,6 +166,12 @@ public class ProfilePresenter(
         }
     }
 
+    private val supportedRelationTypesFlow by lazy {
+        serviceFlow.map { service ->
+            (service as? RelationDataSource)?.supportedRelationTypes.orEmpty()
+        }
+    }
+
     private val isGuestMode by lazy {
         accountType == AccountType.Guest
     }
@@ -182,6 +189,7 @@ public class ProfilePresenter(
             }
         }
         val isListDataSource by isListDataSourceFlow.collectAsUiState()
+        val supportedRelationTypes by supportedRelationTypesFlow.collectAsUiState()
         val relationState by relationStateFlow.flattenUiState()
         val isMe by isMeFlow.collectAsUiState()
         val canSendMessage by canSendMessageFlow.collectAsUiState()
@@ -193,12 +201,14 @@ public class ProfilePresenter(
                 isMe,
                 canSendMessage,
                 relationState,
+                supportedRelationTypes,
                 service,
                 userState,
                 myAccountKey,
             ) {
                 val user = userState.takeSuccess()
                 val accountKey = myAccountKey.takeSuccess()
+                val relationTypes = supportedRelationTypes.takeSuccessOr(emptySet())
                 if (isMe.takeSuccessOr(false) || user == null) {
                     emptyList()
                 } else {
@@ -247,7 +257,7 @@ public class ProfilePresenter(
                             ) +
                             relationState.takeSuccessOr(UiRelation()).let { relation ->
                                 listOfNotNull(
-                                    if (userKey != null) {
+                                    if (userKey != null && RelationActionType.Block in relationTypes) {
                                         ActionMenu.Item(
                                             icon = if (relation.blocking) UiIcon.UnBlock else UiIcon.Block,
                                             text =
@@ -260,16 +270,23 @@ public class ProfilePresenter(
                                                 ),
                                             clickEvent =
                                                 ClickEvent.Deeplink(
-                                                    DeeplinkRoute.BlockUser(
-                                                        accountKey = accountKey,
-                                                        userKey = userKey,
-                                                    ),
+                                                    if (relation.blocking) {
+                                                        DeeplinkRoute.UnblockUser(
+                                                            accountKey = accountKey,
+                                                            userKey = userKey,
+                                                        )
+                                                    } else {
+                                                        DeeplinkRoute.BlockUser(
+                                                            accountKey = accountKey,
+                                                            userKey = userKey,
+                                                        )
+                                                    },
                                                 ),
                                         )
                                     } else {
                                         null
                                     },
-                                    if (userKey != null) {
+                                    if (userKey != null && RelationActionType.Mute in relationTypes) {
                                         ActionMenu.Item(
                                             icon = if (relation.muted) UiIcon.UnMute else UiIcon.Mute,
                                             text =
@@ -282,10 +299,17 @@ public class ProfilePresenter(
                                                 ),
                                             clickEvent =
                                                 ClickEvent.Deeplink(
-                                                    DeeplinkRoute.MuteUser(
-                                                        accountKey = accountKey,
-                                                        userKey = userKey,
-                                                    ),
+                                                    if (relation.muted) {
+                                                        DeeplinkRoute.UnmuteUser(
+                                                            accountKey = accountKey,
+                                                            userKey = userKey,
+                                                        )
+                                                    } else {
+                                                        DeeplinkRoute.MuteUser(
+                                                            accountKey = accountKey,
+                                                            userKey = userKey,
+                                                        )
+                                                    },
                                                 ),
                                         )
                                     } else {
@@ -344,17 +368,21 @@ public class ProfilePresenter(
             canSendMessage = canSendMessage,
             tabs = tabs,
         ) {
-            override fun follow(
-                userKey: MicroBlogKey,
-                data: UiRelation,
-            ) {
+            override fun follow(userKey: MicroBlogKey) {
                 service.onSuccess { service ->
-                    val relationHandler = (service as RelationDataSource).relationHandler
-                    if (data.following) {
-                        relationHandler.unfollow(userKey)
-                    } else {
-                        relationHandler.follow(userKey)
-                    }
+                    (service as RelationDataSource).relationHandler.follow(userKey)
+                }
+            }
+
+            override fun unfollow(userKey: MicroBlogKey) {
+                service.onSuccess { service ->
+                    (service as RelationDataSource).relationHandler.unfollow(userKey)
+                }
+            }
+
+            override fun unblock(userKey: MicroBlogKey) {
+                service.onSuccess { service ->
+                    (service as RelationDataSource).relationHandler.unblock(userKey)
                 }
             }
 
@@ -376,10 +404,11 @@ public abstract class ProfileState(
     public val canSendMessage: UiState<Boolean>,
     public val tabs: UiState<ImmutableList<Tab>>,
 ) {
-    public abstract fun follow(
-        userKey: MicroBlogKey,
-        data: UiRelation,
-    )
+    public abstract fun follow(userKey: MicroBlogKey)
+
+    public abstract fun unfollow(userKey: MicroBlogKey)
+
+    public abstract fun unblock(userKey: MicroBlogKey)
 
     public abstract fun report(userKey: MicroBlogKey)
 

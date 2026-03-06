@@ -65,6 +65,8 @@ import dev.dimension.flare.ui.screen.home.ReportUserDialog
 import dev.dimension.flare.ui.screen.home.SearchScreen
 import dev.dimension.flare.ui.screen.home.TabSettingScreen
 import dev.dimension.flare.ui.screen.home.TimelineScreen
+import dev.dimension.flare.ui.screen.home.UnblockUserDialog
+import dev.dimension.flare.ui.screen.home.UnmuteUserDialog
 import dev.dimension.flare.ui.screen.list.AllListScreen
 import dev.dimension.flare.ui.screen.media.RawMediaScreen
 import dev.dimension.flare.ui.screen.media.StatusMediaScreen
@@ -829,6 +831,24 @@ internal fun WindowScope.Router(
                     metadata = dialog(),
                 ) { args ->
                     MuteUserDialog(
+                        accountType = args.accountType,
+                        userKey = args.userKey,
+                        onBack = onBack,
+                    )
+                }
+                entry<Route.UnblockUser>(
+                    metadata = dialog(),
+                ) { args ->
+                    UnblockUserDialog(
+                        accountType = args.accountType,
+                        userKey = args.userKey,
+                        onBack = onBack,
+                    )
+                }
+                entry<Route.UnmuteUser>(
+                    metadata = dialog(),
+                ) { args ->
+                    UnmuteUserDialog(
                         accountType = args.accountType,
                         userKey = args.userKey,
                         onBack = onBack,

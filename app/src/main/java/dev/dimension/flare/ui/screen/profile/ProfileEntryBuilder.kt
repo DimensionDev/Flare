@@ -232,6 +232,26 @@ internal fun EntryProviderScope<NavKey>.profileEntryBuilder(
         )
     }
 
+    entry<Route.UnblockUser>(
+        metadata = DialogSceneStrategy.dialog()
+    ) {
+        UnblockUserDialog(
+            accountType = it.accountType,
+            userKey = it.userKey,
+            onBack = onBack,
+        )
+    }
+
+    entry<Route.UnmuteUser>(
+        metadata = DialogSceneStrategy.dialog()
+    ) {
+        UnmuteUserDialog(
+            accountType = it.accountType,
+            userKey = it.userKey,
+            onBack = onBack,
+        )
+    }
+
     entry<Route.ReportUser>(
         metadata = DialogSceneStrategy.dialog()
     ) {

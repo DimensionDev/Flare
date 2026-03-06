@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datasource.misskey
 
 import dev.dimension.flare.data.datasource.microblog.loader.EmojiLoader
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
+import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
 import dev.dimension.flare.data.network.misskey.MisskeyService
@@ -29,6 +30,13 @@ internal class MisskeyLoader(
     PostLoader,
     RelationLoader,
     EmojiLoader {
+    override val supportedTypes: Set<RelationActionType> =
+        setOf(
+            RelationActionType.Follow,
+            RelationActionType.Block,
+            RelationActionType.Mute,
+        )
+
     override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile =
         service
             .usersShow(

@@ -12,6 +12,8 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.presenter.profile.BlockUserPresenter
 import dev.dimension.flare.ui.presenter.profile.MuteUserPresenter
+import dev.dimension.flare.ui.presenter.profile.UnblockUserPresenter
+import dev.dimension.flare.ui.presenter.profile.UnmuteUserPresenter
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
@@ -69,6 +71,80 @@ internal fun MuteUserDialog(
         },
         text = {
             Text(text = stringResource(id = R.string.mute_user_description))
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    state.confirm()
+                    onBack.invoke()
+                },
+            ) {
+                Text(text = stringResource(id = android.R.string.ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onBack) {
+                Text(text = stringResource(id = android.R.string.cancel))
+            }
+        },
+    )
+}
+
+@Composable
+internal fun UnblockUserDialog(
+    accountType: AccountType?,
+    userKey: MicroBlogKey,
+    onBack: () -> Unit,
+) {
+    val state by producePresenter("unblock_user_${accountType}_$userKey") {
+        remember {
+            UnblockUserPresenter(accountType, userKey)
+        }.body()
+    }
+    AlertDialog(
+        onDismissRequest = onBack,
+        title = {
+            Text(text = stringResource(id = R.string.unblock_user_title))
+        },
+        text = {
+            Text(text = stringResource(id = R.string.unblock_user_description))
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    state.confirm()
+                    onBack.invoke()
+                },
+            ) {
+                Text(text = stringResource(id = android.R.string.ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onBack) {
+                Text(text = stringResource(id = android.R.string.cancel))
+            }
+        },
+    )
+}
+
+@Composable
+internal fun UnmuteUserDialog(
+    accountType: AccountType?,
+    userKey: MicroBlogKey,
+    onBack: () -> Unit,
+) {
+    val state by producePresenter("unmute_user_${accountType}_$userKey") {
+        remember {
+            UnmuteUserPresenter(accountType, userKey)
+        }.body()
+    }
+    AlertDialog(
+        onDismissRequest = onBack,
+        title = {
+            Text(text = stringResource(id = R.string.unmute_user_title))
+        },
+        text = {
+            Text(text = stringResource(id = R.string.unmute_user_description))
         },
         confirmButton = {
             TextButton(

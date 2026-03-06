@@ -4,7 +4,7 @@
     <string name="cancel">İptal</string>
     <string name="delete">Sil</string>
     <string name="refresh">Yenile</string>
-    <string name="home_compose">Kompoze et</string>
+    <string name="home_compose">Oluştur</string>
     <string name="home_login">Giriş</string>
     <string name="home_settings">Ayarlar</string>
     <string name="home_tab_home_title">Ana Sayfa</string>
@@ -20,6 +20,10 @@
     <string name="home_tab_list_title">Liste</string>
     <string name="home_tab_feeds_title">Beslemeler</string>
     <string name="dm_list_title">Doğrudan Mesajlar</string>
+    <plurals name="home_timeline_new_toots">
+        <item quantity="one">%1$d Yeni Gönderi</item>
+        <item quantity="other">%1$d Yeni Gönderiler</item>
+    </plurals>
     <string name="navigate_back">Geri</string>
     <string name="service_select_instance_input_placeholder">Örnek URL\'si</string>
     <string name="service_select_next_button">İleri</string>
@@ -34,15 +38,15 @@
     <string name="report_title">Şikayet et</string>
     <string name="report_description">Bu gönderide sorun nedir?</string>
     <string name="report_reason_spam_title">Spam</string>
-    <string name="report_reason_violation_title">Yasadışı ve Acil</string>
+    <string name="report_reason_violation_title">Yasa dışı ve Acil</string>
     <string name="report_reason_misleading_title">Yanıltıcı</string>
     <string name="report_reason_sexual_title">İstenmeyen Cinsel İçerik</string>
-    <string name="report_reason_rude_title">Anti-Sosyal Davranış</string>
+    <string name="report_reason_rude_title">Antisosyal Davranış</string>
     <string name="report_reason_other_title">Diğer</string>
     <string name="report_reason_spam_description">Aşırı bahsetmeler veya yanıtlar</string>
     <string name="report_reason_violation_description">Hukuk veya hizmet koşullarının belirgin ihlalleri</string>
     <string name="report_reason_misleading_description">Bu gönderi yanıltıcı</string>
-    <string name="report_reason_sexual_description">Etiketlenmemiş çıplaklık veya pornografi</string>
+    <string name="report_reason_sexual_description">Çıplaklık veya pornografi olarak etiketlenmemiş içerik</string>
     <string name="report_reason_rude_description">Taciz, provokasyon veya hoşgörüsüzlük</string>
     <string name="report_reason_other_description">Bu seçenekler içinde yer almayan bir sorun</string>
     <string name="delete_status_title">Sil</string>
@@ -60,6 +64,7 @@
     <string name="reply">Yanıtla</string>
     <string name="report">Şikayet et</string>
     <string name="retweet">Yeniden paylaş</string>
+    <string name="retweet_remove">Yeniden gönderimi kaldır</string>
     <string name="status_loadmore_error_retry">Yeniden dene</string>
     <string name="status_detail_comment">Yorum</string>
     <string name="status_detail_repost">Yeniden paylaş</string>
@@ -69,6 +74,9 @@
     <string name="media_hide_thumbnail_list">Küçük resim listesini gizle</string>
     <string name="media_save">Kaydet</string>
     <string name="media_fullscreen">Tam ekran</string>
+    <string name="status_share">Bağlantıyı paylaş</string>
+    <string name="status_share_save_screenshot">Ekran görüntüsünü kaydet</string>
+    <string name="status_share_image">Ekran görüntüsünü paylaş</string>
     <string name="list_add">Liste ekle</string>
     <string name="list_edit">Listeyi düzenle</string>
     <string name="list_delete">Listeyi sil</string>
@@ -102,6 +110,9 @@
     <string name="mixed_timeline_title">Karışık</string>
     <string name="bluesky_login_username">Kullanıcı adı</string>
     <string name="bluesky_login_password">Şifre</string>
+    <string name="bluesky_login_oauth_button">OAuth ile giriş yap</string>
+    <string name="bluesky_login_use_password_button">Şifre Kullan</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth yeterince kararlı olmayabilir, herhangi bir sorunla karşılaşırsanız lütfen şifre ile giriş yapın.</string>
     <string name="login_expired">Giriş oturumu süresi doldu</string>
     <string name="login_expired_message">Yeniden giriş yapmak için tıklayın</string>
     <string name="login_expired_relogin">Yeniden giriş yap</string>
@@ -110,7 +121,7 @@
     <string name="add_account">Hesap ekle</string>
     <string name="settings_accounts_title">Hesap Yönetimi</string>
     <string name="settings_appearance_title">Görünüm</string>
-    <string name="settings_appearance_subtitle">Flare\'ın görünümünü ve hissini özelleştir</string>
+    <string name="settings_appearance_subtitle">Flare’in görünümünü ve hissini özelleştirin</string>
     <string name="settings_storage_title">Depolama</string>
     <string name="settings_storage_subtitle">Flare\'ın depolamasını yönet</string>
     <string name="settings_about_title">Hakkında</string>
@@ -135,7 +146,7 @@
     <string name="settings_ai_config_entable_translation">Yapay Zeka çevirisini etkinleştir</string>
     <string name="settings_ai_config_translation_description">Google Çeviri\'yi yapay zeka çevirisi ile değiştirin, daha uzun sürebilir</string>
     <string name="settings_ai_config_enable_tldr">Yapay Zeka Özetleme özelliğini etkinleştir</string>
-    <string name="settings_ai_config_tldr_description">500 karakterden uzun gönderiler için yapay zeka özetlemesini etkinleştirir, sadece 500 karakterden uzun gönderilerde mevcuttur</string>
+    <string name="settings_ai_config_tldr_description">500 karakterden uzun gönderiler için AI özetlemeyi etkinleştir</string>
     <string name="settings_appearance_generic">Genel</string>
     <string name="settings_appearance_show_actions">Eylemleri göster</string>
     <string name="settings_appearance_show_media">Medya göster</string>
@@ -158,10 +169,16 @@
     <string name="settings_appearance_theme_auto">Otomatik</string>
     <string name="settings_appearance_dynamic_theme">Dinamik tema</string>
     <string name="settings_appearance_dynamic_theme_description">Uygulamanın temasını cihazın duvar kağıdına göre değiştir</string>
-    <string name="settings_appearance_show_link_previews">Bağlantı önizlemelerini göster</string>
-    <string name="settings_appearance_compat_link_previews">Bağlantı önizlemelerini basitleştir</string>
+    <string name="settings_appearance_show_link_previews">Bağlantı ön izlemelerini göster</string>
+    <string name="settings_appearance_compat_link_previews">Bağlantı ön izlemelerini basitleştir</string>
     <string name="settings_appearance_theme_color">Tema rengi</string>
     <string name="settings_appearance_theme_color_description">Uygulamanın tema rengini değiştir</string>
+    <string name="settings_appearance_theme_pure_color">Yüksek kontrast modu</string>
+    <string name="settings_appearance_theme_pure_color_description">Arka plan ve metin arasındaki kontrastı artırın</string>
+    <string name="settings_appearance_full_width_post">Tam genişlikte gönderi</string>
+    <string name="settings_appearance_full_width_post_description">Gönderiyi tam genişlikte göster</string>
+    <string name="settings_appearance_absolute_timestamp">Mutlak zaman damgası</string>
+    <string name="settings_appearance_absolute_timestamp_description">Gönderilere mutlak zaman damgaları ekle</string>
     <string name="settings_about_source_code">Kaynak kodu</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Telegram grubumuza katılın</string>
@@ -171,7 +188,7 @@
     <string name="settings_privacy_policy">Gizlilik Politikası</string>
     <string name="users">Kullanıcılar</string>
     <string name="statues">Gönderiler</string>
-    <string name="compose_title">Kompoze et</string>
+    <string name="compose_title">Oluştur</string>
     <string name="compose_hint">Ne oluyor?</string>
     <string name="compose_poll_option_hint">Seçenek %1$s</string>
     <string name="compose_poll_single_choice">Tek seçim</string>
@@ -229,12 +246,18 @@
     <string name="edit">Düzenle</string>
     <string name="local_history_search_placeholder">Yerel önbellekte ara</string>
     <string name="local_history_search_user_title">Kullanıcı</string>
-    <string name="settings_storage_clear_image_cache">Görüntü önbelleğini temizle</string>
+    <string name="settings_storage_clear_image_cache">Görüntü ön belleğini temizle</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB görüntü silinecek</string>
-    <string name="settings_storage_clear_database">Önbellek veritabanını temizle</string>
+    <string name="settings_storage_clear_database">Önbellek veri tabanını temizle</string>
     <string name="settings_storage_app_log">Uygulama günlüğünü aç</string>
     <string name="settings_storage_app_log_description">Uygulama günlüğünü görüntüle</string>
+    <string name="settings_rss_management_title">RSS Yönetimi</string>
+    <string name="settings_rss_management_description">RSS akışlarını yönetin</string>
+    <string name="opml_import">OPML\'den içe aktar</string>
+    <string name="opml_export">OPML\'ye aktar</string>
     <string name="deeplink_account_selection_browser">Tarayıcıda aç</string>
     <string name="misskey_channel_tab_following">Takip Edilenler</string>
+    <string name="misskey_channel_tab_favorites">Favoriler</string>
+    <string name="misskey_channel_tab_owned">Sahip olduklarım</string>
     <string name="misskey_channel_tab_featured">Özellikli</string>
 </resources>

@@ -29,42 +29,38 @@ internal class DesktopDownloadManager(
         targetFile: File,
         overwrite: Boolean = true,
         onProgress: (DownloadProgress) -> Unit = {},
-    ): DownloadResult =
-        withContext(Dispatchers.IO) {
-            require(url.isNotBlank()) { "url must not be blank" }
-            require(targetFile.path.isNotBlank()) { "targetFile must not be blank" }
-            if (targetFile.exists() && !overwrite) {
-                throw IllegalStateException("Target file already exists: ${targetFile.absolutePath}")
-            }
-
-            targetFile.parentFile?.mkdirs()
-            val tempFile = File(targetFile.absolutePath + ".part")
-            tempFile.parentFile?.mkdirs()
-            if (tempFile.exists()) {
-                tempFile.delete()
-            }
-
-            try {
-                client.prepareGet(url).execute { response ->
-                    writeResponseToFile(
-                        response = response,
-                        outputFile = tempFile,
-                        onProgress = onProgress,
-                    )
-                }
-                moveIntoPlace(tempFile = tempFile, targetFile = targetFile, overwrite = overwrite)
-                inAppNotification.message(Res.string.media_save_success)
-                DownloadResult(
-                    url = url,
-                    file = targetFile,
-                    bytesWritten = targetFile.length(),
-                )
-            } catch (t: Throwable) {
-                inAppNotification.message(Res.string.media_save_fail)
-                tempFile.delete()
-                throw t
-            }
+    ) = withContext(Dispatchers.IO) {
+        require(url.isNotBlank()) { "url must not be blank" }
+        require(targetFile.path.isNotBlank()) { "targetFile must not be blank" }
+        if (targetFile.exists() && !overwrite) {
+            throw IllegalStateException("Target file already exists: ${targetFile.absolutePath}")
         }
+
+        targetFile.parentFile?.mkdirs()
+        val tempFile = File(targetFile.absolutePath + ".part")
+        tempFile.parentFile?.mkdirs()
+        if (tempFile.exists()) {
+            tempFile.delete()
+        }
+
+        try {
+            client.prepareGet(url).execute { response ->
+                writeResponseToFile(
+                    response = response,
+                    outputFile = tempFile,
+                    onProgress = onProgress,
+                )
+            }
+            moveIntoPlace(tempFile = tempFile, targetFile = targetFile, overwrite = overwrite)
+            inAppNotification.message(Res.string.media_save_success)
+        } catch (t: Throwable) {
+            inAppNotification.message(
+                Res.string.media_save_fail,
+                success = false,
+            )
+            tempFile.delete()
+        }
+    }
 
     override fun close() {
         client.close()
@@ -81,12 +77,6 @@ internal data class DownloadProgress(
                 ?.takeIf { it > 0 }
                 ?.let { bytesDownloaded.toFloat() / it.toFloat() }
 }
-
-internal data class DownloadResult(
-    val url: String,
-    val file: File,
-    val bytesWritten: Long,
-)
 
 private suspend fun writeResponseToFile(
     response: HttpResponse,

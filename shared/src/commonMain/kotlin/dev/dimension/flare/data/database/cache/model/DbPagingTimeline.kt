@@ -6,9 +6,6 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import androidx.room.TypeConverter
-import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import kotlin.time.Instant
@@ -17,13 +14,15 @@ import kotlin.uuid.Uuid
 @Entity(
     indices = [
         Index(
-            value = ["accountType", "statusKey", "pagingKey"],
+            value = ["statusKey", "pagingKey"],
             unique = true,
+        ),
+        Index(
+            value = ["pagingKey", "sortId"],
         ),
     ],
 )
 internal data class DbPagingTimeline(
-    val accountType: DbAccountType,
     val pagingKey: String,
     val statusKey: MicroBlogKey,
     val sortId: Long,
@@ -53,8 +52,6 @@ internal data class DbPagingTimelineWithStatus(
 internal data class DbStatusWithUser(
     @Embedded
     val data: DbStatus,
-    @Relation(parentColumn = "userKey", entityColumn = "userKey")
-    val user: DbUser?,
 )
 
 internal data class DbStatusReferenceWithStatus(
@@ -80,12 +77,6 @@ internal data class DbStatusWithReference(
 )
 
 internal class StatusConverter {
-    @TypeConverter
-    fun fromStatusContent(value: StatusContent): String = value.encodeJson()
-
-    @TypeConverter
-    fun toStatusContent(value: String): StatusContent = value.decodeJson()
-
     @TypeConverter
     fun fromReferenceType(value: ReferenceType): String = value.name
 

@@ -2,49 +2,54 @@ import SwiftUI
 import KotlinSharedUI
 
 struct TimelineView: View {
-    let data: UiTimeline
+    let data: UiTimelineV2
     let detailStatusKey: MicroBlogKey?
     var showTranslate: Bool = true
-    @Environment(\.openURL) private var openURL
     @Environment(\.appearanceSettings.fullWidthPost) private var fullWidthPost
     @ScaledMetric(relativeTo: .caption) var iconSize: CGFloat = 15
+
     var body: some View {
-        VStack {
-            if let topMessage = data.topMessage {
-                StatusTopMessageView(topMessage: topMessage)
-                    .if(!fullWidthPost && data.content != nil, transform: { view in
-                        view.padding(.leading, 44 - iconSize)
-                    })
-                    .if(data.content != nil, transform: { view in
-                        view.lineLimit(1)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    })
-                    .onTapGesture {
-                        if let user = topMessage.user {
-                            user.onClicked(ClickContext(launcher: AppleUriLauncher(openUrl: openURL)))
-                        }
-                    }
+        switch onEnum(of: data) {
+        case .feed(let feed):
+            FeedView(data: feed)
+        case .post(let post):
+            VStack {
+                messageView(post.message, topMessageOnly: false)
+                StatusView(data: post, isDetail: detailStatusKey == post.statusKey, showTranslate: showTranslate)
             }
-            if let content = data.content {
-                switch onEnum(of: content) {
-                case .feed(let feed):
-                    FeedView(data: feed)
-                case .status(let status):
-                    StatusView(data: status, isDetail: detailStatusKey == status.statusKey, showTranslate: showTranslate)
-                case .user(let user):
-                    TimelineUserView(data: user)
-                case .userList(let userList):
-                    UserListView(data: userList)
-                }
+        case .user(let user):
+            VStack {
+                messageView(user.message, topMessageOnly: false)
+                TimelineUserView(data: user)
             }
+        case .userList(let userList):
+            VStack {
+                messageView(userList.message, topMessageOnly: false)
+                UserListView(data: userList)
+            }
+        case .message(let message):
+            messageView(message, topMessageOnly: true)
         }
-//        .id(data.itemKey)
+    }
+
+    @ViewBuilder
+    private func messageView(_ message: UiTimelineV2.Message?, topMessageOnly: Bool) -> some View {
+        if let message {
+            StatusTopMessageView(topMessage: message)
+                .if(!fullWidthPost && !topMessageOnly, transform: { view in
+                    view.padding(.leading, 44 - iconSize)
+                })
+                .if(!topMessageOnly, transform: { view in
+                    view.lineLimit(1)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                })
+        }
     }
 }
 
 extension TimelineView {
-    init(data: UiTimeline) {
+    init(data: UiTimelineV2) {
         self.data = data
         self.detailStatusKey = nil
     }

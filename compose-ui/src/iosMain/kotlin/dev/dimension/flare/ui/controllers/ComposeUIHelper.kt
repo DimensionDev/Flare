@@ -11,6 +11,7 @@ import dev.dimension.flare.common.SwiftOnDeviceAI
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.ui.humanizer.SwiftFormatter
+import dev.dimension.flare.ui.render.SwiftPlatformTextRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,6 +25,7 @@ public object ComposeUIHelper {
     public fun initialize(
         inAppNotification: InAppNotification,
         swiftFormatter: SwiftFormatter,
+        swiftPlatformTextRenderer: SwiftPlatformTextRenderer,
         swiftOnDeviceAI: SwiftOnDeviceAI,
     ) {
         startKoin {
@@ -39,6 +41,9 @@ public object ComposeUIHelper {
                     single {
                         swiftOnDeviceAI
                     } bind SwiftOnDeviceAI::class
+                    single {
+                        swiftPlatformTextRenderer
+                    } bind SwiftPlatformTextRenderer::class
                 },
             )
             modules(dev.dimension.flare.di.composeUiModule)

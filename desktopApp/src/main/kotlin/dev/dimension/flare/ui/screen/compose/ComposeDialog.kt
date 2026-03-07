@@ -98,7 +98,7 @@ import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onError
@@ -236,7 +236,7 @@ fun ComposeDialog(
                                 },
                                 content = {
                                     AvatarComponent(it.avatar, size = 24.dp)
-                                    Text(it.handle)
+                                    Text(it.handle.canonical)
                                 },
                             )
                         }
@@ -250,7 +250,7 @@ fun ComposeDialog(
                                         user.onSuccess { data ->
                                             MenuFlyoutItem(
                                                 text = {
-                                                    Text(text = data.handle)
+                                                    Text(text = data.handle.canonical)
                                                 },
                                                 onClick = {
                                                     state.state.selectAccount(account)
@@ -600,8 +600,8 @@ fun ComposeDialog(
 
             state.state.replyState?.let { replyState ->
                 replyState.onSuccess { state ->
-                    val content = state.content
-                    if (content is UiTimeline.ItemContent.Status) {
+                    val content = state as? UiTimelineV2.Post
+                    if (content is UiTimelineV2.Post) {
                         Card(
                             modifier =
                                 Modifier
@@ -1023,7 +1023,7 @@ private fun composePresenter(
                                 ?.toString(),
                         visibility =
                             state.visibilityState.takeSuccess()?.visibility
-                                ?: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public,
+                                ?: UiTimelineV2.Post.Visibility.Public,
                         account = it,
                         referenceStatus =
                             status?.let {
@@ -1253,40 +1253,40 @@ internal enum class PollExpiration(
     Days7(Res.string.compose_poll_expiration_7_days, 7.days),
 }
 
-internal val UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.localName: StringResource
+internal val UiTimelineV2.Post.Visibility.localName: StringResource
     get() =
         when (this) {
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
+            UiTimelineV2.Post.Visibility.Public ->
                 Res.string.misskey_visibility_public
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
+            UiTimelineV2.Post.Visibility.Home ->
                 Res.string.misskey_visibility_home
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
+            UiTimelineV2.Post.Visibility.Followers ->
                 Res.string.misskey_visibility_followers
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
+            UiTimelineV2.Post.Visibility.Specified ->
                 Res.string.misskey_visibility_specified
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel ->
+            UiTimelineV2.Post.Visibility.Channel ->
                 Res.string.misskey_visibility_public
         }
 
-internal val UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.localDescription: StringResource
+internal val UiTimelineV2.Post.Visibility.localDescription: StringResource
     get() =
         when (this) {
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
+            UiTimelineV2.Post.Visibility.Public ->
                 Res.string.misskey_visibility_public_description
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
+            UiTimelineV2.Post.Visibility.Home ->
                 Res.string.misskey_visibility_home_description
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
+            UiTimelineV2.Post.Visibility.Followers ->
                 Res.string.misskey_visibility_followers_description
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
+            UiTimelineV2.Post.Visibility.Specified ->
                 Res.string.misskey_visibility_specified_description
 
-            UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel ->
+            UiTimelineV2.Post.Visibility.Channel ->
                 Res.string.misskey_visibility_public_description
         }

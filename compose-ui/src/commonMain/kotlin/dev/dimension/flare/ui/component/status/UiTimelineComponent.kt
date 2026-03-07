@@ -4,10 +4,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -18,37 +16,17 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.zIndex
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.At
 import compose.icons.fontawesomeicons.solid.Check
-import compose.icons.fontawesomeicons.solid.CircleInfo
-import compose.icons.fontawesomeicons.solid.Heart
-import compose.icons.fontawesomeicons.solid.Pen
-import compose.icons.fontawesomeicons.solid.QuoteLeft
-import compose.icons.fontawesomeicons.solid.Reply
-import compose.icons.fontawesomeicons.solid.Retweet
-import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
-import compose.icons.fontawesomeicons.solid.Thumbtack
-import compose.icons.fontawesomeicons.solid.UserPlus
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.compose.ui.Res
-import dev.dimension.flare.compose.ui.bluesky_notification_item_favourited_your_status
-import dev.dimension.flare.compose.ui.bluesky_notification_item_followed_you
-import dev.dimension.flare.compose.ui.bluesky_notification_item_mentioned_you
-import dev.dimension.flare.compose.ui.bluesky_notification_item_pin
-import dev.dimension.flare.compose.ui.bluesky_notification_item_quoted_your_status
-import dev.dimension.flare.compose.ui.bluesky_notification_item_reblogged_your_status
-import dev.dimension.flare.compose.ui.bluesky_notification_item_replied_to_you
 import dev.dimension.flare.compose.ui.bluesky_notification_item_starterpack_joined
-import dev.dimension.flare.compose.ui.bluesky_notification_item_unKnown
 import dev.dimension.flare.compose.ui.mastodon_item_pinned
 import dev.dimension.flare.compose.ui.mastodon_notification_item_favourited_your_status
 import dev.dimension.flare.compose.ui.mastodon_notification_item_followed_you
@@ -217,20 +195,10 @@ import dev.dimension.flare.compose.ui.misskey_achievement_view_instance_chart_ti
 import dev.dimension.flare.compose.ui.misskey_notification_item_achievement_earned
 import dev.dimension.flare.compose.ui.misskey_notification_item_app
 import dev.dimension.flare.compose.ui.misskey_notification_item_follow_request_accepted
-import dev.dimension.flare.compose.ui.misskey_notification_item_followed_you
-import dev.dimension.flare.compose.ui.misskey_notification_item_mentioned_you
-import dev.dimension.flare.compose.ui.misskey_notification_item_poll_ended
-import dev.dimension.flare.compose.ui.misskey_notification_item_quoted_your_status
 import dev.dimension.flare.compose.ui.misskey_notification_item_reacted_to_your_status
-import dev.dimension.flare.compose.ui.misskey_notification_item_replied_to_you
-import dev.dimension.flare.compose.ui.misskey_notification_item_reposted_your_status
-import dev.dimension.flare.compose.ui.misskey_notification_item_requested_follow
-import dev.dimension.flare.compose.ui.misskey_notification_unknwon
 import dev.dimension.flare.compose.ui.notification_item_accept_follow_request
 import dev.dimension.flare.compose.ui.notification_item_reject_follow_request
-import dev.dimension.flare.compose.ui.vvo_notification_like
-import dev.dimension.flare.compose.ui.xqt_item_mention_status
-import dev.dimension.flare.compose.ui.xqt_item_reblogged_status
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.model.PostActionStyle
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
@@ -243,9 +211,8 @@ import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformFilledTonalButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
-import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.ClickContext
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
@@ -255,192 +222,60 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun UiTimelineComponent(
-    item: UiTimeline,
+    item: UiTimelineV2,
     modifier: Modifier = Modifier,
     detailStatusKey: MicroBlogKey? = null,
-    horizontalPadding: Dp = screenHorizontalPadding,
 ) {
-    val bigScreen = isBigScreen()
-    val appearance = LocalComponentAppearance.current
-    Column(
-        modifier = modifier,
-    ) {
-        item.topMessage?.let {
-            TopMessageComponent(
-                data = it,
-                topMessageOnly = item.content == null,
-                modifier =
-                    Modifier
-                        .padding(horizontal = horizontalPadding)
-                        .let {
-                            if (item.content == null) {
-                                it.padding(vertical = 8.dp)
-                            } else {
-                                if (!appearance.fullWidthPost) {
-                                    it.padding(
-                                        top = 8.dp,
-                                        start = AvatarComponentDefaults.size - PlatformTheme.typography.caption.fontSize.value.dp,
-                                    )
-                                } else {
-                                    it.padding(top = 8.dp)
-                                }
-                            }
-                        }.fillMaxWidth(),
-            )
-        }
-        item.content?.let {
-            val padding =
-                if (item.topMessage == null) {
-                    PaddingValues(
-                        start = horizontalPadding,
-                        end = horizontalPadding,
-                        bottom = 8.dp,
-                        top = if (bigScreen) 16.dp else 8.dp,
-                    )
-                } else {
-                    PaddingValues(
-                        start = horizontalPadding,
-                        end = horizontalPadding,
-                        bottom = 8.dp,
-                        top = 8.dp,
-                    )
-                }
-            ItemContentComponent(
-                item = it,
-                detailStatusKey = detailStatusKey,
-                paddingValues = padding,
-            )
-        }
-    }
-}
-
-@Composable
-private fun ItemContentComponent(
-    item: UiTimeline.ItemContent,
-    detailStatusKey: MicroBlogKey?,
-    paddingValues: PaddingValues,
-    modifier: Modifier = Modifier,
-) {
-    val uriHandler = LocalUriHandler.current
     when (item) {
-        is UiTimeline.ItemContent.Status ->
+        is UiTimelineV2.Post ->
             StatusContent(
                 data = item,
                 detailStatusKey = detailStatusKey,
-                paddingValues = paddingValues,
                 modifier = modifier,
             )
 
-        is UiTimeline.ItemContent.User -> {
-            Column(
+        is UiTimelineV2.User -> {
+            UserContent(
+                item,
                 modifier =
-                    modifier
-                        .padding(paddingValues),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                CommonStatusHeaderComponent(
-                    data = item.value,
-                    onUserClick = {
-                        item.value.onClicked.invoke(
-                            ClickContext(
-                                launcher = {
-                                    uriHandler.openUri(it)
-                                },
-                            ),
-                        )
-                    },
-                )
-                if (item.button.isNotEmpty()) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        item.button.fastForEach { button ->
-                            when (button) {
-                                is UiTimeline.ItemContent.User.Button.AcceptFollowRequest ->
-                                    PlatformFilledTonalButton(
-                                        onClick = {
-                                            button.onClicked.invoke(
-                                                ClickContext(
-                                                    launcher = {
-                                                        uriHandler.openUri(it)
-                                                    },
-                                                ),
-                                            )
-                                        },
-                                    ) {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.Check,
-                                            contentDescription =
-                                                stringResource(
-                                                    Res.string.notification_item_accept_follow_request,
-                                                ),
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        PlatformText(
-                                            text =
-                                                stringResource(
-                                                    Res.string.notification_item_accept_follow_request,
-                                                ),
-                                        )
-                                    }
-                                is UiTimeline.ItemContent.User.Button.RejectFollowRequest -> {
-                                    PlatformButton(
-                                        onClick = {
-                                            button.onClicked.invoke(
-                                                ClickContext(
-                                                    launcher = {
-                                                        uriHandler.openUri(it)
-                                                    },
-                                                ),
-                                            )
-                                        },
-                                        content = {
-                                            FAIcon(
-                                                FontAwesomeIcons.Solid.Xmark,
-                                                contentDescription =
-                                                    stringResource(
-                                                        Res.string.notification_item_reject_follow_request,
-                                                    ),
-                                                tint = PlatformTheme.colorScheme.error,
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            PlatformText(
-                                                text =
-                                                    stringResource(
-                                                        Res.string.notification_item_reject_follow_request,
-                                                    ),
-                                                color = PlatformTheme.colorScheme.error,
-                                            )
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+                    Modifier
+                        .padding(horizontal = screenHorizontalPadding)
+                        .padding(vertical = 8.dp),
+            )
         }
 
-        is UiTimeline.ItemContent.UserList ->
+        is UiTimelineV2.UserList ->
             UserListContent(
                 data = item,
                 modifier =
-                    modifier
-                        .padding(paddingValues),
+                    Modifier
+                        .padding(horizontal = screenHorizontalPadding)
+                        .padding(vertical = 8.dp),
             )
 
-        is UiTimeline.ItemContent.Feed -> {
+        is UiTimelineV2.Feed -> {
             FeedComponent(
                 data = item,
                 modifier = modifier,
             )
         }
+
+        is UiTimelineV2.Message ->
+            TopMessageComponent(
+                data = item,
+                topMessageOnly = true,
+                modifier =
+                    Modifier
+                        .padding(horizontal = screenHorizontalPadding)
+                        .padding(vertical = 8.dp)
+                        .fillMaxWidth(),
+            )
     }
 }
 
 @Composable
-private fun UserListContent(
-    data: UiTimeline.ItemContent.UserList,
+private fun UserContent(
+    item: UiTimelineV2.User,
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -448,6 +283,121 @@ private fun UserListContent(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        item.message?.let { message ->
+            TopMessageComponent(
+                data = message,
+                topMessageOnly = false,
+                modifier =
+                    Modifier
+                        .fillMaxWidth(),
+            )
+        }
+        CommonStatusHeaderComponent(
+            data = item.value,
+            onUserClick = {
+                item.value.onClicked.invoke(
+                    ClickContext(
+                        launcher = {
+                            uriHandler.openUri(it)
+                        },
+                    ),
+                )
+            },
+        )
+        if (item.button.isNotEmpty()) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                item.button.fastForEach { button ->
+                    when ((button.text as? ActionMenu.Item.Text.Localized)?.type) {
+                        ActionMenu.Item.Text.Localized.Type.AcceptFollowRequest ->
+                            PlatformFilledTonalButton(
+                                onClick = {
+                                    button.onClicked.invoke(
+                                        ClickContext(
+                                            launcher = {
+                                                uriHandler.openUri(it)
+                                            },
+                                        ),
+                                    )
+                                },
+                            ) {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.Check,
+                                    contentDescription =
+                                        stringResource(
+                                            Res.string.notification_item_accept_follow_request,
+                                        ),
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                PlatformText(
+                                    text =
+                                        stringResource(
+                                            Res.string.notification_item_accept_follow_request,
+                                        ),
+                                )
+                            }
+
+                        ActionMenu.Item.Text.Localized.Type.RejectFollowRequest -> {
+                            PlatformButton(
+                                onClick = {
+                                    button.onClicked.invoke(
+                                        ClickContext(
+                                            launcher = {
+                                                uriHandler.openUri(it)
+                                            },
+                                        ),
+                                    )
+                                },
+                                content = {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Xmark,
+                                        contentDescription =
+                                            stringResource(
+                                                Res.string.notification_item_reject_follow_request,
+                                            ),
+                                        tint = PlatformTheme.colorScheme.error,
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    PlatformText(
+                                        text =
+                                            stringResource(
+                                                Res.string.notification_item_reject_follow_request,
+                                            ),
+                                        color = PlatformTheme.colorScheme.error,
+                                    )
+                                },
+                            )
+                        }
+
+                        else -> Unit
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun UserListContent(
+    data: UiTimelineV2.UserList,
+    modifier: Modifier = Modifier,
+) {
+    val uriHandler = LocalUriHandler.current
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        data.message?.let { message ->
+            TopMessageComponent(
+                data = message,
+                topMessageOnly = false,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(),
+            )
+        }
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -472,7 +422,7 @@ private fun UserListContent(
                 }
             }
         }
-        val status = data.status
+        val status = data.post
         if (status != null) {
             CompositionLocalProvider(
                 LocalComponentAppearance provides
@@ -500,10 +450,9 @@ private fun UserListContent(
 
 @Composable
 private fun StatusContent(
-    data: UiTimeline.ItemContent.Status,
+    data: UiTimelineV2.Post,
     detailStatusKey: MicroBlogKey?,
     modifier: Modifier = Modifier,
-    paddingValues: PaddingValues = PaddingValues(0.dp),
 ) {
     Column(
         modifier = modifier,
@@ -513,7 +462,10 @@ private fun StatusContent(
             Layout(
                 content = {
                     CompositionLocalProvider(
-                        LocalComponentAppearance provides LocalComponentAppearance.current.copy(fullWidthPost = false),
+                        LocalComponentAppearance provides
+                            LocalComponentAppearance.current.copy(
+                                fullWidthPost = false,
+                            ),
                     ) {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -522,7 +474,11 @@ private fun StatusContent(
                                 CommonStatusComponent(
                                     item = it,
                                     isDetail = false,
-                                    modifier = Modifier.padding(paddingValues),
+                                    modifier =
+                                        Modifier.padding(
+                                            horizontal = screenHorizontalPadding,
+                                            vertical = 8.dp,
+                                        ),
                                 )
                             }
                         }
@@ -532,7 +488,7 @@ private fun StatusContent(
                             Modifier
                                 .zIndex(-1f)
                                 .padding(
-                                    start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
+                                    start = screenHorizontalPadding,
                                 ).padding(start = AvatarComponentDefaults.size / 2)
                                 .offset(y = AvatarComponentDefaults.size / 2),
                     )
@@ -563,210 +519,110 @@ private fun StatusContent(
                 },
             )
         }
-        CommonStatusComponent(
-            item = data,
-            isDetail = detailStatusKey == data.statusKey,
-            modifier = Modifier.padding(paddingValues),
-        )
+        Column {
+            data.message?.let { message ->
+                TopMessageComponent(
+                    data = message,
+                    topMessageOnly = false,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                            .padding(
+                                horizontal = screenHorizontalPadding,
+                            ),
+                )
+            }
+            CommonStatusComponent(
+                item = data,
+                isDetail = detailStatusKey?.toString()?.let(data.itemKey::contains) == true,
+                modifier =
+                    Modifier
+                        .padding(
+                            horizontal = screenHorizontalPadding,
+                            vertical = 8.dp,
+                        ),
+            )
+        }
     }
 }
 
 @Composable
 private fun TopMessageComponent(
-    data: UiTimeline.TopMessage,
+    data: UiTimelineV2.Message,
     topMessageOnly: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val appearance = LocalComponentAppearance.current
     val uriHandler = LocalUriHandler.current
-    val icon =
-        when (data.icon) {
-            UiTimeline.TopMessage.Icon.Retweet -> FontAwesomeIcons.Solid.Retweet
-            UiTimeline.TopMessage.Icon.Follow -> FontAwesomeIcons.Solid.UserPlus
-            UiTimeline.TopMessage.Icon.Favourite -> FontAwesomeIcons.Solid.Heart
-            UiTimeline.TopMessage.Icon.Mention -> FontAwesomeIcons.Solid.At
-            UiTimeline.TopMessage.Icon.Poll -> FontAwesomeIcons.Solid.SquarePollHorizontal
-            UiTimeline.TopMessage.Icon.Edit -> FontAwesomeIcons.Solid.Pen
-            UiTimeline.TopMessage.Icon.Info -> FontAwesomeIcons.Solid.CircleInfo
-            UiTimeline.TopMessage.Icon.Reply -> FontAwesomeIcons.Solid.Reply
-            UiTimeline.TopMessage.Icon.Quote -> FontAwesomeIcons.Solid.QuoteLeft
-            UiTimeline.TopMessage.Icon.Pin -> FontAwesomeIcons.Solid.Thumbtack
-        }
+    val icon = data.icon.toImageVector()
     val text: String? =
         when (val type = data.type) {
-            is UiTimeline.TopMessage.MessageType.Bluesky ->
-                when (type) {
-                    UiTimeline.TopMessage.MessageType.Bluesky.Follow ->
-                        stringResource(resource = Res.string.bluesky_notification_item_followed_you)
+            is UiTimelineV2.Message.Type.Raw -> type.content
+            is UiTimelineV2.Message.Type.Unknown -> type.rawType.ifBlank { null }
+            is UiTimelineV2.Message.Type.Localized ->
+                when (type.data) {
+                    UiTimelineV2.Message.Type.Localized.MessageId.Mention ->
+                        stringResource(resource = Res.string.mastodon_notification_item_mentioned_you)
 
-                    UiTimeline.TopMessage.MessageType.Bluesky.Like ->
-                        stringResource(
-                            resource = Res.string.bluesky_notification_item_favourited_your_status,
-                        )
+                    UiTimelineV2.Message.Type.Localized.MessageId.NewPost ->
+                        stringResource(resource = Res.string.mastodon_notification_item_posted_status)
 
-                    UiTimeline.TopMessage.MessageType.Bluesky.Mention ->
-                        stringResource(
-                            resource = Res.string.bluesky_notification_item_mentioned_you,
-                        )
+                    UiTimelineV2.Message.Type.Localized.MessageId.Repost ->
+                        stringResource(resource = Res.string.mastodon_notification_item_reblogged_your_status)
 
-                    UiTimeline.TopMessage.MessageType.Bluesky.Quote ->
-                        stringResource(
-                            resource = Res.string.bluesky_notification_item_quoted_your_status,
-                        )
+                    UiTimelineV2.Message.Type.Localized.MessageId.Follow ->
+                        stringResource(resource = Res.string.mastodon_notification_item_followed_you)
 
-                    UiTimeline.TopMessage.MessageType.Bluesky.Reply ->
-                        stringResource(
-                            resource = Res.string.bluesky_notification_item_replied_to_you,
-                        )
+                    UiTimelineV2.Message.Type.Localized.MessageId.FollowRequest ->
+                        stringResource(resource = Res.string.mastodon_notification_item_requested_follow)
 
-                    UiTimeline.TopMessage.MessageType.Bluesky.Repost ->
-                        stringResource(
-                            resource = Res.string.bluesky_notification_item_reblogged_your_status,
-                        )
+                    UiTimelineV2.Message.Type.Localized.MessageId.Favourite ->
+                        stringResource(resource = Res.string.mastodon_notification_item_favourited_your_status)
 
-                    UiTimeline.TopMessage.MessageType.Bluesky.StarterpackJoined ->
-                        stringResource(
-                            resource = Res.string.bluesky_notification_item_starterpack_joined,
-                        )
-                    UiTimeline.TopMessage.MessageType.Bluesky.UnKnown ->
-                        stringResource(
-                            resource = Res.string.bluesky_notification_item_unKnown,
-                        )
-
-                    UiTimeline.TopMessage.MessageType.Bluesky.Pinned ->
-                        stringResource(
-                            resource = Res.string.bluesky_notification_item_pin,
-                        )
-                }
-
-            is UiTimeline.TopMessage.MessageType.Mastodon ->
-                when (type) {
-                    is UiTimeline.TopMessage.MessageType.Mastodon.Favourite ->
-                        stringResource(
-                            resource = Res.string.mastodon_notification_item_favourited_your_status,
-                        )
-
-                    is UiTimeline.TopMessage.MessageType.Mastodon.Follow ->
-                        stringResource(
-                            resource = Res.string.mastodon_notification_item_followed_you,
-                        )
-
-                    is UiTimeline.TopMessage.MessageType.Mastodon.FollowRequest ->
-                        stringResource(
-                            resource = Res.string.mastodon_notification_item_requested_follow,
-                        )
-
-                    is UiTimeline.TopMessage.MessageType.Mastodon.Mention ->
-                        stringResource(
-                            resource = Res.string.mastodon_notification_item_mentioned_you,
-                        )
-
-                    is UiTimeline.TopMessage.MessageType.Mastodon.Poll ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.PollEnded ->
                         stringResource(resource = Res.string.mastodon_notification_item_poll_ended)
 
-                    is UiTimeline.TopMessage.MessageType.Mastodon.Reblogged ->
-                        stringResource(
-                            resource = Res.string.mastodon_notification_item_reblogged_your_status,
-                        )
+                    UiTimelineV2.Message.Type.Localized.MessageId.PostUpdated ->
+                        stringResource(resource = Res.string.mastodon_notification_item_updated_status)
 
-                    is UiTimeline.TopMessage.MessageType.Mastodon.Status ->
-                        stringResource(
-                            resource = Res.string.mastodon_notification_item_posted_status,
-                        )
+                    UiTimelineV2.Message.Type.Localized.MessageId.Reply ->
+                        stringResource(resource = Res.string.mastodon_notification_item_mentioned_you)
 
-                    is UiTimeline.TopMessage.MessageType.Mastodon.Update ->
-                        stringResource(
-                            resource = Res.string.mastodon_notification_item_updated_status,
-                        )
+                    UiTimelineV2.Message.Type.Localized.MessageId.Quote ->
+                        stringResource(resource = Res.string.mastodon_notification_item_reblogged_your_status)
 
-                    is UiTimeline.TopMessage.MessageType.Mastodon.UnKnown -> null
-                    is UiTimeline.TopMessage.MessageType.Mastodon.Pinned ->
-                        stringResource(
-                            resource = Res.string.mastodon_item_pinned,
-                        )
-                }
+                    UiTimelineV2.Message.Type.Localized.MessageId.Reaction ->
+                        stringResource(resource = Res.string.misskey_notification_item_reacted_to_your_status)
 
-            is UiTimeline.TopMessage.MessageType.Misskey ->
-                when (type) {
-                    is UiTimeline.TopMessage.MessageType.Misskey.AchievementEarned ->
-                        stringResource(
-                            resource = Res.string.misskey_notification_item_achievement_earned,
-                            type.achievement?.titleResId?.let { stringResource(it) } ?: "",
-                            type.achievement?.descriptionResId?.let { stringResource(it) } ?: "",
-                        )
+                    UiTimelineV2.Message.Type.Localized.MessageId.FollowRequestAccepted ->
+                        stringResource(resource = Res.string.misskey_notification_item_follow_request_accepted)
 
-                    is UiTimeline.TopMessage.MessageType.Misskey.App ->
+                    UiTimelineV2.Message.Type.Localized.MessageId.AchievementEarned -> {
+                        runCatching {
+                            MisskeyAchievement.valueOf(type.args.getOrNull(0).orEmpty())
+                        }.getOrNull()?.let { achievement ->
+                            stringResource(
+                                resource = Res.string.misskey_notification_item_achievement_earned,
+                                stringResource(achievement.titleResId),
+                                stringResource(achievement.descriptionResId),
+                            )
+                        }
+                            ?: stringResource(
+                                resource = Res.string.misskey_notification_item_achievement_earned,
+                                type.args.getOrNull(0).orEmpty(),
+                                "",
+                            )
+                    }
+
+                    UiTimelineV2.Message.Type.Localized.MessageId.App ->
                         stringResource(resource = Res.string.misskey_notification_item_app)
 
-                    is UiTimeline.TopMessage.MessageType.Misskey.Follow ->
-                        stringResource(resource = Res.string.misskey_notification_item_followed_you)
+                    UiTimelineV2.Message.Type.Localized.MessageId.StarterpackJoined ->
+                        stringResource(resource = Res.string.bluesky_notification_item_starterpack_joined)
 
-                    is UiTimeline.TopMessage.MessageType.Misskey.FollowRequestAccepted ->
-                        stringResource(
-                            resource = Res.string.misskey_notification_item_follow_request_accepted,
-                        )
-
-                    is UiTimeline.TopMessage.MessageType.Misskey.Mention ->
-                        stringResource(
-                            resource = Res.string.misskey_notification_item_mentioned_you,
-                        )
-
-                    is UiTimeline.TopMessage.MessageType.Misskey.PollEnded ->
-                        stringResource(
-                            resource = Res.string.misskey_notification_item_poll_ended,
-                        )
-
-                    is UiTimeline.TopMessage.MessageType.Misskey.Quote ->
-                        stringResource(
-                            resource = Res.string.misskey_notification_item_quoted_your_status,
-                        )
-
-                    is UiTimeline.TopMessage.MessageType.Misskey.Reaction ->
-                        stringResource(
-                            resource = Res.string.misskey_notification_item_reacted_to_your_status,
-                        )
-
-                    is UiTimeline.TopMessage.MessageType.Misskey.ReceiveFollowRequest ->
-                        stringResource(
-                            resource = Res.string.misskey_notification_item_requested_follow,
-                        )
-
-                    is UiTimeline.TopMessage.MessageType.Misskey.Renote ->
-                        stringResource(
-                            resource = Res.string.misskey_notification_item_reposted_your_status,
-                        )
-
-                    is UiTimeline.TopMessage.MessageType.Misskey.Reply ->
-                        stringResource(
-                            resource = Res.string.misskey_notification_item_replied_to_you,
-                        )
-
-                    is UiTimeline.TopMessage.MessageType.Misskey.UnKnown ->
-                        stringResource(
-                            resource = Res.string.misskey_notification_unknwon,
-                            type.type,
-                        )
-
-                    is UiTimeline.TopMessage.MessageType.Misskey.Pinned ->
-                        stringResource(
-                            resource = Res.string.mastodon_item_pinned,
-                        )
-                }
-
-            is UiTimeline.TopMessage.MessageType.VVO ->
-                when (type) {
-                    is UiTimeline.TopMessage.MessageType.VVO.Custom -> type.message
-                    UiTimeline.TopMessage.MessageType.VVO.Like ->
-                        stringResource(resource = Res.string.vvo_notification_like)
-                }
-
-            is UiTimeline.TopMessage.MessageType.XQT ->
-                when (type) {
-                    is UiTimeline.TopMessage.MessageType.XQT.Custom -> type.message
-                    UiTimeline.TopMessage.MessageType.XQT.Mention ->
-                        stringResource(resource = Res.string.xqt_item_mention_status)
-
-                    UiTimeline.TopMessage.MessageType.XQT.Retweet ->
-                        stringResource(resource = Res.string.xqt_item_reblogged_status)
+                    UiTimelineV2.Message.Type.Localized.MessageId.Pinned ->
+                        stringResource(resource = Res.string.mastodon_item_pinned)
                 }
         }
 
@@ -797,7 +653,16 @@ private fun TopMessageComponent(
                                 },
                             ),
                         )
-                    }.then(modifier),
+                    }.let {
+                        if (!appearance.fullWidthPost && !topMessageOnly) {
+                            it.padding(
+                                start = AvatarComponentDefaults.size - PlatformTheme.typography.caption.fontSize.value.dp,
+                            )
+                        } else {
+                            it
+                        }
+                    }.fillMaxWidth()
+                    .then(modifier),
         )
     }
 }
@@ -950,6 +815,7 @@ private val MisskeyAchievement.descriptionResId: StringResource
             MisskeyAchievement.VIEW_INSTANCE_CHART -> Res.string.misskey_achievement_view_instance_chart_description
             MisskeyAchievement.OUTPUT_HELLO_WORLD_ON_SCRATCHPAD ->
                 Res.string.misskey_achievement_output_hello_world_on_scratchpad_description
+
             MisskeyAchievement.OPEN3WINDOWS -> Res.string.misskey_achievement_open3windows_description
             MisskeyAchievement.DRIVE_FOLDER_CIRCULAR_REFERENCE -> Res.string.misskey_achievement_drive_folder_circular_reference_description
             MisskeyAchievement.REACT_WITHOUT_READ -> Res.string.misskey_achievement_react_without_read_description

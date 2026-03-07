@@ -1,31 +1,26 @@
 package dev.dimension.flare.data.datasource.vvo
 
-import SnowflakeIdGenerator
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 
 internal class LikeRemoteMediator(
     private val service: VVOService,
-    database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
+) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String = "like_$accountKey"
     private val containerId = "2308691748186704_-_mix"
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         val config = service.config()
         if (config.data?.login != true) {
             throw LoginExpiredException(
@@ -36,8 +31,13 @@ internal class LikeRemoteMediator(
 
         val page =
             when (request) {
+                PagingRequest.Refresh -> null
+                is PagingRequest.Prepend -> {
+                    return PagingResult(
+                        endOfPaginationReached = true,
+                    )
+                }
                 is PagingRequest.Append -> request.nextKey.toIntOrNull()
-                else -> null
             }
 
         val response =
@@ -75,21 +75,10 @@ internal class LikeRemoteMediator(
                 }?.filter { it.user?.id != null }
                 .orEmpty()
 
-        val data =
-            status.map { statusItem ->
-                statusItem.toDbPagingTimeline(
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                    sortIdProvider = {
-                        -SnowflakeIdGenerator.nextId()
-                    },
-                )
-            }
         val nextKey = response.data?.cardlistInfo?.page
-
         return PagingResult(
             endOfPaginationReached = nextKey == null,
-            data = data,
+            data = status.map { it.render(accountKey) },
             nextKey = nextKey?.toString(),
         )
     }

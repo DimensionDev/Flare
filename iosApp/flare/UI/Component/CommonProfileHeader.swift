@@ -7,6 +7,38 @@ enum CommonProfileHeaderConstants {
     static let avatarSize: CGFloat = 96
 }
 
+private enum FollowButtonState: Equatable {
+    case blocked
+    case following
+    case requested
+    case follow
+
+    init(_ relation: UiRelation) {
+        if relation.blocking {
+            self = .blocked
+        } else if relation.following {
+            self = .following
+        } else if relation.hasPendingFollowRequestFromYou {
+            self = .requested
+        } else {
+            self = .follow
+        }
+    }
+
+    var titleKey: LocalizedStringKey {
+        switch self {
+        case .blocked:
+            "relation_blocked"
+        case .following:
+            "relation_following"
+        case .requested:
+            "relation_requested"
+        case .follow:
+            "relation_follow"
+        }
+    }
+}
+
 struct CommonProfileHeader: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
@@ -53,37 +85,34 @@ struct CommonProfileHeader: View {
                     VStack {
                         Spacer()
                             .frame(height: CommonProfileHeaderConstants.headerHeight)
-                            if case .success(let data) = onEnum(of: isMe), !data.data.boolValue {
-                                switch onEnum(of: relation) {
-                                case .success(let relationState):
-                                    Button(action: {
+                        if case .success(let data) = onEnum(of: isMe), !data.data.boolValue {
+                            switch onEnum(of: relation) {
+                            case .success(let relationState):
+                                let buttonState = FollowButtonState(relationState.data)
+                                VStack(spacing: 4) {
+                                    followButton(state: buttonState) {
                                         onFollowClick(relationState.data)
-                                    }, label: {
-                                        let text = if relationState.data.blocking {
-                                            String(localized: "relation_blocked")
-                                        } else if relationState.data.following {
-                                            String(localized: "relation_following")
-                                        } else if relationState.data.hasPendingFollowRequestFromYou {
-                                            String(localized: "relation_requested")
-                                        } else {
-                                            String(localized: "relation_follow")
-                                        }
-                                        Text(text)
-                                    })
-                                    .backport
-                                    .glassProminentButtonStyle()
+                                    }
+                                    .id(buttonState)
+                                    .transition(.opacity.combined(with: .scale(scale: 0.92)))
+
                                     if relationState.data.isFans {
                                         Text("relation_is_fans")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                            .multilineTextAlignment(.center)
                                     }
-                                case .loading: Button(action: {}, label: {
-                                    Text("#loading")
-                                })
-                                .backport
-                                .glassProminentButtonStyle()
-                                .redacted(reason: .placeholder)
-                                case .error: EmptyView()
                                 }
+                                .animation(.spring(response: 0.25, dampingFraction: 0.86), value: buttonState)
+                            case .loading: Button(action: {}, label: {
+                                Text("#loading")
+                            })
+                            .backport
+                            .glassProminentButtonStyle()
+                            .redacted(reason: .placeholder)
+                            case .error: EmptyView()
                             }
+                        }
                     }
                 }
 
@@ -99,6 +128,30 @@ struct CommonProfileHeader: View {
             .padding([.horizontal])
         }
     }
+
+    @ViewBuilder
+    private func followButton(state: FollowButtonState, action: @escaping () -> Void) -> some View {
+        switch state {
+        case .blocked:
+            Button(action: action) {
+                Text(state.titleKey)
+            }
+            .tint(.red)
+            .buttonStyle(.borderedProminent)
+        case .following, .requested:
+            Button(action: action) {
+                Text(state.titleKey)
+            }
+            .backport
+            .glassButtonStyle(fallbackStyle: .bordered)
+        case .follow:
+            Button(action: action) {
+                Text(state.titleKey)
+            }
+            .backport
+            .glassProminentButtonStyle()
+        }
+    }
     
     var content: some View {
         VStack(
@@ -110,7 +163,7 @@ struct CommonProfileHeader: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .textSelection(.enabled)
             HStack {
-                Text(user.handle)
+                Text(user.handle.canonical)
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .textSelection(.enabled)

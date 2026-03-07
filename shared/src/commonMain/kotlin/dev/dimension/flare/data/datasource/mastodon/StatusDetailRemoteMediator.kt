@@ -1,29 +1,23 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.mastodon.MastodonService
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import kotlinx.coroutines.flow.firstOrNull
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
+import org.koin.core.component.KoinComponent
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
     private val statusKey: MicroBlogKey,
     private val service: MastodonService,
-    private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val statusOnly: Boolean,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
+) : CacheableRemoteLoader<UiTimelineV2>,
+    KoinComponent {
     override val pagingKey: String =
         buildString {
             append("status_detail_")
@@ -35,10 +29,10 @@ internal class StatusDetailRemoteMediator(
             append(accountKey.toString())
         }
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         val result =
             when (request) {
                 is PagingRequest.Append -> {
@@ -63,26 +57,6 @@ internal class StatusDetailRemoteMediator(
                         endOfPaginationReached = true,
                     )
                 PagingRequest.Refresh -> {
-                    val exists = database.pagingTimelineDao().existsPaging(accountKey, pagingKey)
-                    if (!exists) {
-                        val status = database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()
-                        status?.let {
-                            database.connect {
-                                database
-                                    .pagingTimelineDao()
-                                    .insertAll(
-                                        listOf(
-                                            DbPagingTimeline(
-                                                accountType = AccountType.Specific(accountKey),
-                                                statusKey = statusKey,
-                                                pagingKey = pagingKey,
-                                                sortId = 0,
-                                            ),
-                                        ),
-                                    )
-                            }
-                        }
-                    }
                     val current =
                         service.lookupStatus(
                             statusKey.id,
@@ -94,13 +68,7 @@ internal class StatusDetailRemoteMediator(
 
         return PagingResult(
             endOfPaginationReached = !shouldLoadMore,
-            data =
-                result.toDbPagingTimeline(
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                ) {
-                    -result.indexOf(it).toLong()
-                },
+            data = result.render(accountKey),
             nextKey = if (shouldLoadMore) pagingKey else null,
         )
     }

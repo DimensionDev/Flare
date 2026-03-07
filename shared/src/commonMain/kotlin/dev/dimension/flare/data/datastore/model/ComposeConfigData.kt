@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.datastore.model
 
 import androidx.datastore.core.okio.OkioSerializer
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromByteArray
@@ -12,8 +12,8 @@ import okio.BufferedSource
 
 @Serializable
 internal data class ComposeConfigData(
-    val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type =
-        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public,
+    val visibility: UiTimelineV2.Post.Visibility =
+        UiTimelineV2.Post.Visibility.Public,
 )
 
 @OptIn(ExperimentalSerializationApi::class)

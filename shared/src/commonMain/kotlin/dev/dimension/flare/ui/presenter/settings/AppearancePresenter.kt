@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.createSampleStatus
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -28,5 +28,5 @@ public class AppearancePresenter : PresenterBase<AppearanceState>() {
 
 @Immutable
 public interface AppearanceState {
-    public val sampleStatus: UiState<UiTimeline>
+    public val sampleStatus: UiState<UiTimelineV2.Post>
 }

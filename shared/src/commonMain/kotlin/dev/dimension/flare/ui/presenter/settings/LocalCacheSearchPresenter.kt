@@ -12,17 +12,15 @@ import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
-import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.status.LogStatusHistoryPresenter
 import kotlinx.coroutines.flow.map
@@ -37,8 +35,8 @@ public class LocalCacheSearchPresenter :
 
     @androidx.compose.runtime.Immutable
     public interface State {
-        public val data: PagingState<UiTimeline>
-        public val history: PagingState<UiTimeline>
+        public val data: PagingState<UiTimelineV2>
+        public val history: PagingState<UiTimelineV2>
         public val userHistory: PagingState<UiProfile>
         public val searchUser: PagingState<UiProfile>
 
@@ -74,15 +72,7 @@ public class LocalCacheSearchPresenter :
                             .getStatusHistoryPagingSource(pagingKey = LogStatusHistoryPresenter.PAGING_KEY)
                     }.flow.map {
                         it.map {
-                            val event =
-                                if (it.status.status.data.accountType is AccountType.Specific) {
-                                    accounts
-                                        .firstOrNull { account -> account.accountKey == it.status.status.data.accountType.accountKey }
-                                        ?.dataSource as? StatusEvent
-                                } else {
-                                    null
-                                }
-                            it.render(event)
+                            it.status.status.data.content
                         }
                     }
                 }
@@ -95,15 +85,7 @@ public class LocalCacheSearchPresenter :
                     paging.map { pagingData ->
                         pagingData.map {
                             it.map {
-                                val event =
-                                    if (it.status.data.accountType is AccountType.Specific) {
-                                        accounts
-                                            .firstOrNull { account -> account.accountKey == it.status.data.accountType.accountKey }
-                                            ?.dataSource as? StatusEvent
-                                    } else {
-                                        null
-                                    }
-                                it.render(event)
+                                it.status.data.content
                             }
                         }
                     }
@@ -123,31 +105,27 @@ public class LocalCacheSearchPresenter :
                         .filter {
                             it.data.accountType is AccountType.Specific
                         }.map {
-                            require(it.data.accountType is AccountType.Specific)
-                            it.user.render(it.data.accountType.accountKey)
+                            it.user.content
                         }
                 }
             }.collectAsLazyPagingItems().toPagingState()
 
         val searchUser =
-            remember(query, allAccounts) {
+            remember(query) {
                 if (query.isEmpty()) {
                     UiState.Error(Throwable("Query is empty"))
                 } else {
-                    allAccounts.map { accounts ->
+                    UiState.Success(
                         Pager(
                             config = pagingConfig,
                         ) {
                             database.userDao().searchUser(query)
                         }.flow.map {
                             it.map { user ->
-                                // TODO: potential bug: after logout, there might be no such a platform type for this user
-                                val account =
-                                    accounts.first { it.platformType == user.platformType }
-                                user.render(account.accountKey)
+                                user.content
                             }
-                        }
-                    }
+                        },
+                    )
                 }
             }.map {
                 it.collectAsLazyPagingItems()
@@ -158,8 +136,8 @@ public class LocalCacheSearchPresenter :
                 query = value
             }
 
-            override val data: PagingState<UiTimeline> = data
-            override val history: PagingState<UiTimeline> = history
+            override val data: PagingState<UiTimelineV2> = data
+            override val history: PagingState<UiTimelineV2> = history
             override val userHistory: PagingState<UiProfile> = userHistory
             override val searchUser: PagingState<UiProfile> = searchUser
         }

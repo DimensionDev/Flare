@@ -1,88 +1,83 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickContext
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiNumber
-import dev.dimension.flare.ui.model.launch
+import dev.dimension.flare.ui.model.onClicked
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Immutable
-public sealed interface ActionMenu {
+public sealed class ActionMenu {
     @Immutable
+    @Serializable
     public data class Group internal constructor(
         val displayItem: Item,
-        val actions: ImmutableList<ActionMenu>,
-    ) : ActionMenu
+        val actions: SerializableImmutableList<ActionMenu>,
+    ) : ActionMenu()
+
+//    @Immutable
+//    @Serializable
+//    public data class AsyncActionMenuItem internal constructor(
+//        @Transient
+//        val flow: Flow<Item> = emptyFlow(),
+//    ) : ActionMenu()
 
     @Immutable
-    public data class AsyncActionMenuItem internal constructor(
-        val flow: Flow<Item>,
-    ) : ActionMenu
+    @Serializable
+    public data object Divider : ActionMenu()
 
     @Immutable
-    public data object Divider : ActionMenu
-
-    @Immutable
+    @Serializable
     public data class Item internal constructor(
-        val icon: Icon? = null,
+        internal val updateKey: String = "",
+        val icon: UiIcon? = null,
         val text: Text? = null,
         val count: UiNumber? = null,
-        val onClicked: (ClickContext.() -> Unit)? = null,
         val color: Color? = null,
-    ) : ActionMenu {
+        private val clickEvent: ClickEvent = ClickEvent.Noop,
+    ) : ActionMenu() {
         init {
             require(icon != null || text != null) {
                 "icon and text cannot be both null"
             }
         }
 
+        val onClicked: ClickContext.() -> Unit by lazy {
+            clickEvent.onClicked
+        }
+
+        @Serializable
         public enum class Color {
             Red,
             ContentColor,
             PrimaryColor,
         }
 
-        public enum class Icon {
-            Like,
-            Unlike,
-            Retweet,
-            Unretweet,
-            Reply,
-            Comment,
-            Quote,
-            Bookmark,
-            Unbookmark,
-            More,
-            MoreVerticel,
-            Delete,
-            Report,
-            React,
-            UnReact,
-            Share,
-            List,
-            ChatMessage,
-            Mute,
-            UnMute,
-            Block,
-            UnBlock,
-        }
-
         @Immutable
+        @Serializable
         public sealed interface Text {
             @Immutable
+            @Serializable
             public data class Raw(
                 val text: String,
             ) : Text
 
             @Immutable
+            @Serializable
             public data class Localized(
+                @SerialName("action_type")
                 val type: Type,
-                val parameters: ImmutableList<String> = persistentListOf(),
+                val parameters: SerializableImmutableList<String> = persistentListOf(),
             ) : Text {
+                @Serializable
                 public enum class Type {
                     Like,
                     Unlike,
@@ -108,6 +103,8 @@ public sealed interface ActionMenu {
                     UnBlock,
                     BlockWithHandleParameter,
                     MuteWithHandleParameter,
+                    AcceptFollowRequest,
+                    RejectFollowRequest,
                 }
             }
         }
@@ -121,25 +118,27 @@ internal fun userActionsMenu(
 ): List<ActionMenu> =
     listOfNotNull(
         ActionMenu.Item(
-            icon = ActionMenu.Item.Icon.Mute,
+            icon = UiIcon.Mute,
             text =
                 ActionMenu.Item.Text.Localized(
                     type = ActionMenu.Item.Text.Localized.Type.MuteWithHandleParameter,
                     parameters = persistentListOf(handle),
                 ),
-            onClicked = {
-                launcher.launch(DeeplinkRoute.MuteUser(accountKey, userKey))
-            },
+            clickEvent =
+                ClickEvent.Deeplink(
+                    DeeplinkRoute.MuteUser(accountKey, userKey),
+                ),
         ),
         ActionMenu.Item(
-            icon = ActionMenu.Item.Icon.Block,
+            icon = UiIcon.Block,
             text =
                 ActionMenu.Item.Text.Localized(
                     type = ActionMenu.Item.Text.Localized.Type.BlockWithHandleParameter,
                     parameters = persistentListOf(handle),
                 ),
-            onClicked = {
-                launcher.launch(DeeplinkRoute.BlockUser(accountKey, userKey))
-            },
+            clickEvent =
+                ClickEvent.Deeplink(
+                    DeeplinkRoute.BlockUser(accountKey, userKey),
+                ),
         ),
     )

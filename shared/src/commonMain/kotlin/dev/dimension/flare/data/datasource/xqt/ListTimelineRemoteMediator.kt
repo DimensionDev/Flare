@@ -2,16 +2,15 @@ package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.cursor
-import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -19,12 +18,9 @@ import kotlinx.serialization.Serializable
 internal class ListTimelineRemoteMediator(
     private val listId: String,
     private val service: XQTService,
-    private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
-    override val pagingKey = "list_${listId}_$accountKey"
+) : CacheableRemoteLoader<UiTimelineV2> {
+    override val pagingKey: String = "list_${listId}_$accountKey"
 
     @Serializable
     data class Request(
@@ -34,21 +30,20 @@ internal class ListTimelineRemoteMediator(
         val cursor: String? = null,
     )
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         val response =
             when (request) {
                 PagingRequest.Refresh -> {
-                    service
-                        .getListLatestTweetsTimeline(
-                            variables =
-                                Request(
-                                    listID = listId,
-                                    count = pageSize.toLong(),
-                                ).encodeJson(),
-                        )
+                    service.getListLatestTweetsTimeline(
+                        variables =
+                            Request(
+                                listID = listId,
+                                count = pageSize.toLong(),
+                            ).encodeJson(),
+                    )
                 }
 
                 is PagingRequest.Prepend -> {
@@ -70,11 +65,9 @@ internal class ListTimelineRemoteMediator(
             }.body()?.data?.list?.tweetsTimeline?.timeline?.instructions.orEmpty()
         val result = response.tweets()
 
-        val data = result.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
-
         return PagingResult(
             endOfPaginationReached = response.isEmpty(),
-            data = data,
+            data = result.mapNotNull { it.render(accountKey) },
             nextKey = response.cursor(),
         )
     }

@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.toImmutableListWrapper
+import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.data.repository.allAccountsPresenter
@@ -43,7 +44,7 @@ public class AccountsPresenter :
                                 repository = accountRepository,
                             ).flatMap { service ->
                                 remember(account.accountKey) {
-                                    service.userById(account.accountKey.id)
+                                    (service as UserDataSource).userHandler.userById(account.accountKey.id)
                                 }.collectAsState().toUi()
                             }
                     }.toImmutableList()

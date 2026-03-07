@@ -3,7 +3,7 @@ import KotlinSharedUI
 
 struct UserListView: View {
     @Environment(\.openURL) private var openURL
-    let data: UiTimeline.ItemContentUserList
+    let data: UiTimelineV2.UserList
     var body: some View {
         VStack {
             ScrollView(.horizontal) {
@@ -24,7 +24,7 @@ struct UserListView: View {
                 }
             }
             .scrollIndicators(.hidden)
-            if let status = data.status {
+            if let status = data.post {
                 VStack {
                     StatusView(data: status, isQuote: true, forceHideActions: true)
                         .padding(8)

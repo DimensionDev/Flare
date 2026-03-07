@@ -1,9 +1,12 @@
 package dev.dimension.flare.ui.presenter.home
 
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,14 +31,19 @@ public class SearchStatusTimelinePresenter(
     private val accountRepository: AccountRepository by inject()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val loader: Flow<BaseTimelineLoader> by lazy {
+    override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
         accountServiceFlow(
             accountType = accountType,
             repository = accountRepository,
         ).flatMapLatest { service ->
             queryFlow.map { query ->
                 if (query.isEmpty()) {
-                    BaseTimelineLoader.NotSupported
+                    object : RemoteLoader<UiTimelineV2> {
+                        override suspend fun load(
+                            pageSize: Int,
+                            request: PagingRequest,
+                        ): PagingResult<UiTimelineV2> = PagingResult(data = emptyList())
+                    }
                 } else {
                     service.searchStatus(query)
                 }

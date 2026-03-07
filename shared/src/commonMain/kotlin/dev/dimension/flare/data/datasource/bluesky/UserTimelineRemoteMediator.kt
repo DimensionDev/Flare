@@ -3,27 +3,23 @@ package dev.dimension.flare.data.datasource.bluesky
 import androidx.paging.ExperimentalPagingApi
 import app.bsky.feed.GetAuthorFeedFilter
 import app.bsky.feed.GetAuthorFeedQueryParams
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 import sh.christian.ozone.api.Did
 
 @OptIn(ExperimentalPagingApi::class)
 internal class UserTimelineRemoteMediator(
     private val service: BlueskyService,
     private val accountKey: MicroBlogKey,
-    private val database: CacheDatabase,
     private val userKey: MicroBlogKey,
     private val onlyMedia: Boolean = false,
     private val withReplies: Boolean = false,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
+) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey =
         buildString {
             append("user_timeline")
@@ -37,10 +33,10 @@ internal class UserTimelineRemoteMediator(
             append(userKey.toString())
         }
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         val filter =
             when {
                 onlyMedia -> GetAuthorFeedFilter.PostsWithMedia
@@ -84,11 +80,7 @@ internal class UserTimelineRemoteMediator(
 
         return PagingResult(
             endOfPaginationReached = response.cursor == null,
-            data =
-                response.feed.toDbPagingTimeline(
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                ),
+            data = response.feed.render(accountKey),
             nextKey = response.cursor,
         )
     }

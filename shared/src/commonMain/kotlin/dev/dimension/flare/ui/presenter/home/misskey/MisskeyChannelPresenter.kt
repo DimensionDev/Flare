@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.refreshSuspend
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
@@ -14,7 +15,7 @@ import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.flattenUiState
@@ -25,6 +26,7 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -40,7 +42,7 @@ public class MisskeyChannelPresenter(
 
     private val timelinePresenter by lazy {
         object : TimelinePresenter() {
-            override val loader by lazy {
+            override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
                 accountServiceFlow(accountType, accountRepository)
                     .map {
                         require(it is MisskeyDataSource)
@@ -128,7 +130,7 @@ public class MisskeyChannelPresenter(
 @Immutable
 public interface MisskeyChannelState {
     public val info: UiState<UiList.Channel>
-    public val timeline: PagingState<UiTimeline>
+    public val timeline: PagingState<UiTimelineV2>
     public val followed: UiState<Boolean>
 
     public suspend fun refreshSuspend()

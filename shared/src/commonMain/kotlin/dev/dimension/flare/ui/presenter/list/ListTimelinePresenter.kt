@@ -1,10 +1,11 @@
 package dev.dimension.flare.ui.presenter.list
 
-import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
+import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -21,7 +22,7 @@ public class ListTimelinePresenter(
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
 
-    override val loader: Flow<BaseTimelineLoader> by lazy {
+    override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
         accountServiceFlow(
             accountType = accountType,
             repository = accountRepository,

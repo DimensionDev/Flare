@@ -100,20 +100,21 @@ struct NotificationFilterSegments: View {
 }
 
 struct NotificationAccountsBar: View {
-    let items: [UiProfile : KotlinInt]
+    let items: [NotificationAccountItem]
     let selectedAccount: UiProfile?
     let onSelect: (UiProfile) -> Void
 
     var body: some View {
         ScrollView(.horizontal) {
             HStack(spacing: 8) {
-                ForEach(Array(items.keys), id: \.handle) { key in
-                    let value = items[key]?.intValue
+                ForEach(items, id: \.stableKey) { item in
+                    let key = item.profile
+                    let value = item.badge
                     HStack {
                         ZStack(alignment: .bottomTrailing) {
                             AvatarView(data: key.avatar)
-                            if let badge = value, badge > 0 {
-                                Text("\(badge)")
+                            if value > 0 {
+                                Text("\(value)")
                                     .font(.caption2)
                                     .padding(2)
                                     .background(
@@ -124,7 +125,7 @@ struct NotificationAccountsBar: View {
                                     .frame(width: 12, height: 12)
                             }
                         }
-                        Text(key.handle)
+                        Text(key.handle.canonical)
                     }
                     .onTapGesture {
                         onSelect(key)

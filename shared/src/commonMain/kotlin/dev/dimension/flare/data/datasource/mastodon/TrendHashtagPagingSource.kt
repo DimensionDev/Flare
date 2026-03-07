@@ -1,30 +1,41 @@
 package dev.dimension.flare.data.datasource.mastodon
 
-import androidx.paging.PagingState
-import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.mastodon.api.TrendsResources
 import dev.dimension.flare.ui.model.UiHashtag
 
 internal class TrendHashtagPagingSource(
     private val service: TrendsResources,
-) : BasePagingSource<Int, UiHashtag>() {
-    override fun getRefreshKey(state: PagingState<Int, UiHashtag>): Int? = null
+) : RemoteLoader<UiHashtag> {
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiHashtag> {
+        val response =
+            when (request) {
+                is PagingRequest.Prepend, is PagingRequest.Append -> {
+                    return PagingResult(
+                        endOfPaginationReached = true,
+                    )
+                }
 
-    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiHashtag> {
-        service
-            .trendsTags()
-            .map {
-                UiHashtag(
-                    hashtag = it.name ?: "",
-                    description = null,
-                    searchContent = "#${it.name}",
-                )
-            }.let {
-                return LoadResult.Page(
-                    data = it,
-                    prevKey = null,
-                    nextKey = null,
-                )
+                PagingRequest.Refresh -> {
+                    service
+                        .trendsTags()
+                        .map {
+                            UiHashtag(
+                                hashtag = it.name ?: "",
+                                description = null,
+                                searchContent = "#${it.name}",
+                            )
+                        }
+                }
             }
+
+        return PagingResult(
+            data = response,
+        )
     }
 }

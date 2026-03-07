@@ -7,6 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
@@ -15,13 +16,16 @@ import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
@@ -48,7 +52,7 @@ public class DiscoverPresenter :
         accountRepository.allAccounts
             .map {
                 it.map {
-                    it.dataSource.userById(it.accountKey.id).toUi()
+                    (it.dataSource as UserDataSource).userHandler.userById(it.accountKey.id).toUi()
                 }
             }.combineLatestFlowLists()
             .map {
@@ -76,7 +80,9 @@ public class DiscoverPresenter :
             accountServiceFlow(accountType = accountType, repository = accountRepository)
                 .flatMapLatest { dataSource ->
                     runCatching {
-                        dataSource.discoverUsers()
+                        Pager(config = pagingConfig) {
+                            dataSource.discoverUsers().toPagingSource()
+                        }.flow
                     }.getOrElse { PagingData.emptyFlow(isError = true) }
                 }
         }
@@ -87,7 +93,9 @@ public class DiscoverPresenter :
             accountServiceFlow(accountType = accountType, repository = accountRepository)
                 .flatMapLatest { dataSource ->
                     runCatching {
-                        dataSource.discoverHashtags()
+                        Pager(config = pagingConfig) {
+                            dataSource.discoverHashtags().toPagingSource()
+                        }.flow
                     }.getOrElse { PagingData.emptyFlow(isError = true) }
                 }
         }
@@ -143,7 +151,7 @@ public class DiscoverPresenter :
 @Immutable
 public interface DiscoverState {
     public val users: PagingState<UiProfile>
-    public val status: PagingState<UiTimeline>
+    public val status: PagingState<UiTimelineV2>
     public val hashtags: PagingState<UiHashtag>
     public val accounts: UiState<ImmutableList<UiProfile>>
     public val selectedAccount: UiProfile?

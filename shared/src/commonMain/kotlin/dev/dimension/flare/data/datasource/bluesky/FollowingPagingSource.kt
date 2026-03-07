@@ -1,8 +1,9 @@
 package dev.dimension.flare.data.datasource.bluesky
 
-import androidx.paging.PagingState
 import app.bsky.graph.GetFollowsQueryParams
-import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
@@ -13,28 +14,44 @@ internal class FollowingPagingSource(
     private val service: BlueskyService,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
-) : BasePagingSource<String, UiProfile>() {
-    override fun getRefreshKey(state: PagingState<String, UiProfile>): String? = null
-
-    override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiProfile> {
-        val cursor = params.key
-        val limit = params.loadSize
+) : RemoteLoader<UiProfile> {
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiProfile> {
         val response =
-            service
-                .getFollows(
-                    params =
-                        GetFollowsQueryParams(
-                            actor = Did(userKey.id),
-                            limit = limit.toLong(),
-                            cursor = cursor,
-                        ),
-                ).requireResponse()
-        return LoadResult.Page(
-            data =
-                response.follows.map {
-                    it.render(accountKey = accountKey)
-                },
-            prevKey = null,
+            when (request) {
+                is PagingRequest.Prepend -> {
+                    return PagingResult(
+                        endOfPaginationReached = true,
+                    )
+                }
+
+                PagingRequest.Refresh ->
+                    service
+                        .getFollows(
+                            params =
+                                GetFollowsQueryParams(
+                                    actor = Did(userKey.id),
+                                    limit = pageSize.toLong(),
+                                ),
+                        ).requireResponse()
+
+                is PagingRequest.Append ->
+                    service
+                        .getFollows(
+                            params =
+                                GetFollowsQueryParams(
+                                    actor = Did(userKey.id),
+                                    limit = pageSize.toLong(),
+                                    cursor = request.nextKey,
+                                ),
+                        ).requireResponse()
+            }
+
+        return PagingResult(
+            endOfPaginationReached = response.cursor == null,
+            data = response.follows.map { it.render(accountKey = accountKey) },
             nextKey = response.cursor,
         )
     }

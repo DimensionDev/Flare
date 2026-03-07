@@ -31,7 +31,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -169,7 +168,6 @@ internal fun accountProvider(
         key1 = accountType,
     ) {
         when (accountType) {
-            AccountType.Active -> repository.activeAccount
             AccountType.Guest ->
                 flowOf(
                     UiState.Error(
@@ -203,31 +201,6 @@ internal fun accountServiceFlow(
     repository: AccountRepository,
 ): Flow<MicroblogDataSource> =
     when (accountType) {
-        AccountType.Active -> {
-            repository
-                .activeAccount
-                .map { it.takeSuccess() }
-                .distinctUntilChangedBy { it?.accountKey }
-                .flatMapLatest {
-                    if (it != null) {
-                        flowOf(it.dataSource)
-                    } else {
-                        val guestData = repository.appDataStore.guestDataStore.data
-                        guestData.map {
-                            when (it.platformType) {
-                                PlatformType.Mastodon ->
-                                    GuestMastodonDataSource(
-                                        host = it.host,
-                                        locale = Locale.language,
-                                    )
-
-                                else -> throw UnsupportedOperationException()
-                            }
-                        }
-                    }
-                }
-        }
-
         AccountType.Guest -> {
             val guestData = repository.appDataStore.guestDataStore.data
             guestData.map {

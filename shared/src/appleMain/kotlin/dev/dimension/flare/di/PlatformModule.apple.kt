@@ -9,6 +9,8 @@ import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.shared.image.IosImageCompressor
 import dev.dimension.flare.ui.humanizer.AppleFormatter
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
+import dev.dimension.flare.ui.render.ApplePlatformTextRenderer
+import dev.dimension.flare.ui.render.PlatformTextRendering
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -21,6 +23,7 @@ internal actual val platformModule: Module =
         singleOf(::PlatformPathProducer)
         singleOf(::NativeWebScraper)
         singleOf(::AppleFormatter) bind PlatformFormatter::class
+        singleOf(::ApplePlatformTextRenderer) bind PlatformTextRendering::class
         singleOf(::IosImageCompressor) bind ImageCompressor::class
         singleOf(::OnDeviceAI)
     }

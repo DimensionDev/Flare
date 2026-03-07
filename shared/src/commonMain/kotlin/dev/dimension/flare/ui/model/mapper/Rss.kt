@@ -1,10 +1,11 @@
 package dev.dimension.flare.ui.model.mapper
 
 import com.fleeksoft.ksoup.Ksoup
-import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.network.rss.model.Feed
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
 import io.ktor.http.Url
 import kotlinx.collections.immutable.persistentMapOf
@@ -15,12 +16,12 @@ import kotlinx.datetime.toInstant
 import kotlin.io.encoding.Base64
 import kotlin.time.Instant
 
-internal fun StatusContent.Rss.RssContent.render(): UiTimeline =
-    when (this) {
-        is StatusContent.Rss.RssContent.Atom -> this.render()
-        is StatusContent.Rss.RssContent.Rss20 -> this.render()
-        is StatusContent.Rss.RssContent.RDF -> this.render()
-    }
+// internal fun StatusContent.Rss.RssContent.render(): UiTimelineV2 =
+//    when (this) {
+//        is StatusContent.Rss.RssContent.Atom -> this.render()
+//        is StatusContent.Rss.RssContent.Rss20 -> this.render()
+//        is StatusContent.Rss.RssContent.RDF -> this.render()
+//    }
 
 internal val Feed.title: String
     get() =
@@ -38,97 +39,121 @@ internal val Feed.link: String?
             is Feed.RDF -> this.channel.link
         }
 
-internal fun StatusContent.Rss.RssContent.Atom.render(): UiTimeline =
-    with(data) {
-        val descHtml =
-            content?.value?.let {
-                Ksoup.parse(it)
-            } ?: summary?.value?.let {
-                Ksoup.parse(it)
-            }
-        val img = descHtml?.select("img")?.firstOrNull()?.attr("src") ?: media?.thumbnail?.url
-        return UiTimeline(
-            topMessage = null,
-            content =
-                UiTimeline.ItemContent.Feed(
-                    title = title?.value?.takeIf { it.isNotEmpty() && it.isNotBlank() },
-                    description = descHtml?.text(),
-                    url = links.first().href.replace("http://", "https://"),
-                    image = img,
-                    source = this@render.source,
-                    sourceIcon = this@render.icon,
-                    openInBrowser = this@render.openInBrowser,
-                    createdAt =
-                        (published ?: updated)
-                            ?.let { input -> parseRssDateToInstant(input) }
-                            ?.toUi(),
-                    imageHeaders =
+internal fun Feed.Atom.Entry.render(
+    sourceName: String,
+    sourceIcon: String?,
+    openInBrowser: Boolean,
+): UiTimelineV2 {
+    val descHtml =
+        content?.value?.let {
+            Ksoup.parse(it)
+        } ?: summary?.value?.let {
+            Ksoup.parse(it)
+        }
+    val img = descHtml?.select("img")?.firstOrNull()?.attr("src") ?: media?.thumbnail?.url
+    return UiTimelineV2.Feed(
+        title = title?.value?.takeIf { it.isNotEmpty() && it.isNotBlank() },
+        description = descHtml?.text(),
+        url = links.first().href.replace("http://", "https://"),
+        source =
+            UiTimelineV2.Feed.Source(
+                name = sourceName,
+                icon = sourceIcon,
+            ),
+        media =
+            img?.let {
+                UiMedia.Image(
+                    url = it,
+                    customHeaders =
                         persistentMapOf(
                             "Referer" to "https://${Url(links.first().href).host}/",
                         ),
-                ),
-        )
-    }
+                )
+            },
+        openInBrowser = openInBrowser,
+        createdAt =
+            (published ?: updated)
+                ?.let { input -> parseRssDateToInstant(input) }
+                ?.toUi() ?: Instant.fromEpochMilliseconds(0L).toUi(),
+        accountType = AccountType.Guest,
+    )
+}
 
-internal fun StatusContent.Rss.RssContent.Rss20.render(): UiTimeline =
-    with(data) {
-        val descHtml =
-            description?.let {
-                Ksoup.parse(it)
-            }
-        val img = descHtml?.select("img")?.firstOrNull()
-        return UiTimeline(
-            topMessage = null,
-            content =
-                UiTimeline.ItemContent.Feed(
-                    title = title,
-                    description = descHtml?.text(),
-                    url = link.replace("http://", "https://"),
-                    image = img?.attr("src"),
-                    source = this@render.source,
-                    sourceIcon = this@render.icon,
-                    openInBrowser = this@render.openInBrowser,
-                    createdAt =
-                        pubDate
-                            ?.let { input -> parseRssDateToInstant(input) }
-                            ?.toUi(),
-                    imageHeaders =
+internal fun Feed.Rss20.Item.render(
+    sourceName: String,
+    sourceIcon: String?,
+    openInBrowser: Boolean,
+): UiTimelineV2 {
+    val descHtml =
+        description?.let {
+            Ksoup.parse(it)
+        }
+    val img = descHtml?.select("img")?.firstOrNull()?.attr("src")
+    return UiTimelineV2.Feed(
+        title = title,
+        description = descHtml?.text(),
+        url = link.replace("http://", "https://"),
+        source =
+            UiTimelineV2.Feed.Source(
+                name = sourceName,
+                icon = sourceIcon,
+            ),
+        media =
+            img?.let {
+                UiMedia.Image(
+                    url = it,
+                    customHeaders =
                         persistentMapOf(
                             "Referer" to "https://${Url(link).host}/",
                         ),
-                ),
-        )
-    }
+                )
+            },
+        openInBrowser = openInBrowser,
+        createdAt =
+            pubDate
+                ?.let { input -> parseRssDateToInstant(input) }
+                ?.toUi() ?: Instant.fromEpochMilliseconds(0L).toUi(),
+        accountType = AccountType.Guest,
+    )
+}
 
-internal fun StatusContent.Rss.RssContent.RDF.render(): UiTimeline =
-    with(data) {
-        val descHtml =
-            description?.let {
-                Ksoup.parse(it)
-            }
-        val img = descHtml?.select("img")?.firstOrNull()
-        return UiTimeline(
-            topMessage = null,
-            content =
-                UiTimeline.ItemContent.Feed(
-                    title = title,
-                    description = descHtml?.text(),
-                    url = link.replace("http://", "https://"),
-                    image = img?.attr("src"),
-                    source = source,
-                    sourceIcon = this@render.icon,
-                    openInBrowser = this@render.openInBrowser,
-                    createdAt =
-                        date
-                            ?.let { input -> parseRssDateToInstant(input) }
-                            ?.toUi(),
-                    imageHeaders =
+internal fun Feed.RDF.Item.render(
+    sourceName: String,
+    sourceIcon: String?,
+    openInBrowser: Boolean,
+): UiTimelineV2 {
+    val descHtml =
+        description?.let {
+            Ksoup.parse(it)
+        }
+    val img = descHtml?.select("img")?.firstOrNull()?.attr("src")
+    return UiTimelineV2.Feed(
+        title = title,
+        description = descHtml?.text(),
+        url = link.replace("http://", "https://"),
+        source =
+            UiTimelineV2.Feed.Source(
+                name = sourceName,
+                icon = sourceIcon,
+            ),
+        media =
+            img?.let {
+                UiMedia.Image(
+                    url = it,
+                    customHeaders =
                         persistentMapOf(
                             "Referer" to "https://${Url(link).host}/",
                         ),
-                ),
-        )
-    }
+                )
+            },
+        openInBrowser = openInBrowser,
+        createdAt =
+            date
+                ?.let { input -> parseRssDateToInstant(input) }
+                ?.toUi() ?: Instant.fromEpochMilliseconds(0L).toUi(),
+        accountType = AccountType.Guest,
+    )
+}
 
 internal fun MicroBlogKey.Companion.fromRss(url: String) =
     MicroBlogKey(

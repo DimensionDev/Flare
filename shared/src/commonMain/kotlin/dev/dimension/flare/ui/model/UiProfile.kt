@@ -10,13 +10,14 @@ import dev.dimension.flare.ui.humanizer.Formatter.humanize
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.serialization.Serializable
 
 @Serializable
 @Immutable
 public data class UiProfile internal constructor(
     val key: MicroBlogKey,
-    val handle: String,
+    val handle: UiHandle,
     val avatar: String,
     private val nameInternal: UiRichText,
     val platformType: PlatformType,
@@ -43,6 +44,31 @@ public data class UiProfile internal constructor(
         clickEvent.onClicked
     }
 
+    internal fun mergeWith(existing: UiProfile): UiProfile =
+        UiProfile(
+            key = key,
+            handle =
+                if (handle.raw.isBlank()) {
+                    existing.handle
+                } else {
+                    handle
+                },
+            avatar = avatar.ifBlank { existing.avatar },
+            nameInternal =
+                if (name.raw.isBlank()) {
+                    existing.name
+                } else {
+                    name
+                },
+            platformType = platformType,
+            clickEvent = clickEvent,
+            banner = banner ?: existing.banner,
+            description = description ?: existing.description,
+            matrices = matrices.mergeWith(existing.matrices),
+            mark = (existing.mark + mark).distinct().toPersistentList(),
+            bottomContent = bottomContent ?: existing.bottomContent,
+        )
+
     @Serializable
     @Immutable
     public data class Matrices internal constructor(
@@ -57,23 +83,21 @@ public data class UiProfile internal constructor(
     }
 
     val handleWithoutAt: String by lazy {
-        handle.removePrefix("@")
+        handle.normalizedRaw
     }
 
     val handleWithoutAtAndHost: String by lazy {
-        run {
-            handle
-                .removePrefix("@")
-                .split("@")
-                .firstOrNull()
-                ?: handleWithoutAt
-        }.let {
+        handleWithoutAt.let {
             if (platformType == PlatformType.Bluesky) {
                 it.removeSuffix(".bsky.social")
             } else {
                 it
             }
         }
+    }
+
+    val host: String? by lazy {
+        handle.normalizedHost
     }
 
     @Serializable
@@ -107,7 +131,11 @@ public data class UiProfile internal constructor(
 public fun createSampleUser(): UiProfile =
     UiProfile(
         key = MicroBlogKey("sampleKey", "sampleHost"),
-        handle = "@sampleUser",
+        handle =
+            UiHandle(
+                raw = "sampleUser",
+                host = "sampleHost",
+            ),
         avatar = "https://example.com/avatar.jpg",
         nameInternal = Element("span").toUi(),
         platformType = PlatformType.Mastodon,
@@ -123,4 +151,12 @@ public fun createSampleUser(): UiProfile =
             ),
         mark = persistentListOf(),
         bottomContent = null,
+    )
+
+private fun UiProfile.Matrices.mergeWith(existing: UiProfile.Matrices): UiProfile.Matrices =
+    UiProfile.Matrices(
+        fansCount = fansCount.takeUnless { it == 0L && existing.fansCount > 0L } ?: existing.fansCount,
+        followsCount = followsCount.takeUnless { it == 0L && existing.followsCount > 0L } ?: existing.followsCount,
+        statusesCount = statusesCount.takeUnless { it == 0L && existing.statusesCount > 0L } ?: existing.statusesCount,
+        platformFansCount = platformFansCount ?: existing.platformFansCount,
     )

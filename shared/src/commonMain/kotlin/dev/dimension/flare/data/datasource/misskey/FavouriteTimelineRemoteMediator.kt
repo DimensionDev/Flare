@@ -1,25 +1,20 @@
 package dev.dimension.flare.data.datasource.misskey
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.AdminAdListRequest
 import dev.dimension.flare.model.MicroBlogKey
-import kotlin.time.Instant
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
 internal class FavouriteTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
-    database: CacheDatabase,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
+) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String
         get() =
             buildString {
@@ -27,10 +22,10 @@ internal class FavouriteTimelineRemoteMediator(
                 append(accountKey.toString())
             }
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         val response =
             when (request) {
                 is PagingRequest.Prepend -> return PagingResult(
@@ -57,15 +52,7 @@ internal class FavouriteTimelineRemoteMediator(
 
         val notes = response.map { it.note }
         val data =
-            notes.toDbPagingTimeline(
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                sortIdProvider = {
-                    response.find { note -> note.noteId == it.id }?.createdAt?.let {
-                        Instant.parse(it).toEpochMilliseconds()
-                    } ?: 0
-                },
-            )
+            notes.render(accountKey)
 
         return PagingResult(
             endOfPaginationReached = response.isEmpty(),

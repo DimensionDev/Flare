@@ -203,7 +203,7 @@ fun SearchScreen(
                                             size = AvatarComponentDefaults.compatSize,
                                         )
                                         Text(
-                                            profile.handle,
+                                            profile.handle.canonical,
                                             maxLines = 1,
                                             modifier = Modifier.padding(start = 8.dp),
                                         )

@@ -16,6 +16,12 @@ import dev.dimension.flare.report_user_description
 import dev.dimension.flare.report_user_title
 import dev.dimension.flare.ui.presenter.profile.BlockUserPresenter
 import dev.dimension.flare.ui.presenter.profile.MuteUserPresenter
+import dev.dimension.flare.ui.presenter.profile.UnblockUserPresenter
+import dev.dimension.flare.ui.presenter.profile.UnmuteUserPresenter
+import dev.dimension.flare.unblock_user_description
+import dev.dimension.flare.unblock_user_title
+import dev.dimension.flare.unmute_user_description
+import dev.dimension.flare.unmute_user_title
 import io.github.composefluent.component.ContentDialog
 import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.Text
@@ -71,6 +77,71 @@ internal fun MuteUserDialog(
         visible = true,
         content = {
             Text(stringResource(Res.string.mute_user_description))
+        },
+        primaryButtonText = stringResource(Res.string.ok),
+        closeButtonText = stringResource(Res.string.cancel),
+        onButtonClick = {
+            when (it) {
+                ContentDialogButton.Primary -> {
+                    state.confirm()
+                    onBack.invoke()
+                }
+                ContentDialogButton.Secondary -> onBack.invoke()
+                ContentDialogButton.Close -> onBack.invoke()
+            }
+        },
+    )
+}
+
+@Composable
+internal fun UnblockUserDialog(
+    accountType: AccountType?,
+    userKey: MicroBlogKey,
+    onBack: () -> Unit,
+) {
+    val state by producePresenter("unblock_user_${accountType}_$userKey") {
+        remember {
+            UnblockUserPresenter(accountType, userKey)
+        }.body()
+    }
+    ContentDialog(
+        title = stringResource(Res.string.unblock_user_title),
+        visible = true,
+        content = {
+            Text(stringResource(Res.string.unblock_user_description))
+        },
+        primaryButtonText = stringResource(Res.string.ok),
+        closeButtonText = stringResource(Res.string.cancel),
+        onButtonClick = {
+            when (it) {
+                ContentDialogButton.Primary -> {
+                    state.confirm()
+                    onBack.invoke()
+                }
+                ContentDialogButton.Secondary -> onBack.invoke()
+                ContentDialogButton.Close -> onBack.invoke()
+            }
+        },
+    )
+}
+
+@Composable
+internal fun UnmuteUserDialog(
+    accountType: AccountType?,
+    userKey: MicroBlogKey,
+    onBack: () -> Unit,
+) {
+    val state by producePresenter("unmute_user_${accountType}_$userKey") {
+        remember {
+            UnmuteUserPresenter(accountType, userKey)
+        }.body()
+    }
+
+    ContentDialog(
+        title = stringResource(Res.string.unmute_user_title),
+        visible = true,
+        content = {
+            Text(stringResource(Res.string.unmute_user_description))
         },
         primaryButtonText = stringResource(Res.string.ok),
         closeButtonText = stringResource(Res.string.cancel),

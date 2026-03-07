@@ -104,9 +104,11 @@ struct StatusMediaScreen: View {
             currentTime = .zero
         }
         .onChange(of: presenter.state.status) { oldValue, newValue in
-            if medias.isEmpty, case .success(let success) = onEnum(of: newValue), case .status(let content) = onEnum(of: success.data.content) {
+            if medias.isEmpty,
+               case .success(let success) = onEnum(of: newValue),
+               let content = success.data as? UiTimelineV2.Post {
                 withAnimation {
-                    medias = content.images
+                    medias = Array(content.images)
                 }
             }
         }
@@ -152,7 +154,7 @@ struct StatusMediaScreen: View {
             }
             
             StateView(state: presenter.state.status) { timeline in
-                if case .status(let content) = onEnum(of: timeline.content) {
+                if let content = timeline as? UiTimelineV2.Post {
                     StatusView(data: content, isQuote: true, showMedia: false, maxLine: 3, showExpandTextButton: false)
                 }
             }

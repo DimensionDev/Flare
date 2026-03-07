@@ -57,7 +57,7 @@ internal fun UserCompat(
                     modifier = Modifier.alignByBaseline(),
                 )
                 PlatformText(
-                    text = handle,
+                    text = handle.canonical,
                     style = PlatformTheme.typography.caption,
                     color = PlatformTheme.colorScheme.caption,
                     maxLines = 1,

@@ -10,14 +10,14 @@ import androidx.paging.flatMap
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.NoActiveAccountException
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiMedia
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import kotlinx.coroutines.CoroutineScope
@@ -55,7 +55,7 @@ private class MediaTimelinePresenter(
 ) : TimelinePresenter(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
-    override val loader: Flow<BaseTimelineLoader>
+    override val loader: Flow<RemoteLoader<UiTimelineV2>>
         get() =
             accountServiceFlow(accountType, accountRepository).map { service ->
                 val actualUserKey =
@@ -74,13 +74,13 @@ private class MediaTimelinePresenter(
     fun createTransformedPager(scope: CoroutineScope): Flow<PagingData<ProfileMedia>> =
         createPager(scope).map { data ->
             data.flatMap { status ->
-                val content = status.content
-                if (content is UiTimeline.ItemContent.Status) {
-                    content.images.map {
+                if (status is UiTimelineV2.Post) {
+                    status.images.map {
                         ProfileMedia(
                             it,
                             status,
-                            content.images.indexOf(it),
+                            status.statusKey,
+                            status.images.indexOf(it),
                         )
                     }
                 } else {
@@ -98,6 +98,7 @@ public interface ProfileMediaState {
 @Immutable
 public data class ProfileMedia internal constructor(
     val media: UiMedia,
-    val status: UiTimeline,
+    val status: UiTimelineV2,
+    val statusKey: MicroBlogKey,
     val index: Int,
 )

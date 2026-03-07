@@ -9,6 +9,7 @@ struct FlareApp: App {
         ComposeUIHelper.shared.initialize(
             inAppNotification: SwiftInAppNotification.shared,
             swiftFormatter: Formatter.shared,
+            swiftPlatformTextRenderer: PlatformTextRenderer.shared,
             swiftOnDeviceAI: FoundationModelOnDeviceAI.shared
         )
     }

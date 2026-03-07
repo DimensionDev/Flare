@@ -1,34 +1,11 @@
 package dev.dimension.flare.data.database.cache.model
 
-import dev.dimension.flare.data.network.mastodon.api.model.Emoji
-import dev.dimension.flare.data.network.misskey.api.model.EmojiSimple
-import dev.dimension.flare.data.network.vvo.model.EmojiData
-import kotlinx.serialization.SerialName
+import dev.dimension.flare.common.SerializableImmutableList
+import dev.dimension.flare.common.SerializableImmutableMap
+import dev.dimension.flare.ui.model.UiEmoji
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal sealed interface EmojiContent {
-    @Serializable
-    @SerialName("Mastodon")
-    data class Mastodon internal constructor(
-        internal val data: List<Emoji>,
-    ) : EmojiContent
-
-    @Serializable
-    @SerialName("Misskey")
-    data class Misskey internal constructor(
-        internal val data: List<EmojiSimple>,
-    ) : EmojiContent
-
-    @Serializable
-    @SerialName("VVO")
-    data class VVO internal constructor(
-        internal val data: EmojiData,
-    ) : EmojiContent
-
-    @Serializable
-    @SerialName("FavIcon")
-    data class FavIcon internal constructor(
-        internal val data: String,
-    ) : EmojiContent
-}
+internal data class EmojiContent(
+    val data: SerializableImmutableMap<String, SerializableImmutableList<UiEmoji>>,
+)

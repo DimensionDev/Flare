@@ -9,10 +9,10 @@ import androidx.room.Transaction
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.DbUserHistory
 import dev.dimension.flare.data.database.cache.model.DbUserHistoryWithUser
-import dev.dimension.flare.data.database.cache.model.UserContent
+import dev.dimension.flare.data.database.cache.model.DbUserRelation
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.UiProfile
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -26,7 +26,7 @@ internal interface UserDao {
     @Query("UPDATE DbUser SET content = :content WHERE userKey = :userKey")
     suspend fun update(
         userKey: MicroBlogKey,
-        content: UserContent,
+        content: UiProfile,
     )
 
     @Query("SELECT * FROM DbUser WHERE userKey IN (:userKeys)")
@@ -35,11 +35,10 @@ internal interface UserDao {
     @Query("SELECT * FROM DbUser WHERE userKey = :userKey")
     fun findByKey(userKey: MicroBlogKey): Flow<DbUser?>
 
-    @Query("SELECT * FROM DbUser WHERE handle = :handle AND host = :host AND platformType = :platformType")
-    fun findByHandleAndHost(
-        handle: String,
+    @Query("SELECT * FROM DbUser WHERE canonicalHandle = :canonicalHandle AND host = :host")
+    fun findByCanonicalHandleAndHost(
+        canonicalHandle: String,
         host: String,
-        platformType: PlatformType,
     ): Flow<DbUser?>
 
     @Query("SELECT COUNT(*) FROM DbUser")
@@ -58,10 +57,28 @@ internal interface UserDao {
     @Transaction
     @Query(
         "SELECT * FROM DbUser " +
-            "WHERE DbUser.name like :query OR DbUser.handle like :query",
+            "WHERE DbUser.name like :query OR DbUser.canonicalHandle like :query",
     )
     fun searchUser(query: String): PagingSource<Int, DbUser>
 
     @Query("DELETE FROM DbUserHistory WHERE accountType = :accountType")
     suspend fun deleteHistoryByAccountType(accountType: DbAccountType)
+
+    @Query("SELECT * FROM DbUserRelation WHERE accountType = :accountType AND userKey = :userKey")
+    fun getUserRelation(
+        accountType: DbAccountType,
+        userKey: MicroBlogKey,
+    ): Flow<DbUserRelation?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUserRelation(relation: DbUserRelation)
+
+    @Query("DELETE FROM DbUserRelation WHERE accountType = :accountType AND userKey = :userKey")
+    suspend fun deleteUserRelation(
+        accountType: DbAccountType,
+        userKey: MicroBlogKey,
+    )
+
+    @Query("DELETE FROM DbUserRelation")
+    suspend fun clearUserRelations()
 }

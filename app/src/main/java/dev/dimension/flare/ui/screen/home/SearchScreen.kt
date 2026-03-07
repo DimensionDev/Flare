@@ -92,7 +92,7 @@ internal fun SearchScreen(
                                                 state.searchState.setAccount(profile)
                                             },
                                             label = {
-                                                Text(profile.handle)
+                                                Text(profile.handle.canonical)
                                             },
                                             leadingIcon = {
                                                 AvatarComponent(

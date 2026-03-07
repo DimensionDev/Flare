@@ -1,8 +1,6 @@
 package dev.dimension.flare.data.datasource.mastodon
 
-import dev.dimension.flare.data.database.cache.mapper.toDbUser
-import dev.dimension.flare.data.database.cache.model.DbUser
-import dev.dimension.flare.data.datasource.microblog.list.ListMemberLoader
+import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.mastodon.MastodonService
@@ -10,6 +8,8 @@ import dev.dimension.flare.data.network.mastodon.api.model.MastodonList
 import dev.dimension.flare.data.network.mastodon.api.model.PostAccounts
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.mapper.render
 
 internal class MastodonListMemberLoader(
     private val service: MastodonService,
@@ -19,7 +19,7 @@ internal class MastodonListMemberLoader(
         pageSize: Int,
         request: PagingRequest,
         listId: String,
-    ): PagingResult<DbUser> {
+    ): PagingResult<UiProfile> {
         val maxId =
             when (request) {
                 is PagingRequest.Append -> request.nextKey
@@ -36,7 +36,7 @@ internal class MastodonListMemberLoader(
 
         val users =
             response.map {
-                it.toDbUser(accountKey.host)
+                it.render(accountKey = accountKey, host = accountKey.host)
             }
 
         return PagingResult(
@@ -48,14 +48,14 @@ internal class MastodonListMemberLoader(
     override suspend fun addMember(
         listId: String,
         userKey: MicroBlogKey,
-    ): DbUser {
+    ): UiProfile {
         service.addMember(
             listId = listId,
             accounts = PostAccounts(listOf(userKey.id)),
         )
         return service
             .lookupUser(userKey.id)
-            .toDbUser(accountKey.host)
+            .render(accountKey = accountKey, host = accountKey.host)
     }
 
     override suspend fun removeMember(

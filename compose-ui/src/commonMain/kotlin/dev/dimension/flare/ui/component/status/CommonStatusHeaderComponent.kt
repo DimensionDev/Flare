@@ -61,7 +61,7 @@ public fun CommonStatusHeaderComponent(
         },
         supportingContent = {
             PlatformText(
-                text = data.handle,
+                text = data.handle.canonical,
                 style = PlatformTheme.typography.caption,
                 color = PlatformTheme.colorScheme.caption,
                 modifier =

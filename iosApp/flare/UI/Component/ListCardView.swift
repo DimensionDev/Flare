@@ -10,22 +10,31 @@ struct ListCardView<Content: View>: View {
 
     var body: some View {
         content()
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(
-                !isMultipleColumn ?
-                .rect(
-                    topLeadingRadius: index == 0 ? cornerRadius : 4,
-                    bottomLeadingRadius: index == totalCount - 1 ? cornerRadius : 4,
-                    bottomTrailingRadius: index == totalCount - 1 ? cornerRadius : 4,
-                    topTrailingRadius: index == 0 ? cornerRadius : 4,
-                ) :
-                .rect(
-                    topLeadingRadius: cornerRadius,
-                    bottomLeadingRadius: cornerRadius,
-                    bottomTrailingRadius: cornerRadius,
-                    topTrailingRadius: cornerRadius,
+            .background {
+                UnevenRoundedRectangle(
+                    cornerRadii: cornerRadii,
+                    style: .continuous
                 )
+                .fill(Color(.secondarySystemGroupedBackground))
+            }
+    }
+
+    private var cornerRadii: RectangleCornerRadii {
+        if isMultipleColumn {
+            RectangleCornerRadii(
+                topLeading: cornerRadius,
+                bottomLeading: cornerRadius,
+                bottomTrailing: cornerRadius,
+                topTrailing: cornerRadius
             )
+        } else {
+            RectangleCornerRadii(
+                topLeading: index == 0 ? cornerRadius : 4,
+                bottomLeading: index == totalCount - 1 ? cornerRadius : 4,
+                bottomTrailing: index == totalCount - 1 ? cornerRadius : 4,
+                topTrailing: index == 0 ? cornerRadius : 4
+            )
+        }
     }
 }
 

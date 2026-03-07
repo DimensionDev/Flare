@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -37,13 +36,13 @@ import dev.dimension.flare.ui.component.ErrorContent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.placeholder
 import dev.dimension.flare.ui.component.platform.PlatformText
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
 
 public fun LazyStaggeredGridScope.status(
-    pagingState: PagingState<UiTimeline>,
+    pagingState: PagingState<UiTimelineV2>,
     detailStatusKey: MicroBlogKey? = null,
 ): Unit =
     with(pagingState) {
@@ -222,17 +221,15 @@ private fun OnError(
 
 @Composable
 public fun StatusItem(
-    item: UiTimeline?,
-//    event: StatusEvent,
+    item: UiTimelineV2?,
     modifier: Modifier = Modifier,
     detailStatusKey: MicroBlogKey? = null,
-    horizontalPadding: Dp = screenHorizontalPadding,
 ) {
     if (item == null) {
         Column(
             modifier =
                 modifier.padding(
-                    horizontal = horizontalPadding,
+                    horizontal = screenHorizontalPadding,
                     vertical = 8.dp,
                 ),
         ) {
@@ -243,7 +240,6 @@ public fun StatusItem(
             item = item,
             detailStatusKey = detailStatusKey,
             modifier = modifier,
-            horizontalPadding = screenHorizontalPadding,
         )
     }
 }

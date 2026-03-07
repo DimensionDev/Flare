@@ -3,31 +3,33 @@ package dev.dimension.flare.data.database.cache.model
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
-import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.UiProfile
+import dev.dimension.flare.ui.model.UiRelation
 
 @Entity(
     indices = [
-        Index(value = ["handle", "host", "platformType"], unique = true),
+        Index(value = ["canonicalHandle", "host"], unique = true),
     ],
 )
 internal data class DbUser(
     @PrimaryKey
     val userKey: MicroBlogKey,
-    val platformType: PlatformType,
     val name: String,
-    val handle: String,
+    val canonicalHandle: String,
     val host: String,
-    val content: UserContent,
+    val content: UiProfile,
 )
 
-internal class UserContentConverters {
-    @TypeConverter
-    fun fromUserContent(content: UserContent): String = content.encodeJson()
-
-    @TypeConverter
-    fun toUserContent(value: String): UserContent = value.decodeJson()
-}
+@Entity(
+    primaryKeys = ["accountType", "userKey"],
+    indices = [
+        Index(value = ["accountType", "userKey"], unique = true),
+    ],
+)
+internal data class DbUserRelation(
+    val accountType: DbAccountType,
+    val userKey: MicroBlogKey,
+    val relation: UiRelation,
+)

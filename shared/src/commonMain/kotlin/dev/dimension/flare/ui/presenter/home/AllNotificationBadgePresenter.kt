@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.delay
@@ -28,8 +29,8 @@ public class AllNotificationBadgePresenter :
     private val allBadgeFlow by lazy {
         accountRepository.allAccounts
             .map {
-                it.map {
-                    it.dataSource.notificationBadgeCount()
+                it.map { it.dataSource }.filterIsInstance<NotificationDataSource>().map {
+                    it.notificationHandler.notificationBadgeCount
                 }
             }
     }

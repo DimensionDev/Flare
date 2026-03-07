@@ -1,14 +1,17 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
-import kotlinx.collections.immutable.ImmutableMap
+import dev.dimension.flare.common.SerializableImmutableMap
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Immutable
 public sealed interface UiMedia {
     public val url: String
     public val description: String?
-    public val customHeaders: ImmutableMap<String, String>?
+    public val customHeaders: SerializableImmutableMap<String, String>?
 
+    @Serializable
     @Immutable
     public data class Image internal constructor(
         override val url: String,
@@ -17,12 +20,23 @@ public sealed interface UiMedia {
         val height: Float,
         val width: Float,
         val sensitive: Boolean,
-        override val customHeaders: ImmutableMap<String, String>? = null,
+        override val customHeaders: SerializableImmutableMap<String, String>? = null,
     ) : UiMedia {
+        internal constructor(url: String, customHeaders: SerializableImmutableMap<String, String>? = null) : this(
+            url = url,
+            previewUrl = url,
+            description = null,
+            height = 0f,
+            width = 0f,
+            sensitive = false,
+            customHeaders = customHeaders,
+        )
+
         val aspectRatio: Float
             get() = (width / (height.takeUnless { it == 0f } ?: 1f)).takeUnless { it == 0f } ?: 1f
     }
 
+    @Serializable
     @Immutable
     public data class Video internal constructor(
         override val url: String,
@@ -30,12 +44,13 @@ public sealed interface UiMedia {
         override val description: String?,
         val height: Float,
         val width: Float,
-        override val customHeaders: ImmutableMap<String, String>? = null,
+        override val customHeaders: SerializableImmutableMap<String, String>? = null,
     ) : UiMedia {
         val aspectRatio: Float
             get() = (width / (height.takeUnless { it == 0f } ?: 1f)).takeUnless { it == 0f } ?: 1f
     }
 
+    @Serializable
     @Immutable
     public data class Gif internal constructor(
         override val url: String,
@@ -43,18 +58,19 @@ public sealed interface UiMedia {
         override val description: String?,
         val height: Float,
         val width: Float,
-        override val customHeaders: ImmutableMap<String, String>? = null,
+        override val customHeaders: SerializableImmutableMap<String, String>? = null,
     ) : UiMedia {
         val aspectRatio: Float
             get() = (width / (height.takeUnless { it == 0f } ?: 1f)).takeUnless { it == 0f } ?: 1f
     }
 
+    @Serializable
     @Immutable
     public data class Audio internal constructor(
         override val url: String,
         override val description: String?,
         val previewUrl: String?,
-        override val customHeaders: ImmutableMap<String, String>? = null,
+        override val customHeaders: SerializableImmutableMap<String, String>? = null,
     ) : UiMedia
 }
 

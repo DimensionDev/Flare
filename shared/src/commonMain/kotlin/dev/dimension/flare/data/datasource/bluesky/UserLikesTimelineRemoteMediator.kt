@@ -2,30 +2,26 @@ package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
 import app.bsky.feed.GetActorLikesQueryParams
-import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 import sh.christian.ozone.api.Did
 
 @OptIn(ExperimentalPagingApi::class)
 internal class UserLikesTimelineRemoteMediator(
     private val service: BlueskyService,
     private val accountKey: MicroBlogKey,
-    private val database: CacheDatabase,
-) : BaseTimelineRemoteMediator(
-        database = database,
-    ) {
+) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey = "user_timeline_likes_$accountKey"
 
-    override suspend fun timeline(
+    override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<DbPagingTimelineWithStatus> {
+    ): PagingResult<UiTimelineV2> {
         val response =
             when (request) {
                 PagingRequest.Refresh ->
@@ -59,11 +55,7 @@ internal class UserLikesTimelineRemoteMediator(
 
         return PagingResult(
             endOfPaginationReached = response.cursor == null,
-            data =
-                response.feed.toDbPagingTimeline(
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                ),
+            data = response.feed.render(accountKey),
             nextKey = response.cursor,
         )
     }

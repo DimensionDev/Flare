@@ -6,10 +6,11 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.datasource.rss.RssDataSource
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapper.render
@@ -25,7 +26,7 @@ import org.koin.core.component.inject
 public class RssTimelinePresenter(
     private val url: String,
 ) : TimelinePresenter() {
-    override val loader: Flow<BaseTimelineLoader> by lazy {
+    override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
         flowOf(RssDataSource.fetchLoader(url))
     }
 }
@@ -36,7 +37,7 @@ public class AllRssTimelinePresenter :
     private val appDatabase by inject<AppDatabase>()
     private val database: CacheDatabase by inject()
 
-    override val loader: Flow<BaseTimelineLoader> by lazy {
+    override val loader: Flow<RemoteLoader<UiTimelineV2>> by lazy {
         appDatabase
             .rssSourceDao()
             .getAll()

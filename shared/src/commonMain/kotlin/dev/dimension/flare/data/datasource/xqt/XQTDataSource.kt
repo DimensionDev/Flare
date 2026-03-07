@@ -11,36 +11,36 @@ import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.XQT
-import dev.dimension.flare.data.database.cache.mapper.toDbUser
-import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.DbMessageItem
-import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.MessageContent
-import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
+import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
-import dev.dimension.flare.data.datasource.microblog.RelationDataSource
-import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
-import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
-import dev.dimension.flare.data.datasource.microblog.list.ListHandler
-import dev.dimension.flare.data.datasource.microblog.list.ListMemberHandler
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
+import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.NotificationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.handler.ListHandler
+import dev.dimension.flare.data.datasource.microblog.handler.ListMemberHandler
+import dev.dimension.flare.data.datasource.microblog.handler.NotificationHandler
+import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
+import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
+import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
+import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
-import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
-import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.AddToConversationRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequest
@@ -58,32 +58,23 @@ import dev.dimension.flare.data.network.xqt.model.PostCreateTweetRequestVariable
 import dev.dimension.flare.data.network.xqt.model.PostCreateTweetRequestVariablesReply
 import dev.dimension.flare.data.network.xqt.model.PostDeleteRetweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostDeleteRetweetRequestVariables
-import dev.dimension.flare.data.network.xqt.model.PostDeleteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostDmNew2Request
 import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
-import dev.dimension.flare.data.network.xqt.model.User
-import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.shared.image.ImageCompressor
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
-import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiPodcast
-import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
-import dev.dimension.flare.ui.model.mapper.toUi
-import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -96,7 +87,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -115,11 +105,14 @@ private const val MAX_ASYNC_UPLOAD_SIZE = 10
 internal class XQTDataSource(
     override val accountKey: MicroBlogKey,
 ) : AuthenticatedMicroblogDataSource,
+    NotificationDataSource,
+    UserDataSource,
+    PostDataSource,
     KoinComponent,
-    StatusEvent.XQT,
     ListDataSource,
     DirectMessageDataSource,
-    RelationDataSource {
+    RelationDataSource,
+    PostEventHandler.Handler {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
@@ -139,10 +132,128 @@ internal class XQTDataSource(
                     .map { it.chocolate },
         )
     }
+    private val loader by lazy {
+        XQTLoader(
+            accountKey = accountKey,
+            service = service,
+        )
+    }
 
     private val listLoader = XQTListLoader(service, accountKey)
 
     private val listMemberLoader = XQTListMemberLoader(service, accountKey)
+
+    override val notificationHandler by lazy {
+        NotificationHandler(
+            accountKey = accountKey,
+            loader = loader,
+        )
+    }
+
+    override val userHandler by lazy {
+        UserHandler(
+            host = accountKey.host,
+            loader = loader,
+        )
+    }
+
+    override val postHandler by lazy {
+        PostHandler(
+            accountType = AccountType.Specific(accountKey),
+            loader = loader,
+        )
+    }
+
+    override val relationHandler by lazy {
+        RelationHandler(
+            accountType = AccountType.Specific(accountKey),
+            dataSource = loader,
+        )
+    }
+
+    override val supportedRelationTypes: Set<dev.dimension.flare.data.datasource.microblog.loader.RelationActionType>
+        get() = loader.supportedTypes
+
+    override val postEventHandler by lazy {
+        PostEventHandler(
+            accountType = AccountType.Specific(accountKey),
+            handler = this,
+        )
+    }
+
+    override suspend fun handle(
+        event: PostEvent,
+        updater: DatabaseUpdater,
+    ) {
+        require(event is PostEvent.XQT)
+        when (event) {
+            is PostEvent.XQT.Retweet -> {
+                if (event.retweeted) {
+                    service.postDeleteRetweet(
+                        postDeleteRetweetRequest =
+                            PostDeleteRetweetRequest(
+                                variables = PostDeleteRetweetRequestVariables(sourceTweetId = event.postKey.id),
+                            ),
+                    )
+                } else {
+                    service.postCreateRetweet(
+                        postCreateRetweetRequest =
+                            PostCreateRetweetRequest(
+                                variables =
+                                    PostCreateRetweetRequestVariables(
+                                        tweetId = event.postKey.id,
+                                    ),
+                            ),
+                    )
+                }
+            }
+
+            is PostEvent.XQT.Like -> {
+                if (event.liked) {
+                    service.postUnfavoriteTweet(
+                        postUnfavoriteTweetRequest =
+                            PostUnfavoriteTweetRequest(
+                                variables = PostCreateRetweetRequestVariables(tweetId = event.postKey.id),
+                            ),
+                    )
+                } else {
+                    service.postFavoriteTweet(
+                        postFavoriteTweetRequest =
+                            PostFavoriteTweetRequest(
+                                variables =
+                                    PostCreateRetweetRequestVariables(
+                                        tweetId = event.postKey.id,
+                                    ),
+                            ),
+                    )
+                }
+            }
+
+            is PostEvent.XQT.Bookmark -> {
+                if (event.bookmarked) {
+                    service.postDeleteBookmark(
+                        postDeleteBookmarkRequest =
+                            DeleteBookmarkRequest(
+                                variables =
+                                    DeleteBookmarkRequestVariables(
+                                        tweetId = event.postKey.id,
+                                    ),
+                            ),
+                    )
+                } else {
+                    service.postCreateBookmark(
+                        postCreateBookmarkRequest =
+                            CreateBookmarkRequest(
+                                variables =
+                                    CreateBookmarkRequestVariables(
+                                        tweetId = event.postKey.id,
+                                    ),
+                            ),
+                    )
+                }
+            }
+        }
+    }
 
     override val listHandler =
         ListHandler(
@@ -161,7 +272,6 @@ internal class XQTDataSource(
     override fun homeTimeline() =
         HomeTimelineRemoteMediator(
             service,
-            database,
             accountKey,
             inAppNotification,
         )
@@ -170,20 +280,16 @@ internal class XQTDataSource(
         pageSize: Int = 20,
         pagingKey: String = "featured_$accountKey",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator = featuredTimelineLoader(),
-        )
+    ): Flow<PagingData<UiTimelineV2>> =
+        Pager(
+            config = pagingConfig,
+        ) {
+            featuredTimelineLoader().toPagingSource()
+        }.flow.cachedIn(scope)
 
     fun featuredTimelineLoader() =
         FeaturedTimelineRemoteMediator(
             service,
-            database,
             accountKey,
         )
 
@@ -191,151 +297,44 @@ internal class XQTDataSource(
         pageSize: Int = 20,
         pagingKey: String = "bookmark_$accountKey",
         scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator = bookmarkTimelineLoader(),
-        )
+    ): Flow<PagingData<UiTimelineV2>> =
+        Pager(
+            config = pagingConfig,
+        ) {
+            bookmarkTimelineLoader().toPagingSource()
+        }.flow.cachedIn(scope)
 
     fun bookmarkTimelineLoader() =
         BookmarkTimelineRemoteMediator(
             service,
-            database,
             accountKey,
         )
 
     fun deviceFollowTimelineLoader() =
         DeviceFollowRemoteMediator(
             service,
-            database,
             accountKey,
         )
 
-    override fun notification(
-        type: NotificationFilter,
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> {
+    override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
         if (type == NotificationFilter.All) {
-            return Pager(
-                config = pagingConfig,
-            ) {
-                NotificationPagingSource(
-                    locale = "en",
-                    service = service,
-                    accountKey = accountKey,
-                    event = this,
-                    onClearMarker = {
-                        MemCacheable.update(notificationMarkerKey, 0)
-                    },
-                )
-            }.flow.cachedIn(scope)
+            NotificationPagingSource(
+                locale = "en",
+                service = service,
+                accountKey = accountKey,
+                onClearMarker = {
+                    notificationHandler.clear()
+                },
+            )
         } else {
-            return timelinePager(
-                pageSize = pageSize,
-                database = database,
-                scope = scope,
-                filterFlow = localFilterRepository.getFlow(forNotification = true),
-                accountRepository = accountRepository,
-                mediator =
-                    MentionRemoteMediator(
-                        service,
-                        database,
-                        accountKey,
-                    ),
+            MentionRemoteMediator(
+                service,
+                accountKey,
             )
         }
-    }
 
     override val supportedNotificationFilter: List<NotificationFilter>
         get() = listOf(NotificationFilter.All, NotificationFilter.Mention)
-
-    override fun userByAcct(acct: String): CacheData<UiProfile> {
-        val (name, host) = MicroBlogKey.valueOf(acct.removePrefix("@"))
-        return Cacheable(
-            fetchSource = {
-                val user =
-                    service
-                        .userByScreenName(name)
-                        .body()
-                        ?.data
-                        ?.user
-                        ?.result
-                        ?.let {
-                            when (it) {
-                                is User -> it
-                                is UserUnavailable -> null
-                            }
-                        }?.toDbUser(accountKey) ?: throw Exception("User not found")
-                database.userDao().insert(user)
-            },
-            cacheSource = {
-                database
-                    .userDao()
-                    .findByHandleAndHost(name, host, PlatformType.xQt)
-                    .distinctUntilChanged()
-                    .mapNotNull { it?.render(accountKey) }
-            },
-        )
-    }
-
-    override fun userById(id: String): CacheData<UiProfile> {
-        val userKey = MicroBlogKey(id, accountKey.host)
-        return Cacheable(
-            fetchSource = {
-                val user =
-                    service
-                        .userById(id)
-                        .body()
-                        ?.data
-                        ?.user
-                        ?.result
-                        ?.let {
-                            when (it) {
-                                is User -> it
-                                is UserUnavailable -> null
-                            }
-                        }?.toDbUser(accountKey) ?: throw Exception("User not found")
-                database.userDao().insert(user)
-            },
-            cacheSource = {
-                database
-                    .userDao()
-                    .findByKey(userKey)
-                    .distinctUntilChanged()
-                    .mapNotNull { it?.render(accountKey) }
-            },
-        )
-    }
-
-    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> =
-        MemCacheable<UiRelation>(
-            relationKeyWithUserKey(userKey),
-        ) {
-            val userResponse =
-                service
-                    .userById(userKey.id)
-                    .body()
-                    ?.data
-                    ?.user
-                    ?.result
-                    ?.let {
-                        when (it) {
-                            is User -> it
-                            is UserUnavailable -> null
-                        }
-                    } ?: throw Exception("User not found")
-            val user = userResponse.toDbUser(accountKey)
-
-            service
-                .profileSpotlights(user.handle)
-                .body()
-                ?.toUi(muting = userResponse.legacy.muting) ?: throw Exception("User not found")
-        }.toUi()
 
     override fun userTimeline(
         userKey: MicroBlogKey,
@@ -344,14 +343,12 @@ internal class XQTDataSource(
         UserMediaTimelineRemoteMediator(
             userKey,
             service,
-            database,
             accountKey,
         )
     } else {
         UserTimelineRemoteMediator(
             userKey,
             service,
-            database,
             accountKey,
         )
     }
@@ -360,71 +357,9 @@ internal class XQTDataSource(
         StatusDetailRemoteMediator(
             statusKey = statusKey,
             service = service,
-            database = database,
             accountKey = accountKey,
             statusOnly = false,
-            event = this,
         )
-
-    override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
-        val pagingKey = "status_only_$statusKey"
-        return Cacheable(
-            fetchSource = {
-                if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
-                    database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
-                        database.connect {
-                            database
-                                .pagingTimelineDao()
-                                .insertAll(
-                                    listOf(
-                                        DbPagingTimeline(
-                                            accountType = AccountType.Specific(accountKey),
-                                            statusKey = statusKey,
-                                            pagingKey = pagingKey,
-                                            sortId = 0,
-                                        ),
-                                    ),
-                                )
-                        }
-                    }
-                }
-                val response =
-                    service
-                        .getTweetDetail(
-                            variables =
-                                TweetDetailRequest(
-                                    focalTweetID = statusKey.id,
-                                    cursor = null,
-                                ).encodeJson(),
-                        ).body()
-                        ?.data
-                        ?.threadedConversationWithInjectionsV2
-                        ?.instructions
-                        .orEmpty()
-                val tweet = response.tweets()
-                val item = tweet.firstOrNull { it.id == statusKey.id }
-                if (item != null) {
-                    XQT.save(
-                        accountKey = accountKey,
-                        pagingKey = pagingKey,
-                        database = database,
-                        tweet = listOf(item),
-                    )
-                } else {
-                    throw Exception("Status not found")
-                }
-            },
-            cacheSource = {
-                database
-                    .pagingTimelineDao()
-                    .get(pagingKey, accountType = AccountType.Specific(accountKey))
-                    .distinctUntilChanged()
-                    .mapNotNull {
-                        it?.render(this)
-                    }
-            },
-        )
-    }
 
     override suspend fun compose(
         data: ComposeData,
@@ -450,11 +385,10 @@ internal class XQTDataSource(
                 ?.let {
                     it as? ComposeStatus.Quote
                 }?.let {
-                    data.referenceStatus.data?.content as? UiTimeline.ItemContent.Status
+                    data.referenceStatus.data as? UiTimelineV2.Post
                 }?.user
                 ?.handle
-                ?.removePrefix("@")
-                ?.removeSuffix("@${accountKey.host}")
+                ?.normalizedRaw
         val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias.mapIndexed { index, (item, altText) ->
@@ -611,77 +545,35 @@ internal class XQTDataSource(
             mediaIdString
         }
 
-    override suspend fun deleteStatus(statusKey: MicroBlogKey) {
-        tryRun {
-            service.postDeleteTweet(
-                postDeleteTweetRequest =
-                    PostDeleteTweetRequest(
-                        variables =
-                            PostCreateRetweetRequestVariables(
-                                tweetId = statusKey.id,
-                            ),
-                    ),
-            )
-            // delete status from cache
-            database.connect {
-                database.statusDao().delete(
-                    statusKey = statusKey,
-                    accountType = AccountType.Specific(accountKey),
-                )
-                database.statusReferenceDao().delete(statusKey)
-                database.pagingTimelineDao().deleteStatus(
-                    accountKey = accountKey,
-                    statusKey = statusKey,
-                )
-            }
-        }
-    }
-
     override fun searchStatus(query: String) =
         SearchStatusPagingSource(
             service,
-            database,
             accountKey,
             query,
         )
 
-    override fun searchUser(
-        query: String,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            SearchUserPagingSource(
-                service = service,
-                accountKey = accountKey,
-                query = query,
-            )
-        }.flow
+    override fun searchUser(query: String) =
+        SearchUserPagingSource(
+            service = service,
+            accountKey = accountKey,
+            query = query,
+        )
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            TrendsUserPagingSource(
-                service,
-                accountKey,
-            )
-        }.flow
+    override fun discoverUsers() =
+        TrendsUserPagingSource(
+            service,
+            accountKey,
+        )
 
-    override fun discoverStatuses(): BaseTimelineLoader {
+    override fun discoverStatuses(): RemoteLoader<UiTimelineV2> {
         // not supported
         throw UnsupportedOperationException("XQT does not support discover statuses")
     }
 
-    override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            TrendHashtagPagingSource(
-                service,
-            )
-        }.flow
+    override fun discoverHashtags() =
+        TrendHashtagPagingSource(
+            service,
+        )
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
@@ -695,480 +587,19 @@ internal class XQTDataSource(
                 ),
         )
 
-    override suspend fun follow(
-        userKey: MicroBlogKey,
-        relation: UiRelation,
-    ) {
-        when {
-            relation.following -> unfollow(userKey)
-            relation.blocking -> unblock(userKey)
-            else -> follow(userKey)
-        }
-    }
-
-    override fun profileActions(): List<ProfileAction> =
-        listOf(
-            object : ProfileAction.Mute {
-                override suspend fun invoke(
-                    userKey: MicroBlogKey,
-                    relation: UiRelation,
-                ) {
-                    if (relation.muted) {
-                        unmute(userKey)
-                    } else {
-                        mute(userKey)
-                    }
-                }
-
-                override fun relationState(relation: UiRelation): Boolean = relation.muted
-            },
-            object : ProfileAction.Block {
-                override suspend fun invoke(
-                    userKey: MicroBlogKey,
-                    relation: UiRelation,
-                ) {
-                    if (relation.blocking) {
-                        unblock(userKey)
-                    } else {
-                        block(userKey)
-                    }
-                }
-
-                override fun relationState(relation: UiRelation): Boolean = relation.blocking
-            },
+    override fun following(userKey: MicroBlogKey) =
+        FollowingPagingSource(
+            service = service,
+            userKey = userKey,
+            accountKey = accountKey,
         )
 
-    override fun like(
-        statusKey: MicroBlogKey,
-        liked: Boolean,
-    ) {
-        coroutineScope.launch {
-            updateStatusUseCase<StatusContent.XQT>(
-                statusKey = statusKey,
-                accountKey = accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(
-                        data =
-                            it.data.copy(
-                                legacy =
-                                    it.data.legacy?.copy(
-                                        favorited = !liked,
-                                        favoriteCount =
-                                            if (liked) {
-                                                it.data.legacy.favoriteCount
-                                                    .minus(1)
-                                            } else {
-                                                it.data.legacy.favoriteCount
-                                                    .plus(1)
-                                            },
-                                    ),
-                            ),
-                    )
-                },
-            )
-
-            tryRun {
-                if (liked) {
-                    service.postUnfavoriteTweet(
-                        postUnfavoriteTweetRequest =
-                            PostUnfavoriteTweetRequest(
-                                variables = PostCreateRetweetRequestVariables(tweetId = statusKey.id),
-                            ),
-                    )
-                } else {
-                    service.postFavoriteTweet(
-                        postFavoriteTweetRequest =
-                            PostFavoriteTweetRequest(
-                                variables =
-                                    PostCreateRetweetRequestVariables(
-                                        tweetId = statusKey.id,
-                                    ),
-                            ),
-                    )
-                }
-            }.onFailure {
-                updateStatusUseCase<StatusContent.XQT>(
-                    statusKey = statusKey,
-                    accountKey = accountKey,
-                    cacheDatabase = database,
-                    update = {
-                        it.copy(
-                            data =
-                                it.data.copy(
-                                    legacy =
-                                        it.data.legacy?.copy(
-                                            favorited = liked,
-                                            favoriteCount =
-                                                if (liked) {
-                                                    it.data.legacy.favoriteCount
-                                                        .plus(1)
-                                                } else {
-                                                    it.data.legacy.favoriteCount
-                                                        .minus(1)
-                                                },
-                                        ),
-                                ),
-                        )
-                    },
-                )
-            }.onSuccess {
-//            updateStatusUseCase<StatusContent.XQT>(
-//                statusKey = status.statusKey,
-//                accountKey = status.accountKey,
-//                cacheDatabase = database,
-//                update = {
-//                    it.copy(
-//                        data = result,
-//                    )
-//                },
-//            )
-            }
-        }
-    }
-
-    override fun retweet(
-        statusKey: MicroBlogKey,
-        retweeted: Boolean,
-    ) {
-        coroutineScope.launch {
-            updateStatusUseCase<StatusContent.XQT>(
-                statusKey = statusKey,
-                accountKey = accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(
-                        data =
-                            it.data.copy(
-                                legacy =
-                                    it.data.legacy?.copy(
-                                        retweeted = !retweeted,
-                                        retweetCount =
-                                            if (retweeted) {
-                                                it.data.legacy.retweetCount
-                                                    .minus(1)
-                                            } else {
-                                                it.data.legacy.retweetCount
-                                                    .plus(1)
-                                            },
-                                    ),
-                            ),
-                    )
-                },
-            )
-
-            tryRun {
-                if (retweeted) {
-                    service.postDeleteRetweet(
-                        postDeleteRetweetRequest =
-                            PostDeleteRetweetRequest(
-                                variables = PostDeleteRetweetRequestVariables(sourceTweetId = statusKey.id),
-                            ),
-                    )
-                } else {
-                    service.postCreateRetweet(
-                        postCreateRetweetRequest =
-                            PostCreateRetweetRequest(
-                                variables =
-                                    PostCreateRetweetRequestVariables(
-                                        tweetId = statusKey.id,
-                                    ),
-                            ),
-                    )
-                }
-            }.onFailure {
-                updateStatusUseCase<StatusContent.XQT>(
-                    statusKey = statusKey,
-                    accountKey = accountKey,
-                    cacheDatabase = database,
-                    update = {
-                        it.copy(
-                            data =
-                                it.data.copy(
-                                    legacy =
-                                        it.data.legacy?.copy(
-                                            retweeted = retweeted,
-                                            retweetCount =
-                                                if (retweeted) {
-                                                    it.data.legacy.retweetCount
-                                                        .plus(1)
-                                                } else {
-                                                    it.data.legacy.retweetCount
-                                                        .minus(1)
-                                                },
-                                        ),
-                                ),
-                        )
-                    },
-                )
-            }.onSuccess {
-//            updateStatusUseCase<StatusContent.XQT>(
-//                statusKey = status.statusKey,
-//                accountKey = status.accountKey,
-//                cacheDatabase = database,
-//                update = {
-//                    it.copy(
-//                        data = result,
-//                    )
-//                },
-//            )
-            }
-        }
-    }
-
-    override fun bookmark(
-        statusKey: MicroBlogKey,
-        bookmarked: Boolean,
-    ) {
-        coroutineScope.launch {
-            updateStatusUseCase<StatusContent.XQT>(
-                statusKey = statusKey,
-                accountKey = accountKey,
-                cacheDatabase = database,
-                update = {
-                    it.copy(
-                        data =
-                            it.data.copy(
-                                legacy =
-                                    it.data.legacy?.copy(
-                                        bookmarked = !bookmarked,
-                                        bookmarkCount =
-                                            if (bookmarked) {
-                                                maxOf(0, (it.data.legacy.bookmarkCount ?: 1) - 1)
-                                            } else {
-                                                (it.data.legacy.bookmarkCount ?: 0) + 1
-                                            },
-                                    ),
-                            ),
-                    )
-                },
-            )
-
-            tryRun {
-                if (bookmarked) {
-                    service.postDeleteBookmark(
-                        postDeleteBookmarkRequest =
-                            DeleteBookmarkRequest(
-                                variables =
-                                    DeleteBookmarkRequestVariables(
-                                        tweetId = statusKey.id,
-                                    ),
-                            ),
-                    )
-                } else {
-                    service.postCreateBookmark(
-                        postCreateBookmarkRequest =
-                            CreateBookmarkRequest(
-                                variables =
-                                    CreateBookmarkRequestVariables(
-                                        tweetId = statusKey.id,
-                                    ),
-                            ),
-                    )
-                }
-            }.onFailure {
-                updateStatusUseCase<StatusContent.XQT>(
-                    statusKey = statusKey,
-                    accountKey = accountKey,
-                    cacheDatabase = database,
-                    update = {
-                        it.copy(
-                            data =
-                                it.data.copy(
-                                    legacy =
-                                        it.data.legacy?.copy(
-                                            bookmarked = bookmarked,
-                                            bookmarkCount =
-                                                if (bookmarked) {
-                                                    maxOf(
-                                                        0,
-                                                        (it.data.legacy.bookmarkCount ?: 1) - 1,
-                                                    )
-                                                } else {
-                                                    (it.data.legacy.bookmarkCount ?: 0) + 1
-                                                },
-                                        ),
-                                ),
-                        )
-                    },
-                )
-            }.onSuccess {
-            }
-        }
-    }
-
-    suspend fun follow(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                following = true,
-            )
-        }
-        tryRun {
-            service.postCreateFriendships(userId = userKey.id)
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    following = false,
-                )
-            }
-        }
-    }
-
-    suspend fun unfollow(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                following = false,
-            )
-        }
-        tryRun {
-            service.postDestroyFriendships(userId = userKey.id)
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    following = true,
-                )
-            }
-        }
-    }
-
-    override suspend fun mute(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                muted = true,
-            )
-        }
-        tryRun {
-            service.postMutesUsersCreate(userKey.id)
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    muted = false,
-                )
-            }
-        }
-    }
-
-    suspend fun unmute(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                muted = false,
-            )
-        }
-        tryRun {
-            service.postMutesUsersDestroy(userKey.id)
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    muted = true,
-                )
-            }
-        }
-    }
-
-    override suspend fun block(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                blocking = true,
-            )
-        }
-        tryRun {
-            service.postBlocksCreate(userKey.id)
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    blocking = false,
-                )
-            }
-        }
-    }
-
-    suspend fun unblock(userKey: MicroBlogKey) {
-        val key = relationKeyWithUserKey(userKey)
-        MemCacheable.updateWith<UiRelation>(
-            key = key,
-        ) {
-            it.copy(
-                blocking = false,
-            )
-        }
-        tryRun {
-            service.postBlocksDestroy(userKey.id)
-        }.onFailure {
-            MemCacheable.updateWith<UiRelation>(
-                key = key,
-            ) {
-                it.copy(
-                    blocking = true,
-                )
-            }
-        }
-    }
-
-    private val notificationMarkerKey: String
-        get() = "notificationBadgeCount_$accountKey"
-
-    override fun notificationBadgeCount(): CacheData<Int> =
-        MemCacheable(
-            key = notificationMarkerKey,
-            fetchSource = {
-                service.getBadgeCount().ntabUnreadCount?.toInt() ?: 0
-            },
+    override fun fans(userKey: MicroBlogKey) =
+        FansPagingSource(
+            service = service,
+            userKey = userKey,
+            accountKey = accountKey,
         )
-
-    override fun following(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            FollowingPagingSource(
-                service = service,
-                userKey = userKey,
-                accountKey = accountKey,
-            )
-        }.flow.cachedIn(scope)
-
-    override fun fans(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiProfile>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            FansPagingSource(
-                service = service,
-                userKey = userKey,
-                accountKey = accountKey,
-            )
-        }.flow.cachedIn(scope)
 
     override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         listOfNotNull(
@@ -1182,7 +613,6 @@ internal class XQTDataSource(
                     UserRepliesTimelineRemoteMediator(
                         service = service,
                         accountKey = accountKey,
-                        database = database,
                         userKey = userKey,
                     ),
             ),
@@ -1194,7 +624,6 @@ internal class XQTDataSource(
                         UserLikesTimelineRemoteMediator(
                             service = service,
                             accountKey = accountKey,
-                            database = database,
                             userKey = userKey,
                         ),
                 )
@@ -1207,7 +636,6 @@ internal class XQTDataSource(
         ListTimelineRemoteMediator(
             listId,
             service,
-            database,
             accountKey,
         )
 
@@ -1229,7 +657,7 @@ internal class XQTDataSource(
             .cachedIn(scope)
             .combine(credentialFlow) { paging, credential ->
                 paging.map {
-                    it.render(accountKey = accountKey, credential = credential, statusEvent = this)
+                    it.render(accountKey = accountKey, credential = credential)
                 }
             }.cachedIn(scope)
 
@@ -1256,7 +684,7 @@ internal class XQTDataSource(
             .cachedIn(scope)
             .combine(credentialFlow) { paging, credential ->
                 paging.map {
-                    it.render(accountKey = accountKey, credential = credential, statusEvent = this)
+                    it.render(accountKey = accountKey, credential = credential)
                 }
             }.cachedIn(scope)
 
@@ -1387,7 +815,6 @@ internal class XQTDataSource(
                         room?.render(
                             accountKey = accountKey,
                             credential = credential,
-                            statusEvent = this,
                         )
                     }.mapNotNull { it }
             },

@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.status.action
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
@@ -36,7 +37,9 @@ public class DeleteStatusPresenter(
                         require(it is AuthenticatedMicroblogDataSource)
                         it
                     }.first()
-                        .deleteStatus(statusKey)
+                        .let {
+                            (it as PostDataSource).postHandler.delete(statusKey)
+                        }
                 }
             }
         }

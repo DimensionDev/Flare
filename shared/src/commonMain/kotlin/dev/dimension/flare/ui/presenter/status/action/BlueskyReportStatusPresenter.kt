@@ -12,7 +12,7 @@ import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -49,18 +49,18 @@ public class BlueskyReportStatusPresenter(
             override val reason: BlueskyReportStatusState.ReportReason?
                 get() = reason
 
-            override val status: UiState<UiTimeline>
+            override val status: UiState<UiTimelineV2>
                 get() =
                     status
 
             override fun report(
                 value: BlueskyReportStatusState.ReportReason,
-                status: UiTimeline,
+                status: UiTimelineV2,
             ) {
                 service.onSuccess {
                     scope.launch {
-                        if (status.content is UiTimeline.ItemContent.Status) {
-                            it.report(status.content.statusKey, value)
+                        if (status is UiTimelineV2.Post) {
+                            it.report(status.statusKey, value)
                         }
                     }
                 }
@@ -76,7 +76,7 @@ public class BlueskyReportStatusPresenter(
 @Immutable
 public interface BlueskyReportStatusState {
     public val reason: ReportReason?
-    public val status: UiState<UiTimeline>
+    public val status: UiState<UiTimelineV2>
 
     public val allReasons: ImmutableList<ReportReason>
 
@@ -93,6 +93,6 @@ public interface BlueskyReportStatusState {
 
     public fun report(
         value: ReportReason,
-        status: UiTimeline,
+        status: UiTimelineV2,
     )
 }

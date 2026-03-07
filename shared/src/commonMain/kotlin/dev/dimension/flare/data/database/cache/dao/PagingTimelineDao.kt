@@ -21,7 +21,10 @@ import kotlinx.coroutines.flow.Flow
 internal interface PagingTimelineDao {
     @Transaction
     @Query(
-        "SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountType = :accountType ORDER BY sortId DESC",
+        "SELECT DbPagingTimeline.* FROM DbPagingTimeline " +
+            "INNER JOIN DbStatus ON DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "WHERE DbPagingTimeline.pagingKey = :pagingKey AND DbStatus.accountType = :accountType " +
+            "ORDER BY DbPagingTimeline.sortId DESC",
     )
     fun getPagingSource(
         pagingKey: String,
@@ -43,7 +46,12 @@ internal interface PagingTimelineDao {
     fun searchHistoryPagingSource(query: String): PagingSource<Int, DbStatusWithReference>
 
     @Transaction
-    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountType = :accountType LIMIT 1")
+    @Query(
+        "SELECT DbPagingTimeline.* FROM DbPagingTimeline " +
+            "INNER JOIN DbStatus ON DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "WHERE DbPagingTimeline.pagingKey = :pagingKey AND DbStatus.accountType = :accountType " +
+            "LIMIT 1",
+    )
     fun get(
         pagingKey: String,
         accountType: DbAccountType,
@@ -56,10 +64,26 @@ internal interface PagingTimelineDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(timeline: List<DbPagingTimeline>)
 
+    @Query(
+        "SELECT * FROM DbPagingTimeline " +
+            "WHERE pagingKey = :pagingKey AND statusKey IN (:statusKeys)",
+    )
+    suspend fun getByPagingKeyAndStatusKeys(
+        pagingKey: String,
+        statusKeys: List<MicroBlogKey>,
+    ): List<DbPagingTimeline>
+
     @Delete
     suspend fun delete(timeline: List<DbPagingTimeline>)
 
-    @Query("DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountType = :accountType")
+    @Query(
+        "DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey " +
+            "AND EXISTS(" +
+            "SELECT 1 FROM DbStatus " +
+            "WHERE DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "AND DbStatus.accountType = :accountType" +
+            ")",
+    )
     suspend fun delete(
         pagingKey: String,
         accountType: DbAccountType,
@@ -78,24 +102,41 @@ internal interface PagingTimelineDao {
     @Query("DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey")
     suspend fun delete(pagingKey: String)
 
-    @Query("DELETE FROM DbPagingTimeline WHERE accountType = :accountType")
+    @Query(
+        "DELETE FROM DbPagingTimeline " +
+            "WHERE EXISTS(" +
+            "SELECT 1 FROM DbStatus " +
+            "WHERE DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "AND DbStatus.accountType = :accountType" +
+            ")",
+    )
     suspend fun deleteByAccountType(accountType: DbAccountType)
 
-    @Query("DELETE FROM DbPagingTimeline WHERE accountType = :accountType AND statusKey = :statusKey")
+    @Query(
+        "DELETE FROM DbPagingTimeline " +
+            "WHERE statusKey = :statusKey " +
+            "AND EXISTS(" +
+            "SELECT 1 FROM DbStatus " +
+            "WHERE DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "AND DbStatus.accountType = :accountType" +
+            ")",
+    )
     suspend fun deleteStatus(
         accountType: DbAccountType,
         statusKey: MicroBlogKey,
     )
 
-    suspend fun deleteStatus(
-        statusKey: MicroBlogKey,
-        accountKey: MicroBlogKey,
-    ) = deleteStatus(
-        accountType = AccountType.Specific(accountKey),
-        statusKey = statusKey,
+    @Query(
+        "SELECT EXISTS(" +
+            "SELECT 1 FROM DbPagingTimeline " +
+            "WHERE pagingKey = :paging_key " +
+            "AND EXISTS(" +
+            "SELECT 1 FROM DbStatus " +
+            "WHERE DbStatus.statusKey = DbPagingTimeline.statusKey " +
+            "AND DbStatus.accountType = :accountType" +
+            ")" +
+            ")",
     )
-
-    @Query("SELECT EXISTS(SELECT 1 FROM DbPagingTimeline WHERE accountType = :accountType AND pagingKey = :paging_key)")
     suspend fun existsPaging(
         accountType: DbAccountType,
         paging_key: String,

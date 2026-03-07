@@ -29,6 +29,22 @@ internal expect fun PlatformFilledTonalButton(
 )
 
 @Composable
+internal expect fun PlatformOutlinedButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable RowScope.() -> Unit,
+)
+
+@Composable
+internal expect fun PlatformErrorButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable RowScope.() -> Unit,
+)
+
+@Composable
 internal expect fun PlatformIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,

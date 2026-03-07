@@ -3,7 +3,7 @@ import WaterfallGrids
 import KotlinSharedUI
 
 struct TimelinePagingView: View {
-    let data: PagingState<UiTimeline>
+    let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     var body: some View {
         PagingView(data: data) {
@@ -30,7 +30,7 @@ struct TimelinePagingView: View {
 }
 
 extension TimelinePagingView {
-    init(data: PagingState<UiTimeline>) {
+    init(data: PagingState<UiTimelineV2>) {
         self.data = data
         self.detailStatusKey = nil
     }
@@ -38,12 +38,12 @@ extension TimelinePagingView {
 
 struct TimelineData: Identifiable, Hashable {
     let id: String
-    let data: UiTimeline?
+    let data: UiTimelineV2?
     let index: Int
 }
 
 struct TimelineCollection: @MainActor RandomAccessCollection {
-    let data: PagingStateSuccess<UiTimeline>
+    let data: PagingStateSuccess<UiTimelineV2>
     public var startIndex: Int { 0 }
     public var endIndex: Int { Int(data.itemCount) }
 
@@ -64,7 +64,7 @@ struct TimelinePagingContent: View {
     @AppStorage("pref_timeline_use_compose_view") private var useComposeView: Bool = false
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
-    let data: PagingState<UiTimeline>
+    let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let key: String
     var body: some View {
@@ -125,7 +125,7 @@ struct TimelinePagingContent: View {
 }
 
 struct TimelineWaterFallPagingView: View {
-    let data: PagingState<UiTimeline>
+    let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     let columns: [WaterfallItems.Column]
     var body: some View {

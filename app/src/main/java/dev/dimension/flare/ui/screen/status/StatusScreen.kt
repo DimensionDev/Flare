@@ -30,7 +30,6 @@ import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusContextPresenter
 import kotlinx.coroutines.launch
@@ -91,10 +90,7 @@ internal fun StatusScreen(
                 ) {
                     status(
                         state.state.listState,
-                        detailStatusKey =
-                            state.state.current
-                                .takeSuccess()
-                                ?.statusKey,
+                        detailStatusKey = statusKey,
                     )
                 }
             },

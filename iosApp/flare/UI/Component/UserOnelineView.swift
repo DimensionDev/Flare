@@ -21,7 +21,7 @@ struct UserOnelineView<TrailingContent: View>: View {
             }
             HStack {
                 RichText(text: data.name)
-                Text(data.handle)
+                Text(data.handle.canonical)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

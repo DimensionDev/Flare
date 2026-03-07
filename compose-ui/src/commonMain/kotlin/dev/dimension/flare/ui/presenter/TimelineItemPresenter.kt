@@ -5,7 +5,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import kotlinx.coroutines.launch
 
@@ -13,7 +13,7 @@ public class TimelineItemPresenter(
     private val timelineTabItem: TimelineTabItem,
 ) : PresenterBase<TimelineItemPresenter.State>() {
     public interface State {
-        public val listState: PagingState<UiTimeline>
+        public val listState: PagingState<UiTimelineV2>
 
         public fun refreshSync()
 

@@ -1,15 +1,15 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
-import kotlinx.collections.immutable.ImmutableList
 
 @Immutable
 public data class UiDMRoom internal constructor(
     val key: MicroBlogKey,
-    val users: ImmutableList<UiProfile>,
+    val users: SerializableImmutableList<UiProfile>,
     val lastMessage: UiDMItem?,
     val unreadCount: Long,
 ) {
@@ -50,7 +50,7 @@ public data class UiDMItem internal constructor(
         ) : Message
 
         public data class Status(
-            val status: UiTimeline.ItemContent.Status,
+            val status: UiTimelineV2.Post,
         ) : Message
 
         public data object Deleted : Message

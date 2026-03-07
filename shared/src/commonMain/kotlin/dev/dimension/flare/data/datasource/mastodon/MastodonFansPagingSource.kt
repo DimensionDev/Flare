@@ -1,7 +1,8 @@
 package dev.dimension.flare.data.datasource.mastodon
 
-import androidx.paging.PagingState
-import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.mastodon.api.AccountResources
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
@@ -12,25 +13,39 @@ internal class MastodonFansPagingSource(
     private val accountKey: MicroBlogKey?,
     private val host: String,
     private val userKey: MicroBlogKey,
-) : BasePagingSource<String, UiProfile>() {
-    override fun getRefreshKey(state: PagingState<String, UiProfile>): String? = null
-
-    override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiProfile> {
-        val maxId = params.key
-        val limit = params.loadSize
+) : RemoteLoader<UiProfile> {
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiProfile> {
         val response =
-            service
-                .followers(
-                    id = userKey.id,
-                    limit = limit,
-                    max_id = maxId,
-                )
-        return LoadResult.Page(
-            data =
-                response.map {
-                    it.render(accountKey = accountKey, host = host)
-                },
-            prevKey = null,
+            when (request) {
+                PagingRequest.Refresh -> {
+                    service
+                        .followers(
+                            id = userKey.id,
+                            limit = pageSize,
+                        )
+                }
+
+                is PagingRequest.Prepend -> {
+                    return PagingResult(
+                        endOfPaginationReached = true,
+                    )
+                }
+
+                is PagingRequest.Append -> {
+                    service.followers(
+                        id = userKey.id,
+                        limit = pageSize,
+                        max_id = request.nextKey,
+                    )
+                }
+            }
+
+        return PagingResult(
+            endOfPaginationReached = response.isEmpty() || response.next == null,
+            data = response.map { it.render(accountKey = accountKey, host = host) },
             nextKey = response.next,
         )
     }

@@ -1,13 +1,13 @@
 import KotlinSharedUI
 
-extension UiTimeline : Identifiable {}
+extension UiTimelineV2 : Identifiable {}
 
-extension UiTimeline.ItemContentFeed : Identifiable {}
+extension UiTimelineV2.Feed : Identifiable {}
 
-extension UiTimeline.ItemContentStatus : Identifiable {}
+extension UiTimelineV2.Post : Identifiable {}
 
-extension UiTimeline.ItemContentUser : Identifiable {}
+extension UiTimelineV2.User : Identifiable {}
 
-extension UiTimeline.ItemContentUserList : Identifiable {}
+extension UiTimelineV2.UserList : Identifiable {}
 
-extension UiTimeline.TopMessage : Identifiable {}
+extension UiTimelineV2.Message : Identifiable {}

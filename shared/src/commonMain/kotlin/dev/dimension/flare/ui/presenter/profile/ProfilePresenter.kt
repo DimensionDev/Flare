@@ -9,19 +9,25 @@ import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
-import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
-import dev.dimension.flare.data.datasource.microblog.list.ListDataSource
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
+import dev.dimension.flare.data.datasource.microblog.datasource.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.NoActiveAccountException
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.flattenUiState
@@ -34,9 +40,7 @@ import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.status.LogUserHistoryPresenter
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -44,7 +48,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -69,15 +72,20 @@ public class ProfilePresenter(
                     } else {
                         throw NoActiveAccountException
                     }
-            service.userById(userId).toUi()
+            (service as UserDataSource).userHandler.userById(userId).toUi()
         }
     }
 
     private val relationStateFlow by lazy {
         serviceFlow.flatMapLatest { service ->
-            require(service is AuthenticatedMicroblogDataSource)
-            val actualUserKey = userKey ?: service.accountKey
-            service.relation(actualUserKey)
+            require(service is RelationDataSource)
+            val actualUserKey =
+                userKey ?: if (service is AuthenticatedMicroblogDataSource) {
+                    service.accountKey
+                } else {
+                    null
+                } ?: throw NoActiveAccountException
+            (service as RelationDataSource).relationHandler.relation(actualUserKey).toUi()
         }
     }
 
@@ -88,13 +96,6 @@ public class ProfilePresenter(
             } else {
                 false
             }
-        }
-    }
-
-    private val profileActionsFlow by lazy {
-        serviceFlow.map { service ->
-            require(service is AuthenticatedMicroblogDataSource)
-            service.profileActions().toImmutableList()
         }
     }
 
@@ -154,7 +155,7 @@ public class ProfilePresenter(
                                 type = it.type,
                                 presenter =
                                     object : TimelinePresenter() {
-                                        override val loader: Flow<BaseTimelineLoader>
+                                        override val loader: Flow<RemoteLoader<UiTimelineV2>>
                                             get() = flowOf(it.loader)
                                     },
                             )
@@ -167,6 +168,12 @@ public class ProfilePresenter(
     private val isListDataSourceFlow by lazy {
         serviceFlow.map { service ->
             service is ListDataSource
+        }
+    }
+
+    private val supportedRelationTypesFlow by lazy {
+        serviceFlow.map { service ->
+            (service as? RelationDataSource)?.supportedRelationTypes.orEmpty()
         }
     }
 
@@ -187,9 +194,9 @@ public class ProfilePresenter(
             }
         }
         val isListDataSource by isListDataSourceFlow.collectAsUiState()
+        val supportedRelationTypes by supportedRelationTypesFlow.collectAsUiState()
         val relationState by relationStateFlow.flattenUiState()
         val isMe by isMeFlow.collectAsUiState()
-        val profileActions by profileActionsFlow.collectAsUiState()
         val canSendMessage by canSendMessageFlow.collectAsUiState()
         val myAccountKey by myAccountKeyFlow.collectAsUiState()
         val tabs by tabsFlow.collectAsUiState()
@@ -199,30 +206,30 @@ public class ProfilePresenter(
                 isMe,
                 canSendMessage,
                 relationState,
+                supportedRelationTypes,
                 service,
-                profileActions,
                 userState,
                 myAccountKey,
             ) {
                 val user = userState.takeSuccess()
                 val accountKey = myAccountKey.takeSuccess()
+                val relationTypes = supportedRelationTypes.takeSuccessOr(emptySet())
                 if (isMe.takeSuccessOr(false) || user == null) {
                     emptyList()
                 } else {
                     listOfNotNull(
-                        if (accountKey != null && userKey != null) {
+                        if (accountKey != null && userKey != null && service is ListDataSource) {
                             ActionMenu.Item(
-                                icon = ActionMenu.Item.Icon.List,
+                                icon = UiIcon.List,
                                 text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.EditUserList),
-                                onClicked = {
-                                    launcher.launch(
+                                clickEvent =
+                                    ClickEvent.Deeplink(
                                         DeeplinkRoute
                                             .EditUserList(
                                                 accountKey = accountKey,
                                                 userKey = userKey,
-                                            ).toUri(),
-                                    )
-                                },
+                                            ),
+                                    ),
                             )
                         } else {
                             null
@@ -230,17 +237,16 @@ public class ProfilePresenter(
                         if (canSendMessage.takeSuccessOr(false) && accountKey != null && userKey != null) {
                             // navigate to send message
                             ActionMenu.Item(
-                                icon = ActionMenu.Item.Icon.ChatMessage,
+                                icon = UiIcon.ChatMessage,
                                 text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.SendMessage),
-                                onClicked = {
-                                    launcher.launch(
+                                clickEvent =
+                                    ClickEvent.Deeplink(
                                         DeeplinkRoute
                                             .DirectMessage(
                                                 accountKey = accountKey,
                                                 userKey = userKey,
-                                            ).toUri(),
-                                    )
-                                },
+                                            ),
+                                    ),
                             )
                         } else {
                             null
@@ -255,103 +261,66 @@ public class ProfilePresenter(
                                 },
                             ) +
                             relationState.takeSuccessOr(UiRelation()).let { relation ->
-                                profileActions
-                                    .takeSuccessOr(
-                                        persistentListOf(
-                                            object : ProfileAction.Mute {
-                                                override suspend fun invoke(
-                                                    userKey: MicroBlogKey,
-                                                    relation: UiRelation,
-                                                ) {
-                                                }
-
-                                                override fun relationState(relation: UiRelation): Boolean = false
-                                            },
-                                            object : ProfileAction.Block {
-                                                override suspend fun invoke(
-                                                    userKey: MicroBlogKey,
-                                                    relation: UiRelation,
-                                                ) {
-                                                }
-
-                                                override fun relationState(relation: UiRelation): Boolean = false
-                                            },
-                                        ),
-                                    ).map { action ->
-                                        when (action) {
-                                            is ProfileAction.Block -> {
-                                                ActionMenu.Item(
-                                                    icon =
-                                                        if (action.relationState(relation)) {
-                                                            ActionMenu.Item.Icon.UnBlock
-                                                        } else {
-                                                            ActionMenu.Item.Icon.Block
-                                                        },
-                                                    text =
-                                                        ActionMenu.Item.Text.Localized(
-                                                            if (action.relationState(relation)) {
-                                                                ActionMenu.Item.Text.Localized.Type.UnBlock
-                                                            } else {
-                                                                ActionMenu.Item.Text.Localized.Type.Block
-                                                            },
-                                                        ),
-                                                    onClicked = {
-                                                        if (userKey != null) {
-                                                            if (action.relationState(relation)) {
-                                                                scope.launch {
-                                                                    action.invoke(userKey, relation)
-                                                                }
-                                                            } else {
-                                                                launcher.launch(
-                                                                    DeeplinkRoute
-                                                                        .BlockUser(
-                                                                            accountKey = accountKey,
-                                                                            userKey = userKey,
-                                                                        ).toUri(),
-                                                                )
-                                                            }
-                                                        }
+                                listOfNotNull(
+                                    if (userKey != null && RelationActionType.Block in relationTypes) {
+                                        ActionMenu.Item(
+                                            icon = if (relation.blocking) UiIcon.UnBlock else UiIcon.Block,
+                                            text =
+                                                ActionMenu.Item.Text.Localized(
+                                                    if (relation.blocking) {
+                                                        ActionMenu.Item.Text.Localized.Type.UnBlock
+                                                    } else {
+                                                        ActionMenu.Item.Text.Localized.Type.Block
                                                     },
-                                                )
-                                            }
-
-                                            is ProfileAction.Mute -> {
-                                                ActionMenu.Item(
-                                                    icon =
-                                                        if (action.relationState(relation)) {
-                                                            ActionMenu.Item.Icon.UnMute
-                                                        } else {
-                                                            ActionMenu.Item.Icon.Mute
-                                                        },
-                                                    text =
-                                                        ActionMenu.Item.Text.Localized(
-                                                            if (action.relationState(relation)) {
-                                                                ActionMenu.Item.Text.Localized.Type.UnMute
-                                                            } else {
-                                                                ActionMenu.Item.Text.Localized.Type.Mute
-                                                            },
-                                                        ),
-                                                    onClicked = {
-                                                        if (userKey != null) {
-                                                            if (action.relationState(relation)) {
-                                                                scope.launch {
-                                                                    action.invoke(userKey, relation)
-                                                                }
-                                                            } else {
-                                                                launcher.launch(
-                                                                    DeeplinkRoute
-                                                                        .MuteUser(
-                                                                            accountKey = accountKey,
-                                                                            userKey = userKey,
-                                                                        ).toUri(),
-                                                                )
-                                                            }
-                                                        }
+                                                ),
+                                            clickEvent =
+                                                ClickEvent.Deeplink(
+                                                    if (relation.blocking) {
+                                                        DeeplinkRoute.UnblockUser(
+                                                            accountKey = accountKey,
+                                                            userKey = userKey,
+                                                        )
+                                                    } else {
+                                                        DeeplinkRoute.BlockUser(
+                                                            accountKey = accountKey,
+                                                            userKey = userKey,
+                                                        )
                                                     },
-                                                )
-                                            }
-                                        }
-                                    }
+                                                ),
+                                        )
+                                    } else {
+                                        null
+                                    },
+                                    if (userKey != null && RelationActionType.Mute in relationTypes) {
+                                        ActionMenu.Item(
+                                            icon = if (relation.muted) UiIcon.UnMute else UiIcon.Mute,
+                                            text =
+                                                ActionMenu.Item.Text.Localized(
+                                                    if (relation.muted) {
+                                                        ActionMenu.Item.Text.Localized.Type.UnMute
+                                                    } else {
+                                                        ActionMenu.Item.Text.Localized.Type.Mute
+                                                    },
+                                                ),
+                                            clickEvent =
+                                                ClickEvent.Deeplink(
+                                                    if (relation.muted) {
+                                                        DeeplinkRoute.UnmuteUser(
+                                                            accountKey = accountKey,
+                                                            userKey = userKey,
+                                                        )
+                                                    } else {
+                                                        DeeplinkRoute.MuteUser(
+                                                            accountKey = accountKey,
+                                                            userKey = userKey,
+                                                        )
+                                                    },
+                                                ),
+                                        )
+                                    } else {
+                                        null
+                                    },
+                                )
                             } +
                             listOf(
                                 ActionMenu.Item(
@@ -359,18 +328,19 @@ public class ProfilePresenter(
                                         ActionMenu.Item.Text.Localized(
                                             ActionMenu.Item.Text.Localized.Type.Report,
                                         ),
-                                    icon = ActionMenu.Item.Icon.Report,
-                                    onClicked = {
+                                    icon = UiIcon.Report,
+                                    clickEvent =
                                         if (userKey != null) {
-                                            launcher.launch(
+                                            ClickEvent.Deeplink(
                                                 DeeplinkRoute
                                                     .ReportUser(
                                                         accountKey = accountKey,
                                                         userKey = userKey,
-                                                    ).toUri(),
+                                                    ),
                                             )
-                                        }
-                                    },
+                                        } else {
+                                            ClickEvent.Noop
+                                        },
                                     color = ActionMenu.Item.Color.Red,
                                 ),
                             )
@@ -383,7 +353,7 @@ public class ProfilePresenter(
                             ActionMenu.Group(
                                 displayItem =
                                     ActionMenu.Item(
-                                        icon = ActionMenu.Item.Icon.MoreVerticel,
+                                        icon = UiIcon.MoreVerticel,
                                     ),
                                 actions = it.toImmutableList(),
                             ),
@@ -403,26 +373,21 @@ public class ProfilePresenter(
             canSendMessage = canSendMessage,
             tabs = tabs,
         ) {
-            override fun onProfileActionClick(
-                userKey: MicroBlogKey,
-                relation: UiRelation,
-                action: ProfileAction,
-            ) {
-                scope.launch {
-                    action.invoke(userKey, relation)
+            override fun follow(userKey: MicroBlogKey) {
+                service.onSuccess { service ->
+                    (service as RelationDataSource).relationHandler.follow(userKey)
                 }
             }
 
-            override fun follow(
-                userKey: MicroBlogKey,
-                data: UiRelation,
-            ) {
-                scope.launch {
-                    service.onSuccess { service ->
-                        if (service is AuthenticatedMicroblogDataSource) {
-                            service.follow(userKey, data)
-                        }
-                    }
+            override fun unfollow(userKey: MicroBlogKey) {
+                service.onSuccess { service ->
+                    (service as RelationDataSource).relationHandler.unfollow(userKey)
+                }
+            }
+
+            override fun unblock(userKey: MicroBlogKey) {
+                service.onSuccess { service ->
+                    (service as RelationDataSource).relationHandler.unblock(userKey)
                 }
             }
 
@@ -444,16 +409,11 @@ public abstract class ProfileState(
     public val canSendMessage: UiState<Boolean>,
     public val tabs: UiState<ImmutableList<Tab>>,
 ) {
-    public abstract fun follow(
-        userKey: MicroBlogKey,
-        data: UiRelation,
-    )
+    public abstract fun follow(userKey: MicroBlogKey)
 
-    public abstract fun onProfileActionClick(
-        userKey: MicroBlogKey,
-        relation: UiRelation,
-        action: ProfileAction,
-    )
+    public abstract fun unfollow(userKey: MicroBlogKey)
+
+    public abstract fun unblock(userKey: MicroBlogKey)
 
     public abstract fun report(userKey: MicroBlogKey)
 
@@ -488,7 +448,14 @@ public class ProfileWithUserNameAndHostPresenter(
                 repository = accountRepository,
             ).flatMap { service ->
                 remember(service) {
-                    service.userByAcct("$userName@$host")
+                    (service as UserDataSource)
+                        .userHandler
+                        .userByHandleAndHost(
+                            UiHandle(
+                                raw = userName,
+                                host = host,
+                            ),
+                        )
                 }.collectAsState().toUi()
             }
         return object : UserState {

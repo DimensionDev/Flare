@@ -7,10 +7,9 @@ import de.cketti.codepoints.codePointCount
 import de.cketti.codepoints.deluxe.codePointSequence
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.data.database.cache.mapper.XQTTimeline
 import dev.dimension.flare.data.database.cache.model.MessageContent
-import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
-import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.network.xqt.model.Admin
 import dev.dimension.flare.data.network.xqt.model.AudioSpace
@@ -25,6 +24,9 @@ import dev.dimension.flare.data.network.xqt.model.TimelineTwitterList
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetCardLegacy
 import dev.dimension.flare.data.network.xqt.model.TweetCardLegacyBindingValueData
+import dev.dimension.flare.data.network.xqt.model.TweetTombstone
+import dev.dimension.flare.data.network.xqt.model.TweetUnion
+import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.TwitterList
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserResultCore
@@ -34,11 +36,12 @@ import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
@@ -46,7 +49,7 @@ import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
@@ -63,16 +66,33 @@ import moe.tlaster.twitter.parser.TwitterParser
 import moe.tlaster.twitter.parser.UrlToken
 import kotlin.time.Clock
 import kotlin.time.Instant
-import kotlin.uuid.Uuid
 
 private val twitterParser by lazy {
     TwitterParser(enableNonAsciiInUrl = false)
 }
 
-internal fun TopLevel.renderNotifications(
-    accountKey: MicroBlogKey,
-    event: StatusEvent.XQT,
-): List<UiTimeline> {
+private fun TweetUnion.toTweetOrNull(): Tweet? =
+    when (this) {
+        is Tweet -> this
+        is TweetWithVisibilityResults -> tweet
+        is TweetTombstone -> null
+    }
+
+private fun TweetUnion.getRetweet(): TweetUnion? =
+    when (this) {
+        is Tweet -> legacy?.retweetedStatusResult?.result
+        is TweetTombstone -> null
+        is TweetWithVisibilityResults -> tweet.legacy?.retweetedStatusResult?.result
+    }
+
+private fun TweetUnion.getQuoted(): TweetUnion? =
+    when (this) {
+        is Tweet -> quotedStatusResult?.result
+        is TweetTombstone -> null
+        is TweetWithVisibilityResults -> tweet.quotedStatusResult?.result
+    }
+
+internal fun TopLevel.renderNotifications(accountKey: MicroBlogKey): List<UiTimelineV2> {
     return timeline
         ?.instructions
         ?.asSequence()
@@ -110,12 +130,12 @@ internal fun TopLevel.renderNotifications(
                     }
                 val icon =
                     when (data?.icon?.id) {
-                        "person_icon" -> UiTimeline.TopMessage.Icon.Follow
-                        "heart_icon" -> UiTimeline.TopMessage.Icon.Favourite
-                        "bird_icon" -> UiTimeline.TopMessage.Icon.Info
-                        else -> UiTimeline.TopMessage.Icon.Info
+                        "person_icon" -> UiIcon.Follow
+                        "heart_icon" -> UiIcon.Like
+                        "bird_icon" -> UiIcon.Info
+                        else -> UiIcon.Info
                     }
-                val tweet =
+                val post =
                     notificationTweet?.firstOrNull()?.let {
                         Tweet(
                             restId = it.idStr,
@@ -134,60 +154,64 @@ internal fun TopLevel.renderNotifications(
                                         ),
                                 ),
                             legacy = it,
-                        ).renderStatus(accountKey, event, emptyMap())
+                        ).renderStatus(accountKey)
                     }
-                val itemContent =
+
+                val statusKey =
+                    MicroBlogKey(
+                        id = notification.id.orEmpty(),
+                        host = accountKey.host,
+                    )
+                val clickEvent =
                     when {
-                        data?.icon?.id in listOf("person_icon") && users != null ->
-                            if (users.size > 1) {
-                                UiTimeline.ItemContent.UserList(
-                                    users = users.toImmutableList(),
-                                )
-                            } else if (users.size == 1) {
-                                UiTimeline.ItemContent.User(
-                                    value = users.first(),
-                                )
-                            } else {
-                                null
-                            }
-
-                        tweet != null -> tweet
-                        else -> null
-                    }
-
-                UiTimeline(
-                    topMessage =
-                        UiTimeline.TopMessage(
-                            user = null, // users?.firstOrNull(),
-                            icon = icon,
-                            type =
-                                UiTimeline.TopMessage.MessageType.XQT
-                                    .Custom(
-                                        message = message.orEmpty(),
-                                        id = notification.id ?: Uuid.random().toString(),
+                        url == "/2/notifications/device_follow.json" ->
+                            ClickEvent.Deeplink(
+                                DeeplinkRoute.Timeline
+                                    .XQTDeviceFollow(
+                                        accountType = AccountType.Specific(accountKey),
                                     ),
-                            onClicked = {
-                                if (itemContent == null && url != null) {
-                                    if (url == "/2/notifications/device_follow.json") {
-                                        launcher.launch(
-                                            DeeplinkRoute.Timeline
-                                                .XQTDeviceFollow(
-                                                    accountType = AccountType.Specific(accountKey),
-                                                ).toUri(),
-                                        )
-                                    } else if (!url.startsWith("/")) {
-                                        launcher.launch(url)
-                                    }
-                                }
-                            },
-                            statusKey =
-                                MicroBlogKey(
-                                    id = notification.id.orEmpty(),
-                                    host = accountKey.host,
-                                ),
-                        ),
-                    content = itemContent,
-                )
+                            )
+
+                        post == null && !url.isNullOrEmpty() && !url.startsWith("/") ->
+                            ClickEvent.Deeplink(
+                                DeeplinkRoute.OpenLinkDirectly(url),
+                            )
+
+                        else -> ClickEvent.Noop
+                    }
+                val messageItem =
+                    UiTimelineV2.Message(
+                        user = null,
+                        statusKey = statusKey,
+                        icon = icon,
+                        type = UiTimelineV2.Message.Type.Raw(message.orEmpty()),
+                        createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
+                        clickEvent = clickEvent,
+                        accountType = AccountType.Specific(accountKey),
+                    )
+                when {
+                    data?.icon?.id == "person_icon" && users?.size == 1 ->
+                        UiTimelineV2.User(
+                            message = messageItem,
+                            value = users.first(),
+                            createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
+                            statusKey = users.first().key,
+                            accountType = AccountType.Specific(accountKey),
+                        )
+
+                    data?.icon?.id == "person_icon" && !users.isNullOrEmpty() ->
+                        UiTimelineV2.UserList(
+                            message = messageItem,
+                            users = users.toImmutableList(),
+                            createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
+                            statusKey = statusKey,
+                            post = null,
+                            accountType = AccountType.Specific(accountKey),
+                        )
+
+                    post != null -> post.copy(message = messageItem)
+                    else -> messageItem
+                }
             } else if (mentionTweet != null) {
                 val tweet = globalObjects?.tweets?.get(mentionTweet.id) ?: return@mapNotNull null
                 if (tweet.userIdStr == null) {
@@ -222,31 +246,32 @@ internal fun TopLevel.renderNotifications(
                                     ),
                             ),
                         legacy = tweet,
-                    ).renderStatus(accountKey, event, emptyMap())
-                UiTimeline(
-                    topMessage =
-                        UiTimeline.TopMessage(
+                    ).renderStatus(accountKey)
+                data.copy(
+                    message =
+                        UiTimelineV2.Message(
                             user = renderedUser,
-                            icon = UiTimeline.TopMessage.Icon.Retweet,
-                            type = UiTimeline.TopMessage.MessageType.XQT.Mention,
-                            onClicked = {
-                                launcher.launch(
-                                    DeeplinkRoute.Profile
-                                        .User(
-                                            accountType =
-                                                dev.dimension.flare.model.AccountType
-                                                    .Specific(accountKey),
-                                            userKey = renderedUser.key,
-                                        ).toUri(),
-                                )
-                            },
                             statusKey =
                                 MicroBlogKey(
                                     id = notification?.id.orEmpty(),
                                     host = accountKey.host,
                                 ),
+                            icon = UiIcon.Retweet,
+                            type =
+                                UiTimelineV2.Message.Type.Localized(
+                                    UiTimelineV2.Message.Type.Localized.MessageId.Mention,
+                                ),
+                            createdAt = data.createdAt,
+                            clickEvent =
+                                ClickEvent.Deeplink(
+                                    DeeplinkRoute.Profile
+                                        .User(
+                                            accountType = AccountType.Specific(accountKey),
+                                            userKey = renderedUser.key,
+                                        ),
+                                ),
+                            accountType = AccountType.Specific(accountKey),
                         ),
-                    content = data,
                 )
             } else {
                 null
@@ -255,65 +280,123 @@ internal fun TopLevel.renderNotifications(
         .orEmpty()
 }
 
-internal fun Tweet.render(
-    accountKey: MicroBlogKey,
-    event: StatusEvent.XQT,
-    references: Map<ReferenceType, List<StatusContent>> = emptyMap(),
-): UiTimeline {
-    val retweet =
-        (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.XQT)
-            ?.data
-            ?.renderStatus(
-                accountKey = accountKey,
-                event = event,
-                references = mapOf(ReferenceType.Quote to references[ReferenceType.Quote].orEmpty()),
-            )
-    val currentTweet = renderStatus(accountKey, event, references)
-    val actualTweet = retweet ?: currentTweet
+internal fun Tweet.render(accountKey: MicroBlogKey): UiTimelineV2.Post {
+    val retweetUnion = this.getRetweet()
+    val quoteUnion = retweetUnion?.getQuoted() ?: this.getQuoted()
+    val quote = quoteUnion?.toTweetOrNull()?.renderStatus(accountKey = accountKey)
+    val retweet = retweetUnion?.toTweetOrNull()?.renderStatus(accountKey, quote = quote)
+    val currentTweet = renderStatus(accountKey, quote = quote)
+    val actualTweet =
+        if (retweet != null) {
+            currentTweet.copy(internalRepost = retweet)
+        } else {
+            currentTweet
+        }
     val user = currentTweet.user
-    val topMessage =
+    val message =
         if (retweet != null && user != null) {
-            UiTimeline.TopMessage(
+            UiTimelineV2.Message(
                 user = user,
-                icon = UiTimeline.TopMessage.Icon.Retweet,
-                type = UiTimeline.TopMessage.MessageType.XQT.Retweet,
-                onClicked = {
-                    launcher.launch(
+                icon = UiIcon.Retweet,
+                type =
+                    UiTimelineV2.Message.Type.Localized(
+                        UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                    ),
+                createdAt = currentTweet.createdAt,
+                clickEvent =
+                    ClickEvent.Deeplink(
                         DeeplinkRoute.Profile
                             .User(
-                                accountType =
-                                    dev.dimension.flare.model.AccountType
-                                        .Specific(accountKey),
+                                accountType = AccountType.Specific(accountKey),
                                 userKey = user.key,
-                            ).toUri(),
-                    )
-                },
+                            ),
+                    ),
                 statusKey = currentTweet.statusKey,
+                accountType = AccountType.Specific(accountKey),
             )
         } else {
             null
         }
-    return UiTimeline(
-        content = actualTweet,
-        topMessage = topMessage,
-    )
+    return if (message != null) {
+        actualTweet.copy(message = message)
+    } else {
+        actualTweet
+    }
+}
+
+internal fun XQTTimeline.render(accountKey: MicroBlogKey): UiTimelineV2? {
+    val result = tweets.tweetResults.result ?: return null
+    val retweetUnion = result.getRetweet()
+    val quoteUnion = retweetUnion?.getQuoted() ?: result.getQuoted()
+    val quote = quoteUnion?.toTweetOrNull()?.renderStatus(accountKey = accountKey)
+    val parentStatuses =
+        parents
+            .mapNotNull {
+                it.tweets.tweetResults.result
+                    ?.toTweetOrNull()
+            }.map { it.renderStatus(accountKey = accountKey) }
+            .toImmutableList()
+
+    val currentTweet =
+        result
+            .toTweetOrNull()
+            ?.renderStatus(
+                accountKey = accountKey,
+                parents = parentStatuses,
+                quote = quote,
+            ) ?: return null
+    val retweet =
+        retweetUnion
+            ?.toTweetOrNull()
+            ?.renderStatus(
+                accountKey = accountKey,
+                quote = quote,
+            )
+    val actualTweet =
+        if (retweet != null) {
+            currentTweet.copy(internalRepost = retweet)
+        } else {
+            currentTweet
+        }
+    val user = currentTweet.user
+    val message =
+        if (retweet != null && user != null) {
+            UiTimelineV2.Message(
+                user = user,
+                icon = UiIcon.Retweet,
+                type =
+                    UiTimelineV2.Message.Type.Localized(
+                        UiTimelineV2.Message.Type.Localized.MessageId.Repost,
+                    ),
+                createdAt = currentTweet.createdAt,
+                clickEvent =
+                    ClickEvent.Deeplink(
+                        DeeplinkRoute.Profile
+                            .User(
+                                accountType = AccountType.Specific(accountKey),
+                                userKey = user.key,
+                            ),
+                    ),
+                statusKey = currentTweet.statusKey,
+                accountType = AccountType.Specific(accountKey),
+            )
+        } else {
+            null
+        }
+    return if (message != null) {
+        actualTweet.copy(message = message)
+    } else {
+        actualTweet
+    }
 }
 
 internal fun Tweet.renderStatus(
     accountKey: MicroBlogKey,
-    event: StatusEvent.XQT,
-    references: Map<ReferenceType, List<StatusContent>>,
-): UiTimeline.ItemContent.Status {
-    val parents =
-        references[ReferenceType.Reply]
-            ?.mapNotNull { it as? StatusContent.XQT }
-            ?.map { it.data.renderStatus(accountKey, event, emptyMap()) }
-            ?.toImmutableList()
-            ?: persistentListOf()
-    val quote =
-        (references[ReferenceType.Quote]?.firstOrNull() as? StatusContent.XQT)
-            ?.data
-            ?.renderStatus(accountKey = accountKey, event = event, references = emptyMap())
+    parents: List<UiTimelineV2.Post> = emptyList(),
+    quote: UiTimelineV2.Post? = null,
+): UiTimelineV2.Post {
+    val actualParents = parents.toImmutableList()
+    val actualQuote = quote ?: quotedStatusResult?.result?.toTweetOrNull()?.renderStatus(accountKey = accountKey)
     val user =
         core
             ?.userResults
@@ -388,21 +471,30 @@ internal fun Tweet.renderStatus(
     val poll =
         card?.legacy?.let { cardLegacy ->
             if (cardLegacy.get("choice1_label") != null) {
-                val max =
-                    (1..4).sumOf { index ->
-                        cardLegacy.get("choice${index}_count")?.stringValue?.toLong() ?: 0
+                val optionData =
+                    (1..4).mapNotNull { index ->
+                        cardLegacy.get("choice${index}_label")?.stringValue?.let { label ->
+                            val count = cardLegacy.get("choice${index}_count")?.stringValue?.toLongOrNull() ?: 0L
+                            Triple(index - 1, label, count)
+                        }
                     }
+                val totalVotes = optionData.sumOf { it.third }.coerceAtLeast(1L)
                 val options =
-                    (1..4)
-                        .mapNotNull { index ->
-                            val count =
-                                cardLegacy.get("choice${index}_count")?.stringValue?.toLong() ?: 0
-                            cardLegacy.get("choice${index}_label")?.stringValue?.let {
-                                UiPoll.Option(
-                                    title = it,
-                                    votesCount = count,
-                                    percentage = count.toFloat() / max.coerceAtLeast(1).toFloat(),
-                                )
+                    optionData
+                        .map { (_, label, count) ->
+                            UiPoll.Option(
+                                title = label,
+                                votesCount = count,
+                                percentage = count.toFloat() / totalVotes.toFloat(),
+                            )
+                        }.toImmutableList()
+                val ownVotes =
+                    optionData
+                        .mapNotNull { (index, _, _) ->
+                            if (cardLegacy.get("choice${index + 1}_selected")?.booleanValue == true) {
+                                index
+                            } else {
+                                null
                             }
                         }.toImmutableList()
                 UiPoll(
@@ -410,15 +502,14 @@ internal fun Tweet.renderStatus(
                     id = "",
                     options = options,
                     multiple = false,
-                    ownVotes = persistentListOf(),
+                    ownVotes = ownVotes,
+                    voteEvent = null,
                     expiresAt =
                         cardLegacy.get("end_datetime_utc")?.stringValue?.let {
                             parseXQTCustomDateTime(
                                 it,
                             )
-                        }
-                            ?: Clock.System.now(),
-                    onVote = { options -> },
+                        },
                     enabled = false,
                 )
             } else {
@@ -468,12 +559,7 @@ internal fun Tweet.renderStatus(
         }
     val content = renderContent(accountKey)
 
-    val aboveTextContent =
-        legacy?.in_reply_to_screen_name?.let { screenName ->
-            UiTimeline.ItemContent.Status.AboveTextContent.ReplyTo(
-                handle = "@$screenName",
-            )
-        }
+    val replyToHandle = legacy?.in_reply_to_screen_name?.let { "@$it" }
 
     val isFromMe = user?.key == accountKey
     val createAt =
@@ -483,7 +569,7 @@ internal fun Tweet.renderStatus(
             id = legacy?.idStr ?: restId,
             host = accountKey.host,
         )
-    val url =
+    val statusUrl =
         buildString {
             append("https://${accountKey.host}/")
             append(user?.handleWithoutAtAndHost)
@@ -505,175 +591,117 @@ internal fun Tweet.renderStatus(
             append(legacy?.idStr ?: restId)
         }
 
-    return UiTimeline.ItemContent.Status(
-        statusKey = statusKey,
-        user = user,
-        content = content,
-        card = uiCard,
-        quote = listOfNotNull(quote).toImmutableList(),
-        poll = poll,
+    return UiTimelineV2.Post(
+        message = null,
+        platformType = PlatformType.xQt,
         images = medias,
+        sensitive = legacy?.possiblySensitive == true,
         contentWarning = null,
-        createdAt = createAt.toUi(),
-        aboveTextContent = aboveTextContent,
-        parents = parents,
+        user = user,
+        quote = listOfNotNull(actualQuote).toImmutableList(),
+        content = content,
         actions =
             listOfNotNull(
                 ActionMenu.Item(
-                    icon = ActionMenu.Item.Icon.Reply,
+                    icon = UiIcon.Reply,
                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Reply),
                     count = UiNumber(legacy?.replyCount?.toLong() ?: 0),
-                    onClicked = {
-                        launcher.launch(
+                    clickEvent =
+                        ClickEvent.Deeplink(
                             DeeplinkRoute.Compose
                                 .Reply(
                                     accountKey = accountKey,
                                     statusKey = statusKey,
-                                ).toUri(),
-                        )
-                    },
+                                ),
+                        ),
                 ),
                 ActionMenu.Group(
                     displayItem =
-                        ActionMenu.Item(
-                            icon = if (legacy?.retweeted == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
-                            text =
-                                ActionMenu.Item.Text.Localized(
-                                    if (legacy?.retweeted ==
-                                        true
-                                    ) {
-                                        ActionMenu.Item.Text.Localized.Type.Unretweet
-                                    } else {
-                                        ActionMenu.Item.Text.Localized.Type.Retweet
-                                    },
-                                ),
-                            count = UiNumber(legacy?.retweetCount?.toLong() ?: 0),
-                            color = if (legacy?.retweeted == true) ActionMenu.Item.Color.PrimaryColor else null,
+                        ActionMenu.xqtRetweet(
+                            statusKey = statusKey,
+                            retweeted = legacy?.retweeted == true,
+                            count = legacy?.retweetCount?.toLong() ?: 0,
+                            accountKey = accountKey,
                         ),
                     actions =
                         listOfNotNull(
-                            ActionMenu.Item(
-                                icon = if (legacy?.retweeted == true) ActionMenu.Item.Icon.Unretweet else ActionMenu.Item.Icon.Retweet,
-                                text =
-                                    ActionMenu.Item.Text.Localized(
-                                        if (legacy?.retweeted ==
-                                            true
-                                        ) {
-                                            ActionMenu.Item.Text.Localized.Type.Unretweet
-                                        } else {
-                                            ActionMenu.Item.Text.Localized.Type.Retweet
-                                        },
-                                    ),
-                                count = UiNumber(legacy?.retweetCount?.toLong() ?: 0),
-                                color = if (legacy?.retweeted == true) ActionMenu.Item.Color.PrimaryColor else null,
-                                onClicked = {
-                                    event.retweet(statusKey, legacy?.retweeted ?: false)
-                                },
+                            ActionMenu.xqtRetweet(
+                                statusKey = statusKey,
+                                retweeted = legacy?.retweeted == true,
+                                count = legacy?.retweetCount?.toLong() ?: 0,
+                                accountKey = accountKey,
                             ),
                             ActionMenu.Item(
-                                icon = ActionMenu.Item.Icon.Quote,
+                                icon = UiIcon.Quote,
                                 text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Quote),
                                 count = UiNumber(legacy?.quoteCount?.toLong() ?: 0),
-                                onClicked = {
-                                    launcher.launch(
+                                clickEvent =
+                                    ClickEvent.Deeplink(
                                         DeeplinkRoute.Compose
                                             .Quote(
                                                 accountKey = accountKey,
                                                 statusKey = statusKey,
-                                            ).toUri(),
-                                    )
-                                },
+                                            ),
+                                    ),
                             ),
                         ).toImmutableList(),
                 ),
-                ActionMenu.Item(
-                    icon = if (legacy?.favorited == true) ActionMenu.Item.Icon.Unlike else ActionMenu.Item.Icon.Like,
-                    text =
-                        ActionMenu.Item.Text.Localized(
-                            if (legacy?.favorited ==
-                                true
-                            ) {
-                                ActionMenu.Item.Text.Localized.Type.Unlike
-                            } else {
-                                ActionMenu.Item.Text.Localized.Type.Like
-                            },
-                        ),
-                    count = UiNumber(legacy?.favoriteCount?.toLong() ?: 0),
-                    color = if (legacy?.favorited == true) ActionMenu.Item.Color.Red else null,
-                    onClicked = {
-                        event.like(statusKey, legacy?.favorited ?: false)
-                    },
+                ActionMenu.xqtLike(
+                    statusKey = statusKey,
+                    liked = legacy?.favorited == true,
+                    count = legacy?.favoriteCount?.toLong() ?: 0,
+                    accountKey = accountKey,
                 ),
                 ActionMenu.Group(
                     displayItem =
                         ActionMenu.Item(
-                            icon = ActionMenu.Item.Icon.More,
+                            icon = UiIcon.More,
                             text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                         ),
                     actions =
                         buildList {
                             add(
-                                ActionMenu.Item(
-                                    icon =
-                                        if (legacy?.bookmarked ==
-                                            true
-                                        ) {
-                                            ActionMenu.Item.Icon.Unbookmark
-                                        } else {
-                                            ActionMenu.Item.Icon.Bookmark
-                                        },
-                                    text =
-                                        ActionMenu.Item.Text.Localized(
-                                            if (legacy?.bookmarked ==
-                                                true
-                                            ) {
-                                                ActionMenu.Item.Text.Localized.Type.Unbookmark
-                                            } else {
-                                                ActionMenu.Item.Text.Localized.Type.Bookmark
-                                            },
-                                        ),
-                                    count = UiNumber(legacy?.bookmarkCount?.toLong() ?: 0),
-                                    onClicked = {
-                                        event.bookmark(statusKey, legacy?.bookmarked ?: false)
-                                    },
+                                ActionMenu.xqtBookmark(
+                                    statusKey = statusKey,
+                                    bookmarked = legacy?.bookmarked == true,
+                                    count = legacy?.bookmarkCount?.toLong() ?: 0,
+                                    accountKey = accountKey,
                                 ),
                             )
                             add(
                                 ActionMenu.Item(
-                                    icon = ActionMenu.Item.Icon.Share,
+                                    icon = UiIcon.Share,
                                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
-                                    onClicked = {
-                                        launcher.launch(
+                                    clickEvent =
+                                        ClickEvent.Deeplink(
                                             DeeplinkRoute.Status
                                                 .ShareSheet(
                                                     statusKey = statusKey,
                                                     accountType = AccountType.Specific(accountKey),
-                                                    shareUrl = url,
+                                                    shareUrl = statusUrl,
                                                     fxShareUrl = fxUrl,
                                                     fixvxShareUrl = fixvxUrl,
-                                                ).toUri(),
-                                        )
-                                    },
+                                                ),
+                                        ),
                                 ),
                             )
 
                             if (isFromMe) {
                                 add(
                                     ActionMenu.Item(
-                                        icon = ActionMenu.Item.Icon.Delete,
+                                        icon = UiIcon.Delete,
                                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
                                         color = ActionMenu.Item.Color.Red,
-                                        onClicked = {
-                                            launcher.launch(
+                                        clickEvent =
+                                            ClickEvent.Deeplink(
                                                 DeeplinkRoute.Status
                                                     .DeleteConfirm(
                                                         statusKey = statusKey,
                                                         accountType =
                                                             dev.dimension.flare.model.AccountType
                                                                 .Specific(accountKey),
-                                                    ).toUri(),
-                                            )
-                                        },
+                                                    ),
+                                            ),
                                     ),
                                 )
                             } else {
@@ -683,58 +711,40 @@ internal fun Tweet.renderStatus(
                                         userActionsMenu(
                                             accountKey = accountKey,
                                             userKey = user.key,
-                                            handle = user.handle,
+                                            handle = user.handle.canonical,
                                         ),
                                     )
                                     add(ActionMenu.Divider)
                                 }
                                 add(
                                     ActionMenu.Item(
-                                        icon = ActionMenu.Item.Icon.Report,
+                                        icon = UiIcon.Report,
                                         text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
                                         color = ActionMenu.Item.Color.Red,
-                                        onClicked = {
-                                            // TODO: implement report
-                                        },
+                                        clickEvent = ClickEvent.Noop,
                                     ),
                                 )
                             }
                         }.toImmutableList(),
                 ),
             ).toImmutableList(),
-        sensitive = legacy?.possiblySensitive == true,
-        onClicked = {
-            launcher.launch(
-                DeeplinkRoute.Status
-                    .Detail(
-                        statusKey = statusKey,
-                        accountType =
-                            dev.dimension.flare.model.AccountType
-                                .Specific(accountKey),
-                    ).toUri(),
-            )
-        },
-        platformType = PlatformType.xQt,
-        onMediaClicked = { media, index ->
-            launcher.launch(
-                DeeplinkRoute.Media
-                    .StatusMedia(
-                        statusKey = statusKey,
-                        accountType =
-                            dev.dimension.flare.model.AccountType
-                                .Specific(accountKey),
-                        index = index,
-                        preview =
-                            when (media) {
-                                is UiMedia.Image -> media.previewUrl
-                                is UiMedia.Video -> media.thumbnailUrl
-                                is UiMedia.Audio -> null
-                                is UiMedia.Gif -> media.previewUrl
-                            },
-                    ).toUri(),
-            )
-        },
-        url = url,
+        poll = poll,
+        statusKey = statusKey,
+        card = uiCard,
+        createdAt = createAt.toUi(),
+        emojiReactions = persistentListOf(),
+        sourceChannel = null,
+        visibility = null,
+        replyToHandle = replyToHandle,
+        parents = actualParents,
+        clickEvent =
+            ClickEvent.Deeplink(
+                DeeplinkRoute.Status.Detail(
+                    statusKey = statusKey,
+                    accountType = AccountType.Specific(accountKey),
+                ),
+            ),
+        accountType = AccountType.Specific(accountKey),
     )
 }
 
@@ -752,7 +762,11 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                 .apply {
                     addChildren(TextNode(name))
                 }.toUi(),
-        handle = "@$screenName@${accountKey.host}",
+        handle =
+            UiHandle(
+                raw = screenName,
+                host = accountKey.host,
+            ),
         banner = legacy.profileBannerUrl,
         description =
             legacy.description?.takeIf { it.isNotEmpty() }?.let {
@@ -846,7 +860,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                             dev.dimension.flare.model.AccountType
                                 .Specific(accountKey),
                         userKey = userKey,
-                    ).toUri(),
+                    ),
             ),
     )
 }
@@ -884,7 +898,7 @@ internal fun parseXQTCustomDateTime(dateTimeStr: String): Instant? {
             "Dec" to 12,
         )
 
-    val parts = dateTimeStr.split(" ")
+    val parts = dateTimeStr.trim().split(Regex("\\s+"))
     if (parts.size != 6) return null
 
     try {
@@ -892,20 +906,20 @@ internal fun parseXQTCustomDateTime(dateTimeStr: String): Instant? {
         val day = parts[2].toInt()
         val timeParts = parts[3].split(":").map { it.toInt() }
         val year = parts[5].toInt()
+        val timezoneOffset = parts[4]
+        if (timezoneOffset.length != 5 || (timezoneOffset[0] != '+' && timezoneOffset[0] != '-')) return null
+        val offsetHours = timezoneOffset.substring(1, 3).toInt()
+        val offsetMinutes = timezoneOffset.substring(3, 5).toInt()
 
         val hour = timeParts[0]
         val minute = timeParts[1]
         val second = timeParts[2]
 
-        // Assuming the timezone is always in the format of +HHMM or -HHMM
-//        val timezoneOffset = parts[4]
-//        val offsetHours = timezoneOffset.substring(1, 3).toInt()
-//        val offsetMinutes = timezoneOffset.substring(3, 5).toInt()
-//        val totalOffsetMinutes = offsetHours * 60 + offsetMinutes
-//        val offsetSign = if (timezoneOffset.startsWith("+")) 1 else -1
-
         val dateTime = LocalDateTime(year, month, day, hour, minute, second)
-        return dateTime.toInstant(TimeZone.UTC)
+        val offsetSign = if (timezoneOffset.startsWith("+")) 1 else -1
+        val totalOffsetMillis = ((offsetHours * 60L) + offsetMinutes) * 60_000L
+        val utcEpochMillis = dateTime.toInstant(TimeZone.UTC).toEpochMilliseconds() - (offsetSign * totalOffsetMillis)
+        return Instant.fromEpochMilliseconds(utcEpochMillis)
     } catch (e: Exception) {
         return null
     }
@@ -968,16 +982,14 @@ internal fun TwitterList.render(accountKey: MicroBlogKey): UiList.List {
 internal fun MessageContent.XQT.render(
     accountKey: MicroBlogKey,
     credential: UiAccount.Credential,
-    statusEvent: StatusEvent,
 ): UiDMItem.Message =
     when (this) {
-        is MessageContent.XQT.Message -> render(accountKey, credential, statusEvent)
+        is MessageContent.XQT.Message -> render(accountKey, credential)
     }
 
 private fun MessageContent.XQT.Message.render(
     accountKey: MicroBlogKey,
     credential: UiAccount.Credential,
-    statusEvent: StatusEvent,
 ): UiDMItem.Message {
     if (!data.attachment
             ?.photo
@@ -1106,8 +1118,7 @@ private fun MessageContent.XQT.Message.render(
         data.text
             .orEmpty()
             .endsWith(data.attachment.tweet.url) &&
-        data.attachment.tweet.status != null &&
-        statusEvent is StatusEvent.XQT
+        data.attachment.tweet.status != null
     ) {
         val tweetLegacy = data.attachment.tweet.status
         val status =
@@ -1128,7 +1139,7 @@ private fun MessageContent.XQT.Message.render(
                         )
                     },
                 legacy = tweetLegacy,
-            ).renderStatus(accountKey, statusEvent, emptyMap())
+            ).renderStatus(accountKey)
         return UiDMItem.Message.Status(
             status = status,
         )
@@ -1194,7 +1205,11 @@ private fun Admin.render(accountKey: MicroBlogKey): UiProfile {
                 .apply {
                     addChildren(TextNode(displayName.orEmpty()))
                 }.toUi(),
-        handle = "@$twitterScreenName@${accountKey.host}",
+        handle =
+            UiHandle(
+                raw = twitterScreenName.orEmpty(),
+                host = accountKey.host,
+            ),
         platformType = PlatformType.xQt,
         clickEvent =
             ClickEvent.Deeplink(
@@ -1204,7 +1219,7 @@ private fun Admin.render(accountKey: MicroBlogKey): UiProfile {
                             dev.dimension.flare.model.AccountType
                                 .Specific(accountKey),
                         userKey = key,
-                    ).toUri(),
+                    ),
             ),
         description = null,
         banner = null,
@@ -1307,7 +1322,7 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
                                         .UserNameWithHost(
                                             dev.dimension.flare.model.AccountType
                                                 .Specific(accountKey),
-                                            it.screenName ?: "",
+                                            it.screenName?.trimStart('@') ?: "",
                                             accountKey.host,
                                         ).toUri(),
                                 )

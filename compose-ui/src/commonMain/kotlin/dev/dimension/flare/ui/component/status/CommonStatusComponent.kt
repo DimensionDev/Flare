@@ -59,6 +59,7 @@ import compose.icons.fontawesomeicons.regular.CommentDots
 import compose.icons.fontawesomeicons.regular.Heart
 import compose.icons.fontawesomeicons.solid.At
 import compose.icons.fontawesomeicons.solid.Bookmark
+import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.Ellipsis
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
@@ -70,13 +71,16 @@ import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.LockOpen
 import compose.icons.fontawesomeicons.solid.Message
 import compose.icons.fontawesomeicons.solid.Minus
+import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
-import compose.icons.fontawesomeicons.solid.QuoteLeft
 import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
 import compose.icons.fontawesomeicons.solid.ShareNodes
+import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
+import compose.icons.fontawesomeicons.solid.Thumbtack
 import compose.icons.fontawesomeicons.solid.Trash
 import compose.icons.fontawesomeicons.solid.Tv
+import compose.icons.fontawesomeicons.solid.UserPlus
 import compose.icons.fontawesomeicons.solid.UserSlash
 import compose.icons.fontawesomeicons.solid.VolumeXmark
 import dev.dimension.flare.compose.ui.Res
@@ -122,7 +126,6 @@ import dev.dimension.flare.compose.ui.user_unmute
 import dev.dimension.flare.compose.ui.vote
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.model.PostActionStyle
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -147,14 +150,16 @@ import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.icons.Misskey
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableList
@@ -164,7 +169,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 public fun CommonStatusComponent(
-    item: UiTimeline.ItemContent.Status,
+    item: UiTimelineV2.Post,
     modifier: Modifier = Modifier,
     isDetail: Boolean = false,
     isQuote: Boolean = false,
@@ -219,18 +224,14 @@ public fun CommonStatusComponent(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        when (val content = item.topEndContent) {
-                            is UiTimeline.ItemContent.Status.TopEndContent.Visibility -> {
-                                StatusVisibilityComponent(
-                                    visibility = content.visibility,
-                                    modifier =
-                                        Modifier
-                                            .size(PlatformTheme.typography.caption.fontSize.value.dp),
-                                    tint = PlatformTheme.colorScheme.caption,
-                                )
-                            }
-
-                            null -> Unit
+                        item.visibility?.let {
+                            StatusVisibilityComponent(
+                                visibility = it,
+                                modifier =
+                                    Modifier
+                                        .size(PlatformTheme.typography.caption.fontSize.value.dp),
+                                tint = PlatformTheme.colorScheme.caption,
+                            )
                         }
                         if (appearanceSettings.showPlatformLogo) {
                             val icon =
@@ -312,15 +313,11 @@ public fun CommonStatusComponent(
                     }
                 }
             }
-            when (val content = item.aboveTextContent) {
-                is UiTimeline.ItemContent.Status.AboveTextContent.ReplyTo -> {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    StatusReplyComponent(
-                        replyHandle = content.handle,
-                    )
-                }
-
-                null -> Unit
+            item.replyToHandle?.let { replyHandle ->
+                Spacer(modifier = Modifier.height(4.dp))
+                StatusReplyComponent(
+                    replyHandle = replyHandle,
+                )
             }
             if (isDetail) {
                 SelectionContainer {
@@ -350,7 +347,7 @@ public fun CommonStatusComponent(
 
             if (isDetail && !item.content.isEmpty && appearanceSettings.showTranslateButton) {
                 TranslationComponent(
-                    statusKey = item.statusKey,
+                    statusKey = item.itemKey,
                     contentWarning = item.contentWarning,
                     rawContent = item.content.innerText,
                     content = item.content,
@@ -362,15 +359,21 @@ public fun CommonStatusComponent(
                 StatusMediasComponent(
                     item,
                     onMediaClick = { media ->
-                        item.onMediaClicked.invoke(
-                            ClickContext(
-                                launcher = {
-                                    uriHandler.openUri(it)
-                                },
-                            ),
-                            media,
-                            item.images.indexOf(media),
-                        )
+                        val index = item.images.indexOf(media)
+                        val link =
+                            DeeplinkRoute.Media.StatusMedia(
+                                statusKey = item.statusKey,
+                                accountType = item.accountType,
+                                index = index,
+                                preview =
+                                    when (media) {
+                                        is UiMedia.Image -> media.previewUrl
+                                        is UiMedia.Video -> media.thumbnailUrl
+                                        is UiMedia.Gif -> media.previewUrl
+                                        is UiMedia.Audio -> null
+                                    },
+                            )
+                        uriHandler.openUri(link.toUri())
                     },
                 )
             }
@@ -395,19 +398,11 @@ public fun CommonStatusComponent(
                 )
             }
 
-            if (!isQuote) {
-                when (val content = item.bottomContent) {
-                    is UiTimeline.ItemContent.Status.BottomContent.Reaction -> {
-                        if (content.emojiReactions.isNotEmpty() || content.channel != null) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            StatusReactionComponent(
-                                data = content,
-                            )
-                        }
-                    }
-
-                    null -> Unit
-                }
+            if (!isQuote && (item.emojiReactions.isNotEmpty() || item.sourceChannel != null)) {
+                Spacer(modifier = Modifier.height(4.dp))
+                StatusReactionComponent(
+                    data = item,
+                )
             }
 
             if (isDetail) {
@@ -453,7 +448,7 @@ public fun CommonStatusComponent(
 
 @Composable
 internal fun StatusMediasComponent(
-    item: UiTimeline.ItemContent.Status,
+    item: UiTimelineV2.Post,
     onMediaClick: (UiMedia) -> Unit,
 ) {
     val appearanceSettings = LocalComponentAppearance.current
@@ -520,7 +515,7 @@ internal fun StatusMediasComponent(
 
 @Composable
 private fun StatusQuoteComponent(
-    quotes: ImmutableList<UiTimeline.ItemContent.Status>,
+    quotes: ImmutableList<UiTimelineV2.Post>,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -560,14 +555,15 @@ private fun StatusQuoteComponent(
 
 @Composable
 private fun StatusReactionComponent(
-    data: UiTimeline.ItemContent.Status.BottomContent.Reaction,
+    data: UiTimelineV2.Post,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        data.channel?.let { channel ->
+        data.sourceChannel?.let { channel ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -622,7 +618,9 @@ private fun StatusReactionComponent(
                             modifier =
                                 Modifier
                                     .clickable {
-                                        reaction.onClicked.invoke()
+                                        reaction.onClicked.invoke(
+                                            ClickContext(uriHandler::openUri),
+                                        )
                                     }.padding(horizontal = 8.dp, vertical = 4.dp),
                         ) {
                             if (reaction.isUnicode) {
@@ -647,7 +645,7 @@ private fun StatusReactionComponent(
 
 @Composable
 private fun TranslationComponent(
-    statusKey: MicroBlogKey,
+    statusKey: String,
     contentWarning: UiRichText?,
     rawContent: String,
     content: UiRichText,
@@ -758,12 +756,12 @@ private fun TranslationComponent(
 
 @Composable
 public fun StatusVisibilityComponent(
-    visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type,
+    visibility: UiTimelineV2.Post.Visibility,
     tint: Color = PlatformContentColor.current,
     modifier: Modifier = Modifier,
 ) {
     when (visibility) {
-        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
+        UiTimelineV2.Post.Visibility.Public ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Globe,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_public),
@@ -771,7 +769,7 @@ public fun StatusVisibilityComponent(
                 tint = tint,
             )
 
-        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
+        UiTimelineV2.Post.Visibility.Home ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.LockOpen,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_unlisted),
@@ -779,7 +777,7 @@ public fun StatusVisibilityComponent(
                 tint = tint,
             )
 
-        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
+        UiTimelineV2.Post.Visibility.Followers ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Lock,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_private),
@@ -787,7 +785,7 @@ public fun StatusVisibilityComponent(
                 tint = tint,
             )
 
-        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
+        UiTimelineV2.Post.Visibility.Specified ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.At,
                 contentDescription = stringResource(resource = Res.string.mastodon_visibility_direct),
@@ -795,7 +793,7 @@ public fun StatusVisibilityComponent(
                 tint = tint,
             )
 
-        UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Channel ->
+        UiTimelineV2.Post.Visibility.Channel ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Tv,
                 contentDescription = stringResource(resource = Res.string.channel_title),
@@ -843,44 +841,6 @@ internal fun StatusActions(
                                     StatusActionItemMenu(subActions, closeMenu, launcher)
                                 }
 
-                                is ActionMenu.AsyncActionMenuItem -> {
-                                    if (isMenuShown) {
-                                        val state by subActions.flow.collectAsUiState()
-                                        state
-                                            .onSuccess {
-                                                StatusActionItemMenu(it, closeMenu, launcher)
-                                            }.onLoading {
-                                                PlatformDropdownMenuItem(
-                                                    text = {
-                                                        PlatformText(
-                                                            text = "Loading",
-                                                            modifier =
-                                                                Modifier.placeholder(
-                                                                    true,
-                                                                    color = PlatformTheme.colorScheme.cardAlt,
-                                                                ),
-                                                        )
-                                                    },
-                                                    leadingIcon = {
-                                                        FAIcon(
-                                                            imageVector = FontAwesomeIcons.Solid.Ellipsis,
-                                                            contentDescription = "Loading",
-                                                            modifier =
-                                                                Modifier
-                                                                    .size(PlatformTextStyle.current.fontSize.value.dp + 2.dp)
-                                                                    .placeholder(
-                                                                        true,
-                                                                        color = PlatformTheme.colorScheme.cardAlt,
-                                                                    ),
-                                                        )
-                                                    },
-                                                    onClick = {
-                                                    },
-                                                )
-                                            }
-                                    }
-                                }
-
                                 // nested group is not supported
                                 is ActionMenu.Group -> Unit
                                 ActionMenu.Divider -> PlatformDropdownMenuDivider()
@@ -896,7 +856,7 @@ internal fun StatusActions(
                         color = action.color?.toComposeColor() ?: PlatformContentColor.current,
                         withTextMinWidth = index != items.lastIndex,
                         onClicked = {
-                            action.onClicked?.let { onClick ->
+                            action.onClicked.let { onClick ->
                                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
                                 onClick.invoke(
                                     ClickContext(
@@ -910,8 +870,6 @@ internal fun StatusActions(
                     )
                 }
 
-                // async action item is only supported in group
-                is ActionMenu.AsyncActionMenuItem -> Unit
                 // divider is only supported in group
                 ActionMenu.Divider -> Unit
             }
@@ -946,7 +904,7 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
         },
         onClick = {
             closeMenu.invoke()
-            subActions.onClicked?.invoke(
+            subActions.onClicked.invoke(
                 ClickContext(
                     launcher = {
                         launcher.openUri(it)
@@ -988,6 +946,8 @@ private fun ActionMenu.Item.Text.asString(): String =
                     ActionMenu.Item.Text.Localized.Type.UnBlock -> Res.string.user_unblock
                     ActionMenu.Item.Text.Localized.Type.BlockWithHandleParameter -> Res.string.user_block_with_parameter
                     ActionMenu.Item.Text.Localized.Type.MuteWithHandleParameter -> Res.string.user_mute_with_parameter
+                    ActionMenu.Item.Text.Localized.Type.AcceptFollowRequest -> Res.string.more
+                    ActionMenu.Item.Text.Localized.Type.RejectFollowRequest -> Res.string.more
                 }
             stringResource(resource, *parameters.toTypedArray())
         }
@@ -1001,30 +961,38 @@ private fun ActionMenu.Item.Color.toComposeColor(): Color =
         ActionMenu.Item.Color.PrimaryColor -> PlatformTheme.colorScheme.retweetColor
     }
 
-private fun ActionMenu.Item.Icon.toImageVector(): ImageVector =
+internal fun UiIcon.toImageVector(): ImageVector =
     when (this) {
-        ActionMenu.Item.Icon.Like -> FontAwesomeIcons.Regular.Heart
-        ActionMenu.Item.Icon.Unlike -> FontAwesomeIcons.Solid.Heart
-        ActionMenu.Item.Icon.Retweet -> FontAwesomeIcons.Solid.Retweet
-        ActionMenu.Item.Icon.Unretweet -> FontAwesomeIcons.Solid.Retweet
-        ActionMenu.Item.Icon.Reply -> FontAwesomeIcons.Solid.Reply
-        ActionMenu.Item.Icon.Comment -> FontAwesomeIcons.Regular.CommentDots
-        ActionMenu.Item.Icon.Quote -> FontAwesomeIcons.Solid.QuoteLeft
-        ActionMenu.Item.Icon.Bookmark -> FontAwesomeIcons.Regular.Bookmark
-        ActionMenu.Item.Icon.Unbookmark -> FontAwesomeIcons.Solid.Bookmark
-        ActionMenu.Item.Icon.More -> FontAwesomeIcons.Solid.Ellipsis
-        ActionMenu.Item.Icon.Delete -> FontAwesomeIcons.Solid.Trash
-        ActionMenu.Item.Icon.Report -> FontAwesomeIcons.Solid.CircleInfo
-        ActionMenu.Item.Icon.React -> FontAwesomeIcons.Solid.Plus
-        ActionMenu.Item.Icon.UnReact -> FontAwesomeIcons.Solid.Minus
-        ActionMenu.Item.Icon.Share -> FontAwesomeIcons.Solid.ShareNodes
-        ActionMenu.Item.Icon.MoreVerticel -> FontAwesomeIcons.Solid.EllipsisVertical
-        ActionMenu.Item.Icon.List -> FontAwesomeIcons.Solid.List
-        ActionMenu.Item.Icon.ChatMessage -> FontAwesomeIcons.Solid.Message
-        ActionMenu.Item.Icon.Mute -> FontAwesomeIcons.Solid.VolumeXmark
-        ActionMenu.Item.Icon.UnMute -> FontAwesomeIcons.Solid.VolumeXmark
-        ActionMenu.Item.Icon.Block -> FontAwesomeIcons.Solid.UserSlash
-        ActionMenu.Item.Icon.UnBlock -> FontAwesomeIcons.Solid.UserSlash
+        UiIcon.Like -> FontAwesomeIcons.Regular.Heart
+        UiIcon.Unlike -> FontAwesomeIcons.Solid.Heart
+        UiIcon.Retweet -> FontAwesomeIcons.Solid.Retweet
+        UiIcon.Unretweet -> FontAwesomeIcons.Solid.Retweet
+        UiIcon.Reply -> FontAwesomeIcons.Solid.Reply
+        UiIcon.Comment -> FontAwesomeIcons.Regular.CommentDots
+        UiIcon.Quote -> FontAwesomeIcons.Solid.Reply
+        UiIcon.Bookmark -> FontAwesomeIcons.Regular.Bookmark
+        UiIcon.Unbookmark -> FontAwesomeIcons.Solid.Bookmark
+        UiIcon.More -> FontAwesomeIcons.Solid.Ellipsis
+        UiIcon.Delete -> FontAwesomeIcons.Solid.Trash
+        UiIcon.Report -> FontAwesomeIcons.Solid.CircleInfo
+        UiIcon.React -> FontAwesomeIcons.Solid.Plus
+        UiIcon.UnReact -> FontAwesomeIcons.Solid.Minus
+        UiIcon.Share -> FontAwesomeIcons.Solid.ShareNodes
+        UiIcon.MoreVerticel -> FontAwesomeIcons.Solid.EllipsisVertical
+        UiIcon.List -> FontAwesomeIcons.Solid.List
+        UiIcon.ChatMessage -> FontAwesomeIcons.Solid.Message
+        UiIcon.Mute -> FontAwesomeIcons.Solid.VolumeXmark
+        UiIcon.UnMute -> FontAwesomeIcons.Solid.VolumeXmark
+        UiIcon.Block -> FontAwesomeIcons.Solid.UserSlash
+        UiIcon.UnBlock -> FontAwesomeIcons.Solid.UserSlash
+        UiIcon.Follow -> FontAwesomeIcons.Solid.UserPlus
+        UiIcon.Favourite -> FontAwesomeIcons.Solid.Heart
+        UiIcon.Mention -> FontAwesomeIcons.Solid.At
+        UiIcon.Poll -> FontAwesomeIcons.Solid.SquarePollHorizontal
+        UiIcon.Edit -> FontAwesomeIcons.Solid.Pen
+        UiIcon.Info -> FontAwesomeIcons.Solid.CircleInfo
+        UiIcon.Pin -> FontAwesomeIcons.Solid.Thumbtack
+        UiIcon.Check -> FontAwesomeIcons.Solid.Check
     }
 
 @Composable
@@ -1204,10 +1172,14 @@ private fun StatusPollComponent(
             }
         }
         if (poll.canVote) {
+            val uriHandler = LocalUriHandler.current
             PlatformFilledTonalButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    poll.onVote.invoke(selectedOptions.toImmutableList())
+                    poll.onVote.invoke(
+                        ClickContext(launcher = uriHandler::openUri),
+                        selectedOptions.toImmutableList(),
+                    )
                 },
             ) {
                 PlatformText(

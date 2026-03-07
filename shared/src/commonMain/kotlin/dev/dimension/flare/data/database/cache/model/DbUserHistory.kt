@@ -11,6 +11,7 @@ import dev.dimension.flare.model.MicroBlogKey
 @Entity(
     indices = [
         Index(value = ["userKey", "accountType"], unique = true),
+        Index(value = ["lastVisit"]),
     ],
 )
 internal data class DbUserHistory(

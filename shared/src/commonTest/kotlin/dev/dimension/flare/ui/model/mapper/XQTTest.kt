@@ -22,6 +22,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 class XQTTest {
     @BeforeTest
@@ -41,6 +42,22 @@ class XQTTest {
     }
 
     private val accountKey = MicroBlogKey("test_id", "example.com")
+
+    @Test
+    fun parseXQTCustomDateTime_appliesTimezoneOffset() {
+        val parsedPlus = parseXQTCustomDateTime("Wed Mar 04 14:17:49 +0900 2026")
+        val parsedMinus = parseXQTCustomDateTime("Wed Mar 04 14:17:49 -0500 2026")
+
+        assertEquals(Instant.parse("2026-03-04T05:17:49Z"), parsedPlus)
+        assertEquals(Instant.parse("2026-03-04T19:17:49Z"), parsedMinus)
+    }
+
+    @Test
+    fun parseXQTCustomDateTime_supportsDoubleSpacesInDayField() {
+        val parsed = parseXQTCustomDateTime("Wed Mar  4 14:17:49 +0000 2026")
+
+        assertEquals(Instant.parse("2026-03-04T14:17:49Z"), parsed)
+    }
 
     @Test
     fun renderContent_legacyTweet_rendersCorrectly() {
@@ -332,43 +349,7 @@ class XQTTest {
                 legacy = legacy,
             )
 
-        // renderStatus requires event and references. Mock or pass null/empty.
-        // renderStatus(accountKey, event, references)
-        // event is StatusEvent.XQT which is an interface. I need to mock it or create a dummy implementation.
-        // It seems StatusEvent.XQT is hard to mock without mock framework.
-        // However, I can check if I can avoid calling renderStatus directly?
-        // Tweet.render calls renderStatus.
-        // But Tweet.render returns UiTimeline.
-        // UiTimeline has content which is UiTimeline.ItemContent.Status.
-        // I can inspect that.
-
-        // But render() also requires event.
-        // Let's see if I can implement a dummy event.
-        val dummyEvent =
-            object : dev.dimension.flare.data.datasource.microblog.StatusEvent.XQT {
-                override fun retweet(
-                    statusKey: MicroBlogKey,
-                    retweeted: Boolean,
-                ) {
-                }
-
-                override fun like(
-                    statusKey: MicroBlogKey,
-                    liked: Boolean,
-                ) {
-                }
-
-                override fun bookmark(
-                    statusKey: MicroBlogKey,
-                    bookmarked: Boolean,
-                ) {
-                }
-
-                override val accountKey: MicroBlogKey
-                    get() = this@XQTTest.accountKey
-            }
-
-        val statusContent = tweet.renderStatus(accountKey, dummyEvent, emptyMap())
+        val statusContent = tweet.renderStatus(accountKey)
 
         // Assert images list is empty
         assertTrue(statusContent.images.isEmpty(), "Images should be empty when inline media is present")

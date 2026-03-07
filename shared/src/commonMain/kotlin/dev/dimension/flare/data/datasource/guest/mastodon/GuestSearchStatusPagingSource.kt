@@ -1,47 +1,48 @@
 package dev.dimension.flare.data.datasource.guest.mastodon
 
-import SnowflakeIdGenerator
-import androidx.paging.PagingState
-import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.mapper.renderGuest
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 
 internal class GuestSearchStatusPagingSource(
     private val service: GuestMastodonService,
     private val host: String,
     private val query: String,
-) : BasePagingSource<String, UiTimeline>() {
-    override fun getRefreshKey(state: PagingState<String, UiTimeline>): String? = null
+) : RemoteLoader<UiTimelineV2> {
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiTimelineV2> {
+        if (request is PagingRequest.Prepend) {
+            return PagingResult(endOfPaginationReached = true)
+        }
 
-    override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiTimeline> {
+        val maxId = (request as? PagingRequest.Append)?.nextKey
         val result =
             if (query.startsWith("#")) {
                 service.hashtagTimeline(
                     hashtag = query.removePrefix("#"),
-                    limit = params.loadSize,
-                    max_id = params.key,
+                    limit = pageSize,
+                    max_id = maxId,
                 )
             } else {
                 service
                     .searchV2(
                         query = query,
-                        limit = params.loadSize,
+                        limit = pageSize,
                         type = "statuses",
-                        max_id = params.key,
+                        max_id = maxId,
                     ).statuses
             }
 
-        return LoadResult.Page(
-            data =
-                result
-                    ?.map {
-                        it
-                            .renderGuest(host = host)
-                            .copy(dbKey = "guest_${SnowflakeIdGenerator.nextId()}")
-                    }.orEmpty(),
-            prevKey = null,
-            nextKey = result?.lastOrNull()?.id,
+        val data = result.orEmpty()
+        return PagingResult(
+            endOfPaginationReached = data.isEmpty(),
+            data = data.map { it.render(host = host, accountKey = null) },
+            nextKey = data.lastOrNull()?.id,
         )
     }
 }

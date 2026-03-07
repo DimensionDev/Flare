@@ -17,16 +17,15 @@ import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.datasource.microblog.contains
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineLoader
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelinePagingSourceFactory
-import dev.dimension.flare.data.datasource.microblog.paging.BaseTimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.NotSupportRemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
+import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
+import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
-import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
-import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.mapper.render
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +33,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -46,90 +46,81 @@ public abstract class TimelinePresenter :
     KoinComponent {
     private val database: CacheDatabase by inject()
 
-    private val accountRepository: AccountRepository by inject()
-
     private val localFilterRepository: LocalFilterRepository by inject()
 
     private val filterFlow by lazy {
         localFilterRepository.getFlow(forTimeline = true)
     }
 
-//    internal val pagerFlow: Flow<PagingData<UiTimeline>> by lazy {
-//        createPager()
-//    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
-    internal fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimeline>> =
+    internal fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimelineV2>> =
         loader
-            .catch {
-                emit(BaseTimelineLoader.NotSupported)
-            }.flatMapLatest {
+            .flatMapLatest {
                 when (it) {
-                    is BaseTimelinePagingSourceFactory<*> ->
-                        networkPager(
-                            pagingSource = it,
-                        ).cachedIn(scope)
+                    is NotSupportRemoteLoader<UiTimelineV2> -> {
+                        PagingData.emptyFlow(isError = false)
+                    }
 
-                    is BaseTimelineRemoteMediator ->
+                    is CacheableRemoteLoader<UiTimelineV2> -> {
                         cachePager(
-                            mediator = it,
-                            scope = scope,
-                        )
+                            loader = it,
+                        ).cachedIn(scope)
+                    }
 
-                    BaseTimelineLoader.NotSupported -> PagingData.emptyFlow(isError = true)
+                    else -> {
+                        networkPager(
+                            loader = it,
+                        ).cachedIn(scope)
+                    }
                 }.flatMapLatest { pager ->
                     filterFlow.map { filterList ->
-                        pager.filter {
-                            !it.contains(filterList)
-                        }
+                        pager
+                            .filter { item ->
+                                if (filterList.isEmpty()) {
+                                    true
+                                } else {
+                                    !filterList.any { filter ->
+                                        item.searchText.orEmpty().contains(filter, ignoreCase = true)
+                                    }
+                                }
+                            }.map {
+                                transform(it)
+                            }
                     }
                 }
+            }.catch {
+                emitAll(PagingData.emptyFlow(isError = true))
             }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun cachePager(
-        mediator: BaseTimelineRemoteMediator,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
+    private fun cachePager(loader: CacheableRemoteLoader<UiTimelineV2>): Flow<PagingData<UiTimelineV2>> =
         Pager(
             config = pagingConfig,
-            remoteMediator = mediator,
+            remoteMediator =
+                TimelineRemoteMediator(
+                    loader = loader,
+                    database = database,
+                ),
             pagingSourceFactory = {
                 database.pagingTimelineDao().getPagingSource(
-                    pagingKey = mediator.pagingKey,
+                    pagingKey = loader.pagingKey,
                 )
             },
-        ).flow
-            .cachedIn(scope)
-            .flatMapLatest { pagingData ->
-                accountRepository.allAccounts.map { accounts ->
-                    pagingData
-                        .map { data ->
-                            withContext(Dispatchers.IO) {
-                                val dataSource =
-                                    when (data.timeline.accountType) {
-                                        AccountType.Guest -> null
-                                        is AccountType.Specific -> {
-                                            accounts.firstOrNull {
-                                                it.accountKey == data.timeline.accountType.accountKey
-                                            }
-                                        }
-                                    }?.dataSource
-                                data
-                                    .render(dataSource, useDbKeyInItemKey)
-                                    .let { transform(it) }
-                            }
-                        }
+        ).flow.map { pagingData ->
+            withContext(Dispatchers.IO) {
+                pagingData.map { item ->
+                    TimelinePagingMapper.toUi(item, loader.pagingKey, useDbKeyInItemKey)
                 }
             }
+        }
 
-    protected open suspend fun transform(data: UiTimeline): UiTimeline = data
+    protected open suspend fun transform(data: UiTimelineV2): UiTimelineV2 = data
 
-    private fun networkPager(pagingSource: BaseTimelinePagingSourceFactory<*>): Flow<PagingData<UiTimeline>> =
+    private fun networkPager(loader: RemoteLoader<UiTimelineV2>): Flow<PagingData<UiTimelineV2>> =
         Pager(
             config = pagingConfig,
             pagingSourceFactory = {
-                pagingSource.create()
+                loader.toPagingSource()
             },
         ).flow
 
@@ -156,13 +147,13 @@ public abstract class TimelinePresenter :
         }
     }
 
-    internal abstract val loader: Flow<BaseTimelineLoader>
+    internal abstract val loader: Flow<RemoteLoader<UiTimelineV2>>
     protected open val useDbKeyInItemKey: Boolean = false
 }
 
 @Immutable
 public interface TimelineState {
-    public val listState: PagingState<UiTimeline>
+    public val listState: PagingState<UiTimelineV2>
 
     public suspend fun refresh()
 }

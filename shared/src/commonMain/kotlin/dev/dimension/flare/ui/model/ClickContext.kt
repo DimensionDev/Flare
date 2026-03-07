@@ -1,5 +1,9 @@
 package dev.dimension.flare.ui.model
 
+import dev.dimension.flare.data.datasource.microblog.PostEvent
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.toUri
 import kotlinx.serialization.Serializable
 
 public data class ClickContext(
@@ -12,9 +16,42 @@ internal sealed interface ClickEvent {
     data object Noop : ClickEvent
 
     @Serializable
-    data class Deeplink(
+    data class Deeplink private constructor(
         val url: String,
-    ) : ClickEvent
+    ) : ClickEvent {
+        constructor(route: DeeplinkRoute) : this(route.toUri())
+        constructor(route: DeeplinkEvent) : this(route.toUri())
+    }
+
+    companion object {
+        fun event(
+            accountKey: MicroBlogKey?,
+            postEvent: PostEvent,
+        ) = if (accountKey == null) {
+            Noop
+        } else {
+            Deeplink(
+                DeeplinkEvent(
+                    accountKey = accountKey,
+                    postEvent = postEvent,
+                ),
+            )
+        }
+
+        inline fun event(
+            accountKey: MicroBlogKey?,
+            eventCreator: (accountKey: MicroBlogKey) -> PostEvent,
+        ) = if (accountKey == null) {
+            Noop
+        } else {
+            Deeplink(
+                DeeplinkEvent(
+                    accountKey = accountKey,
+                    postEvent = eventCreator.invoke(accountKey),
+                ),
+            )
+        }
+    }
 }
 
 internal val ClickEvent.onClicked: ClickContext.() -> Unit

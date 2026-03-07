@@ -2,6 +2,7 @@ package dev.dimension.flare.data.database.cache.model
 
 import androidx.room.Embedded
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import androidx.room.TypeConverter
@@ -16,9 +17,12 @@ import kotlinx.serialization.Serializable
 
 @Entity(
     indices = [
-        androidx.room.Index(
+        Index(
             value = ["accountType", "roomKey"],
             unique = true,
+        ),
+        Index(
+            value = ["accountType", "sortId"],
         ),
     ],
 )
@@ -50,7 +54,13 @@ internal data class DbMessageRoom(
     val messageKey: MicroBlogKey?,
 )
 
-@Entity
+@Entity(
+    indices = [
+        Index(
+            value = ["roomKey"],
+        ),
+    ],
+)
 internal data class DbMessageRoomReference(
     val roomKey: MicroBlogKey,
     val userKey: MicroBlogKey,
@@ -85,7 +95,13 @@ internal data class DbMessageRoomWithLastMessageAndUser(
     val users: List<DbMessageRoomReferenceWithUser>,
 )
 
-@Entity
+@Entity(
+    indices = [
+        Index(
+            value = ["roomKey", "timestamp"],
+        ),
+    ],
+)
 internal data class DbMessageItem(
     @PrimaryKey
     val messageKey: MicroBlogKey,

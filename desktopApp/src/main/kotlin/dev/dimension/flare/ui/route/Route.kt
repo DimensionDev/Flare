@@ -244,7 +244,19 @@ internal sealed interface Route : NavKey {
     ) : FloatingRoute
 
     @Serializable
+    data class UnblockUser(
+        val accountType: AccountType?,
+        val userKey: MicroBlogKey,
+    ) : FloatingRoute
+
+    @Serializable
     data class MuteUser(
+        val accountType: AccountType?,
+        val userKey: MicroBlogKey,
+    ) : FloatingRoute
+
+    @Serializable
+    data class UnmuteUser(
         val accountType: AccountType?,
         val userKey: MicroBlogKey,
     ) : FloatingRoute
@@ -404,6 +416,11 @@ internal sealed interface Route : NavKey {
                         accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
                         userKey = deeplinkRoute.userKey,
                     )
+                is DeeplinkRoute.UnmuteUser ->
+                    Route.UnmuteUser(
+                        accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
+                        userKey = deeplinkRoute.userKey,
+                    )
                 is DeeplinkRoute.ReportUser ->
                     Route.ReportUser(
                         accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
@@ -412,6 +429,11 @@ internal sealed interface Route : NavKey {
 
                 is DeeplinkRoute.BlockUser ->
                     Route.BlockUser(
+                        accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
+                        userKey = deeplinkRoute.userKey,
+                    )
+                is DeeplinkRoute.UnblockUser ->
+                    Route.UnblockUser(
                         accountType = deeplinkRoute.accountKey?.let { AccountType.Specific(it) },
                         userKey = deeplinkRoute.userKey,
                     )

@@ -16,13 +16,13 @@ import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.ClickContext
-import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @Composable
 internal fun FeedComponent(
-    data: UiTimeline.ItemContent.Feed,
+    data: UiTimelineV2.Feed,
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -43,20 +43,20 @@ internal fun FeedComponent(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
-            data.sourceIcon?.let {
+            data.source.icon?.let {
                 NetworkImage(
                     it,
-                    contentDescription = data.source,
+                    contentDescription = data.source.name,
                     modifier = Modifier.size(16.dp),
                 )
             }
             PlatformText(
-                text = data.source,
+                text = data.source.name,
                 style = PlatformTheme.typography.caption,
                 modifier = Modifier.weight(1f),
                 maxLines = 1,
             )
-            data.createdAt?.let {
+            data.actualCreatedAt?.let {
                 DateTimeText(
                     it,
                     style = PlatformTheme.typography.caption,
@@ -81,7 +81,7 @@ internal fun FeedComponent(
                     color = PlatformTheme.colorScheme.caption,
                     modifier =
                         Modifier.let {
-                            if (data.image != null) {
+                            if (data.media != null) {
                                 it.weight(1f)
                             } else {
                                 it
@@ -89,9 +89,9 @@ internal fun FeedComponent(
                         },
                 )
             }
-            data.image?.let {
+            data.media?.let {
                 NetworkImage(
-                    model = it,
+                    model = it.url,
                     contentDescription = data.title,
                     modifier =
                         Modifier
@@ -104,7 +104,7 @@ internal fun FeedComponent(
                             }.clip(
                                 PlatformTheme.shapes.medium,
                             ),
-                    customHeaders = data.imageHeaders,
+                    customHeaders = it.customHeaders,
                 )
             }
         }

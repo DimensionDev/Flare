@@ -515,7 +515,7 @@ internal object VVODateSerializer : KSerializer<Instant> {
                     },
             )
         }.getOrElse {
-            Instant.parse(str)
+            Instant.parseOrNull(str) ?: Instant.DISTANT_PAST
         }
     }
 

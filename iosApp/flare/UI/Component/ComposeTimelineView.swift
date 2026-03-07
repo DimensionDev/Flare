@@ -39,8 +39,8 @@ struct ComposeTimelineItemView : UIViewControllerRepresentable {
 
 struct ComposeTimelineView : UIViewControllerRepresentable {
     let key: String
-    let data: PagingState<UiTimeline>
-    let state: ComposeUIStateProxy<PagingState<UiTimeline>>
+    let data: PagingState<UiTimelineV2>
+    let state: ComposeUIStateProxy<PagingState<UiTimelineV2>>
     let topPadding: Int
     let onExpand: () -> Void
     let onCollapse: () -> Void
@@ -48,7 +48,7 @@ struct ComposeTimelineView : UIViewControllerRepresentable {
     
     init(
         key: String,
-        data: PagingState<UiTimeline>,
+        data: PagingState<UiTimelineV2>,
         detailStatusKey: MicroBlogKey?,
         topPadding: Int,
         onOpenLink: @escaping (String) -> Void,
@@ -63,7 +63,7 @@ struct ComposeTimelineView : UIViewControllerRepresentable {
         self.detailStatusKey = detailStatusKey
         if let state = ComposeUIStateProxyCache.shared.getOrCreate(key: key, factory: {
             .init(initialState: data, onOpenLink: onOpenLink)
-        }) as? ComposeUIStateProxy<PagingState<UiTimeline>> {
+        }) as? ComposeUIStateProxy<PagingState<UiTimelineV2>> {
             self.state = state
         } else {
             self.state = ComposeUIStateProxy(initialState: data, onOpenLink: onOpenLink)

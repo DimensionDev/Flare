@@ -410,9 +410,13 @@
 
     <string name="block_user_title">Block user</string>
     <string name="block_user_description">Are you sure you want to block this user?</string>
+    <string name="unblock_user_title">Unblock user</string>
+    <string name="unblock_user_description">Are you sure you want to unblock this user?</string>
 
     <string name="mute_user_title">Mute user</string>
     <string name="mute_user_description">Are you sure you want to mute this user?</string>
+    <string name="unmute_user_title">Unmute user</string>
+    <string name="unmute_user_description">Are you sure you want to unmute this user?</string>
 
     <string name="report_user_title">Report user</string>
     <string name="report_user_description">Are you sure you want to report this user?</string>

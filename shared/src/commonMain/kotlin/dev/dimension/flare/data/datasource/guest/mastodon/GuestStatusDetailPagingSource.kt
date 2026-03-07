@@ -1,50 +1,39 @@
 package dev.dimension.flare.data.datasource.guest.mastodon
 
-import SnowflakeIdGenerator
-import androidx.paging.PagingState
-import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
+import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.mapper.renderGuest
+import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.render
 
 internal class GuestStatusDetailPagingSource(
     private val service: GuestMastodonService,
     private val host: String,
     private val statusKey: MicroBlogKey,
     private val statusOnly: Boolean,
-) : BasePagingSource<Int, UiTimeline>() {
-    override fun getRefreshKey(state: PagingState<Int, UiTimeline>): Int? = null
+) : RemoteLoader<UiTimelineV2> {
+    override suspend fun load(
+        pageSize: Int,
+        request: PagingRequest,
+    ): PagingResult<UiTimelineV2> {
+        if (request is PagingRequest.Prepend || request is PagingRequest.Append) {
+            return PagingResult(endOfPaginationReached = true)
+        }
 
-    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiTimeline> {
         val result =
             if (statusOnly) {
-                val current =
-                    service.lookupStatus(
-                        statusKey.id,
-                    )
-                listOf(current)
+                listOf(service.lookupStatus(statusKey.id))
             } else {
-                val context =
-                    service.context(
-                        statusKey.id,
-                    )
-                val current =
-                    service.lookupStatus(
-                        statusKey.id,
-                    )
+                val context = service.context(statusKey.id)
+                val current = service.lookupStatus(statusKey.id)
                 context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()
             }
 
-        return LoadResult.Page(
-            data =
-                result.map {
-                    it
-                        .renderGuest(host = host)
-                        .copy(dbKey = "guest_${SnowflakeIdGenerator.nextId()}")
-                },
-            prevKey = null,
-            nextKey = null,
+        return PagingResult(
+            endOfPaginationReached = true,
+            data = result.map { it.render(host = host, accountKey = null) },
         )
     }
 }

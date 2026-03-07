@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.isBigScreen
+import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -35,7 +36,7 @@ internal fun CommonProfileHeader(
     avatarUrl: String?,
     displayName: UiRichText,
     userKey: MicroBlogKey,
-    handle: String,
+    handle: UiHandle,
     modifier: Modifier = Modifier,
     onAvatarClick: (() -> Unit)? = null,
     onBannerClick: (() -> Unit)? = null,
@@ -190,7 +191,7 @@ internal fun CommonProfileHeader(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             PlatformText(
-                                text = handle,
+                                text = handle.canonical,
                                 style = PlatformTheme.typography.caption,
 //                            modifier =
 //                                Modifier

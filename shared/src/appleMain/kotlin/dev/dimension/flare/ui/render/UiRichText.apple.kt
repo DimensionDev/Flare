@@ -16,8 +16,18 @@ public interface SwiftPlatformTextRenderer {
     public fun render(richText: UiRichText): PlatformText
 }
 
+internal class ApplePlatformTextRenderer(
+    private val renderer: SwiftPlatformTextRenderer,
+) : PlatformTextRendering {
+    override fun render(richText: UiRichText): PlatformText = renderer.render(richText)
+}
+
+internal interface PlatformTextRendering {
+    fun render(richText: UiRichText): PlatformText
+}
+
 private object PlatformTextRendererHolder : KoinComponent {
-    val renderer: SwiftPlatformTextRenderer by inject()
+    val renderer: PlatformTextRendering by inject()
 }
 
 internal actual fun UiRichText.renderPlatformText(): PlatformText = PlatformTextRendererHolder.renderer.render(this)

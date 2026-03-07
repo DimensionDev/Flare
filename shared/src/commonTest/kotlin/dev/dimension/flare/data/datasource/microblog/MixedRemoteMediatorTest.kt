@@ -7,18 +7,27 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.TimelinePagingMapper
 import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediator
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
+import dev.dimension.flare.ui.model.ClickEvent
+import dev.dimension.flare.ui.model.UiHandle
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -27,11 +36,13 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
-import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.Test
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -243,6 +254,88 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             )
         }
 
+    @OptIn(ExperimentalPagingApi::class)
+    @Test
+    fun refreshCollapsesLinearReplyChainIntoLatestPost() =
+        runTest {
+            val accountKey = MicroBlogKey("mastodon.example", "timeline")
+            val accountType = AccountType.Specific(accountKey)
+            val user = profile(MicroBlogKey("mastodon.example", "user"), "User")
+            val postA =
+                createPost(
+                    accountType = accountType,
+                    user = user,
+                    statusKey = MicroBlogKey("mastodon.example", "a"),
+                    text = "A",
+                )
+            val postB =
+                createPost(
+                    accountType = accountType,
+                    user = user,
+                    statusKey = MicroBlogKey("mastodon.example", "b"),
+                    text = "B",
+                    parents = listOf(postA),
+                )
+            val postC =
+                createPost(
+                    accountType = accountType,
+                    user = user,
+                    statusKey = MicroBlogKey("mastodon.example", "c"),
+                    text = "C",
+                    parents = listOf(postB),
+                )
+            val loader =
+                FakeLoader("reply_chain") { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(postC, postB, postA),
+                                nextKey = null,
+                            )
+
+                        is PagingRequest.Append -> error("No append expected")
+                        is PagingRequest.Prepend -> error("No prepend expected")
+                    }
+                }
+
+            val mediator = TimelineRemoteMediator(loader = loader, database = db)
+            val mediatorResult =
+                mediator.load(
+                    loadType = LoadType.REFRESH,
+                    state =
+                        PagingState(
+                            pages = emptyList(),
+                            anchorPosition = null,
+                            config = PagingConfig(pageSize = 20),
+                            leadingPlaceholderCount = 0,
+                        ),
+                )
+            assertTrue(mediatorResult is androidx.paging.RemoteMediator.MediatorResult.Success)
+
+            val pagingSource = db.pagingTimelineDao().getPagingSource(mediator.pagingKey)
+            val page =
+                pagingSource.load(
+                    PagingSource.LoadParams.Refresh(
+                        key = null,
+                        loadSize = 20,
+                        placeholdersEnabled = false,
+                    ),
+                )
+            assertTrue(page is PagingSource.LoadResult.Page)
+            assertEquals(1, page.data.size)
+
+            val post =
+                assertIs<UiTimelineV2.Post>(
+                    TimelinePagingMapper.toUi(
+                        item = page.data.single(),
+                        pagingKey = mediator.pagingKey,
+                        useDbKeyInItemKey = false,
+                    ),
+                )
+            assertEquals(postC.statusKey, post.statusKey)
+            assertEquals(listOf(postA.statusKey, postB.statusKey), post.parents.map { it.statusKey })
+        }
+
     private class FakeLoader(
         override val pagingKey: String,
         private val onLoad: suspend (PagingRequest) -> PagingResult<UiTimelineV2>,
@@ -274,4 +367,57 @@ class MixedRemoteMediatorTest : RobolectricTest() {
         openInBrowser = false,
         accountType = AccountType.Guest,
     )
+
+    private fun profile(
+        key: MicroBlogKey,
+        name: String,
+    ): UiProfile =
+        UiProfile(
+            key = key,
+            handle =
+                UiHandle(
+                    raw = key.id,
+                    host = key.host,
+                ),
+            avatar = "https://${key.host}/${key.id}.png",
+            nameInternal = Element("span").apply { appendText(name) }.toUi(),
+            platformType = PlatformType.Mastodon,
+            clickEvent = ClickEvent.Noop,
+            banner = null,
+            description = null,
+            matrices = UiProfile.Matrices(fansCount = 0, followsCount = 0, statusesCount = 0, platformFansCount = "0"),
+            mark = persistentListOf(),
+            bottomContent = null,
+        )
+
+    private fun createPost(
+        accountType: AccountType,
+        user: UiProfile,
+        statusKey: MicroBlogKey,
+        text: String,
+        parents: List<UiTimelineV2.Post> = emptyList(),
+    ): UiTimelineV2.Post =
+        UiTimelineV2.Post(
+            message = null,
+            platformType = PlatformType.Mastodon,
+            images = persistentListOf(),
+            sensitive = false,
+            contentWarning = null,
+            user = user,
+            quote = persistentListOf(),
+            content = Element("span").apply { appendText(text) }.toUi(),
+            actions = persistentListOf(),
+            poll = null,
+            statusKey = statusKey,
+            card = null,
+            createdAt = Clock.System.now().toUi(),
+            emojiReactions = persistentListOf(),
+            sourceChannel = null,
+            visibility = null,
+            replyToHandle = null,
+            references = persistentListOf(),
+            parents = parents.toPersistentList(),
+            clickEvent = ClickEvent.Noop,
+            accountType = accountType,
+        )
 }

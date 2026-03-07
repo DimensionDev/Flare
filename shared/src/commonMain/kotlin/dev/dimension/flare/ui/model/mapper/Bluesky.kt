@@ -417,7 +417,6 @@ private val ListNotificationsNotificationReason.type: UiTimelineV2.Message.Type
         }
 
 internal fun List<FeedViewPost>.render(accountKey: MicroBlogKey): List<UiTimelineV2> {
-    // TODO: https://github.com/DimensionDev/Flare/issues/1671
     return this.map { it.render(accountKey) }
 }
 

@@ -64,18 +64,18 @@ internal interface UserDao {
     @Query("DELETE FROM DbUserHistory WHERE accountType = :accountType")
     suspend fun deleteHistoryByAccountType(accountType: DbAccountType)
 
-    @Query("SELECT * FROM DbUserRelation WHERE accountKey = :accountKey AND userKey = :userKey")
+    @Query("SELECT * FROM DbUserRelation WHERE accountType = :accountType AND userKey = :userKey")
     fun getUserRelation(
-        accountKey: MicroBlogKey,
+        accountType: DbAccountType,
         userKey: MicroBlogKey,
     ): Flow<DbUserRelation?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUserRelation(relation: DbUserRelation)
 
-    @Query("DELETE FROM DbUserRelation WHERE accountKey = :accountKey AND userKey = :userKey")
+    @Query("DELETE FROM DbUserRelation WHERE accountType = :accountType AND userKey = :userKey")
     suspend fun deleteUserRelation(
-        accountKey: MicroBlogKey,
+        accountType: DbAccountType,
         userKey: MicroBlogKey,
     )
 

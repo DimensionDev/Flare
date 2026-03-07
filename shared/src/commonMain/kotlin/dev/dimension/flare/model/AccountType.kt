@@ -3,6 +3,7 @@ package dev.dimension.flare.model
 import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 
+@Immutable
 @Serializable
 internal sealed interface DbAccountType
 

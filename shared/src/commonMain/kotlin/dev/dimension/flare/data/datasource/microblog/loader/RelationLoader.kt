@@ -10,7 +10,6 @@ internal enum class RelationActionType {
 }
 
 internal interface RelationLoader {
-    val accountKey: MicroBlogKey
     val supportedTypes: Set<RelationActionType>
 
     suspend fun relation(userKey: MicroBlogKey): UiRelation

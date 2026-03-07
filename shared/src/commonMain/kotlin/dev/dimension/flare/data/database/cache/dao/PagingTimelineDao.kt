@@ -126,14 +126,6 @@ internal interface PagingTimelineDao {
         statusKey: MicroBlogKey,
     )
 
-    suspend fun deleteStatus(
-        statusKey: MicroBlogKey,
-        accountKey: MicroBlogKey,
-    ) = deleteStatus(
-        accountType = AccountType.Specific(accountKey),
-        statusKey = statusKey,
-    )
-
     @Query(
         "SELECT EXISTS(" +
             "SELECT 1 FROM DbPagingTimeline " +

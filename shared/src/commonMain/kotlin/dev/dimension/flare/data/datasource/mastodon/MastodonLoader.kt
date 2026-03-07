@@ -21,7 +21,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 
 internal class MastodonLoader(
-    override val accountKey: MicroBlogKey,
+    val accountKey: MicroBlogKey,
     private val service: MastodonService,
 ) : NotificationLoader,
     UserLoader,

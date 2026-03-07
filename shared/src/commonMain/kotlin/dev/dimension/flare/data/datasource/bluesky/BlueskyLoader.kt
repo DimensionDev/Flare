@@ -29,7 +29,7 @@ import sh.christian.ozone.api.RKey
 import kotlin.time.Clock
 
 internal class BlueskyLoader(
-    override val accountKey: MicroBlogKey,
+    val accountKey: MicroBlogKey,
     private val service: BlueskyService,
 ) : NotificationLoader,
     UserLoader,

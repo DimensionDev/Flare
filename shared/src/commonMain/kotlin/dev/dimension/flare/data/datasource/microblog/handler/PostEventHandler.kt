@@ -8,6 +8,7 @@ import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.UpdatePostActionMenuEvent
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.collections.immutable.ImmutableList
@@ -19,12 +20,13 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 internal class PostEventHandler(
-    private val accountKey: MicroBlogKey,
+    private val accountType: AccountType,
     private val handler: Handler,
 ) : KoinComponent,
     DatabaseUpdater {
     private val coroutineScope: CoroutineScope by inject()
     private val database: CacheDatabase by inject()
+    private val dbAccountType = accountType as DbAccountType
 
     interface Handler {
         suspend fun handle(
@@ -40,7 +42,7 @@ internal class PostEventHandler(
                     .statusDao()
                     .get(
                         statusKey = event.postKey,
-                        accountType = AccountType.Specific(accountKey),
+                        accountType = dbAccountType,
                     ).firstOrNull()
                     ?.content
             if (event is UpdatePostActionMenuEvent && originalData is UiTimelineV2.Post) {
@@ -54,7 +56,7 @@ internal class PostEventHandler(
                     )
                 database.statusDao().update(
                     statusKey = event.postKey,
-                    accountType = AccountType.Specific(accountKey),
+                    accountType = dbAccountType,
                     content = updatedData,
                 )
             }
@@ -82,7 +84,7 @@ internal class PostEventHandler(
                     )
                 database.statusDao().update(
                     statusKey = event.postKey,
-                    accountType = AccountType.Specific(accountKey),
+                    accountType = dbAccountType,
                     content = updatedData,
                 )
             }
@@ -96,7 +98,7 @@ internal class PostEventHandler(
                 if (originalData != null) {
                     database.statusDao().update(
                         statusKey = event.postKey,
-                        accountType = AccountType.Specific(accountKey),
+                        accountType = dbAccountType,
                         content = originalData,
                     )
                 }
@@ -108,10 +110,10 @@ internal class PostEventHandler(
         database.connect {
             database.statusDao().delete(
                 statusKey = postKey,
-                accountType = AccountType.Specific(accountKey),
+                accountType = dbAccountType,
             )
             database.pagingTimelineDao().deleteStatus(
-                accountKey = accountKey,
+                accountType = dbAccountType,
                 statusKey = postKey,
             )
         }
@@ -127,14 +129,14 @@ internal class PostEventHandler(
                     .statusDao()
                     .get(
                         statusKey = postKey,
-                        accountType = AccountType.Specific(accountKey),
+                        accountType = dbAccountType,
                     ).firstOrNull()
                     ?.content
             if (currentData != null) {
                 val updatedData = update(currentData)
                 database.statusDao().update(
                     statusKey = postKey,
-                    accountType = AccountType.Specific(accountKey),
+                    accountType = dbAccountType,
                     content = updatedData,
                 )
             }
@@ -151,7 +153,7 @@ internal class PostEventHandler(
                     .statusDao()
                     .get(
                         statusKey = postKey,
-                        accountType = AccountType.Specific(accountKey),
+                        accountType = dbAccountType,
                     ).firstOrNull()
                     ?.content
             if (currentData != null && currentData is UiTimelineV2.Post) {
@@ -165,7 +167,7 @@ internal class PostEventHandler(
                     )
                 database.statusDao().update(
                     statusKey = postKey,
-                    accountType = AccountType.Specific(accountKey),
+                    accountType = dbAccountType,
                     content = updatedData,
                 )
             }

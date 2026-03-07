@@ -78,8 +78,13 @@ public class ProfilePresenter(
 
     private val relationStateFlow by lazy {
         serviceFlow.flatMapLatest { service ->
-            require(service is AuthenticatedMicroblogDataSource)
-            val actualUserKey = userKey ?: service.accountKey
+            require(service is RelationDataSource)
+            val actualUserKey =
+                userKey ?: if (service is AuthenticatedMicroblogDataSource) {
+                    service.accountKey
+                } else {
+                    null
+                } ?: throw NoActiveAccountException
             (service as RelationDataSource).relationHandler.relation(actualUserKey).toUi()
         }
     }

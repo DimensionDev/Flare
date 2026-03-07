@@ -97,7 +97,7 @@ internal class VVODataSource(
 
     override val userHandler by lazy {
         UserHandler(
-            accountKey = accountKey,
+            host = accountKey.host,
             loader = loader,
         )
     }
@@ -112,6 +112,7 @@ internal class VVODataSource(
     override val relationHandler by lazy {
         RelationHandler(
             dataSource = loader,
+            accountType = AccountType.Specific(accountKey),
         )
     }
 
@@ -120,7 +121,7 @@ internal class VVODataSource(
 
     override val postEventHandler by lazy {
         PostEventHandler(
-            accountKey = accountKey,
+            accountType = AccountType.Specific(accountKey),
             handler = this,
         )
     }

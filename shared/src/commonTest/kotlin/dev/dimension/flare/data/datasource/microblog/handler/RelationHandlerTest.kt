@@ -10,6 +10,7 @@ import dev.dimension.flare.data.database.cache.model.DbUserRelation
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.memoryDatabaseBuilder
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation
 import kotlinx.coroutines.CoroutineScope
@@ -49,7 +50,7 @@ class RelationHandlerTest : RobolectricTest() {
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
 
-        loader = FakeRelationLoader(accountKey = accountKey, supportedTypes = RelationActionType.entries.toSet())
+        loader = FakeRelationLoader(supportedTypes = RelationActionType.entries.toSet())
     }
 
     @AfterTest
@@ -72,7 +73,7 @@ class RelationHandlerTest : RobolectricTest() {
 
             val expected = UiRelation(following = true, muted = true)
             loader.nextRelation = expected
-            handler = RelationHandler(dataSource = loader)
+            handler = RelationHandler(accountType = AccountType.Specific(accountKey), dataSource = loader)
             val cacheable = handler.relation(userKey)
 
             val valueDeferred =
@@ -87,7 +88,7 @@ class RelationHandlerTest : RobolectricTest() {
             assertTrue(refreshState is LoadState.NotLoading)
             assertEquals(expected, valueDeferred.await())
 
-            val saved = db.userDao().getUserRelation(accountKey, userKey).first()
+            val saved = db.userDao().getUserRelation(AccountType.Specific(accountKey), userKey).first()
             assertEquals(expected, saved?.relation)
             assertEquals(1, loader.relationCallCount)
         }
@@ -106,17 +107,17 @@ class RelationHandlerTest : RobolectricTest() {
 
             db.userDao().insertUserRelation(
                 DbUserRelation(
-                    accountKey = accountKey,
+                    accountType = AccountType.Specific(accountKey),
                     userKey = userKey,
                     relation = UiRelation(following = false),
                 ),
             )
 
-            handler = RelationHandler(dataSource = loader)
+            handler = RelationHandler(accountType = AccountType.Specific(accountKey), dataSource = loader)
             handler.follow(userKey)
             advanceUntilIdle()
 
-            val saved = db.userDao().getUserRelation(accountKey, userKey).first()
+            val saved = db.userDao().getUserRelation(AccountType.Specific(accountKey), userKey).first()
             assertTrue(saved?.relation?.following == true)
             assertEquals(1, loader.followCallCount)
         }
@@ -135,18 +136,18 @@ class RelationHandlerTest : RobolectricTest() {
 
             db.userDao().insertUserRelation(
                 DbUserRelation(
-                    accountKey = accountKey,
+                    accountType = AccountType.Specific(accountKey),
                     userKey = userKey,
                     relation = UiRelation(following = false),
                 ),
             )
             loader.failFollow = true
 
-            handler = RelationHandler(dataSource = loader)
+            handler = RelationHandler(accountType = AccountType.Specific(accountKey), dataSource = loader)
             handler.follow(userKey)
             advanceUntilIdle()
 
-            val saved = db.userDao().getUserRelation(accountKey, userKey).first()
+            val saved = db.userDao().getUserRelation(AccountType.Specific(accountKey), userKey).first()
             assertTrue(saved?.relation?.following == false)
             assertEquals(1, loader.followCallCount)
         }
@@ -165,35 +166,34 @@ class RelationHandlerTest : RobolectricTest() {
 
             db.userDao().insertUserRelation(
                 DbUserRelation(
-                    accountKey = accountKey,
+                    accountType = AccountType.Specific(accountKey),
                     userKey = userKey,
                     relation = UiRelation(hasPendingFollowRequestToYou = true, isFans = false),
                 ),
             )
 
-            handler = RelationHandler(dataSource = loader)
+            handler = RelationHandler(accountType = AccountType.Specific(accountKey), dataSource = loader)
             handler.approveFollowRequest(userKey)
 
-            val afterApprove = assertNotNull(db.userDao().getUserRelation(accountKey, userKey).first())
+            val afterApprove = assertNotNull(db.userDao().getUserRelation(AccountType.Specific(accountKey), userKey).first())
             assertTrue(afterApprove.relation.hasPendingFollowRequestToYou == false)
             assertTrue(afterApprove.relation.isFans == true)
 
             db.userDao().insertUserRelation(
                 DbUserRelation(
-                    accountKey = accountKey,
+                    accountType = AccountType.Specific(accountKey),
                     userKey = userKey,
                     relation = UiRelation(hasPendingFollowRequestToYou = true, isFans = true),
                 ),
             )
             handler.rejectFollowRequest(userKey)
 
-            val afterReject = assertNotNull(db.userDao().getUserRelation(accountKey, userKey).first())
+            val afterReject = assertNotNull(db.userDao().getUserRelation(AccountType.Specific(accountKey), userKey).first())
             assertTrue(afterReject.relation.hasPendingFollowRequestToYou == false)
             assertTrue(afterReject.relation.isFans == false)
         }
 
     private class FakeRelationLoader(
-        override val accountKey: MicroBlogKey,
         override val supportedTypes: Set<RelationActionType>,
     ) : RelationLoader {
         var nextRelation: UiRelation = UiRelation()

@@ -22,7 +22,7 @@ import dev.dimension.flare.ui.model.mapper.screenName
 import dev.dimension.flare.ui.model.mapper.toUi
 
 internal class XQTLoader(
-    override val accountKey: MicroBlogKey,
+    val accountKey: MicroBlogKey,
     private val service: XQTService,
 ) : NotificationLoader,
     UserLoader,

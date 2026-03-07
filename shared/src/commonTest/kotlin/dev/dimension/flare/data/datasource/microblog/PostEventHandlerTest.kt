@@ -84,7 +84,7 @@ class PostEventHandlerTest : RobolectricTest() {
             val original = createPost(actions = persistentListOf(createMenuItem(updateKey = "like", count = 1)))
             insertPost(original)
 
-            handler = PostEventHandler(accountKey = accountKey, handler = fakeRemoteHandler)
+            handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
             handler.handleEvent(TestUpdateMenuEvent(postKey = postKey, updateKey = "like", nextCount = 2))
             advanceUntilIdle()
 
@@ -112,7 +112,7 @@ class PostEventHandlerTest : RobolectricTest() {
             insertPost(original)
 
             fakeRemoteHandler.shouldFail = true
-            handler = PostEventHandler(accountKey = accountKey, handler = fakeRemoteHandler)
+            handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
             handler.handleEvent(TestUpdateMenuEvent(postKey = postKey, updateKey = "like", nextCount = 2))
             advanceUntilIdle()
 
@@ -151,7 +151,7 @@ class PostEventHandlerTest : RobolectricTest() {
                 )
             insertPost(createPost(poll = poll))
 
-            handler = PostEventHandler(accountKey = accountKey, handler = fakeRemoteHandler)
+            handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
             handler.handleEvent(
                 PostEvent.Mastodon.Vote(
                     id = "poll-1",
@@ -187,12 +187,12 @@ class PostEventHandlerTest : RobolectricTest() {
             insertPost(createPost())
             db.pagingTimelineDao().insertAll(listOf(DbPagingTimeline(pagingKey = "home", statusKey = postKey, sortId = 1L)))
 
-            handler = PostEventHandler(accountKey = accountKey, handler = fakeRemoteHandler)
+            handler = PostEventHandler(accountType = AccountType.Specific(accountKey), handler = fakeRemoteHandler)
             handler.deleteFromCache(postKey)
 
             val saved = db.statusDao().get(postKey, AccountType.Specific(accountKey)).first()
             assertNull(saved)
-            val exists = db.pagingTimelineDao().existsPaging(accountKey, "home")
+            val exists = db.pagingTimelineDao().existsPaging(AccountType.Specific(accountKey), "home")
             assertTrue(!exists)
         }
 

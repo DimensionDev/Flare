@@ -5,6 +5,8 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbUserRelation
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiRelation
 import kotlinx.coroutines.CoroutineScope
@@ -15,6 +17,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 internal class RelationHandler(
+    val accountType: AccountType,
     val dataSource: RelationLoader,
 ) : KoinComponent {
     private val database: CacheDatabase by inject()
@@ -26,7 +29,7 @@ internal class RelationHandler(
                 val result = dataSource.relation(userKey)
                 database.userDao().insertUserRelation(
                     DbUserRelation(
-                        accountKey = dataSource.accountKey,
+                        accountType = accountType as DbAccountType,
                         userKey = userKey,
                         relation = result,
                     ),
@@ -36,7 +39,7 @@ internal class RelationHandler(
                 database
                     .userDao()
                     .getUserRelation(
-                        accountKey = dataSource.accountKey,
+                        accountType = accountType as DbAccountType,
                         userKey = userKey,
                     ).mapNotNull { it?.relation }
             },
@@ -218,14 +221,14 @@ internal class RelationHandler(
             database
                 .userDao()
                 .getUserRelation(
-                    accountKey = dataSource.accountKey,
+                    accountType = accountType as DbAccountType,
                     userKey = userKey,
                 ).mapNotNull { it?.relation }
                 .firstOrNull() ?: return
         val newRelation = update(currentRelation)
         database.userDao().insertUserRelation(
             DbUserRelation(
-                accountKey = dataSource.accountKey,
+                accountType = accountType as DbAccountType,
                 userKey = userKey,
                 relation = newRelation,
             ),

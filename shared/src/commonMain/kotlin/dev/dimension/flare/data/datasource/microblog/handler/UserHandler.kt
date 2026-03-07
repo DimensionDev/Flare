@@ -13,7 +13,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 internal class UserHandler(
-    val accountKey: MicroBlogKey,
+    val host: String,
     val loader: UserLoader,
 ) : KoinComponent {
     private val database: CacheDatabase by inject()
@@ -51,7 +51,7 @@ internal class UserHandler(
                     .findByKey(
                         MicroBlogKey(
                             id = id,
-                            host = accountKey.host,
+                            host = host,
                         ),
                     ).distinctUntilChanged()
                     .mapNotNull { it?.content }

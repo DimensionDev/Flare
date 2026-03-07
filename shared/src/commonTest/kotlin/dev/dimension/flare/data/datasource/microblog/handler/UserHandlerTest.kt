@@ -64,7 +64,7 @@ class UserHandlerTest : RobolectricTest() {
             )
         }
 
-        handler = UserHandler(accountKey = accountKey, loader = loader)
+        handler = UserHandler(host = accountKey.host, loader = loader)
     }
 
     @AfterTest

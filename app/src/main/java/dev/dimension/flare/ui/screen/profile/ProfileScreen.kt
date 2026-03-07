@@ -564,7 +564,7 @@ private fun ProfileMediaTab(
                                         .clip(MaterialTheme.shapes.medium)
                                         .clipToBounds()
                                         .clickable {
-                                            val content = item.status as? UiTimelineV2.Post
+                                            val content = item.status
                                             if (content is UiTimelineV2.Post) {
                                                 onItemClicked(
                                                     item.statusKey,

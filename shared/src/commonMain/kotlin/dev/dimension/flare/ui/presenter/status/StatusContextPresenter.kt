@@ -17,7 +17,7 @@ import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.toUi
@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
@@ -56,9 +57,14 @@ public class StatusContextPresenter(
             accountType = accountType,
             repository = accountRepository,
         ).flatMapLatest { service ->
-            (service as PostDataSource).postHandler.post(statusKey).toUi()
-        }.mapNotNull { it.takeSuccess() }
-            .distinctUntilChanged()
+            if (service is PostDataSource) {
+                service.postHandler.post(statusKey).toUi()
+            } else {
+                flowOf(null)
+            }
+        }.mapNotNull {
+            it ?: UiState.Error(Exception("Current service does not support post data source"))
+        }.distinctUntilChanged()
     }
 
     private val timelinePresenter by lazy {
@@ -101,7 +107,7 @@ public class StatusContextPresenter(
             }
 
             override suspend fun transform(data: UiTimelineV2): UiTimelineV2 {
-                val currentCreatedAt = currentStatusFlow.firstOrNull()?.createdAt
+                val currentCreatedAt = currentStatusFlow.firstOrNull()?.takeSuccess()?.createdAt
                 if (data !is UiTimelineV2.Post || currentCreatedAt == null) {
                     return data
                 }
@@ -124,7 +130,7 @@ public class StatusContextPresenter(
 
     @Composable
     override fun body(): State {
-        val current by currentStatusFlow.collectAsUiState()
+        val current by currentStatusFlow.flattenUiState()
         val listState = timelinePresenter.body()
         current.onSuccess {
             remember {

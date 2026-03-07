@@ -24,7 +24,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 
 internal class MisskeyLoader(
-    override val accountKey: MicroBlogKey,
+    val accountKey: MicroBlogKey,
     private val service: MisskeyService,
 ) : UserLoader,
     PostLoader,

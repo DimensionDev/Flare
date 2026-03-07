@@ -50,7 +50,7 @@ internal class CommentPagingSource(
         return PagingResult(
             data = data,
             endOfPaginationReached = data.isEmpty(),
-            nextKey = (page + 1).toString(),
+            nextKey = (page + 1).takeIf { data.isNotEmpty() }?.toString(),
         )
     }
 }

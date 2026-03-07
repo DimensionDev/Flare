@@ -3,6 +3,7 @@ package dev.dimension.flare.data.database.cache.model
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
@@ -22,13 +23,13 @@ internal data class DbUser(
 )
 
 @Entity(
-    primaryKeys = ["accountKey", "userKey"],
+    primaryKeys = ["accountType", "userKey"],
     indices = [
-        Index(value = ["accountKey", "userKey"], unique = true),
+        Index(value = ["accountType", "userKey"], unique = true),
     ],
 )
 internal data class DbUserRelation(
-    val accountKey: MicroBlogKey,
+    val accountType: DbAccountType,
     val userKey: MicroBlogKey,
     val relation: UiRelation,
 )

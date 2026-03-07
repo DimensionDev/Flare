@@ -25,7 +25,7 @@ import kotlinx.collections.immutable.toImmutableMap
 import kotlin.time.Clock
 
 internal class VVOLoader(
-    override val accountKey: MicroBlogKey,
+    val accountKey: MicroBlogKey,
     private val service: VVOService,
 ) : NotificationLoader,
     UserLoader,

@@ -7,7 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
@@ -21,6 +20,7 @@ import io.ktor.http.buildUrl
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
@@ -62,9 +62,9 @@ public class DeepLinkPresenter(
                         accountServiceFlow(
                             accountType = AccountType.Specific(event.accountKey),
                             repository = accountRepository,
-                        ).collect { service ->
-                            if (service is AuthenticatedMicroblogDataSource) {
-                                (service as PostDataSource).postEventHandler.handleEvent(event.postEvent)
+                        ).firstOrNull()?.let { service ->
+                            if (service is PostDataSource) {
+                                service.postEventHandler.handleEvent(event.postEvent)
                             }
                         }
                     }

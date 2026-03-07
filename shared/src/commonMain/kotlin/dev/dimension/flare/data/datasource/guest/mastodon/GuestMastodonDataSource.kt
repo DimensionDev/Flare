@@ -4,12 +4,23 @@ import dev.dimension.flare.data.datasource.mastodon.MastodonFansPagingSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonFollowingPagingSource
 import dev.dimension.flare.data.datasource.mastodon.SearchUserPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendHashtagPagingSource
+import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
+import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
+import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
+import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
+import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
+import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
@@ -22,10 +33,57 @@ internal class GuestMastodonDataSource(
     private val host: String,
     private val locale: String,
 ) : MicroblogDataSource,
+    UserDataSource,
+    RelationDataSource,
+    PostDataSource,
+    PostEventHandler.Handler,
     KoinComponent {
     private val service by lazy {
         GuestMastodonService("https://$host/", locale)
     }
+
+    private val loader by lazy {
+        GuestMastodonLoader(
+            host = host,
+            service = service,
+        )
+    }
+
+    override val userHandler by lazy {
+        UserHandler(
+            host = host,
+            loader = loader,
+        )
+    }
+
+    override val relationHandler by lazy {
+        RelationHandler(
+            dataSource = loader,
+            accountType = AccountType.Guest,
+        )
+    }
+
+    override val postHandler by lazy {
+        PostHandler(
+            accountType = AccountType.Guest,
+            loader = loader,
+        )
+    }
+
+    override val postEventHandler by lazy {
+        PostEventHandler(
+            accountType = AccountType.Guest,
+            handler = this,
+        )
+    }
+
+    override val supportedRelationTypes: Set<RelationActionType>
+        get() = loader.supportedTypes
+
+    override suspend fun handle(
+        event: PostEvent,
+        updater: DatabaseUpdater,
+    ): Unit = throw UnsupportedOperationException("Guest Mastodon data source does not support post events")
 
     override fun homeTimeline(): RemoteLoader<UiTimelineV2> = GuestTimelinePagingSource(service = service, host = host)
 

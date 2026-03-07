@@ -99,7 +99,7 @@ internal open class MastodonDataSource(
 
     override val userHandler by lazy {
         UserHandler(
-            accountKey = accountKey,
+            host = accountKey.host,
             loader = loader,
         )
     }
@@ -113,6 +113,7 @@ internal open class MastodonDataSource(
 
     override val relationHandler by lazy {
         RelationHandler(
+            accountType = AccountType.Specific(accountKey),
             dataSource = loader,
         )
     }
@@ -122,7 +123,7 @@ internal open class MastodonDataSource(
 
     override val postEventHandler by lazy {
         PostEventHandler(
-            accountKey = accountKey,
+            accountType = AccountType.Specific(accountKey),
             handler = this,
         )
     }

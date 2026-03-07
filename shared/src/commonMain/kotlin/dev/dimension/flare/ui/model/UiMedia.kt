@@ -91,6 +91,6 @@ public fun UiMedia.getFileName(
                 is UiMedia.Image -> "jpg"
                 is UiMedia.Video -> "mp4"
             }
-        }
+        }.removeSuffix("?name=orig")
     return "${key}_$handle.$extension"
 }

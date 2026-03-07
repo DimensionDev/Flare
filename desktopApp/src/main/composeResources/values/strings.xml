@@ -390,4 +390,7 @@
     <string name="misskey_channel_tab_favorites">Favorites</string>
     <string name="misskey_channel_tab_owned">Owned</string>
     <string name="misskey_channel_tab_featured">Featured</string>
+
+    <string name="media_save_success">Saved to Downloads</string>
+    <string name="media_save_fail">Failed to save</string>
 </resources>

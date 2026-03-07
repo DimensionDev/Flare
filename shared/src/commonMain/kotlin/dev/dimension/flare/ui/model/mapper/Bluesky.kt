@@ -416,9 +416,7 @@ private val ListNotificationsNotificationReason.type: UiTimelineV2.Message.Type
                 )
         }
 
-internal fun List<FeedViewPost>.render(accountKey: MicroBlogKey): List<UiTimelineV2> {
-    return this.map { it.render(accountKey) }
-}
+internal fun List<FeedViewPost>.render(accountKey: MicroBlogKey): List<UiTimelineV2> = this.map { it.render(accountKey) }
 
 internal fun List<ListNotificationsNotification>.render(
     accountKey: MicroBlogKey,

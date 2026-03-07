@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -51,7 +52,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.roundToIntSize
 import androidx.compose.ui.unit.toOffset
-import androidx.compose.ui.window.WindowPlacement
 import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
@@ -63,11 +63,9 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FloppyDisk
 import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
-import compose.icons.fontawesomeicons.solid.UpRightAndDownLeftFromCenter
-import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
+import dev.dimension.flare.common.DesktopDownloadManager
 import dev.dimension.flare.common.FlareHardwareShortcutDetector
-import dev.dimension.flare.media_fullscreen
 import dev.dimension.flare.media_save
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -89,6 +87,7 @@ import dev.dimension.flare.ui.presenter.status.StatusState
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
+import io.github.composefluent.component.CommandBarSeparator
 import io.github.composefluent.component.GridViewItem
 import io.github.composefluent.component.HorizontalFlipView
 import io.github.composefluent.component.ProgressBar
@@ -101,6 +100,7 @@ import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
 import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
 import io.github.kdroidfilter.composemediaplayer.rememberVideoPlayerState
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import me.saket.telephoto.ExperimentalTelephotoApi
 import me.saket.telephoto.zoomable.HardwareShortcutsSpec
@@ -113,6 +113,7 @@ import me.saket.telephoto.zoomable.zoomable
 import moe.tlaster.precompose.molecule.producePresenter
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import java.awt.FileDialog
 import kotlin.math.roundToLong
 import kotlin.time.Duration.Companion.milliseconds
@@ -136,7 +137,7 @@ internal fun StatusMediaScreen(
             window = window,
         )
     }
-    Box(
+    Column(
         modifier =
             Modifier
                 .fillMaxSize(),
@@ -152,7 +153,9 @@ internal fun StatusMediaScreen(
                 state = pagerState,
                 enabled = state.lockPager,
                 modifier =
-                    Modifier.fillMaxSize(),
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
             ) {
                 val media = medias[it]
                 when (media) {
@@ -164,9 +167,6 @@ internal fun StatusMediaScreen(
                             description = media.description,
                             isFocused = pagerState.currentPage == it,
                             setLockPager = state::setLockPager,
-                            onClick = {
-                                state.setShowThumbnailList(!state.showThumbnailList)
-                            },
                         )
 
                     is UiMedia.Video -> {
@@ -177,10 +177,7 @@ internal fun StatusMediaScreen(
                                 description = media.description,
                                 modifier =
                                     Modifier
-                                        .fillMaxSize()
-                                        .clickable {
-                                            state.setShowThumbnailList(!state.showThumbnailList)
-                                        },
+                                        .fillMaxSize(),
                             )
                         } else {
                             ImageItem(
@@ -190,9 +187,6 @@ internal fun StatusMediaScreen(
                                 description = media.description,
                                 isFocused = pagerState.currentPage == it,
                                 setLockPager = state::setLockPager,
-                                onClick = {
-                                    state.setShowThumbnailList(!state.showThumbnailList)
-                                },
                             )
                         }
                     }
@@ -214,83 +208,21 @@ internal fun StatusMediaScreen(
                         }
                 }
             }
-            AnimatedVisibility(
-                state.showThumbnailList,
+            LazyRow(
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.TopCenter),
-                enter = slideInVertically { -it } + fadeIn(),
-                exit = slideOutVertically { -it } + fadeOut(),
+                        .background(FluentTheme.colors.background.layer.default)
+                        .height(64.dp)
+                        .padding(8.dp)
+                        .fillMaxWidth(),
+                horizontalArrangement =
+                    Arrangement.spacedBy(
+                        8.dp,
+                        Alignment.CenterHorizontally,
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier =
-                        Modifier
-                            .background(FluentTheme.colors.background.layer.default)
-                            .padding(
-                                top = LocalWindowPadding.current.calculateTopPadding(),
-                                bottom = 8.dp,
-                                start = 8.dp,
-                                end = 8.dp,
-                            ),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Spacer(modifier = Modifier.weight(1f))
-                    SubtleButton(
-                        onClick = {
-                            val current = medias[pagerState.currentPage]
-                            state.save(current)
-                        },
-                        content = {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.FloppyDisk,
-                                contentDescription = stringResource(Res.string.media_save),
-                            )
-                        },
-                    )
-                    SubtleButton(
-                        onClick = {
-                            if (window != null) {
-                                val current = window.placement
-                                if (current == WindowPlacement.Fullscreen) {
-                                    window.placement = WindowPlacement.Floating
-                                } else {
-                                    window.placement = WindowPlacement.Fullscreen
-                                }
-                            }
-                        },
-                        content = {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.UpRightAndDownLeftFromCenter,
-                                contentDescription = stringResource(Res.string.media_fullscreen),
-                            )
-                        },
-                    )
-                }
-            }
-
-            AnimatedVisibility(
-                state.showThumbnailList,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                enter = slideInVertically { it } + fadeIn(),
-                exit = slideOutVertically { it } + fadeOut(),
-            ) {
-                LazyRow(
-                    modifier =
-                        Modifier
-                            .background(FluentTheme.colors.background.layer.default)
-                            .height(96.dp)
-                            .padding(8.dp),
-                    horizontalArrangement =
-                        Arrangement.spacedBy(
-                            8.dp,
-                            Alignment.CenterHorizontally,
-                        ),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                if (medias.size > 1) {
                     items(medias.size) { index ->
                         val media = medias[index]
                         GridViewItem(
@@ -318,6 +250,23 @@ internal fun StatusMediaScreen(
                             )
                         }
                     }
+                    item {
+                        CommandBarSeparator()
+                    }
+                }
+                item {
+                    SubtleButton(
+                        onClick = {
+                            val current = medias[pagerState.currentPage]
+                            state.save(current)
+                        },
+                        content = {
+                            FAIcon(
+                                FontAwesomeIcons.Solid.FloppyDisk,
+                                contentDescription = stringResource(Res.string.media_save),
+                            )
+                        },
+                    )
                 }
             }
         }
@@ -570,8 +519,10 @@ private fun presenter(
     statusKey: MicroBlogKey,
     window: ComposeWindow?,
 ) = run {
+    // io scope
+    val scope: CoroutineScope = koinInject()
+    val desktopDownloadManager: DesktopDownloadManager = koinInject()
     var lockPager by remember { mutableStateOf(false) }
-    val showThumbnailList by remember { mutableStateOf(false) }
     val state =
         remember(
             "StatusMediaScreen_${accountType}_$statusKey",
@@ -584,25 +535,12 @@ private fun presenter(
             (it as? UiTimelineV2.Post)?.images.orEmpty().toImmutableList()
         }
 
-    medias.onSuccess {
-        LaunchedEffect(it.size) {
-            if (it.size > 1) {
-//                showThumbnailList = true
-            }
-        }
-    }
-
     object : StatusState by state {
         val medias = medias
         val lockPager = lockPager
-        val showThumbnailList = showThumbnailList
 
         fun setLockPager(value: Boolean) {
             lockPager = value
-        }
-
-        fun setShowThumbnailList(value: Boolean) {
-//            showThumbnailList = value
         }
 
         fun save(item: UiMedia) {
@@ -610,22 +548,20 @@ private fun presenter(
             if (status != null) {
                 val userHandle = status.user?.handle?.canonical ?: "unknown"
                 val fileName = item.getFileName(statusKey.toString(), userHandle)
-
-                when (item) {
-                    is UiMedia.Audio -> Unit
-                    is UiMedia.Gif -> Unit
-                    is UiMedia.Image -> {
-                        FileDialog(window).apply {
-                            mode = FileDialog.SAVE
-                            file = fileName
-                            isVisible = true
-                            val dir = directory
-                            val file = file
-                            if (!dir.isNullOrEmpty() && !file.isNullOrEmpty()) {
-                            }
+                FileDialog(window).apply {
+                    mode = FileDialog.SAVE
+                    file = fileName
+                    isVisible = true
+                    val dir = directory
+                    val file = file
+                    if (!dir.isNullOrEmpty() && !file.isNullOrEmpty()) {
+                        scope.launch {
+                            desktopDownloadManager.download(
+                                url = item.url,
+                                targetFile = java.io.File(dir, file),
+                            )
                         }
                     }
-                    is UiMedia.Video -> Unit
                 }
             }
         }

@@ -1,5 +1,6 @@
 package dev.dimension.flare.di
 
+import dev.dimension.flare.common.DesktopDownloadManager
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.SurfaceBindingManager
@@ -11,4 +12,5 @@ val desktopModule =
     module {
         single { ComposeInAppNotification() } binds arrayOf(InAppNotification::class)
         singleOf(::SurfaceBindingManager)
+        single { DesktopDownloadManager(get()) }
     }

@@ -237,4 +237,6 @@
     <string name="deeplink_account_selection_browser">브라우저에서 열기</string>
     <string name="misskey_channel_tab_following">팔로잉</string>
     <string name="misskey_channel_tab_featured">추천</string>
+    <string name="media_save_success">다운로드에 저장됨</string>
+    <string name="media_save_fail">저장 실패</string>
 </resources>

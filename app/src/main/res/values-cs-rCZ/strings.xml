@@ -351,8 +351,12 @@
     <string name="deeplink_account_selection_browser">Otevřít v prohlížeči</string>
     <string name="block_user_title">Blokovat uživatele</string>
     <string name="block_user_description">Opravdu chcete zablokovat tohoto uživatele?</string>
+    <string name="unblock_user_title">Odblokovat uživatele</string>
+    <string name="unblock_user_description">Opravdu chcete odblokovat tohoto uživatele?</string>
     <string name="mute_user_title">Ztlumit uživatele</string>
     <string name="mute_user_description">Opravdu chcete ztlumit tohoto uživatele?</string>
+    <string name="unmute_user_title">Zrušit ztlumení uživatele</string>
+    <string name="unmute_user_description">Opravdu chcete zrušit ztlumení tohoto uživatele?</string>
     <string name="report_user_title">Nahlásit uživatele</string>
     <string name="report_user_description">Opravdu chcete nahlásit tohoto uživatele?</string>
     <string name="settings_storage_export_data">Exportovat data</string>

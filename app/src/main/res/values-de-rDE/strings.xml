@@ -349,8 +349,12 @@
     <string name="deeplink_account_selection_browser">Im Browser öffnen</string>
     <string name="block_user_title">Benutzer sperren</string>
     <string name="block_user_description">Sind Sie sicher, dass Sie diesen Benutzer blockieren möchten?</string>
+    <string name="unblock_user_title">Benutzer entsperren</string>
+    <string name="unblock_user_description">Sind Sie sicher, dass Sie diesen Benutzer entsperren möchten?</string>
     <string name="mute_user_title">Benutzer stumm</string>
     <string name="mute_user_description">Sind Sie sicher, dass Sie diesen Benutzer stummschalten möchten?</string>
+    <string name="unmute_user_title">Benutzer entsperren</string>
+    <string name="unmute_user_description">Sind Sie sicher, dass Sie diesen Benutzer entmuten wollen?</string>
     <string name="report_user_title">Benutzer melden</string>
     <string name="report_user_description">Sind Sie sicher, dass Sie diesen Benutzer melden möchten?</string>
     <string name="settings_storage_export_data">Daten exportieren</string>

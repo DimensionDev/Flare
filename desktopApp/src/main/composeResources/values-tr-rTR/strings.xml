@@ -260,4 +260,6 @@
     <string name="misskey_channel_tab_favorites">Favoriler</string>
     <string name="misskey_channel_tab_owned">Sahip olduklarım</string>
     <string name="misskey_channel_tab_featured">Özellikli</string>
+    <string name="media_save_success">İndirilenlere kaydedildi</string>
+    <string name="media_save_fail">Kaydetmede başarısız</string>
 </resources>

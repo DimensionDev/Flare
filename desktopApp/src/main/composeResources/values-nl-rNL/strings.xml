@@ -316,8 +316,12 @@
     <string name="deeplink_account_selection_browser">Openen in browser</string>
     <string name="block_user_title">Gebruiker blokkeren</string>
     <string name="block_user_description">Weet je zeker dat je deze gebruiker wilt blokkeren?</string>
+    <string name="unblock_user_title">Gebruiker deblokkeren</string>
+    <string name="unblock_user_description">Weet je zeker dat je deze gebruiker wilt deblokkeren?</string>
     <string name="mute_user_title">Gebruiker dempen</string>
     <string name="mute_user_description">Weet je zeker dat je deze gebruiker wilt muten?</string>
+    <string name="unmute_user_title">Dempen gebruiker inschakelen</string>
+    <string name="unmute_user_description">Weet je zeker dat je deze gebruiker wilt uitdempen?</string>
     <string name="report_user_title">Gebruiker melden</string>
     <string name="report_user_description">Weet je zeker dat je deze gebruiker wilt rapporteren?</string>
     <string name="settings_storage_export_data">Gegevens exporteren</string>
@@ -336,4 +340,6 @@
     <string name="misskey_channel_tab_favorites">Favorieten</string>
     <string name="misskey_channel_tab_owned">Eigendom</string>
     <string name="misskey_channel_tab_featured">Aanbevolen</string>
+    <string name="media_save_success">Opgeslagen in Downloads</string>
+    <string name="media_save_fail">Opslaan mislukt</string>
 </resources>

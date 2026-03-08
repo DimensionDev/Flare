@@ -316,8 +316,12 @@
     <string name="deeplink_account_selection_browser">在浏览器中打开</string>
     <string name="block_user_title">屏蔽用户</string>
     <string name="block_user_description">您确定要屏蔽此用户吗？</string>
+    <string name="unblock_user_title">取消屏蔽用户</string>
+    <string name="unblock_user_description">您确定要解除屏蔽此用户吗？</string>
     <string name="mute_user_title">静音用户</string>
     <string name="mute_user_description">您确定要静音此用户吗？</string>
+    <string name="unmute_user_title">取消静音用户</string>
+    <string name="unmute_user_description">您确定要取消静音此用户吗？</string>
     <string name="report_user_title">报告用户</string>
     <string name="report_user_description">您确定要报告此用户吗？</string>
     <string name="settings_storage_export_data">导出数据</string>
@@ -336,4 +340,6 @@
     <string name="misskey_channel_tab_favorites">收藏夹</string>
     <string name="misskey_channel_tab_owned">拥有的</string>
     <string name="misskey_channel_tab_featured">精选</string>
+    <string name="media_save_success">已保存到下载文件夹</string>
+    <string name="media_save_fail">保存失败</string>
 </resources>

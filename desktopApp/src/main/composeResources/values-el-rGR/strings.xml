@@ -317,8 +317,12 @@
     <string name="deeplink_account_selection_browser">Άνοιγμα σε πρόγραμμα περιήγησης</string>
     <string name="block_user_title">Αποκλεισμός χρήστη</string>
     <string name="block_user_description">Είστε βέβαιοι ότι θέλετε να μπλοκάρετε αυτόν τον χρήστη?</string>
+    <string name="unblock_user_title">Ξεμπλοκάρισμα χρήστη</string>
+    <string name="unblock_user_description">Είστε βέβαιοι ότι θέλετε να καταργήσετε την φραγή αυτού του χρήστη?</string>
     <string name="mute_user_title">Σίγαση χρήστη</string>
     <string name="mute_user_description">Είστε βέβαιοι ότι θέλετε να κάνετε σίγαση αυτού του χρήστη?</string>
+    <string name="unmute_user_title">Κατάργηση σίγασης χρήστη</string>
+    <string name="unmute_user_description">Είστε βέβαιοι ότι θέλετε να καταργήσετε τη σίγαση αυτού του χρήστη?</string>
     <string name="report_user_title">Αναφορά χρήστη</string>
     <string name="report_user_description">Είστε βέβαιοι ότι θέλετε να αναφέρετε αυτόν τον χρήστη?</string>
     <string name="settings_storage_export_data">Εξαγωγή Δεδομένων</string>
@@ -337,4 +341,6 @@
     <string name="misskey_channel_tab_favorites">Αγαπημένα</string>
     <string name="misskey_channel_tab_owned">Ιδιοκτησία</string>
     <string name="misskey_channel_tab_featured">Προτεινόμενα</string>
+    <string name="media_save_success">Αποθηκεύτηκε στις Λήψεις</string>
+    <string name="media_save_fail">Αποτυχία αποθήκευσης</string>
 </resources>

@@ -349,8 +349,12 @@
     <string name="deeplink_account_selection_browser">Abrir en el navegador</string>
     <string name="block_user_title">Bloquear usuario</string>
     <string name="block_user_description">¿Estás seguro de que quieres bloquear a este usuario?</string>
+    <string name="unblock_user_title">Desbloquear usuario</string>
+    <string name="unblock_user_description">¿Estás seguro de que quieres desbloquear a este usuario?</string>
     <string name="mute_user_title">Silenciar usuario</string>
     <string name="mute_user_description">¿Estás seguro de que quieres silenciar a este usuario?</string>
+    <string name="unmute_user_title">Dessilenciar usuario</string>
+    <string name="unmute_user_description">¿Estás seguro de que quieres quitar el silencio a este usuario?</string>
     <string name="report_user_title">Denunciar usuario</string>
     <string name="report_user_description">¿Está seguro que desea reportar a este usuario?</string>
     <string name="settings_storage_export_data">Exportar datos</string>

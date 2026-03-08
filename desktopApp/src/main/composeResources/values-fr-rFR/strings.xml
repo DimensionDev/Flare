@@ -313,8 +313,12 @@
     <string name="deeplink_account_selection_browser">Ouvrir dans le navigateur</string>
     <string name="block_user_title">Bloquer l\'utilisateur</string>
     <string name="block_user_description">Êtes-vous sûr de vouloir bloquer cet utilisateur ?</string>
+    <string name="unblock_user_title">Débloquer l\'utilisateur</string>
+    <string name="unblock_user_description">Êtes-vous sûr de vouloir débloquer cet utilisateur ?</string>
     <string name="mute_user_title">Rendre l\'utilisateur muet</string>
     <string name="mute_user_description">Êtes-vous sûr de vouloir rendre muet cet utilisateur ?</string>
+    <string name="unmute_user_title">Rétablir le son</string>
+    <string name="unmute_user_description">Êtes-vous sûr de vouloir réactiver le son de cet utilisateur ?</string>
     <string name="report_user_title">Signaler l\'utilisateur</string>
     <string name="report_user_description">Êtes-vous sûr de vouloir signaler cet utilisateur ?</string>
     <string name="settings_storage_export_data">Exporter les données</string>
@@ -333,4 +337,6 @@
     <string name="misskey_channel_tab_favorites">Favoris</string>
     <string name="misskey_channel_tab_owned">Possédé</string>
     <string name="misskey_channel_tab_featured">En vedette</string>
+    <string name="media_save_success">Enregistré dans les téléchargements</string>
+    <string name="media_save_fail">Échec de l\'enregistrement</string>
 </resources>

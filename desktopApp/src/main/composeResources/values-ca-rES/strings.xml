@@ -232,4 +232,6 @@
     <string name="deeplink_account_selection_browser">Obre al navegador</string>
     <string name="misskey_channel_tab_following">Seguint</string>
     <string name="misskey_channel_tab_featured">Destacats</string>
+    <string name="media_save_success">Desat a Descàrregues</string>
+    <string name="media_save_fail">No s\'ha pogut desar</string>
 </resources>

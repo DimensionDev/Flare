@@ -349,8 +349,12 @@
     <string name="deeplink_account_selection_browser">Avaa selaimessa</string>
     <string name="block_user_title">Estä käyttäjä</string>
     <string name="block_user_description">Oletko varma, että haluat estää tämän käyttäjän?</string>
+    <string name="unblock_user_title">Poista esto käyttäjältä</string>
+    <string name="unblock_user_description">Oletko varma, että haluat poistaa eston tälle käyttäjälle?</string>
     <string name="mute_user_title">Mykistä käyttäjä</string>
     <string name="mute_user_description">Oletko varma, että haluat mykistää tämän käyttäjän?</string>
+    <string name="unmute_user_title">Poista mykistys käyttäjältä</string>
+    <string name="unmute_user_description">Oletko varma, että haluat poistaa mykistyksen tältä käyttäjältä?</string>
     <string name="report_user_title">Raportoi käyttäjä</string>
     <string name="report_user_description">Oletko varma, että haluat raportoida tämän käyttäjän?</string>
     <string name="settings_storage_export_data">Vie Tiedot</string>

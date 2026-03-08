@@ -48,7 +48,9 @@ public class AccountRepository internal constructor(
         appDatabase
             .accountDao()
             .activeAccount()
-            .map {
+            .distinctUntilChangedBy {
+                it?.account_key
+            }.map {
                 it?.toUi()
             }.map {
                 if (it == null) {

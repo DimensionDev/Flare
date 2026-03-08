@@ -1,9 +1,9 @@
 package dev.dimension.flare.ui.screen.rss
 
-import java.io.ByteArrayOutputStream
-import java.nio.charset.StandardCharsets
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.io.ByteArrayOutputStream
+import java.nio.charset.StandardCharsets
 
 class RssSourcesScreenTest {
     @Test

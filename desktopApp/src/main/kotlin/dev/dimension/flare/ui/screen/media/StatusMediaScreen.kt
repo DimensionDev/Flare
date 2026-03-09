@@ -10,6 +10,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +47,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.isUnspecified
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.times
 import androidx.compose.ui.unit.LayoutDirection
@@ -66,6 +69,7 @@ import compose.icons.fontawesomeicons.solid.Play
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.DesktopDownloadManager
 import dev.dimension.flare.common.FlareHardwareShortcutDetector
+import dev.dimension.flare.common.FlareHardwareShortcutsElement
 import dev.dimension.flare.media_save
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -155,7 +159,34 @@ internal fun StatusMediaScreen(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .weight(1f),
+                        .weight(1f)
+                        .onKeyEvent {
+                            when (it.key) {
+                                androidx.compose.ui.input.key.Key.DirectionRight -> {
+                                    if (pagerState.currentPage < pagerState.pageCount - 1) {
+                                        scope.launch {
+                                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                        }
+                                        true
+                                    } else {
+                                        false
+                                    }
+                                }
+
+                                androidx.compose.ui.input.key.Key.DirectionLeft -> {
+                                    if (pagerState.currentPage > 0) {
+                                        scope.launch {
+                                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                        }
+                                        true
+                                    } else {
+                                        false
+                                    }
+                                }
+
+                                else -> false
+                            }
+                        },
             ) {
                 val media = medias[it]
                 when (media) {
@@ -460,6 +491,7 @@ internal fun ImageItem(
             zoomSpec = ZoomSpec(maxZoomFactor = 50f, minZoomFactor = 0.1f),
             hardwareShortcutsSpec =
                 HardwareShortcutsSpec(
+                    enabled = false,
                     shortcutDetector = FlareHardwareShortcutDetector,
                 ),
         ).apply {
@@ -503,7 +535,8 @@ internal fun ImageItem(
                         onClick = {
                             onClick?.invoke()
                         },
-                    ),
+                    ).then(FlareHardwareShortcutsElement(zoomableState))
+                    .focusable(),
             contentScale = ContentScale.Fit,
             alignment = Alignment.Center,
         )

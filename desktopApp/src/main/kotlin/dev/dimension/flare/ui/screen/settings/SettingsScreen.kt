@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -161,6 +160,7 @@ import dev.dimension.flare.ui.component.AccountItem
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.Header
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.model.isSuccess
@@ -193,7 +193,6 @@ import io.github.composefluent.component.MenuFlyout
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.RadioButton
-import io.github.composefluent.component.ScrollbarContainer
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
@@ -247,9 +246,9 @@ internal fun SettingsScreen(
     }
 
     val scrollState = rememberScrollState()
-    ScrollbarContainer(
+    FlareScrollBar(
+        state = scrollState,
         modifier = Modifier.fillMaxSize(),
-        adapter = rememberScrollbarAdapter(scrollState),
     ) {
         Column(
             modifier =

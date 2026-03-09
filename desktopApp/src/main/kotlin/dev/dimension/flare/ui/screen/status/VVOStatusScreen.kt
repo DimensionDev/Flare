@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -34,6 +36,7 @@ import dev.dimension.flare.status_detail_comment
 import dev.dimension.flare.status_detail_repost
 import dev.dimension.flare.status_loadmore_error_retry
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -74,21 +77,49 @@ internal fun VVOStatusScreen(
             ),
     ) {
         if (bigScreen) {
+            val detailScrollState = rememberScrollState()
+            val reactionListState = rememberLazyStaggeredGridState()
             Row {
-                StatusContent(
-                    detailStatusKey = statusKey,
-                    statusState = state.status,
-                    modifier =
-                        Modifier
-                            .verticalScroll(rememberScrollState())
-                            .width(350.dp)
-                            .padding(PaddingValues(horizontal = screenHorizontalPadding))
-                            .padding(LocalWindowPadding.current),
-                )
+                FlareScrollBar(detailScrollState) {
+                    StatusContent(
+                        detailStatusKey = statusKey,
+                        statusState = state.status,
+                        modifier =
+                            Modifier
+                                .verticalScroll(detailScrollState)
+                                .width(350.dp)
+                                .padding(PaddingValues(horizontal = screenHorizontalPadding))
+                                .padding(LocalWindowPadding.current),
+                    )
+                }
+                FlareScrollBar(
+                    modifier = Modifier.weight(1f),
+                    state = reactionListState,
+                ) {
+                    LazyStatusVerticalStaggeredGrid(
+                        contentPadding = LocalWindowPadding.current,
+                        modifier = Modifier.fillMaxSize(),
+                        state = reactionListState,
+                    ) {
+                        reactionContent(
+                            comment = state.comment,
+                            repost = state.repost,
+                            detailType = state.type,
+                            onDetailTypeChange = state::onTypeChanged,
+                        )
+                    }
+                }
+            }
+        } else {
+            val listState = rememberLazyStaggeredGridState()
+            FlareScrollBar(listState) {
                 LazyStatusVerticalStaggeredGrid(
                     contentPadding = LocalWindowPadding.current,
-                    modifier = Modifier.weight(1f),
+                    state = listState,
                 ) {
+                    item {
+                        StatusContent(statusState = state.status, detailStatusKey = statusKey)
+                    }
                     reactionContent(
                         comment = state.comment,
                         repost = state.repost,
@@ -96,20 +127,6 @@ internal fun VVOStatusScreen(
                         onDetailTypeChange = state::onTypeChanged,
                     )
                 }
-            }
-        } else {
-            LazyStatusVerticalStaggeredGrid(
-                contentPadding = LocalWindowPadding.current,
-            ) {
-                item {
-                    StatusContent(statusState = state.status, detailStatusKey = statusKey)
-                }
-                reactionContent(
-                    comment = state.comment,
-                    repost = state.repost,
-                    detailType = state.type,
-                    onDetailTypeChange = state::onTypeChanged,
-                )
             }
         }
     }

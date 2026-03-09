@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +28,7 @@ import dev.dimension.flare.opml_export
 import dev.dimension.flare.save_completed
 import dev.dimension.flare.ui.component.ComposeInAppNotification
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.presenter.home.rss.ExportOPMLPresenter
 import dev.dimension.flare.ui.presenter.invoke
@@ -69,57 +71,61 @@ internal fun RssListScreen(
         )
     }
 
-    LazyColumn(
-        modifier =
-            modifier
-                .padding(horizontal = screenHorizontalPadding),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-        contentPadding = LocalWindowPadding.current,
-    ) {
-        item {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                modifier = Modifier.fillParentMaxWidth(),
-            ) {
-                if (state.sources.any()) {
-                    SubtleButton(
+    val listState = rememberLazyListState()
+    FlareScrollBar(listState) {
+        LazyColumn(
+            state = listState,
+            modifier =
+                modifier
+                    .padding(horizontal = screenHorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            contentPadding = LocalWindowPadding.current,
+        ) {
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                    modifier = Modifier.fillParentMaxWidth(),
+                ) {
+                    if (state.sources.any()) {
+                        SubtleButton(
+                            onClick = {
+                                state.export()
+                            },
+                        ) {
+                            FAIcon(
+                                FontAwesomeIcons.Solid.FileExport,
+                                contentDescription = stringResource(Res.string.opml_export),
+                            )
+                            Text(
+                                stringResource(Res.string.opml_export),
+                            )
+                        }
+                    }
+                    AccentButton(
                         onClick = {
-                            state.export()
+                            onAdd.invoke()
                         },
                     ) {
                         FAIcon(
-                            FontAwesomeIcons.Solid.FileExport,
-                            contentDescription = stringResource(Res.string.opml_export),
+                            imageVector = FontAwesomeIcons.Solid.Plus,
+                            contentDescription = stringResource(Res.string.add_rss_source),
                         )
                         Text(
-                            stringResource(Res.string.opml_export),
+                            text = stringResource(Res.string.add_rss_source),
                         )
                     }
                 }
-                AccentButton(
-                    onClick = {
-                        onAdd.invoke()
-                    },
-                ) {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.Plus,
-                        contentDescription = stringResource(Res.string.add_rss_source),
-                    )
-                    Text(
-                        text = stringResource(Res.string.add_rss_source),
-                    )
-                }
             }
-        }
-        item {
-            Spacer(modifier = Modifier.height(6.dp))
-        }
+            item {
+                Spacer(modifier = Modifier.height(6.dp))
+            }
 
-        rssListWithTabs(
-            state = state,
-            onClicked = toItem,
-            onEdit = onEdit,
-        )
+            rssListWithTabs(
+                state = state,
+                onClicked = toItem,
+                onEdit = onEdit,
+            )
+        }
     }
 
     if (state.exporting) {

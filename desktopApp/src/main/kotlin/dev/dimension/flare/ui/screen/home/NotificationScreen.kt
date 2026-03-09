@@ -20,6 +20,7 @@ import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
@@ -48,76 +49,78 @@ internal fun NotificationScreen() {
             Modifier
                 .fillMaxSize(),
     ) {
-        LazyStatusVerticalStaggeredGrid(
-            contentPadding = LocalWindowPadding.current,
-            state = listState,
-        ) {
-            if (state.notifications.size > 1) {
-                item(
-                    span = StaggeredGridItemSpan.FullLine,
-                ) {
-                    LiteFilter {
-                        state.notifications.forEach { item ->
-                            val profile = item.profile
-                            val badge = item.badge
-                            PillButton(
-                                selected = state.selectedAccount?.key == profile.key,
-                                onSelectedChanged = {
-                                    if (it) {
-                                        state.setAccount(profile)
-                                    }
-                                },
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    AvatarComponent(
-                                        data = profile.avatar,
-                                        size = AvatarComponentDefaults.compatSize,
-                                    )
-                                    Text(
-                                        profile.handle.canonical,
-                                        maxLines = 1,
-                                        modifier = Modifier.padding(start = 8.dp),
-                                    )
-                                    AnimatedVisibility(badge > 0) {
-                                        Badge(
-                                            status = BadgeStatus.Informational,
-                                            content = {
-                                                Text(badge.toString())
-                                            },
-                                            modifier = Modifier.padding(start = 8.dp),
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            state.supportedNotificationFilters.onSuccess { types ->
-                if (types.size > 1) {
+        FlareScrollBar(listState) {
+            LazyStatusVerticalStaggeredGrid(
+                contentPadding = LocalWindowPadding.current,
+                state = listState,
+            ) {
+                if (state.notifications.size > 1) {
                     item(
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
                         LiteFilter {
-                            types.forEach { type ->
+                            state.notifications.forEach { item ->
+                                val profile = item.profile
+                                val badge = item.badge
                                 PillButton(
-                                    selected = state.selectedFilter == type,
+                                    selected = state.selectedAccount?.key == profile.key,
                                     onSelectedChanged = {
                                         if (it) {
-                                            state.setFilter(type)
+                                            state.setAccount(profile)
                                         }
                                     },
                                 ) {
-                                    Text(text = type.name)
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        AvatarComponent(
+                                            data = profile.avatar,
+                                            size = AvatarComponentDefaults.compatSize,
+                                        )
+                                        Text(
+                                            profile.handle.canonical,
+                                            maxLines = 1,
+                                            modifier = Modifier.padding(start = 8.dp),
+                                        )
+                                        AnimatedVisibility(badge > 0) {
+                                            Badge(
+                                                status = BadgeStatus.Informational,
+                                                content = {
+                                                    Text(badge.toString())
+                                                },
+                                                modifier = Modifier.padding(start = 8.dp),
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
+                state.supportedNotificationFilters.onSuccess { types ->
+                    if (types.size > 1) {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
+                            LiteFilter {
+                                types.forEach { type ->
+                                    PillButton(
+                                        selected = state.selectedFilter == type,
+                                        onSelectedChanged = {
+                                            if (it) {
+                                                state.setFilter(type)
+                                            }
+                                        },
+                                    ) {
+                                        Text(text = type.name)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                status(state.timeline)
             }
-            status(state.timeline)
         }
         if (state.timeline.isRefreshing) {
             ProgressBar(

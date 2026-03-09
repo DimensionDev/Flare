@@ -53,6 +53,7 @@ import dev.dimension.flare.tab_settings_group_empty
 import dev.dimension.flare.tab_settings_group_name_placeholder
 import dev.dimension.flare.tab_settings_remove
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.presenter.invoke
@@ -98,150 +99,152 @@ internal fun GroupConfigScreen(
             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         }
 
-    LazyColumn(
-        state = lazyListState,
-        contentPadding = LocalWindowPadding.current,
-        modifier =
-            Modifier
-                .padding(horizontal = screenHorizontalPadding),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        stickyHeader {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                AccentButton(
-                    onClick = {
-                        state.setAddTab(true)
-                    },
+    FlareScrollBar(lazyListState) {
+        LazyColumn(
+            state = lazyListState,
+            contentPadding = LocalWindowPadding.current,
+            modifier =
+                Modifier
+                    .padding(horizontal = screenHorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            stickyHeader {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.CenterEnd,
                 ) {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.Plus,
-                        contentDescription = stringResource(Res.string.tab_settings_add),
-                    )
-                    Text(stringResource(Res.string.tab_settings_add))
+                    AccentButton(
+                        onClick = {
+                            state.setAddTab(true)
+                        },
+                    ) {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Plus,
+                            contentDescription = stringResource(Res.string.tab_settings_add),
+                        )
+                        Text(stringResource(Res.string.tab_settings_add))
+                    }
                 }
             }
-        }
 
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box {
-                    TabIcon(
-                        accountType = AccountType.Guest,
-                        icon = state.icon,
-                        title = TitleType.Text(state.name.text.toString()),
-                        size = 36.dp,
-                        modifier = Modifier.clickable { state.setShowIconPicker(true) },
-                    )
-                    Flyout(
-                        visible = state.showIconPicker,
-                        onDismissRequest = { state.setShowIconPicker(false) },
-                    ) {
-                        LazyHorizontalGrid(
-                            rows = GridCells.FixedSize(48.dp),
-                            modifier = Modifier.heightIn(max = 120.dp),
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box {
+                        TabIcon(
+                            accountType = AccountType.Guest,
+                            icon = state.icon,
+                            title = TitleType.Text(state.name.text.toString()),
+                            size = 36.dp,
+                            modifier = Modifier.clickable { state.setShowIconPicker(true) },
+                        )
+                        Flyout(
+                            visible = state.showIconPicker,
+                            onDismissRequest = { state.setShowIconPicker(false) },
                         ) {
-                            items(state.availableIcons) { icon ->
-                                TabIcon(
-                                    accountType = AccountType.Guest,
-                                    icon = icon,
-                                    title = TitleType.Text(state.name.text.toString()),
-                                    modifier =
-                                        Modifier.padding(4.dp).clickable {
-                                            state.setIcon(icon)
-                                            state.setShowIconPicker(false)
-                                        },
-                                    size = 48.dp,
-                                )
+                            LazyHorizontalGrid(
+                                rows = GridCells.FixedSize(48.dp),
+                                modifier = Modifier.heightIn(max = 120.dp),
+                            ) {
+                                items(state.availableIcons) { icon ->
+                                    TabIcon(
+                                        accountType = AccountType.Guest,
+                                        icon = icon,
+                                        title = TitleType.Text(state.name.text.toString()),
+                                        modifier =
+                                            Modifier.padding(4.dp).clickable {
+                                                state.setIcon(icon)
+                                                state.setShowIconPicker(false)
+                                            },
+                                        size = 48.dp,
+                                    )
+                                }
                             }
                         }
                     }
-                }
 
-                TextField(
-                    state = state.name,
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text(stringResource(Res.string.tab_settings_group_name_placeholder)) },
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                )
-            }
-        }
-
-        if (state.tabs.isEmpty()) {
-            item {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    FAIcon(
-                        FontAwesomeIcons.Solid.TableList,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = FluentTheme.colors.text.text.secondary,
-                    )
-                    Text(
-                        text = stringResource(Res.string.tab_settings_group_empty),
-                        style = FluentTheme.typography.body,
-                        textAlign = TextAlign.Center,
-                        color = FluentTheme.colors.text.text.secondary,
+                    TextField(
+                        state = state.name,
+                        modifier = Modifier.weight(1f),
+                        placeholder = { Text(stringResource(Res.string.tab_settings_group_name_placeholder)) },
+                        lineLimits = TextFieldLineLimits.SingleLine,
                     )
                 }
             }
-        }
 
-        itemsIndexed(state.tabs, key = { _, item -> item.key }) { index, item ->
-            ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
-                CardExpanderItem(
-                    heading = {
-                        TabTitle(item.metaData.title)
-                    },
-                    icon = {
-                        TabIcon(item)
-                    },
-                    trailing = {
-                        Row {
-                            SubtleButton(
-                                onClick = {
-                                    state.deleteTab(item)
-                                },
-                                iconOnly = true,
-                            ) {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.Trash,
-                                    contentDescription =
-                                        stringResource(
-                                            Res.string.tab_settings_remove,
-                                        ),
-                                    tint = FluentTheme.colors.system.critical,
-                                )
+            if (state.tabs.isEmpty()) {
+                item {
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        FAIcon(
+                            FontAwesomeIcons.Solid.TableList,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = FluentTheme.colors.text.text.secondary,
+                        )
+                        Text(
+                            text = stringResource(Res.string.tab_settings_group_empty),
+                            style = FluentTheme.typography.body,
+                            textAlign = TextAlign.Center,
+                            color = FluentTheme.colors.text.text.secondary,
+                        )
+                    }
+                }
+            }
+
+            itemsIndexed(state.tabs, key = { _, item -> item.key }) { index, item ->
+                ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
+                    CardExpanderItem(
+                        heading = {
+                            TabTitle(item.metaData.title)
+                        },
+                        icon = {
+                            TabIcon(item)
+                        },
+                        trailing = {
+                            Row {
+                                SubtleButton(
+                                    onClick = {
+                                        state.deleteTab(item)
+                                    },
+                                    iconOnly = true,
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Trash,
+                                        contentDescription =
+                                            stringResource(
+                                                Res.string.tab_settings_remove,
+                                            ),
+                                        tint = FluentTheme.colors.system.critical,
+                                    )
+                                }
+                                SubtleButton(
+                                    modifier =
+                                        Modifier.draggableHandle(),
+                                    onClick = {},
+                                    iconOnly = true,
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Bars,
+                                        contentDescription =
+                                            stringResource(
+                                                Res.string.tab_settings_drag,
+                                            ),
+                                    )
+                                }
                             }
-                            SubtleButton(
-                                modifier =
-                                    Modifier.draggableHandle(),
-                                onClick = {},
-                                iconOnly = true,
-                            ) {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.Bars,
-                                    contentDescription =
-                                        stringResource(
-                                            Res.string.tab_settings_drag,
-                                        ),
-                                )
-                            }
-                        }
-                    },
-                )
+                        },
+                    )
+                }
             }
         }
     }

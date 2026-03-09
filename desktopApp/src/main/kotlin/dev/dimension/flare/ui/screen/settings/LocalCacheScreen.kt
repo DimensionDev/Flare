@@ -26,6 +26,7 @@ import dev.dimension.flare.local_history_search_status_title
 import dev.dimension.flare.local_history_search_user_title
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.AccountItem
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.ClickContext
@@ -52,72 +53,74 @@ internal fun LocalCacheScreen() {
         presenter()
     }
     val lazyListState = rememberLazyStaggeredGridState()
-    LazyStatusVerticalStaggeredGrid(
-        state = lazyListState,
-        contentPadding = LocalWindowPadding.current,
-        modifier =
-            Modifier
-                .fillMaxSize(),
-    ) {
-        item(
-            span = StaggeredGridItemSpan.FullLine,
+    FlareScrollBar(lazyListState) {
+        LazyStatusVerticalStaggeredGrid(
+            state = lazyListState,
+            contentPadding = LocalWindowPadding.current,
+            modifier =
+                Modifier
+                    .fillMaxSize(),
         ) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize(),
+            item(
+                span = StaggeredGridItemSpan.FullLine,
             ) {
-                TextField(
-                    state = state.searchTextState,
+                Box(
                     modifier =
                         Modifier
-                            .widthIn(min = 200.dp)
-                            .align(Alignment.CenterEnd),
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                )
+                            .fillMaxSize(),
+                ) {
+                    TextField(
+                        state = state.searchTextState,
+                        modifier =
+                            Modifier
+                                .widthIn(min = 200.dp)
+                                .align(Alignment.CenterEnd),
+                        lineLimits = TextFieldLineLimits.SingleLine,
+                    )
+                }
             }
-        }
-        item(
-            span = StaggeredGridItemSpan.FullLine,
-        ) {
-            LiteFilter {
-                state.allSearchTypes.forEach { searchType ->
-                    PillButton(
-                        selected = state.selectedSearchType == searchType,
-                        onSelectedChanged = {
-                            if (it) {
-                                state.setSearchType(searchType)
-                            }
-                        },
-                    ) {
-                        Text(stringResource(searchType.title))
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
+                LiteFilter {
+                    state.allSearchTypes.forEach { searchType ->
+                        PillButton(
+                            selected = state.selectedSearchType == searchType,
+                            onSelectedChanged = {
+                                if (it) {
+                                    state.setSearchType(searchType)
+                                }
+                            },
+                        ) {
+                            Text(stringResource(searchType.title))
+                        }
                     }
                 }
             }
-        }
-        when (state.selectedSearchType) {
-            SearchType.Status ->
-                status(
-                    if (state.data.isEmpty || !state.data.isSuccess()) {
-                        state.history
-                    } else {
-                        state.data
-                    },
-                )
-            SearchType.User ->
-                itemsIndexed(
-                    if (state.searchUser.isEmpty || !state.searchUser.isSuccess()) {
-                        state.userHistory
-                    } else {
-                        state.searchUser
-                    },
-                ) { index, itemsCount, user ->
-                    AccountItem(
-                        userState = UiState.Success(user),
-                        onClick = { user.onClicked.invoke(ClickContext(uriHandler::openUri)) },
-                        toLogin = {},
+            when (state.selectedSearchType) {
+                SearchType.Status ->
+                    status(
+                        if (state.data.isEmpty || !state.data.isSuccess()) {
+                            state.history
+                        } else {
+                            state.data
+                        },
                     )
-                }
+                SearchType.User ->
+                    itemsIndexed(
+                        if (state.searchUser.isEmpty || !state.searchUser.isSuccess()) {
+                            state.userHistory
+                        } else {
+                            state.searchUser
+                        },
+                    ) { index, itemsCount, user ->
+                        AccountItem(
+                            userState = UiState.Success(user),
+                            onClick = { user.onClicked.invoke(ClickContext(uriHandler::openUri)) },
+                            toLogin = {},
+                        )
+                    }
+            }
         }
     }
 }

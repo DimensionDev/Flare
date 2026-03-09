@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import io.github.kdroidfilter.webview.web.WebView
 import io.github.kdroidfilter.webview.web.rememberWebViewState
+import io.github.kdroidfilter.webview.wry.WryWebViewPanel
 import io.ktor.http.Url
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
@@ -18,7 +19,7 @@ internal fun WebViewLoginScreen(
 ) {
     val state = rememberWebViewState(url)
     LaunchedEffect(Unit) {
-        state.cookieManager.removeAllCookies()
+        (state.webView?.nativeWebView as? WryWebViewPanel)?.clearAllCookies()
         val urlData = Url(url)
         val actualUrl =
             urlData.protocol.name
@@ -27,7 +28,10 @@ internal fun WebViewLoginScreen(
                 .plus("/")
         while (true) {
             delay(2.seconds)
-            val cookies = state.cookieManager.getCookies(actualUrl)
+            val cookies =
+                (state.webView?.nativeWebView as? WryWebViewPanel)
+                    ?.getCookiesForUrl(actualUrl)
+                    .orEmpty()
             if (callback.invoke(cookies.joinToString("; ") { "${it.name}=${it.value}" })) {
                 onBack.invoke()
                 break

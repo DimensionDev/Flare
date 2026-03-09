@@ -11,17 +11,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil3.PlatformContext
@@ -87,6 +91,7 @@ import dev.dimension.flare.settings_ai_config_model_no_models
 import dev.dimension.flare.settings_ai_config_model_select
 import dev.dimension.flare.settings_ai_config_server
 import dev.dimension.flare.settings_ai_config_server_hint
+import dev.dimension.flare.settings_ai_config_server_url_requirement
 import dev.dimension.flare.settings_ai_config_title
 import dev.dimension.flare.settings_ai_config_tldr_description
 import dev.dimension.flare.settings_ai_config_tldr_prompt
@@ -178,7 +183,10 @@ import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.FluentTheme
+import io.github.composefluent.component.AutoSuggestBoxDefaults
+import io.github.composefluent.component.AutoSuggestionBox
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.CardExpanderItem
 import io.github.composefluent.component.ContentDialog
@@ -189,6 +197,7 @@ import io.github.composefluent.component.ExpanderItem
 import io.github.composefluent.component.ExpanderItemSeparator
 import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.HyperlinkButton
+import io.github.composefluent.component.ListItem
 import io.github.composefluent.component.MenuFlyout
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
@@ -197,7 +206,10 @@ import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
@@ -205,6 +217,7 @@ import org.koin.compose.koinInject
 import java.io.File
 import java.util.Locale
 
+@OptIn(ExperimentalFluentApi::class)
 @Composable
 internal fun SettingsScreen(
     toLogin: () -> Unit,
@@ -989,11 +1002,20 @@ internal fun SettingsScreen(
             Header(stringResource(Res.string.settings_ai_config_title))
             state.aiConfigState.textEditDialog?.let { dialog ->
                 val textState = rememberTextFieldState()
+                var isSuggestionExpanded by remember(dialog) { mutableStateOf(false) }
                 LaunchedEffect(dialog) {
                     textState.edit {
                         replace(0, length, dialog.value)
                     }
                 }
+                val filteredSuggestions by remember(dialog) {
+                    snapshotFlow { textState.text.toString() }
+                        .map { query ->
+                            dialog.suggestions.filter { item ->
+                                query.isBlank() || item.contains(query, ignoreCase = true)
+                            }
+                        }
+                }.collectAsState(dialog.suggestions)
                 ContentDialog(
                     title = dialog.title,
                     visible = true,
@@ -1007,10 +1029,51 @@ internal fun SettingsScreen(
                                 )
                                 Spacer(modifier = Modifier.size(8.dp))
                             }
-                            TextField(
-                                state = textState,
-                                modifier = Modifier.fillMaxWidth(),
-                            )
+                            if (dialog.suggestions.isEmpty()) {
+                                TextField(
+                                    state = textState,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            } else {
+                                AutoSuggestionBox(
+                                    expanded = isSuggestionExpanded,
+                                    onExpandedChange = { isSuggestionExpanded = it },
+                                ) {
+                                    TextField(
+                                        state = textState,
+                                        shape = AutoSuggestBoxDefaults.textFieldShape(isSuggestionExpanded),
+                                        modifier = Modifier.fillMaxWidth().flyoutAnchor(),
+                                        lineLimits = TextFieldLineLimits.SingleLine,
+                                    )
+                                    AutoSuggestBoxDefaults.suggestFlyout(
+                                        expanded = isSuggestionExpanded && filteredSuggestions.isNotEmpty(),
+                                        onDismissRequest = { isSuggestionExpanded = false },
+                                        itemsContent = {
+                                            items(filteredSuggestions) { item ->
+                                                ListItem(
+                                                    onClick = {
+                                                        textState.edit {
+                                                            replace(0, length, item)
+                                                        }
+                                                        isSuggestionExpanded = false
+                                                    },
+                                                    text = { Text(item, maxLines = 1) },
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                )
+                                            }
+                                        },
+                                        modifier = Modifier.flyoutSize(matchAnchorWidth = true),
+                                    )
+                                }
+                            }
+                            if (dialog.hint.isNotBlank()) {
+                                Spacer(modifier = Modifier.size(8.dp))
+                                Text(
+                                    dialog.hint,
+                                    style = FluentTheme.typography.caption,
+                                    color = FluentTheme.colors.text.text.secondary,
+                                )
+                            }
                         }
                     },
                     primaryButtonText = stringResource(Res.string.ok),
@@ -1063,6 +1126,7 @@ internal fun SettingsScreen(
             ) {
                 val serverTitle = stringResource(Res.string.settings_ai_config_server)
                 val serverHint = stringResource(Res.string.settings_ai_config_server_hint)
+                val serverRequirementHint = stringResource(Res.string.settings_ai_config_server_url_requirement)
                 val apiKeyTitle = stringResource(Res.string.settings_ai_config_api_key)
                 val apiKeyHint = stringResource(Res.string.settings_ai_config_api_key_hint)
                 val translatePromptTitle = stringResource(Res.string.settings_ai_config_translate_prompt)
@@ -1143,6 +1207,8 @@ internal fun SettingsScreen(
                                                 title = serverTitle,
                                                 placeholder = serverHint,
                                                 value = openAITypeForDisplay.serverUrl,
+                                                suggestions = state.aiConfigState.serverSuggestions,
+                                                hint = serverRequirementHint,
                                                 onConfirm = { newValue ->
                                                     state.aiConfigState.update {
                                                         val currentType = type as? AppSettings.AiConfig.Type.OpenAI
@@ -1697,6 +1763,7 @@ private fun aiConfigPresenter() =
             val aiConfig = state.aiConfig
             val openAIModels = state.openAIModels
             val supportedTypes = state.supportedTypes
+            val serverSuggestions = state.serverSuggestions
             val expanded = expanded
             val showTypeDropdown = showTypeDropdown
             val showModelDropdown = showModelDropdown
@@ -1732,5 +1799,7 @@ private data class TextEditDialogState(
     val title: String,
     val placeholder: String,
     val value: String,
+    val suggestions: ImmutableList<String> = persistentListOf(),
+    val hint: String = "",
     val onConfirm: (String) -> Unit,
 )

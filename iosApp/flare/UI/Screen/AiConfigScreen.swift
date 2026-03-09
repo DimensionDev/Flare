@@ -217,6 +217,28 @@ struct AiConfigScreen: View {
                         } else {
                             TextField(fieldPlaceholder(field: field), text: $editingText)
                         }
+                    } footer: {
+                        if field == .serverUrl {
+                            Text(serverUrlHint)
+                                .font(.footnote)
+                        }
+                    }
+                    if field == .serverUrl {
+                        let suggestions = filteredServerSuggestions(query: editingText)
+                        if !suggestions.isEmpty {
+                            Section("Suggestions") {
+                                ForEach(suggestions, id: \.self) { suggestion in
+                                    Button {
+                                        editingText = suggestion
+                                    } label: {
+                                        Text(suggestion)
+                                            .font(.callout.monospaced())
+                                            .lineLimit(1)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
                     }
                 }
                 .navigationTitle(fieldTitle(field: field))
@@ -260,7 +282,7 @@ struct AiConfigScreen: View {
         }
     }
 
-    private func aiTypeTitle(type: any AppSettingsAiConfigType) -> String {
+    private func aiTypeTitle(type: any AppSettingsAiConfigType) -> LocalizedStringResource {
         aiTypeOptionTitle(option: aiTypeOption(type: type))
     }
 
@@ -273,7 +295,7 @@ struct AiConfigScreen: View {
         }
     }
 
-    private func aiTypeOptionTitle(option: AiTypeOption) -> String {
+    private func aiTypeOptionTitle(option: AiTypeOption) -> LocalizedStringResource {
         switch option {
         case .onDevice:
             return "On Device"
@@ -283,11 +305,28 @@ struct AiConfigScreen: View {
     }
 
     private func displayText(_ value: String) -> String {
-        value.isEmpty ? "Not set" : value
+        value.isEmpty ? String(localized: "Not set") : value
     }
 
     private func displayModelText(_ value: String) -> String {
-        value.isEmpty ? "Select model" : value
+        value.isEmpty ? String(localized: "Select model") : value
+    }
+
+    private var serverUrlHint: LocalizedStringResource {
+        "Server URL must end with '/' and support the OpenAI-compatible v1/chat/completions API."
+    }
+
+    private var serverSuggestions: [String] {
+        (presenter.state.serverSuggestions as NSArray).cast(NSString.self).map(String.init)
+    }
+
+    private func filteredServerSuggestions(query: String) -> [String] {
+        if query.isEmpty {
+            return serverSuggestions
+        }
+        return serverSuggestions.filter {
+            $0.localizedCaseInsensitiveContains(query)
+        }
     }
 
     private func beginEditing(field: EditableField, value: String) {
@@ -295,7 +334,7 @@ struct AiConfigScreen: View {
         editingField = field
     }
 
-    private func fieldTitle(field: EditableField) -> String {
+    private func fieldTitle(field: EditableField) -> LocalizedStringResource {
         switch field {
         case .serverUrl:
             return "Server URL"

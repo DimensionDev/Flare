@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -47,6 +51,8 @@ import dev.dimension.flare.ui.theme.item
 import dev.dimension.flare.ui.theme.last
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.single
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,6 +86,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
         ) {
             val serverTitle = stringResource(id = R.string.settings_ai_config_server)
             val serverHint = stringResource(id = R.string.settings_ai_config_server_hint)
+            val serverRequirementHint = stringResource(id = R.string.settings_ai_config_server_url_requirement)
             val apiKeyTitle = stringResource(id = R.string.settings_ai_config_api_key)
             val apiKeyHint = stringResource(id = R.string.settings_ai_config_api_key_hint)
             val translatePromptTitle = stringResource(id = R.string.settings_ai_config_translate_prompt)
@@ -112,7 +119,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     )
                 },
                 trailingContent = {
-                    Box {
+                    androidx.compose.foundation.layout.Box {
                         TextButton(
                             onClick = {
                                 state.setShowTypeDropdown(true)
@@ -173,6 +180,8 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                                     title = serverTitle,
                                     placeholder = serverHint,
                                     value = openAITypeForDisplay.serverUrl,
+                                    suggestions = state.serverSuggestions,
+                                    hint = serverRequirementHint,
                                     onConfirm = { newValue ->
                                         state.update {
                                             val currentType = type as? AppSettings.AiConfig.Type.OpenAI
@@ -469,6 +478,8 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
             title = dialog.title,
             placeholder = dialog.placeholder,
             value = dialog.value,
+            suggestions = dialog.suggestions,
+            hint = dialog.hint,
             onDismiss = {
                 state.setTextEditDialog(null)
             },
@@ -492,6 +503,7 @@ private fun presenter() =
             val aiConfig = businessState.aiConfig
             val openAIModels = businessState.openAIModels
             val supportedTypes = businessState.supportedTypes
+            val serverSuggestions = businessState.serverSuggestions
             val showTypeDropdown = showTypeDropdown
             val showModelDropdown = showModelDropdown
             val textEditDialog = textEditDialog
@@ -523,6 +535,8 @@ private data class TextEditDialogState(
     val title: String,
     val placeholder: String,
     val value: String,
+    val suggestions: ImmutableList<String> = persistentListOf(),
+    val hint: String = "",
     val onConfirm: (String) -> Unit,
 )
 
@@ -533,33 +547,97 @@ private enum class AiConfigEditField {
     TldrPrompt,
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TextEditDialog(
     title: String,
     placeholder: String,
     value: String,
+    suggestions: ImmutableList<String>,
+    hint: String,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit,
 ) {
     var text by remember(value) { mutableStateOf(value) }
+    var showSuggestions by remember(value) { mutableStateOf(false) }
+    val filteredSuggestions =
+        remember(text, suggestions) {
+            suggestions.filter { item ->
+                text.isBlank() || item.contains(text, ignoreCase = true)
+            }
+        }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(text = title)
         },
         text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = {
-                    text = it
-                },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = {
-                    if (placeholder.isNotBlank()) {
-                        Text(text = placeholder)
+            Column {
+                if (suggestions.isEmpty()) {
+                    OutlinedTextField(
+                        value = text,
+                        onValueChange = {
+                            text = it
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = {
+                            if (placeholder.isNotBlank()) {
+                                Text(text = placeholder)
+                            }
+                        },
+                    )
+                } else {
+                    ExposedDropdownMenuBox(
+                        expanded = showSuggestions && filteredSuggestions.isNotEmpty(),
+                        onExpandedChange = { showSuggestions = it },
+                    ) {
+                        OutlinedTextField(
+                            value = text,
+                            onValueChange = {
+                                text = it
+                                showSuggestions = true
+                            },
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
+                            placeholder = {
+                                if (placeholder.isNotBlank()) {
+                                    Text(text = placeholder)
+                                }
+                            },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(
+                                    expanded = showSuggestions && filteredSuggestions.isNotEmpty(),
+                                )
+                            },
+                        )
+                        ExposedDropdownMenu(
+                            expanded = showSuggestions && filteredSuggestions.isNotEmpty(),
+                            onDismissRequest = { showSuggestions = false },
+                            modifier = Modifier.heightIn(max = 240.dp),
+                        ) {
+                            filteredSuggestions.forEach { item ->
+                                DropdownMenuItem(
+                                    text = { Text(item) },
+                                    onClick = {
+                                        text = item
+                                        showSuggestions = false
+                                    },
+                                )
+                            }
+                        }
                     }
-                },
-            )
+                }
+                if (hint.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = hint,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(text) }) {

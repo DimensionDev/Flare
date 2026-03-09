@@ -48,6 +48,7 @@ public class AiConfigPresenter :
         public val aiConfig: AppSettings.AiConfig
         public val openAIModels: UiState<ImmutableList<String>>
         public val supportedTypes: ImmutableList<AiTypeOption>
+        public val serverSuggestions: ImmutableList<String>
 
         public fun update(block: AppSettings.AiConfig.() -> AppSettings.AiConfig)
 
@@ -131,6 +132,7 @@ public class AiConfigPresenter :
             override val aiConfig: AppSettings.AiConfig = aiConfig
             override val openAIModels: UiState<ImmutableList<String>> = openAIModels
             override val supportedTypes: ImmutableList<AiTypeOption> = supportedTypes
+            override val serverSuggestions: ImmutableList<String> = SERVER_SUGGESTIONS
 
             override fun update(block: AppSettings.AiConfig.() -> AppSettings.AiConfig) {
                 scope.launch {
@@ -164,3 +166,20 @@ public class AiConfigPresenter :
         }
     }
 }
+
+private val SERVER_SUGGESTIONS =
+    persistentListOf(
+        "https://api.openai.com/v1/",
+        "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "https://openrouter.ai/api/v1/",
+        "https://api.x.ai/v1/",
+        "https://dashscope.aliyuncs.com/compatible-mode/v1/",
+        "https://open.bigmodel.cn/api/paas/v4/",
+        "https://api.moonshot.cn/v1/",
+        "https://api.siliconflow.cn/v1/",
+        "https://api.minimaxi.com/v1/",
+        "https://api.groq.com/openai/v1/",
+        "https://api.together.xyz/v1/",
+        "https://api.deepseek.com/v1/",
+        "https://api.fireworks.ai/inference/v1/",
+    )

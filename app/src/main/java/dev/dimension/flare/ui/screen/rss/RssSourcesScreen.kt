@@ -39,6 +39,8 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
+import java.io.OutputStream
+import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -133,10 +135,10 @@ private fun presenter(context: Context) =
                 scope.launch {
                     runCatching {
                         exportPresenter.export()
-                    }.getOrNull().let {
-                        if (it != null) {
-                            context.contentResolver.openOutputStream(uri)?.use {
-                                it.write(it.toString().toByteArray())
+                    }.getOrNull().let { opmlContent ->
+                        if (opmlContent != null) {
+                            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                                writeOpmlToStream(outputStream, opmlContent)
                             }
                         }
                     }
@@ -146,3 +148,10 @@ private fun presenter(context: Context) =
             }
         }
     }
+
+internal fun writeOpmlToStream(
+    outputStream: OutputStream,
+    opmlContent: String,
+) {
+    outputStream.write(opmlContent.toByteArray(StandardCharsets.UTF_8))
+}

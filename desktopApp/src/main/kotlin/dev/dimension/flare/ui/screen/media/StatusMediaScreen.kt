@@ -107,6 +107,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import me.saket.telephoto.ExperimentalTelephotoApi
+import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.HardwareShortcutsSpec
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.ZoomableContentLocation
@@ -119,6 +120,7 @@ import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import java.awt.FileDialog
+import kotlin.math.max
 import kotlin.math.roundToLong
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.nanoseconds
@@ -517,6 +519,24 @@ internal fun ImageItem(
             zoomableState.contentScale = ContentScale.Fit
         }
     }
+    val onDoubleClick =
+        remember(zoomableState) {
+            DoubleClickToZoomListener { state, centroid ->
+                val transformation = state.contentTransformation.takeIf { it.isSpecified } ?: return@DoubleClickToZoomListener
+                val isZoomedIn = transformation.scaleMetadata.userZoom > 1.01f
+                if (isZoomedIn) {
+                    state.zoomTo(
+                        zoomFactor =
+                            max(
+                                transformation.scaleMetadata.initialScale.scaleX,
+                                transformation.scaleMetadata.initialScale.scaleY,
+                            ),
+                    )
+                } else {
+                    state.zoomTo(zoomFactor = 3f, centroid = centroid)
+                }
+            }
+        }
 
     val state by painter.state.collectAsState()
     Box(
@@ -535,6 +555,7 @@ internal fun ImageItem(
                         onClick = {
                             onClick?.invoke()
                         },
+                        onDoubleClick = onDoubleClick,
                     ).then(FlareHardwareShortcutsElement(zoomableState))
                     .focusable(),
             contentScale = ContentScale.Fit,

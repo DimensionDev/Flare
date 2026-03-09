@@ -43,12 +43,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -71,6 +72,7 @@ import dev.dimension.flare.data.model.SettingsTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.InAppNotificationComponent
@@ -85,12 +87,14 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isError
 import dev.dimension.flare.ui.model.isSuccess
+import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTabsPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.AllNotificationBadgePresenter
+import dev.dimension.flare.ui.presenter.home.DeepLinkPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
@@ -108,38 +112,26 @@ import moe.tlaster.precompose.molecule.producePresenter
 )
 @Composable
 internal fun HomeScreen(afterInit: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    val state by producePresenter { presenter() }
+    val uriHandler = LocalUriHandler.current
+    val state by producePresenter { presenter(uriHandler = uriHandler) }
     val hapticFeedback = LocalHapticFeedback.current
-    val wideNavigationRailState = rememberWideNavigationRailState()
     state.tabs
         .onSuccess { tabs ->
-            val topLevelBackStack =
-                retain(
-                    "home_top_level_back_stack_${tabs.all.first().key}",
+            val currentRoute =
+                remember(
+                    tabs,
+                    state.topLevelBackStack.takeSuccess()?.topLevelKey,
                 ) {
-                    TopLevelBackStack(
-                        getDirection(tabs.all.first()),
-                    )
+                    state.topLevelBackStack.takeSuccess()?.topLevelKey ?: getDirection(tabs.all.first())
                 }
-
-            val topLevelBackStackState by rememberUpdatedState(topLevelBackStack)
-
-            val navigate =
-                remember(topLevelBackStack, wideNavigationRailState) {
-                    { route: Route ->
-                        topLevelBackStack.addTopLevel(route)
-                        scope.launch {
-                            wideNavigationRailState.collapse()
-                        }
-                        Unit
-                    }
-                }
-
-            val currentRoute = topLevelBackStack.topLevelKey
             val accountType = currentRoute.accountTypeOr(state.defaultAccountType)
             val userState by producePresenter(key = "home_account_type_$accountType") {
                 userPresenter(accountType)
+            }
+            OnNewIntent(
+                withOnCreateIntent = true,
+            ) {
+                it.dataString?.let { url -> state.deeplinkPresenter.handle(url) }
             }
             LaunchedEffect(Unit) {
                 afterInit.invoke()
@@ -150,13 +142,16 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 )
             Box {
                 NavigationSuiteScaffold2(
-                    wideNavigationRailState = wideNavigationRailState,
+                    wideNavigationRailState = state.wideNavigationRailState,
                     modifier = Modifier.fillMaxSize(),
                     bottomBarAutoHideEnabled = state.navigationState.bottomBarAutoHideEnabled,
                     layoutType = layoutType,
-                    showFab = userState.isSuccess && accountType !is AccountType.Guest && topLevelBackStack.currentKey is Route.Home,
+                    showFab =
+                        userState.isSuccess &&
+                            accountType !is AccountType.Guest &&
+                            state.topLevelBackStack.takeSuccess()?.currentKey is Route.Home,
                     onFabClicked = {
-                        navigate(Route.Compose.New(accountType))
+                        state.navigate(Route.Compose.New(accountType))
                     },
                     navigationSuiteColors =
                         NavigationSuiteDefaults.colors(
@@ -164,12 +159,12 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         ),
                     railHeader = {
                         HomeRailHeader(
-                            wideNavigationRailState,
+                            state.wideNavigationRailState,
                             userState,
                             layoutType,
                             currentRoute,
                             state.defaultAccountType,
-                            navigate,
+                            state::navigate,
                         )
                     },
                     navigationSuiteItems = {
@@ -180,7 +175,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                     if (currentRoute == getDirection(tab)) {
                                         state.scrollToTopRegistry.scrollToTop()
                                     } else {
-                                        navigate(getDirection(tab))
+                                        state.navigate(getDirection(tab))
                                     }
                                 },
                                 icon = {
@@ -213,7 +208,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                             hapticFeedback.performHapticFeedback(
                                                 HapticFeedbackType.LongPress,
                                             )
-                                            navigate(Route.AccountSelection)
+                                            state.navigate(Route.AccountSelection)
                                         }
                                     } else {
                                         null
@@ -229,7 +224,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                     if (currentRoute == getDirection(tab)) {
                                         state.scrollToTopRegistry.scrollToTop()
                                     } else {
-                                        navigate(getDirection(tab))
+                                        state.navigate(getDirection(tab))
                                     }
                                 },
                                 icon = {
@@ -265,7 +260,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                             item(
                                 selected = currentRoute is Route.Settings.Main,
                                 onClick = {
-                                    navigate(Route.Settings.Main)
+                                    state.navigate(Route.Settings.Main)
                                 },
                                 icon = {
                                     FAIcon(
@@ -281,22 +276,26 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                     },
                 ) {
                     CompositionLocalProvider(
+                        LocalUriHandler provides
+                            remember {
+                                object : UriHandler {
+                                    override fun openUri(uri: String) {
+                                        state.deeplinkPresenter.handle(uri)
+                                    }
+                                }
+                            },
                         LocalScrollToTopRegistry provides state.scrollToTopRegistry,
                     ) {
                         Router(
-                            backStack = topLevelBackStack.backStack,
+                            backStack =
+                                state.topLevelBackStack.takeSuccess()?.backStack
+                                    ?: remember { androidx.compose.runtime.mutableStateListOf(currentRoute) },
                             navigationState = state.navigationState,
                             openDrawer = {
-                                scope.launch {
-                                    wideNavigationRailState.toggle()
-                                }
+                                state.openDrawer()
                             },
-                            navigate = {
-                                topLevelBackStackState.add(it)
-                            },
-                            onBack = {
-                                topLevelBackStackState.removeLast()
-                            },
+                            navigate = state::navigate,
+                            onBack = state::goBack,
                         )
                     }
                 }
@@ -543,13 +542,14 @@ private fun getDirection(
     }
 
 @Composable
-private fun presenter() =
+private fun presenter(uriHandler: UriHandler) =
     run {
         val activeAccountState = remember { ActiveAccountPresenter() }.invoke()
         val navigationState =
             remember {
                 NavigationState()
             }
+        val wideNavigationRailState = rememberWideNavigationRailState()
         val tabs =
             remember {
                 HomeTabsPresenter()
@@ -562,18 +562,98 @@ private fun presenter() =
             remember {
                 AllNotificationBadgePresenter()
             }.invoke()
+        val firstDirection =
+            remember(tabs.tabs) {
+                tabs.tabs.map {
+                    getDirection(it.all.first())
+                }
+            }
+        val topLevelBackStack =
+            remember(firstDirection) {
+                firstDirection.map {
+                    TopLevelBackStack(it)
+                }
+            }
+        val topLevelRoutes =
+            remember(tabs.tabs) {
+                tabs.tabs.map { state ->
+                    state.all.map { getDirection(it) }.toSet()
+                }
+            }
+        val scope = rememberCoroutineScope()
+        val deeplinkPresenter =
+            remember(topLevelBackStack, topLevelRoutes) {
+                DeepLinkPresenter(
+                    onRoute = {
+                        val route = Route.from(it)
+                        if (route != null) {
+                            navigate(
+                                route = route,
+                                topLevelBackStack = topLevelBackStack.takeSuccess(),
+                                topLevelRoutes = topLevelRoutes.takeSuccess(),
+                                wideNavigationRailState = wideNavigationRailState,
+                                scope = scope,
+                            )
+                        }
+                    },
+                    onLink = {
+                        uriHandler.openUri(it)
+                    },
+                )
+            }.invoke()
         object {
             val notificationState = notificationState
             val tabs = tabs.tabs
             val navigationState = navigationState
             val scrollToTopRegistry = scrollToTopRegistry
+            val deeplinkPresenter = deeplinkPresenter
+            val topLevelBackStack = topLevelBackStack
+            val wideNavigationRailState = wideNavigationRailState
             val defaultAccountType: AccountType =
                 activeAccountState.user
                     .takeSuccess()
                     ?.let { AccountType.Specific(it.key) }
                     ?: AccountType.Guest
+
+            fun navigate(route: Route) {
+                navigate(
+                    route = route,
+                    topLevelBackStack = topLevelBackStack.takeSuccess(),
+                    topLevelRoutes = topLevelRoutes.takeSuccess(),
+                    wideNavigationRailState = wideNavigationRailState,
+                    scope = scope,
+                )
+            }
+
+            fun goBack() {
+                topLevelBackStack.takeSuccess()?.removeLast()
+            }
+
+            fun openDrawer() {
+                scope.launch {
+                    wideNavigationRailState.toggle()
+                }
+            }
         }
     }
+
+private fun navigate(
+    route: Route,
+    topLevelBackStack: TopLevelBackStack<Route>?,
+    topLevelRoutes: Set<Route>?,
+    wideNavigationRailState: WideNavigationRailState,
+    scope: kotlinx.coroutines.CoroutineScope,
+) {
+    if (topLevelBackStack == null) return
+    if (topLevelRoutes?.contains(route) == true) {
+        topLevelBackStack.addTopLevel(route)
+    } else {
+        topLevelBackStack.add(route)
+    }
+    scope.launch {
+        wideNavigationRailState.collapse()
+    }
+}
 
 @Composable
 private fun userPresenter(accountType: AccountType) =

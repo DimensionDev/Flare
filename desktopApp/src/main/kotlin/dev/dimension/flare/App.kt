@@ -30,7 +30,6 @@ import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.retain.retain
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -60,8 +59,10 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabTitle
+import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.HomeTabsPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.AllNotificationBadgePresenter
@@ -79,66 +80,28 @@ import io.github.composefluent.component.Button
 import io.github.composefluent.component.Icon
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
-    val state by producePresenter { presenter() }
     val uriHandler = LocalUriHandler.current
+    val state by producePresenter { presenter(uriHandler = uriHandler) }
     state.tabs.onSuccess { tabs ->
-        val topLevelBackStack =
-            retain(
-                "home_top_level_back_stack_${tabs.all.first().key}",
-            ) {
-                TopLevelBackStack(
-                    getRoute(tabs.all.first()),
-                    topLevelRoutes = tabs.all.map { getRoute(it) },
-                )
-            }
-
-        val currentRoute = topLevelBackStack.currentRoute
-
-        fun navigate(route: Route) {
-            when (route) {
-                is Route.UrlRoute -> {
-                    uriHandler.openUri(route.url)
-                }
-
-                else -> {
-                    topLevelBackStack.push(route)
+        state.topLevelBackStack.onSuccess { topLevelBackStack ->
+            LaunchedEffect(topLevelBackStack) {
+                backButtonState.attach {
+                    state.goBack()
                 }
             }
-        }
 
-        fun goBack() {
-            topLevelBackStack.pop()
-        }
-
-        LaunchedEffect(topLevelBackStack) {
-            backButtonState.attach {
-                goBack()
+            LaunchedEffect(topLevelBackStack.canGoBack) {
+                backButtonState.update(topLevelBackStack.canGoBack)
             }
         }
-
-        LaunchedEffect(topLevelBackStack.canGoBack) {
-            backButtonState.update(topLevelBackStack.canGoBack)
-        }
-
-        val deeplinkPresenter by producePresenter("deeplink_presenter") {
-            DeepLinkPresenter(
-                onRoute = {
-                    val route = Route.from(it)
-                    if (route != null) {
-                        navigate(route)
-                    }
-                },
-                onLink = {
-                    uriHandler.openUri(it)
-                },
-            ).invoke()
-        }
+        val currentRoute = state.topLevelBackStack.takeSuccess()?.currentRoute
 
         Row {
             Column(
@@ -155,7 +118,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                     .onSuccess { user ->
                         SubtleButton(
                             onClick = {
-                                navigate(Route.MeRoute(AccountType.Specific(user.key)))
+                                state.navigate(Route.MeRoute(AccountType.Specific(user.key)))
                             },
                         ) {
                             Column(
@@ -175,7 +138,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = {
-                                navigate(
+                                state.navigate(
                                     Route.Compose.New(
                                         accountType = AccountType.Specific(user.key),
                                     ),
@@ -196,7 +159,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                     }.onError {
                         Button(
                             onClick = {
-                                navigate(Route.ServiceSelect)
+                                state.navigate(Route.ServiceSelect)
                             },
                             modifier =
                                 Modifier
@@ -236,7 +199,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                             if (selected) {
                                 state.scrollToTopRegistry.scrollToTop()
                             } else {
-                                navigate(getRoute(tab))
+                                state.navigate(getRoute(tab))
                             }
                         },
                         icon = {
@@ -309,7 +272,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                             )
                         },
                         onClick = {
-                            navigate(Route.Settings)
+                            state.navigate(Route.Settings)
                         },
                     )
                 }
@@ -319,7 +282,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                     remember {
                         object : UriHandler {
                             override fun openUri(uri: String) {
-                                deeplinkPresenter.handle(uri)
+                                state.deeplinkPresenter.handle(uri)
                             }
                         }
                     },
@@ -333,19 +296,12 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                 ) {
                     Box {
                         Router(
-                            backStack = topLevelBackStack.stack,
-                            navigate = { route -> navigate(route) },
-                            onBack = { goBack() },
+                            backStack =
+                                state.topLevelBackStack.takeSuccess()?.stack
+                                    ?: persistentListOf(),
+                            navigate = { route -> state.navigate(route) },
+                            onBack = { state.goBack() },
                         )
-//                        if (topLevelBackStack.canGoBack) {
-//                            NavigationDefaults.BackButton(
-//                                onClick = {
-//                                    goBack()
-//                                },
-//                                disabled = !topLevelBackStack.canGoBack,
-//                                modifier = Modifier.align(Alignment.TopStart),
-//                            )
-//                        }
                         InAppNotificationComponent(
                             modifier =
                                 Modifier
@@ -422,7 +378,7 @@ private fun getRoute(tab: TabItem): Route =
     }
 
 @Composable
-private fun presenter() =
+private fun presenter(uriHandler: UriHandler) =
     run {
         val accountState = remember { ActiveAccountPresenter() }.invoke()
         val tabState = remember { HomeTabsPresenter() }.invoke()
@@ -431,9 +387,59 @@ private fun presenter() =
             remember {
                 ScrollToTopRegistry()
             }
+        val topLevelBackStack =
+            remember(tabState.tabs) {
+                tabState.tabs.map {
+                    TopLevelBackStack(
+                        getRoute(it.all.first()),
+                        topLevelRoutes = it.all.map { getRoute(it) },
+                    )
+                }
+            }
+        val deeplinkPresenter =
+            remember(topLevelBackStack) {
+                DeepLinkPresenter(
+                    onRoute = {
+                        val route = Route.from(it)
+                        if (route != null) {
+                            when (route) {
+                                is Route.UrlRoute -> {
+                                    uriHandler.openUri(route.url)
+                                }
+
+                                else -> {
+                                    topLevelBackStack.takeSuccess()?.push(route)
+                                }
+                            }
+                        }
+                    },
+                    onLink = {
+                        uriHandler.openUri(it)
+                    },
+                )
+            }.invoke()
+
         object : UserState by accountState, HomeTabsPresenter.State by tabState {
             val notificationState = allNotificationState
             val scrollToTopRegistry = scrollToTopRegistry
+            val deeplinkPresenter = deeplinkPresenter
+            val topLevelBackStack = topLevelBackStack
+
+            fun navigate(route: Route) {
+                when (route) {
+                    is Route.UrlRoute -> {
+                        uriHandler.openUri(route.url)
+                    }
+
+                    else -> {
+                        topLevelBackStack.takeSuccess()?.push(route)
+                    }
+                }
+            }
+
+            fun goBack() {
+                topLevelBackStack.takeSuccess()?.pop()
+            }
         }
     }
 

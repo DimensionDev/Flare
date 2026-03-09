@@ -1,24 +1,44 @@
 package dev.dimension.flare.common
 
+import androidx.compose.animation.core.SnapSpec
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.KeyInputModifierNode
 import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerEvent
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isAltPressed
 import androidx.compose.ui.input.pointer.isCtrlPressed
 import androidx.compose.ui.input.pointer.isMetaPressed
 import androidx.compose.ui.input.pointer.isShiftPressed
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.PointerInputModifierNode
+import androidx.compose.ui.node.requireDensity
+import androidx.compose.ui.platform.InspectorInfo
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFold
 import androidx.compose.ui.util.fastForEach
+import kotlinx.coroutines.launch
+import me.saket.telephoto.ExperimentalTelephotoApi
 import me.saket.telephoto.zoomable.HardwareShortcutDetector
 import me.saket.telephoto.zoomable.HardwareShortcutDetector.ShortcutEvent
 import me.saket.telephoto.zoomable.HardwareShortcutDetector.ShortcutEvent.PanDirection
 import me.saket.telephoto.zoomable.HardwareShortcutDetector.ShortcutEvent.ZoomDirection
+import me.saket.telephoto.zoomable.Viewport
+import me.saket.telephoto.zoomable.ZoomableState
+import me.saket.telephoto.zoomable.spatial.CoordinateSpace
 import org.apache.commons.lang3.SystemUtils
 import kotlin.math.absoluteValue
 
@@ -125,4 +145,123 @@ internal object FlareHardwareShortcutDetector : HardwareShortcutDetector {
             else -> centroid / centroidWeight
         }
     }
+}
+
+/** Responds to keyboard and mouse events to zoom and pan. */
+internal data class FlareHardwareShortcutsElement(
+    private val state: ZoomableState,
+) : ModifierNodeElement<FlareHardwareShortcutsNode>() {
+    override fun create(): FlareHardwareShortcutsNode = FlareHardwareShortcutsNode(state)
+
+    override fun update(node: FlareHardwareShortcutsNode) {
+        node.state = state
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "hardwareShortcuts"
+    }
+}
+
+internal class FlareHardwareShortcutsNode(
+    var state: ZoomableState,
+    val shortcutDetector: HardwareShortcutDetector = FlareHardwareShortcutDetector,
+) : Modifier.Node(),
+    KeyInputModifierNode,
+    PointerInputModifierNode {
+    val canPan: () -> Boolean = {
+        state.contentAlignment == Alignment.TopCenter ||
+            state.contentTransformation.scaleMetadata.userZoom > 1f
+    }
+    val onZoom: (factor: Float, centroid: Offset) -> Unit = { factor, centroid ->
+        coroutineScope.launch {
+            state.zoomBy(
+                zoomFactor = factor,
+                centroid = centroid,
+                animationSpec = SnapSpec(),
+            )
+        }
+    }
+    val onPan: (delta: DpOffset) -> Unit = { delta ->
+        coroutineScope.launch {
+            state.panBy(
+                offset =
+                    with(requireDensity()) {
+                        Offset(x = delta.x.toPx(), y = delta.y.toPx())
+                    },
+                animationSpec = SnapSpec(),
+            )
+        }
+    }
+
+    override fun onKeyEvent(event: KeyEvent): Boolean {
+        if (event.type == KeyEventType.KeyDown) {
+            val shortcut = shortcutDetector.detectKey(event)
+            shortcut?.let(::handleShortcut)
+            return shortcut != null
+        } else {
+            return false
+        }
+    }
+
+    override fun onPointerEvent(
+        pointerEvent: PointerEvent,
+        pass: PointerEventPass,
+        bounds: IntSize,
+    ) {
+        if (
+            pointerEvent.type == PointerEventType.Scroll &&
+            pass == PointerEventPass.Main &&
+            pointerEvent.changes.fastAny { !it.isConsumed }
+        ) {
+            val shortcut = shortcutDetector.detectScroll(pointerEvent)
+            if (shortcut != null) {
+                handleShortcut(shortcut, pointerEvent)
+            }
+        }
+    }
+
+    @OptIn(ExperimentalTelephotoApi::class)
+    private fun handleShortcut(
+        shortcut: ShortcutEvent,
+        pointerEvent: PointerEvent? = null,
+    ) {
+        when (shortcut) {
+            is ShortcutEvent.Zoom -> {
+                when (shortcut.direction) {
+                    ShortcutEvent.ZoomDirection.In -> onZoom(1f + shortcut.zoomFactor, shortcut.centroid)
+                    ShortcutEvent.ZoomDirection.Out -> onZoom(1f - shortcut.zoomFactor, shortcut.centroid)
+                }
+            }
+            is ShortcutEvent.Pan -> {
+                if (canPan()) {
+                    with(state.coordinateSystem) {
+                        val rect = unscaledContentBounds(false).rectIn(CoordinateSpace.Viewport)
+                        val rectInViewport = state.coordinateSystem.unscaledContentBounds(true).rectIn(CoordinateSpace.Viewport)
+                        val canPanHorizontally = rect.width > rectInViewport.width
+                        val canPanVertically = rect.height > rectInViewport.height
+                        if ((shortcut.direction == PanDirection.Left || shortcut.direction == PanDirection.Right) && !canPanHorizontally) {
+                            return
+                        }
+                        if ((shortcut.direction == PanDirection.Up || shortcut.direction == PanDirection.Down) && !canPanVertically) {
+                            return
+                        }
+                    }
+
+                    val offset =
+                        when (shortcut.direction) {
+                            ShortcutEvent.PanDirection.Up -> DpOffset(x = 0.dp, y = shortcut.panOffset)
+                            ShortcutEvent.PanDirection.Down -> DpOffset(x = 0.dp, y = -shortcut.panOffset)
+                            ShortcutEvent.PanDirection.Left -> DpOffset(x = shortcut.panOffset, y = 0.dp)
+                            ShortcutEvent.PanDirection.Right -> DpOffset(x = -shortcut.panOffset, y = 0.dp)
+                        }
+                    onPan(offset)
+                    pointerEvent?.changes?.fastForEach { it.consume() }
+                }
+            }
+        }
+    }
+
+    override fun onPreKeyEvent(event: KeyEvent): Boolean = false
+
+    override fun onCancelPointerInput() = Unit
 }

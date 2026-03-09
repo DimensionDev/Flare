@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +26,7 @@ import dev.dimension.flare.settings_app_logging_clear
 import dev.dimension.flare.settings_app_logging_enable_network_logging
 import dev.dimension.flare.settings_app_logging_save
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.DevModePresenter
 import dev.dimension.flare.ui.theme.LocalComposeWindow
@@ -47,96 +49,100 @@ import kotlin.time.ExperimentalTime
 internal fun AppLoggingScreen() {
     val window = LocalComposeWindow.current
     val state by producePresenter { presenter() }
-    LazyColumn(
-        modifier =
-            Modifier
-                .padding(horizontal = screenHorizontalPadding),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-        contentPadding = LocalWindowPadding.current,
-    ) {
-        item {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                modifier = Modifier.fillParentMaxWidth(),
-            ) {
-                SubtleButton(
-                    onClick = {
-                        FileDialog(window).apply {
-                            mode = FileDialog.SAVE
-                            file = "flare-log-${Clock.System.now().toEpochMilliseconds()}.txt"
-                            isVisible = true
-                            val dir = directory
-                            val file = file
-                            if (dir != null && file != null) {
-                                val data = state.printMessageToString()
-                                val file = File(dir, file)
-                                file.writeText(data)
+    val listState = rememberLazyListState()
+    FlareScrollBar(listState) {
+        LazyColumn(
+            state = listState,
+            modifier =
+                Modifier
+                    .padding(horizontal = screenHorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            contentPadding = LocalWindowPadding.current,
+        ) {
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                    modifier = Modifier.fillParentMaxWidth(),
+                ) {
+                    SubtleButton(
+                        onClick = {
+                            FileDialog(window).apply {
+                                mode = FileDialog.SAVE
+                                file = "flare-log-${Clock.System.now().toEpochMilliseconds()}.txt"
+                                isVisible = true
+                                val dir = directory
+                                val file = file
+                                if (dir != null && file != null) {
+                                    val data = state.printMessageToString()
+                                    val file = File(dir, file)
+                                    file.writeText(data)
+                                }
                             }
-                        }
-                    },
-                ) {
-                    FAIcon(
-                        FontAwesomeIcons.Solid.FloppyDisk,
-                        contentDescription = stringResource(Res.string.settings_app_logging_save),
-                    )
-                    Text(
-                        stringResource(Res.string.settings_app_logging_save),
-                    )
-                }
-                AccentButton(
-                    onClick = {
-                        state.clear()
-                    },
-                ) {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.Trash,
-                        contentDescription = stringResource(Res.string.settings_app_logging_clear),
-                    )
-                    Text(
-                        text = stringResource(Res.string.settings_app_logging_clear),
-                    )
+                        },
+                    ) {
+                        FAIcon(
+                            FontAwesomeIcons.Solid.FloppyDisk,
+                            contentDescription = stringResource(Res.string.settings_app_logging_save),
+                        )
+                        Text(
+                            stringResource(Res.string.settings_app_logging_save),
+                        )
+                    }
+                    AccentButton(
+                        onClick = {
+                            state.clear()
+                        },
+                    ) {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Trash,
+                            contentDescription = stringResource(Res.string.settings_app_logging_clear),
+                        )
+                        Text(
+                            text = stringResource(Res.string.settings_app_logging_clear),
+                        )
+                    }
                 }
             }
-        }
-        item {
-            Spacer(modifier = Modifier.height(6.dp))
-        }
-        item {
-            ExpanderItem(
-                heading = {
-                    Text(stringResource(Res.string.settings_app_logging_enable_network_logging))
-                },
-                trailing = {
-                    Switcher(
-                        checked = state.enabled,
-                        onCheckStateChange = {
-                            state.setEnabled(it)
-                        },
-                        textBefore = true,
-                    )
-                },
-            )
-        }
-        item {
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-        items(state.messages) { it ->
-            var isExpanded by remember { mutableStateOf(false) }
-            Expander(
-                expanded = isExpanded,
-                onExpandedChanged = {
-                    isExpanded = it
-                },
-                heading = {
-                    Text(it, maxLines = 3)
-                },
-                expandContent = {
-                    Text(
-                        it,
-                        modifier = Modifier.padding(16.dp),
-                    )
-                },
-            )
+            item {
+                Spacer(modifier = Modifier.height(6.dp))
+            }
+            item {
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_app_logging_enable_network_logging))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = state.enabled,
+                            onCheckStateChange = {
+                                state.setEnabled(it)
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+            }
+            item {
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+            items(state.messages) { it ->
+                var isExpanded by remember { mutableStateOf(false) }
+                Expander(
+                    expanded = isExpanded,
+                    onExpandedChanged = {
+                        isExpanded = it
+                    },
+                    heading = {
+                        Text(it, maxLines = 3)
+                    },
+                    expandContent = {
+                        Text(
+                            it,
+                            modifier = Modifier.padding(16.dp),
+                        )
+                    },
+                )
+            }
         }
     }
 }

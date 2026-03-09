@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.clearText
@@ -45,6 +44,7 @@ import dev.dimension.flare.more
 import dev.dimension.flare.send
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.dm.DMItem
 import dev.dimension.flare.ui.component.dm.DMLoadingItem
@@ -57,8 +57,6 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
-import io.github.composefluent.component.Scrollbar
-import io.github.composefluent.component.ScrollbarContainer
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
@@ -85,7 +83,6 @@ fun DmConversationScreen(
         focusRequester.requestFocus()
     }
     val listState = rememberLazyListState()
-    val scrollbarAdapter = rememberScrollbarAdapter(listState)
     state.items.onSuccess {
         if (listState.firstVisibleItemIndex == 0) {
             LaunchedEffect(itemCount) {
@@ -177,11 +174,9 @@ fun DmConversationScreen(
                 }
             }
         }
-        ScrollbarContainer(
-            adapter = scrollbarAdapter,
-            scrollbar = {
-                Scrollbar(true, scrollbarAdapter, reverseLayout = true)
-            },
+        FlareScrollBar(
+            state = listState,
+            reverseLayout = true,
         ) {
             LazyColumn(
                 state = listState,

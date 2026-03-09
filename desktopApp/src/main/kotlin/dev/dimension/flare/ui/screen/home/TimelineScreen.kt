@@ -34,6 +34,7 @@ import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.home_timeline_new_toots
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.presenter.TimelineItemPresenterWithLazyListState
@@ -95,18 +96,26 @@ internal fun TimelineContent(
             modifier
                 .fillMaxSize(),
     ) {
-        LazyStatusVerticalStaggeredGrid(
-            contentPadding = LocalWindowPadding.current + contentPadding,
+        FlareScrollBar(
             state = state.lazyListState,
+            scrollbarPadding =
+                PaddingValues(
+                    top = contentPadding.calculateTopPadding(),
+                ),
         ) {
-            if (header != null) {
-                item(
-                    span = StaggeredGridItemSpan.FullLine,
-                ) {
-                    header.invoke()
+            LazyStatusVerticalStaggeredGrid(
+                contentPadding = LocalWindowPadding.current + contentPadding,
+                state = state.lazyListState,
+            ) {
+                if (header != null) {
+                    item(
+                        span = StaggeredGridItemSpan.FullLine,
+                    ) {
+                        header.invoke()
+                    }
                 }
+                status(state.listState)
             }
-            status(state.listState)
         }
         AnimatedVisibility(
             state.listState.isRefreshing,
@@ -146,7 +155,14 @@ internal fun TimelineContent(
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = pluralStringResource(Res.plurals.home_timeline_new_toots, state.newPostsCount, state.newPostsCount))
+                Text(
+                    text =
+                        pluralStringResource(
+                            Res.plurals.home_timeline_new_toots,
+                            state.newPostsCount,
+                            state.newPostsCount,
+                        ),
+                )
             }
         }
     }

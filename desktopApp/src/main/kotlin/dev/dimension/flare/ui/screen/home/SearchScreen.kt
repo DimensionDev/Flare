@@ -49,6 +49,7 @@ import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.Header
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -92,170 +93,201 @@ fun SearchScreen(
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        LazyStatusVerticalStaggeredGrid(
-            modifier = Modifier.fillMaxSize(),
-            state = lazyListState,
-            contentPadding = LocalWindowPadding.current,
-        ) {
-            item(
-                span = StaggeredGridItemSpan.FullLine,
+        FlareScrollBar(lazyListState) {
+            LazyStatusVerticalStaggeredGrid(
+                modifier = Modifier.fillMaxSize(),
+                state = lazyListState,
+                contentPadding = LocalWindowPadding.current,
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
+                item(
+                    span = StaggeredGridItemSpan.FullLine,
                 ) {
-                    AutoSuggestionBox(
-                        expanded = state.isHistoryExpanded,
-                        onExpandedChange = state::setHistoryExpanded,
+                    Box(
+                        contentAlignment = Alignment.Center,
                     ) {
-                        TextField(
-                            state = state.textState,
-                            shape = AutoSuggestBoxDefaults.textFieldShape(state.isHistoryExpanded),
-                            modifier = Modifier.widthIn(300.dp).flyoutAnchor(),
-                            lineLimits = TextFieldLineLimits.SingleLine,
-                            onKeyboardAction = {
-                                if (state.textState.text.isNotBlank()) {
-                                    state.selectedAccount?.let { user ->
-                                        state.search(state.textState.text.toString())
-                                    }
-                                }
-                            },
-                            keyboardOptions =
-                                KeyboardOptions(
-                                    imeAction = ImeAction.Search,
-                                ),
-                            trailing = {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.MagnifyingGlass,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                            },
-                        )
-                        state.searchHistories.onSuccess { history ->
-                            val searchResult by remember(history) {
-                                snapshotFlow { state.textState.text }.map {
-                                    history.toImmutableList().filter { item ->
-                                        item.keyword.contains(
-                                            it,
-                                            ignoreCase = true,
-                                        )
-                                    }
-                                }
-                            }.collectAsState(emptyList())
-
-                            AutoSuggestBoxDefaults.suggestFlyout(
-                                expanded = state.isHistoryExpanded,
-                                onDismissRequest = { state.setHistoryExpanded(false) },
-                                itemsContent = {
-                                    items(searchResult) {
-                                        ListItem(
-                                            onClick = {
-                                                state.commitSearch(it.keyword)
-                                                state.setHistoryExpanded(false)
-                                            },
-                                            text = { Text(it.keyword, maxLines = 1) },
-                                            modifier = Modifier.fillMaxWidth(),
-                                            trailing = {
-                                                SubtleButton(
-                                                    onClick = {
-                                                        state.deleteSearchHistory(it.keyword)
-                                                    },
-                                                ) {
-                                                    FAIcon(
-                                                        FontAwesomeIcons.Solid.Trash,
-                                                        contentDescription = stringResource(Res.string.delete),
-                                                    )
-                                                }
-                                            },
-                                        )
+                        AutoSuggestionBox(
+                            expanded = state.isHistoryExpanded,
+                            onExpandedChange = state::setHistoryExpanded,
+                        ) {
+                            TextField(
+                                state = state.textState,
+                                shape = AutoSuggestBoxDefaults.textFieldShape(state.isHistoryExpanded),
+                                modifier = Modifier.widthIn(300.dp).flyoutAnchor(),
+                                lineLimits = TextFieldLineLimits.SingleLine,
+                                onKeyboardAction = {
+                                    if (state.textState.text.isNotBlank()) {
+                                        state.selectedAccount?.let { user ->
+                                            state.search(state.textState.text.toString())
+                                        }
                                     }
                                 },
-                                modifier = Modifier.flyoutSize(matchAnchorWidth = true),
+                                keyboardOptions =
+                                    KeyboardOptions(
+                                        imeAction = ImeAction.Search,
+                                    ),
+                                trailing = {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.MagnifyingGlass,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                },
                             )
+                            state.searchHistories.onSuccess { history ->
+                                val searchResult by remember(history) {
+                                    snapshotFlow { state.textState.text }.map {
+                                        history.toImmutableList().filter { item ->
+                                            item.keyword.contains(
+                                                it,
+                                                ignoreCase = true,
+                                            )
+                                        }
+                                    }
+                                }.collectAsState(emptyList())
+
+                                AutoSuggestBoxDefaults.suggestFlyout(
+                                    expanded = state.isHistoryExpanded,
+                                    onDismissRequest = { state.setHistoryExpanded(false) },
+                                    itemsContent = {
+                                        items(searchResult) {
+                                            ListItem(
+                                                onClick = {
+                                                    state.commitSearch(it.keyword)
+                                                    state.setHistoryExpanded(false)
+                                                },
+                                                text = { Text(it.keyword, maxLines = 1) },
+                                                modifier = Modifier.fillMaxWidth(),
+                                                trailing = {
+                                                    SubtleButton(
+                                                        onClick = {
+                                                            state.deleteSearchHistory(it.keyword)
+                                                        },
+                                                    ) {
+                                                        FAIcon(
+                                                            FontAwesomeIcons.Solid.Trash,
+                                                            contentDescription = stringResource(Res.string.delete),
+                                                        )
+                                                    }
+                                                },
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.flyoutSize(matchAnchorWidth = true),
+                                )
+                            }
                         }
                     }
                 }
-            }
-            state.accounts.onSuccess { accounts ->
-                if (accounts.size > 1) {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        LiteFilter(
-                            modifier =
-                                Modifier
-                                    .padding(top = 8.dp),
+                state.accounts.onSuccess { accounts ->
+                    if (accounts.size > 1) {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
                         ) {
-                            accounts.forEach { profile ->
-                                PillButton(
-                                    selected = state.selectedAccount?.key == profile.key,
-                                    onSelectedChanged = {
-                                        if (it) {
-                                            state.setAccount(profile)
-                                        }
-                                    },
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
+                            LiteFilter(
+                                modifier =
+                                    Modifier
+                                        .padding(top = 8.dp),
+                            ) {
+                                accounts.forEach { profile ->
+                                    PillButton(
+                                        selected = state.selectedAccount?.key == profile.key,
+                                        onSelectedChanged = {
+                                            if (it) {
+                                                state.setAccount(profile)
+                                            }
+                                        },
                                     ) {
-                                        AvatarComponent(
-                                            data = profile.avatar,
-                                            size = AvatarComponentDefaults.compatSize,
-                                        )
-                                        Text(
-                                            profile.handle.canonical,
-                                            maxLines = 1,
-                                            modifier = Modifier.padding(start = 8.dp),
-                                        )
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            AvatarComponent(
+                                                data = profile.avatar,
+                                                size = AvatarComponentDefaults.compatSize,
+                                            )
+                                            Text(
+                                                profile.handle.canonical,
+                                                maxLines = 1,
+                                                modifier = Modifier.padding(start = 8.dp),
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            state.users
-                .onSuccess {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        Header(stringResource(Res.string.users))
-                    }
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        LazyHorizontalGrid(
-                            modifier = Modifier.height(128.dp),
-                            rows = GridCells.Fixed(2),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                state.users
+                    .onSuccess {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
                         ) {
-                            items(
-                                itemCount,
+                            Header(stringResource(Res.string.users))
+                        }
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
+                            LazyHorizontalGrid(
+                                modifier = Modifier.height(128.dp),
+                                rows = GridCells.Fixed(2),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                val user = get(it)
-                                Card(
-                                    modifier =
-                                        Modifier
-                                            .width(256.dp),
-                                    onClick = {
-                                    },
+                                items(
+                                    itemCount,
                                 ) {
-                                    if (user != null) {
-                                        CommonStatusHeaderComponent(
-                                            data = user,
-                                            onUserClick = {
-                                                state.selectedAccount?.let { account ->
-                                                    toUser.invoke(
-                                                        AccountType.Specific(account.key),
-                                                        user.key,
-                                                    )
-                                                }
-                                            },
-                                            modifier = Modifier.padding(8.dp),
-                                        )
-                                    } else {
+                                    val user = get(it)
+                                    Card(
+                                        modifier =
+                                            Modifier
+                                                .width(256.dp),
+                                        onClick = {
+                                        },
+                                    ) {
+                                        if (user != null) {
+                                            CommonStatusHeaderComponent(
+                                                data = user,
+                                                onUserClick = {
+                                                    state.selectedAccount?.let { account ->
+                                                        toUser.invoke(
+                                                            AccountType.Specific(account.key),
+                                                            user.key,
+                                                        )
+                                                    }
+                                                },
+                                                modifier = Modifier.padding(8.dp),
+                                            )
+                                        } else {
+                                            UserPlaceholder(
+                                                modifier = Modifier.padding(8.dp),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }.onLoading {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
+                            Header(stringResource(Res.string.users))
+                        }
+
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
+                            LazyHorizontalGrid(
+                                modifier = Modifier.height(128.dp),
+                                rows = GridCells.Fixed(2),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                items(10) {
+                                    Card(
+                                        modifier =
+                                            Modifier
+                                                .width(256.dp),
+                                    ) {
                                         UserPlaceholder(
                                             modifier = Modifier.padding(8.dp),
                                         )
@@ -264,52 +296,23 @@ fun SearchScreen(
                             }
                         }
                     }
-                }.onLoading {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        Header(stringResource(Res.string.users))
-                    }
-
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        LazyHorizontalGrid(
-                            modifier = Modifier.height(128.dp),
-                            rows = GridCells.Fixed(2),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                state.status
+                    .onSuccess {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
                         ) {
-                            items(10) {
-                                Card(
-                                    modifier =
-                                        Modifier
-                                            .width(256.dp),
-                                ) {
-                                    UserPlaceholder(
-                                        modifier = Modifier.padding(8.dp),
-                                    )
-                                }
-                            }
+                            Header(stringResource(Res.string.statues))
                         }
+                        status(state.status)
+                    }.onLoading {
+                        item(
+                            span = StaggeredGridItemSpan.FullLine,
+                        ) {
+                            Header(stringResource(Res.string.statues))
+                        }
+                        status(state.status)
                     }
-                }
-            state.status
-                .onSuccess {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        Header(stringResource(Res.string.statues))
-                    }
-                    status(state.status)
-                }.onLoading {
-                    item(
-                        span = StaggeredGridItemSpan.FullLine,
-                    ) {
-                        Header(stringResource(Res.string.statues))
-                    }
-                    status(state.status)
-                }
+            }
         }
 
         if (state.refreshing) {

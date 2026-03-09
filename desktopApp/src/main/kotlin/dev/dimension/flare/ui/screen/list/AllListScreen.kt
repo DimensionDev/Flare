@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -18,11 +17,11 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.component.ProgressBar
-import io.github.composefluent.component.ScrollbarContainer
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
@@ -37,7 +36,6 @@ internal fun AllListScreen(
         presenter(accountType)
     }
     val listState = rememberLazyListState()
-    val scrollbarAdapter = rememberScrollbarAdapter(listState)
     RegisterTabCallback(listState, onRefresh = state::refresh)
 
     Box {
@@ -76,10 +74,9 @@ internal fun AllListScreen(
 //                )
 //            }
 //        }
-            ScrollbarContainer(
-                adapter = scrollbarAdapter,
-            ) {
+            FlareScrollBar(listState) {
                 LazyColumn(
+                    state = listState,
                     contentPadding = LocalWindowPadding.current,
                     modifier =
                         Modifier

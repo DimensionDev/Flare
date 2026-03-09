@@ -18,6 +18,7 @@ import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.plus
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.dm.dmList
 import dev.dimension.flare.ui.presenter.dm.DMListPresenter
 import dev.dimension.flare.ui.presenter.dm.DMListState
@@ -40,18 +41,20 @@ internal fun DmListScreen(
     RegisterTabCallback(listState, onRefresh = state::refresh)
 
     Box {
-        LazyColumn(
-            contentPadding = LocalWindowPadding.current,
-            modifier =
-                Modifier
-                    .padding(horizontal = screenHorizontalPadding),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-            state = listState,
-        ) {
-            dmList(
-                data = state.items,
-                onItemClicked = onItemClicked,
-            )
+        FlareScrollBar(listState) {
+            LazyColumn(
+                contentPadding = LocalWindowPadding.current,
+                modifier =
+                    Modifier
+                        .padding(horizontal = screenHorizontalPadding),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                state = listState,
+            ) {
+                dmList(
+                    data = state.items,
+                    onItemClicked = onItemClicked,
+                )
+            }
         }
         if (state.isRefreshing) {
             ProgressBar(

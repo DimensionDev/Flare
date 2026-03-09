@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -15,6 +16,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.AccountItem
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.invoke
@@ -88,28 +90,32 @@ private fun UserListScreen(
     data: PagingState<UiProfile>,
     onUserClick: (MicroBlogKey) -> Unit,
 ) {
-    LazyColumn(
-        contentPadding = LocalWindowPadding.current,
-        modifier =
-            Modifier
-                .padding(horizontal = screenHorizontalPadding),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        itemsIndexed(
-            data,
-            loadingContent = { index, itemCount ->
+    val listState = rememberLazyListState()
+    FlareScrollBar(listState) {
+        LazyColumn(
+            state = listState,
+            contentPadding = LocalWindowPadding.current,
+            modifier =
+                Modifier
+                    .padding(horizontal = screenHorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            itemsIndexed(
+                data,
+                loadingContent = { index, itemCount ->
+                    AccountItem(
+                        userState = UiState.Loading(),
+                        onClick = { onUserClick(it) },
+                        toLogin = {},
+                    )
+                },
+            ) { index, itemCount, it ->
                 AccountItem(
-                    userState = UiState.Loading(),
+                    userState = UiState.Success(it),
                     onClick = { onUserClick(it) },
                     toLogin = {},
                 )
-            },
-        ) { index, itemCount, it ->
-            AccountItem(
-                userState = UiState.Success(it),
-                onClick = { onUserClick(it) },
-                toLogin = {},
-            )
+            }
         }
     }
 }

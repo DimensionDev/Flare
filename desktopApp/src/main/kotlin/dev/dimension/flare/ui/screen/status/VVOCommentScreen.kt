@@ -19,6 +19,7 @@ import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusItem
@@ -56,20 +57,22 @@ internal fun VVOCommentScreen(
                     lineLimit = Int.MAX_VALUE,
                 ),
         ) {
-            LazyStatusVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Fixed(1),
-                contentPadding = LocalWindowPadding.current,
-                state = listState,
-            ) {
-                item {
-                    state.state.root
-                        .onSuccess {
-                            StatusItem(item = it)
-                        }.onLoading {
-                            StatusItem(item = null)
-                        }
+            FlareScrollBar(listState) {
+                LazyStatusVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Fixed(1),
+                    contentPadding = LocalWindowPadding.current,
+                    state = listState,
+                ) {
+                    item {
+                        state.state.root
+                            .onSuccess {
+                                StatusItem(item = it)
+                            }.onLoading {
+                                StatusItem(item = null)
+                            }
+                    }
+                    status(state.state.list)
                 }
-                status(state.state.list)
             }
         }
         if (state.isRefreshing) {

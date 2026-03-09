@@ -46,6 +46,7 @@ import dev.dimension.flare.tab_settings_mixed_timeline_desc
 import dev.dimension.flare.tab_settings_remove
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -92,154 +93,156 @@ internal fun TabSettingScreen(
         rememberReorderableLazyListState(lazyListState) { from, to ->
             state.moveTab(from.key, to.key)
         }
-    LazyColumn(
-        state = lazyListState,
-        contentPadding = LocalWindowPadding.current + PaddingValues(vertical = 24.dp),
-        modifier =
-            Modifier
-                .padding(horizontal = screenHorizontalPadding),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        state.enableMixedTimeline.onSuccess { enabled ->
-            if (state.currentTabs.size > 1) {
-                item("header") {
-                    CardExpanderItem(
-                        heading = {
-                            Text(stringResource(Res.string.tab_settings_mixed_timeline))
-                        },
-                        trailing = {
-                            Switcher(
-                                checked = enabled,
-                                onCheckStateChange = {
-                                    state.setEnableMixedTimeline(it)
-                                },
-                            )
-                        },
-                        icon = {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.Rss,
-                                contentDescription = null,
-                            )
-                        },
-                        caption = {
-                            Text(stringResource(Res.string.tab_settings_mixed_timeline_desc))
-                        },
-                        modifier =
-                            Modifier
-                                .animateItem(),
-                    )
-                }
-                item {
-                    Spacer(modifier = Modifier.height(12.dp))
+    FlareScrollBar(lazyListState) {
+        LazyColumn(
+            state = lazyListState,
+            contentPadding = LocalWindowPadding.current + PaddingValues(vertical = 24.dp),
+            modifier =
+                Modifier
+                    .padding(horizontal = screenHorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            state.enableMixedTimeline.onSuccess { enabled ->
+                if (state.currentTabs.size > 1) {
+                    item("header") {
+                        CardExpanderItem(
+                            heading = {
+                                Text(stringResource(Res.string.tab_settings_mixed_timeline))
+                            },
+                            trailing = {
+                                Switcher(
+                                    checked = enabled,
+                                    onCheckStateChange = {
+                                        state.setEnableMixedTimeline(it)
+                                    },
+                                )
+                            },
+                            icon = {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.Rss,
+                                    contentDescription = null,
+                                )
+                            },
+                            caption = {
+                                Text(stringResource(Res.string.tab_settings_mixed_timeline_desc))
+                            },
+                            modifier =
+                                Modifier
+                                    .animateItem(),
+                        )
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
                 }
             }
-        }
-        item {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                var showMenu by remember { mutableStateOf(false) }
-                AccentButton(
-                    onClick = {
-                        showMenu = true
-                    },
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.CenterEnd,
                 ) {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.Plus,
-                        contentDescription = stringResource(Res.string.tab_settings_add),
-                    )
-                    Box {
-                        Text(
-                            text = stringResource(Res.string.tab_settings_add),
+                    var showMenu by remember { mutableStateOf(false) }
+                    AccentButton(
+                        onClick = {
+                            showMenu = true
+                        },
+                    ) {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Plus,
+                            contentDescription = stringResource(Res.string.tab_settings_add),
                         )
-                        MenuFlyout(
-                            visible = showMenu,
-                            onDismissRequest = { showMenu = false },
-                        ) {
-                            MenuFlyoutItem(
-                                text = { Text(stringResource(Res.string.tab_settings_add_group)) },
-                                onClick = {
-                                    showMenu = false
-                                    toGroupConfig(null)
-                                },
+                        Box {
+                            Text(
+                                text = stringResource(Res.string.tab_settings_add),
                             )
-                            MenuFlyoutItem(
-                                text = { Text(stringResource(Res.string.tab_settings_add_tab)) },
-                                onClick = {
-                                    showMenu = false
-                                    state.setAddTab(true)
-                                },
-                            )
+                            MenuFlyout(
+                                visible = showMenu,
+                                onDismissRequest = { showMenu = false },
+                            ) {
+                                MenuFlyoutItem(
+                                    text = { Text(stringResource(Res.string.tab_settings_add_group)) },
+                                    onClick = {
+                                        showMenu = false
+                                        toGroupConfig(null)
+                                    },
+                                )
+                                MenuFlyoutItem(
+                                    text = { Text(stringResource(Res.string.tab_settings_add_tab)) },
+                                    onClick = {
+                                        showMenu = false
+                                        state.setAddTab(true)
+                                    },
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
-        item {
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-        itemsIndexed(state.currentTabs, key = { _, item -> item.key }) { index, item ->
-            ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
-                CardExpanderItem(
-                    heading = {
-                        TabTitle(item.metaData.title)
-                    },
-                    icon = {
-                        TabIcon(item)
-                    },
-                    trailing = {
-                        Row {
-                            SubtleButton(
-                                onClick = {
-                                    if (item is MixedTimelineTabItem) {
-                                        toGroupConfig(item)
-                                    } else {
-                                        state.setEditTab(item)
-                                    }
-                                },
-                                iconOnly = true,
-                            ) {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.Pen,
-                                    contentDescription =
-                                        stringResource(
-                                            Res.string.tab_settings_edit,
-                                        ),
-                                )
+            item {
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+            itemsIndexed(state.currentTabs, key = { _, item -> item.key }) { index, item ->
+                ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
+                    CardExpanderItem(
+                        heading = {
+                            TabTitle(item.metaData.title)
+                        },
+                        icon = {
+                            TabIcon(item)
+                        },
+                        trailing = {
+                            Row {
+                                SubtleButton(
+                                    onClick = {
+                                        if (item is MixedTimelineTabItem) {
+                                            toGroupConfig(item)
+                                        } else {
+                                            state.setEditTab(item)
+                                        }
+                                    },
+                                    iconOnly = true,
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Pen,
+                                        contentDescription =
+                                            stringResource(
+                                                Res.string.tab_settings_edit,
+                                            ),
+                                    )
+                                }
+                                SubtleButton(
+                                    onClick = {
+                                        state.deleteTab(item)
+                                    },
+                                    iconOnly = true,
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Trash,
+                                        contentDescription =
+                                            stringResource(
+                                                Res.string.tab_settings_remove,
+                                            ),
+                                        tint = FluentTheme.colors.system.critical,
+                                    )
+                                }
+                                SubtleButton(
+                                    modifier =
+                                        Modifier.draggableHandle(),
+                                    onClick = {},
+                                    iconOnly = true,
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.Bars,
+                                        contentDescription =
+                                            stringResource(
+                                                Res.string.tab_settings_drag,
+                                            ),
+                                    )
+                                }
                             }
-                            SubtleButton(
-                                onClick = {
-                                    state.deleteTab(item)
-                                },
-                                iconOnly = true,
-                            ) {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.Trash,
-                                    contentDescription =
-                                        stringResource(
-                                            Res.string.tab_settings_remove,
-                                        ),
-                                    tint = FluentTheme.colors.system.critical,
-                                )
-                            }
-                            SubtleButton(
-                                modifier =
-                                    Modifier.draggableHandle(),
-                                onClick = {},
-                                iconOnly = true,
-                            ) {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.Bars,
-                                    contentDescription =
-                                        stringResource(
-                                            Res.string.tab_settings_drag,
-                                        ),
-                                )
-                            }
-                        }
-                    },
-                )
+                        },
+                    )
+                }
             }
         }
     }

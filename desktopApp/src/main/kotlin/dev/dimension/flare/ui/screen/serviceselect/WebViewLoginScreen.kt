@@ -27,7 +27,7 @@ internal fun WebViewLoginScreen(
                 .plus("/")
         while (true) {
             delay(2.seconds)
-            val cookies = state.nativeWebView.getCookiesForUrl(actualUrl)
+            val cookies = state.cookieManager.getCookies(actualUrl)
             if (callback.invoke(cookies.joinToString("; ") { "${it.name}=${it.value}" })) {
                 onBack.invoke()
                 break

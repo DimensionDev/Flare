@@ -234,17 +234,19 @@ internal class FlareHardwareShortcutsNode(
             }
             is ShortcutEvent.Pan -> {
                 if (canPan()) {
-                    with(state.coordinateSystem) {
-                        val rect = unscaledContentBounds(false).rectIn(CoordinateSpace.Viewport)
-                        val rectInViewport = state.coordinateSystem.unscaledContentBounds(true).rectIn(CoordinateSpace.Viewport)
-                        val canPanHorizontally = rect.width > rectInViewport.width
-                        val canPanVertically = rect.height > rectInViewport.height
-                        if ((shortcut.direction == PanDirection.Left || shortcut.direction == PanDirection.Right) && !canPanHorizontally) {
-                            return
+                    val canContinuePan =
+                        with(state.coordinateSystem) {
+                            val contentBounds = contentBounds(false).rectIn(CoordinateSpace.Viewport)
+                            val viewportSize = viewportSize
+                            when (shortcut.direction) {
+                                PanDirection.Up -> contentBounds.top < 0f
+                                PanDirection.Down -> contentBounds.bottom > viewportSize.height
+                                PanDirection.Left -> contentBounds.left < 0f
+                                PanDirection.Right -> contentBounds.right > viewportSize.width
+                            }
                         }
-                        if ((shortcut.direction == PanDirection.Up || shortcut.direction == PanDirection.Down) && !canPanVertically) {
-                            return
-                        }
+                    if (!canContinuePan) {
+                        return
                     }
 
                     val offset =

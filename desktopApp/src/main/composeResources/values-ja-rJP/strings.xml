@@ -147,6 +147,7 @@
     <string name="settings_ai_config_description">AI の設定を構成する</string>
     <string name="settings_ai_config_server">サーバー URL</string>
     <string name="settings_ai_config_server_hint">サーバー URL を入力してください</string>
+    <string name="settings_ai_config_server_url_requirement">サーバー URL は \'/\' で終わり、OpenAI 互換の v1/chat/completions API をサポートする必要があります。</string>
     <string name="settings_ai_config_server_self_host_description">公式サーバーまたは自己ホストサーバーを使用できます。</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">AIバックエンドタイプを選択するにはタップしてください</string>

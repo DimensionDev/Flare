@@ -62,6 +62,7 @@
     <string name="settings_ai_config_description">تهيئة إعدادات الذكاء الاصطناعي</string>
     <string name="settings_ai_config_server">رابط الخادم</string>
     <string name="settings_ai_config_server_hint">أدخل رابط الخادم</string>
+    <string name="settings_ai_config_server_url_requirement">يجب أن ينتهي عنوان URL للخادم بقطع متتالي ودعم واجهة OpenAI-متوافقة مع v1/Chat/completions API.</string>
     <string name="settings_ai_config_server_self_host_description">يمكنك استخدام الخادم الرسمي أو استضافة الخادم الخاص بك</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">انقر لاختيار نوع خلفية الذكاء الاصطناعي</string>

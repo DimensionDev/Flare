@@ -58,6 +58,7 @@
     <string name="settings_ai_config_description">Konfigurer AI-innstillinger</string>
     <string name="settings_ai_config_server">URL til server</string>
     <string name="settings_ai_config_server_hint">Skriv inn nettadressen til serveren</string>
+    <string name="settings_ai_config_server_url_requirement">Server-URL må avsluttes med en slash som støtter OpenAI-kompatibelt v1/chat/completions API.</string>
     <string name="settings_ai_config_server_self_host_description">Du kan bruke den offisielle serveren eller selv verne din egen server</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Trykk for å velge backend type AI</string>

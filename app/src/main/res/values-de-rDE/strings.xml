@@ -58,6 +58,7 @@
     <string name="settings_ai_config_description">KI Einstellungen konfigurieren</string>
     <string name="settings_ai_config_server">Server-URL</string>
     <string name="settings_ai_config_server_hint">Server-URL eingeben</string>
+    <string name="settings_ai_config_server_url_requirement">Server-URL muss mit einem abschließenden Schrägstrich enden und die OpenAI-kompatible v1/chat/completions API unterstützen.</string>
     <string name="settings_ai_config_server_self_host_description">Du kannst den offiziellen Server oder einen eigenen Server verwenden</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Tippen um den KI-Backend-Typ auszuwählen</string>

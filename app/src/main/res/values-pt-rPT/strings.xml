@@ -58,6 +58,7 @@
     <string name="settings_ai_config_description">Configurar AI</string>
     <string name="settings_ai_config_server">URL do servidor</string>
     <string name="settings_ai_config_server_hint">Digite a URL do servidor</string>
+    <string name="settings_ai_config_server_url_requirement">A URL do servidor deve terminar com uma barra à direita e suportar a API OpenAI-compatível com v1/chat/completions.</string>
     <string name="settings_ai_config_server_self_host_description">Você pode usar o servidor oficial ou auto-hospedar seu próprio servidor</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Toque para escolher o tipo do back-end IA</string>

@@ -148,6 +148,7 @@
     <string name="settings_ai_config_description">Configureer AI instellingen</string>
     <string name="settings_ai_config_server">Server URL</string>
     <string name="settings_ai_config_server_hint">Voer de server-URL in</string>
+    <string name="settings_ai_config_server_url_requirement">Server-URL moet eindigen met \'/\' en de OpenAI-compatibele v1/chat/aanvullingen API ondersteunen.</string>
     <string name="settings_ai_config_server_self_host_description">U kunt de officiële server gebruiken of zelf uw eigen server organiseren</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Tik om het AI backend type te kiezen</string>

@@ -8,6 +8,7 @@ import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
 import dev.dimension.flare.data.database.app.dao.AccountDao
 import dev.dimension.flare.data.database.app.dao.ApplicationDao
+import dev.dimension.flare.data.database.app.dao.DraftDao
 import dev.dimension.flare.data.database.app.dao.KeywordFilterDao
 import dev.dimension.flare.data.database.app.dao.RssSourceDao
 import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
@@ -16,11 +17,14 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
     entities = [
         dev.dimension.flare.data.database.app.model.DbAccount::class,
         dev.dimension.flare.data.database.app.model.DbApplication::class,
+        dev.dimension.flare.data.database.app.model.DbDraftGroup::class,
+        dev.dimension.flare.data.database.app.model.DbDraftTarget::class,
+        dev.dimension.flare.data.database.app.model.DbDraftMedia::class,
         dev.dimension.flare.data.database.app.model.DbKeywordFilter::class,
         dev.dimension.flare.data.database.app.model.DbSearchHistory::class,
         dev.dimension.flare.data.database.app.model.DbRssSources::class,
     ],
-    version = 5,
+    version = 6,
     autoMigrations = [
         AutoMigration(
             from = 3,
@@ -30,18 +34,25 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
             from = 4,
             to = 5,
         ),
+        AutoMigration(
+            from = 5,
+            to = 6,
+        ),
     ],
     exportSchema = true,
 )
 @TypeConverters(
     dev.dimension.flare.data.database.adapter.MicroBlogKeyConverter::class,
     dev.dimension.flare.data.database.adapter.PlatformTypeConverter::class,
+    dev.dimension.flare.data.database.app.model.DraftConverters::class,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 internal abstract class AppDatabase : RoomDatabase() {
     abstract fun accountDao(): AccountDao
 
     abstract fun applicationDao(): ApplicationDao
+
+    abstract fun draftDao(): DraftDao
 
     abstract fun keywordFilterDao(): KeywordFilterDao
 

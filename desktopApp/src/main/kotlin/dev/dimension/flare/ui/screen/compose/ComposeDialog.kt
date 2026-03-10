@@ -989,62 +989,59 @@ private fun composePresenter(
         }
 
         fun send() {
-            state.selectedAccounts.forEach {
-                val data =
-                    ComposeData(
-                        content = textFieldState.text.toString(),
-                        medias =
-                            mediaState.takeSuccess()?.medias.orEmpty().map {
-                                ComposeData.Media(
-                                    file = FileItem(it.file),
-                                    altText =
-                                        it.textState.text
-                                            .toString()
-                                            .takeIf { it.isNotEmpty() },
-                                )
-                            },
-                        poll =
-                            pollState.takeSuccess()?.takeIf { it.enabled }?.let {
-                                ComposeData.Poll(
-                                    multiple = !it.pollSingleChoice,
-                                    expiredAfter = it.expiredAt.duration.inWholeMilliseconds,
-                                    options =
-                                        it.options.map { option ->
-                                            option.text.toString()
-                                        },
-                                )
-                            },
-                        sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
-                        spoilerText =
-                            contentWarningState
-                                .takeSuccess()
-                                ?.textFieldState
-                                ?.text
-                                ?.toString(),
-                        visibility =
-                            state.visibilityState.takeSuccess()?.visibility
-                                ?: UiTimelineV2.Post.Visibility.Public,
-                        account = it,
-                        referenceStatus =
-                            status?.let {
-                                ComposeData.ReferenceStatus(
-                                    data = state.replyState?.takeSuccess(),
-                                    composeStatus = status,
-                                )
-                            },
-                        language = languageState.takeSuccess()?.selectedLanguage.orEmpty(),
-                    )
-                state.send(data)
-                // cleanup
+            val data =
+                ComposeData(
+                    content = textFieldState.text.toString(),
+                    medias =
+                        mediaState.takeSuccess()?.medias.orEmpty().map {
+                            ComposeData.Media(
+                                file = FileItem(it.file),
+                                altText =
+                                    it.textState.text
+                                        .toString()
+                                        .takeIf { it.isNotEmpty() },
+                            )
+                        },
+                    poll =
+                        pollState.takeSuccess()?.takeIf { it.enabled }?.let {
+                            ComposeData.Poll(
+                                multiple = !it.pollSingleChoice,
+                                expiredAfter = it.expiredAt.duration.inWholeMilliseconds,
+                                options =
+                                    it.options.map { option ->
+                                        option.text.toString()
+                                    },
+                            )
+                        },
+                    sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
+                    spoilerText =
+                        contentWarningState
+                            .takeSuccess()
+                            ?.textFieldState
+                            ?.text
+                            ?.toString(),
+                    visibility =
+                        state.visibilityState.takeSuccess()?.visibility
+                            ?: UiTimelineV2.Post.Visibility.Public,
+                    referenceStatus =
+                        status?.let {
+                            ComposeData.ReferenceStatus(
+                                data = state.replyState?.takeSuccess(),
+                                composeStatus = status,
+                            )
+                        },
+                    language = languageState.takeSuccess()?.selectedLanguage.orEmpty(),
+                )
+            state.send(data, state.draftGroupId)
+            // cleanup
 
-                textFieldState.edit {
-                    this.delete(0, this.length)
-                }
-                mediaState.takeSuccess()?.clear()
-                pollState.takeSuccess()?.clear()
-                contentWarningState.takeSuccess()?.clear()
-                state.visibilityState.takeSuccess()?.clear()
+            textFieldState.edit {
+                this.delete(0, this.length)
             }
+            mediaState.takeSuccess()?.clear()
+            pollState.takeSuccess()?.clear()
+            contentWarningState.takeSuccess()?.clear()
+            state.visibilityState.takeSuccess()?.clear()
         }
     }
 }

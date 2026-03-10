@@ -21,6 +21,7 @@ import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountProvider
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.data.repository.allAccountsPresenter
+import dev.dimension.flare.data.repository.newDraftGroupId
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -262,6 +263,10 @@ public class ComposePresenter(
         var mediaSize by remember {
             mutableStateOf(0)
         }
+        val draftGroupId =
+            remember {
+                newDraftGroupId()
+            }
         val remainingLength =
             composeConfig
                 .mapNotNull {
@@ -288,6 +293,7 @@ public class ComposePresenter(
 
         return object : ComposeState(
             canSend = canSend,
+            draftGroupId = draftGroupId,
             visibilityState = visibilityState,
             replyState = replyState,
             emojiState = emojiState,
@@ -298,8 +304,15 @@ public class ComposePresenter(
             otherAccounts = remainingAccounts,
             initialTextState = initialTextState,
         ) {
-            override fun send(data: ComposeData) {
-                composeUseCase.invoke(data)
+            override fun send(
+                data: ComposeData,
+                groupId: String,
+            ) {
+                composeUseCase.invoke(
+                    accounts = selectedAccounts.toList(),
+                    data = data,
+                    groupId = groupId,
+                )
             }
 
             override fun selectAccount(account: UiAccount) {
@@ -406,6 +419,7 @@ public sealed class ComposeStatus {
 @Immutable
 public abstract class ComposeState(
     public val canSend: Boolean,
+    public val draftGroupId: String,
     public val visibilityState: UiState<VisibilityState>,
     public val replyState: UiState<UiTimelineV2>?,
     public val initialTextState: UiState<InitialText>?,
@@ -416,7 +430,10 @@ public abstract class ComposeState(
     public val otherAccounts: UiState<ImmutableListWrapper<Pair<UiState<UiProfile>, UiAccount>>>,
     public val selectedUsers: UiState<ImmutableListWrapper<Pair<UiState<UiProfile>, UiAccount>>>,
 ) {
-    public abstract fun send(data: ComposeData)
+    public abstract fun send(
+        data: ComposeData,
+        groupId: String,
+    )
 
     public abstract fun selectAccount(account: UiAccount)
 

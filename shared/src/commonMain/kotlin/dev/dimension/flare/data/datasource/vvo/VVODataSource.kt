@@ -10,7 +10,6 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -292,15 +291,14 @@ internal class VVODataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: (ComposeProgress) -> Unit,
+        progress: () -> Unit,
     ) {
-        val maxProgress = data.medias.size + 1
         val st = ensureLogin()
 
         val mediaIds =
             data.medias.mapIndexed { index, (it, _) ->
                 uploadMedia(it, st).also {
-                    progress(ComposeProgress(index + 1, maxProgress))
+                    progress()
                 }
             }
         val mediaId = mediaIds.joinToString(",")

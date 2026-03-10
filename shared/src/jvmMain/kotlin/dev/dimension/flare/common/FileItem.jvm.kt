@@ -4,27 +4,14 @@ import java.io.File
 
 public actual class FileItem(
     private val file: File,
+    internal actual val name: String? = file.name,
+    internal actual val type: FileType = resolveType(file.name),
 ) {
-    internal actual val name: String? = file.name
-
     internal actual suspend fun readBytes(): ByteArray = file.readBytes()
 
-    internal actual val type: FileType
-        get() {
-            val mimeType =
-                try {
-                    java.nio.file.Files
-                        .probeContentType(file.toPath())
-                } catch (e: Exception) {
-                    null
-                }
-
-            if (mimeType != null) {
-                if (mimeType.startsWith("image")) return FileType.Image
-                if (mimeType.startsWith("video")) return FileType.Video
-            }
-
-            val lowerName = file.name.lowercase()
+    private companion object {
+        fun resolveType(fileName: String): FileType {
+            val lowerName = fileName.lowercase()
             return when {
                 lowerName.endsWith(".jpg") ||
                     lowerName.endsWith(".jpeg") ||
@@ -40,4 +27,5 @@ public actual class FileItem(
                 else -> FileType.Other
             }
         }
+    }
 }

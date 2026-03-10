@@ -9,7 +9,6 @@ import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -403,7 +402,7 @@ internal class MisskeyDataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: (ComposeProgress) -> Unit,
+        progress: () -> Unit,
     ) {
         val renoteId =
             data.referenceStatus
@@ -419,7 +418,6 @@ internal class MisskeyDataSource(
                     it as? ComposeStatus.Reply
                 }?.statusKey
                 ?.id
-        val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias
                 .mapIndexed { index, (item, altText) ->
@@ -443,7 +441,7 @@ internal class MisskeyDataSource(
                             sensitive = data.sensitive,
                             comment = altText,
                         ).also {
-                            progress(ComposeProgress(index + 1, maxProgress))
+                            progress()
                         }
                 }.mapNotNull {
                     it?.id

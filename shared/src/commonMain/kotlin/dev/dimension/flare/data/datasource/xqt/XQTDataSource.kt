@@ -18,7 +18,6 @@ import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
@@ -363,7 +362,7 @@ internal class XQTDataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: (ComposeProgress) -> Unit,
+        progress: () -> Unit,
     ) {
         val inReplyToID =
             data.referenceStatus
@@ -389,7 +388,6 @@ internal class XQTDataSource(
                 }?.user
                 ?.handle
                 ?.normalizedRaw
-        val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias.mapIndexed { index, (item, altText) ->
                 val bytes = item.readBytes()
@@ -432,7 +430,7 @@ internal class XQTDataSource(
                                 ),
                         )
                     }
-                    progress(ComposeProgress(index + 1, maxProgress))
+                    progress()
                 }
             }
         service.postCreateTweet(

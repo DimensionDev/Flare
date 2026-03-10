@@ -8,8 +8,13 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
-public actual class PlatformPathProducer {
-    public actual fun dataStoreFile(fileName: String): Path = "${fileDirectory()}/$fileName".toPath()
+internal class ApplePlatformPathProducer : PlatformPathProducer {
+    override fun dataStoreFile(fileName: String): Path = "${fileDirectory()}/$fileName".toPath()
+
+    override fun draftMediaFile(
+        groupId: String,
+        fileName: String,
+    ): Path = "${fileDirectory()}/draft_media/$groupId/$fileName".toPath()
 
     @OptIn(ExperimentalForeignApi::class)
     private fun fileDirectory(): String {

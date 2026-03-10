@@ -5,7 +5,10 @@ import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.repository.newDraftGroupId
+import dev.dimension.flare.data.repository.toComposeDraftBundle
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.ui.model.UiAccount
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -15,9 +18,15 @@ internal class ComposeUseCase(
     private val scope: CoroutineScope,
     private val inAppNotification: InAppNotification,
     private val appDataStore: AppDataStore,
+    private val saveDraftUseCase: SaveDraftUseCase,
+    private val sendDraftUseCase: SendDraftUseCase,
 ) {
-    operator fun invoke(data: ComposeData) {
-        invoke(data) {
+    operator fun invoke(
+        accounts: List<UiAccount>,
+        data: ComposeData,
+        groupId: String,
+    ) {
+        invoke(accounts = accounts, data = data, groupId = groupId) {
             withContext(Dispatchers.Main) {
                 when (it) {
                     is ComposeProgressState.Error ->
@@ -32,7 +41,9 @@ internal class ComposeUseCase(
     }
 
     operator fun invoke(
+        accounts: List<UiAccount>,
         data: ComposeData,
+        groupId: String,
         progress: suspend (ComposeProgressState) -> Unit,
     ) {
         scope.launch {
@@ -43,13 +54,9 @@ internal class ComposeUseCase(
                         visibility = data.visibility,
                     )
                 }
-                data.account.dataSource.compose(
-                    data = data,
-                    progress = {
-                        scope.launch {
-                            progress.invoke(ComposeProgressState.Progress(it.progress, it.total))
-                        }
-                    },
+                sendDraftUseCase(
+                    bundle = data.toComposeDraftBundle(accounts = accounts, groupId = groupId),
+                    progress = progress,
                 )
             }.onSuccess {
                 scope.launch {
@@ -59,6 +66,18 @@ internal class ComposeUseCase(
                 scope.launch {
                     progress.invoke(ComposeProgressState.Error(it))
                 }
+            }
+        }
+    }
+
+    fun saveDraft(
+        accounts: List<UiAccount>,
+        data: ComposeData,
+        groupId: String = newDraftGroupId(),
+    ) {
+        scope.launch {
+            tryRun {
+                saveDraftUseCase(data.toComposeDraftBundle(accounts = accounts, groupId = groupId))
             }
         }
     }

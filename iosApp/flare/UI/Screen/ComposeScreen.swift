@@ -437,28 +437,23 @@ struct ComposeScreen: View {
         textView.scrollRangeToVisible(NSRange(location: max(0, newLocation - 1), length: 1))
     }
     
-    private func getComposeData() -> [ComposeData] {
-        return presenter.state.selectedAccounts.map { account in
-            ComposeData(
-                account: account,
-                content: viewModel.text,
-                visibility: getVisibility(),
-                language: viewModel.languages,
-                medias: getMedia(),
-                sensitive: viewModel.mediaViewModel.sensitive,
-                spoilerText: viewModel.contentWarning,
-                poll: getPoll(),
-                localOnly: false,
-                referenceStatus: getReferenceStatus()
-            )
-        }
+    private func getComposeData() -> ComposeData {
+        ComposeData(
+            content: viewModel.text,
+            visibility: getVisibility(),
+            language: viewModel.languages,
+            medias: getMedia(),
+            sensitive: viewModel.mediaViewModel.sensitive,
+            spoilerText: viewModel.contentWarning,
+            poll: getPoll(),
+            localOnly: false,
+            referenceStatus: getReferenceStatus()
+        )
     }
     
     private func send() {
-        let datas = getComposeData()
-        for data in datas {
-            presenter.state.send(data: data)
-        }
+        let data = getComposeData()
+        presenter.state.send(data: data, groupId: presenter.state.draftGroupId)
         dismiss()
     }
     

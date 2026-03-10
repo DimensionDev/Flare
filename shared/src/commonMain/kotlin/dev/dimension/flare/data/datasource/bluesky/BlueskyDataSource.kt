@@ -51,7 +51,6 @@ import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
@@ -279,7 +278,7 @@ internal class BlueskyDataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: (ComposeProgress) -> Unit,
+        progress: () -> Unit,
     ) {
         val quoteId =
             data.referenceStatus
@@ -295,7 +294,6 @@ internal class BlueskyDataSource(
                     it as? ComposeStatus.Reply
                 }?.statusKey
                 ?.id
-        val maxProgress = data.medias.size + 1
         val mediaBlob =
             data.medias
                 .mapIndexedNotNull { index, (item, altText) ->
@@ -315,7 +313,7 @@ internal class BlueskyDataSource(
                     service
                         .uploadBlob(finalBytes)
                         .also {
-                            progress(ComposeProgress(index + 1, maxProgress))
+                            progress()
                         }.maybeResponse()
                         ?.let {
                             it.blob to altText
@@ -400,7 +398,7 @@ internal class BlueskyDataSource(
         service
             .createRecord(
                 CreateRecordRequest(
-                    repo = Did(did = data.account.accountKey.id),
+                    repo = Did(did = accountKey.id),
                     collection = Nsid("app.bsky.feed.post"),
                     record = post.bskyJson(),
                 ),

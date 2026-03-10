@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datasource.microblog
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.CacheData
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiEmoji
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -275,12 +276,14 @@ public data class ComposeConfig internal constructor(
         internal val emoji: CacheData<ImmutableMap<String, ImmutableList<UiEmoji>>>,
         // Emojis picker can be merged only if their mergeTag is the same.
         val mergeTag: String,
+        val accountKey: MicroBlogKey,
     ) {
         internal fun merge(other: Emoji): Emoji? =
             if (mergeTag == other.mergeTag) {
                 Emoji(
                     emoji = emoji,
                     mergeTag = mergeTag,
+                    accountKey = accountKey,
                 )
             } else {
                 null

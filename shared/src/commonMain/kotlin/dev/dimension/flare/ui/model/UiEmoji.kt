@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.SerializableImmutableMap
+import dev.dimension.flare.model.AccountType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -19,6 +20,7 @@ public data class UiEmoji internal constructor(
 @Immutable
 public data class EmojiData internal constructor(
     val data: SerializableImmutableMap<String, SerializableImmutableList<UiEmoji>>,
+    val accountType: AccountType,
 ) {
     private val list = data.toList()
     public val size: Int get() = data.size

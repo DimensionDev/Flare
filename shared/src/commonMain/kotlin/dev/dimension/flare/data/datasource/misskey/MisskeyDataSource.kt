@@ -191,7 +191,9 @@ internal class MisskeyDataSource(
                                                             accountKey = accountKey,
                                                         ),
                                                     ),
-                                                isUnicode = !event.reaction.startsWith(':') && !event.reaction.endsWith(':'),
+                                                isUnicode = !event.reaction.startsWith(':') && !event.reaction.endsWith(
+                                                    ':'
+                                                ),
                                                 me = true,
                                             ),
                                         )
@@ -319,10 +321,11 @@ internal class MisskeyDataSource(
                     when (request) {
                         is PagingRequest.Prepend,
                         is PagingRequest.Append,
-                        ->
+                            ->
                             PagingResult<UiList>(
                                 endOfPaginationReached = true,
                             )
+
                         PagingRequest.Refresh ->
                             PagingResult(
                                 endOfPaginationReached = true,
@@ -555,7 +558,11 @@ internal class MisskeyDataSource(
                     allowMediaOnly = true,
                 ),
             poll = ComposeConfig.Poll(9),
-            emoji = ComposeConfig.Emoji(emojiHandler.emoji, "misskey@${accountKey.host}"),
+            emoji = ComposeConfig.Emoji(
+                emojiHandler.emoji,
+                "misskey@${accountKey.host}",
+                accountKey = accountKey,
+            ),
             contentWarning = ComposeConfig.ContentWarning,
             visibility = ComposeConfig.Visibility,
         )

@@ -54,7 +54,7 @@ public class AddReactionPresenter(
                     }
                 }.map {
                     remember(it) {
-                        EmojiData(it)
+                        EmojiData(it, accountType)
                     }
                 }
 

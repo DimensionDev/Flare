@@ -155,6 +155,8 @@ import dev.dimension.flare.settings_storage_clear_database
 import dev.dimension.flare.settings_storage_clear_database_description
 import dev.dimension.flare.settings_storage_clear_image_cache
 import dev.dimension.flare.settings_storage_clear_image_cache_description
+import dev.dimension.flare.settings_draft_box_description
+import dev.dimension.flare.settings_draft_box_title
 import dev.dimension.flare.settings_storage_export_data
 import dev.dimension.flare.settings_storage_export_data_description
 import dev.dimension.flare.settings_storage_import_data
@@ -221,6 +223,7 @@ import java.util.Locale
 @Composable
 internal fun SettingsScreen(
     toLogin: () -> Unit,
+    toDraftBox: () -> Unit,
     toLocalCache: () -> Unit,
     toAppLog: () -> Unit,
     toRSSManagement: () -> Unit,
@@ -845,6 +848,23 @@ internal fun SettingsScreen(
             }
 
             Header(stringResource(Res.string.settings_storage_title))
+            CardExpanderItem(
+                onClick = toDraftBox,
+                heading = {
+                    Text(stringResource(Res.string.settings_draft_box_title))
+                },
+                trailing = {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.AngleRight,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                    )
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_draft_box_description))
+                },
+                icon = null,
+            )
             AnimatedVisibility(
                 state.accountState.activeAccount.isSuccess,
             ) {

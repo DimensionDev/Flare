@@ -40,6 +40,8 @@ internal sealed interface Route : NavKey {
 
     data object Settings : ScreenRoute
 
+    data object DraftBox : ScreenRoute
+
     data class Profile(
         val accountType: AccountType,
         val userKey: MicroBlogKey,

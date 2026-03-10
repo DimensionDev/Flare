@@ -3,53 +3,54 @@ package dev.dimension.flare.ui.presenter.compose
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import dev.dimension.flare.common.ImmutableListWrapper
-import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.common.toImmutableListWrapper
+import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
+import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.accountProvider
-import dev.dimension.flare.data.repository.accountServiceProvider
-import dev.dimension.flare.data.repository.allAccountsPresenter
-import dev.dimension.flare.data.repository.newDraftGroupId
+import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.EmojiData
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.flatMap
-import dev.dimension.flare.ui.model.isSuccess
+import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
-import dev.dimension.flare.ui.model.merge
-import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
-import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.presenter.home.UserPresenter
-import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 public class ComposePresenter(
-    private val accountType: AccountType,
+    private val accountType: AccountType?,
     private val status: ComposeStatus? = null,
 ) : PresenterBase<ComposeState>(),
     KoinComponent {
@@ -57,197 +58,233 @@ public class ComposePresenter(
     private val accountRepository: AccountRepository by inject()
     private val appDataStore: AppDataStore by inject()
 
-    @Composable
-    override fun body(): ComposeState {
-        val userState =
-            remember(accountType) {
-                UserPresenter(accountType = accountType, userKey = null)
-            }.body().user
-        val accountState by accountProvider(accountType = accountType, repository = accountRepository)
-        val accounts by allAccountsPresenter(repository = accountRepository)
-        val selectedAccounts =
-            remember {
-                mutableStateListOf<UiAccount>()
+    private val selectedAccountsKeyFlow by lazy {
+        MutableStateFlow<ImmutableList<MicroBlogKey>>(persistentListOf())
+    }
+
+    private val enableCrossPostFlow by lazy {
+        selectedAccountsKeyFlow.map { accountKeys ->
+            accountKeys.size > 1 // && status == null
+        }
+    }
+
+    private val selectedAccountsFlow by lazy {
+        selectedAccountsKeyFlow.map { accountKeys ->
+            accountKeys.map { key ->
+                accountRepository.getFlow(key)
             }
-        accountState.onSuccess {
-            LaunchedEffect(Unit) {
-                selectedAccounts.add(it)
+        }.combineLatestFlowLists().map {
+            it.mapNotNull {
+                it.takeSuccess()
+            }.toImmutableList()
+        }
+    }
+
+    private val selectedAccountServicesFlow by lazy {
+        selectedAccountsKeyFlow.map { accountKeys ->
+            accountKeys.map { accountKey ->
+                accountServiceFlow(
+                    accountType = AccountType.Specific(accountKey = accountKey),
+                    repository = accountRepository,
+                )
+            }
+        }.combineLatestFlowLists().map { it.toImmutableList() }
+    }
+
+    private val composeConfigFlow by lazy {
+        selectedAccountServicesFlow.map { services ->
+            services
+                .mapNotNull {
+                    if (it is AuthenticatedMicroblogDataSource) {
+                        it.composeConfig(
+                            type =
+                                when (status) {
+                                    is ComposeStatus.Quote -> ComposeType.Quote
+                                    is ComposeStatus.Reply -> ComposeType.Reply
+                                    null -> ComposeType.New
+                                },
+                        )
+                    } else {
+                        null
+                    }
+                }.reduceOrNull { acc, config -> acc.merge(config) } ?: ComposeConfig()
+        }
+    }
+
+    private val selectedUsersFlow by lazy {
+        selectedAccountServicesFlow.map { services ->
+            services
+                .mapNotNull { service ->
+                    if (service is UserDataSource && service is AuthenticatedMicroblogDataSource) {
+                        service.userHandler.userById(service.accountKey.id).toUi()
+                    } else {
+                        null
+                    }
+                }
+        }.combineLatestFlowLists().map { it.toImmutableList() }
+    }
+
+    private val otherAccountsFlow by lazy {
+        combine(
+            accountRepository.allAccounts,
+            selectedAccountsKeyFlow,
+            statusFlow ?: flowOf(UiState.Error(Exception("No status for compose"))),
+        ) { allAccounts, selectedAccountKeys, status ->
+            val statusPlatform = status.takeSuccess()?.let {
+                it as? UiTimelineV2.Post
+            }?.platformType
+            allAccounts.filterNot { account ->
+                selectedAccountKeys.contains(account.accountKey) ||
+                (statusPlatform != null && account.platformType != statusPlatform)
+            }.map {
+                it.accountKey
             }
         }
-        val statusState =
-            status?.let { status ->
-                remember(status.statusKey) {
-                    StatusPresenter(accountType = accountType, statusKey = status.statusKey)
-                }.body().status
-            }
-        val allUsers =
-            accounts.flatMap { data ->
-                accountState
-                    .flatMap { current ->
-                        statusState
-                            ?.mapNotNull {
-                                it as? UiTimelineV2.Post
-                            }?.map {
-                                current to listOf(it.platformType)
-                            } ?: UiState.Success(current to PlatformType.entries.toList())
-                    }.map { (current, platforms) ->
-                        data
-                            .sortedBy {
-                                it.accountKey != current.accountKey
-                            }.filter {
-                                it.platformType in platforms
-                            }.map { account ->
-                                accountServiceProvider(
-                                    accountType = AccountType.Specific(accountKey = account.accountKey),
-                                    repository = accountRepository,
-                                ).flatMap { service ->
-                                    remember(account.accountKey) {
-                                        (service as UserDataSource).userHandler.userById(account.accountKey.id)
-                                    }.collectAsState()
-                                        .toUi()
-                                } to account
-                            }.toImmutableList()
-                            .toImmutableListWrapper()
-                    }
-            }
+    }
 
-        val selectedUsers =
-            allUsers.map {
-                it
-                    .toImmutableList()
-                    .filter {
-                        selectedAccounts.contains(it.second)
-                    }.toImmutableList()
-                    .toImmutableListWrapper()
+    private val otherUsersFlow by lazy {
+        otherAccountsFlow.map { keys ->
+            keys.map { key ->
+                accountServiceFlow(
+                    accountType = AccountType.Specific(accountKey = key),
+                    repository = accountRepository,
+                ).mapNotNull {
+                    if (it is UserDataSource && it is AuthenticatedMicroblogDataSource) {
+                        it.userHandler.userById(it.accountKey.id).toUi()
+                    } else {
+                        null
+                    }
+                }.flatMapLatest { it }
             }
-        val replyState =
-            statusState?.map {
-                if (it is UiTimelineV2.Post && it.platformType == PlatformType.VVo) {
-                    it.quote.firstOrNull() ?: it
-                } else {
-                    it
+        }.combineLatestFlowLists().map { it.toImmutableList() }
+    }
+
+    private val emojiFlow by lazy {
+        composeConfigFlow.mapNotNull { config ->
+            config.emoji
+        }.flatMapLatest { emojiConfig ->
+            emojiConfig.emoji.toUi().map { emojiState ->
+                emojiState.map { emoji ->
+                    EmojiData(
+                        data = emoji,
+                        accountType = AccountType.Specific(emojiConfig.accountKey),
+                    )
                 }
             }
-        val remainingAccounts =
-            allUsers.map {
-                it
-                    .toImmutableList()
-                    .filter {
-                        !selectedAccounts.contains(it.second)
-                    }.toImmutableList()
-                    .toImmutableListWrapper()
+        }
+    }
+
+    private val textFlow by lazy {
+        MutableStateFlow("")
+    }
+
+    private val mediaSizeFlow by lazy {
+        MutableStateFlow(0)
+    }
+
+    private val remainingLengthFlow by lazy {
+        combine(
+            textFlow,
+            composeConfigFlow,
+        ) { text, config ->
+            config.text?.maxLength?.minus(text.length) ?: Int.MAX_VALUE
+        }
+    }
+
+    private val canSendFlow by lazy {
+        combine(
+            textFlow,
+            mediaSizeFlow,
+            remainingLengthFlow,
+            selectedAccountsKeyFlow,
+            composeConfigFlow,
+        ) { text, mediaSize, remainingLength, selectedAccountKeys, composeConfig ->
+            (text.isNotBlank() && text.isNotEmpty() && selectedAccountKeys.isNotEmpty() && remainingLength >= 0) ||
+                    ((text.isEmpty() || text.isBlank()) && composeConfig.media?.allowMediaOnly == true && mediaSize > 0)
+        }
+    }
+
+
+    private val statusFlow by lazy {
+        if (status != null && accountType != null) {
+            accountServiceFlow(
+                accountType = accountType,
+                repository = accountRepository,
+            ).mapNotNull {
+                if (it is PostDataSource) {
+                    it.postHandler.post(status.statusKey).toUi()
+                } else {
+                    null
+                }
+            }.flatMapLatest { it }
+        } else {
+            null
+        }
+    }
+
+    private val replyStateFlow by lazy {
+        statusFlow?.map { statusState ->
+            statusState.map { post ->
+                if (post is UiTimelineV2.Post && post.platformType == PlatformType.VVo) {
+                    post.quote.firstOrNull() ?: post
+                } else {
+                    post
+                }
             }
-        val enableCrossPost =
-            allUsers.map {
-                it.size > 1 // && status == null
-            }
-        val initialTextState =
-            if (statusState != null) {
-                userState.flatMap { user ->
-                    remember(statusState) {
-                        statusState.mapNotNull { timeline ->
-                            val content = timeline
-                            if (content is UiTimelineV2.Post) {
-                                when (content.platformType) {
-                                    PlatformType.VVo -> {
-                                        if (content.quote.any() && status is ComposeStatus.Quote) {
-                                            InitialText(
-                                                text = "//@${content.user?.name?.raw}:${content.content.raw}",
-                                                cursorPosition = 0,
-                                            )
-                                        } else {
-                                            null
-                                        }
-                                    }
-                                    PlatformType.Mastodon, PlatformType.Misskey -> {
-                                        if (status is ComposeStatus.Reply) {
-                                            val handleToAdd = mutableSetOf<String>()
-                                            if (content.user?.key != selectedAccounts.firstOrNull()?.accountKey) {
-                                                content.user?.handle?.let {
-                                                    handleToAdd.add(it.canonical)
-                                                }
-                                            }
-                                            content.content.data
-                                                .getElementsByAttributeValueStarting(
-                                                    "href",
-                                                    "flare://ProfileWithNameAndHost",
-                                                ).filter {
-                                                    val href = it.attr("href")
-                                                    val params =
-                                                        href
-                                                            .substringAfter("flare://ProfileWithNameAndHost/")
-                                                            .substringBefore("?accountKey=")
-                                                            .split('/')
-                                                    val userName = params.getOrNull(0)
-                                                    val host = params.getOrNull(1)
-                                                    user.handle.canonical != "@$userName@$host"
-                                                }.filter {
-                                                    it.text() != content.user?.handle?.canonical
-                                                }.forEach {
-                                                    handleToAdd.add(it.text())
-                                                }
-                                            val text =
-                                                buildString {
-                                                    handleToAdd.distinct().forEach {
-                                                        append("$it ")
-                                                    }
-                                                }
-                                            InitialText(
-                                                text = text,
-                                                cursorPosition = text.length,
-                                            )
-                                        } else {
-                                            null
-                                        }
-                                    }
-                                    else -> null
-                                }
-                            } else {
-                                null
-                            }
+        }
+    }
+
+    private val initialTextFlow by lazy {
+        if (accountType is AccountType.Specific && status != null) {
+            statusFlow?.flatMapLatest { statusState ->
+                selectedUsersFlow.mapNotNull {
+                    it.firstOrNull()?.takeSuccess()
+                }.map { user ->
+                    statusState.mapNotNull { post ->
+                        if (post is UiTimelineV2.Post) {
+                            InitialTextResolver.resolve(
+                                post = post,
+                                composeStatus = status,
+                                currentUserHandle = user.handle,
+                                selectedAccountKey = accountType.accountKey,
+                            )
+                        } else {
+                            null
                         }
                     }
                 }
-            } else {
-                null
             }
+        } else {
+            null
+        }
+    }
 
-        val services =
-            selectedAccounts.map {
-                accountServiceProvider(accountType = AccountType.Specific(accountKey = it.accountKey), repository = accountRepository)
+    @Composable
+    override fun body(): ComposeState {
+        val scope = rememberCoroutineScope()
+        val selectedUsers by selectedUsersFlow.collectAsUiState()
+        val remainingUsers by otherUsersFlow.collectAsUiState()
+        val emojiState by emojiFlow.flattenUiState()
+        val enableCrossPost by enableCrossPostFlow.collectAsUiState()
+        val composeConfig: UiState<ComposeConfig> by composeConfigFlow.collectAsUiState()
+        val canSend by canSendFlow.collectAsState(false)
+        if (accountType != null && accountType is AccountType.Specific) {
+            LaunchedEffect(accountType) {
+                selectedAccountsKeyFlow.value = listOf(accountType.accountKey).toImmutableList()
             }
-        val composeConfig: UiState<ComposeConfig> =
-            remember(services) {
-                services.merge().map {
-                    it
-                        .mapNotNull {
-                            if (it is AuthenticatedMicroblogDataSource) {
-                                it.composeConfig(
-                                    type =
-                                        when (status) {
-                                            is ComposeStatus.Quote -> ComposeType.Quote
-                                            is ComposeStatus.Reply -> ComposeType.Reply
-                                            null -> ComposeType.New
-                                        },
-                                )
-                            } else {
-                                null
-                            }
-                        }.reduceOrNull { acc, config -> acc.merge(config) } ?: ComposeConfig()
+        } else {
+            // load active account
+            LaunchedEffect(Unit) {
+                accountRepository.activeAccount.firstOrNull()?.let { account ->
+                    selectedAccountsKeyFlow.value = listOfNotNull(account.takeSuccess()?.accountKey)
+                        .toImmutableList()
                 }
             }
+        }
 
-        val emojiState =
-            composeConfig
-                .mapNotNull {
-                    it.emoji
-                }.flatMap {
-                    it.emoji.collectAsState().toUi()
-                }.map {
-                    remember(it) {
-                        EmojiData(it)
-                    }
-                }
+        val replyState = replyStateFlow?.flattenUiState()?.value
+        val initialTextState = initialTextFlow?.flattenUiState()?.value
+
 
         val visibilityState =
             composeConfig
@@ -257,81 +294,53 @@ public class ComposePresenter(
                     visibilityPresenter()
                 }
 
-        var text by remember {
-            mutableStateOf("")
-        }
-        var mediaSize by remember {
-            mutableStateOf(0)
-        }
-        val draftGroupId =
-            remember {
-                newDraftGroupId()
-            }
-        val remainingLength =
-            composeConfig
-                .mapNotNull {
-                    it.text
-                }.map {
-                    it.maxLength - text.length
-                }
-
-        val canSend =
-            remember(text, mediaSize, composeConfig) {
-                text.isNotBlank() &&
-                    text.isNotEmpty() &&
-                    accountState.isSuccess &&
-                    remainingLength.takeSuccessOr(0) >= 0 ||
-                    (
-                        (text.isEmpty() || text.isBlank()) &&
-                            composeConfig
-                                .takeSuccess()
-                                ?.media
-                                ?.allowMediaOnly == true &&
-                            mediaSize > 0
-                    )
-            }
 
         return object : ComposeState(
             canSend = canSend,
-            draftGroupId = draftGroupId,
             visibilityState = visibilityState,
             replyState = replyState,
             emojiState = emojiState,
             composeConfig = composeConfig,
             enableCrossPost = enableCrossPost,
-            selectedAccounts = selectedAccounts.toImmutableList(),
             selectedUsers = selectedUsers,
-            otherAccounts = remainingAccounts,
+            otherUsers = remainingUsers,
             initialTextState = initialTextState,
         ) {
             override fun send(
                 data: ComposeData,
                 groupId: String,
             ) {
-                composeUseCase.invoke(
-                    accounts = selectedAccounts.toList(),
-                    data = data,
-                    groupId = groupId,
-                )
+                scope.launch {
+                    val selectedAccounts = selectedAccountsFlow.firstOrNull().orEmpty()
+                    if (selectedAccounts.isNotEmpty()) {
+                        composeUseCase.invoke(
+                            accounts = selectedAccounts,
+                            data = data,
+                            groupId = groupId,
+                        )
+                    }
+                }
             }
 
-            override fun selectAccount(account: UiAccount) {
-                if (selectedAccounts.contains(account)) {
-                    if (selectedAccounts.size == 1) {
+            override fun selectAccount(accountKey: MicroBlogKey) {
+                if (selectedAccountsKeyFlow.value.contains(accountKey)) {
+                    if (selectedAccountsKeyFlow.value.size == 1) {
                         return
                     }
-                    selectedAccounts.remove(account)
+                    selectedAccountsKeyFlow.value =
+                        (selectedAccountsKeyFlow.value - accountKey).toImmutableList()
                 } else {
-                    selectedAccounts.add(account)
+                    selectedAccountsKeyFlow.value =
+                        (selectedAccountsKeyFlow.value + accountKey).toImmutableList()
                 }
             }
 
             override fun setText(value: String) {
-                text = value
+                textFlow.value = value
             }
 
             override fun setMediaSize(value: Int) {
-                mediaSize = value
+                mediaSizeFlow.value = value
             }
         }
     }
@@ -419,23 +428,21 @@ public sealed class ComposeStatus {
 @Immutable
 public abstract class ComposeState(
     public val canSend: Boolean,
-    public val draftGroupId: String,
     public val visibilityState: UiState<VisibilityState>,
     public val replyState: UiState<UiTimelineV2>?,
     public val initialTextState: UiState<InitialText>?,
     public val emojiState: UiState<EmojiData>,
     public val composeConfig: UiState<ComposeConfig>,
     public val enableCrossPost: UiState<Boolean>,
-    public val selectedAccounts: ImmutableList<UiAccount>,
-    public val otherAccounts: UiState<ImmutableListWrapper<Pair<UiState<UiProfile>, UiAccount>>>,
-    public val selectedUsers: UiState<ImmutableListWrapper<Pair<UiState<UiProfile>, UiAccount>>>,
+    public val otherUsers: UiState<ImmutableList<UiState<UiProfile>>>,
+    public val selectedUsers: UiState<ImmutableList<UiState<UiProfile>>>,
 ) {
     public abstract fun send(
         data: ComposeData,
         groupId: String,
     )
 
-    public abstract fun selectAccount(account: UiAccount)
+    public abstract fun selectAccount(accountKey: MicroBlogKey)
 
     public abstract fun setText(value: String)
 

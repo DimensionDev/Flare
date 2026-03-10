@@ -11,6 +11,7 @@ import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.SearchHistoryRepository
 import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
+import dev.dimension.flare.ui.presenter.compose.RestoreDraftUseCase
 import dev.dimension.flare.ui.presenter.compose.SaveDraftUseCase
 import dev.dimension.flare.ui.presenter.compose.SendDraftUseCase
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +31,7 @@ internal val commonModule =
         singleOf(::LocalFilterRepository)
         single { CoroutineScope(Dispatchers.IO) }
         singleOf(::SaveDraftUseCase)
+        singleOf(::RestoreDraftUseCase)
         single {
             SendDraftUseCase(
                 draftRepository = get(),

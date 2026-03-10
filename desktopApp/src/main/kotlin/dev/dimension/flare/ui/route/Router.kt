@@ -46,6 +46,7 @@ import dev.dimension.flare.ui.route.Route.Search
 import dev.dimension.flare.ui.route.Route.Timeline
 import dev.dimension.flare.ui.route.WindowSceneStrategy.Companion.window
 import dev.dimension.flare.ui.screen.compose.ComposeDialog
+import dev.dimension.flare.ui.screen.compose.DraftBoxScreen
 import dev.dimension.flare.ui.screen.dm.DmConversationScreen
 import dev.dimension.flare.ui.screen.dm.DmListScreen
 import dev.dimension.flare.ui.screen.dm.UserDMConversationScreen
@@ -520,6 +521,9 @@ internal fun WindowScope.Router(
                         toLogin = {
                             navigate(Route.ServiceSelect)
                         },
+                        toDraftBox = {
+                            navigate(Route.DraftBox)
+                        },
                         toLocalCache = {
                             navigate(Route.LocalCache)
                         },
@@ -528,6 +532,18 @@ internal fun WindowScope.Router(
                         },
                         toRSSManagement = {
                             navigate(Route.RssList)
+                        },
+                    )
+                }
+
+                entry<Route.DraftBox> {
+                    DraftBoxScreen(
+                        onEdit = { _, accountKey ->
+                            navigate(
+                                Route.Compose.New(
+                                    accountType = Specific(accountKey = accountKey),
+                                ),
+                            )
                         },
                     )
                 }

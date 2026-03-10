@@ -126,11 +126,6 @@ import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import io.github.composefluent.component.TextFieldDefaults
 import io.github.composefluent.surface.Card
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
-import moe.tlaster.precompose.molecule.producePresenter
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import java.util.Locale
 import kotlin.time.Duration
@@ -138,6 +133,11 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.uuid.ExperimentalUuidApi
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 private val imageExtensions = setOf("png", "jpg", "jpeg", "gif", "bmp")
 private val videoExtensions = setOf("mp4", "mov", "avi", "mkv", "webm")
@@ -222,38 +222,36 @@ fun ComposeDialog(
                         .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                state.state.selectedUsers.onSuccess { selectedUsers ->
-                    for (i in 0 until selectedUsers.size) {
-                        val (user, account) = selectedUsers[i]
-                        user.onSuccess {
+                state.state.selectedUsers.onSuccess { users ->
+                    users.forEach { userState ->
+                        userState.onSuccess { user ->
                             PillButton(
 //                                onClick = {
 //                                    state.state.selectAccount(account)
 //                                },
                                 selected = false,
                                 onSelectedChanged = {
-                                    state.state.selectAccount(account)
+                                    state.state.selectAccount(user.key)
                                 },
                                 content = {
-                                    AvatarComponent(it.avatar, size = 24.dp)
-                                    Text(it.handle.canonical)
+                                    AvatarComponent(user.avatar, size = 24.dp)
+                                    Text(user.handle.canonical)
                                 },
                             )
                         }
                     }
-                    state.state.otherAccounts.onSuccess { others ->
-                        if (others.size > 0) {
+                    state.state.otherUsers.onSuccess { others ->
+                        if (others.isNotEmpty()) {
                             MenuFlyoutContainer(
                                 flyout = {
-                                    for (i in 0 until others.size) {
-                                        val (user, account) = others[i]
-                                        user.onSuccess { data ->
+                                    others.forEach { userState ->
+                                        userState.onSuccess { data ->
                                             MenuFlyoutItem(
                                                 text = {
                                                     Text(text = data.handle.canonical)
                                                 },
                                                 onClick = {
-                                                    state.state.selectAccount(account)
+                                                    state.state.selectAccount(data.key)
                                                 },
                                                 icon = {
                                                     AvatarComponent(
@@ -752,19 +750,10 @@ fun ComposeDialog(
                     AnimatedVisibility(emojis.size > 0) {
                         FlyoutContainer(
                             flyout = {
-                                val actualAccountType =
-                                    remember(
-                                        state.state.selectedAccounts,
-                                    ) {
-                                        state.state.selectedAccounts
-                                            .firstOrNull()
-                                            ?.accountKey
-                                            ?.let(AccountType::Specific)
-                                    }
                                 EmojiPicker(
                                     data = emojis.data,
                                     onEmojiSelected = state::selectEmoji,
-                                    accountType = actualAccountType ?: accountType,
+                                    accountType = emojis.accountType,
                                     modifier =
                                         Modifier
                                             .sizeIn(
@@ -1032,7 +1021,7 @@ private fun composePresenter(
                         },
                     language = languageState.takeSuccess()?.selectedLanguage.orEmpty(),
                 )
-            state.send(data, state.draftGroupId)
+            state.send(data, "")
             // cleanup
 
             textFieldState.edit {

@@ -1086,7 +1086,7 @@ private fun composePresenter(
                         },
                     language = languageState.takeSuccess()?.selectedLanguage.orEmpty(),
                 )
-            state.send(data, state.draftGroupId)
+            state.send(data)
         }
     }
 }

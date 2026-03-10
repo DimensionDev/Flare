@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.presenter.compose
 
-import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.repository.AccountRepository
@@ -74,40 +73,7 @@ internal class SendDraftUseCase(
                     findAccount(target.accountKey)?.let { account ->
                         ComposeTargetData(
                             account = account,
-                            data =
-                                ComposeData(
-                                    content = draft.content.text,
-                                    visibility = draft.content.visibility,
-                                    language = draft.content.language,
-                                    medias = medias,
-                                    sensitive = draft.content.sensitive,
-                                    spoilerText = draft.content.spoilerText,
-                                    poll =
-                                        draft.content.poll?.let {
-                                            ComposeData.Poll(
-                                                options = it.options,
-                                                expiredAfter = it.expiredAfter,
-                                                multiple = it.multiple,
-                                            )
-                                        },
-                                    localOnly = draft.content.localOnly,
-                                    referenceStatus =
-                                        draft.content.reference?.let { reference ->
-                                            ComposeData.ReferenceStatus(
-                                                data = null,
-                                                composeStatus =
-                                                    when (reference.type) {
-                                                        DraftReferenceType.QUOTE -> ComposeStatus.Quote(reference.statusKey)
-                                                        DraftReferenceType.REPLY -> ComposeStatus.Reply(reference.statusKey)
-                                                        DraftReferenceType.VVO_COMMENT ->
-                                                            ComposeStatus.VVOComment(
-                                                                statusKey = reference.statusKey,
-                                                                rootId = requireNotNull(reference.rootId),
-                                                            )
-                                                    },
-                                            )
-                                        },
-                                ),
+                            data = draft.content.toComposeData(medias = medias),
                         )
                     }
                 }

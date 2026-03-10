@@ -144,6 +144,7 @@
     <string name="settings_ai_config_description">Налаштування параметрів ШІ</string>
     <string name="settings_ai_config_server">URL-адреса сервера</string>
     <string name="settings_ai_config_server_hint">Введіть URL-адресу сервера</string>
+    <string name="settings_ai_config_server_url_requirement">URL-адреса сервера повинна закінчуватися \'/\' і підтримувати API сумісних з OpenAI-chat/completions.</string>
     <string name="settings_ai_config_server_self_host_description">Ви можете використовувати офіційний сервер або власний сервер</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Натисніть для вибору типу бекенду ШІ</string>

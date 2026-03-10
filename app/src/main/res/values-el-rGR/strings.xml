@@ -58,6 +58,7 @@
     <string name="settings_ai_config_description">Ρύθμιση ρυθμίσεων τεχνητής νοημοσύνης</string>
     <string name="settings_ai_config_server">Url Διακομιστή</string>
     <string name="settings_ai_config_server_hint">Εισάγετε το URL του διακομιστή</string>
+    <string name="settings_ai_config_server_url_requirement">Το URL διακομιστή πρέπει να τελειώσει με μια τελική κάθετο και να υποστηρίξει το API συμβατό με OpenAI v1/chat/completions API.</string>
     <string name="settings_ai_config_server_self_host_description">Μπορείτε να χρησιμοποιήσετε τον επίσημο διακομιστή ή αυτο-φιλοξενία του δικού σας διακομιστή</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Πατήστε για να επιλέξετε τον τύπο συστήματος υποστήριξης τεχνητής νοημοσύνης</string>

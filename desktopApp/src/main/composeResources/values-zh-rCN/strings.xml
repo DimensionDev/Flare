@@ -147,6 +147,7 @@
     <string name="settings_ai_config_description">配置 AI 设置</string>
     <string name="settings_ai_config_server">服务器 URL</string>
     <string name="settings_ai_config_server_hint">输入服务器 URL</string>
+    <string name="settings_ai_config_server_url_requirement">服务器 URL 必须以 \'/\' 结尾，并支持OpenAI兼容的 v1/chat/complitions API。</string>
     <string name="settings_ai_config_server_self_host_description">您可以使用官方服务器或自己的服务器</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">点击选择 AI 后端类型</string>

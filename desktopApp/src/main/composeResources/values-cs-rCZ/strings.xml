@@ -150,6 +150,7 @@
     <string name="settings_ai_config_description">Konfigurace nastavení AI</string>
     <string name="settings_ai_config_server">URL serveru</string>
     <string name="settings_ai_config_server_hint">Zadejte URL serveru</string>
+    <string name="settings_ai_config_server_url_requirement">Adresa URL serveru musí skončit \'/\' a podpořit API kompatibilní s OpenAI v1/chat/completions API.</string>
     <string name="settings_ai_config_server_self_host_description">Můžete použít oficiální server nebo hostit vlastní server</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Klepnutím vyberte typ AI backendu</string>

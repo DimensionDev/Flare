@@ -148,6 +148,7 @@
     <string name="settings_ai_config_description">Muokkaa AI asetuksia</string>
     <string name="settings_ai_config_server">Palvelimen URL</string>
     <string name="settings_ai_config_server_hint">Syötä palvelimen URL</string>
+    <string name="settings_ai_config_server_url_requirement">Palvelimen URL-osoitteen tulee päättyä \'/\' ja tukea OpenAI-yhteensopivaa v1/chat/completions APIa.</string>
     <string name="settings_ai_config_server_self_host_description">Voit käyttää virallista palvelinta tai itse isäntä oma palvelin</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Napauta valitaksesi AI taustaosan tyyppi</string>

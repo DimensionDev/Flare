@@ -58,6 +58,7 @@
     <string name="settings_ai_config_description">Konfigurer AI-indstillinger</string>
     <string name="settings_ai_config_server">Server URL</string>
     <string name="settings_ai_config_server_hint">Angiv serverens URL</string>
+    <string name="settings_ai_config_server_url_requirement">Server URL skal slutte med en afsluttende skråstreg og støtte OpenAI-kompatibel v1/chat/komplettering API.</string>
     <string name="settings_ai_config_server_self_host_description">Du kan bruge den officielle server eller selv-vært din egen server</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Tryk for at vælge AI-motortype</string>

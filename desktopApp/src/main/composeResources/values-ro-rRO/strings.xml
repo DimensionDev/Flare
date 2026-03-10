@@ -149,6 +149,7 @@
     <string name="settings_ai_config_description">Configurare setări AI</string>
     <string name="settings_ai_config_server">URL Server</string>
     <string name="settings_ai_config_server_hint">Introduceți URL-ul serverului</string>
+    <string name="settings_ai_config_server_url_requirement">URL-ul serverului trebuie să se termine cu \'/\' şi să suporte v1/chat/completions API.</string>
     <string name="settings_ai_config_server_self_host_description">Puteţi utiliza serverul oficial sau vă puteţi gazdui propriul server</string>
     <string name="settings_ai_config_type">AI Type</string>
     <string name="settings_ai_config_type_description">Atingeți pentru a alege tipul backend AI</string>

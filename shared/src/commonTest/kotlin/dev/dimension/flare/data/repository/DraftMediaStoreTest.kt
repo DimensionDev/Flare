@@ -179,7 +179,12 @@ class DraftMediaStoreTest {
             assertEquals("", persisted[1].fileName)
             persisted.forEach {
                 assertTrue(fileSystem.exists(it.cachePath.toPath()))
-                assertTrue(it.cachePath.substringAfterLast('/').matches(Regex("\\d+_.+\\.bin")))
+                assertTrue(
+                    it.cachePath
+                        .toPath()
+                        .name
+                        .matches(Regex("\\d+_.+\\.bin")),
+                )
             }
         }
 
@@ -197,7 +202,14 @@ class DraftMediaStoreTest {
 
             assertEquals(1, persisted.size)
             assertTrue(fileSystem.exists(persisted.single().cachePath.toPath()))
-            assertEquals("0_a__b__c___.png", persisted.single().cachePath.substringAfterLast('/'))
+            assertEquals(
+                "0_a__b__c___.png",
+                persisted
+                    .single()
+                    .cachePath
+                    .toPath()
+                    .name,
+            )
         }
 
     @Test
@@ -213,7 +225,14 @@ class DraftMediaStoreTest {
                     ),
                 )
 
-            assertEquals("0______file_.png__", persisted.single().cachePath.substringAfterLast('/'))
+            assertEquals(
+                "0______file_.png__",
+                persisted
+                    .single()
+                    .cachePath
+                    .toPath()
+                    .name,
+            )
             assertTrue(fileSystem.exists(persisted.single().cachePath.toPath()))
         }
 

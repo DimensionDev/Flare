@@ -9,7 +9,10 @@ import okio.SYSTEM
 import platform.Foundation.NSTemporaryDirectory
 import kotlin.uuid.Uuid
 
-internal actual fun createTestRootPath(): Path = "${NSTemporaryDirectory()}draft-media-store-test-${Uuid.random()}".toPath()
+internal actual fun createTestRootPath(): Path =
+    "${NSTemporaryDirectory()}draft-media-store-test-${Uuid.random()}".toPath().also {
+        FileSystem.SYSTEM.createDirectories(it)
+    }
 
 internal actual fun deleteTestRootPath(path: Path) {
     if (FileSystem.SYSTEM.exists(path)) {

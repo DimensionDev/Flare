@@ -225,11 +225,11 @@ private fun renderInlineContent(
                         height = 1.em,
                         placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
                     )
-                return InlineTextContent(placeholder) { altText ->
+                return InlineTextContent(placeholder) {
                     Layout(
                         content = {
                             EmojiImage(
-                                uri = altText,
+                                uri = content.url,
                                 modifier = Modifier.fillMaxSize(),
                             )
                         },

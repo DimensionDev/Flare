@@ -84,6 +84,19 @@ class RichTextStateTest {
     }
 
     @Test
+    fun inline_image_creates_inline_content_entry_with_image_url() {
+        val imgUrl = "https://example.com/inline.png"
+        val ui = htmlToUiRichText("<p>Hi <img src=\"$imgUrl\" alt=\"inline image\"/></p>")
+        val state = RichTextState(ui, defaultStyleData())
+
+        val anyInlineImage =
+            state.inlineContent.values.any {
+                it is BuildContentAnnotatedStringContext.InlineType.Emoji && it.url == imgUrl
+            }
+        assertTrue(anyInlineImage, "Expected an inline image entry with the provided URL")
+    }
+
+    @Test
     fun span_br_span_renders_single_newline() {
         val html = "<span>hello</span><span><br></span><span>world</span>"
         val ui = htmlToUiRichText(html)

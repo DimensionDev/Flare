@@ -1,13 +1,14 @@
 package dev.dimension.flare.data.database.cache.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import androidx.room.TypeConverter
-import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.common.decodeProtobuf
+import dev.dimension.flare.common.encodeProtobuf
 import dev.dimension.flare.data.database.cache.model.DbList.ListContent
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -21,6 +22,7 @@ import kotlin.uuid.Uuid
 internal data class DbList(
     val listKey: MicroBlogKey,
     val accountType: DbAccountType,
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     val content: ListContent,
     @PrimaryKey
     val id: String = "${accountType}_$listKey",
@@ -33,10 +35,10 @@ internal data class DbList(
 
 internal class ListContentConverters {
     @TypeConverter
-    fun fromMessageContent(content: ListContent): String = content.encodeJson()
+    fun fromMessageContent(content: ListContent): ByteArray = content.encodeProtobuf()
 
     @TypeConverter
-    fun toMessageContent(value: String): ListContent = value.decodeJson()
+    fun toMessageContent(value: ByteArray): ListContent = value.decodeProtobuf()
 }
 
 @Entity(

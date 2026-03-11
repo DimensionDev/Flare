@@ -12,8 +12,8 @@ import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.UiRichText
-import dev.dimension.flare.ui.render.parseHtml
-import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toTranslatableText
+import dev.dimension.flare.ui.render.toUiPlainText
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -33,6 +33,7 @@ public class TranslatePresenter(
     private val openAIService by inject<OpenAIService>()
     private val appDataStore: AppDataStore by inject()
     private val onDeviceAI: OnDeviceAI by inject()
+    private val sourceText: String by lazy { source.toTranslatableText() }
 
     @Composable
     override fun body(): UiState<UiRichText> {
@@ -53,7 +54,7 @@ public class TranslatePresenter(
                     val prompt = buildTranslatePrompt(promptTemplate, targetLanguage, source)
                     when (val type = aiConfig.type) {
                         AppSettings.AiConfig.Type.OnDevice ->
-                            onDeviceAI.translate(source.html, targetLanguage, prompt) ?: legacyGoogleTranslate()
+                            onDeviceAI.translate(sourceText, targetLanguage, prompt) ?: legacyGoogleTranslate()
                         is AppSettings.AiConfig.Type.OpenAI -> {
                             if (type.serverUrl.isBlank() || type.apiKey.isBlank() || type.model.isBlank()) {
                                 legacyGoogleTranslate()
@@ -82,7 +83,7 @@ public class TranslatePresenter(
                     parameter("sl", "auto")
                     parameter("tl", targetLanguage)
                     parameter("dt", "t")
-                    parameter("q", source.innerText)
+                    parameter("q", sourceText)
                     parameter("ie", "UTF-8")
                     parameter("oe", "UTF-8")
                 }.body<JsonArray>()
@@ -106,14 +107,15 @@ public class TranslatePresenter(
     ): String =
         template
             .replace("{target_language}", targetLanguage)
-            .replace("{source_html}", source.html)
+            .replace("{source_text}", sourceText)
+            .replace("{source_html}", sourceText)
 
     private fun toUiRichText(translatedContent: String): UiRichText =
-        parseHtml(
-            translatedContent
-                .removePrefix("```html")
-                .removePrefix("```")
-                .removeSuffix("```")
-                .trim(),
-        ).toUi()
+        translatedContent
+            .removePrefix("```html")
+            .removePrefix("```text")
+            .removePrefix("```")
+            .removeSuffix("```")
+            .trim()
+            .toUiPlainText()
 }

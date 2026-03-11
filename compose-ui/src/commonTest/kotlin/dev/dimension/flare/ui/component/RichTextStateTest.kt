@@ -5,6 +5,7 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.TextStyle
 import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.render.toUi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -27,7 +28,7 @@ class RichTextStateTest {
 
     private fun htmlToUiRichText(html: String): UiRichText {
         val element = Ksoup.parse(html).body()
-        return UiRichText(data = element, isRtl = false)
+        return element.toUi()
     }
 
     @Test

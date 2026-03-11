@@ -1,94 +1,152 @@
 package dev.dimension.flare.ui.render
 
 import androidx.compose.runtime.Immutable
-import com.fleeksoft.ksoup.Ksoup
-import com.fleeksoft.ksoup.nodes.Element
-import com.fleeksoft.ksoup.nodes.TextNode
 import de.cketti.codepoints.codePointCount
+import dev.dimension.flare.common.SerializableImmutableList
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 
 public expect class PlatformText
 
-internal expect fun UiRichText.renderPlatformText(): PlatformText
+internal expect fun renderPlatformText(renderRuns: ImmutableList<RenderContent>): PlatformText
 
-@Serializable(with = UiRichTextSerializer::class)
+@Serializable
+public sealed class RenderContent {
+    @Serializable
+    public data class Text(
+        val runs: SerializableImmutableList<RenderRun>,
+        val block: RenderBlockStyle = RenderBlockStyle(),
+    ) : RenderContent()
+
+    @Serializable
+    public data class BlockImage(
+        val url: String,
+        val href: String?,
+    ) : RenderContent()
+}
+
+@Serializable
+public sealed class RenderRun {
+    @Serializable
+    public data class Text(
+        val text: String,
+        val style: RenderTextStyle = RenderTextStyle(),
+    ) : RenderRun()
+
+    @Serializable
+    public data class Image(
+        val url: String,
+        val alt: String,
+    ) : RenderRun()
+}
+
+@Serializable
+public data class RenderTextStyle(
+    val link: String? = null,
+    val bold: Boolean = false,
+    val italic: Boolean = false,
+    val strikethrough: Boolean = false,
+    val monospace: Boolean = false,
+    val code: Boolean = false,
+    val underline: Boolean = false,
+    val small: Boolean = false,
+    val time: Boolean = false,
+)
+
+@Serializable
+public data class RenderBlockStyle(
+    val headingLevel: Int? = null,
+    val textAlignment: RenderTextAlignment? = null,
+    val isListItem: Boolean = false,
+    val isBlockQuote: Boolean = false,
+    val isFigCaption: Boolean = false,
+)
+
+@Serializable
+public enum class RenderTextAlignment {
+    Start,
+    Center,
+}
+
+@Serializable
 @Immutable
 public data class UiRichText(
-    val data: Element,
+    public val renderRuns: SerializableImmutableList<RenderContent>,
     val isRtl: Boolean,
+    public val raw: String,
+    public val innerText: String,
+    public val imageUrls: SerializableImmutableList<String>,
 ) {
-    public val innerText: String = data.wholeText()
-    val raw: String by lazy {
-        data
-            .nodeStream()
-            .joinToString("") { node ->
-                when {
-                    node is TextNode -> node.getWholeText()
-                    node.nameIs("br") -> "\n"
-                    node.nameIs("img") -> node.attr("alt")
-                    node.nameIs("emoji") -> node.attr("alt")
-                    else -> ""
-                }
+    public val isEmpty: Boolean =
+        renderRuns.all { content ->
+            when (content) {
+                is RenderContent.BlockImage -> false
+                is RenderContent.Text ->
+                    content.runs.all { run ->
+                        when (run) {
+                            is RenderRun.Image -> false
+                            is RenderRun.Text -> run.text.isEmpty()
+                        }
+                    }
             }
-    }
-    val html: String = data.compactHtml()
-    public val isEmpty: Boolean = raw.isEmpty() && data.getAllElements().size <= 1
+        }
     public val isLongText: Boolean = innerText.codePointCount() > 480
-
-    public val imageUrls: ImmutableList<String> =
-        data
-            .getElementsByTag("img")
-            .mapNotNull { it.attr("src").ifEmpty { null } }
-            .plus(
-                data
-                    .getElementsByTag("emoji")
-                    .mapNotNull { it.attr("target").ifEmpty { null } },
-            ).toImmutableList()
-
     public val platformText: PlatformText by lazy {
-        renderPlatformText()
+        renderPlatformText(renderRuns)
     }
 }
 
-internal object UiRichTextSerializer : KSerializer<UiRichText> {
-    override val descriptor by lazy {
-        PrimitiveSerialDescriptor("UiRichText", PrimitiveKind.STRING)
-    }
-
-    override fun serialize(
-        encoder: Encoder,
-        value: UiRichText,
-    ) {
-        encoder.encodeString(value.html)
-    }
-
-    override fun deserialize(decoder: Decoder): UiRichText {
-        val html = decoder.decodeString()
-        return parseHtml(html).toUi()
-    }
-}
-
-private fun Element.compactHtml(): String {
-    val root = clone()
-    val document = Ksoup.parse("")
-    document.outputSettings().prettyPrint(false)
-    document.body().appendChild(root)
-    return root.html()
-}
-
-internal fun Element.toUi(): UiRichText =
+public fun String.toUiPlainText(): UiRichText =
     UiRichText(
-        data = this,
-        isRtl = text().isRtl(),
+        renderRuns =
+            listOf(
+                RenderContent.Text(
+                    runs =
+                        listOf(
+                            RenderRun.Text(text = this),
+                        ).toImmutableList(),
+                ),
+            ).toImmutableList(),
+        isRtl = isRtl(),
+        raw = this,
+        innerText = this,
+        imageUrls = emptyList<String>().toImmutableList(),
     )
 
-internal fun parseHtml(html: String): Element = Ksoup.parse(html).body()
+public fun UiRichText.toTranslatableText(): String {
+    val builder = StringBuilder()
+    var appendedTextBlock = false
+    renderRuns.forEach { content ->
+        when (content) {
+            is RenderContent.BlockImage -> Unit
+            is RenderContent.Text -> {
+                val blockText = content.plainText().trim()
+                if (blockText.isNotEmpty()) {
+                    if (appendedTextBlock) {
+                        builder.append('\n')
+                    }
+                    builder.append(blockText)
+                    appendedTextBlock = true
+                }
+            }
+        }
+    }
+    return builder.toString().trim()
+}
+
+public fun RenderContent.Text.plainText(): String =
+    buildString {
+        runs.forEach { run ->
+            when (run) {
+                is RenderRun.Image -> {
+                    if (run.alt.isNotBlank()) {
+                        append(run.alt)
+                    }
+                }
+                is RenderRun.Text -> append(run.text)
+            }
+        }
+    }
 
 internal expect fun String.isRtl(): Boolean

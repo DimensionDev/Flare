@@ -10,12 +10,14 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.util.fastForEach
-import com.fleeksoft.ksoup.nodes.Element
-import com.fleeksoft.ksoup.nodes.Node
-import com.fleeksoft.ksoup.nodes.TextNode
+import dev.dimension.flare.ui.render.RenderBlockStyle
+import dev.dimension.flare.ui.render.RenderContent
+import dev.dimension.flare.ui.render.RenderRun
+import dev.dimension.flare.ui.render.RenderTextAlignment
+import dev.dimension.flare.ui.render.RenderTextStyle
 import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -34,7 +36,7 @@ internal class RichTextState(
     private val context = BuildContentAnnotatedStringContext()
     val contents: ImmutableList<RichTextContent> =
         buildContentAnnotatedString(
-            element = richText.data,
+            renderContents = richText.renderRuns,
             context = context,
             styleData = styleData,
         )
@@ -45,16 +47,12 @@ internal class RichTextState(
 }
 
 private fun buildContentAnnotatedString(
-    element: Element,
+    renderContents: ImmutableList<RenderContent>,
     context: BuildContentAnnotatedStringContext,
     styleData: StyleData,
 ): ImmutableList<RichTextContent> {
     val builder = ContentBuilder(context)
-    builder.renderElement(
-        element,
-        styleData = styleData,
-        context = context,
-    )
+    builder.renderContents(renderContents, styleData)
     return builder.build()
 }
 
@@ -240,427 +238,186 @@ private class ContentBuilder(
     }
 }
 
-
-private fun ContentBuilder.renderNode(
-    node: Node,
+private fun ContentBuilder.renderContents(
+    renderContents: ImmutableList<RenderContent>,
     styleData: StyleData,
-    context: BuildContentAnnotatedStringContext,
 ) {
-    when (node) {
-        is Element -> {
-            this.renderElement(node, styleData = styleData, context = context)
+    renderContents.forEachIndexed { index, content ->
+        when (content) {
+            is RenderContent.BlockImage -> appendBlockImage(content.url, content.href)
+            is RenderContent.Text -> {
+                renderTextContent(content, styleData)
+                appendSeparatorIfNeeded(
+                    current = content,
+                    next = renderContents.getOrNull(index + 1),
+                )
+            }
         }
-
-        is TextNode -> {
-            renderText(node.text())
-        }
-
-        else -> Unit
     }
 }
 
-private fun ContentBuilder.renderText(
-    text: String,
+private fun ContentBuilder.renderTextContent(
+    content: RenderContent.Text,
+    styleData: StyleData,
 ) {
-    append(text)
+    val blockTextStyle = styleData.blockTextStyle(content.block)
+    val paragraphStyle = blockTextStyle.toParagraphStyle()
+    val needsParagraphStyle =
+        content.block.textAlignment != null ||
+            content.block.isBlockQuote ||
+            content.block.headingLevel != null ||
+            content.block.isFigCaption
+
+    if (needsParagraphStyle) {
+        withStyle(paragraphStyle) {
+            renderRuns(content.runs, content.block, styleData, blockTextStyle)
+        }
+    } else {
+        renderRuns(content.runs, content.block, styleData, blockTextStyle)
+    }
 }
 
-
-private fun ContentBuilder.renderElement(
-    element: Element,
+private fun ContentBuilder.renderRuns(
+    runs: ImmutableList<RenderRun>,
+    block: RenderBlockStyle,
     styleData: StyleData,
-    context: BuildContentAnnotatedStringContext,
+    blockTextStyle: TextStyle,
 ) {
-    when (element.tagName().lowercase()) {
-        "a" -> {
-            renderLink(element, styleData = styleData, context = context)
+    runs.forEach { run ->
+        when (run) {
+            is RenderRun.Image -> {
+                val imageId = context.appendImageInlineContent(run.url)
+                appendInlineContent(imageId, run.alt.ifEmpty { run.url })
+            }
+            is RenderRun.Text -> renderTextRun(run, block, styleData, blockTextStyle)
         }
+    }
+}
 
-        "br" -> {
-            appendLine()
+private fun ContentBuilder.renderTextRun(
+    run: RenderRun.Text,
+    block: RenderBlockStyle,
+    styleData: StyleData,
+    blockTextStyle: TextStyle,
+) {
+    val spanStyle = styleData.runTextStyle(run.style, block, blockTextStyle).toSpanStyle()
+    val appendContent: ContentBuilder.() -> Unit = {
+        append(run.text)
+    }
+    val link = run.style.link
+
+    if (link != null) {
+        withLink(link) {
+            withStyle(spanStyle, appendContent)
         }
+    } else {
+        withStyle(spanStyle, appendContent)
+    }
+}
 
-        "center" -> {
-            val style =
-                styleData.textStyle.copy(
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                )
-            withStyle(
-                style.toParagraphStyle()
-            ) {
-                withStyle(style.toSpanStyle()) {
-                    element.childNodes().fastForEach {
-                        renderNode(
-                            node = it,
-                            styleData = styleData.copy(
-                                style = style,
-                            ),
-                            context = context,
-                        )
-                    }
-                }
-            }
-        }
-
-        "code" -> {
-            pushStyle(
-                styleData.textStyle.copy(
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                    background = styleData.color.copy(alpha = 0.1f),
-                ).toSpanStyle(),
-            )
-            element.childNodes().fastForEach {
-                renderNode(node = it, styleData = styleData, context = context)
-            }
-            pop()
-        }
-
-        "blockquote" -> {
-            val style =
-                styleData.textStyle.copy(
-                    color = styleData.color.copy(alpha = 0.7f),
-                    background = styleData.color.copy(alpha = 0.05f),
-                )
-            withStyle(
-                style.toParagraphStyle(),
-            ) {
-                withStyle(style.toSpanStyle()) {
-                    element.childNodes().fastForEach {
-                        renderNode(
-                            node = it,
-                            styleData = styleData.copy(
-                                style = style
-                            ),
-                            context = context,
-                        )
-                    }
-                }
-            }
-        }
-
-        "p", "div" -> {
-            withStyle(
-                styleData.textStyle.toSpanStyle(),
-            ) {
-                element.childNodes().fastForEach {
-                    renderNode(node = it, styleData = styleData, context = context)
-                }
-            }
-
-            if (element.parent()?.childNodes()?.last() != element) {
-                appendLine()
-                appendLine()
-            }
-        }
-
-        "span" -> {
-            element.childNodes().fastForEach {
-                renderNode(node = it, styleData = styleData, context = context)
-            }
-        }
-
-        "emoji" -> {
-            val target = element.attribute("target")?.value
-            if (!target.isNullOrEmpty()) {
-                val imageId = context.appendImageInlineContent(target)
-                appendInlineContent(imageId, target)
-            }
-        }
-
-        "img" -> {
-            val src = element.attribute("src")?.value
-            if (!src.isNullOrEmpty()) {
-                if (context.isInBlockState()) {
-                    val href = element.attribute("href")?.value
-                    // Block image
-                    appendBlockImage(src, href)
-                } else {
-                    // Inline image
-                    val imageId = context.appendImageInlineContent(src)
-                    appendInlineContent(imageId, src)
-                }
-            }
-        }
-
-        "strong", "b" -> {
-            val style = styleData.textStyle.copy(fontWeight = FontWeight.Bold)
-            pushStyle(
-                style.toSpanStyle(),
-            )
-            element.childNodes().fastForEach {
-                renderNode(
-                    node = it,
-                    styleData = styleData.copy(
-                        style = style,
-                        linkStyle = styleData.linkStyle.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                    ),
-                    context = context
-                )
-            }
-            pop()
-        }
-
-        "em", "i" -> {
-            val style = styleData.textStyle.copy(fontStyle = FontStyle.Italic)
-            pushStyle(
-                style.toSpanStyle(),
-            )
-            element.childNodes().fastForEach {
-                renderNode(
-                    node = it,
-                    styleData = styleData.copy(
-                        style = style,
-                        linkStyle = styleData.linkStyle.copy(
-                            fontStyle = FontStyle.Italic
-                        ),
-                    ),
-                    context = context
-                )
-            }
-            pop()
-        }
-
-        "del", "s" -> {
-            val style = styleData.textStyle.copy(textDecoration = TextDecoration.LineThrough)
-            pushStyle(
-                style.toSpanStyle(),
-            )
-            element.childNodes().fastForEach {
-                renderNode(
-                    node = it,
-                    styleData = styleData.copy(
-                        style = style,
-                        linkStyle = styleData.linkStyle.copy(
-                            textDecoration = TextDecoration.LineThrough
-                        ),
-                    ),
-                    context = context
-                )
-            }
-            pop()
-        }
-
-        "u" -> {
-            val style = styleData.textStyle.copy(textDecoration = TextDecoration.Underline)
-            pushStyle(
-                style.toSpanStyle(),
-            )
-            element.childNodes().fastForEach {
-                renderNode(
-                    node = it,
-                    styleData = styleData.copy(
-                        style = style,
-                        linkStyle = styleData.linkStyle.copy(
-                            textDecoration = TextDecoration.Underline
-                        ),
-                    ),
-                    context = context
-                )
-            }
-            pop()
-        }
-
-        "small" -> {
-            val style = styleData.textStyle.copy(
-                fontSize = styleData.textStyle.fontSize * 0.8,
-                color = styleData.color.copy(alpha = 0.7f),
-            )
-            pushStyle(
-                style.toSpanStyle(),
-            )
-            element.childNodes().fastForEach {
-                renderNode(
-                    node = it,
-                    styleData = styleData.copy(
-                        style = style,
-                        linkStyle = styleData.linkStyle.copy(
-                            fontSize = styleData.linkStyle.fontSize * 0.8,
-                            color = styleData.linkStyle.color.copy(alpha = 0.7f),
-                        ),
-                    ),
-                    context = context
-                )
-            }
-            pop()
-        }
-
-        "li" -> {
-            append("• ")
-            element.childNodes().fastForEach {
-                renderNode(node = it, styleData = styleData, context = context)
-            }
-            appendLine()
-        }
-
-        "ul" -> {
-            element.childNodes().fastForEach {
-                renderNode(node = it, styleData = styleData, context = context)
-            }
-        }
-
-        "h6" -> {
-            withStyle(
-                styleData.h6.toParagraphStyle(),
-            ) {
-                withStyle(styleData.h6.toSpanStyle()) {
-                    element.childNodes().fastForEach {
-                        renderNode(node = it, styleData = styleData, context = context)
-                    }
-                }
-            }
-            if (element.parent()?.childNodes()?.last() != element) {
-                appendLine()
-            }
-        }
-
-        "h5" -> {
-            withStyle(
-                styleData.h5.toParagraphStyle(),
-            ) {
-                withStyle(styleData.h5.toSpanStyle()) {
-                    element.childNodes().fastForEach {
-                        renderNode(node = it, styleData = styleData, context = context)
-                    }
-                }
-            }
-            if (element.parent()?.childNodes()?.last() != element) {
-                appendLine()
-            }
-        }
-
-        "h4" -> {
-            withStyle(
-                styleData.h4.toParagraphStyle(),
-            ) {
-                withStyle(styleData.h4.toSpanStyle()) {
-                    element.childNodes().fastForEach {
-                        renderNode(node = it, styleData = styleData, context = context)
-                    }
-                }
-            }
-            if (element.parent()?.childNodes()?.last() != element) {
-                appendLine()
-            }
-        }
-
-        "h3" -> {
-            withStyle(
-                styleData.h3.toParagraphStyle(),
-            ) {
-                withStyle(styleData.h3.toSpanStyle()) {
-                    element.childNodes().fastForEach {
-                        renderNode(node = it, styleData = styleData, context = context)
-                    }
-                }
-            }
-            if (element.parent()?.childNodes()?.last() != element) {
-                appendLine()
-            }
-        }
-
-        "h2" -> {
-            withStyle(
-                styleData.h2.toParagraphStyle(),
-            ) {
-                withStyle(styleData.h2.toSpanStyle()) {
-                    element.childNodes().fastForEach {
-                        renderNode(node = it, styleData = styleData, context = context)
-                    }
-                }
-            }
-            if (element.parent()?.childNodes()?.last() != element) {
-                appendLine()
-            }
-        }
-
-        "h1" -> {
-            withStyle(
-                styleData.h1.toParagraphStyle(),
-            ) {
-                withStyle(styleData.h1.toSpanStyle()) {
-                    element.childNodes().fastForEach {
-                        renderNode(node = it, styleData = styleData, context = context)
-                    }
-                }
-            }
-            if (element.parent()?.childNodes()?.last() != element) {
-                appendLine()
-            }
-        }
-
-        "figure" -> {
-            context.pushBlockState()
-            element.childNodes().fastForEach {
-                renderNode(node = it, styleData = styleData, context = context)
-            }
-            context.popBlockState()
-        }
-
-        "figcaption" -> {
-            val style =
-                styleData.textStyle.copy(
-                    fontStyle = FontStyle.Italic,
-                    fontSize = styleData.textStyle.fontSize * 0.7,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                )
-            withStyle(style.toParagraphStyle()) {
-                withStyle(style.toSpanStyle()) {
-                    element.childNodes().fastForEach {
-                        renderNode(node = it, styleData = styleData, context = context)
-                    }
-                }
-            }
-            appendLine()
-        }
-
-        "time" -> {
-            val style =
-                styleData.textStyle.copy(
-                    color = styleData.color.copy(alpha = 0.7f),
-                    background = styleData.color.copy(alpha = 0.05f),
-                )
-            withStyle(style.toSpanStyle()) {
-                element.childNodes().fastForEach {
-                    renderNode(
-                        node = it,
-                        styleData = styleData.copy(
-                            style = style
-                        ),
-                        context = context,
-                    )
-                }
-            }
-        }
-
+private fun ContentBuilder.appendSeparatorIfNeeded(
+    current: RenderContent.Text,
+    next: RenderContent?,
+) {
+    if (next !is RenderContent.Text) return
+    when {
+        current.block.headingLevel != null -> appendLine()
+        current.block.isListItem -> appendLine()
+        current.block.isFigCaption -> appendLine()
+        current.block.isBlockQuote -> Unit
+        current.block.textAlignment == RenderTextAlignment.Center -> Unit
         else -> {
-            element.childNodes().fastForEach {
-                renderNode(node = it, styleData = styleData, context = context)
-            }
+            appendLine()
+            appendLine()
         }
     }
 }
 
-private fun ContentBuilder.renderLink(
-    element: Element,
-    styleData: StyleData,
-    context: BuildContentAnnotatedStringContext,
-) {
-    val href = element.attribute("href")?.value
-    if (!href.isNullOrEmpty()) {
-        withLink(href) {
-            withStyle(
-                styleData.linkStyle.toSpanStyle(),
-            ) {
-                element.childNodes().fastForEach {
-                    renderNode(
-                        node = it,
-                        styleData = styleData.copy(style = styleData.linkStyle),
-                        context = context,
-                    )
-                }
+private fun StyleData.blockTextStyle(block: RenderBlockStyle): TextStyle =
+    when {
+        block.headingLevel != null ->
+            when (block.headingLevel) {
+                1 -> h1
+                2 -> h2
+                3 -> h3
+                4 -> h4
+                5 -> h5
+                else -> h6
             }
-        }
+        block.isFigCaption ->
+            textStyle.copy(
+                fontStyle = FontStyle.Italic,
+                fontSize = textStyle.fontSize * 0.7,
+                textAlign = TextAlign.Center,
+            )
+        block.isBlockQuote ->
+            textStyle.copy(
+                color = color.copy(alpha = 0.7f),
+                background = color.copy(alpha = 0.05f),
+            )
+        block.textAlignment == RenderTextAlignment.Center ->
+            textStyle.copy(
+                textAlign = TextAlign.Center,
+            )
+        else -> textStyle
     }
+
+private fun StyleData.runTextStyle(
+    renderStyle: RenderTextStyle,
+    block: RenderBlockStyle,
+    blockTextStyle: TextStyle,
+): TextStyle {
+    var style =
+        if (renderStyle.link != null) {
+            linkStyle
+        } else {
+            blockTextStyle
+        }
+
+    if (renderStyle.bold) {
+        style = style.copy(fontWeight = FontWeight.Bold)
+    }
+    if (renderStyle.italic) {
+        style = style.copy(fontStyle = FontStyle.Italic)
+    }
+    if (renderStyle.strikethrough) {
+        style = style.copy(textDecoration = TextDecoration.LineThrough)
+    }
+    if (renderStyle.underline) {
+        style =
+            style.copy(
+                textDecoration =
+                    when (style.textDecoration) {
+                        TextDecoration.LineThrough -> TextDecoration.combine(
+                            listOf(TextDecoration.LineThrough, TextDecoration.Underline),
+                        )
+                        else -> TextDecoration.Underline
+                    },
+            )
+    }
+    if (renderStyle.small) {
+        style =
+            style.copy(
+                fontSize = style.fontSize * 0.8,
+                color = style.color.takeOrElse { color }.copy(alpha = 0.7f),
+            )
+    }
+    if (renderStyle.code || renderStyle.monospace) {
+        style =
+            style.copy(
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                background = color.copy(alpha = 0.1f),
+            )
+    }
+    if (renderStyle.time) {
+        style =
+            style.copy(
+                color = color.copy(alpha = 0.7f),
+                background = color.copy(alpha = 0.05f),
+            )
+    }
+    if (block.isFigCaption) {
+        style = style.copy(textAlign = TextAlign.Center)
+    }
+    return style
 }

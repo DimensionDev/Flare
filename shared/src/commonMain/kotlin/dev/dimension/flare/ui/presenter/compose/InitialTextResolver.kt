@@ -4,6 +4,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.render.RenderContent
+import dev.dimension.flare.ui.render.RenderRun
 
 internal object InitialTextResolver {
     fun resolve(
@@ -46,24 +48,40 @@ internal object InitialTextResolver {
                 handleToAdd.add(it.canonical)
             }
         }
-        post.content.data
-            .getElementsByAttributeValueStarting(
-                "href",
-                "flare://ProfileWithNameAndHost",
-            ).filter {
-                val href = it.attr("href")
+        post.content.renderRuns
+            .asSequence()
+            .flatMap { content ->
+                when (content) {
+                    is RenderContent.BlockImage -> emptySequence()
+                    is RenderContent.Text -> content.runs.asSequence()
+                }
+            }.mapNotNull { run ->
+                when (run) {
+                    is RenderRun.Image -> null
+                    is RenderRun.Text -> {
+                        val href = run.style.link ?: return@mapNotNull null
+                        if (!href.startsWith("flare://ProfileWithNameAndHost")) {
+                            return@mapNotNull null
+                        }
+                        MentionLink(
+                            href = href,
+                            text = run.text,
+                        )
+                    }
+                }
+            }.filterNot { mention ->
                 val params =
-                    href
+                    mention.href
                         .substringAfter("flare://ProfileWithNameAndHost/")
                         .substringBefore("?accountKey=")
                         .split('/')
                 val userName = params.getOrNull(0)
                 val host = params.getOrNull(1)
-                currentUserHandle.canonical != "@$userName@$host"
-            }.filter {
-                it.text() != post.user?.handle?.canonical
-            }.forEach {
-                handleToAdd.add(it.text())
+                currentUserHandle.canonical == "@$userName@$host"
+            }.filterNot { mention ->
+                mention.text == post.user?.handle?.canonical
+            }.forEach { mention ->
+                handleToAdd.add(mention.text)
             }
         val text =
             buildString {
@@ -76,4 +94,9 @@ internal object InitialTextResolver {
             cursorPosition = text.length,
         )
     }
+
+    private data class MentionLink(
+        val href: String,
+        val text: String,
+    )
 }

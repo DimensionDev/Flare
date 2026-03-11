@@ -8,6 +8,8 @@ import app.bsky.richtext.FacetMention
 import app.bsky.richtext.FacetTag
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.render.RenderContent
+import dev.dimension.flare.ui.render.RenderRun
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import kotlinx.serialization.json.JsonPrimitive
@@ -52,6 +54,12 @@ class BlueskyUiMappingTest {
             )
 
         val result = parseBlueskyJson(json, accountKey)
+        val links =
+            result.renderRuns
+                .filterIsInstance<RenderContent.Text>()
+                .flatMap { it.runs }
+                .filterIsInstance<RenderRun.Text>()
+                .mapNotNull { it.style.link }
         val expectedMentionUrl =
             DeeplinkRoute.Profile
                 .User(
@@ -65,9 +73,9 @@ class BlueskyUiMappingTest {
                     query = "#tag",
                 ).toUri()
 
-        assertTrue(result.html.contains("""href="https://example.com""""))
-        assertTrue(result.html.contains("""href="$expectedMentionUrl""""))
-        assertTrue(result.html.contains("""href="$expectedTagUrl""""))
+        assertTrue(links.contains("https://example.com"))
+        assertTrue(links.contains(expectedMentionUrl))
+        assertTrue(links.contains(expectedTagUrl))
     }
 
     @Test
@@ -81,6 +89,6 @@ class BlueskyUiMappingTest {
 
         val result = parseBlueskyJson(json, accountKey)
         assertEquals("plain text", result.innerText)
-        assertEquals("plain text", result.html)
+        assertEquals("plain text", result.raw)
     }
 }

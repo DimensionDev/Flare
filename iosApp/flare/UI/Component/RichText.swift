@@ -13,7 +13,12 @@ struct RichText: View {
             ForEach(Array(contents.enumerated()), id: \.offset) { _, content in
                 switch content {
                 case let textContent as PlatformTextTextContent:
-                    render(textContent: textContent)
+                    if textContent.alignment == .center {
+                        render(textContent: textContent)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    } else {
+                        render(textContent: textContent)
+                    }
                 case let imageContent as PlatformTextBlockImageContent:
                     if let url = URL(string: imageContent.url) {
                         KFImage(url)

@@ -42,7 +42,7 @@ internal fun Attitude.render(accountKey: MicroBlogKey): UiTimelineV2 {
         message =
             UiTimelineV2.Message(
                 user = user,
-                statusKey = MicroBlogKey(id.toString(), vvoHost),
+                statusKey = MicroBlogKey(id.toString(), accountKey.host),
                 icon = UiIcon.Like,
                 type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Favourite),
                 createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
@@ -63,7 +63,7 @@ internal fun Attitude.render(accountKey: MicroBlogKey): UiTimelineV2 {
         users = listOfNotNull(user).toImmutableList(),
         post = content,
         createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
-        statusKey = MicroBlogKey(id.toString(), vvoHost),
+        statusKey = MicroBlogKey(id.toString(), accountKey.host),
         accountType = AccountType.Specific(accountKey),
     )
 }
@@ -153,7 +153,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
     val user = this.user?.render(accountKey)
     val isFromMe = user?.key == accountKey
     val displayUser = user
-    val statusKey = MicroBlogKey(id = id, host = vvoHost)
+    val statusKey = MicroBlogKey(id = id, host = accountKey.host)
     val canReblog = visible?.type == null || visible.type == 0L
     val url =
         buildString {
@@ -291,7 +291,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
 }
 
 private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
-    val statusKey = MicroBlogKey(id = id, host = vvoHost)
+    val statusKey = MicroBlogKey(id = id, host = accountKey.host)
     val statusMid =
         status?.mid ?: analysis_extra
             ?.split('|')
@@ -441,7 +441,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
     val userKey =
         MicroBlogKey(
             id = id.toString(),
-            host = vvoHost,
+            host = accountKey.host,
         )
     return UiProfile(
         key = userKey,
@@ -449,7 +449,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         handle =
             UiHandle(
                 raw = screenName.orEmpty(),
-                host = vvoHost.removePrefix("m."),
+                host = accountKey.host,
             ),
         nameInternal =
             Element("span")

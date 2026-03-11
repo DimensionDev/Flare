@@ -14,6 +14,8 @@ import dev.dimension.flare.data.network.xqt.model.UserMention
 import dev.dimension.flare.data.network.xqt.model.XqtUrl
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
+import dev.dimension.flare.ui.render.RenderContent
+import dev.dimension.flare.ui.render.RenderRun
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -96,13 +98,10 @@ class XQTTest {
             )
 
         val result = tweet.renderContent(accountKey)
-
-        // Expected HTML structure from legacy parsing (TwitterParser)
-        // Note: TwitterParser behavior might vary, but we expect the link to be replaced.
-        // For legacy, it uses renderRichText which uses TwitterParser.
-        // Assuming TwitterParser works as expected.
-        val expectedHtml = """<span>Hello World </span><a href="https://example.com">example.com</a>"""
-        assertEquals(expectedHtml, result.html)
+        assertEquals("Hello World example.com", result.innerText)
+        val linkRun = result.allTextRuns().last()
+        assertEquals("example.com", linkRun.text)
+        assertEquals("https://example.com", linkRun.style.link)
     }
 
     @Test
@@ -164,16 +163,15 @@ class XQTTest {
             )
 
         val result = tweet.renderContent(accountKey)
-        val html = result.html
+        val textRuns = result.allTextRuns()
 
-        assertTrue(html.contains("Check out "))
-        // assert(html.contains("""<a href="flare://search?type=specific&amp;host=example.com&amp;query=%23Flare">#Flare</a>""")) // URL encoding might vary
-        assertTrue(html.contains("#Flare"))
-        assertTrue(html.contains("@user"))
-        assertTrue(html.contains("""<a href="https://flare.app/expanded">flare.app</a>"""))
-        assertTrue(html.contains("\$FLR"))
-        assertTrue(html.contains("<b>Bold</b>"))
-        assertTrue(html.contains("<i>Italic</i>"))
+        assertTrue(result.innerText.contains("Check out "))
+        assertTrue(textRuns.any { it.text.contains("#Flare") })
+        assertTrue(textRuns.any { it.text.contains("@user") })
+        assertTrue(textRuns.any { it.text == "flare.app" && it.style.link == "https://flare.app/expanded" })
+        assertTrue(result.innerText.contains("\$FLR"))
+        assertTrue(textRuns.any { it.text == "Bold" && it.style.bold })
+        assertTrue(textRuns.any { it.text == "Italic" && it.style.italic })
     }
 
     @Test
@@ -199,12 +197,7 @@ class XQTTest {
             )
 
         val result = tweet.renderContent(accountKey)
-        val html = result.html
-
-        // Expect "Line 1<br>Line 2"
-        assertTrue(html.contains("Line 1"))
-        assertTrue(html.contains("<br>"))
-        assertTrue(html.contains("Line 2"))
+        assertEquals("Line 1\nLine 2", result.raw)
     }
 
     @Test
@@ -456,14 +449,9 @@ class XQTTest {
             )
 
         val result = tweet.renderContent(accountKey)
-        val html = result.html
-
-        // Expect "Text before media. <figure><img src="..."></figure>Text after media."
-        // Or similar depending on how index is treated. If index 18, it splits.
-        assertTrue(html.contains("Text before media."))
-        assertTrue(html.contains("<figure>"))
-        assertTrue(html.contains(mediaUrl))
-        assertTrue(html.contains("Text after media."))
+        assertTrue(result.innerText.contains("Text before media."))
+        assertTrue(result.innerText.contains("Text after media."))
+        assertTrue(result.renderRuns.any { it is RenderContent.BlockImage && it.url == mediaUrl })
     }
 
     @Test
@@ -642,30 +630,17 @@ class XQTTest {
             )
 
         val result = tweet.renderContent(accountKey)
-        val html = result.html
-
-        // Expected Structure: "Start 🫠 <a ...>@user</a> <figure>...</figure>End"
-
-        // Expected Structure: "<b>Start</b> 🫠 <a ...>@user</a> <figure>...</figure><i>End</i>"
-
-        assertTrue(html.contains("<b>Start</b>"), "Start should be bold")
-        assertTrue(html.contains("🫠"), "Emoji preserved")
-        assertTrue(html.contains(">@user</a>"), "User mention linked")
-        assertTrue(html.contains("<figure>"), "Media figure present")
-        assertTrue(html.contains("src=\"$mediaUrl\""), "Media source correct")
-        assertTrue(html.contains("<i>End</i>"), "End should be italic")
-
-        // order check
-        val indexUser = html.indexOf(">@user</a>")
-        val indexMedia = html.indexOf("<figure>")
-        val indexEnd = html.indexOf("End")
-
-        assertTrue(indexUser != -1)
-        assertTrue(indexMedia != -1)
-        assertTrue(indexEnd != -1)
-
-        assertTrue(indexUser < indexMedia, "User mention should be before media")
-        assertTrue(indexUser < indexMedia, "User mention should be before media")
-        assertTrue(indexMedia < indexEnd, "Media should be before 'End'")
+        val textRuns = result.allTextRuns()
+        assertTrue(textRuns.any { it.text == "Start" && it.style.bold }, "Start should be bold")
+        assertTrue(result.innerText.contains("🫠"), "Emoji preserved")
+        assertTrue(textRuns.any { it.text == "@user" && it.style.link != null }, "User mention linked")
+        assertTrue(result.renderRuns.any { it is RenderContent.BlockImage && it.url == mediaUrl }, "Media figure present")
+        assertTrue(textRuns.any { it.text == "End" && it.style.italic }, "End should be italic")
     }
+
+    private fun dev.dimension.flare.ui.render.UiRichText.allTextRuns(): List<RenderRun.Text> =
+        renderRuns
+            .filterIsInstance<RenderContent.Text>()
+            .flatMap { it.runs }
+            .filterIsInstance<RenderRun.Text>()
 }

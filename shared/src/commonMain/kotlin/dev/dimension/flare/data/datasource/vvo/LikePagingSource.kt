@@ -13,7 +13,7 @@ import dev.dimension.flare.ui.model.mapper.render
 internal class LikePagingSource(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
-    private val onClearMarker: () -> Unit,
+    private val onClearMarker: suspend () -> Unit,
 ) : RemoteLoader<UiTimelineV2> {
     override suspend fun load(
         pageSize: Int,
@@ -38,7 +38,7 @@ internal class LikePagingSource(
                 is PagingRequest.Append -> request.nextKey.toIntOrNull() ?: 1
             }
         if (request == PagingRequest.Refresh) {
-            onClearMarker.invoke()
+            onClearMarker()
         }
 
         val response = service.getAttitudes(page = page)

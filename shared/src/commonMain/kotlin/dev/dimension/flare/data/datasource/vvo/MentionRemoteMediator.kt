@@ -15,7 +15,7 @@ import dev.dimension.flare.ui.model.mapper.render
 internal class MentionRemoteMediator(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
-    private val onClearMarker: () -> Unit,
+    private val onClearMarker: suspend () -> Unit,
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String = "mention_$accountKey"
 
@@ -47,7 +47,7 @@ internal class MentionRemoteMediator(
                 page = page,
             )
         if (request == PagingRequest.Refresh) {
-            onClearMarker.invoke()
+            onClearMarker()
         }
 
         val data = response.data.orEmpty().map { it.render(accountKey) }

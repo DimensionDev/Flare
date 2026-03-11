@@ -16,12 +16,14 @@ import dev.dimension.flare.ui.model.UiDraftStatus
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
+import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.time.Instant
 
 public class DraftBoxPresenter :
     PresenterBase<DraftBoxState>(),
@@ -78,8 +80,8 @@ public class DraftBoxPresenter :
                         UiDraft(
                             groupId = draft.groupId,
                             status = draft.toUiDraftStatus(),
-                            updatedAt = draft.updatedAt,
-                            accounts = accounts,
+                            updatedAt = Instant.fromEpochMilliseconds(draft.updatedAt).toUi(),
+                            accounts = accounts.toImmutableList(),
                             data = draft.content.toComposeData(medias = emptyList()),
                             medias =
                                 draft.medias

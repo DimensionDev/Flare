@@ -43,6 +43,8 @@ enum Route: Hashable, Identifiable {
             SearchScreen(accountType: accountType, initialQuery: query)
         case .composeNew(let accountType):
             ComposeScreen(accountType: accountType)
+        case .composeDraft(let groupId):
+            ComposeScreen(accountType: nil, draftGroupId: groupId)
         case .composeQuote(let accountType, let statusKey):
             ComposeScreen(accountType: accountType, composeStatus: ComposeStatus.Quote(statusKey: statusKey))
         case .composeReply(let accountType, let statusKey):
@@ -102,6 +104,10 @@ enum Route: Hashable, Identifiable {
             UserDMConversationScreen(accountType: accountType, userKey: userKey)
         case .rssManagement:
             RssScreen()
+        case .draftBox:
+            DraftBoxScreen { groupId in
+                onNavigate(.composeDraft(groupId))
+            }
         default:
             Text("Not done yet for \(self)")
         }
@@ -109,7 +115,8 @@ enum Route: Hashable, Identifiable {
 
     case home(AccountType)
     case timeline(TimelineTabItem)
-    case composeNew(AccountType)
+    case composeNew(AccountType?)
+    case composeDraft(String)
     case composeQuote(AccountType, MicroBlogKey)
     case composeReply(AccountType, MicroBlogKey)
     case composeVVOReplyComment(AccountType, MicroBlogKey, String)
@@ -156,11 +163,12 @@ enum Route: Hashable, Identifiable {
     case userDirectMessages(AccountType, MicroBlogKey)
     case tabGroupConfig(MixedTimelineTabItem?)
     case rssManagement
+    case draftBox
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {
         case .new(let data):
-            return Route.composeNew(data.accountType)
+            return Route.composeNew(nil)
         case .quote(let data):
             return Route.composeQuote(AccountType.Specific(accountKey: data.accountKey), data.statusKey)
         case .reply(let data):

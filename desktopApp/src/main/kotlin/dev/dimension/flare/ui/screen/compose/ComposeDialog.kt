@@ -112,7 +112,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
-import dev.dimension.flare.ui.presenter.compose.DraftBoxPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -171,9 +170,6 @@ fun ComposeDialog(
             draftGroupId = draftGroupId,
             initialText = initialText,
         )
-    }
-    val draftBoxState by producePresenter(key = "compose_draft_box_button") {
-        remember { DraftBoxPresenter() }.invoke()
     }
     var showCloseConfirmDialog by remember { mutableStateOf(false) }
     val composeWindow = LocalComposeWindow.current
@@ -267,7 +263,7 @@ fun ComposeDialog(
                         contentDescription = stringResource(Res.string.navigate_back),
                     )
                 }
-                if (onOpenDraftBox != null && draftBoxState.items.isNotEmpty()) {
+                if (onOpenDraftBox != null && state.state.showDraft) {
                     SubtleButton(
                         onClick = onOpenDraftBox,
                     ) {

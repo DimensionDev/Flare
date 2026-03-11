@@ -17,6 +17,14 @@ internal suspend fun saveToDatabase(
     items: List<DbPagingTimelineWithStatus>,
 ) {
     val rootStatusKeys = items.map { it.status.status.data.statusKey }.distinct()
+    val rootsWithIncomingReplyReferences =
+        items
+            .asSequence()
+            .filter { item ->
+                item.status.references.any { it.reference.referenceType == ReferenceType.Reply }
+            }.map { it.status.status.data.statusKey }
+            .distinct()
+            .toList()
     val statuses =
         items.map { it.status.status.data } +
             items
@@ -30,7 +38,16 @@ internal suspend fun saveToDatabase(
         database.statusDao().insertAll(changedStatuses)
     }
     if (rootStatusKeys.isNotEmpty()) {
-        database.statusReferenceDao().delete(rootStatusKeys)
+        database.statusReferenceDao().delete(
+            rootStatusKeys,
+            ReferenceType.entries.filterNot { it == ReferenceType.Reply },
+        )
+    }
+    if (rootsWithIncomingReplyReferences.isNotEmpty()) {
+        database.statusReferenceDao().delete(
+            rootsWithIncomingReplyReferences,
+            listOf(ReferenceType.Reply),
+        )
     }
     items.flatMap { it.status.references }.map { it.reference }.let {
         database.statusReferenceDao().insertAll(it)

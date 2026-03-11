@@ -89,6 +89,14 @@ struct SettingsScreen: View {
                         Image("fa-square-rss")
                     }
                 }
+                NavigationLink(value: Route.draftBox) {
+                    Label {
+                        Text("Drafts")
+                        Text("View and manage saved drafts")
+                    } icon: {
+                        Image(.faPenToSquare)
+                    }
+                }
                 NavigationLink(value: Route.storage) {
                     Label {
                         Text("storage_title")

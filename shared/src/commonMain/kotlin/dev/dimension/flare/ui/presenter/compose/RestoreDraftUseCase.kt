@@ -9,7 +9,10 @@ import dev.dimension.flare.ui.model.UiDraftAccount
 import dev.dimension.flare.ui.model.UiDraftMedia
 import dev.dimension.flare.ui.model.UiDraftMediaType
 import dev.dimension.flare.ui.model.UiDraftStatus
+import dev.dimension.flare.ui.render.toUi
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.firstOrNull
+import kotlin.time.Instant
 
 public class RestoreDraftUseCase internal constructor(
     private val draftRepository: DraftRepository,
@@ -26,23 +29,24 @@ public class RestoreDraftUseCase internal constructor(
         return UiDraft(
             groupId = draft.groupId,
             status = draft.toUiDraftStatus(),
-            updatedAt = draft.updatedAt,
-            accounts = accounts,
+            updatedAt = Instant.fromEpochMilliseconds(draft.updatedAt).toUi(),
+            accounts = accounts.toImmutableList(),
             data = draft.content.toComposeData(medias = emptyList()),
             medias =
-                draft.medias.map { media ->
-                    UiDraftMedia(
-                        cachePath = media.cachePath,
-                        fileName = media.fileName,
-                        type =
-                            when (media.mediaType) {
-                                DraftMediaType.IMAGE -> UiDraftMediaType.IMAGE
-                                DraftMediaType.VIDEO -> UiDraftMediaType.VIDEO
-                                DraftMediaType.OTHER -> UiDraftMediaType.OTHER
-                            },
-                        altText = media.altText,
-                    )
-                },
+                draft.medias
+                    .map { media ->
+                        UiDraftMedia(
+                            cachePath = media.cachePath,
+                            fileName = media.fileName,
+                            type =
+                                when (media.mediaType) {
+                                    DraftMediaType.IMAGE -> UiDraftMediaType.IMAGE
+                                    DraftMediaType.VIDEO -> UiDraftMediaType.VIDEO
+                                    DraftMediaType.OTHER -> UiDraftMediaType.OTHER
+                                },
+                            altText = media.altText,
+                        )
+                    }.toImmutableList(),
         )
     }
 }

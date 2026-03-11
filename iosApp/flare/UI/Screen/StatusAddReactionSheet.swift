@@ -7,7 +7,7 @@ struct StatusAddReactionSheet: View {
     @StateObject private var presenter: KotlinPresenter<AddReactionState>
     var body: some View {
         StateView(state: presenter.state.emojis) { emojiData in
-            EmojiPopup(accountType: accountType, data: emojiData) { emoji in
+            EmojiPopup(data: emojiData) { emoji in
                 presenter.state.select(emoji: emoji)
                 dismiss()
             }

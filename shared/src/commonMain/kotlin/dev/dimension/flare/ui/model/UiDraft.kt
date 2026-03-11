@@ -3,15 +3,17 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.render.UiDateTime
+import kotlinx.collections.immutable.ImmutableList
 
 @Immutable
 public data class UiDraft(
     val groupId: String,
     val status: UiDraftStatus,
-    val updatedAt: Long,
-    val accounts: List<UiDraftAccount>,
+    val updatedAt: UiDateTime,
+    val accounts: ImmutableList<UiDraftAccount>,
     val data: ComposeData,
-    val medias: List<UiDraftMedia>,
+    val medias: ImmutableList<UiDraftMedia>,
 )
 
 @Immutable

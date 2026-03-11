@@ -18,6 +18,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.data.repository.newDraftGroupId
 import dev.dimension.flare.model.AccountType
@@ -38,6 +39,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -48,6 +50,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -62,6 +65,15 @@ public class ComposePresenter(
     private val accountRepository: AccountRepository by inject()
     private val appDataStore: AppDataStore by inject()
     private val restoreDraftUseCase: RestoreDraftUseCase by inject()
+    private val draftRepository: DraftRepository by inject()
+
+    private val showDraftFlow by lazy {
+        combine(draftRepository.visibleDrafts, draftRepository.sendingDrafts) { visible, sending ->
+            visible + sending
+        }.map {
+            it.isNotEmpty()
+        }
+    }
 
     private val selectedAccountsKeyFlow by lazy {
         MutableStateFlow<ImmutableList<MicroBlogKey>>(persistentListOf())
@@ -353,6 +365,8 @@ public class ComposePresenter(
                     visibilityPresenter()
                 }
 
+        val showDraft by showDraftFlow.collectAsState(false)
+
         return object : ComposeState(
             canSend = canSend,
             visibilityState = visibilityState,
@@ -366,6 +380,7 @@ public class ComposePresenter(
             loadedDraftState = loadedDraftState,
             editingDraftGroupId = editingDraftGroupId,
             composeStatus = composeStatus,
+            showDraft = showDraft,
         ) {
             override fun send(
                 data: ComposeData,
@@ -379,9 +394,13 @@ public class ComposePresenter(
                             data = data,
                             groupId = editingDraftGroupIdFlow.value ?: newDraftGroupId(),
                         )
-                        onDispatched(true)
+                        withContext(Dispatchers.Main) {
+                            onDispatched(true)
+                        }
                     } else {
-                        onDispatched(false)
+                        withContext(Dispatchers.Main) {
+                            onDispatched(false)
+                        }
                     }
                 }
             }
@@ -433,9 +452,13 @@ public class ComposePresenter(
                         if (editingDraftGroupIdFlow.value.isNullOrEmpty() && groupId.isNotEmpty()) {
                             editingDraftGroupIdFlow.value = groupId
                         }
-                        onDispatched(true)
+                        withContext(Dispatchers.Main) {
+                            onDispatched(true)
+                        }
                     } else {
-                        onDispatched(false)
+                        withContext(Dispatchers.Main) {
+                            onDispatched(false)
+                        }
                     }
                 }
             }
@@ -563,6 +586,7 @@ public abstract class ComposeState(
     public val loadedDraftState: UiState<UiDraft>?,
     public val editingDraftGroupId: String?,
     public val composeStatus: ComposeStatus?,
+    public val showDraft: Boolean,
 ) {
     public abstract fun send(
         data: ComposeData,

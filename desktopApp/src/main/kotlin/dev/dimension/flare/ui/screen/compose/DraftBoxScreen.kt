@@ -3,7 +3,6 @@ package dev.dimension.flare.ui.screen.compose
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +38,7 @@ import dev.dimension.flare.draft_box_empty
 import dev.dimension.flare.draft_box_retry
 import dev.dimension.flare.draft_box_send
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.NetworkImage
@@ -68,14 +68,8 @@ internal fun DraftBoxScreen(onEdit: (String) -> Unit = {}) {
     ) {
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding =
-                PaddingValues(
-                    start = screenHorizontalPadding,
-                    end = screenHorizontalPadding,
-                    top = LocalWindowPadding.current.calculateTopPadding(),
-                    bottom = LocalWindowPadding.current.calculateBottomPadding(),
-                ),
+            modifier = Modifier.fillMaxSize().padding(horizontal = screenHorizontalPadding),
+            contentPadding = LocalWindowPadding.current,
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             if (state.items.isEmpty()) {
@@ -227,6 +221,8 @@ private fun DraftBoxCard(
                 }
             }
 
+            DraftMetadataText(item)
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
@@ -299,4 +295,16 @@ private fun DraftBoxCard(
             }
         }
     }
+}
+
+@Composable
+private fun DraftMetadataText(item: UiDraft) {
+    DateTimeText(
+        data = item.updatedAt,
+        style = FluentTheme.typography.caption,
+        color = FluentTheme.colors.text.text.secondary,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        fullTime = true,
+    )
 }

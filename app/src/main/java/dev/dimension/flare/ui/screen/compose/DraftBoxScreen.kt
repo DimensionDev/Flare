@@ -44,6 +44,7 @@ import compose.icons.fontawesomeicons.solid.Video
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.DateTimeText
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -244,6 +245,7 @@ private fun DraftBoxItem(
                         }
                     }
                 }
+                DraftMetadataText(item)
             }
         },
         trailingContent = {
@@ -345,5 +347,17 @@ private fun DraftBoxItem(
                 }
             }
         },
+    )
+}
+
+@Composable
+private fun DraftMetadataText(item: UiDraft) {
+    DateTimeText(
+        data = item.updatedAt,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        fullTime = true,
     )
 }

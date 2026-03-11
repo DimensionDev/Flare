@@ -28,7 +28,6 @@ public data class ComposeData(
     )
 
     public data class ReferenceStatus(
-        val data: UiTimelineV2?,
         val composeStatus: ComposeStatus,
     )
 }

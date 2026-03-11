@@ -114,7 +114,6 @@ class SaveDraftUseCaseTest : RobolectricTest() {
                             localOnly = true,
                             referenceStatus =
                                 ComposeData.ReferenceStatus(
-                                    data = null,
                                     composeStatus = ComposeStatus.VVOComment(statusKey = replyKey, rootId = "root-1"),
                                 ),
                         ),
@@ -224,7 +223,6 @@ class SaveDraftUseCaseTest : RobolectricTest() {
                                 content = "quote",
                                 referenceStatus =
                                     ComposeData.ReferenceStatus(
-                                        data = null,
                                         composeStatus = ComposeStatus.Quote(statusKey),
                                     ),
                             ),
@@ -260,7 +258,6 @@ class SaveDraftUseCaseTest : RobolectricTest() {
                                 content = "reply",
                                 referenceStatus =
                                     ComposeData.ReferenceStatus(
-                                        data = null,
                                         composeStatus = ComposeStatus.Reply(statusKey),
                                     ),
                             ),

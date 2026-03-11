@@ -126,11 +126,6 @@ import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import io.github.composefluent.component.TextFieldDefaults
 import io.github.composefluent.surface.Card
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
-import moe.tlaster.precompose.molecule.producePresenter
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import java.util.Locale
 import kotlin.time.Duration
@@ -138,6 +133,11 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.uuid.ExperimentalUuidApi
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 private val imageExtensions = setOf("png", "jpg", "jpeg", "gif", "bmp")
 private val videoExtensions = setOf("mp4", "mov", "avi", "mkv", "webm")
@@ -1015,13 +1015,12 @@ private fun composePresenter(
                     referenceStatus =
                         status?.let {
                             ComposeData.ReferenceStatus(
-                                data = state.replyState?.takeSuccess(),
                                 composeStatus = status,
                             )
                         },
                     language = languageState.takeSuccess()?.selectedLanguage.orEmpty(),
                 )
-            state.send(data, "")
+            state.send(data)
             // cleanup
 
             textFieldState.edit {

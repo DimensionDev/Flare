@@ -1080,7 +1080,6 @@ private fun composePresenter(
                     referenceStatus =
                         status?.let {
                             ComposeData.ReferenceStatus(
-                                data = state.replyState?.takeSuccess(),
                                 composeStatus = status,
                             )
                         },

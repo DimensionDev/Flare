@@ -27,7 +27,9 @@ internal val commonModule =
         singleOf(::provideCacheDatabase)
         singleOf(::ApplicationRepository)
         singleOf(::DraftRepository)
-        singleOf(::DraftMediaStore)
+        single {
+            DraftMediaStore(get())
+        }
         singleOf(::LocalFilterRepository)
         single { CoroutineScope(Dispatchers.IO) }
         singleOf(::SaveDraftUseCase)

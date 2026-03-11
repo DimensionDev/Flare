@@ -464,7 +464,7 @@ struct ComposeScreen: View {
     }
     private func getReferenceStatus() -> ComposeData.ReferenceStatus? {
         return if let data = composeStatus {
-            ComposeData.ReferenceStatus(data: presenter.state.replyState?.takeSuccess() as? UiTimelineV2, composeStatus: data)
+            ComposeData.ReferenceStatus(composeStatus: data)
         } else {
             nil
         }

@@ -78,15 +78,16 @@ internal class PostHandler(
                 loader.deleteStatus(postKey)
             }.onSuccess {
                 database.connect {
+                    val dbAccountType = accountType as DbAccountType
+                    database.pagingTimelineDao().deleteStatus(
+                        accountType = dbAccountType,
+                        statusKey = postKey,
+                    )
                     database.statusDao().delete(
                         statusKey = postKey,
-                        accountType = accountType as DbAccountType,
+                        accountType = dbAccountType,
                     )
                     database.statusReferenceDao().delete(postKey)
-                    database.pagingTimelineDao().deleteStatus(
-                        accountType = accountType as DbAccountType,
-                        statusKey = postKey,
-                    )
                 }
             }
         }

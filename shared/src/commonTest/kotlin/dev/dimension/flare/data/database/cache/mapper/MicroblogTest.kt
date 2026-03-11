@@ -279,7 +279,7 @@ class MicroblogTest : RobolectricTest() {
         }
 
     @Test
-    fun referencesRemainWhenSubsequentInsertHasNoReferences() =
+    fun staleReferencesAreRemovedWhenSubsequentInsertHasNoReferences() =
         runTest {
             val accountKey = MicroBlogKey(id = "account", host = "test.com")
 
@@ -309,7 +309,7 @@ class MicroblogTest : RobolectricTest() {
             saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withoutRef, pagingKey = "home")))
 
             val refsAfter = db.statusReferenceDao().getByStatusKey(withRef.statusKey)
-            assertEquals(1, refsAfter.size)
+            assertEquals(0, refsAfter.size)
 
             val paging = db.pagingTimelineDao().getPagingSource("home")
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)

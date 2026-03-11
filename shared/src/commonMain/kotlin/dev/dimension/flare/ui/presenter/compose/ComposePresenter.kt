@@ -19,10 +19,12 @@ import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
+import dev.dimension.flare.data.repository.newDraftGroupId
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.EmojiData
+import dev.dimension.flare.ui.model.UiDraft
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -53,14 +55,28 @@ import org.koin.core.component.inject
 public class ComposePresenter(
     private val accountType: AccountType?,
     private val status: ComposeStatus? = null,
+    private val draftGroupId: String? = null,
 ) : PresenterBase<ComposeState>(),
     KoinComponent {
     private val composeUseCase: ComposeUseCase by inject()
     private val accountRepository: AccountRepository by inject()
     private val appDataStore: AppDataStore by inject()
+    private val restoreDraftUseCase: RestoreDraftUseCase by inject()
 
     private val selectedAccountsKeyFlow by lazy {
         MutableStateFlow<ImmutableList<MicroBlogKey>>(persistentListOf())
+    }
+
+    private val activeStatusFlow by lazy {
+        MutableStateFlow(status)
+    }
+
+    private val editingDraftGroupIdFlow by lazy {
+        MutableStateFlow<String?>(draftGroupId)
+    }
+
+    private val loadedDraftStateFlow by lazy {
+        MutableStateFlow<UiState<UiDraft>?>(null)
     }
 
     private val enableCrossPostFlow by lazy {
@@ -98,13 +114,13 @@ public class ComposePresenter(
     }
 
     private val composeConfigFlow by lazy {
-        selectedAccountServicesFlow.map { services ->
+        combine(selectedAccountServicesFlow, activeStatusFlow) { services, composeStatus ->
             services
                 .mapNotNull {
                     if (it is AuthenticatedMicroblogDataSource) {
                         it.composeConfig(
                             type =
-                                when (status) {
+                                when (composeStatus) {
                                     is ComposeStatus.Quote -> ComposeType.Quote
                                     is ComposeStatus.Reply -> ComposeType.Reply
                                     null -> ComposeType.New
@@ -136,7 +152,7 @@ public class ComposePresenter(
         combine(
             accountRepository.allAccounts,
             selectedAccountsKeyFlow,
-            statusFlow ?: flowOf(UiState.Error(Exception("No status for compose"))),
+            statusFlow,
         ) { allAccounts, selectedAccountKeys, status ->
             val statusPlatform =
                 status
@@ -220,25 +236,35 @@ public class ComposePresenter(
     }
 
     private val statusFlow by lazy {
-        if (status != null && accountType != null) {
-            accountServiceFlow(
-                accountType = accountType,
-                repository = accountRepository,
-            ).mapNotNull {
-                if (it is PostDataSource) {
-                    it.postHandler.post(status.statusKey).toUi()
-                } else {
-                    null
+        combine(activeStatusFlow, selectedAccountsKeyFlow) { composeStatus, accountKeys ->
+            composeStatus to accountKeys.firstOrNull()
+        }.flatMapLatest { (composeStatus, selectedAccountKey) ->
+            val resolvedAccountType =
+                when {
+                    selectedAccountKey != null -> AccountType.Specific(selectedAccountKey)
+                    accountType is AccountType.Specific -> accountType
+                    else -> null
                 }
-            }.flatMapLatest { it }
-        } else {
-            null
+            if (composeStatus != null && resolvedAccountType != null) {
+                accountServiceFlow(
+                    accountType = resolvedAccountType,
+                    repository = accountRepository,
+                ).mapNotNull {
+                    if (it is PostDataSource) {
+                        it.postHandler.post(composeStatus.statusKey).toUi()
+                    } else {
+                        null
+                    }
+                }.flatMapLatest { it }
+            } else {
+                flowOf(UiState.Error(Exception("No status for compose")))
+            }
         }
     }
 
     private val replyStateFlow by lazy {
         statusFlow
-            ?.map { statusState ->
+            .map { statusState ->
                 statusState.map { post ->
                     if (post is UiTimelineV2.Post && post.platformType == PlatformType.VVo) {
                         post.quote.firstOrNull() ?: post
@@ -246,12 +272,12 @@ public class ComposePresenter(
                         post
                     }
                 }
-            }?.distinctUntilChanged()
+            }.distinctUntilChanged()
     }
 
     private val initialTextFlow by lazy {
         if (accountType is AccountType.Specific && status != null) {
-            statusFlow?.flatMapLatest { statusState ->
+            statusFlow.flatMapLatest { statusState ->
                 selectedUsersFlow
                     .mapNotNull {
                         it.firstOrNull()?.takeSuccess()
@@ -284,6 +310,8 @@ public class ComposePresenter(
         val enableCrossPost by enableCrossPostFlow.collectAsUiState()
         val composeConfig: UiState<ComposeConfig> by composeConfigFlow.collectAsUiState()
         val canSend by canSendFlow.collectAsState(false)
+        val loadedDraftState by loadedDraftStateFlow.collectAsState()
+        val editingDraftGroupId by editingDraftGroupIdFlow.collectAsState()
         if (accountType != null && accountType is AccountType.Specific) {
             LaunchedEffect(accountType) {
                 selectedAccountsKeyFlow.value = listOf(accountType.accountKey).toImmutableList()
@@ -298,9 +326,19 @@ public class ComposePresenter(
                 }
             }
         }
+        LaunchedEffect(draftGroupId) {
+            draftGroupId?.let {
+                loadDraftInternal(it)
+            }
+        }
 
-        val replyState = replyStateFlow?.flattenUiState()?.value
-        val initialTextState = initialTextFlow?.flattenUiState()?.value
+        val replyState = replyStateFlow.flattenUiState().value
+        val initialTextState =
+            if (editingDraftGroupId == null) {
+                initialTextFlow?.flattenUiState()?.value
+            } else {
+                null
+            }
 
         val visibilityState =
             composeConfig
@@ -320,10 +358,11 @@ public class ComposePresenter(
             selectedUsers = selectedUsers,
             otherUsers = remainingUsers,
             initialTextState = initialTextState,
+            loadedDraftState = loadedDraftState,
+            editingDraftGroupId = editingDraftGroupId,
         ) {
             override fun send(
                 data: ComposeData,
-                groupId: String,
             ) {
                 scope.launch {
                     val selectedAccounts = selectedAccountsFlow.firstOrNull().orEmpty()
@@ -331,7 +370,7 @@ public class ComposePresenter(
                         composeUseCase.invoke(
                             accounts = selectedAccounts,
                             data = data,
-                            groupId = groupId,
+                            groupId = editingDraftGroupIdFlow.value ?: newDraftGroupId(),
                         )
                     }
                 }
@@ -357,6 +396,53 @@ public class ComposePresenter(
             override fun setMediaSize(value: Int) {
                 mediaSizeFlow.value = value
             }
+
+            override fun loadDraft(groupId: String) {
+                scope.launch {
+                    loadDraftInternal(groupId)
+                }
+            }
+
+            override fun consumeLoadedDraft() {
+                loadedDraftStateFlow.value = null
+            }
+
+            override fun saveDraft(data: ComposeData) {
+                scope.launch {
+                    val selectedAccounts = selectedAccountsFlow.firstOrNull().orEmpty()
+                    if (selectedAccounts.isNotEmpty()) {
+                        val groupId = editingDraftGroupIdFlow.value ?: draftGroupId ?: newDraftGroupId()
+                        composeUseCase.saveDraft(
+                            accounts = selectedAccounts,
+                            data = data,
+                            groupId = groupId,
+                        )
+                        if (editingDraftGroupIdFlow.value.isNullOrEmpty() && groupId.isNotEmpty()) {
+                            editingDraftGroupIdFlow.value = groupId
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun loadDraftInternal(groupId: String) {
+        loadedDraftStateFlow.value = UiState.Loading()
+        runCatching {
+            restoreDraftUseCase(groupId)
+        }.onSuccess { draft ->
+            if (draft == null) {
+                loadedDraftStateFlow.value = UiState.Error(IllegalStateException("Draft not found"))
+                return
+            }
+            editingDraftGroupIdFlow.value = draft.groupId
+            activeStatusFlow.value = draft.data.referenceStatus?.composeStatus
+            selectedAccountsKeyFlow.value = draft.accounts.map { it.account.accountKey }.toImmutableList()
+            textFlow.value = draft.data.content
+            mediaSizeFlow.value = draft.medias.size
+            loadedDraftStateFlow.value = UiState.Success(draft)
+        }.onFailure {
+            loadedDraftStateFlow.value = UiState.Error(it)
         }
     }
 
@@ -451,10 +537,11 @@ public abstract class ComposeState(
     public val enableCrossPost: UiState<Boolean>,
     public val otherUsers: UiState<ImmutableList<UiState<UiProfile>>>,
     public val selectedUsers: UiState<ImmutableList<UiState<UiProfile>>>,
+    public val loadedDraftState: UiState<UiDraft>?,
+    public val editingDraftGroupId: String?,
 ) {
     public abstract fun send(
         data: ComposeData,
-        groupId: String,
     )
 
     public abstract fun selectAccount(accountKey: MicroBlogKey)
@@ -462,6 +549,12 @@ public abstract class ComposeState(
     public abstract fun setText(value: String)
 
     public abstract fun setMediaSize(value: Int)
+
+    public abstract fun loadDraft(groupId: String)
+
+    public abstract fun consumeLoadedDraft()
+
+    public abstract fun saveDraft(data: ComposeData)
 }
 
 @Immutable

@@ -79,6 +79,14 @@ internal interface StatusApi {
         @Header("X-Xsrf-Token") xsrfToken: String = st,
     ): VVOResponse<String>
 
+    @POST("comments/destroy")
+    @FormUrlEncoded
+    suspend fun deleteComment(
+        @Field("cid") cid: String,
+        @Field("st") st: String,
+        @Header("X-Xsrf-Token") xsrfToken: String = st,
+    ): VVOResponse<String>
+
     @POST("api/attitudes/create")
     @FormUrlEncoded
     suspend fun likeStatus(

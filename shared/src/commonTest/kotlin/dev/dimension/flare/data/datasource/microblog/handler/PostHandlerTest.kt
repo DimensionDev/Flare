@@ -341,8 +341,8 @@ class PostHandlerTest : RobolectricTest() {
             assertNull(savedStatus)
             val refs = db.statusReferenceDao().getByStatusKey(postKey)
             assertTrue(refs.isEmpty())
-            val pagingExists = db.pagingTimelineDao().existsPaging(accountKey, "post_only_$postKey")
-            assertTrue(!pagingExists)
+            val pagingRows = db.pagingTimelineDao().getByPagingKeyAndStatusKeys("post_only_$postKey", listOf(postKey))
+            assertTrue(pagingRows.isEmpty())
         }
 
     @Test

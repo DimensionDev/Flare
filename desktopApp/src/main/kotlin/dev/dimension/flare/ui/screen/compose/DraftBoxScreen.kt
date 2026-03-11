@@ -21,11 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ArrowUpFromBracket
 import compose.icons.fontawesomeicons.solid.ArrowsRotate
+import compose.icons.fontawesomeicons.solid.BoxOpen
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.TriangleExclamation
 import dev.dimension.flare.LocalWindowPadding
@@ -77,10 +80,23 @@ internal fun DraftBoxScreen(onEdit: (String, MicroBlogKey) -> Unit = { _, _ -> }
         ) {
             if (state.items.isEmpty()) {
                 item {
-                    Text(
-                        text = stringResource(Res.string.draft_box_empty),
-                        color = FluentTheme.colors.text.text.secondary,
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillParentMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                    ) {
+                        FAIcon(
+                            FontAwesomeIcons.Solid.BoxOpen,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = FluentTheme.colors.text.text.secondary,
+                        )
+                        Text(
+                            text = stringResource(Res.string.draft_box_empty),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                 }
             } else {
                 items(state.items, key = { it.groupId }) { item ->
@@ -128,6 +144,14 @@ private fun DraftBoxCard(
                         contentDescription = null,
                         tint = FluentTheme.colors.system.critical,
                         modifier = Modifier.align(Alignment.TopEnd),
+                    )
+                } else if (item.status == UiDraftStatus.SENDING) {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.ArrowUpFromBracket,
+                        contentDescription = null,
+                        tint = FluentTheme.colors.system.success,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd),
                     )
                 }
             }

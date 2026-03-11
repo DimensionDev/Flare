@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.vvo
 
 import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.loader.EmojiLoader
 import dev.dimension.flare.data.datasource.microblog.loader.NotificationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
@@ -35,16 +36,21 @@ internal class VVOLoader(
     override val supportedTypes: Set<RelationActionType> = setOf(RelationActionType.Follow)
 
     override suspend fun notificationBadgeCount(): Int {
+        return notificationBadgeCounts().values.sum()
+    }
+
+    suspend fun notificationBadgeCounts(): Map<NotificationFilter, Int> {
         val st = ensureLogin()
         val response =
             service.remindUnread(
                 time = Clock.System.now().toEpochMilliseconds() / 1000,
                 st = st,
             )
-        val mention = response.data?.mentionStatus ?: 0
-        val comment = response.data?.cmt ?: 0
-        val like = response.data?.attitude ?: 0
-        return (mention + comment + like).toInt()
+        return mapOf(
+            NotificationFilter.Mention to (response.data?.mentionStatus ?: 0).toInt(),
+            NotificationFilter.Comment to (response.data?.cmt ?: 0).toInt(),
+            NotificationFilter.Like to (response.data?.attitude ?: 0).toInt(),
+        )
     }
 
     override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile {

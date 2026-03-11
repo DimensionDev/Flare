@@ -81,6 +81,12 @@ internal class VVODataSource(
         )
     }
 
+    private val notificationBadgeStore: VVONotificationBadgeStore by lazy {
+        VVONotificationBadgeStore(loader) { total ->
+            notificationHandler.update(total)
+        }
+    }
+
     private val emojiHandler by lazy {
         EmojiHandler(
             host = accountKey.host,
@@ -88,10 +94,13 @@ internal class VVODataSource(
         )
     }
 
-    override val notificationHandler by lazy {
+    override val notificationHandler: NotificationHandler by lazy {
         NotificationHandler(
             accountKey = accountKey,
             loader = loader,
+            fetchBadgeCount = {
+                notificationBadgeStore.refreshAndGetTotal()
+            },
         )
     }
 
@@ -147,14 +156,21 @@ internal class VVODataSource(
 
     override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
         when (type) {
-            NotificationFilter.All,
-            NotificationFilter.Mention,
-            ->
+            NotificationFilter.All ->
                 MentionRemoteMediator(
                     service = service,
                     accountKey = accountKey,
                     onClearMarker = {
-                        notificationHandler.clear()
+                        notificationBadgeStore.clearAll()
+                    },
+                )
+
+            NotificationFilter.Mention ->
+                MentionRemoteMediator(
+                    service = service,
+                    accountKey = accountKey,
+                    onClearMarker = {
+                        notificationBadgeStore.clear(NotificationFilter.Mention)
                     },
                 )
 
@@ -163,7 +179,7 @@ internal class VVODataSource(
                     service = service,
                     accountKey = accountKey,
                     onClearMarker = {
-                        notificationHandler.clear()
+                        notificationBadgeStore.clear(NotificationFilter.Comment)
                     },
                 )
 
@@ -172,7 +188,7 @@ internal class VVODataSource(
                     service = service,
                     accountKey = accountKey,
                     onClearMarker = {
-                        notificationHandler.clear()
+                        notificationBadgeStore.clear(NotificationFilter.Like)
                     },
                 )
         }

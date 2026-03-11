@@ -7,6 +7,7 @@ import dev.dimension.flare.model.MicroBlogKey
 internal class NotificationHandler(
     val accountKey: MicroBlogKey,
     val loader: NotificationLoader,
+    private val fetchBadgeCount: (suspend () -> Int) = { loader.notificationBadgeCount() },
 ) {
     private val key by lazy {
         "notificationHandler_$accountKey"
@@ -16,12 +17,16 @@ internal class NotificationHandler(
         MemCacheable(
             key = key,
             fetchSource = {
-                loader.notificationBadgeCount()
+                fetchBadgeCount.invoke()
             },
         )
     }
 
+    fun update(count: Int) {
+        MemCacheable.update(key, count)
+    }
+
     fun clear() {
-        MemCacheable.update(key, 0)
+        update(0)
     }
 }

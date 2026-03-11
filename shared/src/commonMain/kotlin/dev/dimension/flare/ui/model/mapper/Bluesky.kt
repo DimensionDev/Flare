@@ -28,8 +28,6 @@ import app.bsky.richtext.FacetLink
 import app.bsky.richtext.FacetMention
 import app.bsky.richtext.FacetTag
 import chat.bsky.convo.MessageView
-import com.fleeksoft.ksoup.nodes.Element
-import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
@@ -49,9 +47,13 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
-import dev.dimension.flare.ui.model.toHtml
+import dev.dimension.flare.ui.render.RenderContent
+import dev.dimension.flare.ui.render.RenderRun
+import dev.dimension.flare.ui.render.RenderTextStyle
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
+import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.Url
@@ -68,7 +70,11 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import moe.tlaster.twitter.parser.CashTagToken
+import moe.tlaster.twitter.parser.EmojiToken
 import moe.tlaster.twitter.parser.HashTagToken
+import moe.tlaster.twitter.parser.StringToken
+import moe.tlaster.twitter.parser.Token
 import moe.tlaster.twitter.parser.TwitterParser
 import moe.tlaster.twitter.parser.UrlToken
 import moe.tlaster.twitter.parser.UserNameToken
@@ -111,16 +117,6 @@ internal fun BookmarkView.render(accountKey: MicroBlogKey): UiTimelineV2? =
         is BookmarkViewItemUnion.Unknown -> null
     }
 
-private fun Element.appendTextWithBr(text: String) {
-    val parts = text.split("\n")
-    for (i in parts.indices) {
-        addChildren(TextNode(parts[i]))
-        if (i < parts.size - 1) {
-            addChildren(Element("br"))
-        }
-    }
-}
-
 internal fun parseBlueskyJson(
     json: JsonContent,
     accountKey: MicroBlogKey,
@@ -143,12 +139,7 @@ internal fun parseBlueskyJson(
                 accountKey = accountKey,
             )
         } else {
-            return Element("span")
-                .apply {
-                    if (text != null) {
-                        appendText(text)
-                    }
-                }.toUi()
+            return text.orEmpty().toUiPlainText()
         }
     }
 }
@@ -233,9 +224,22 @@ private fun parseBluesky(
     facets: List<Facet>,
     accountKey: MicroBlogKey,
 ): UiRichText {
-    val element = Element("span")
-
     val codePoints = text.toByteArray(charset = Charsets.UTF_8)
+    val runs = mutableListOf<RenderRun>()
+
+    fun appendText(
+        text: String,
+        style: RenderTextStyle = RenderTextStyle(),
+    ) {
+        if (text.isEmpty()) return
+        val lastRun = runs.lastOrNull()
+        if (lastRun is RenderRun.Text && lastRun.style == style) {
+            runs[runs.lastIndex] = lastRun.copy(text = lastRun.text + text)
+        } else {
+            runs.add(RenderRun.Text(text = text, style = style))
+        }
+    }
+
     var codePointIndex = 0
     for (facet in facets) {
         val start = facet.index.byteStart.toInt()
@@ -247,7 +251,7 @@ private fun parseBluesky(
         }
         val beforeFacetText =
             codePoints.drop(codePointIndex).take(start - codePointIndex).stringify()
-        element.appendTextWithBr(beforeFacetText)
+        appendText(beforeFacetText)
         if (end - start < 0) {
             continue
         }
@@ -256,71 +260,126 @@ private fun parseBluesky(
         val feature = facet.features.firstOrNull()
         if (feature != null) {
             when (feature) {
-                is FacetFeatureUnion.Link -> {
-                    element.addChildren(
-                        Element("a")
-                            .apply {
-                                appendTextWithBr(facetText)
-                                attributes().put("href", feature.value.uri.uri)
-                            },
+                is FacetFeatureUnion.Link ->
+                    appendText(
+                        facetText,
+                        RenderTextStyle(
+                            link = feature.value.uri.uri,
+                        ),
                     )
-                }
 
-                is FacetFeatureUnion.Mention -> {
-                    element.addChildren(
-                        Element("a")
-                            .apply {
-                                appendTextWithBr(facetText)
-                                attributes().put(
-                                    "href",
-                                    DeeplinkRoute.Profile
-                                        .User(
-                                            accountType = AccountType.Specific(accountKey),
-                                            userKey =
-                                                MicroBlogKey(
-                                                    id = feature.value.did.did,
-                                                    host = accountKey.host,
-                                                ),
-                                        ).toUri(),
-                                )
-                            },
+                is FacetFeatureUnion.Mention ->
+                    appendText(
+                        facetText,
+                        RenderTextStyle(
+                            link =
+                                DeeplinkRoute.Profile
+                                    .User(
+                                        accountType = AccountType.Specific(accountKey),
+                                        userKey =
+                                            MicroBlogKey(
+                                                id = feature.value.did.did,
+                                                host = accountKey.host,
+                                            ),
+                                    ).toUri(),
+                        ),
                     )
-                }
 
-                is FacetFeatureUnion.Tag -> {
-                    element.addChildren(
-                        Element("a")
-                            .apply {
-                                appendTextWithBr(facetText)
-                                attributes().put(
-                                    "href",
-                                    DeeplinkRoute
-                                        .Search(
-                                            accountType = AccountType.Specific(accountKey),
-                                            query = facetText,
-                                        ).toUri(),
-                                )
-                            },
+                is FacetFeatureUnion.Tag ->
+                    appendText(
+                        facetText,
+                        RenderTextStyle(
+                            link =
+                                DeeplinkRoute
+                                    .Search(
+                                        accountType = AccountType.Specific(accountKey),
+                                        query = facetText,
+                                    ).toUri(),
+                        ),
                     )
-                }
 
-                is FacetFeatureUnion.Unknown -> {
-                    element.addChildren(
-                        Element("span")
-                            .apply {
-                                appendTextWithBr(facetText)
-                            },
-                    )
-                }
+                is FacetFeatureUnion.Unknown -> appendText(facetText)
             }
         } else {
-            element.appendTextWithBr(facetText)
+            appendText(facetText)
         }
         codePointIndex = end
     }
     val afterFacetText = codePoints.drop(codePointIndex).stringify()
-    element.appendTextWithBr(afterFacetText)
-    return element.toUi()
+    appendText(afterFacetText)
+    return uiRichTextOf(
+        renderRuns =
+            if (runs.isEmpty()) {
+                emptyList()
+            } else {
+                listOf(RenderContent.Text(runs = runs.toImmutableList()))
+            },
+    )
+}
+
+private fun List<Token>.toUiRichText(accountKey: MicroBlogKey): UiRichText {
+    val runs =
+        buildList<RenderRun> {
+            this@toUiRichText.forEach { token ->
+                when (token) {
+                    is CashTagToken ->
+                        add(
+                            RenderRun.Text(
+                                text = token.value,
+                                style = RenderTextStyle(link = DeeplinkRoute.Search(AccountType.Specific(accountKey), token.value).toUri()),
+                            ),
+                        )
+
+                    is EmojiToken, is StringToken ->
+                        add(
+                            RenderRun.Text(
+                                text = token.value,
+                            ),
+                        )
+
+                    is HashTagToken ->
+                        add(
+                            RenderRun.Text(
+                                text = token.value,
+                                style = RenderTextStyle(link = DeeplinkRoute.Search(AccountType.Specific(accountKey), token.value).toUri()),
+                            ),
+                        )
+
+                    is UrlToken ->
+                        add(
+                            RenderRun.Text(
+                                text = token.value,
+                                style = RenderTextStyle(link = token.value),
+                            ),
+                        )
+
+                    is UserNameToken ->
+                        add(
+                            RenderRun.Text(
+                                text = token.value,
+                                style =
+                                    RenderTextStyle(
+                                        link =
+                                            DeeplinkRoute.Profile
+                                                .UserNameWithHost(
+                                                    accountType = AccountType.Specific(accountKey),
+                                                    userName = token.value.trimStart('@'),
+                                                    host = accountKey.host,
+                                                ).toUri(),
+                                    ),
+                            ),
+                        )
+                }
+            }
+        }
+    return uiRichTextOf(
+        renderRuns =
+            if (runs.isEmpty()) {
+                emptyList()
+            } else {
+                listOf(RenderContent.Text(runs = runs.toImmutableList()))
+            },
+    )
 }
 
 private val ListNotificationsNotificationReason.icon: UiIcon
@@ -970,11 +1029,7 @@ internal fun chat.bsky.actor.ProfileViewBasic.render(accountKey: MicroBlogKey): 
         )
     return UiProfile(
         avatar = avatar?.uri.orEmpty(),
-        nameInternal =
-            Element("span")
-                .apply {
-                    addChildren(TextNode(displayName.orEmpty()))
-                }.toUi(),
+        nameInternal = displayName.orEmpty().toUiPlainText(),
         handle =
             UiHandle(
                 raw = handle.handle,
@@ -1011,11 +1066,7 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatar?.uri.orEmpty(),
-        nameInternal =
-            Element("span")
-                .apply {
-                    addChildren(TextNode(displayName.orEmpty()))
-                }.toUi(),
+        nameInternal = displayName.orEmpty().toUiPlainText(),
         handle =
             UiHandle(
                 raw = handle.handle,
@@ -1052,11 +1103,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatar?.uri.orEmpty(),
-        nameInternal =
-            Element("span")
-                .apply {
-                    addChildren(TextNode(displayName.orEmpty()))
-                }.toUi(),
+        nameInternal = displayName.orEmpty().toUiPlainText(),
         handle =
             UiHandle(
                 raw = handle.handle,
@@ -1064,7 +1111,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
             ),
         key = userKey,
         banner = null,
-        description = description?.let { parser.parse(it) }?.toHtml(accountKey)?.toUi(),
+        description = description?.let { parser.parse(it) }?.toUiRichText(accountKey),
         matrices =
             UiProfile.Matrices(
                 fansCount = 0,
@@ -1093,11 +1140,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatar?.uri.orEmpty(),
-        nameInternal =
-            Element("span")
-                .apply {
-                    addChildren(TextNode(displayName.orEmpty()))
-                }.toUi(),
+        nameInternal = displayName.orEmpty().toUiPlainText(),
         handle =
             UiHandle(
                 raw = handle.handle,
@@ -1105,7 +1148,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
             ),
         key = userKey,
         banner = banner?.uri,
-        description = description?.let { parser.parse(it) }?.toHtml(accountKey)?.toUi(),
+        description = description?.let { parser.parse(it) }?.toUiRichText(accountKey),
         matrices =
             UiProfile.Matrices(
                 fansCount = followersCount ?: 0,

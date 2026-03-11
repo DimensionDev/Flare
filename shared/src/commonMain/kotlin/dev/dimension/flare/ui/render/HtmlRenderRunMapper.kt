@@ -6,7 +6,17 @@ import com.fleeksoft.ksoup.nodes.TextNode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
+internal data class HtmlRenderResult(
+    val contents: ImmutableList<RenderContent>,
+    val raw: String,
+    val imageUrls: ImmutableList<String>,
+)
+
 internal fun mapHtmlToRenderContents(element: Element): ImmutableList<RenderContent> {
+    return mapHtmlToRenderResult(element).contents
+}
+
+internal fun mapHtmlToRenderResult(element: Element): HtmlRenderResult {
     val builder = RenderRunBuilder()
     builder.renderElement(
         element = element,
@@ -19,12 +29,18 @@ internal fun mapHtmlToRenderContents(element: Element): ImmutableList<RenderCont
 private class RenderRunBuilder {
     private val contents = mutableListOf<RenderContent>()
     private val currentRuns = mutableListOf<RenderRun>()
+    private val raw = StringBuilder()
+    private val imageUrls = mutableListOf<String>()
     private var currentBlock = RenderBlockStyle()
     private var isInBlockImageState = false
 
-    fun build(): ImmutableList<RenderContent> {
+    fun build(): HtmlRenderResult {
         flushTextContent()
-        return contents.toImmutableList()
+        return HtmlRenderResult(
+            contents = contents.toImmutableList(),
+            raw = raw.toString(),
+            imageUrls = imageUrls.toImmutableList(),
+        )
     }
 
     fun renderNode(
@@ -87,6 +103,7 @@ private class RenderRunBuilder {
                 if (isInBlockImageState) {
                     appendBlockImage(
                         url = src,
+                        alt = element.attr("alt"),
                         href = element.attr("href").ifEmpty { null },
                     )
                 } else {
@@ -152,6 +169,7 @@ private class RenderRunBuilder {
         block: RenderBlockStyle,
     ) {
         if (text.isEmpty()) return
+        raw.append(text)
         ensureBlock(block)
         val lastRun = currentRuns.lastOrNull()
         if (lastRun is RenderRun.Text && lastRun.style == style) {
@@ -166,14 +184,23 @@ private class RenderRunBuilder {
         alt: String,
         block: RenderBlockStyle,
     ) {
+        if (url.isNotEmpty()) {
+            imageUrls.add(url)
+        }
+        raw.append(alt)
         ensureBlock(block)
         currentRuns.add(RenderRun.Image(url = url, alt = alt))
     }
 
     private fun appendBlockImage(
         url: String,
+        alt: String,
         href: String?,
     ) {
+        if (url.isNotEmpty()) {
+            imageUrls.add(url)
+        }
+        raw.append(alt)
         flushTextContent()
         contents.add(RenderContent.BlockImage(url = url, href = href))
     }

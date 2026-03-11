@@ -97,6 +97,23 @@ public data class UiRichText(
     }
 }
 
+internal fun uiRichTextOf(
+    renderRuns: List<RenderContent>,
+    raw: String? = null,
+    innerText: String? = null,
+    imageUrls: List<String>? = null,
+): UiRichText {
+    val contents = renderRuns.toImmutableList()
+    val resolvedInnerText = innerText ?: contents.joinToString(separator = "") { it.plainText() }
+    return UiRichText(
+        renderRuns = contents,
+        isRtl = resolvedInnerText.isRtl(),
+        raw = raw ?: resolvedInnerText,
+        innerText = resolvedInnerText,
+        imageUrls = (imageUrls ?: contents.imageUrls()).toImmutableList(),
+    )
+}
+
 public fun String.toUiPlainText(): UiRichText =
     UiRichText(
         renderRuns =
@@ -146,6 +163,26 @@ public fun RenderContent.Text.plainText(): String =
                 }
                 is RenderRun.Text -> append(run.text)
             }
+        }
+    }
+
+private fun RenderContent.plainText(): String =
+    when (this) {
+        is RenderContent.BlockImage -> ""
+        is RenderContent.Text -> plainText()
+    }
+
+private fun List<RenderContent>.imageUrls(): List<String> =
+    flatMap { content ->
+        when (content) {
+            is RenderContent.BlockImage -> listOf(content.url)
+            is RenderContent.Text ->
+                content.runs.mapNotNull { run ->
+                    when (run) {
+                        is RenderRun.Image -> run.url
+                        is RenderRun.Text -> null
+                    }
+                }
         }
     }
 

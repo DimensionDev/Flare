@@ -26,7 +26,7 @@ internal fun EntryProviderScope<NavKey>.homeEntryBuilder(
         HomeTimelineScreen(
             accountType = args.accountType,
             toCompose = {
-                navigate(Route.Compose.New(args.accountType))
+                navigate(Route.Compose.New)
             },
             toQuickMenu = {
                 openDrawer.invoke()

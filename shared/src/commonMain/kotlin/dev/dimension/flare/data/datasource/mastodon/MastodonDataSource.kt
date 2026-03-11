@@ -5,7 +5,6 @@ import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -136,14 +135,19 @@ internal open class MastodonDataSource(
         when (event) {
             is PostEvent.Mastodon.AcceptFollowRequest ->
                 acceptFollowRequest(event, updater)
+
             is PostEvent.Mastodon.Bookmark ->
                 bookmark(event, updater)
+
             is PostEvent.Mastodon.Like ->
                 like(event, updater)
+
             is PostEvent.Mastodon.Reblog ->
                 reblog(event, updater)
+
             is PostEvent.Mastodon.RejectFollowRequest ->
                 rejectFollowRequest(event, updater)
+
             is PostEvent.Mastodon.Vote ->
                 vote(event, updater)
         }
@@ -228,7 +232,7 @@ internal open class MastodonDataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: (ComposeProgress) -> Unit,
+        progress: () -> Unit,
     ) {
         val inReplyToID =
             data.referenceStatus
@@ -244,7 +248,6 @@ internal open class MastodonDataSource(
                     it as? ComposeStatus.Quote
                 }?.statusKey
                 ?.id
-        val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias
                 .mapIndexed { index, (file, altText) ->
@@ -267,7 +270,7 @@ internal open class MastodonDataSource(
                             name = file.name ?: "unknown",
                             description = altText,
                         ).also {
-                            progress(ComposeProgress(index + 1, maxProgress))
+                            progress()
                         }
                 }.mapNotNull {
                     it.id
@@ -420,7 +423,12 @@ internal open class MastodonDataSource(
                 } else {
                     ComposeConfig.Poll(4)
                 },
-            emoji = ComposeConfig.Emoji(emojiHandler.emoji, mergeTag = "mastodon@${accountKey.host}"),
+            emoji =
+                ComposeConfig.Emoji(
+                    emojiHandler.emoji,
+                    mergeTag = "mastodon@${accountKey.host}",
+                    accountKey = accountKey,
+                ),
             contentWarning = ComposeConfig.ContentWarning,
             visibility = ComposeConfig.Visibility,
             language = ComposeConfig.Language(1),

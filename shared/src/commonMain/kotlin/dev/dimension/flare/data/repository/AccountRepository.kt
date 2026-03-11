@@ -31,6 +31,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -135,6 +136,13 @@ public class AccountRepository internal constructor(
                 UiState.Success(it.toUi())
             }
         }
+
+    internal suspend fun find(accountKey: MicroBlogKey): UiAccount? =
+        appDatabase
+            .accountDao()
+            .get(accountKey)
+            .firstOrNull()
+            ?.toUi()
 
     internal inline fun <reified T : UiAccount.Credential> credentialFlow(accountKey: MicroBlogKey): Flow<T> =
         appDatabase

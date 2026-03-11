@@ -140,6 +140,8 @@ import dev.dimension.flare.settings_appearance_theme_light
 import dev.dimension.flare.settings_appearance_title
 import dev.dimension.flare.settings_appearance_video_autoplay
 import dev.dimension.flare.settings_appearance_video_autoplay_description
+import dev.dimension.flare.settings_draft_box_description
+import dev.dimension.flare.settings_draft_box_title
 import dev.dimension.flare.settings_language_description
 import dev.dimension.flare.settings_language_title
 import dev.dimension.flare.settings_local_history_description
@@ -221,6 +223,7 @@ import java.util.Locale
 @Composable
 internal fun SettingsScreen(
     toLogin: () -> Unit,
+    toDraftBox: () -> Unit,
     toLocalCache: () -> Unit,
     toAppLog: () -> Unit,
     toRSSManagement: () -> Unit,
@@ -845,6 +848,23 @@ internal fun SettingsScreen(
             }
 
             Header(stringResource(Res.string.settings_storage_title))
+            CardExpanderItem(
+                onClick = toRSSManagement,
+                heading = {
+                    Text(stringResource(Res.string.settings_rss_management_title))
+                },
+                trailing = {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.AngleRight,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                    )
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_rss_management_description))
+                },
+                icon = null,
+            )
             AnimatedVisibility(
                 state.accountState.activeAccount.isSuccess,
             ) {
@@ -867,9 +887,9 @@ internal fun SettingsScreen(
                 )
             }
             CardExpanderItem(
-                onClick = toRSSManagement,
+                onClick = toDraftBox,
                 heading = {
-                    Text(stringResource(Res.string.settings_rss_management_title))
+                    Text(stringResource(Res.string.settings_draft_box_title))
                 },
                 trailing = {
                     FAIcon(
@@ -879,7 +899,7 @@ internal fun SettingsScreen(
                     )
                 },
                 caption = {
-                    Text(stringResource(Res.string.settings_rss_management_description))
+                    Text(stringResource(Res.string.settings_draft_box_description))
                 },
                 icon = null,
             )

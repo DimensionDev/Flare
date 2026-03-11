@@ -15,10 +15,26 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
 ) {
     entry<Route.Compose.New>(
         metadata = DialogSceneStrategy.dialog()
+    ) {
+        ComposeScreen(
+            onBack = onBack,
+            accountType = null,
+            onOpenDraftBox = {
+                navigate(Route.DraftBox)
+            },
+        )
+    }
+
+    entry<Route.Compose.Draft>(
+        metadata = DialogSceneStrategy.dialog()
     ) { args ->
         ComposeScreen(
             onBack = onBack,
-            accountType = args.accountType,
+            accountType = null,
+            draftGroupId = args.draftGroupId,
+            onOpenDraftBox = {
+                navigate(Route.DraftBox)
+            },
         )
     }
 
@@ -29,6 +45,9 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
             onBack = onBack,
             status = ComposeStatus.Reply(args.statusKey),
             accountType = AccountType.Specific(accountKey = args.accountKey),
+            onOpenDraftBox = {
+                navigate(Route.DraftBox)
+            },
         )
     }
 
@@ -39,6 +58,9 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
             onBack = onBack,
             status = ComposeStatus.Quote(args.statusKey),
             accountType = AccountType.Specific(accountKey = args.accountKey),
+            onOpenDraftBox = {
+                navigate(Route.DraftBox)
+            },
         )
     }
 
@@ -49,6 +71,18 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
             onBack = onBack,
             accountType = AccountType.Specific(accountKey = args.accountKey),
             status = ComposeStatus.VVOComment(args.replyTo, args.rootId),
+            onOpenDraftBox = {
+                navigate(Route.DraftBox)
+            },
+        )
+    }
+
+    entry<Route.DraftBox> {
+        DraftBoxScreen(
+            onBack = onBack,
+            onEdit = { draftGroupId ->
+                navigate(Route.Compose.Draft(draftGroupId = draftGroupId))
+            },
         )
     }
 }

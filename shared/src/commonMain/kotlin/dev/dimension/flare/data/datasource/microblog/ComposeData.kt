@@ -1,12 +1,10 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.common.FileItem
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 
 public data class ComposeData(
-    val account: UiAccount,
     val content: String,
     val visibility: UiTimelineV2.Post.Visibility =
         UiTimelineV2.Post.Visibility.Public,
@@ -30,7 +28,6 @@ public data class ComposeData(
     )
 
     public data class ReferenceStatus(
-        val data: UiTimelineV2?,
         val composeStatus: ComposeStatus,
     )
 }

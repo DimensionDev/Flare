@@ -40,6 +40,8 @@ internal sealed interface Route : NavKey {
 
     data object Settings : ScreenRoute
 
+    data object DraftBox : ScreenRoute
+
     data class Profile(
         val accountType: AccountType,
         val userKey: MicroBlogKey,
@@ -140,6 +142,10 @@ internal sealed interface Route : NavKey {
     ) : WindowRoute
 
     data object Compose {
+        data class Draft(
+            val draftGroupId: String,
+        ) : FloatingRoute
+
         data class Reply(
             val accountKey: MicroBlogKey,
             val statusKey: MicroBlogKey,
@@ -150,9 +156,7 @@ internal sealed interface Route : NavKey {
             val statusKey: MicroBlogKey,
         ) : FloatingRoute
 
-        data class New(
-            val accountType: AccountType,
-        ) : FloatingRoute
+        data object New : FloatingRoute
 
         data class VVOReplyComment(
             val accountKey: MicroBlogKey,
@@ -295,7 +299,7 @@ internal sealed interface Route : NavKey {
                                 .toImmutableMap(),
                     )
                 is DeeplinkRoute.Login -> ServiceSelect
-                is DeeplinkRoute.Compose.New -> New(deeplinkRoute.accountType)
+                DeeplinkRoute.Compose.New -> New
                 is DeeplinkRoute.Compose.Quote ->
                     Quote(
                         deeplinkRoute.accountKey,

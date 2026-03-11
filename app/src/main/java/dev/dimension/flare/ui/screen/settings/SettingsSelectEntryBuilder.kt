@@ -45,6 +45,9 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             toLocalHistory = {
                 navigate(Route.Settings.LocalHistory)
             },
+            toDraftBox = {
+                navigate(Route.DraftBox)
+            },
             toAiConfig = {
                 navigate(Route.Settings.AiConfig)
             },

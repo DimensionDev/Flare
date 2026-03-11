@@ -3,6 +3,7 @@ package dev.dimension.flare.di
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.io.ApplePlatformPathProducer
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.rss.NativeWebScraper
 import dev.dimension.flare.shared.image.ImageCompressor
@@ -20,7 +21,7 @@ internal actual val platformModule: Module =
     module {
         singleOf(::AppDataStore)
         singleOf(::DriverFactory)
-        singleOf(::PlatformPathProducer)
+        singleOf(::ApplePlatformPathProducer) bind PlatformPathProducer::class
         singleOf(::NativeWebScraper)
         singleOf(::AppleFormatter) bind PlatformFormatter::class
         singleOf(::ApplePlatformTextRenderer) bind PlatformTextRendering::class

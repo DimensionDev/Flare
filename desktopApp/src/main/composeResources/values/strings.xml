@@ -60,6 +60,9 @@
 
     <string name="delete_status_title">Delete</string>
     <string name="delete_status_message">Are you sure you want to delete this?</string>
+    <string name="compose_close_confirm_title">Save draft?</string>
+    <string name="compose_close_confirm_message">You have unsaved text. Do you want to save it as a draft before closing?</string>
+    <string name="compose_close_discard">Discard</string>
 
     <string name="mastodon_report_title">Report</string>
     <string name="mastodon_report_description">Are you sure you want to report this?</string>
@@ -148,6 +151,8 @@
     <string name="settings_status_appearance_subtitle">Customize the appearance of post</string>
     <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
     <string name="settings_storage_title">Storage</string>
+    <string name="settings_draft_box_title">Draft Box</string>
+    <string name="settings_draft_box_description">View sending, failed, and unsent drafts</string>
     <string name="settings_storage_subtitle">Manage Flare\'s storage</string>
     <string name="settings_about_title">About</string>
     <string name="settings_about_subtitle">Learn more about Flare</string>
@@ -348,6 +353,11 @@
     <string name="settings_storage_app_log_description">View the app log</string>
     <string name="settings_rss_management_title">RSS Management</string>
     <string name="settings_rss_management_description">Manage RSS feeds</string>
+    <string name="draft_box_title">Draft Box</string>
+    <string name="draft_box_empty">No drafts yet</string>
+    <string name="draft_box_retry">Retry</string>
+    <string name="draft_box_edit">Edit</string>
+    <string name="draft_box_send">Send</string>
 
     <string name="copied_to_clipboard">Copied to clipboard</string>
 

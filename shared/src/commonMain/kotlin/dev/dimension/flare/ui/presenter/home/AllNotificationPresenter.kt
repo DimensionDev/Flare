@@ -6,7 +6,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.common.refreshSuspend
@@ -22,7 +21,11 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
+import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -77,29 +80,22 @@ public class AllNotificationPresenter :
                         }
 
                         !is NotificationDataSource -> {
-                            dataSource.userHandler.userById(account.accountKey.id).data.map {
-                                if (it is CacheState.Success) {
-                                    it.data to 0
-                                } else {
-                                    null
+                            dataSource.userHandler.userById(account.accountKey.id).toUi().map {
+                                it.map {
+                                    it to 0
                                 }
                             }
                         }
 
                         else -> {
                             combine(
-                                dataSource.userHandler.userById(account.accountKey.id).data,
-                                dataSource.notificationHandler.notificationBadgeCount.data,
+                                dataSource.userHandler.userById(account.accountKey.id).toUi(),
+                                dataSource.notificationHandler.notificationBadgeCount.toUi(),
                             ) { user, badge ->
-                                if (user is CacheState.Success) {
-                                    user.data to
-                                        if (badge is CacheState.Success) {
-                                            badge.data
-                                        } else {
-                                            0
-                                        }
-                                } else {
-                                    null
+                                user.flatMap { profile ->
+                                    badge.map { count ->
+                                        profile to count
+                                    }
                                 }
                             }
                         }
@@ -108,7 +104,7 @@ public class AllNotificationPresenter :
             }.combineLatestFlowLists()
             .map {
                 it
-                    .filterNotNull()
+                    .mapNotNull { it?.takeSuccess() }
                     .sortedWith(
                         compareByDescending<Pair<UiProfile, Int>> { it.second }
                             .thenBy { it.first.handle.canonical }

@@ -76,12 +76,11 @@ struct EmojiPopup: View {
 
 extension EmojiPopup {
     init(
-        accountType: AccountType,
         data: EmojiData,
         onItemClicked: @escaping (UiEmoji) -> Void
     ) {
         self.data = data
         self.onItemClicked = onItemClicked
-        self._presenter = .init(wrappedValue: .init(presenter: EmojiHistoryPresenter(accountType: accountType, emojis: data.data.values.flatMap { $0 })))
+        self._presenter = .init(wrappedValue: .init(presenter: EmojiHistoryPresenter(accountType: data.accountType, emojis: data.data.values.flatMap { $0 })))
     }
 }

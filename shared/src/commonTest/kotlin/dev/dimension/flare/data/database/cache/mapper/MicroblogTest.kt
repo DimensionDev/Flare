@@ -279,7 +279,7 @@ class MicroblogTest : RobolectricTest() {
         }
 
     @Test
-    fun referencesRemainWhenSubsequentInsertHasNoReferences() =
+    fun replyReferencesRemainWhenSubsequentInsertHasNoReplyReferences() =
         runTest {
             val accountKey = MicroBlogKey(id = "account", host = "test.com")
 
@@ -315,6 +315,40 @@ class MicroblogTest : RobolectricTest() {
             val pager = TestPager(config = PagingConfig(pageSize = 20), paging)
             val refreshResult = pager.refresh()
             assertIs<PagingSource.LoadResult.Page<Int, DbPagingTimelineWithStatus>>(refreshResult)
+        }
+
+    @Test
+    fun staleQuoteReferencesAreRemovedWhenSubsequentInsertHasNoQuoteReferences() =
+        runTest {
+            val accountKey = MicroBlogKey(id = "account", host = "test.com")
+
+            val quoteUser = createUser(MicroBlogKey(id = "quote-user", host = "test.com"), "Quote User")
+            val quotePost =
+                createPost(
+                    accountKey = accountKey,
+                    user = quoteUser,
+                    statusKey = MicroBlogKey(id = "quote-status", host = "test.com"),
+                    text = "quote status",
+                )
+
+            val mainUser = createUser(MicroBlogKey(id = "main-user-quote", host = "test.com"), "Main User")
+            val withQuote =
+                createPost(
+                    accountKey = accountKey,
+                    user = mainUser,
+                    statusKey = MicroBlogKey(id = "main-status-quote", host = "test.com"),
+                    text = "main status",
+                    quote = persistentListOf(quotePost),
+                )
+
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withQuote, pagingKey = "home")))
+            assertEquals(1, db.statusReferenceDao().getByStatusKey(withQuote.statusKey).size)
+
+            val withoutQuote = withQuote.copy(quote = persistentListOf())
+            saveToDatabase(db, listOf(TimelinePagingMapper.toDb(withoutQuote, pagingKey = "home")))
+
+            val refsAfter = db.statusReferenceDao().getByStatusKey(withQuote.statusKey)
+            assertEquals(0, refsAfter.size)
         }
 
     @Test

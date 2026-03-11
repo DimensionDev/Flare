@@ -107,9 +107,7 @@ public sealed class DeeplinkRoute {
     @Serializable
     public sealed class Compose : DeeplinkRoute() {
         @Serializable
-        public data class New(
-            val accountType: AccountType,
-        ) : Compose()
+        public data object New : Compose()
 
         @Serializable
         public data class Reply(

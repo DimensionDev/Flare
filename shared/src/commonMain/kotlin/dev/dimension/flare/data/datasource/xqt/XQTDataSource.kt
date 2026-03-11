@@ -18,7 +18,6 @@ import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
@@ -39,7 +38,6 @@ import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
-import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.AddToConversationRequest
@@ -63,7 +61,6 @@ import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -114,7 +111,6 @@ internal class XQTDataSource(
     RelationDataSource,
     PostEventHandler.Handler {
     private val database: CacheDatabase by inject()
-    private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
     private val accountRepository: AccountRepository by inject()
     private val inAppNotification: InAppNotification by inject()
@@ -276,33 +272,11 @@ internal class XQTDataSource(
             inAppNotification,
         )
 
-    fun featuredTimeline(
-        pageSize: Int = 20,
-        pagingKey: String = "featured_$accountKey",
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimelineV2>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            featuredTimelineLoader().toPagingSource()
-        }.flow.cachedIn(scope)
-
     fun featuredTimelineLoader() =
         FeaturedTimelineRemoteMediator(
             service,
             accountKey,
         )
-
-    fun bookmarkTimeline(
-        pageSize: Int = 20,
-        pagingKey: String = "bookmark_$accountKey",
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimelineV2>> =
-        Pager(
-            config = pagingConfig,
-        ) {
-            bookmarkTimelineLoader().toPagingSource()
-        }.flow.cachedIn(scope)
 
     fun bookmarkTimelineLoader() =
         BookmarkTimelineRemoteMediator(
@@ -363,7 +337,7 @@ internal class XQTDataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: (ComposeProgress) -> Unit,
+        progress: () -> Unit,
     ) {
         val inReplyToID =
             data.referenceStatus
@@ -378,18 +352,13 @@ internal class XQTDataSource(
                 ?.let {
                     it as? ComposeStatus.Quote
                 }?.statusKey
-                ?.id
         val quoteUserName =
-            data.referenceStatus
-                ?.composeStatus
-                ?.let {
-                    it as? ComposeStatus.Quote
-                }?.let {
-                    data.referenceStatus.data as? UiTimelineV2.Post
+            quoteId
+                ?.let { statusKey ->
+                    loader.status(statusKey) as? UiTimelineV2.Post
                 }?.user
                 ?.handle
                 ?.normalizedRaw
-        val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias.mapIndexed { index, (item, altText) ->
                 val bytes = item.readBytes()
@@ -432,7 +401,7 @@ internal class XQTDataSource(
                                 ),
                         )
                     }
-                    progress(ComposeProgress(index + 1, maxProgress))
+                    progress()
                 }
             }
         service.postCreateTweet(
@@ -462,7 +431,7 @@ internal class XQTDataSource(
                             semanticAnnotationIds = emptyList(),
                             attachmentUrl =
                                 quoteId?.let {
-                                    "https://${accountKey.host}/$quoteUserName/status/$it"
+                                    "https://${accountKey.host}/$quoteUserName/status/${it.id}"
                                 },
                         ),
                 ),

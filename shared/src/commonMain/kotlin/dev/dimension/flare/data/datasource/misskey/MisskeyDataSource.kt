@@ -9,7 +9,6 @@ import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.ComposeType
 import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
@@ -192,7 +191,11 @@ internal class MisskeyDataSource(
                                                             accountKey = accountKey,
                                                         ),
                                                     ),
-                                                isUnicode = !event.reaction.startsWith(':') && !event.reaction.endsWith(':'),
+                                                isUnicode =
+                                                    !event.reaction.startsWith(':') &&
+                                                        !event.reaction.endsWith(
+                                                            ':',
+                                                        ),
                                                 me = true,
                                             ),
                                         )
@@ -324,6 +327,7 @@ internal class MisskeyDataSource(
                             PagingResult<UiList>(
                                 endOfPaginationReached = true,
                             )
+
                         PagingRequest.Refresh ->
                             PagingResult(
                                 endOfPaginationReached = true,
@@ -403,7 +407,7 @@ internal class MisskeyDataSource(
 
     override suspend fun compose(
         data: ComposeData,
-        progress: (ComposeProgress) -> Unit,
+        progress: () -> Unit,
     ) {
         val renoteId =
             data.referenceStatus
@@ -419,7 +423,6 @@ internal class MisskeyDataSource(
                     it as? ComposeStatus.Reply
                 }?.statusKey
                 ?.id
-        val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias
                 .mapIndexed { index, (item, altText) ->
@@ -443,7 +446,7 @@ internal class MisskeyDataSource(
                             sensitive = data.sensitive,
                             comment = altText,
                         ).also {
-                            progress(ComposeProgress(index + 1, maxProgress))
+                            progress()
                         }
                 }.mapNotNull {
                     it?.id
@@ -557,7 +560,12 @@ internal class MisskeyDataSource(
                     allowMediaOnly = true,
                 ),
             poll = ComposeConfig.Poll(9),
-            emoji = ComposeConfig.Emoji(emojiHandler.emoji, "misskey@${accountKey.host}"),
+            emoji =
+                ComposeConfig.Emoji(
+                    emojiHandler.emoji,
+                    "misskey@${accountKey.host}",
+                    accountKey = accountKey,
+                ),
             contentWarning = ComposeConfig.ContentWarning,
             visibility = ComposeConfig.Visibility,
         )

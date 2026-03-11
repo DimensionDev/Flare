@@ -95,6 +95,7 @@ struct Router<Root: View>: View {
         switch route {
         case .deepLinkAccountPicker,
                 .composeNew,
+                .composeDraft,
                 .composeQuote,
                 .composeReply,
                 .composeVVOReplyComment,

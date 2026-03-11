@@ -13,7 +13,7 @@ internal interface AuthenticatedMicroblogDataSource : MicroblogDataSource {
 
     suspend fun compose(
         data: ComposeData,
-        progress: (ComposeProgress) -> Unit,
+        progress: () -> Unit,
     )
 
     fun composeConfig(type: ComposeType): ComposeConfig

@@ -3,6 +3,7 @@ package dev.dimension.flare.di
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.io.AndroidPlatformPathProducer
 import dev.dimension.flare.data.io.PlatformPathProducer
 import dev.dimension.flare.data.network.rss.NativeWebScraper
 import dev.dimension.flare.shared.image.AndroidImageCompressor
@@ -19,7 +20,7 @@ internal actual val platformModule: Module =
         singleOf(::AppDataStore)
         singleOf(::DriverFactory)
         singleOf(::NativeWebScraper)
-        singleOf(::PlatformPathProducer)
+        singleOf(::AndroidPlatformPathProducer) bind PlatformPathProducer::class
         singleOf(::AndroidFormatter) bind PlatformFormatter::class
         singleOf(::AndroidImageCompressor) bind ImageCompressor::class
         singleOf(::OnDeviceAI)

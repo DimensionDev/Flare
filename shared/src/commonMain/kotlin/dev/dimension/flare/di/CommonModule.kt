@@ -6,9 +6,14 @@ import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ApplicationRepository
+import dev.dimension.flare.data.repository.DraftMediaStore
+import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.SearchHistoryRepository
 import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
+import dev.dimension.flare.ui.presenter.compose.RestoreDraftUseCase
+import dev.dimension.flare.ui.presenter.compose.SaveDraftUseCase
+import dev.dimension.flare.ui.presenter.compose.SendDraftUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -21,8 +26,26 @@ internal val commonModule =
         singleOf(::provideAppDatabase)
         singleOf(::provideCacheDatabase)
         singleOf(::ApplicationRepository)
+        single {
+            DraftMediaStore(get())
+        }
+        single {
+            DraftRepository(
+                database = get(),
+                draftMediaStore = get(),
+            )
+        }
         singleOf(::LocalFilterRepository)
         single { CoroutineScope(Dispatchers.IO) }
+        singleOf(::SaveDraftUseCase)
+        singleOf(::RestoreDraftUseCase)
+        single {
+            SendDraftUseCase(
+                draftRepository = get(),
+                accountRepository = get(),
+                draftMediaStore = get(),
+            )
+        }
         singleOf(::ComposeUseCase)
         singleOf(::SearchHistoryRepository)
         singleOf(::Readability)

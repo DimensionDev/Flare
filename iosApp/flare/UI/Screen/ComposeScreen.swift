@@ -6,14 +6,17 @@ import SwiftUIBackports
 
 struct ComposeScreen: View {
     @Environment(\.dismiss) var dismiss
-    let accountType: AccountType
+    let accountType: AccountType?
     let composeStatus: ComposeStatus?
+    let draftGroupId: String?
     @FocusState private var keyboardFocused: Bool
     @FocusState private var cwKeyboardFocused: Bool
     @StateObject private var presenter: KotlinPresenter<ComposeState>
     @State private var viewModel = ComposeInputViewModel()
     @State private var uiTextView: UITextView?
     @State private var pendingCursor: Int?
+    @State private var showDraftSheet = false
+    @State private var showDraftConfirmation = false
 
     var body: some View {
         VStack(
@@ -208,7 +211,7 @@ struct ComposeScreen: View {
                                 })
                                 .popover(isPresented: $viewModel.showEmoji) {
                                     NavigationStack {
-                                        EmojiPopup(accountType: accountType,data: emojis) { item in
+                                        EmojiPopup(data: emojis) { item in
                                             viewModel.addEmoji(emoji: item)
                                             insert(item.insertText)
                                         }
@@ -307,16 +310,24 @@ struct ComposeScreen: View {
                 viewModel.mediaViewModel.altTextMaxLength = Int(media.altTextMaxLength)
             }
         }
+        .onChange(of: presenter.state.loadedDraftState) { _, newValue in
+            guard let newValue, case .success(let loadedDraft) = onEnum(of: newValue) else { return }
+            applyDraft(loadedDraft.data)
+            presenter.state.consumeLoadedDraft()
+        }
         .onChange(of: viewModel.text) { oldValue, newValue in
             presenter.state.setText(value: newValue)
         }
         .onChange(of: viewModel.mediaViewModel.items.count) { _, newValue in
             presenter.state.setMediaSize(value: Int32(newValue))
         }
+        .sheet(isPresented: $showDraftSheet) {
+            draftSheet
+        }
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                switch onEnum(of: composeStatus) {
+                switch onEnum(of: presenter.state.composeStatus) {
                 case .none:
                     Text("compose_title_new")
                 case .quote:
@@ -327,12 +338,41 @@ struct ComposeScreen: View {
             }
             ToolbarItem(placement: .cancellationAction) {
                 Button {
-                    dismiss()
+                    if hasDraftContent {
+                        showDraftConfirmation = true
+                    } else {
+                        dismiss()
+                    }
                 } label: {
                     Label {
                         Text("compose_button_cancel")
                     } icon: {
                         Image(systemName: "xmark")
+                    }
+                }
+                .confirmationDialog("Draft", isPresented: $showDraftConfirmation, titleVisibility: .visible) {
+                    if #available(iOS 26.0, *) {
+                        Button("Save Draft", role: .confirm) {
+                            saveDraft(shouldDismiss: true)
+                        }
+                    } else {
+                        Button("Save Draft") {
+                            saveDraft(shouldDismiss: true)
+                        }
+                    }
+                    Button("Cancel", role: .cancel) {
+                        dismiss()
+                    }
+                } message: {
+                    Text("Save your current content as a draft before leaving?")
+                }
+            }
+            if presenter.state.showDraft {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showDraftSheet = true
+                    } label: {
+                        Text("Drafts")
                     }
                 }
             }
@@ -355,45 +395,41 @@ struct ComposeScreen: View {
         ScrollView(.horizontal) {
             HStack {
                 StateView(state: presenter.state.selectedUsers) { users in
-                    ForEach(0..<users.size, id: \.self) { index in
-                        let item = users.get(index: index)
-                        if let userState = item.first, let account = item.second {
-                            StateView(state: userState) { user in
-                                Label {
-                                    Text(user.handle.canonical)
-                                } icon: {
-                                    AvatarView(data: user.avatar)
-                                        .scaledToFit()
-                                        .frame(width: 20, height: 20)
-                                }
-                                .padding(.horizontal)
-                                .padding(.vertical, 8)
-                                .background(Color(.secondarySystemBackground))
-                                .clipShape(.rect(cornerRadius: 16))
-                                .onTapGesture {
-                                    presenter.state.selectAccount(account: account)
-                                }
+                    let items = (users as NSArray).cast(UiState<UiProfile>.self)
+                    ForEach(Array(items.enumerated()), id: \.offset) { _, userState in
+                        StateView(state: userState) { user in
+                            Label {
+                                Text(user.handle.canonical)
+                            } icon: {
+                                AvatarView(data: user.avatar)
+                                    .scaledToFit()
+                                    .frame(width: 20, height: 20)
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .background(Color(.secondarySystemBackground))
+                            .clipShape(.rect(cornerRadius: 16))
+                            .onTapGesture {
+                                presenter.state.selectAccount(accountKey: user.key)
                             }
                         }
                     }
                 }
-                StateView(state: presenter.state.otherAccounts) { others in
-                    if others.size > 0 {
+                StateView(state: presenter.state.otherUsers) { others in
+                    let items = (others as NSArray).cast(UiState<UiProfile>.self)
+                    if !items.isEmpty {
                         Menu {
-                            ForEach(0..<others.size, id: \.self) { index in
-                                let item = others.get(index: index)
-                                if let userState = item.first, let account = item.second {
-                                    StateView(state: userState) { user in
-                                        Button {
-                                            presenter.state.selectAccount(account: account)
-                                        } label: {
-                                            Label {
-                                                Text(user.handle.canonical)
-                                            } icon: {
-                                                AvatarView(data: user.avatar)
-                                                    .scaledToFit()
-                                                    .frame(maxWidth: 20, maxHeight: 20)
-                                            }
+                            ForEach(Array(items.enumerated()), id: \.offset) { _, userState in
+                                StateView(state: userState) { user in
+                                    Button {
+                                        presenter.state.selectAccount(accountKey: user.key)
+                                    } label: {
+                                        Label {
+                                            Text(user.handle.canonical)
+                                        } icon: {
+                                            AvatarView(data: user.avatar)
+                                                .scaledToFit()
+                                                .frame(maxWidth: 20, maxHeight: 20)
                                         }
                                     }
                                 }
@@ -437,39 +473,69 @@ struct ComposeScreen: View {
         textView.scrollRangeToVisible(NSRange(location: max(0, newLocation - 1), length: 1))
     }
     
-    private func getComposeData() -> [ComposeData] {
-        return presenter.state.selectedAccounts.map { account in
-            ComposeData(
-                account: account,
-                content: viewModel.text,
-                visibility: getVisibility(),
-                language: viewModel.languages,
-                medias: getMedia(),
-                sensitive: viewModel.mediaViewModel.sensitive,
-                spoilerText: viewModel.contentWarning,
-                poll: getPoll(),
-                localOnly: false,
-                referenceStatus: getReferenceStatus()
-            )
-        }
+    private func getComposeData() -> ComposeData {
+        ComposeData(
+            content: viewModel.text,
+            visibility: getVisibility(),
+            language: viewModel.languages,
+            medias: getMedia(),
+            sensitive: viewModel.mediaViewModel.sensitive,
+            spoilerText: viewModel.contentWarning,
+            poll: getPoll(),
+            localOnly: false,
+            referenceStatus: getReferenceStatus()
+        )
+    }
+
+    private var hasDraftContent: Bool {
+        !viewModel.text.isEmpty ||
+        !viewModel.contentWarning.isEmpty ||
+        !viewModel.mediaViewModel.items.isEmpty ||
+        viewModel.pollViewModel.enabled
     }
     
     private func send() {
-        let datas = getComposeData()
-        for data in datas {
-            presenter.state.send(data: data)
+        let data = getComposeData()
+        presenter.state.send(data: data) { dispatched in
+            if dispatched.boolValue {
+                dismiss()
+            }
         }
-        dismiss()
+    }
+
+    private func saveDraft(shouldDismiss: Bool = false) {
+        presenter.state.saveDraft(data: getComposeData()) { dispatched in
+            guard dispatched.boolValue else { return }
+            if shouldDismiss {
+                dismiss()
+            }
+        }
+    }
+
+    private func applyDraft(_ draft: UiDraft) {
+        let data = draft.data
+        viewModel.text = data.content
+        viewModel.contentWarning = data.spoilerText ?? ""
+        viewModel.enableCW = !(data.spoilerText ?? "").isEmpty
+        if !data.language.isEmpty {
+            viewModel.languages = data.language
+        }
+        viewModel.mediaViewModel.sensitive = data.sensitive
+        viewModel.mediaViewModel.restore(draftMedias: draft.medias)
+        viewModel.apply(poll: data.poll)
+        if case .success(let visibilityState) = onEnum(of: presenter.state.visibilityState) {
+            visibilityState.data.setVisibility(value: data.visibility)
+        }
     }
     
     private func getMedia() -> [ComposeData.Media] {
         return viewModel.mediaViewModel.items.map { item in
-                .init(file: .init(name: item.item.itemIdentifier, data: KotlinByteArray.from(data: item.data!), type: item.type), altText: item.altText.isEmpty ? nil : item.altText)
+                .init(file: .init(name: item.fileName, data: KotlinByteArray.from(data: item.data!), type: item.type), altText: item.altText.isEmpty ? nil : item.altText)
         }
     }
     private func getReferenceStatus() -> ComposeData.ReferenceStatus? {
-        return if let data = composeStatus {
-            ComposeData.ReferenceStatus(data: presenter.state.replyState?.takeSuccess() as? UiTimelineV2, composeStatus: data)
+        return if let data = presenter.state.composeStatus {
+            ComposeData.ReferenceStatus(composeStatus: data)
         } else {
             nil
         }
@@ -486,6 +552,16 @@ struct ComposeScreen: View {
             case .success(let success): return success.data.visibility
             default: return .public
         }
+    }
+
+    private var draftSheet: some View {
+        NavigationStack {
+            DraftBoxScreen { groupId in
+                presenter.state.loadDraft(groupId: groupId)
+                showDraftSheet = false
+            }
+        }
+        .presentationDetents([.medium, .large])
     }
 
 }
@@ -520,6 +596,20 @@ class ComposeInputViewModel {
             pollViewModel.enabled = true
         }
     }
+    func apply(poll: ComposeData.Poll?) {
+        guard let poll else {
+            pollViewModel = PollViewModel()
+            return
+        }
+
+        pollViewModel.enabled = true
+        pollViewModel.pollType = poll.multiple ? .multiple : .single
+        pollViewModel.expired = ComposePollExpired(milliseconds: poll.expiredAfter) ?? .minutes5
+        pollViewModel.choices = poll.options.map(PollChoice.init)
+        while pollViewModel.choices.count < 2 {
+            pollViewModel.choices.append(PollChoice())
+        }
+    }
     func addEmoji(emoji: UiEmoji) {
 //        text += " :" + emoji.shortcode + ": "
         showEmoji = false
@@ -545,10 +635,16 @@ class MediaViewModel {
             MediaItem(item: item)
         }
     }
+    func restore(draftMedias: [UiDraftMedia]) {
+        selectedItems = []
+        items = draftMedias.compactMap(MediaItem.init(draftMedia:))
+    }
     func remove(item: MediaItem) {
         if let index = items.firstIndex(of: item) {
             items.remove(at: index)
-            selectedItems.remove(at: index)
+            if selectedItems.indices.contains(index) {
+                selectedItems.remove(at: index)
+            }
         }
     }
 }
@@ -556,18 +652,20 @@ class MediaViewModel {
 @Observable
 class MediaItem: Equatable, Identifiable {
     static func == (lhs: MediaItem, rhs: MediaItem) -> Bool {
-        lhs.item == rhs.item
+        lhs.id == rhs.id
     }
-    let item: PhotosPickerItem
+    let item: PhotosPickerItem?
     var image: UIImage?
     var data: Data?
     var altText: String = ""
     let id: String
+    let fileName: String
     var type: FileType = .other
     
     init(item: PhotosPickerItem) {
         self.item = item
         self.id = item.itemIdentifier ?? UUID().uuidString
+        self.fileName = item.itemIdentifier ?? UUID().uuidString
         
         if let contentType = item.supportedContentTypes.first {
             if contentType.conforms(to: .image) {
@@ -589,6 +687,29 @@ class MediaItem: Equatable, Identifiable {
                 }
             } catch {
             }
+        }
+    }
+
+    init?(draftMedia: UiDraftMedia) {
+        let fileURL = URL(fileURLWithPath: draftMedia.cachePath)
+        guard let data = try? Data(contentsOf: fileURL) else {
+            return nil
+        }
+
+        self.item = nil
+        self.id = draftMedia.cachePath
+        self.fileName = draftMedia.fileName ?? fileURL.lastPathComponent
+        self.data = data
+        self.altText = draftMedia.altText ?? ""
+
+        switch draftMedia.type {
+        case .image:
+            self.type = .image
+            self.image = UIImage(data: data)
+        case .video:
+            self.type = .video
+        default:
+            self.type = .other
         }
     }
 }
@@ -626,6 +747,10 @@ class PollViewModel {
 @Observable
 class PollChoice: Identifiable {
     var text = ""
+
+    init(text: String = "") {
+        self.text = text
+    }
 }
 
 enum ComposePollType {
@@ -642,6 +767,28 @@ enum ComposePollExpired: String {
     case days1
     case days3
     case days7
+    init?(milliseconds: Int64) {
+        switch milliseconds {
+        case 5 * 60 * 1000:
+            self = .minutes5
+        case 30 * 60 * 1000:
+            self = .minutes30
+        case 1 * 60 * 60 * 1000:
+            self = .hours1
+        case 6 * 60 * 60 * 1000:
+            self = .hours6
+        case 12 * 60 * 60 * 1000:
+            self = .hours12
+        case 24 * 60 * 60 * 1000:
+            self = .days1
+        case 3 * 24 * 60 * 60 * 1000:
+            self = .days3
+        case 7 * 24 * 60 * 60 * 1000:
+            self = .days7
+        default:
+            return nil
+        }
+    }
     var inWholeMilliseconds: Int64 {
         switch self {
         case .minutes5:
@@ -664,12 +811,41 @@ enum ComposePollExpired: String {
     }
 }
 
+extension UiDraftStatus {
+    fileprivate var title: String {
+        switch self {
+        case .draft:
+            return "Draft"
+        case .failed:
+            return "Failed"
+        case .sending:
+            return "Sending"
+        default:
+            return "Draft"
+        }
+    }
+
+    fileprivate var tint: Color {
+        switch self {
+        case .draft:
+            return .secondary
+        case .failed:
+            return .red
+        case .sending:
+            return .orange
+        default:
+            return .secondary
+        }
+    }
+}
+
 
 extension ComposeScreen {
-    init(accountType: AccountType, composeStatus: ComposeStatus? = nil) {
+    init(accountType: AccountType?, composeStatus: ComposeStatus? = nil, draftGroupId: String? = nil) {
         self.accountType = accountType
         self.composeStatus = composeStatus
-        self._presenter = .init(wrappedValue: .init(presenter: ComposePresenter(accountType: accountType, status: composeStatus)))
+        self.draftGroupId = draftGroupId
+        self._presenter = .init(wrappedValue: .init(presenter: ComposePresenter(accountType: accountType, status: composeStatus, draftGroupId: draftGroupId)))
     }
 }
 

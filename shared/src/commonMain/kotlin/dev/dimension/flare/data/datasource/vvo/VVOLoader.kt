@@ -152,10 +152,23 @@ internal class VVOLoader(
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
         val st = ensureLogin()
-        service.deleteStatus(
-            mid = statusKey.id,
-            st = st,
-        )
+        val response =
+            service.deleteStatus(
+                mid = statusKey.id,
+                st = st,
+            )
+        val ok = response.ok ?: 0
+        if (ok == 0L) {
+            val response =
+                service.deleteComment(
+                    cid = statusKey.id,
+                    st = st,
+                )
+            val ok = response.ok ?: 0
+            if (ok == 0L) {
+                throw Exception("failed to delete status")
+            }
+        }
     }
 
     private suspend fun ensureLogin(): String {

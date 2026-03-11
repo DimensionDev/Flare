@@ -46,6 +46,7 @@ import dev.dimension.flare.ui.route.Route.Search
 import dev.dimension.flare.ui.route.Route.Timeline
 import dev.dimension.flare.ui.route.WindowSceneStrategy.Companion.window
 import dev.dimension.flare.ui.screen.compose.ComposeDialog
+import dev.dimension.flare.ui.screen.compose.DraftBoxScreen
 import dev.dimension.flare.ui.screen.dm.DmConversationScreen
 import dev.dimension.flare.ui.screen.dm.DmListScreen
 import dev.dimension.flare.ui.screen.dm.UserDMConversationScreen
@@ -342,7 +343,25 @@ internal fun WindowScope.Router(
                     ) {
                         ComposeDialog(
                             onBack = onBack,
-                            accountType = args.accountType,
+                            accountType = null,
+                            onOpenDraftBox = {
+                                navigate(Route.DraftBox)
+                            },
+                        )
+                    }
+                }
+
+                entry<Route.Compose.Draft>(
+                    metadata = dialog(),
+                ) { args ->
+                    FluentDialog(visible = true) {
+                        ComposeDialog(
+                            onBack = onBack,
+                            accountType = null,
+                            draftGroupId = args.draftGroupId,
+                            onOpenDraftBox = {
+                                navigate(Route.DraftBox)
+                            },
                         )
                     }
                 }
@@ -355,6 +374,9 @@ internal fun WindowScope.Router(
                             onBack = onBack,
                             status = Quote(args.statusKey),
                             accountType = Specific(accountKey = args.accountKey),
+                            onOpenDraftBox = {
+                                navigate(Route.DraftBox)
+                            },
                         )
                     }
                 }
@@ -367,6 +389,9 @@ internal fun WindowScope.Router(
                             onBack = onBack,
                             status = Reply(args.statusKey),
                             accountType = Specific(accountKey = args.accountKey),
+                            onOpenDraftBox = {
+                                navigate(Route.DraftBox)
+                            },
                         )
                     }
                 }
@@ -379,6 +404,9 @@ internal fun WindowScope.Router(
                             onBack = onBack,
                             accountType = Specific(accountKey = args.accountKey),
                             status = VVOComment(args.replyTo, args.rootId),
+                            onOpenDraftBox = {
+                                navigate(Route.DraftBox)
+                            },
                         )
                     }
                 }
@@ -520,6 +548,9 @@ internal fun WindowScope.Router(
                         toLogin = {
                             navigate(Route.ServiceSelect)
                         },
+                        toDraftBox = {
+                            navigate(Route.DraftBox)
+                        },
                         toLocalCache = {
                             navigate(Route.LocalCache)
                         },
@@ -528,6 +559,14 @@ internal fun WindowScope.Router(
                         },
                         toRSSManagement = {
                             navigate(Route.RssList)
+                        },
+                    )
+                }
+
+                entry<Route.DraftBox> {
+                    DraftBoxScreen(
+                        onEdit = { groupId ->
+                            navigate(Route.Compose.Draft(draftGroupId = groupId))
                         },
                     )
                 }

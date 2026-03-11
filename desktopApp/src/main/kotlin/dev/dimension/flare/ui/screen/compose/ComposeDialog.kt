@@ -57,9 +57,12 @@ import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
 import compose.icons.fontawesomeicons.solid.TriangleExclamation
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.Res
+import dev.dimension.flare.cancel
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.ImageClipboardManager
 import dev.dimension.flare.common.ImageDragAndDropTarget
+import dev.dimension.flare.compose_close_confirm_message
+import dev.dimension.flare.compose_close_confirm_title
 import dev.dimension.flare.compose_content_warning_hint
 import dev.dimension.flare.compose_hint
 import dev.dimension.flare.compose_media_sensitive
@@ -78,6 +81,8 @@ import dev.dimension.flare.compose_poll_single_choice
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.model.PostActionStyle
+import dev.dimension.flare.draft_box_title
+import dev.dimension.flare.media_save
 import dev.dimension.flare.misskey_visibility_followers
 import dev.dimension.flare.misskey_visibility_followers_description
 import dev.dimension.flare.misskey_visibility_home
@@ -96,6 +101,7 @@ import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.status.CommonStatusComponent
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
+import dev.dimension.flare.ui.model.UiDraftMedia
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
@@ -106,6 +112,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import dev.dimension.flare.ui.presenter.compose.DraftBoxPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -114,6 +121,8 @@ import io.github.composefluent.LocalTextStyle
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.CheckBox
+import io.github.composefluent.component.ContentDialog
+import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.FlyoutContainer
 import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.MenuFlyout
@@ -126,6 +135,11 @@ import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import io.github.composefluent.component.TextFieldDefaults
 import io.github.composefluent.surface.Card
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import java.util.Locale
 import kotlin.time.Duration
@@ -133,11 +147,6 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.uuid.ExperimentalUuidApi
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
-import moe.tlaster.precompose.molecule.producePresenter
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
 
 private val imageExtensions = setOf("png", "jpg", "jpeg", "gif", "bmp")
 private val videoExtensions = setOf("mp4", "mov", "avi", "mkv", "webm")
@@ -150,19 +159,34 @@ fun ComposeDialog(
     accountType: AccountType?,
     modifier: Modifier = Modifier,
     status: ComposeStatus? = null,
+    draftGroupId: String? = null,
     initialText: String = "",
     focusOnOpen: Boolean = true,
+    onOpenDraftBox: (() -> Unit)? = null,
 ) {
     val state by producePresenter(key = "compose_$accountType") {
         composePresenter(
             accountType = accountType,
             status = status,
+            draftGroupId = draftGroupId,
             initialText = initialText,
         )
     }
+    val draftBoxState by producePresenter(key = "compose_draft_box_button") {
+        remember { DraftBoxPresenter() }.invoke()
+    }
+    var showCloseConfirmDialog by remember { mutableStateOf(false) }
     val composeWindow = LocalComposeWindow.current
     val focusRequester = remember { FocusRequester() }
     val contentWarningFocusRequester = remember { FocusRequester() }
+
+    fun closeOrConfirm() {
+        if (state.hasTextContent) {
+            showCloseConfirmDialog = true
+        } else {
+            onBack?.invoke()
+        }
+    }
     if (focusOnOpen) {
         state.contentWarningState
             .onSuccess {
@@ -178,6 +202,34 @@ fun ComposeDialog(
                     focusRequester.requestFocus()
                 }
             }
+    }
+    if (showCloseConfirmDialog) {
+        ContentDialog(
+            visible = true,
+            title = stringResource(Res.string.compose_close_confirm_title),
+            content = {
+                Text(text = stringResource(Res.string.compose_close_confirm_message))
+            },
+            primaryButtonText = stringResource(Res.string.media_save),
+            secondaryButtonText = stringResource(Res.string.cancel),
+            onButtonClick = {
+                when (it) {
+                    ContentDialogButton.Primary -> {
+                        state.saveDraft { dispatched ->
+                            if (dispatched) {
+                                showCloseConfirmDialog = false
+                                onBack?.invoke()
+                            }
+                        }
+                    }
+                    ContentDialogButton.Secondary -> {
+                        showCloseConfirmDialog = false
+                        onBack?.invoke()
+                    }
+                    ContentDialogButton.Close -> Unit
+                }
+            },
+        )
     }
     Column(
         modifier =
@@ -198,18 +250,30 @@ fun ComposeDialog(
                 ),
     ) {
         if (onBack != null) {
-            SubtleButton(
-                onClick = onBack,
+            Row(
                 modifier =
                     Modifier
-                        .align(Alignment.Start)
+                        .fillMaxWidth()
                         .padding(8.dp),
-                iconOnly = true,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                FAIcon(
-                    imageVector = FontAwesomeIcons.Solid.Xmark,
-                    contentDescription = stringResource(Res.string.navigate_back),
-                )
+                SubtleButton(
+                    onClick = ::closeOrConfirm,
+                    iconOnly = true,
+                ) {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.Xmark,
+                        contentDescription = stringResource(Res.string.navigate_back),
+                    )
+                }
+                if (onOpenDraftBox != null && draftBoxState.items.isNotEmpty()) {
+                    SubtleButton(
+                        onClick = onOpenDraftBox,
+                    ) {
+                        Text(stringResource(Res.string.draft_box_title))
+                    }
+                }
             }
         }
         Column(
@@ -375,8 +439,9 @@ fun ComposeDialog(
                                 ).onKeyEvent {
                                     if (it.isCtrlPressed && it.key == Key.Enter) {
                                         if (state.canSend) {
-                                            state.send()
-                                            onBack?.invoke()
+                                            state.send {
+                                                onBack?.invoke()
+                                            }
                                         }
                                         true
                                     } else {
@@ -828,8 +893,9 @@ fun ComposeDialog(
                 Spacer(modifier = Modifier.width(8.dp))
                 AccentButton(
                     onClick = {
-                        state.send()
-                        onBack?.invoke()
+                        state.send {
+                            onBack?.invoke()
+                        }
                     },
                     disabled = !state.canSend,
                 ) {
@@ -876,11 +942,12 @@ private fun PollOption(
 private fun composePresenter(
     accountType: AccountType?,
     status: ComposeStatus? = null,
+    draftGroupId: String? = null,
     initialText: String = "",
 ) = run {
     val state =
-        remember(status, accountType) {
-            ComposePresenter(accountType = accountType, status)
+        remember(status, accountType, draftGroupId) {
+            ComposePresenter(accountType = accountType, status = status, draftGroupId = draftGroupId)
         }.invoke()
     val textFieldState by remember {
         mutableStateOf(TextFieldState(initialText))
@@ -946,6 +1013,32 @@ private fun composePresenter(
             }
         }
     }
+    state.loadedDraftState?.onSuccess { draft ->
+        val composeConfig = state.composeConfig.takeSuccess()
+        val canApplyDraft =
+            (composeConfig?.visibility == null || state.visibilityState.takeSuccess() != null) &&
+                (composeConfig?.media == null || mediaState is UiState.Success) &&
+                (composeConfig?.poll == null || pollState is UiState.Success) &&
+                (composeConfig?.contentWarning == null || contentWarningState is UiState.Success) &&
+                (composeConfig?.language == null || languageState is UiState.Success)
+        LaunchedEffect(draft.groupId, draft.updatedAt, canApplyDraft) {
+            if (!canApplyDraft) {
+                return@LaunchedEffect
+            }
+            textFieldState.edit {
+                delete(0, length)
+                append(draft.data.content)
+                selection = TextRange(length)
+            }
+            mediaState.takeSuccess()?.replaceMedias(draft.medias)
+            mediaState.takeSuccess()?.setMediaSensitive(draft.data.sensitive)
+            pollState.takeSuccess()?.setPoll(draft.data.poll)
+            contentWarningState.takeSuccess()?.setText(draft.data.spoilerText)
+            state.visibilityState.takeSuccess()?.setVisibility(draft.data.visibility)
+            languageState.takeSuccess()?.setSelectedLanguages(draft.data.language)
+            state.consumeLoadedDraft()
+        }
+    }
 
     val canPoll =
         remember(mediaState) {
@@ -977,59 +1070,70 @@ private fun composePresenter(
             }
         }
 
-        fun send() {
-            val data =
-                ComposeData(
-                    content = textFieldState.text.toString(),
-                    medias =
-                        mediaState.takeSuccess()?.medias.orEmpty().map {
-                            ComposeData.Media(
-                                file = FileItem(it.file),
-                                altText =
-                                    it.textState.text
-                                        .toString()
-                                        .takeIf { it.isNotEmpty() },
-                            )
-                        },
-                    poll =
-                        pollState.takeSuccess()?.takeIf { it.enabled }?.let {
-                            ComposeData.Poll(
-                                multiple = !it.pollSingleChoice,
-                                expiredAfter = it.expiredAt.duration.inWholeMilliseconds,
-                                options =
-                                    it.options.map { option ->
-                                        option.text.toString()
-                                    },
-                            )
-                        },
-                    sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
-                    spoilerText =
-                        contentWarningState
-                            .takeSuccess()
-                            ?.textFieldState
-                            ?.text
-                            ?.toString(),
-                    visibility =
-                        state.visibilityState.takeSuccess()?.visibility
-                            ?: UiTimelineV2.Post.Visibility.Public,
-                    referenceStatus =
-                        status?.let {
-                            ComposeData.ReferenceStatus(
-                                composeStatus = status,
-                            )
-                        },
-                    language = languageState.takeSuccess()?.selectedLanguage.orEmpty(),
-                )
-            state.send(data)
-            // cleanup
+        val hasTextContent = textFieldState.text.toString().isNotBlank()
 
-            textFieldState.edit {
-                this.delete(0, this.length)
+        fun buildComposeData() =
+            ComposeData(
+                content = textFieldState.text.toString(),
+                medias =
+                    mediaState.takeSuccess()?.medias.orEmpty().map {
+                        ComposeData.Media(
+                            file = FileItem(it.file),
+                            altText =
+                                it.textState.text
+                                    .toString()
+                                    .takeIf { it.isNotEmpty() },
+                        )
+                    },
+                poll =
+                    pollState.takeSuccess()?.takeIf { it.enabled }?.let {
+                        ComposeData.Poll(
+                            multiple = !it.pollSingleChoice,
+                            expiredAfter = it.expiredAt.duration.inWholeMilliseconds,
+                            options =
+                                it.options.map { option ->
+                                    option.text.toString()
+                                },
+                        )
+                    },
+                sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
+                spoilerText =
+                    contentWarningState
+                        .takeSuccess()
+                        ?.textFieldState
+                        ?.text
+                        ?.toString(),
+                visibility =
+                    state.visibilityState.takeSuccess()?.visibility
+                        ?: UiTimelineV2.Post.Visibility.Public,
+                referenceStatus =
+                    state.composeStatus?.let {
+                        ComposeData.ReferenceStatus(
+                            composeStatus = it,
+                        )
+                    },
+                language = languageState.takeSuccess()?.selectedLanguage.orEmpty(),
+            )
+
+        fun send(onDispatched: () -> Unit = {}) {
+            val data = buildComposeData()
+            state.send(data) { dispatched ->
+                if (dispatched) {
+                    // cleanup
+                    textFieldState.edit {
+                        this.delete(0, this.length)
+                    }
+                    mediaState.takeSuccess()?.clear()
+                    pollState.takeSuccess()?.clear()
+                    contentWarningState.takeSuccess()?.clear()
+                    state.visibilityState.takeSuccess()?.clear()
+                    onDispatched()
+                }
             }
-            mediaState.takeSuccess()?.clear()
-            pollState.takeSuccess()?.clear()
-            contentWarningState.takeSuccess()?.clear()
-            state.visibilityState.takeSuccess()?.clear()
+        }
+
+        fun saveDraft(onDispatched: (Boolean) -> Unit) {
+            state.saveDraft(buildComposeData(), onDispatched)
         }
     }
 }
@@ -1049,6 +1153,14 @@ private fun contentWarningPresenter() =
 
             fun toggle() {
                 enabled = !enabled
+            }
+
+            fun setText(value: String?) {
+                enabled = !value.isNullOrEmpty()
+                textFieldState.edit {
+                    delete(0, length)
+                    value?.let(::append)
+                }
             }
 
             fun clear() {
@@ -1089,6 +1201,19 @@ private fun mediaPresenter(config: ComposeConfig.Media) =
                     ).distinctBy {
                         it.file
                     }.takeLast(config.maxCount)
+            }
+
+            fun replaceMedias(items: List<UiDraftMedia>) {
+                medias =
+                    items
+                        .map { item ->
+                            MediaData(
+                                file = File(item.cachePath),
+                                textState = TextFieldState(item.altText.orEmpty()),
+                            )
+                        }.distinctBy {
+                            it.file
+                        }.takeLast(config.maxCount)
             }
 
             fun removeMedia(uri: File) {
@@ -1166,6 +1291,27 @@ private fun pollPresenter(config: ComposeConfig.Poll) =
                 expiredAt = value
             }
 
+            fun setPoll(value: ComposeData.Poll?) {
+                if (value == null) {
+                    clear()
+                    return
+                }
+                enabled = true
+                options =
+                    value.options
+                        .ifEmpty { listOf("", "") }
+                        .map { TextFieldState(it) }
+                        .let { current ->
+                            if (current.size == 1) {
+                                current + TextFieldState()
+                            } else {
+                                current
+                            }
+                        }.take(config.maxOptions)
+                pollSingleChoice = !value.multiple
+                expiredAt = PollExpiration.fromDuration(value.expiredAfter)
+            }
+
             fun clear() {
                 enabled = false
                 options = listOf(TextFieldState(), TextFieldState())
@@ -1221,6 +1367,15 @@ private fun languageState(config: ComposeConfig.Language) =
                     selectedLanguage = (selectedLanguage + tag).toImmutableList()
                 }
             }
+
+            fun setSelectedLanguages(tags: List<String>) {
+                selectedLanguage =
+                    tags
+                        .filter { tag ->
+                            allLanguage.any { it.second == tag }
+                        }.take(config.maxCount)
+                        .toImmutableList()
+            }
         }
     }
 
@@ -1236,6 +1391,14 @@ internal enum class PollExpiration(
     Days1(Res.string.compose_poll_expiration_1_day, 1.days),
     Days3(Res.string.compose_poll_expiration_3_days, 3.days),
     Days7(Res.string.compose_poll_expiration_7_days, 7.days),
+    ;
+
+    companion object {
+        fun fromDuration(durationMillis: Long): PollExpiration =
+            entries.minByOrNull { item ->
+                kotlin.math.abs(item.duration.inWholeMilliseconds - durationMillis)
+            } ?: Minutes5
+    }
 }
 
 internal val UiTimelineV2.Post.Visibility.localName: StringResource

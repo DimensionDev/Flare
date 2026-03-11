@@ -344,6 +344,24 @@ internal fun WindowScope.Router(
                         ComposeDialog(
                             onBack = onBack,
                             accountType = null,
+                            onOpenDraftBox = {
+                                navigate(Route.DraftBox)
+                            },
+                        )
+                    }
+                }
+
+                entry<Route.Compose.Draft>(
+                    metadata = dialog(),
+                ) { args ->
+                    FluentDialog(visible = true) {
+                        ComposeDialog(
+                            onBack = onBack,
+                            accountType = null,
+                            draftGroupId = args.draftGroupId,
+                            onOpenDraftBox = {
+                                navigate(Route.DraftBox)
+                            },
                         )
                     }
                 }
@@ -356,6 +374,9 @@ internal fun WindowScope.Router(
                             onBack = onBack,
                             status = Quote(args.statusKey),
                             accountType = Specific(accountKey = args.accountKey),
+                            onOpenDraftBox = {
+                                navigate(Route.DraftBox)
+                            },
                         )
                     }
                 }
@@ -368,6 +389,9 @@ internal fun WindowScope.Router(
                             onBack = onBack,
                             status = Reply(args.statusKey),
                             accountType = Specific(accountKey = args.accountKey),
+                            onOpenDraftBox = {
+                                navigate(Route.DraftBox)
+                            },
                         )
                     }
                 }
@@ -380,6 +404,9 @@ internal fun WindowScope.Router(
                             onBack = onBack,
                             accountType = Specific(accountKey = args.accountKey),
                             status = VVOComment(args.replyTo, args.rootId),
+                            onOpenDraftBox = {
+                                navigate(Route.DraftBox)
+                            },
                         )
                     }
                 }
@@ -538,7 +565,8 @@ internal fun WindowScope.Router(
 
                 entry<Route.DraftBox> {
                     DraftBoxScreen(
-                        onEdit = { _, accountKey ->
+                        onEdit = { groupId ->
+                            navigate(Route.Compose.Draft(draftGroupId = groupId))
                         },
                     )
                 }

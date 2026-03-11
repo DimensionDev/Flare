@@ -18,11 +18,11 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
-import kotlin.time.Clock
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlin.time.Clock
 
 internal class VVOLoader(
     val accountKey: MicroBlogKey,
@@ -146,16 +146,18 @@ internal class VVOLoader(
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
         val st = ensureLogin()
-        val response = service.deleteStatus(
-            mid = statusKey.id,
-            st = st,
-        )
-        val ok = response.ok ?: 0
-        if (ok == 0L) {
-            val response = service.deleteComment(
-                cid = statusKey.id,
+        val response =
+            service.deleteStatus(
+                mid = statusKey.id,
                 st = st,
             )
+        val ok = response.ok ?: 0
+        if (ok == 0L) {
+            val response =
+                service.deleteComment(
+                    cid = statusKey.id,
+                    st = st,
+                )
             val ok = response.ok ?: 0
             if (ok == 0L) {
                 throw Exception("failed to delete status")

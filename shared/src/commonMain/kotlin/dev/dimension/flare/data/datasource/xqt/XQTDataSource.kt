@@ -73,10 +73,6 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.time.Duration.Companion.seconds
-import kotlin.uuid.Uuid
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -94,6 +90,10 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.time.Duration.Companion.seconds
+import kotlin.uuid.Uuid
 
 private const val BULK_SIZE: Long = 512 * 1024L // 512 Kib
 private const val MAX_ASYNC_UPLOAD_SIZE = 10
@@ -277,6 +277,7 @@ internal class XQTDataSource(
             service,
             accountKey,
         )
+
     fun bookmarkTimelineLoader() =
         BookmarkTimelineRemoteMediator(
             service,

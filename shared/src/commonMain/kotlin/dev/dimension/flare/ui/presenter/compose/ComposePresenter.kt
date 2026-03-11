@@ -312,7 +312,12 @@ public class ComposePresenter(
         val canSend by canSendFlow.collectAsState(false)
         val loadedDraftState by loadedDraftStateFlow.collectAsState()
         val editingDraftGroupId by editingDraftGroupIdFlow.collectAsState()
-        if (accountType != null && accountType is AccountType.Specific) {
+        val composeStatus by activeStatusFlow.collectAsState()
+        if (draftGroupId != null) {
+            LaunchedEffect(Unit) {
+                selectedAccountsKeyFlow.value = persistentListOf()
+            }
+        } else if (accountType != null && accountType is AccountType.Specific) {
             LaunchedEffect(accountType) {
                 selectedAccountsKeyFlow.value = listOf(accountType.accountKey).toImmutableList()
             }
@@ -360,9 +365,11 @@ public class ComposePresenter(
             initialTextState = initialTextState,
             loadedDraftState = loadedDraftState,
             editingDraftGroupId = editingDraftGroupId,
+            composeStatus = composeStatus,
         ) {
             override fun send(
                 data: ComposeData,
+                onDispatched: (Boolean) -> Unit,
             ) {
                 scope.launch {
                     val selectedAccounts = selectedAccountsFlow.firstOrNull().orEmpty()
@@ -372,6 +379,9 @@ public class ComposePresenter(
                             data = data,
                             groupId = editingDraftGroupIdFlow.value ?: newDraftGroupId(),
                         )
+                        onDispatched(true)
+                    } else {
+                        onDispatched(false)
                     }
                 }
             }
@@ -407,7 +417,10 @@ public class ComposePresenter(
                 loadedDraftStateFlow.value = null
             }
 
-            override fun saveDraft(data: ComposeData) {
+            override fun saveDraft(
+                data: ComposeData,
+                onDispatched: (Boolean) -> Unit,
+            ) {
                 scope.launch {
                     val selectedAccounts = selectedAccountsFlow.firstOrNull().orEmpty()
                     if (selectedAccounts.isNotEmpty()) {
@@ -420,6 +433,9 @@ public class ComposePresenter(
                         if (editingDraftGroupIdFlow.value.isNullOrEmpty() && groupId.isNotEmpty()) {
                             editingDraftGroupIdFlow.value = groupId
                         }
+                        onDispatched(true)
+                    } else {
+                        onDispatched(false)
                     }
                 }
             }
@@ -454,9 +470,14 @@ public class ComposePresenter(
         var visibility by remember {
             mutableStateOf(UiTimelineV2.Post.Visibility.Public)
         }
-        LaunchedEffect(appDataStore.composeConfigData.data) {
-            appDataStore.composeConfigData.data.collect {
-                visibility = it.visibility
+        var hasExplicitVisibility by remember {
+            mutableStateOf(false)
+        }
+        LaunchedEffect(Unit) {
+            appDataStore.composeConfigData.data.firstOrNull()?.let {
+                if (!hasExplicitVisibility) {
+                    visibility = it.visibility
+                }
             }
         }
         return object : VisibilityState {
@@ -482,12 +503,14 @@ public class ComposePresenter(
             }
 
             override fun setVisibility(value: UiTimelineV2.Post.Visibility) {
+                hasExplicitVisibility = true
                 visibility = value
             }
 
             override fun clear() {
                 visibility = UiTimelineV2.Post.Visibility.Public
                 showVisibilityMenu = false
+                hasExplicitVisibility = true
             }
         }
     }
@@ -539,9 +562,11 @@ public abstract class ComposeState(
     public val selectedUsers: UiState<ImmutableList<UiState<UiProfile>>>,
     public val loadedDraftState: UiState<UiDraft>?,
     public val editingDraftGroupId: String?,
+    public val composeStatus: ComposeStatus?,
 ) {
     public abstract fun send(
         data: ComposeData,
+        onDispatched: (Boolean) -> Unit,
     )
 
     public abstract fun selectAccount(accountKey: MicroBlogKey)
@@ -554,7 +579,10 @@ public abstract class ComposeState(
 
     public abstract fun consumeLoadedDraft()
 
-    public abstract fun saveDraft(data: ComposeData)
+    public abstract fun saveDraft(
+        data: ComposeData,
+        onDispatched: (Boolean) -> Unit,
+    )
 }
 
 @Immutable

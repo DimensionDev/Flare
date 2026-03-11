@@ -39,6 +39,16 @@
     <string name="compose_content_warning_hint">Content warning</string>
     <string name="compose_media_sensitive">Mark media as sensitive</string>
     <string name="compose_notification_title">Sending Post</string>
+    <string name="compose_close_confirm_title">Save draft?</string>
+    <string name="compose_close_confirm_message">You have unsaved text. Save it as a draft before closing?</string>
+    <string name="compose_save_draft">Save</string>
+    <string name="compose_close_discard">Discard</string>
+    <string name="draft_box_title">Drafts</string>
+    <string name="draft_box_empty">No drafts yet</string>
+    <string name="draft_box_edit">Edit</string>
+    <string name="draft_box_retry">Retry</string>
+    <string name="draft_box_send">Send</string>
+    <string name="settings_draft_box_description">View and manage saved drafts</string>
 
     <string name="settings_title">Settings</string>
 

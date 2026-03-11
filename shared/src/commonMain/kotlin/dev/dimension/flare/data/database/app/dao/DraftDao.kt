@@ -63,6 +63,16 @@ internal interface DraftDao {
     )
     fun draftGroup(groupId: String): Flow<DbDraftGroupWithRelations?>
 
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM DbDraftGroup
+        WHERE group_id = :groupId
+        LIMIT 1
+        """,
+    )
+    suspend fun getDraftGroup(groupId: String): DbDraftGroupWithRelations?
+
     @Query(
         """
         SELECT * FROM DbDraftGroup

@@ -849,9 +849,9 @@ internal fun SettingsScreen(
 
             Header(stringResource(Res.string.settings_storage_title))
             CardExpanderItem(
-                onClick = toDraftBox,
+                onClick = toRSSManagement,
                 heading = {
-                    Text(stringResource(Res.string.settings_draft_box_title))
+                    Text(stringResource(Res.string.settings_rss_management_title))
                 },
                 trailing = {
                     FAIcon(
@@ -861,7 +861,7 @@ internal fun SettingsScreen(
                     )
                 },
                 caption = {
-                    Text(stringResource(Res.string.settings_draft_box_description))
+                    Text(stringResource(Res.string.settings_rss_management_description))
                 },
                 icon = null,
             )
@@ -887,9 +887,9 @@ internal fun SettingsScreen(
                 )
             }
             CardExpanderItem(
-                onClick = toRSSManagement,
+                onClick = toDraftBox,
                 heading = {
-                    Text(stringResource(Res.string.settings_rss_management_title))
+                    Text(stringResource(Res.string.settings_draft_box_title))
                 },
                 trailing = {
                     FAIcon(
@@ -899,7 +899,7 @@ internal fun SettingsScreen(
                     )
                 },
                 caption = {
-                    Text(stringResource(Res.string.settings_rss_management_description))
+                    Text(stringResource(Res.string.settings_draft_box_description))
                 },
                 icon = null,
             )

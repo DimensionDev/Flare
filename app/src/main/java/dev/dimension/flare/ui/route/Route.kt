@@ -211,6 +211,9 @@ internal sealed interface Route : NavKey {
     data object Discover : Route
 
     @Serializable
+    data object DraftBox : Route
+
+    @Serializable
     sealed interface Profile : Route {
         @Serializable
         data class User(
@@ -384,6 +387,11 @@ internal sealed interface Route : NavKey {
     sealed interface Compose : Route {
         @Serializable
         data object New : Compose
+
+        @Serializable
+        data class Draft(
+            val draftGroupId: String,
+        ) : Compose
 
         @Serializable
         data class Reply(

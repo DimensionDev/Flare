@@ -104,6 +104,20 @@ public class DraftBoxPresenter :
             override val items: ImmutableList<UiDraft> = items
 
             override fun retry(groupId: String) {
+                sendDraft(groupId)
+            }
+
+            override fun send(groupId: String) {
+                sendDraft(groupId)
+            }
+
+            override fun delete(groupId: String) {
+                coroutineScope.launch {
+                    draftRepository.deleteGroup(groupId)
+                }
+            }
+
+            private fun sendDraft(groupId: String) {
                 coroutineScope.launch {
                     sendDraftUseCase(groupId) {
                         when (it) {
@@ -133,6 +147,10 @@ public interface DraftBoxState {
     public val items: ImmutableList<UiDraft>
 
     public fun retry(groupId: String)
+
+    public fun send(groupId: String)
+
+    public fun delete(groupId: String)
 }
 
 private val UiDraftStatus.sortOrder: Int

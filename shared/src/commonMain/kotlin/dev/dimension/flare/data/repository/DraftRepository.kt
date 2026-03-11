@@ -19,6 +19,7 @@ import kotlin.uuid.Uuid
 
 internal class DraftRepository(
     private val database: AppDatabase,
+    private val draftMediaStore: DraftMediaStore,
 ) {
     val visibleDrafts: Flow<List<DraftGroup>> =
         database
@@ -118,7 +119,9 @@ internal class DraftRepository(
         database.connect {
             database.draftDao().deleteTarget(targetId(groupId, accountKey))
             if (database.draftDao().countTargets(groupId) == 0) {
+                val draft = database.draftDao().getDraftGroup(groupId)
                 database.draftDao().deleteGroup(groupId)
+                draftMediaStore.delete(draft?.toModel()?.medias.orEmpty())
             } else {
                 database.draftDao().touchGroup(
                     groupId = groupId,
@@ -129,7 +132,15 @@ internal class DraftRepository(
     }
 
     suspend fun deleteGroup(groupId: String) {
+        val medias =
+            database
+                .draftDao()
+                .getDraftGroup(groupId)
+                ?.toModel()
+                ?.medias
+                .orEmpty()
         database.draftDao().deleteGroup(groupId)
+        draftMediaStore.delete(medias)
     }
 
     suspend fun markSendingAsDraftIfExpired(

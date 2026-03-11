@@ -69,8 +69,8 @@ class SendDraftUseCaseTest : RobolectricTest() {
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
-        repository = DraftRepository(db)
         mediaStore = DraftMediaStore(pathProducer, fileSystem)
+        repository = DraftRepository(db, mediaStore)
     }
 
     @AfterTest

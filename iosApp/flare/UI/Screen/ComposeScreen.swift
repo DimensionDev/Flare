@@ -453,8 +453,11 @@ struct ComposeScreen: View {
     
     private func send() {
         let data = getComposeData()
-        presenter.state.send(data: data)
-        dismiss()
+        presenter.state.send(data: data) { dispatched in
+            if dispatched.boolValue {
+                dismiss()
+            }
+        }
     }
     
     private func getMedia() -> [ComposeData.Media] {

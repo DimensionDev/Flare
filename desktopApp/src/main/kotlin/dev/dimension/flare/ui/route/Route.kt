@@ -142,6 +142,10 @@ internal sealed interface Route : NavKey {
     ) : WindowRoute
 
     data object Compose {
+        data class Draft(
+            val draftGroupId: String,
+        ) : FloatingRoute
+
         data class Reply(
             val accountKey: MicroBlogKey,
             val statusKey: MicroBlogKey,

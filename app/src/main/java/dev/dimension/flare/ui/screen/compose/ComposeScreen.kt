@@ -28,6 +28,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.insert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
@@ -113,6 +114,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import dev.dimension.flare.ui.presenter.compose.DraftBoxPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.FlareTheme
@@ -171,19 +173,26 @@ internal fun ComposeScreen(
     accountType: AccountType?,
     modifier: Modifier = Modifier,
     status: ComposeStatus? = null,
+    draftGroupId: String? = null,
     initialText: String = "",
     initialMedias: ImmutableList<Uri> = persistentListOf(),
+    onOpenDraftBox: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    val state by producePresenter(key = "compose_$accountType") {
+    val state by producePresenter(key = "compose_${accountType}_${status}_$draftGroupId") {
         composePresenter(
             context = context,
             accountType = accountType,
             status = status,
+            draftGroupId = draftGroupId,
             initialText = initialText,
             initialMedias = initialMedias,
         )
     }
+    val draftBoxState by producePresenter(key = "compose_draft_box_button") {
+        remember { DraftBoxPresenter() }.invoke()
+    }
+    var showCloseConfirmDialog by remember { mutableStateOf(false) }
     val photoPickerLauncher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.PickMultipleVisualMedia(4),
@@ -220,7 +229,7 @@ internal fun ComposeScreen(
         FlareTopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
             title = {
-                when (status) {
+                when (state.state.composeStatus) {
                     is ComposeStatus.VVOComment ->
                         Text(text = stringResource(id = R.string.compose_vvo_comment_title))
                     is ComposeStatus.Quote ->
@@ -232,7 +241,15 @@ internal fun ComposeScreen(
                 }
             },
             navigationIcon = {
-                IconButton(onClick = onBack) {
+                IconButton(
+                    onClick = {
+                        if (state.hasTextContent) {
+                            showCloseConfirmDialog = true
+                        } else {
+                            onBack()
+                        }
+                    },
+                ) {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.Xmark,
                         contentDescription = stringResource(id = R.string.navigate_back),
@@ -240,10 +257,18 @@ internal fun ComposeScreen(
                 }
             },
             actions = {
+                if (onOpenDraftBox != null && draftBoxState.items.isNotEmpty()) {
+                    TextButton(
+                        onClick = onOpenDraftBox,
+                    ) {
+                        Text(text = stringResource(id = R.string.draft_box_title))
+                    }
+                }
                 IconButton(
                     onClick = {
-                        state.send()
-                        onBack.invoke()
+                        state.send {
+                            onBack.invoke()
+                        }
                     },
                     enabled = state.canSend,
                 ) {
@@ -251,6 +276,43 @@ internal fun ComposeScreen(
                 }
             },
         )
+        if (showCloseConfirmDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showCloseConfirmDialog = false
+                },
+                title = {
+                    Text(text = stringResource(id = R.string.compose_close_confirm_title))
+                },
+                text = {
+                    Text(text = stringResource(id = R.string.compose_close_confirm_message))
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            state.saveDraft { dispatched ->
+                                if (dispatched) {
+                                    showCloseConfirmDialog = false
+                                    onBack()
+                                }
+                            }
+                        },
+                    ) {
+                        Text(text = stringResource(id = R.string.compose_save_draft))
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showCloseConfirmDialog = false
+                            onBack()
+                        },
+                    ) {
+                        Text(text = stringResource(android.R.string.cancel))
+                    }
+                },
+            )
+        }
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -262,25 +324,24 @@ internal fun ComposeScreen(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 state.state.selectedUsers.onSuccess { selectedUsers ->
-                    for (i in 0 until selectedUsers.size) {
-                        val (user, account) = selectedUsers[i]
-                        user.onSuccess {
+                    selectedUsers.forEach { userState ->
+                        userState.onSuccess { user ->
                             AssistChip(
                                 onClick = {
-                                    state.state.selectAccount(account)
+                                    state.state.selectAccount(user.key)
                                 },
                                 label = {
-                                    Text(it.handle.canonical)
+                                    Text(user.handle.canonical)
                                 },
                                 leadingIcon = {
-                                    AvatarComponent(it.avatar, size = 24.dp)
+                                    AvatarComponent(user.avatar, size = 24.dp)
                                 },
                                 shape = RoundedCornerShape(100),
                             )
                         }
                     }
-                    state.state.otherAccounts.onSuccess { others ->
-                        if (others.size > 0) {
+                    state.state.otherUsers.onSuccess { others ->
+                        if (others.isNotEmpty()) {
                             AssistChip(
                                 shape = CircleShape,
                                 onClick = {
@@ -295,19 +356,18 @@ internal fun ComposeScreen(
                                         },
                                         properties = PopupProperties(focusable = false),
                                     ) {
-                                        for (i in 0 until others.size) {
-                                            val (user, account) = others[i]
-                                            user.onSuccess { data ->
+                                        others.forEach { userState ->
+                                            userState.onSuccess { user ->
                                                 DropdownMenuItem(
                                                     text = {
-                                                        Text(text = data.handle.canonical)
+                                                        Text(text = user.handle.canonical)
                                                     },
                                                     onClick = {
-                                                        state.state.selectAccount(account)
+                                                        state.state.selectAccount(user.key)
                                                     },
                                                     leadingIcon = {
                                                         AvatarComponent(
-                                                            data.avatar,
+                                                            user.avatar,
                                                             size = 24.dp,
                                                         )
                                                     },
@@ -771,15 +831,6 @@ internal fun ComposeScreen(
                                 contentDescription = null,
                             )
                             if (state.showEmojiMenu) {
-                                val actualAccountType =
-                                    remember(
-                                        state.state.selectedAccounts,
-                                    ) {
-                                        state.state.selectedAccounts
-                                            .firstOrNull()
-                                            ?.accountKey
-                                            ?.let(AccountType::Specific)
-                                    }
                                 Popup(
                                     alignment = Alignment.BottomStart,
                                     onDismissRequest = {
@@ -814,7 +865,7 @@ internal fun ComposeScreen(
                                         EmojiPicker(
                                             data = emojis.data,
                                             onEmojiSelected = state::selectEmoji,
-                                            accountType = actualAccountType ?: accountType,
+                                            accountType = emojis.accountType,
                                             modifier =
                                                 Modifier
                                                     .padding(8.dp),
@@ -928,12 +979,17 @@ private fun composePresenter(
     context: Context,
     accountType: AccountType?,
     status: ComposeStatus? = null,
+    draftGroupId: String? = null,
     initialText: String = "",
     initialMedias: ImmutableList<Uri> = persistentListOf(),
 ) = run {
     val state =
-        remember(status, accountType) {
-            ComposePresenter(accountType = accountType, status)
+        remember(status, accountType, draftGroupId) {
+            ComposePresenter(
+                accountType = accountType,
+                status = status,
+                draftGroupId = draftGroupId,
+            )
         }.invoke()
     val textFieldState by remember {
         mutableStateOf(TextFieldState(initialText))
@@ -998,6 +1054,32 @@ private fun composePresenter(
             }
         }
     }
+    state.loadedDraftState?.onSuccess { draft ->
+        val composeConfig = state.composeConfig.takeSuccess()
+        val canApplyDraft =
+            (composeConfig?.visibility == null || state.visibilityState.takeSuccess() != null) &&
+                (composeConfig?.media == null || mediaState is UiState.Success) &&
+                (composeConfig?.poll == null || pollState is UiState.Success) &&
+                (composeConfig?.contentWarning == null || contentWarningState is UiState.Success) &&
+                (composeConfig?.language == null || languageState is UiState.Success)
+        LaunchedEffect(draft.groupId, draft.updatedAt, canApplyDraft) {
+            if (!canApplyDraft) {
+                return@LaunchedEffect
+            }
+            textFieldState.edit {
+                delete(0, length)
+                append(draft.data.content)
+                selection = TextRange(length)
+            }
+            mediaState.takeSuccess()?.replaceMedias(draft.medias)
+            mediaState.takeSuccess()?.setMediaSensitive(draft.data.sensitive)
+            pollState.takeSuccess()?.setPoll(draft.data.poll)
+            contentWarningState.takeSuccess()?.setText(draft.data.spoilerText)
+            state.visibilityState.takeSuccess()?.setVisibility(draft.data.visibility)
+            languageState.takeSuccess()?.setSelectedLanguages(draft.data.language)
+            state.consumeLoadedDraft()
+        }
+    }
 
     val canPoll =
         remember(mediaState) {
@@ -1025,6 +1107,7 @@ private fun composePresenter(
         val state = state
         val showAccountSelectMenu = showAccountSelectMenu
         val languageState = languageState
+        val hasTextContent = textFieldState.text.toString().isNotBlank()
 
         fun selectEmoji(emoji: UiEmoji) {
             textFieldState.edit {
@@ -1042,50 +1125,60 @@ private fun composePresenter(
             showAccountSelectMenu = value
         }
 
-        fun send() {
-            val data =
-                ComposeData(
-                    content = textFieldState.text.toString(),
-                    medias =
-                        mediaState.takeSuccess()?.medias.orEmpty().map {
-                            ComposeData.Media(
-                                file = FileItem(context, it.uri),
-                                altText =
-                                    it.textState.text
-                                        .toString()
-                                        .takeIf { it.isNotEmpty() },
-                            )
-                        },
-                    poll =
-                        pollState.takeSuccess()?.takeIf { it.enabled }?.let {
-                            ComposeData.Poll(
-                                multiple = !it.pollSingleChoice,
-                                expiredAfter = it.expiredAt.duration.inWholeMilliseconds,
-                                options =
-                                    it.options.map { option ->
-                                        option.text.toString()
-                                    },
-                            )
-                        },
-                    sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
-                    spoilerText =
-                        contentWarningState
-                            .takeSuccess()
-                            ?.textFieldState
-                            ?.text
-                            ?.toString(),
-                    visibility =
-                        state.visibilityState.takeSuccess()?.visibility
-                            ?: UiTimelineV2.Post.Visibility.Public,
-                    referenceStatus =
-                        status?.let {
-                            ComposeData.ReferenceStatus(
-                                composeStatus = status,
-                            )
-                        },
-                    language = languageState.takeSuccess()?.selectedLanguage.orEmpty(),
-                )
-            state.send(data)
+        fun buildComposeData() =
+            ComposeData(
+                content = textFieldState.text.toString(),
+                medias =
+                    mediaState.takeSuccess()?.medias.orEmpty().map {
+                        ComposeData.Media(
+                            file = FileItem(context, it.uri),
+                            altText =
+                                it.textState.text
+                                    .toString()
+                                    .takeIf { it.isNotEmpty() },
+                        )
+                    },
+                poll =
+                    pollState.takeSuccess()?.takeIf { it.enabled }?.let {
+                        ComposeData.Poll(
+                            multiple = !it.pollSingleChoice,
+                            expiredAfter = it.expiredAt.duration.inWholeMilliseconds,
+                            options =
+                                it.options.map { option ->
+                                    option.text.toString()
+                                },
+                        )
+                    },
+                sensitive = mediaState.takeSuccess()?.isMediaSensitive ?: false,
+                spoilerText =
+                    contentWarningState
+                        .takeSuccess()
+                        ?.textFieldState
+                        ?.text
+                        ?.toString(),
+                visibility =
+                    state.visibilityState.takeSuccess()?.visibility
+                        ?: UiTimelineV2.Post.Visibility.Public,
+                referenceStatus =
+                    state.composeStatus?.let {
+                        ComposeData.ReferenceStatus(
+                            composeStatus = it,
+                        )
+                    },
+                language = languageState.takeSuccess()?.selectedLanguage.orEmpty(),
+            )
+
+        fun send(onDispatched: () -> Unit = {}) {
+            val data = buildComposeData()
+            state.send(data) { dispatched ->
+                if (dispatched) {
+                    onDispatched()
+                }
+            }
+        }
+
+        fun saveDraft(onDispatched: (Boolean) -> Unit) {
+            state.saveDraft(buildComposeData(), onDispatched)
         }
     }
 }
@@ -1105,6 +1198,21 @@ private fun contentWarningPresenter() =
 
             fun toggle() {
                 enabled = !enabled
+            }
+
+            fun setText(value: String?) {
+                enabled = !value.isNullOrEmpty()
+                textFieldState.edit {
+                    delete(0, length)
+                    value?.let(::append)
+                }
+            }
+
+            fun clear() {
+                enabled = false
+                textFieldState.edit {
+                    delete(0, length)
+                }
             }
         }
     }
@@ -1146,6 +1254,19 @@ private fun mediaPresenter(
                 }.takeLast(config.maxCount)
         }
 
+        fun replaceMedias(items: List<dev.dimension.flare.ui.model.UiDraftMedia>) {
+            medias =
+                items
+                    .map { item ->
+                        MediaData(
+                            uri = Uri.parse(item.cachePath),
+                            textState = TextFieldState(item.altText.orEmpty()),
+                        )
+                    }.distinctBy {
+                        it.uri
+                    }.takeLast(config.maxCount)
+        }
+
         fun removeMedia(uri: Uri) {
             medias = medias.filterNot { it.uri == uri }
             if (medias.isEmpty()) {
@@ -1155,6 +1276,11 @@ private fun mediaPresenter(
 
         fun setMediaSensitive(value: Boolean) {
             isMediaSensitive = value
+        }
+
+        fun clear() {
+            medias = emptyList()
+            isMediaSensitive = false
         }
     }
 }
@@ -1226,6 +1352,35 @@ private fun pollPresenter(config: ComposeConfig.Poll) =
             fun setShowExpirationMenu(value: Boolean) {
                 showExpirationMenu = value
             }
+
+            fun setPoll(value: ComposeData.Poll?) {
+                if (value == null) {
+                    clear()
+                    return
+                }
+                enabled = true
+                options =
+                    value.options
+                        .ifEmpty { listOf("", "") }
+                        .map(::TextFieldState)
+                        .let { current ->
+                            if (current.size == 1) {
+                                current + TextFieldState()
+                            } else {
+                                current
+                            }
+                        }.take(config.maxOptions)
+                pollSingleChoice = !value.multiple
+                expiredAt = PollExpiration.fromDuration(value.expiredAfter)
+            }
+
+            fun clear() {
+                enabled = false
+                options = listOf(TextFieldState(), TextFieldState())
+                pollSingleChoice = true
+                expiredAt = PollExpiration.Minutes5
+                showExpirationMenu = false
+            }
         }
     }
 
@@ -1280,6 +1435,15 @@ private fun languageState(config: ComposeConfig.Language) =
                     selectedLanguage = (selectedLanguage + tag).toImmutableList()
                 }
             }
+
+            fun setSelectedLanguages(tags: List<String>) {
+                selectedLanguage =
+                    tags
+                        .filter { tag ->
+                            allLanguage.any { it.second == tag }
+                        }.take(config.maxCount)
+                        .toImmutableList()
+            }
         }
     }
 
@@ -1295,6 +1459,15 @@ internal enum class PollExpiration(
     Days1(R.string.compose_poll_expiration_1_day, 1.days),
     Days3(R.string.compose_poll_expiration_3_days, 3.days),
     Days7(R.string.compose_poll_expiration_7_days, 7.days),
+
+    ;
+
+    companion object {
+        fun fromDuration(durationMillis: Long): PollExpiration =
+            entries.minByOrNull { item ->
+                kotlin.math.abs(item.duration.inWholeMilliseconds - durationMillis)
+            } ?: Minutes5
+    }
 }
 
 internal val UiTimelineV2.Post.Visibility.localName: Int

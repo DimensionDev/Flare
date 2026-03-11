@@ -65,8 +65,8 @@ class SaveDraftUseCaseTest : RobolectricTest() {
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
-        repository = DraftRepository(db)
         mediaStore = DraftMediaStore(pathProducer, fileSystem)
+        repository = DraftRepository(db, mediaStore)
         useCase = SaveDraftUseCase(repository, mediaStore)
     }
 

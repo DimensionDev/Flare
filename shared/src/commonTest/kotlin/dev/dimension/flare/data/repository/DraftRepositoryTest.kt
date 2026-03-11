@@ -3,27 +3,51 @@ package dev.dimension.flare.data.repository
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
+import dev.dimension.flare.common.FileType
+import dev.dimension.flare.createTestFileItem
+import dev.dimension.flare.createTestRootPath
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DraftContent
 import dev.dimension.flare.data.database.app.model.DraftMediaType
 import dev.dimension.flare.data.database.app.model.DraftReferenceType
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
+import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.io.PlatformPathProducer
+import dev.dimension.flare.deleteTestRootPath
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import okio.FileSystem
+import okio.Path
+import okio.Path.Companion.toPath
+import okio.SYSTEM
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class DraftRepositoryTest : RobolectricTest() {
+    private val root = createTestRootPath()
+    private val fileSystem = FileSystem.SYSTEM
+    private val pathProducer =
+        object : PlatformPathProducer {
+            override fun dataStoreFile(fileName: String): Path = root.resolve(fileName)
+
+            override fun draftMediaFile(
+                groupId: String,
+                fileName: String,
+            ): Path = root.resolve("draft_media").resolve(groupId).resolve(fileName)
+        }
+
     private lateinit var db: AppDatabase
     private lateinit var repository: DraftRepository
+    private lateinit var mediaStore: DraftMediaStore
 
     @BeforeTest
     fun setup() {
@@ -33,12 +57,14 @@ class DraftRepositoryTest : RobolectricTest() {
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.Unconfined)
                 .build()
-        repository = DraftRepository(db)
+        mediaStore = DraftMediaStore(pathProducer, fileSystem)
+        repository = DraftRepository(db, mediaStore)
     }
 
     @AfterTest
     fun tearDown() {
         db.close()
+        deleteTestRootPath(root)
     }
 
     @Test
@@ -160,6 +186,36 @@ class DraftRepositoryTest : RobolectricTest() {
 
             assertNull(repository.draft(groupId).first())
             assertEquals(emptyList(), repository.visibleDrafts.first())
+        }
+
+    @Test
+    fun deleteGroupDeletesPersistedMediaFiles() =
+        runTest {
+            val persistedMedia =
+                mediaStore.persist(
+                    groupId = "group-media-delete",
+                    medias =
+                        listOf(
+                            ComposeData.Media(
+                                file = createTestFileItem(root = root, name = "a.png", bytes = byteArrayOf(1, 2, 3), type = FileType.Image),
+                                altText = "cover",
+                            ),
+                        ),
+                )
+
+            repository.saveDraft(
+                SaveDraftInput(
+                    groupId = "group-media-delete",
+                    content = sampleContent("with media"),
+                    targets = listOf(SaveDraftTarget(accountKey = MicroBlogKey("alice", "example.com"))),
+                    medias = persistedMedia,
+                ),
+            )
+
+            repository.deleteGroup("group-media-delete")
+
+            assertNull(repository.draft("group-media-delete").first())
+            assertFalse(fileSystem.exists(persistedMedia.single().cachePath.toPath()))
         }
 
     @Test

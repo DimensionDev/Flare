@@ -41,6 +41,7 @@ import me.saket.telephoto.zoomable.ZoomableState
 import me.saket.telephoto.zoomable.spatial.CoordinateSpace
 import org.apache.commons.lang3.SystemUtils
 import kotlin.math.absoluteValue
+import kotlin.math.roundToInt
 
 internal object FlareHardwareShortcutDetector : HardwareShortcutDetector {
     override fun detectKey(event: KeyEvent): ShortcutEvent? {
@@ -240,9 +241,9 @@ internal class FlareHardwareShortcutsNode(
                             val viewportSize = viewportSize
                             when (shortcut.direction) {
                                 PanDirection.Up -> contentBounds.top < 0f
-                                PanDirection.Down -> contentBounds.bottom > viewportSize.height
+                                PanDirection.Down -> contentBounds.bottom.roundToInt() > viewportSize.height.roundToInt()
                                 PanDirection.Left -> contentBounds.left < 0f
-                                PanDirection.Right -> contentBounds.right > viewportSize.width
+                                PanDirection.Right -> contentBounds.right.roundToInt() > viewportSize.width.roundToInt()
                             }
                         }
                     if (!canContinuePan) {

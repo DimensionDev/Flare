@@ -36,6 +36,7 @@ import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Palette
+import compose.icons.fontawesomeicons.solid.PenToSquare
 import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.SquareRss
 import compose.icons.fontawesomeicons.solid.TableList
@@ -98,6 +99,7 @@ internal fun SettingsScreen(
     toLocalFilter: () -> Unit,
     toGuestSettings: () -> Unit,
     toLocalHistory: () -> Unit,
+    toDraftBox: () -> Unit,
     toAiConfig: () -> Unit,
     toRSSManagement: () -> Unit,
     onBack: () -> Unit,
@@ -337,6 +339,25 @@ internal fun SettingsScreen(
                         )
                         SegmentedListItem(
                             onClick = {
+                                toDraftBox.invoke()
+                            },
+                            shapes = ListItemDefaults.item(),
+                            content = {
+                                Text(text = stringResource(id = R.string.draft_box_title))
+                            },
+                            leadingContent = {
+                                ThemedIcon(
+                                    imageVector = FontAwesomeIcons.Solid.PenToSquare,
+                                    contentDescription = stringResource(id = R.string.draft_box_title),
+                                    color = ThemeIconData.Color.ForestGreen,
+                                )
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_draft_box_description))
+                            },
+                        )
+                        SegmentedListItem(
+                            onClick = {
                                 toStorage.invoke()
                             },
                             shapes = ListItemDefaults.last(),
@@ -394,6 +415,25 @@ internal fun SettingsScreen(
                             },
                             supportingContent = {
                                 Text(text = stringResource(id = R.string.settings_rss_management_description))
+                            },
+                        )
+                        SegmentedListItem(
+                            onClick = {
+                                toDraftBox.invoke()
+                            },
+                            shapes = ListItemDefaults.item(),
+                            content = {
+                                Text(text = stringResource(id = R.string.draft_box_title))
+                            },
+                            leadingContent = {
+                                ThemedIcon(
+                                    imageVector = FontAwesomeIcons.Solid.PenToSquare,
+                                    contentDescription = stringResource(id = R.string.draft_box_title),
+                                    color = ThemeIconData.Color.ForestGreen,
+                                )
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_draft_box_description))
                             },
                         )
                         SegmentedListItem(

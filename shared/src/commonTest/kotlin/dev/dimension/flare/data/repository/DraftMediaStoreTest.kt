@@ -68,6 +68,7 @@ class DraftMediaStoreTest {
             persisted.forEach {
                 assertFalse(fileSystem.exists(it.cachePath.toPath()))
             }
+            assertFalse(fileSystem.exists(root.resolve("draft_media").resolve("group-1")))
         }
 
     @Test

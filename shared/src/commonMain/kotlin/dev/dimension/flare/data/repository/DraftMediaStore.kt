@@ -64,6 +64,7 @@ internal class DraftMediaStore(
             if (fileSystem.exists(path)) {
                 fileSystem.delete(path)
             }
+            cleanupEmptyGroupDirectory(media.groupId)
         }
     }
 
@@ -86,6 +87,20 @@ internal class DraftMediaStore(
                     fileSystem.delete(stalePath)
                 }
             }
+        cleanupEmptyGroupDirectory(groupId)
+    }
+
+    private fun cleanupEmptyGroupDirectory(groupId: String) {
+        val groupDirectory =
+            platformPathProducer
+                .draftMediaFile(groupId, "__placeholder__")
+                .parent ?: return
+        if (!fileSystem.exists(groupDirectory)) {
+            return
+        }
+        if (fileSystem.list(groupDirectory).isEmpty()) {
+            fileSystem.delete(groupDirectory)
+        }
     }
 }
 

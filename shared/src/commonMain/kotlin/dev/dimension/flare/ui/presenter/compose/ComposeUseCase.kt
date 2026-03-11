@@ -58,14 +58,6 @@ internal class ComposeUseCase(
                     bundle = data.toComposeDraftBundle(accounts = accounts, groupId = groupId),
                     progress = progress,
                 )
-            }.onSuccess {
-                scope.launch {
-                    progress.invoke(ComposeProgressState.Success)
-                }
-            }.onFailure {
-                scope.launch {
-                    progress.invoke(ComposeProgressState.Error(it))
-                }
             }
         }
     }

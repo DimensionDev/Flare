@@ -38,11 +38,11 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScrollBar
 import dev.dimension.flare.ui.component.NetworkImage
-import dev.dimension.flare.ui.presenter.compose.DraftBoxPresenter
 import dev.dimension.flare.ui.model.UiDraft
 import dev.dimension.flare.ui.model.UiDraftMediaType
 import dev.dimension.flare.ui.model.UiDraftStatus
 import dev.dimension.flare.ui.model.primaryAccountKey
+import dev.dimension.flare.ui.presenter.compose.DraftBoxPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
@@ -54,9 +54,7 @@ import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun DraftBoxScreen(
-    onEdit: (String, MicroBlogKey) -> Unit = { _, _ -> },
-) {
+internal fun DraftBoxScreen(onEdit: (String, MicroBlogKey) -> Unit = { _, _ -> }) {
     val state by producePresenter {
         remember { DraftBoxPresenter() }.invoke()
     }
@@ -168,7 +166,8 @@ private fun DraftBoxCard(
                                 )
 
                             UiDraftMediaType.VIDEO,
-                            UiDraftMediaType.OTHER ->
+                            UiDraftMediaType.OTHER,
+                            ->
                                 Box(
                                     modifier =
                                         Modifier

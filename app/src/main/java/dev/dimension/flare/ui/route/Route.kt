@@ -383,10 +383,7 @@ internal sealed interface Route : NavKey {
     @Serializable
     sealed interface Compose : Route {
         @Serializable
-        data class New(
-            override val accountType: AccountType,
-        ) : Compose,
-            WithAccountType
+        data object New : Compose
 
         @Serializable
         data class Reply(
@@ -503,7 +500,7 @@ internal sealed interface Route : NavKey {
 
                 is DeeplinkRoute.Login -> ServiceSelect.Selection
                 is DeeplinkRoute.Compose.New ->
-                    Compose.New(accountType = deeplinkRoute.accountType)
+                    Compose.New
 
                 is DeeplinkRoute.Compose.Quote ->
                     Compose.Quote(

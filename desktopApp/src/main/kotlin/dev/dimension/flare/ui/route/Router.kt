@@ -343,7 +343,7 @@ internal fun WindowScope.Router(
                     ) {
                         ComposeDialog(
                             onBack = onBack,
-                            accountType = args.accountType,
+                            accountType = null,
                         )
                     }
                 }
@@ -539,11 +539,6 @@ internal fun WindowScope.Router(
                 entry<Route.DraftBox> {
                     DraftBoxScreen(
                         onEdit = { _, accountKey ->
-                            navigate(
-                                Route.Compose.New(
-                                    accountType = Specific(accountKey = accountKey),
-                                ),
-                            )
                         },
                     )
                 }

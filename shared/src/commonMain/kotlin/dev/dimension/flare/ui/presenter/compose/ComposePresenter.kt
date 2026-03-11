@@ -39,6 +39,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -69,26 +70,31 @@ public class ComposePresenter(
     }
 
     private val selectedAccountsFlow by lazy {
-        selectedAccountsKeyFlow.map { accountKeys ->
-            accountKeys.map { key ->
-                accountRepository.getFlow(key)
+        selectedAccountsKeyFlow
+            .map { accountKeys ->
+                accountKeys.map { key ->
+                    accountRepository.getFlow(key)
+                }
+            }.combineLatestFlowLists()
+            .map {
+                it
+                    .mapNotNull {
+                        it.takeSuccess()
+                    }.toImmutableList()
             }
-        }.combineLatestFlowLists().map {
-            it.mapNotNull {
-                it.takeSuccess()
-            }.toImmutableList()
-        }
     }
 
     private val selectedAccountServicesFlow by lazy {
-        selectedAccountsKeyFlow.map { accountKeys ->
-            accountKeys.map { accountKey ->
-                accountServiceFlow(
-                    accountType = AccountType.Specific(accountKey = accountKey),
-                    repository = accountRepository,
-                )
-            }
-        }.combineLatestFlowLists().map { it.toImmutableList() }
+        selectedAccountsKeyFlow
+            .map { accountKeys ->
+                accountKeys.map { accountKey ->
+                    accountServiceFlow(
+                        accountType = AccountType.Specific(accountKey = accountKey),
+                        repository = accountRepository,
+                    )
+                }
+            }.combineLatestFlowLists()
+            .map { it.toImmutableList() }
     }
 
     private val composeConfigFlow by lazy {
@@ -112,16 +118,18 @@ public class ComposePresenter(
     }
 
     private val selectedUsersFlow by lazy {
-        selectedAccountServicesFlow.map { services ->
-            services
-                .mapNotNull { service ->
-                    if (service is UserDataSource && service is AuthenticatedMicroblogDataSource) {
-                        service.userHandler.userById(service.accountKey.id).toUi()
-                    } else {
-                        null
+        selectedAccountServicesFlow
+            .map { services ->
+                services
+                    .mapNotNull { service ->
+                        if (service is UserDataSource && service is AuthenticatedMicroblogDataSource) {
+                            service.userHandler.userById(service.accountKey.id).toUi()
+                        } else {
+                            null
+                        }
                     }
-                }
-        }.combineLatestFlowLists().map { it.toImmutableList() }
+            }.combineLatestFlowLists()
+            .map { it.toImmutableList() }
     }
 
     private val otherAccountsFlow by lazy {
@@ -130,48 +138,55 @@ public class ComposePresenter(
             selectedAccountsKeyFlow,
             statusFlow ?: flowOf(UiState.Error(Exception("No status for compose"))),
         ) { allAccounts, selectedAccountKeys, status ->
-            val statusPlatform = status.takeSuccess()?.let {
-                it as? UiTimelineV2.Post
-            }?.platformType
-            allAccounts.filterNot { account ->
-                selectedAccountKeys.contains(account.accountKey) ||
-                (statusPlatform != null && account.platformType != statusPlatform)
-            }.map {
-                it.accountKey
-            }
+            val statusPlatform =
+                status
+                    .takeSuccess()
+                    ?.let {
+                        it as? UiTimelineV2.Post
+                    }?.platformType
+            allAccounts
+                .filterNot { account ->
+                    selectedAccountKeys.contains(account.accountKey) ||
+                        (statusPlatform != null && account.platformType != statusPlatform)
+                }.map {
+                    it.accountKey
+                }
         }
     }
 
     private val otherUsersFlow by lazy {
-        otherAccountsFlow.map { keys ->
-            keys.map { key ->
-                accountServiceFlow(
-                    accountType = AccountType.Specific(accountKey = key),
-                    repository = accountRepository,
-                ).mapNotNull {
-                    if (it is UserDataSource && it is AuthenticatedMicroblogDataSource) {
-                        it.userHandler.userById(it.accountKey.id).toUi()
-                    } else {
-                        null
-                    }
-                }.flatMapLatest { it }
-            }
-        }.combineLatestFlowLists().map { it.toImmutableList() }
+        otherAccountsFlow
+            .map { keys ->
+                keys.map { key ->
+                    accountServiceFlow(
+                        accountType = AccountType.Specific(accountKey = key),
+                        repository = accountRepository,
+                    ).mapNotNull {
+                        if (it is UserDataSource && it is AuthenticatedMicroblogDataSource) {
+                            it.userHandler.userById(it.accountKey.id).toUi()
+                        } else {
+                            null
+                        }
+                    }.flatMapLatest { it }
+                }
+            }.combineLatestFlowLists()
+            .map { it.toImmutableList() }
     }
 
     private val emojiFlow by lazy {
-        composeConfigFlow.mapNotNull { config ->
-            config.emoji
-        }.flatMapLatest { emojiConfig ->
-            emojiConfig.emoji.toUi().map { emojiState ->
-                emojiState.map { emoji ->
-                    EmojiData(
-                        data = emoji,
-                        accountType = AccountType.Specific(emojiConfig.accountKey),
-                    )
-                }
-            }
-        }
+        composeConfigFlow
+            .map { config ->
+                config.emoji
+            }.flatMapLatest { emojiConfig ->
+                emojiConfig?.emoji?.toUi()?.map { emojiState ->
+                    emojiState.map { emoji ->
+                        EmojiData(
+                            data = emoji,
+                            accountType = AccountType.Specific(emojiConfig.accountKey),
+                        )
+                    }
+                } ?: flowOf(UiState.Error(Exception("No emoji config")))
+            }.distinctUntilChanged()
     }
 
     private val textFlow by lazy {
@@ -200,10 +215,9 @@ public class ComposePresenter(
             composeConfigFlow,
         ) { text, mediaSize, remainingLength, selectedAccountKeys, composeConfig ->
             (text.isNotBlank() && text.isNotEmpty() && selectedAccountKeys.isNotEmpty() && remainingLength >= 0) ||
-                    ((text.isEmpty() || text.isBlank()) && composeConfig.media?.allowMediaOnly == true && mediaSize > 0)
+                ((text.isEmpty() || text.isBlank()) && composeConfig.media?.allowMediaOnly == true && mediaSize > 0)
         }
     }
-
 
     private val statusFlow by lazy {
         if (status != null && accountType != null) {
@@ -223,36 +237,38 @@ public class ComposePresenter(
     }
 
     private val replyStateFlow by lazy {
-        statusFlow?.map { statusState ->
-            statusState.map { post ->
-                if (post is UiTimelineV2.Post && post.platformType == PlatformType.VVo) {
-                    post.quote.firstOrNull() ?: post
-                } else {
-                    post
+        statusFlow
+            ?.map { statusState ->
+                statusState.map { post ->
+                    if (post is UiTimelineV2.Post && post.platformType == PlatformType.VVo) {
+                        post.quote.firstOrNull() ?: post
+                    } else {
+                        post
+                    }
                 }
-            }
-        }
+            }?.distinctUntilChanged()
     }
 
     private val initialTextFlow by lazy {
         if (accountType is AccountType.Specific && status != null) {
             statusFlow?.flatMapLatest { statusState ->
-                selectedUsersFlow.mapNotNull {
-                    it.firstOrNull()?.takeSuccess()
-                }.map { user ->
-                    statusState.mapNotNull { post ->
-                        if (post is UiTimelineV2.Post) {
-                            InitialTextResolver.resolve(
-                                post = post,
-                                composeStatus = status,
-                                currentUserHandle = user.handle,
-                                selectedAccountKey = accountType.accountKey,
-                            )
-                        } else {
-                            null
+                selectedUsersFlow
+                    .mapNotNull {
+                        it.firstOrNull()?.takeSuccess()
+                    }.map { user ->
+                        statusState.mapNotNull { post ->
+                            if (post is UiTimelineV2.Post) {
+                                InitialTextResolver.resolve(
+                                    post = post,
+                                    composeStatus = status,
+                                    currentUserHandle = user.handle,
+                                    selectedAccountKey = accountType.accountKey,
+                                )
+                            } else {
+                                null
+                            }
                         }
-                    }
-                }
+                    }.distinctUntilChanged()
             }
         } else {
             null
@@ -276,15 +292,15 @@ public class ComposePresenter(
             // load active account
             LaunchedEffect(Unit) {
                 accountRepository.activeAccount.firstOrNull()?.let { account ->
-                    selectedAccountsKeyFlow.value = listOfNotNull(account.takeSuccess()?.accountKey)
-                        .toImmutableList()
+                    selectedAccountsKeyFlow.value =
+                        listOfNotNull(account.takeSuccess()?.accountKey)
+                            .toImmutableList()
                 }
             }
         }
 
         val replyState = replyStateFlow?.flattenUiState()?.value
         val initialTextState = initialTextFlow?.flattenUiState()?.value
-
 
         val visibilityState =
             composeConfig
@@ -293,7 +309,6 @@ public class ComposePresenter(
                 }.map {
                     visibilityPresenter()
                 }
-
 
         return object : ComposeState(
             canSend = canSend,

@@ -168,7 +168,7 @@ private fun activeAccountPresenter() =
 @Composable
 internal fun ComposeScreen(
     onBack: () -> Unit,
-    accountType: AccountType,
+    accountType: AccountType?,
     modifier: Modifier = Modifier,
     status: ComposeStatus? = null,
     initialText: String = "",
@@ -926,7 +926,7 @@ private fun PollOption(
 @Composable
 private fun composePresenter(
     context: Context,
-    accountType: AccountType,
+    accountType: AccountType?,
     status: ComposeStatus? = null,
     initialText: String = "",
     initialMedias: ImmutableList<Uri> = persistentListOf(),

@@ -148,7 +148,7 @@ internal class VVODataSource(
         when (type) {
             NotificationFilter.All,
             NotificationFilter.Mention,
-                ->
+            ->
                 MentionRemoteMediator(
                     service = service,
                     accountKey = accountKey,
@@ -203,7 +203,7 @@ internal class VVODataSource(
                 when (request) {
                     is PagingRequest.Prepend,
                     is PagingRequest.Append,
-                        ->
+                    ->
                         return PagingResult(
                             endOfPaginationReached = true,
                         )
@@ -345,11 +345,12 @@ internal class VVODataSource(
                     altTextMaxLength = -1,
                     allowMediaOnly = false,
                 ),
-            emoji = ComposeConfig.Emoji(
-                emoji = emojiHandler.emoji,
-                mergeTag = "vvo@${accountKey.host}",
-                accountKey = accountKey,
-            ),
+            emoji =
+                ComposeConfig.Emoji(
+                    emoji = emojiHandler.emoji,
+                    mergeTag = "vvo@${accountKey.host}",
+                    accountKey = accountKey,
+                ),
         )
 
     private suspend fun like(event: PostEvent.VVO.Like) {

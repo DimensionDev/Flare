@@ -86,7 +86,6 @@ import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.isError
-import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -99,7 +98,6 @@ import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
-import dev.dimension.flare.ui.route.accountTypeOr
 import dev.dimension.flare.ui.screen.splash.SplashScreen
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
@@ -124,10 +122,6 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 ) {
                     state.topLevelBackStack.takeSuccess()?.topLevelKey ?: getDirection(tabs.all.first())
                 }
-            val accountType = currentRoute.accountTypeOr(state.defaultAccountType)
-            val userState by producePresenter(key = "home_account_type_$accountType") {
-                userPresenter(accountType)
-            }
             OnNewIntent(
                 withOnCreateIntent = true,
             ) {
@@ -147,11 +141,10 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                     bottomBarAutoHideEnabled = state.navigationState.bottomBarAutoHideEnabled,
                     layoutType = layoutType,
                     showFab =
-                        userState.isSuccess &&
-                            accountType !is AccountType.Guest &&
+                        state.defaultAccountType !is AccountType.Guest &&
                             state.topLevelBackStack.takeSuccess()?.currentKey is Route.Home,
                     onFabClicked = {
-                        state.navigate(Route.Compose.New(accountType))
+                        state.navigate(Route.Compose.New)
                     },
                     navigationSuiteColors =
                         NavigationSuiteDefaults.colors(
@@ -160,10 +153,8 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                     railHeader = {
                         HomeRailHeader(
                             state.wideNavigationRailState,
-                            userState,
+                            state.userState,
                             layoutType,
-                            currentRoute,
-                            state.defaultAccountType,
                             state::navigate,
                         )
                     },
@@ -256,7 +247,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         }
                     },
                     footerItems = {
-                        if (!userState.isError) {
+                        if (!state.userState.isError) {
                             item(
                                 selected = currentRoute is Route.Settings.Main,
                                 onClick = {
@@ -314,8 +305,6 @@ private fun HomeRailHeader(
     wideNavigationRailState: WideNavigationRailState,
     userState: UiState<UiProfile>,
     layoutType: NavigationSuiteType,
-    currentRoute: Route,
-    defaultAccountType: AccountType,
     navigate: (Route) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -455,13 +444,7 @@ private fun HomeRailHeader(
                         WideNavigationRailValue.Collapsed ->
                             FloatingActionButton(
                                 onClick = {
-                                    navigate(
-                                        Route.Compose.New(
-                                            currentRoute.accountTypeOr(
-                                                defaultAccountType,
-                                            ),
-                                        ),
-                                    )
+                                    navigate(Route.Compose.New)
                                 },
                                 elevation =
                                     FloatingActionButtonDefaults.elevation(
@@ -483,13 +466,7 @@ private fun HomeRailHeader(
                         WideNavigationRailValue.Expanded ->
                             ExtendedFloatingActionButton(
                                 onClick = {
-                                    navigate(
-                                        Route.Compose.New(
-                                            currentRoute.accountTypeOr(
-                                                defaultAccountType,
-                                            ),
-                                        ),
-                                    )
+                                    navigate(Route.Compose.New)
                                 },
                                 icon = {
                                     FAIcon(
@@ -609,6 +586,7 @@ private fun presenter(uriHandler: UriHandler) =
             val deeplinkPresenter = deeplinkPresenter
             val topLevelBackStack = topLevelBackStack
             val wideNavigationRailState = wideNavigationRailState
+            val userState = activeAccountState.user
             val defaultAccountType: AccountType =
                 activeAccountState.user
                     .takeSuccess()

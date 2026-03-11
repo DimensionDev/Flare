@@ -140,6 +140,8 @@ import dev.dimension.flare.settings_appearance_theme_light
 import dev.dimension.flare.settings_appearance_title
 import dev.dimension.flare.settings_appearance_video_autoplay
 import dev.dimension.flare.settings_appearance_video_autoplay_description
+import dev.dimension.flare.settings_draft_box_description
+import dev.dimension.flare.settings_draft_box_title
 import dev.dimension.flare.settings_language_description
 import dev.dimension.flare.settings_language_title
 import dev.dimension.flare.settings_local_history_description
@@ -155,8 +157,6 @@ import dev.dimension.flare.settings_storage_clear_database
 import dev.dimension.flare.settings_storage_clear_database_description
 import dev.dimension.flare.settings_storage_clear_image_cache
 import dev.dimension.flare.settings_storage_clear_image_cache_description
-import dev.dimension.flare.settings_draft_box_description
-import dev.dimension.flare.settings_draft_box_title
 import dev.dimension.flare.settings_storage_export_data
 import dev.dimension.flare.settings_storage_export_data_description
 import dev.dimension.flare.settings_storage_import_data

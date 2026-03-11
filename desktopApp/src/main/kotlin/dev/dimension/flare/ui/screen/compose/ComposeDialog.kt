@@ -126,6 +126,11 @@ import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import io.github.composefluent.component.TextFieldDefaults
 import io.github.composefluent.surface.Card
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import java.util.Locale
 import kotlin.time.Duration
@@ -133,11 +138,6 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.uuid.ExperimentalUuidApi
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
-import moe.tlaster.precompose.molecule.producePresenter
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
 
 private val imageExtensions = setOf("png", "jpg", "jpeg", "gif", "bmp")
 private val videoExtensions = setOf("mp4", "mov", "avi", "mkv", "webm")
@@ -147,7 +147,7 @@ private val pickerFileExtensions = imageExtensions + videoExtensions
 @Composable
 fun ComposeDialog(
     onBack: (() -> Unit)?,
-    accountType: AccountType,
+    accountType: AccountType?,
     modifier: Modifier = Modifier,
     status: ComposeStatus? = null,
     initialText: String = "",
@@ -874,7 +874,7 @@ private fun PollOption(
 
 @Composable
 private fun composePresenter(
-    accountType: AccountType,
+    accountType: AccountType?,
     status: ComposeStatus? = null,
     initialText: String = "",
 ) = run {

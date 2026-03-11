@@ -44,12 +44,12 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
-import kotlin.uuid.Uuid
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal open class MastodonDataSource(
@@ -423,11 +423,12 @@ internal open class MastodonDataSource(
                 } else {
                     ComposeConfig.Poll(4)
                 },
-            emoji = ComposeConfig.Emoji(
-                emojiHandler.emoji,
-                mergeTag = "mastodon@${accountKey.host}",
-                accountKey = accountKey,
-            ),
+            emoji =
+                ComposeConfig.Emoji(
+                    emojiHandler.emoji,
+                    mergeTag = "mastodon@${accountKey.host}",
+                    accountKey = accountKey,
+                ),
             contentWarning = ComposeConfig.ContentWarning,
             visibility = ComposeConfig.Visibility,
             language = ComposeConfig.Language(1),

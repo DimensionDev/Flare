@@ -149,7 +149,7 @@ class DeeplinkRouteTest {
 
     @Test
     fun testComposeNew() {
-        val route = DeeplinkRoute.Compose.New(accountType = activeAccountType)
+        val route = DeeplinkRoute.Compose.New
         val uri = route.toUri()
         val parsed = DeeplinkRoute.parse(uri)
         assertEquals(route, parsed)

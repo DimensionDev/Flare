@@ -15,10 +15,10 @@ internal fun EntryProviderScope<NavKey>.composeEntryBuilder(
 ) {
     entry<Route.Compose.New>(
         metadata = DialogSceneStrategy.dialog()
-    ) { args ->
+    ) {
         ComposeScreen(
             onBack = onBack,
-            accountType = args.accountType,
+            accountType = null,
         )
     }
 

@@ -139,9 +139,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                         Button(
                             onClick = {
                                 state.navigate(
-                                    Route.Compose.New(
-                                        accountType = AccountType.Specific(user.key),
-                                    ),
+                                    Route.Compose.New,
                                 )
                             },
                             modifier =

@@ -152,9 +152,7 @@ internal sealed interface Route : NavKey {
             val statusKey: MicroBlogKey,
         ) : FloatingRoute
 
-        data class New(
-            val accountType: AccountType,
-        ) : FloatingRoute
+        data object New : FloatingRoute
 
         data class VVOReplyComment(
             val accountKey: MicroBlogKey,
@@ -297,7 +295,7 @@ internal sealed interface Route : NavKey {
                                 .toImmutableMap(),
                     )
                 is DeeplinkRoute.Login -> ServiceSelect
-                is DeeplinkRoute.Compose.New -> New(deeplinkRoute.accountType)
+                DeeplinkRoute.Compose.New -> New
                 is DeeplinkRoute.Compose.Quote ->
                     Quote(
                         deeplinkRoute.accountKey,

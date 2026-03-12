@@ -51,7 +51,7 @@ jobs:
           KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
           KEYCHAIN_PASSWORD="$(uuidgen)"
 
-          printf '%s' "$MACOS_CERT_BASE64" | base64 -D -i > "$P12_FILE"
+          printf '%s' "$MACOS_CERT_BASE64" | base64 -D > "$P12_FILE"
           openssl pkcs12 -in "$P12_FILE" -nokeys -passin "pass:$MACOS_CERT_PASSWORD" >/dev/null
 
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"

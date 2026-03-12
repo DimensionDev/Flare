@@ -44,7 +44,6 @@ import io.github.composefluent.Colors
 import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.Shades
-import io.github.kdroidfilter.nucleus.core.runtime.tools.allowNucleusRuntimeLogging
 import io.github.kdroidfilter.nucleus.darkmodedetector.isSystemInDarkMode
 import io.github.kdroidfilter.nucleus.systemcolor.systemAccentColor
 import io.github.kdroidfilter.nucleus.window.DecoratedWindowDefaults
@@ -66,9 +65,6 @@ internal fun FlareTheme(
     isDarkTheme: Boolean = isDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    LaunchedEffect(Unit) {
-        allowNucleusRuntimeLogging = true
-    }
     val accentColor = systemAccentColor() ?: Color(0xFF00F5F0)
     val accentShades = remember(accentColor) { accentColor.toFluentAccentShades() }
     FluentTheme(

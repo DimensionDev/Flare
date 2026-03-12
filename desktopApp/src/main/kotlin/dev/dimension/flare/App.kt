@@ -187,7 +187,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                     val color by animateColorAsState(
                         targetValue =
                             if (selected) {
-                                FluentTheme.colors.system.attention
+                                FluentTheme.colors.fillAccent.secondary
                             } else {
                                 FluentTheme.colors.system.neutral
                             },
@@ -246,7 +246,7 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                     val color by animateColorAsState(
                         targetValue =
                             if (selected) {
-                                FluentTheme.colors.system.attention
+                                FluentTheme.colors.fillAccent.secondary
                             } else {
                                 FluentTheme.colors.system.neutral
                             },

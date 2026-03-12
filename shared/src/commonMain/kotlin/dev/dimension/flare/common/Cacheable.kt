@@ -11,6 +11,8 @@ import androidx.paging.LoadStates
 import androidx.paging.PagingData
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.withContext
 
 internal class Cacheable<T>(
     fetchSource: suspend () -> Unit,
@@ -81,7 +84,9 @@ internal sealed class CacheData<T>(
                 emit(LoadState.Loading)
                 emit(
                     try {
-                        fetchSource.invoke()
+                        withContext(Dispatchers.IO) {
+                            fetchSource.invoke()
+                        }
                         LoadState.NotLoading(true)
                     } catch (e: Throwable) {
                         LoadState.Error(e)

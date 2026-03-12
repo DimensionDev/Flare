@@ -18,6 +18,7 @@ struct StatusView: View {
     var showExpandTextButton: Bool = true
     var forceHideActions: Bool = false
     var showTranslate: Bool = true
+    var showParents: Bool = true
     @State private var expand = false
     private var showAsFullWidth: Bool {
         (!fullWidthPost || withLeadingPadding) && !isQuote && !isDetail
@@ -27,7 +28,7 @@ struct StatusView: View {
             alignment: .leading,
             spacing: 0
         ) {
-            if !data.parents.isEmpty {
+            if !data.parents.isEmpty, showParents {
                 ForEach(data.parents, id: \.itemKey) { parent in
                     VStack(
                         spacing: nil

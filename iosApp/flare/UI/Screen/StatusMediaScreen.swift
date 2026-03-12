@@ -155,7 +155,7 @@ struct StatusMediaScreen: View {
             
             StateView(state: presenter.state.status) { timeline in
                 if let content = timeline as? UiTimelineV2.Post {
-                    StatusView(data: content, isQuote: true, showMedia: false, maxLine: 3, showExpandTextButton: false)
+                    StatusView(data: content, isQuote: true, showMedia: false, maxLine: 3, showExpandTextButton: false, showParents: false)
                 }
             }
         }

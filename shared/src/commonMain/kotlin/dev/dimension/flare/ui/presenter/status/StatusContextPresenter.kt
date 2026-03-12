@@ -108,10 +108,13 @@ public class StatusContextPresenter(
 
             override suspend fun transform(data: UiTimelineV2): UiTimelineV2 {
                 val currentCreatedAt = currentStatusFlow.firstOrNull()?.takeSuccess()?.createdAt
-                if (data !is UiTimelineV2.Post || currentCreatedAt == null) {
+                if (data !is UiTimelineV2.Post) {
                     return data
                 }
-                return if (data.createdAt <= currentCreatedAt) {
+                return if (currentCreatedAt != null &&
+                    data.createdAt <= currentCreatedAt ||
+                    data.parents.all { it.statusKey == statusKey }
+                ) {
                     data.copy(
                         parents = persistentListOf(),
                     )
@@ -120,7 +123,11 @@ public class StatusContextPresenter(
                         parents =
                             data.parents
                                 .filter {
-                                    it.createdAt > currentCreatedAt
+                                    (
+                                        currentCreatedAt == null ||
+                                            it.createdAt > currentCreatedAt
+                                    ) &&
+                                        it.statusKey != statusKey
                                 }.toPersistentList(),
                     )
                 }

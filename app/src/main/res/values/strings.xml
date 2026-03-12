@@ -447,6 +447,9 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
+                <li>Added full draft support.</li>
+                <li>Reworked AI configuration to support both on-device AI and OpenAI-compatible APIs.</li>
+                <li>Added Misskey Channels support.</li>
                 <li>Bug fixes and performance improvements.</li>
             </ul>
         ]]>

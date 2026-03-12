@@ -499,6 +499,23 @@ internal fun WindowScope.Router(
                     ProfileScreen(
                         accountType = args.accountType,
                         userKey = null,
+                        onMediaClick = { statusKey, index, preview ->
+                            navigate(
+                                Route.StatusMedia(
+                                    accountType = args.accountType,
+                                    statusKey = statusKey,
+                                    index = index,
+                                    preview = preview,
+                                ),
+                            )
+                        },
+                        onRawMediaClick = {
+                            navigate(
+                                Route.RawImage(
+                                    rawImage = it,
+                                ),
+                            )
+                        },
                     )
                 }
 
@@ -523,6 +540,23 @@ internal fun WindowScope.Router(
                                 Route.Fans(
                                     accountType = args.accountType,
                                     userKey = it,
+                                ),
+                            )
+                        },
+                        onMediaClick = { statusKey, index, preview ->
+                            navigate(
+                                Route.StatusMedia(
+                                    accountType = args.accountType,
+                                    statusKey = statusKey,
+                                    index = index,
+                                    preview = preview,
+                                ),
+                            )
+                        },
+                        onRawMediaClick = {
+                            navigate(
+                                Route.RawImage(
+                                    rawImage = it,
                                 ),
                             )
                         },
@@ -658,6 +692,23 @@ internal fun WindowScope.Router(
                                 Route.Fans(
                                     accountType = args.accountType,
                                     userKey = it,
+                                ),
+                            )
+                        },
+                        onMediaClick = { statusKey, index, preview ->
+                            navigate(
+                                Route.StatusMedia(
+                                    accountType = args.accountType,
+                                    statusKey = statusKey,
+                                    index = index,
+                                    preview = preview,
+                                ),
+                            )
+                        },
+                        onRawMediaClick = {
+                            navigate(
+                                Route.RawImage(
+                                    rawImage = it,
                                 ),
                             )
                         },

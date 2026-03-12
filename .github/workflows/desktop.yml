@@ -52,7 +52,7 @@ jobs:
           KEYCHAIN_PASSWORD="$(uuidgen)"
 
           printf '%s' "$MACOS_CERT_BASE64" | base64 -D > "$P12_FILE"
-          openssl pkcs12 -in "$P12_FILE" -nokeys -passin "pass:$MACOS_CERT_PASSWORD" >/dev/null
+          openssl pkcs12 -legacy -in "$P12_FILE" -nokeys -passin "pass:$MACOS_CERT_PASSWORD" >/dev/null
 
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security default-keychain -s "$KEYCHAIN_PATH"

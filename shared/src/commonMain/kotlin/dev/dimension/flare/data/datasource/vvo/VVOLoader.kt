@@ -35,7 +35,9 @@ internal class VVOLoader(
     PostLoader {
     override val supportedTypes: Set<RelationActionType> = setOf(RelationActionType.Follow)
 
-    override suspend fun notificationBadgeCount(): Int = notificationBadgeCounts().values.sum()
+    override suspend fun notificationBadgeCount(): Int {
+        return notificationBadgeCounts().values.sum()
+    }
 
     suspend fun notificationBadgeCounts(): Map<NotificationFilter, Int> {
         val st = ensureLogin()

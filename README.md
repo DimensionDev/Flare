@@ -10,9 +10,7 @@
 ![badge-Windows](https://img.shields.io/badge/Windows_10-1809-blue)
 ![badge-macOS](https://img.shields.io/badge/macOS-Sonoma-black)
 
-Flare is an open-source social client that merges your feeds from Mastodon, Misskey, Bluesky, X, and RSS into a single timeline, turning it into your personal information hub, with Android/iOS and macOS/Windows Support.
-
-
+Flare is an open-source, privacy-first social client that brings Mastodon, Misskey, Bluesky, X, and RSS into one unified timeline. It supports cross-posting, lists, feeds, DMs, RSS management, and AI-powered features such as translation and summaries. Built with Kotlin Multiplatform, Flare shares its core logic across Android, iOS, macOS, Windows, and Linux, turning fragmented social feeds into a personal information hub.
 
 <a href="https://apps.microsoft.com/detail/9NLRN0BKZ357?referrer=appbadge&mode=direct">
 	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="190"/>
@@ -22,9 +20,13 @@ Flare is an open-source social client that merges your feeds from Mastodon, Miss
 <a href='https://f-droid.org/packages/dev.dimension.flare'><img alt='Get it on F-Droid' src='https://f-droid.org/badge/get-it-on.svg' width=150/></a>
 
 ## Features
- - Consolidate all your social networks into one client, featuring Mastodon, Misskey, Bluesky and more to come.
- - Crosspost your content simultaneously across all your platforms.
- - It is FOSS and privacy-centric.
+ - Unified social inbox: Flare brings Mastodon, Misskey, Bluesky, X, and RSS together in one place, so users can follow fragmented communities through a single timeline.
+ - Mixed timeline experience: It merges content from multiple accounts and platforms into a coherent feed, reducing context switching between apps.
+ - Cross-platform by design: Built with Kotlin Multiplatform, Flare shares core logic across Android, iOS, macOS, Windows, and Linux.
+ - Rich platform support: Beyond basic timelines, it supports features such as polls, lists, bookmarks/favorites, Misskey antennas, Bluesky feeds and DMs, and RSS management.
+ - Cross-posting workflow: Users can publish to multiple platforms at once, making it practical for creators and heavy social media users.
+ - AI-assisted reading: Flare includes AI-powered capabilities such as translation and summaries to help users catch up on content faster.
+ - Privacy-first approach: As a FOSS client, it emphasizes user control with features like anonymous mode, local filtering, local history, and transparent data handling.
 
 ## Roadmap
 Here're some features we're planning to implement in the future.
@@ -74,18 +76,19 @@ Here're some features we've done before.
 
 ## Building
 ### Android
- - Make sure you have JDK 21 installed
+ - Make sure you have JDK(JBR) 25 installed
  - Run `./gradlew installDebug` to build and install the debug version of the app
  - You can open the project in Android Studio or IntelliJ IDEA if you want
 
 ### iOS
+ - Make sure you have JDK(JBR) 25 installed
  - Make sure you have a Mac with Xcode 26 installed
  - open `iosApp/Flare.xcodeproj` in Xcode
  - Build and run the app
 
 ### Server
  - Flare Server uses Ktor with Kotlin Native, which only works on Linux X64 and MacOS X64/ARM64
- - Make sure you have JDK 21 installed
+ - Make sure you have JDK 25(JBR) installed
  - Run `./gradlew :server:runDebugExecutableMacosArm64 -PrunArgs="--config-path=path/to/server/src/commonMain/resources/application.yaml"` to build and run the server, remember to replace `path/to/server/src/commonMain/resources/application.yaml` with the path to your config file
  - The server will run on `http://localhost:8080` by default
 #### Docker
@@ -102,14 +105,8 @@ If you prefer using Docker, you can use Docker Compose to run prebuild Server Im
  - Run `docker compose up -d`
 
 ### Desktop
- - Make sure you have JDK 21 installed, JBR-21 is recommended.
-#### macOS
- - Make sure you have Xcode 26 installed
+ - Make sure you have JDK(JBR) 25 installed
  - Run `./gradlew run` to build and run the debug version of the desktop app.
-#### Windows
- - Make sure you have Visual Studio 2022 installed with Windows App development installed
- - Open `desktopApp/src/main/csharp/Flare.csproj` with Visual Studio
- - Click Run and you should able to build and run the app.
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.

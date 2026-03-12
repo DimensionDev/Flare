@@ -34,6 +34,7 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.persistentListOf
@@ -463,7 +464,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
             } else if (!cw.isNullOrEmpty()) {
                 misskeyParser.parse(cw).toHtml(accountKey, emojis, remoteHost).toUi()
             } else {
-                Element("span").toUi()
+                "".toUiPlainText()
             },
         actions =
             listOfNotNull(

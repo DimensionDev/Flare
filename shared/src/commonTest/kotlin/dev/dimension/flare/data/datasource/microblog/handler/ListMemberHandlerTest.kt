@@ -18,6 +18,7 @@ import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -326,7 +327,7 @@ class ListMemberHandlerTest : RobolectricTest() {
                     host = userKey.host,
                 ),
             avatar = "https://${userKey.host}/${userKey.id}.png",
-            nameInternal = Element("span").apply { appendText(name) }.toUi(),
+            nameInternal = name.toUiPlainText(),
             platformType = PlatformType.Mastodon,
             clickEvent = ClickEvent.Noop,
             banner = null,

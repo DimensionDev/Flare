@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import de.cketti.codepoints.codePointCount
 import dev.dimension.flare.common.SerializableImmutableList
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.Serializable
 
@@ -117,18 +118,18 @@ internal fun uiRichTextOf(
 public fun String.toUiPlainText(): UiRichText =
     UiRichText(
         renderRuns =
-            listOf(
+            persistentListOf(
                 RenderContent.Text(
                     runs =
-                        listOf(
+                        persistentListOf(
                             RenderRun.Text(text = this),
-                        ).toImmutableList(),
+                        ),
                 ),
-            ).toImmutableList(),
+            ),
         isRtl = isRtl(),
         raw = this,
         innerText = this,
-        imageUrls = emptyList<String>().toImmutableList(),
+        imageUrls = persistentListOf<String>(),
     )
 
 public fun UiRichText.toTranslatableText(): String {

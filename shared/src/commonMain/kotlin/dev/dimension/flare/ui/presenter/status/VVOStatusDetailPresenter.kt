@@ -72,7 +72,7 @@ public class VVOStatusDetailPresenter(
                                         renderVVOText(
                                             extendedText.data,
                                             service.accountKey,
-                                        ).toUi(),
+                                        ),
                                 )
                             } else {
                                 item

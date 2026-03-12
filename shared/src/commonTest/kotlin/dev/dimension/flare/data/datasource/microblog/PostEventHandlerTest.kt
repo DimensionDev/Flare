@@ -22,6 +22,7 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -226,7 +227,7 @@ class PostEventHandlerTest : RobolectricTest() {
             contentWarning = null,
             user = createProfile(),
             quote = persistentListOf(),
-            content = Element("span").apply { appendText("post content") }.toUi(),
+            content = "post content".toUiPlainText(),
             actions = actions,
             poll = poll,
             statusKey = postKey,
@@ -251,7 +252,7 @@ class PostEventHandlerTest : RobolectricTest() {
                     host = "test.social",
                 ),
             avatar = "https://test.social/author.png",
-            nameInternal = Element("span").apply { appendText("Author") }.toUi(),
+            nameInternal = "Author".toUiPlainText(),
             platformType = PlatformType.Mastodon,
             clickEvent = ClickEvent.Noop,
             banner = null,

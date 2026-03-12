@@ -16,6 +16,7 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toPersistentList
@@ -268,7 +269,7 @@ class SerializationFormatBenchmarkTest {
                     host = key.host,
                 ),
             avatar = "https://${key.host}/${key.id}.png",
-            nameInternal = Element("span").apply { appendText(name) }.toUi(),
+            nameInternal = name.toUiPlainText(),
             platformType = PlatformType.Mastodon,
             clickEvent = ClickEvent.Noop,
             banner = "https://${key.host}/${key.id}/banner.png",
@@ -289,8 +290,8 @@ class SerializationFormatBenchmarkTest {
                 UiProfile.BottomContent.Fields(
                     fields =
                         mapOf(
-                            "Website" to Element("span").apply { appendText("https://${key.host}") }.toUi(),
-                            "Location" to Element("span").apply { appendText("Benchmark City") }.toUi(),
+                            "Website" to "https://${key.host}".toUiPlainText(),
+                            "Location" to "Benchmark City".toUiPlainText(),
                         ).let {
                             persistentMapOf(
                                 "Website" to it.getValue("Website"),
@@ -325,10 +326,10 @@ class SerializationFormatBenchmarkTest {
                     )
                 }.toPersistentList(),
             sensitive = false,
-            contentWarning = Element("span").apply { appendText("cw-$text") }.toUi(),
+            contentWarning = "cw-$text".toUiPlainText(),
             user = user,
             quote = quote.toPersistentList(),
-            content = Element("span").apply { appendText(text) }.toUi(),
+            content = text.toUiPlainText(),
             actions = createActions(statusKey),
             poll = createPoll(statusKey, accountKey),
             statusKey = statusKey,

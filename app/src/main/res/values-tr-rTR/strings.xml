@@ -34,6 +34,10 @@
     <string name="compose_content_warning_hint">İçerik uyarısı</string>
     <string name="compose_media_sensitive">Medya duyarlı olarak işaretle</string>
     <string name="compose_notification_title">Gönderi Gönderme</string>
+    <string name="compose_save_draft">Kaydet</string>
+    <string name="draft_box_edit">Düzenle</string>
+    <string name="draft_box_retry">Yeniden dene</string>
+    <string name="draft_box_send">Gönder</string>
     <string name="settings_title">Ayarlar</string>
     <string name="settings_accounts_title">Hesap Yönetimi</string>
     <string name="settings_appearance_title">Görünüm</string>

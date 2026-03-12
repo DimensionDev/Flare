@@ -34,6 +34,16 @@
     <string name="compose_content_warning_hint">Προειδοποίηση περιεχομένου</string>
     <string name="compose_media_sensitive">Σημείωση πολυμέσων ως ευαίσθητα</string>
     <string name="compose_notification_title">Αποστολή Δημοσίευσης</string>
+    <string name="compose_close_confirm_title">Αποθήκευση προχείρου?</string>
+    <string name="compose_close_confirm_message">Έχετε μη αποθηκευμένο κείμενο. Αποθηκεύστε το ως προσχέδιο πριν το κλείσετε?</string>
+    <string name="compose_save_draft">Αποθήκευση</string>
+    <string name="compose_close_discard">Απορρίψτε</string>
+    <string name="draft_box_title">Πρόχειρα</string>
+    <string name="draft_box_empty">Δεν υπάρχουν ακόμη πρόχειρα</string>
+    <string name="draft_box_edit">Επεξεργασία</string>
+    <string name="draft_box_retry">Επανάληψη</string>
+    <string name="draft_box_send">Αποστολή</string>
+    <string name="settings_draft_box_description">Προβολή και διαχείριση αποθηκευμένων προσχεδίων</string>
     <string name="settings_title">Ρυθμίσεις</string>
     <string name="settings_accounts_title">Διαχείριση Λογαριασμού</string>
     <string name="settings_appearance_title">Εμφάνιση</string>

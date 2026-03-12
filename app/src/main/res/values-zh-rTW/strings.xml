@@ -30,6 +30,10 @@
     <string name="compose_content_warning_hint">內容警告</string>
     <string name="compose_media_sensitive">將媒體標記為敏感</string>
     <string name="compose_notification_title">發文中</string>
+    <string name="compose_save_draft">保存</string>
+    <string name="draft_box_edit">編輯</string>
+    <string name="draft_box_retry">重試</string>
+    <string name="draft_box_send">發送</string>
     <string name="settings_title">設定</string>
     <string name="settings_accounts_title">帳號管理</string>
     <string name="settings_appearance_title">外觀</string>

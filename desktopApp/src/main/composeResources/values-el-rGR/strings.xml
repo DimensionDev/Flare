@@ -51,6 +51,9 @@
     <string name="report_reason_other_description">Ένα ζήτημα που δεν περιλαμβάνεται σε αυτές τις επιλογές</string>
     <string name="delete_status_title">Διαγραφή</string>
     <string name="delete_status_message">Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτό?</string>
+    <string name="compose_close_confirm_title">Αποθήκευση προχείρου?</string>
+    <string name="compose_close_confirm_message">Έχετε μη αποθηκευμένο κείμενο. Θέλετε να το αποθηκεύσετε ως προσχέδιο πριν το κλείσετε?</string>
+    <string name="compose_close_discard">Απορρίψτε</string>
     <string name="mastodon_report_title">Αναφορά</string>
     <string name="mastodon_report_description">Είστε βέβαιοι ότι θέλετε να αναφέρετε αυτό?</string>
     <string name="bookmark_remove">Αφαίρεση σελιδοδείκτη</string>
@@ -129,6 +132,8 @@
     <string name="settings_status_appearance_subtitle">Προσαρμόστε την εμφάνιση της δημοσίευσης</string>
     <string name="settings_appearance_subtitle">Προσαρμόστε την εμφάνιση και την αίσθηση του Flare</string>
     <string name="settings_storage_title">Αποθήκευση</string>
+    <string name="settings_draft_box_title">Πλαίσιο Προσχεδίου</string>
+    <string name="settings_draft_box_description">Προβολή αποστολής, αποτυχημένων και μη απεσταλμένων προσχεδίων</string>
     <string name="settings_storage_subtitle">Διαχείριση χώρου αποθήκευσης Flare</string>
     <string name="settings_about_title">Σχετικά</string>
     <string name="settings_about_subtitle">Μάθετε περισσότερα για το Flare</string>
@@ -309,6 +314,11 @@
     <string name="settings_storage_app_log_description">Δείτε το αρχείο καταγραφής της εφαρμογής</string>
     <string name="settings_rss_management_title">Διαχείριση RSS</string>
     <string name="settings_rss_management_description">Διαχείριση ροών RSS</string>
+    <string name="draft_box_title">Πλαίσιο Προσχεδίου</string>
+    <string name="draft_box_empty">Δεν υπάρχουν ακόμη πρόχειρα</string>
+    <string name="draft_box_retry">Επανάληψη</string>
+    <string name="draft_box_edit">Επεξεργασία</string>
+    <string name="draft_box_send">Αποστολή</string>
     <string name="copied_to_clipboard">Αντιγράφηκε στο πρόχειρο</string>
     <string name="opml_import">Εισαγωγή από OPML</string>
     <string name="opml_export">Εξαγωγή σε OPML</string>

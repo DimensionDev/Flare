@@ -51,6 +51,9 @@
     <string name="report_reason_other_description">Een probleem niet opgenomen in deze opties</string>
     <string name="delete_status_title">Verwijderen</string>
     <string name="delete_status_message">Weet u zeker dat u dit wilt verwijderen?</string>
+    <string name="compose_close_confirm_title">Concept opslaan?</string>
+    <string name="compose_close_confirm_message">Je hebt niet-opgeslagen tekst. Wil je het opslaan als concept voordat je afsluit?</string>
+    <string name="compose_close_discard">Weggooien</string>
     <string name="mastodon_report_title">Rapporteren</string>
     <string name="mastodon_report_description">Weet u zeker dat u dit wilt melden?</string>
     <string name="bookmark_remove">Bladwijzer verwijderen</string>
@@ -129,6 +132,8 @@
     <string name="settings_status_appearance_subtitle">Aanpassen van het uiterlijk van bericht</string>
     <string name="settings_appearance_subtitle">Pas het uiterlijk en gevoel van Flare aan</string>
     <string name="settings_storage_title">Opslagruimte</string>
+    <string name="settings_draft_box_title">Concept vak</string>
+    <string name="settings_draft_box_description">Verzenden, mislukt en niet-verzonden concepten bekijken</string>
     <string name="settings_storage_subtitle">Beheer Flare\'s opslag</string>
     <string name="settings_about_title">Informatie</string>
     <string name="settings_about_subtitle">Meer informatie over Flare</string>
@@ -308,6 +313,11 @@
     <string name="settings_storage_app_log_description">Bekijk het app-logboek</string>
     <string name="settings_rss_management_title">RSS Management</string>
     <string name="settings_rss_management_description">RSS-feeds beheren</string>
+    <string name="draft_box_title">Concept vak</string>
+    <string name="draft_box_empty">Nog geen concepten</string>
+    <string name="draft_box_retry">Opnieuw</string>
+    <string name="draft_box_edit">Bewerken</string>
+    <string name="draft_box_send">Verzenden</string>
     <string name="copied_to_clipboard">Gekopieerd naar klembord</string>
     <string name="opml_import">Importeren uit OPML</string>
     <string name="opml_export">Exporteren naar OPML</string>

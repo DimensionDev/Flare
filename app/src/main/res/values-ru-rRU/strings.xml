@@ -36,6 +36,16 @@
     <string name="compose_content_warning_hint">Предупреждение о содержании</string>
     <string name="compose_media_sensitive">Скрыть медиа под спойлер</string>
     <string name="compose_notification_title">Отправка сообщения</string>
+    <string name="compose_close_confirm_title">Сохранить черновик?</string>
+    <string name="compose_close_confirm_message">У вас есть несохраненный текст. Сохранить его как черновик перед закрытием?</string>
+    <string name="compose_save_draft">Сохранить</string>
+    <string name="compose_close_discard">Сбросить</string>
+    <string name="draft_box_title">Черновики</string>
+    <string name="draft_box_empty">Пока нет черновиков</string>
+    <string name="draft_box_edit">Редактирование</string>
+    <string name="draft_box_retry">Повторить</string>
+    <string name="draft_box_send">Отправить</string>
+    <string name="settings_draft_box_description">Просмотр и управление сохраненными черновиками</string>
     <string name="settings_title">Настройки</string>
     <string name="settings_accounts_title">Управление аккаунтом</string>
     <string name="settings_appearance_title">Внешний вид</string>

@@ -30,6 +30,16 @@
     <string name="compose_content_warning_hint">Avertissement de contenu</string>
     <string name="compose_media_sensitive">Marquer le média comme sensible</string>
     <string name="compose_notification_title">Envoi du message</string>
+    <string name="compose_close_confirm_title">Enregistrer le brouillon ?</string>
+    <string name="compose_close_confirm_message">Vous avez du texte non enregistré. Enregistrez-le comme brouillon avant de fermer?</string>
+    <string name="compose_save_draft">Enregistrer</string>
+    <string name="compose_close_discard">Abandonner</string>
+    <string name="draft_box_title">Brouillons</string>
+    <string name="draft_box_empty">Aucun brouillon pour le moment</string>
+    <string name="draft_box_edit">Editer</string>
+    <string name="draft_box_retry">Réessayer</string>
+    <string name="draft_box_send">Envoyer</string>
+    <string name="settings_draft_box_description">Voir et gérer les brouillons enregistrés</string>
     <string name="settings_title">Réglages</string>
     <string name="settings_accounts_title">Gestion du compte</string>
     <string name="settings_appearance_title">Apparence</string>

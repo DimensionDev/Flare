@@ -51,6 +51,9 @@
     <string name="report_reason_other_description">Un problema non incluso in queste opzioni</string>
     <string name="delete_status_title">Elimina</string>
     <string name="delete_status_message">Sei sicuro di volerlo eliminare?</string>
+    <string name="compose_close_confirm_title">Salvare la bozza?</string>
+    <string name="compose_close_confirm_message">Hai un testo non salvato. Vuoi salvarlo come una bozza prima di chiudere?</string>
+    <string name="compose_close_discard">Scarta</string>
     <string name="mastodon_report_title">Segnala</string>
     <string name="mastodon_report_description">Sei sicuro di volerlo segnalare?</string>
     <string name="bookmark_remove">Rimuovi segnalibro</string>
@@ -129,6 +132,8 @@
     <string name="settings_status_appearance_subtitle">Personalizza l\'aspetto dei post</string>
     <string name="settings_appearance_subtitle">Personalizza l\'aspetto di Flare</string>
     <string name="settings_storage_title">Archiviazione</string>
+    <string name="settings_draft_box_title">Bozza Casella</string>
+    <string name="settings_draft_box_description">Visualizza le bozze inviate, non riuscite e non inviate</string>
     <string name="settings_storage_subtitle">Gestisci lo spazio di archiviazione</string>
     <string name="settings_about_title">Informazioni</string>
     <string name="settings_about_subtitle">Scopri di più su Flare</string>
@@ -309,6 +314,11 @@
     <string name="settings_storage_app_log_description">Visualizza il registro app</string>
     <string name="settings_rss_management_title">Gestione RSS</string>
     <string name="settings_rss_management_description">Gestisci feed RSS</string>
+    <string name="draft_box_title">Bozza Casella</string>
+    <string name="draft_box_empty">Ancora nessuna bozza</string>
+    <string name="draft_box_retry">Riprova</string>
+    <string name="draft_box_edit">Modifica</string>
+    <string name="draft_box_send">Invia</string>
     <string name="copied_to_clipboard">Copiato negli appunti</string>
     <string name="opml_import">Importa da OPML</string>
     <string name="opml_export">Esporta in OPML</string>

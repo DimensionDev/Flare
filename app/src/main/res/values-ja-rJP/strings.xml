@@ -33,6 +33,16 @@
     <string name="compose_content_warning_hint">閲覧注意:</string>
     <string name="compose_media_sensitive">メディアを閲覧注意にする</string>
     <string name="compose_notification_title">投稿を送信しました</string>
+    <string name="compose_close_confirm_title">下書きを保存しますか？</string>
+    <string name="compose_close_confirm_message">保存されていないテキストがあります。閉じる前に下書きとして保存しますか？</string>
+    <string name="compose_save_draft">保存</string>
+    <string name="compose_close_discard">破棄する</string>
+    <string name="draft_box_title">Drafts</string>
+    <string name="draft_box_empty">下書きはまだありません</string>
+    <string name="draft_box_edit">編集</string>
+    <string name="draft_box_retry">再試行する</string>
+    <string name="draft_box_send">送信</string>
+    <string name="settings_draft_box_description">保存した下書きの表示と管理</string>
     <string name="settings_title">設定</string>
     <string name="settings_accounts_title">アカウント管理</string>
     <string name="settings_appearance_title">外観</string>

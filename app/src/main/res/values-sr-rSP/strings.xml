@@ -29,6 +29,10 @@
     <string name="compose_poll_expiration_7_days">7 дана</string>
     <string name="compose_content_warning_hint">Упозорење на садржај</string>
     <string name="compose_media_sensitive">Означите медије као осетљиве</string>
+    <string name="compose_save_draft">Сачувај</string>
+    <string name="draft_box_edit">Уреди</string>
+    <string name="draft_box_retry">Поновите</string>
+    <string name="draft_box_send">Пошаљи</string>
     <string name="settings_title">Подешавања</string>
     <string name="settings_accounts_title">Управљање рачунима</string>
     <string name="settings_appearance_title">Изглед</string>

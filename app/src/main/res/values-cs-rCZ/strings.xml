@@ -36,6 +36,16 @@
     <string name="compose_content_warning_hint">Upozornění na obsah</string>
     <string name="compose_media_sensitive">Označit média jako citlivá</string>
     <string name="compose_notification_title">Odesílání příspěvku</string>
+    <string name="compose_close_confirm_title">Uložit koncept?</string>
+    <string name="compose_close_confirm_message">Máte neuložený text. Uložit jej jako koncept před uzavřením?</string>
+    <string name="compose_save_draft">Uložit</string>
+    <string name="compose_close_discard">Zahodit</string>
+    <string name="draft_box_title">Koncepty</string>
+    <string name="draft_box_empty">Zatím žádné koncepty</string>
+    <string name="draft_box_edit">Upravit</string>
+    <string name="draft_box_retry">Opakovat</string>
+    <string name="draft_box_send">Poslat</string>
+    <string name="settings_draft_box_description">Zobrazit a spravovat uložené koncepty</string>
     <string name="settings_title">Nastavení</string>
     <string name="settings_accounts_title">Správa účtů</string>
     <string name="settings_appearance_title">Vzhled</string>

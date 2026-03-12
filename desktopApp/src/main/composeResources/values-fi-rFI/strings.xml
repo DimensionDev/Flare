@@ -51,6 +51,9 @@
     <string name="report_reason_other_description">Ongelma, joka ei sisälly näihin vaihtoehtoihin</string>
     <string name="delete_status_title">Poista</string>
     <string name="delete_status_message">Oletko varma, että haluat poistaa tämän?</string>
+    <string name="compose_close_confirm_title">Tallennetaanko luonnos?</string>
+    <string name="compose_close_confirm_message">Sinulla on tallentamatonta tekstiä. Haluatko tallentaa sen luonnoksena ennen sulkemista?</string>
+    <string name="compose_close_discard">Hylkää</string>
     <string name="mastodon_report_title">Raportoi</string>
     <string name="mastodon_report_description">Oletko varma, että haluat raportoida tästä?</string>
     <string name="bookmark_remove">Poista kirjanmerkki</string>
@@ -129,6 +132,8 @@
     <string name="settings_status_appearance_subtitle">Muokkaa postin ulkoasua</string>
     <string name="settings_appearance_subtitle">Mukauta Floren ulkoasua ja tunnelmaa</string>
     <string name="settings_storage_title">Tallennustila</string>
+    <string name="settings_draft_box_title">Luonnos Laatikko</string>
+    <string name="settings_draft_box_description">Näytä lähettämiset, epäonnistuneet ja lähettämättömät luonnokset</string>
     <string name="settings_storage_subtitle">Hallitse Flare-tallennustilaa</string>
     <string name="settings_about_title">Tietoja</string>
     <string name="settings_about_subtitle">Lue lisää Floresta</string>
@@ -309,6 +314,11 @@
     <string name="settings_storage_app_log_description">Näytä sovellusloki</string>
     <string name="settings_rss_management_title">Rss Hallinta</string>
     <string name="settings_rss_management_description">Hallitse RSS-syötteitä</string>
+    <string name="draft_box_title">Luonnos Laatikko</string>
+    <string name="draft_box_empty">Ei vielä luonnoksia</string>
+    <string name="draft_box_retry">Yritä Uudelleen</string>
+    <string name="draft_box_edit">Muokkaa</string>
+    <string name="draft_box_send">Lähetä</string>
     <string name="copied_to_clipboard">Kopioitu leikepöydälle</string>
     <string name="opml_import">Tuo OPML:sta</string>
     <string name="opml_export">Vie OPML:ään</string>

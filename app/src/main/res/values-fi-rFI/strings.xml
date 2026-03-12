@@ -34,6 +34,16 @@
     <string name="compose_content_warning_hint">Sisällön varoitus</string>
     <string name="compose_media_sensitive">Merkitse media tuntevaksi</string>
     <string name="compose_notification_title">Lähetetään Viestiä</string>
+    <string name="compose_close_confirm_title">Tallennetaanko luonnos?</string>
+    <string name="compose_close_confirm_message">Sinulla on tallentamatonta tekstiä. Tallennetaanko se luonnoksena ennen sulkemista?</string>
+    <string name="compose_save_draft">Tallenna</string>
+    <string name="compose_close_discard">Hylkää</string>
+    <string name="draft_box_title">Luonnokset</string>
+    <string name="draft_box_empty">Ei vielä luonnoksia</string>
+    <string name="draft_box_edit">Muokkaa</string>
+    <string name="draft_box_retry">Yritä Uudelleen</string>
+    <string name="draft_box_send">Lähetä</string>
+    <string name="settings_draft_box_description">Tarkastele ja hallitse tallennettuja luonnoksia</string>
     <string name="settings_title">Asetukset</string>
     <string name="settings_accounts_title">Tilin Hallinta</string>
     <string name="settings_appearance_title">Ulkoasu</string>

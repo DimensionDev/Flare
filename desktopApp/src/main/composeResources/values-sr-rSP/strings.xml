@@ -229,6 +229,9 @@
     <string name="settings_storage_clear_database">Очистите базу кеша</string>
     <string name="settings_storage_app_log">Отворите лог апликације</string>
     <string name="settings_storage_app_log_description">Погледајте лог апликације</string>
+    <string name="draft_box_retry">Поновите</string>
+    <string name="draft_box_edit">Уреди</string>
+    <string name="draft_box_send">Пошаљи</string>
     <string name="deeplink_account_selection_browser">Отворите у прегледаћу</string>
     <string name="misskey_channel_tab_following">Пратим</string>
     <string name="misskey_channel_tab_featured">Истакнути</string>

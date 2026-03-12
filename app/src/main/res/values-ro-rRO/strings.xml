@@ -35,6 +35,16 @@
     <string name="compose_content_warning_hint">Avertisment conținut</string>
     <string name="compose_media_sensitive">Marchează fișierele media ca fiind sensibile</string>
     <string name="compose_notification_title">Se trimite postarea</string>
+    <string name="compose_close_confirm_title">Salvează ciorna?</string>
+    <string name="compose_close_confirm_message">Aveți text nesalvat. Salvați-l ca schiță înainte de a închide?</string>
+    <string name="compose_save_draft">Salvează</string>
+    <string name="compose_close_discard">Renunțați</string>
+    <string name="draft_box_title">Schițe</string>
+    <string name="draft_box_empty">Nici o ciornă încă</string>
+    <string name="draft_box_edit">Editare</string>
+    <string name="draft_box_retry">Reîncercați</string>
+    <string name="draft_box_send">Trimite</string>
+    <string name="settings_draft_box_description">Vizualizați și gestionați ciornele salvate</string>
     <string name="settings_title">Setări</string>
     <string name="settings_accounts_title">Administrare cont</string>
     <string name="settings_appearance_title">Aspectul</string>

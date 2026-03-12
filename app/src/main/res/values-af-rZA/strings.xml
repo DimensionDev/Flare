@@ -29,6 +29,10 @@
     <string name="compose_poll_expiration_7_days">7 dae</string>
     <string name="compose_content_warning_hint">Inhoud waarskuwing</string>
     <string name="compose_media_sensitive">Merk media as sensitief</string>
+    <string name="compose_save_draft">Bly</string>
+    <string name="draft_box_edit">Bewerk</string>
+    <string name="draft_box_retry">Probeer weer</string>
+    <string name="draft_box_send">Stuur</string>
     <string name="settings_title">Instellings</string>
     <string name="settings_accounts_title">Rekeningbestuur</string>
     <string name="settings_appearance_title">Uiterlik</string>

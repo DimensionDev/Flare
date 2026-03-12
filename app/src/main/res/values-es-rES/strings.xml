@@ -34,6 +34,16 @@
     <string name="compose_content_warning_hint">Advertencia de contenido</string>
     <string name="compose_media_sensitive">Marcar medio como sensible</string>
     <string name="compose_notification_title">Enviando Post</string>
+    <string name="compose_close_confirm_title">¿Guardar borrado?</string>
+    <string name="compose_close_confirm_message">Tienes texto sin guardar. ¿Guardar como borrador antes de cerrar?</string>
+    <string name="compose_save_draft">Guardar</string>
+    <string name="compose_close_discard">Descartar</string>
+    <string name="draft_box_title">Borradores</string>
+    <string name="draft_box_empty">Aún no hay borradores</string>
+    <string name="draft_box_edit">Editar</string>
+    <string name="draft_box_retry">Reintentar</string>
+    <string name="draft_box_send">Enviar</string>
+    <string name="settings_draft_box_description">Ver y administrar borradores guardados</string>
     <string name="settings_title">Ajustes</string>
     <string name="settings_accounts_title">Gestión de cuentas</string>
     <string name="settings_appearance_title">Apariencia</string>

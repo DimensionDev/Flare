@@ -30,6 +30,10 @@
     <string name="compose_content_warning_hint">Предупреждение за съдържание</string>
     <string name="compose_media_sensitive">Отбелязване на медията като деликатна</string>
     <string name="compose_notification_title">Изпраща се публикация</string>
+    <string name="compose_save_draft">Запазване</string>
+    <string name="draft_box_edit">Редактиране</string>
+    <string name="draft_box_retry">Повторен опит</string>
+    <string name="draft_box_send">Изпращане</string>
     <string name="settings_title">Настройки</string>
     <string name="settings_accounts_title">Управление на акаунти</string>
     <string name="settings_appearance_title">Облик</string>

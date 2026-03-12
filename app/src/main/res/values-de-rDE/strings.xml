@@ -34,6 +34,16 @@
     <string name="compose_content_warning_hint">Inhaltswarnung</string>
     <string name="compose_media_sensitive">Medien als sensibel markieren</string>
     <string name="compose_notification_title">Beitrag wird gesendet</string>
+    <string name="compose_close_confirm_title">Entwurf speichern?</string>
+    <string name="compose_close_confirm_message">Sie haben ungespeicherten Text. Speichern als Entwurf vor dem Schließen?</string>
+    <string name="compose_save_draft">Speichern</string>
+    <string name="compose_close_discard">Verwerfen</string>
+    <string name="draft_box_title">Entwürfe</string>
+    <string name="draft_box_empty">Noch keine Entwürfe</string>
+    <string name="draft_box_edit">Bearbeiten</string>
+    <string name="draft_box_retry">Wiederholen</string>
+    <string name="draft_box_send">Senden</string>
+    <string name="settings_draft_box_description">Gespeicherte Entwürfe anzeigen und verwalten</string>
     <string name="settings_title">Einstellungen</string>
     <string name="settings_accounts_title">Kontoverwaltung</string>
     <string name="settings_appearance_title">Erscheinungsbild</string>

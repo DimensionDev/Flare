@@ -53,6 +53,9 @@
     <string name="report_reason_other_description">Другая проблема, не описанная здесь</string>
     <string name="delete_status_title">Удалить</string>
     <string name="delete_status_message">Вы уверены, что хотите удалить это?</string>
+    <string name="compose_close_confirm_title">Сохранить черновик?</string>
+    <string name="compose_close_confirm_message">У вас есть несохраненный текст. Вы хотите сохранить его как черновик перед закрытием?</string>
+    <string name="compose_close_discard">Сбросить</string>
     <string name="mastodon_report_title">Пожаловаться</string>
     <string name="mastodon_report_description">Вы уверены, что хотите пожаловаться на это?</string>
     <string name="bookmark_remove">Удалить закладку</string>
@@ -131,6 +134,8 @@
     <string name="settings_status_appearance_subtitle">Настроить внешний вид поста</string>
     <string name="settings_appearance_subtitle">Настройте внешний вид Flare</string>
     <string name="settings_storage_title">Хранилище</string>
+    <string name="settings_draft_box_title">Черновик</string>
+    <string name="settings_draft_box_description">Просмотр отправления, неудачных и неотправленных черновиков</string>
     <string name="settings_storage_subtitle">Управление хранилищем Flare</string>
     <string name="settings_about_title">О программе</string>
     <string name="settings_about_subtitle">Узнайте больше о Flare</string>
@@ -311,6 +316,11 @@
     <string name="settings_storage_app_log_description">Просмотр журнала приложений</string>
     <string name="settings_rss_management_title">Управление RSS</string>
     <string name="settings_rss_management_description">Управление RSS-каналами</string>
+    <string name="draft_box_title">Черновик</string>
+    <string name="draft_box_empty">Пока нет черновиков</string>
+    <string name="draft_box_retry">Повторить</string>
+    <string name="draft_box_edit">Редактирование</string>
+    <string name="draft_box_send">Отправить</string>
     <string name="copied_to_clipboard">Скопировано в буфер обмена</string>
     <string name="opml_import">Импорт из OPML</string>
     <string name="opml_export">Экспорт в OPML</string>

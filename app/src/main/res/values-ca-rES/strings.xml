@@ -29,6 +29,10 @@
     <string name="compose_poll_expiration_7_days">7 dies</string>
     <string name="compose_content_warning_hint">Avís de contingut</string>
     <string name="compose_media_sensitive">Marcar mitjans com a sensibles</string>
+    <string name="compose_save_draft">Desar</string>
+    <string name="draft_box_edit">Editar</string>
+    <string name="draft_box_retry">Reintenteu</string>
+    <string name="draft_box_send">Enviar</string>
     <string name="settings_title">Configuració</string>
     <string name="settings_accounts_title">Gestió del compte</string>
     <string name="settings_appearance_title">Aparença</string>

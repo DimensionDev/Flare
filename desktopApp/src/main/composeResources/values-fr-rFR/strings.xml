@@ -47,6 +47,9 @@
     <string name="report_reason_other_description">Un problème non inclus dans ces options</string>
     <string name="delete_status_title">Supprimez</string>
     <string name="delete_status_message">Êtes-vous sûr de vouloir supprimer cela ?</string>
+    <string name="compose_close_confirm_title">Enregistrer le brouillon ?</string>
+    <string name="compose_close_confirm_message">Vous avez un texte non enregistré. Voulez-vous l\'enregistrer comme brouillon avant de le fermer?</string>
+    <string name="compose_close_discard">Abandonner</string>
     <string name="mastodon_report_title">Rapporter</string>
     <string name="mastodon_report_description">Êtes-vous sûr de vouloir signaler cela ?</string>
     <string name="bookmark_remove">Supprimer le favori</string>
@@ -125,6 +128,8 @@
     <string name="settings_status_appearance_subtitle">Personnaliser l\'apparence du message</string>
     <string name="settings_appearance_subtitle">Personnaliser l\'apparence de la fusée éclairante</string>
     <string name="settings_storage_title">Stockage</string>
+    <string name="settings_draft_box_title">Boîte de brouillon</string>
+    <string name="settings_draft_box_description">Voir l\'envoi, l\'échec et les brouillons non envoyés</string>
     <string name="settings_storage_subtitle">Gérer le stockage de Fusée éclairante</string>
     <string name="settings_about_title">À propos de</string>
     <string name="settings_about_subtitle">En savoir plus sur Flare</string>
@@ -305,6 +310,11 @@
     <string name="settings_storage_app_log_description">Voir le journal des applications</string>
     <string name="settings_rss_management_title">Gestion des flux RSS</string>
     <string name="settings_rss_management_description">Gérer les flux RSS</string>
+    <string name="draft_box_title">Boîte de brouillon</string>
+    <string name="draft_box_empty">Aucun brouillon pour le moment</string>
+    <string name="draft_box_retry">Réessayer</string>
+    <string name="draft_box_edit">Editer</string>
+    <string name="draft_box_send">Envoyer</string>
     <string name="copied_to_clipboard">Copié dans le presse-papiers</string>
     <string name="opml_import">Importer depuis OPML</string>
     <string name="opml_export">Exporter vers OPML</string>

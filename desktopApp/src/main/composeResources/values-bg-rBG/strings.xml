@@ -186,6 +186,9 @@
     <string name="local_history_search_placeholder">Търсене в локалния кеш</string>
     <string name="local_history_search_user_title">Потребител</string>
     <string name="settings_storage_clear_image_cache">Изчистване на кеша на изображенията</string>
+    <string name="draft_box_retry">Повторен опит</string>
+    <string name="draft_box_edit">Редактиране</string>
+    <string name="draft_box_send">Изпращане</string>
     <string name="deeplink_account_selection_browser">Отваряне в браузър</string>
     <string name="misskey_channel_tab_following">Следван</string>
     <string name="misskey_channel_tab_featured">Избрани</string>

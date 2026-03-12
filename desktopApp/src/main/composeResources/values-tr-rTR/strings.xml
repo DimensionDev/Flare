@@ -253,6 +253,9 @@
     <string name="settings_storage_app_log_description">Uygulama günlüğünü görüntüle</string>
     <string name="settings_rss_management_title">RSS Yönetimi</string>
     <string name="settings_rss_management_description">RSS akışlarını yönetin</string>
+    <string name="draft_box_retry">Yeniden dene</string>
+    <string name="draft_box_edit">Düzenle</string>
+    <string name="draft_box_send">Gönder</string>
     <string name="opml_import">OPML\'den içe aktar</string>
     <string name="opml_export">OPML\'ye aktar</string>
     <string name="deeplink_account_selection_browser">Tarayıcıda aç</string>

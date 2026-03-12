@@ -51,6 +51,9 @@
     <string name="report_reason_other_description">Et problem der ikke er inkluderet i disse muligheder</string>
     <string name="delete_status_title">Slet</string>
     <string name="delete_status_message">Er du sikker på, at du vil slette dette?</string>
+    <string name="compose_close_confirm_title">Gem kladde?</string>
+    <string name="compose_close_confirm_message">Du har ikke-gemt tekst. Vil du gemme den som en kladde før du lukker?</string>
+    <string name="compose_close_discard">Kassér</string>
     <string name="mastodon_report_title">Rapport</string>
     <string name="mastodon_report_description">Er du sikker på, at du vil rapportere dette?</string>
     <string name="bookmark_remove">Fjern bogmærke</string>
@@ -129,6 +132,8 @@
     <string name="settings_status_appearance_subtitle">Tilpas udseendet af indlæg</string>
     <string name="settings_appearance_subtitle">Tilpas udseendet og fornemmelsen af Flare</string>
     <string name="settings_storage_title">Lagerplads</string>
+    <string name="settings_draft_box_title">Kladde Boks</string>
+    <string name="settings_draft_box_description">Se afsendelse, mislykkedes og usendte kladder</string>
     <string name="settings_storage_subtitle">Håndtér Flare\'s lagerplads</string>
     <string name="settings_about_title">Om</string>
     <string name="settings_about_subtitle">Læs mere om Flare</string>
@@ -309,6 +314,11 @@
     <string name="settings_storage_app_log_description">Se app-loggen</string>
     <string name="settings_rss_management_title">RSS Management</string>
     <string name="settings_rss_management_description">Administrer RSS-feeds</string>
+    <string name="draft_box_title">Kladde Boks</string>
+    <string name="draft_box_empty">Endnu ingen kladder</string>
+    <string name="draft_box_retry">Forsøg igen</string>
+    <string name="draft_box_edit">Rediger</string>
+    <string name="draft_box_send">Send</string>
     <string name="copied_to_clipboard">Kopieret til udklipsholder</string>
     <string name="opml_import">Importer fra OPML</string>
     <string name="opml_export">Eksporter til OPML</string>

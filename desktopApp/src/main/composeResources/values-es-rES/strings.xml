@@ -51,6 +51,9 @@
     <string name="report_reason_other_description">Un problema no incluido en estas opciones</string>
     <string name="delete_status_title">Eliminar</string>
     <string name="delete_status_message">¿Está seguro que desea eliminar esto?</string>
+    <string name="compose_close_confirm_title">¿Guardar borrado?</string>
+    <string name="compose_close_confirm_message">Tienes texto sin guardar. ¿Quieres guardarlo como borrador antes de cerrarlo?</string>
+    <string name="compose_close_discard">Descartar</string>
     <string name="mastodon_report_title">Reporte</string>
     <string name="mastodon_report_description">¿Estás seguro de que quieres reportar esto?</string>
     <string name="bookmark_remove">Eliminar marcador</string>
@@ -129,6 +132,8 @@
     <string name="settings_status_appearance_subtitle">Personalizar la apariencia del post</string>
     <string name="settings_appearance_subtitle">Personaliza la apariencia de Bengala</string>
     <string name="settings_storage_title">Almacenamiento</string>
+    <string name="settings_draft_box_title">Caja de borrador</string>
+    <string name="settings_draft_box_description">Ver borradores enviados, fallidos y no enviados</string>
     <string name="settings_storage_subtitle">Administrar almacenamiento de bengalas</string>
     <string name="settings_about_title">Acerca de</string>
     <string name="settings_about_subtitle">Más información sobre Bengala</string>
@@ -309,6 +314,11 @@
     <string name="settings_storage_app_log_description">Ver el registro de aplicaciones</string>
     <string name="settings_rss_management_title">Administración de RSS</string>
     <string name="settings_rss_management_description">Administrar fuentes RSS</string>
+    <string name="draft_box_title">Caja de borrador</string>
+    <string name="draft_box_empty">Aún no hay borradores</string>
+    <string name="draft_box_retry">Reintentar</string>
+    <string name="draft_box_edit">Editar</string>
+    <string name="draft_box_send">Enviar</string>
     <string name="copied_to_clipboard">Copiado al portapapeles</string>
     <string name="opml_import">Importar desde OPML</string>
     <string name="opml_export">Exportar a OPML</string>

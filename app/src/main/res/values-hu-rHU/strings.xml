@@ -29,6 +29,10 @@
     <string name="compose_poll_expiration_7_days">7 nap</string>
     <string name="compose_content_warning_hint">Tartalom figyelmeztetés</string>
     <string name="compose_media_sensitive">Jelöld meg a médiát érzékenyként</string>
+    <string name="compose_save_draft">Mentés</string>
+    <string name="draft_box_edit">Szerkesztés</string>
+    <string name="draft_box_retry">Újrapróbálás</string>
+    <string name="draft_box_send">Küldés</string>
     <string name="settings_title">Beállítások</string>
     <string name="settings_accounts_title">Fiók kezelés</string>
     <string name="settings_appearance_title">Megjelenés</string>

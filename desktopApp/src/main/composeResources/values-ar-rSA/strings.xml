@@ -55,6 +55,9 @@
     <string name="report_reason_other_description">مشكلة غير مدرجة في هذه الخيارات</string>
     <string name="delete_status_title">حذف</string>
     <string name="delete_status_message">هل أنت متأكد من أنك تريد حذف هذا؟</string>
+    <string name="compose_close_confirm_title">حفظ المسودة؟</string>
+    <string name="compose_close_confirm_message">لديك نص غير محفوظ. هل تريد حفظه كمسودة قبل الإغلاق؟</string>
+    <string name="compose_close_discard">تجاهل</string>
     <string name="mastodon_report_title">تقرير</string>
     <string name="mastodon_report_description">هل أنت متأكد من أنك تريد الإبلاغ عن هذا؟</string>
     <string name="bookmark_remove">إزالة الإشارة المرجعية</string>
@@ -133,6 +136,8 @@
     <string name="settings_status_appearance_subtitle">تخصيص مظهر المشاركة</string>
     <string name="settings_appearance_subtitle">تخصيص مظهر و إحساس Felle</string>
     <string name="settings_storage_title">التخزين</string>
+    <string name="settings_draft_box_title">مربع المسودة</string>
+    <string name="settings_draft_box_description">عرض الإرسال والفشل والمسودات غير المرسلة</string>
     <string name="settings_storage_subtitle">إدارة تخزين اللعب</string>
     <string name="settings_about_title">حول</string>
     <string name="settings_about_subtitle">تعرف على المزيد حول Ffluy</string>
@@ -313,6 +318,11 @@
     <string name="settings_storage_app_log_description">عرض سجل التطبيقات</string>
     <string name="settings_rss_management_title">إدارة RSS</string>
     <string name="settings_rss_management_description">إدارة تغذية RSS</string>
+    <string name="draft_box_title">مربع المسودة</string>
+    <string name="draft_box_empty">لا توجد مسودات بعد</string>
+    <string name="draft_box_retry">إعادة المحاولة</string>
+    <string name="draft_box_edit">تحرير</string>
+    <string name="draft_box_send">إرسال</string>
     <string name="copied_to_clipboard">نسخ إلى الحافظة</string>
     <string name="opml_import">استيراد من OPML</string>
     <string name="opml_export">تصدير إلى OPML</string>

@@ -34,6 +34,16 @@
     <string name="compose_content_warning_hint">Advarsel for innhold</string>
     <string name="compose_media_sensitive">Merk media som sensitivt</string>
     <string name="compose_notification_title">Sender innlegg</string>
+    <string name="compose_close_confirm_title">Lagre utkast?</string>
+    <string name="compose_close_confirm_message">Du har ulagret tekst. Lagre det som et utkast før du lukker?</string>
+    <string name="compose_save_draft">Lagre</string>
+    <string name="compose_close_discard">Forkast</string>
+    <string name="draft_box_title">Utkast</string>
+    <string name="draft_box_empty">Ingen utkast ennå</string>
+    <string name="draft_box_edit">Rediger</string>
+    <string name="draft_box_retry">Prøv igjen</string>
+    <string name="draft_box_send">Sende</string>
+    <string name="settings_draft_box_description">Vis og administrer lagrede utkast</string>
     <string name="settings_title">Innstillinger</string>
     <string name="settings_accounts_title">Konto administrasjon</string>
     <string name="settings_appearance_title">Utseende</string>

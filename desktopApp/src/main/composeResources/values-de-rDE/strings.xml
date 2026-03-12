@@ -51,6 +51,9 @@
     <string name="report_reason_other_description">Ein Problem, das in diesen Optionen nicht enthalten ist</string>
     <string name="delete_status_title">Löschen</string>
     <string name="delete_status_message">Bist du sicher, dass du dies löschen möchtest?</string>
+    <string name="compose_close_confirm_title">Entwurf speichern?</string>
+    <string name="compose_close_confirm_message">Sie haben ungespeicherten Text. Möchten Sie ihn vor dem Schließen als Entwurf speichern?</string>
+    <string name="compose_close_discard">Verwerfen</string>
     <string name="mastodon_report_title">Bericht</string>
     <string name="mastodon_report_description">Bist du sicher, dass du dies melden möchtest?</string>
     <string name="bookmark_remove">Lesezeichen entfernen</string>
@@ -129,6 +132,8 @@
     <string name="settings_status_appearance_subtitle">Aussehen des Beitrags anpassen</string>
     <string name="settings_appearance_subtitle">Passen Sie das Erscheinungsbild von Flare an</string>
     <string name="settings_storage_title">Speicher</string>
+    <string name="settings_draft_box_title">Entwürfe Box</string>
+    <string name="settings_draft_box_description">Sendung, fehlgeschlagene und nicht gesendete Entwürfe anzeigen</string>
     <string name="settings_storage_subtitle">Speicherplatz von Flare verwalten</string>
     <string name="settings_about_title">Über</string>
     <string name="settings_about_subtitle">Erfahre mehr über Flare</string>
@@ -309,6 +314,11 @@
     <string name="settings_storage_app_log_description">App-Log anzeigen</string>
     <string name="settings_rss_management_title">RSS-Verwaltung</string>
     <string name="settings_rss_management_description">RSS-Feeds verwalten</string>
+    <string name="draft_box_title">Entwürfe Box</string>
+    <string name="draft_box_empty">Noch keine Entwürfe</string>
+    <string name="draft_box_retry">Wiederholen</string>
+    <string name="draft_box_edit">Bearbeiten</string>
+    <string name="draft_box_send">Senden</string>
     <string name="copied_to_clipboard">In Zwischenablage kopiert</string>
     <string name="opml_import">Von OPML importieren</string>
     <string name="opml_export">Nach OPML exportieren</string>

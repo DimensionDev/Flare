@@ -34,6 +34,16 @@
     <string name="compose_content_warning_hint">Waarschuwing inhoud</string>
     <string name="compose_media_sensitive">Media als gevoelig markeren</string>
     <string name="compose_notification_title">Bericht verzenden</string>
+    <string name="compose_close_confirm_title">Concept opslaan?</string>
+    <string name="compose_close_confirm_message">Je hebt niet-opgeslagen tekst. Wil je het opslaan als concept voordat je afsluit?</string>
+    <string name="compose_save_draft">Opslaan</string>
+    <string name="compose_close_discard">Weggooien</string>
+    <string name="draft_box_title">Concepten</string>
+    <string name="draft_box_empty">Nog geen concepten</string>
+    <string name="draft_box_edit">Bewerken</string>
+    <string name="draft_box_retry">Opnieuw</string>
+    <string name="draft_box_send">Verzenden</string>
+    <string name="settings_draft_box_description">Bekijk en beheer opgeslagen concepten</string>
     <string name="settings_title">Instellingen</string>
     <string name="settings_accounts_title">Account beheer</string>
     <string name="settings_appearance_title">Uiterlijk</string>

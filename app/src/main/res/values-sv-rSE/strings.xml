@@ -34,6 +34,16 @@
     <string name="compose_content_warning_hint">Varning för innehåll</string>
     <string name="compose_media_sensitive">Markera media som känslig</string>
     <string name="compose_notification_title">Skickar inlägg</string>
+    <string name="compose_close_confirm_title">Spara utkast?</string>
+    <string name="compose_close_confirm_message">Du har osparad text. Spara det som ett utkast innan du stänger?</string>
+    <string name="compose_save_draft">Spara</string>
+    <string name="compose_close_discard">Ignorera</string>
+    <string name="draft_box_title">Utkast</string>
+    <string name="draft_box_empty">Inga utkast ännu</string>
+    <string name="draft_box_edit">Redigera</string>
+    <string name="draft_box_retry">Försök igen</string>
+    <string name="draft_box_send">Skicka</string>
+    <string name="settings_draft_box_description">Visa och hantera sparade utkast</string>
     <string name="settings_title">Inställningar</string>
     <string name="settings_accounts_title">Hantering av konto</string>
     <string name="settings_appearance_title">Utseende</string>

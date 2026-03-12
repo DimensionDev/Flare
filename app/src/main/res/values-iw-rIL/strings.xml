@@ -29,6 +29,10 @@
     <string name="compose_poll_expiration_7_days">7 ימים</string>
     <string name="compose_content_warning_hint">אזהרת תוכן</string>
     <string name="compose_media_sensitive">סמן מדיה כהרגשה</string>
+    <string name="compose_save_draft">שמור</string>
+    <string name="draft_box_edit">ערוך</string>
+    <string name="draft_box_retry">ניסיון שוב</string>
+    <string name="draft_box_send">שלח</string>
     <string name="settings_title">הגדרות</string>
     <string name="settings_accounts_title">ניהול חשבון</string>
     <string name="settings_appearance_title">מראה</string>

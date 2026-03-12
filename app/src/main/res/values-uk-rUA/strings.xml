@@ -30,6 +30,16 @@
     <string name="compose_content_warning_hint">Попередження про вміст</string>
     <string name="compose_media_sensitive">Позначити медіа як дражливе</string>
     <string name="compose_notification_title">Надсилання повідомлення</string>
+    <string name="compose_close_confirm_title">Зберегти чернетку?</string>
+    <string name="compose_close_confirm_message">У вас є незбережений текст. Бажаєте зберегти його в чернетці перед закриттям?</string>
+    <string name="compose_save_draft">Зберегти</string>
+    <string name="compose_close_discard">Відкинути</string>
+    <string name="draft_box_title">Чернетки</string>
+    <string name="draft_box_empty">Ще немає чернеток</string>
+    <string name="draft_box_edit">Редагувати</string>
+    <string name="draft_box_retry">Повторити спробу</string>
+    <string name="draft_box_send">Відправити</string>
+    <string name="settings_draft_box_description">Перегляд та керування збереженими чернетками</string>
     <string name="settings_title">Налаштування</string>
     <string name="settings_accounts_title">Особистий кабінет</string>
     <string name="settings_appearance_title">Зовнішній вигляд</string>

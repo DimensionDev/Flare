@@ -29,6 +29,10 @@
     <string name="compose_poll_expiration_7_days">7 ngày</string>
     <string name="compose_content_warning_hint">Cảnh báo nội dung</string>
     <string name="compose_media_sensitive">Đánh dấu phương tiện là nhạy cảm</string>
+    <string name="compose_save_draft">Lưu</string>
+    <string name="draft_box_edit">Chỉnh sửa</string>
+    <string name="draft_box_retry">Thử lại</string>
+    <string name="draft_box_send">Gửi</string>
     <string name="settings_title">Cài đặt</string>
     <string name="settings_accounts_title">Quản lý tài khoản</string>
     <string name="settings_appearance_title">Giao diện</string>

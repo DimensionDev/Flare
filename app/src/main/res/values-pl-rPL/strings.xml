@@ -36,6 +36,16 @@
     <string name="compose_content_warning_hint">Ostrzeżenie o zawartości</string>
     <string name="compose_media_sensitive">Oznacz media jako wrażliwe</string>
     <string name="compose_notification_title">Wysyłanie posta</string>
+    <string name="compose_close_confirm_title">Zapisać szkic?</string>
+    <string name="compose_close_confirm_message">Masz niezapisany tekst. Zapisać go jako szkic przed zamknięciem?</string>
+    <string name="compose_save_draft">Zapisz</string>
+    <string name="compose_close_discard">Odrzuć</string>
+    <string name="draft_box_title">Szkice</string>
+    <string name="draft_box_empty">Brak szkiców</string>
+    <string name="draft_box_edit">Edytuj</string>
+    <string name="draft_box_retry">Ponów próbę</string>
+    <string name="draft_box_send">Wyślij</string>
+    <string name="settings_draft_box_description">Przeglądaj i zarządzaj zapisanymi szkicami</string>
     <string name="settings_title">Ustawienia</string>
     <string name="settings_accounts_title">Zarządzanie kontem</string>
     <string name="settings_appearance_title">Wygląd</string>

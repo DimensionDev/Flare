@@ -53,6 +53,9 @@
     <string name="report_reason_other_description">Problém nezahrnutý do těchto možností</string>
     <string name="delete_status_title">Vymazat</string>
     <string name="delete_status_message">Jste si jisti, že to chcete odstranit?</string>
+    <string name="compose_close_confirm_title">Uložit koncept?</string>
+    <string name="compose_close_confirm_message">Máte neuložený text. Chcete jej uložit jako koncept před uzavřením?</string>
+    <string name="compose_close_discard">Zahodit</string>
     <string name="mastodon_report_title">Nahlásit</string>
     <string name="mastodon_report_description">Opravdu to chcete nahlásit?</string>
     <string name="bookmark_remove">Odstranit záložku</string>
@@ -131,6 +134,8 @@
     <string name="settings_status_appearance_subtitle">Přizpůsobit vzhled příspěvku</string>
     <string name="settings_appearance_subtitle">Přizpůsobit vzhled a pocit Flare</string>
     <string name="settings_storage_title">Úložiště</string>
+    <string name="settings_draft_box_title">Koncept boxu</string>
+    <string name="settings_draft_box_description">Zobrazit odesílání, selhalo a neodeslané koncepty</string>
     <string name="settings_storage_subtitle">Správa Flareho úložiště</string>
     <string name="settings_about_title">O aplikaci</string>
     <string name="settings_about_subtitle">Zjistěte více o Flare</string>
@@ -311,6 +316,11 @@
     <string name="settings_storage_app_log_description">Zobrazit protokol aplikace</string>
     <string name="settings_rss_management_title">Správa RSS</string>
     <string name="settings_rss_management_description">Spravovat RSS kanály</string>
+    <string name="draft_box_title">Koncept boxu</string>
+    <string name="draft_box_empty">Zatím žádné koncepty</string>
+    <string name="draft_box_retry">Opakovat</string>
+    <string name="draft_box_edit">Upravit</string>
+    <string name="draft_box_send">Poslat</string>
     <string name="copied_to_clipboard">Zkopírováno do schránky</string>
     <string name="opml_import">Importovat z OPML</string>
     <string name="opml_export">Exportovat do OPML</string>

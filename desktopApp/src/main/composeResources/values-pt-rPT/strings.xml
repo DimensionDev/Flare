@@ -51,6 +51,9 @@
     <string name="report_reason_other_description">Uma issue não incluída nessas opções</string>
     <string name="delete_status_title">excluir</string>
     <string name="delete_status_message">Tem certeza que deseja excluir isto?</string>
+    <string name="compose_close_confirm_title">Salvar rascunho?</string>
+    <string name="compose_close_confirm_message">Você tem texto não salvo. Deseja salvá-lo como rascunho antes de fechar?</string>
+    <string name="compose_close_discard">Descartar</string>
     <string name="mastodon_report_title">Denunciar</string>
     <string name="mastodon_report_description">Tem certeza de que deseja denunciar isto?</string>
     <string name="bookmark_remove">Remover marcador favorito</string>
@@ -129,6 +132,8 @@
     <string name="settings_status_appearance_subtitle">Personalize a aparência da publicação</string>
     <string name="settings_appearance_subtitle">Personalizar a aparência do Sinalizador</string>
     <string name="settings_storage_title">Armazenamento</string>
+    <string name="settings_draft_box_title">Caixa de rascunho</string>
+    <string name="settings_draft_box_description">Ver envio, falha e rascunhos não enviados</string>
     <string name="settings_storage_subtitle">Gerenciar armazenamento do Sinalizador</string>
     <string name="settings_about_title">SOBRE</string>
     <string name="settings_about_subtitle">Saiba mais sobre sinalizador</string>
@@ -309,6 +314,11 @@
     <string name="settings_storage_app_log_description">Ver registro do aplicativo</string>
     <string name="settings_rss_management_title">Gerenciamento de RSS</string>
     <string name="settings_rss_management_description">Gerenciar feeds RSS</string>
+    <string name="draft_box_title">Caixa de rascunho</string>
+    <string name="draft_box_empty">Ainda não há rascunhos</string>
+    <string name="draft_box_retry">Repetir</string>
+    <string name="draft_box_edit">Alterar</string>
+    <string name="draft_box_send">Mandar</string>
     <string name="copied_to_clipboard">Copiado para o clipboard</string>
     <string name="opml_import">Importar do OPML</string>
     <string name="opml_export">Exportar para OPML</string>

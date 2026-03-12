@@ -50,6 +50,9 @@
     <string name="report_reason_other_description">これらのオプションに含まれていない問題</string>
     <string name="delete_status_title">削除</string>
     <string name="delete_status_message">削除してもよろしいですか？</string>
+    <string name="compose_close_confirm_title">下書きを保存しますか？</string>
+    <string name="compose_close_confirm_message">未保存のテキストがあります。閉じる前に下書きとして保存しますか？</string>
+    <string name="compose_close_discard">破棄する</string>
     <string name="mastodon_report_title">レポート</string>
     <string name="mastodon_report_description">これを報告してもよろしいですか？</string>
     <string name="bookmark_remove">ブックマークを削除</string>
@@ -128,6 +131,8 @@
     <string name="settings_status_appearance_subtitle">投稿の外観をカスタマイズする</string>
     <string name="settings_appearance_subtitle">Flareの見た目をカスタマイズする</string>
     <string name="settings_storage_title">ストレージ</string>
+    <string name="settings_draft_box_title">ドラフトボックス</string>
+    <string name="settings_draft_box_description">送信に失敗しました。未送信の下書きを表示</string>
     <string name="settings_storage_subtitle">Flareのストレージを管理する</string>
     <string name="settings_about_title">このアプリについて</string>
     <string name="settings_about_subtitle">Flareについての詳細</string>
@@ -307,6 +312,11 @@
     <string name="settings_storage_app_log_description">アプリのログを表示</string>
     <string name="settings_rss_management_title">RSS管理</string>
     <string name="settings_rss_management_description">RSSフィードの管理</string>
+    <string name="draft_box_title">ドラフトボックス</string>
+    <string name="draft_box_empty">下書きはまだありません</string>
+    <string name="draft_box_retry">再試行する</string>
+    <string name="draft_box_edit">編集</string>
+    <string name="draft_box_send">送信</string>
     <string name="copied_to_clipboard">クリップボードにコピーしました</string>
     <string name="opml_import">OPMLからインポート</string>
     <string name="opml_export">OPMLにエクスポート</string>

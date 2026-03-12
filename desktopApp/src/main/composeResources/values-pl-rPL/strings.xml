@@ -53,6 +53,9 @@
     <string name="report_reason_other_description">Problem nieuwzględniony w tych opcjach</string>
     <string name="delete_status_title">Usuń</string>
     <string name="delete_status_message">Czy na pewno chcesz to usunąć?</string>
+    <string name="compose_close_confirm_title">Zapisać szkic?</string>
+    <string name="compose_close_confirm_message">Masz niezapisany tekst. Czy chcesz zapisać go jako szkic przed zamknięciem?</string>
+    <string name="compose_close_discard">Odrzuć</string>
     <string name="mastodon_report_title">Zgłoszenie</string>
     <string name="mastodon_report_description">Czy na pewno chcesz to zgłosić?</string>
     <string name="bookmark_remove">Usuń zakładkę</string>
@@ -131,6 +134,8 @@
     <string name="settings_status_appearance_subtitle">Dostosuj wygląd wpisu</string>
     <string name="settings_appearance_subtitle">Dostosuj wygląd Flary</string>
     <string name="settings_storage_title">Pamięć</string>
+    <string name="settings_draft_box_title">Ramka szkicowa</string>
+    <string name="settings_draft_box_description">Wyświetl wysyłanie, nie powiodło się i niewysłane szkice</string>
     <string name="settings_storage_subtitle">Zarządzaj pamięcią Flara</string>
     <string name="settings_about_title">O programie</string>
     <string name="settings_about_subtitle">Dowiedz się więcej o Flarze</string>
@@ -311,6 +316,11 @@
     <string name="settings_storage_app_log_description">Zobacz dziennik aplikacji</string>
     <string name="settings_rss_management_title">Zarządzanie RSS</string>
     <string name="settings_rss_management_description">Zarządzaj kanałami RSS</string>
+    <string name="draft_box_title">Ramka szkicowa</string>
+    <string name="draft_box_empty">Brak szkiców</string>
+    <string name="draft_box_retry">Ponów próbę</string>
+    <string name="draft_box_edit">Edytuj</string>
+    <string name="draft_box_send">Wyślij</string>
     <string name="copied_to_clipboard">Skopiowano do schowka</string>
     <string name="opml_import">Importuj z OPML</string>
     <string name="opml_export">Eksportuj do OPML</string>

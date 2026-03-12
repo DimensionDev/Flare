@@ -38,6 +38,16 @@
     <string name="compose_content_warning_hint">تحذير المحتوى</string>
     <string name="compose_media_sensitive">تحديد الوسائط كوسائط حساسة</string>
     <string name="compose_notification_title">إرسال الرد</string>
+    <string name="compose_close_confirm_title">حفظ المسودة؟</string>
+    <string name="compose_close_confirm_message">لديك نص غير محفوظ. حفظه كمسودة قبل الإغلاق؟</string>
+    <string name="compose_save_draft">حفظ</string>
+    <string name="compose_close_discard">تجاهل</string>
+    <string name="draft_box_title">المسودات</string>
+    <string name="draft_box_empty">لا توجد مسودات بعد</string>
+    <string name="draft_box_edit">تحرير</string>
+    <string name="draft_box_retry">إعادة المحاولة</string>
+    <string name="draft_box_send">إرسال</string>
+    <string name="settings_draft_box_description">عرض وإدارة المسودات المحفوظة</string>
     <string name="settings_title">الإعدادات</string>
     <string name="settings_accounts_title">إدارة الحساب</string>
     <string name="settings_appearance_title">المظهر</string>

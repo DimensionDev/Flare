@@ -51,6 +51,9 @@
     <string name="report_reason_other_description">Et problem er ikke inkludert i disse alternativene</string>
     <string name="delete_status_title">Slett</string>
     <string name="delete_status_message">Er du sikker på at du vil slette dette?</string>
+    <string name="compose_close_confirm_title">Lagre utkast?</string>
+    <string name="compose_close_confirm_message">Du har ulagret tekst. Vil du lagre det som et utkast før du lukker?</string>
+    <string name="compose_close_discard">Forkast</string>
     <string name="mastodon_report_title">Rapporter</string>
     <string name="mastodon_report_description">Er du sikker på at du vil rapportere dette?</string>
     <string name="bookmark_remove">Fjern bokmerke</string>
@@ -129,6 +132,8 @@
     <string name="settings_status_appearance_subtitle">Tilpass utseendet på innlegget</string>
     <string name="settings_appearance_subtitle">Tilpass utseendet og følelsen til flare</string>
     <string name="settings_storage_title">Lagring</string>
+    <string name="settings_draft_box_title">Utkast boks</string>
+    <string name="settings_draft_box_description">Vis sending, feilet, og usendte utkast</string>
     <string name="settings_storage_subtitle">Behandle flammetall lagring</string>
     <string name="settings_about_title">Om</string>
     <string name="settings_about_subtitle">Lær mer om Flare</string>
@@ -309,6 +314,11 @@
     <string name="settings_storage_app_log_description">Se app-loggen</string>
     <string name="settings_rss_management_title">RSS administrasjon</string>
     <string name="settings_rss_management_description">Administrer RSS-feeder</string>
+    <string name="draft_box_title">Utkast boks</string>
+    <string name="draft_box_empty">Ingen utkast ennå</string>
+    <string name="draft_box_retry">Prøv igjen</string>
+    <string name="draft_box_edit">Rediger</string>
+    <string name="draft_box_send">Sende</string>
     <string name="copied_to_clipboard">Kopiert til utklippstavle</string>
     <string name="opml_import">Importer fra OPML</string>
     <string name="opml_export">Eksporter til OPML</string>

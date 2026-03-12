@@ -52,6 +52,9 @@
     <string name="report_reason_other_description">O problemă care nu este inclusă în aceste opțiuni</string>
     <string name="delete_status_title">Ștergere</string>
     <string name="delete_status_message">Sunteţi sigur că doriţi să ştergeţi acest lucru?</string>
+    <string name="compose_close_confirm_title">Salvează ciorna?</string>
+    <string name="compose_close_confirm_message">Aveți text nesalvat. Doriți să-l salvați ca ciornă înainte de închidere?</string>
+    <string name="compose_close_discard">Renunțați</string>
     <string name="mastodon_report_title">Raport</string>
     <string name="mastodon_report_description">Ești sigur că vrei să raportezi acest lucru?</string>
     <string name="bookmark_remove">Eliminaţi marcajul</string>
@@ -130,6 +133,8 @@
     <string name="settings_status_appearance_subtitle">Personalizați aspectul postării</string>
     <string name="settings_appearance_subtitle">Personalizați aspectul și simțul Flare</string>
     <string name="settings_storage_title">Depozitare</string>
+    <string name="settings_draft_box_title">Căsuță de Schiță</string>
+    <string name="settings_draft_box_description">Vizualizare schițe trimise, eșuate și netrimise</string>
     <string name="settings_storage_subtitle">Gestionează spațiul de stocare al Flare</string>
     <string name="settings_about_title">Despre</string>
     <string name="settings_about_subtitle">Află mai multe despre Flare</string>
@@ -310,6 +315,11 @@
     <string name="settings_storage_app_log_description">Vezi jurnalul aplicațiilor</string>
     <string name="settings_rss_management_title">Administrare RSS</string>
     <string name="settings_rss_management_description">Gestionare fluxuri RSS</string>
+    <string name="draft_box_title">Căsuță de Schiță</string>
+    <string name="draft_box_empty">Nici o ciornă încă</string>
+    <string name="draft_box_retry">Reîncercați</string>
+    <string name="draft_box_edit">Editare</string>
+    <string name="draft_box_send">Trimite</string>
     <string name="copied_to_clipboard">Copiat în clipboard</string>
     <string name="opml_import">Importă din OPML</string>
     <string name="opml_export">Exportă în OPML</string>

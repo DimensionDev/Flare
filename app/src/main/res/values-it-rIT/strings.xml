@@ -34,6 +34,16 @@
     <string name="compose_content_warning_hint">Contenuti sensibili</string>
     <string name="compose_media_sensitive">Imposta media come sensibile</string>
     <string name="compose_notification_title">Invio Post</string>
+    <string name="compose_close_confirm_title">Salvare la bozza?</string>
+    <string name="compose_close_confirm_message">Hai un testo non salvato. Salvarlo come una bozza prima di chiudere?</string>
+    <string name="compose_save_draft">Salva</string>
+    <string name="compose_close_discard">Scarta</string>
+    <string name="draft_box_title">Bozze</string>
+    <string name="draft_box_empty">Ancora nessuna bozza</string>
+    <string name="draft_box_edit">Modifica</string>
+    <string name="draft_box_retry">Riprova</string>
+    <string name="draft_box_send">Invia</string>
+    <string name="settings_draft_box_description">Visualizza e gestisci le bozze salvate</string>
     <string name="settings_title">Impostazioni</string>
     <string name="settings_accounts_title">Gestione Account</string>
     <string name="settings_appearance_title">Aspetto</string>

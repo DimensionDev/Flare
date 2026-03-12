@@ -34,6 +34,16 @@
     <string name="compose_content_warning_hint">Aviso de conteúdo</string>
     <string name="compose_media_sensitive">Marcar mídia como sensível</string>
     <string name="compose_notification_title">Enviando Postagem</string>
+    <string name="compose_close_confirm_title">Salvar rascunho?</string>
+    <string name="compose_close_confirm_message">Você tem texto não salvo. Salvá-lo como rascunho antes de fechar?</string>
+    <string name="compose_save_draft">Guardar</string>
+    <string name="compose_close_discard">Descartar</string>
+    <string name="draft_box_title">Rascunhos</string>
+    <string name="draft_box_empty">Ainda não há rascunhos</string>
+    <string name="draft_box_edit">Alterar</string>
+    <string name="draft_box_retry">Repetir</string>
+    <string name="draft_box_send">Mandar</string>
+    <string name="settings_draft_box_description">Ver e gerenciar rascunhos salvos</string>
     <string name="settings_title">Confirgurações</string>
     <string name="settings_accounts_title">Gerenciamento da conta</string>
     <string name="settings_appearance_title">Aparência</string>

@@ -34,6 +34,16 @@
     <string name="compose_content_warning_hint">Advarsel om indhold</string>
     <string name="compose_media_sensitive">Markér medier som følsomme</string>
     <string name="compose_notification_title">Sender Indlæg</string>
+    <string name="compose_close_confirm_title">Gem kladde?</string>
+    <string name="compose_close_confirm_message">Du har ikke-gemt tekst. Gem det som et udkast før lukning?</string>
+    <string name="compose_save_draft">Gem</string>
+    <string name="compose_close_discard">Kassér</string>
+    <string name="draft_box_title">Kladder</string>
+    <string name="draft_box_empty">Endnu ingen kladder</string>
+    <string name="draft_box_edit">Rediger</string>
+    <string name="draft_box_retry">Forsøg igen</string>
+    <string name="draft_box_send">Send</string>
+    <string name="settings_draft_box_description">Se og håndtér gemte kladder</string>
     <string name="settings_title">Indstillinger</string>
     <string name="settings_accounts_title">Konto Administration</string>
     <string name="settings_appearance_title">Udseende</string>

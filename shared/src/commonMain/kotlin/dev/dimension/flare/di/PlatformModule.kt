@@ -1,10 +1,11 @@
 package dev.dimension.flare.di
 
+import org.koin.core.module.Module
 import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
-import org.koin.core.module.Module
 
 internal expect val platformModule: Module
+
 @OptIn(ExperimentalObjCRefinement::class)
 @HiddenFromObjC
 public object KoinHelper {

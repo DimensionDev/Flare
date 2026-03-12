@@ -1,7 +1,5 @@
 package dev.dimension.flare.common
 
-import kotlin.experimental.ExperimentalObjCRefinement
-import kotlin.native.HiddenFromObjC
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -13,6 +11,8 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
+import kotlin.experimental.ExperimentalObjCRefinement
+import kotlin.native.HiddenFromObjC
 
 private val json =
     Json {
@@ -30,11 +30,13 @@ internal val JSON get() = json
 internal val JSON_WITH_ENCODE_DEFAULT get() = jsonWithEncodeDefault
 
 internal inline fun <reified T> T.encodeJson(): String = JSON.encodeToString(this)
+
 @OptIn(ExperimentalObjCRefinement::class)
 @HiddenFromObjC
 public fun <T> T.encodeJson(serializer: KSerializer<T>): String = JSON.encodeToString(serializer, this)
 
 internal inline fun <reified T> String.decodeJson(): T = JSON.decodeFromString(this)
+
 @OptIn(ExperimentalObjCRefinement::class)
 @HiddenFromObjC
 public fun <T> String.decodeJson(serializer: KSerializer<T>): T = JSON.decodeFromString(serializer, this)

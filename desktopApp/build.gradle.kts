@@ -119,10 +119,7 @@ nucleus.application {
                 signing {
                     sign.set(true)
                     identity.set("SUJITEKU LIMITED LIABILITY CO. (7LFDZ96332)")
-                    keychain.set(
-                        System.getenv("KEYCHAIN_PATH")
-                            ?: "${System.getProperty("user.home")}/Library/Keychains/signing_temp.keychain-db"
-                    )
+                    keychain.set("${System.getProperty("user.home")}/Library/Keychains/signing_temp.keychain-db")
                 }
 
                 entitlementsFile.set(project.file("entitlements.plist"))

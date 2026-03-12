@@ -73,7 +73,6 @@ jobs:
         run: ./gradlew :desktop:check :desktop:build --stacktrace
       - name: Package with Gradle
         env:
-          KEYCHAIN_PATH: $HOME/Library/Keychains/signing_temp.keychain-db
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
         run: ./gradlew :desktop:packageReleasePkg --stacktrace

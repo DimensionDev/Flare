@@ -25,7 +25,10 @@ import kotlinx.collections.immutable.toImmutableMap
 
 
 internal sealed interface RichTextContent {
-    data class Text(val content: AnnotatedString) : RichTextContent
+    data class Text(
+        val content: AnnotatedString,
+        val block: RenderBlockStyle? = null,
+    ) : RichTextContent
     data class BlockImage(val url: String, val href: String?) : RichTextContent
 }
 
@@ -141,9 +144,7 @@ private class ContentBuilder(
     }
 
     fun appendBlockImage(url: String, href: String?) {
-        if (currentBuilder.length > 0) {
-            _contents.add(RichTextContent.Text(currentBuilder.toAnnotatedString()))
-        }
+        flushText()
         _contents.add(RichTextContent.BlockImage(url, href))
         currentBuilder = AnnotatedString.Builder()
         restoreStyles()
@@ -230,10 +231,15 @@ private class ContentBuilder(
         }
     }
 
+    fun flushText(block: RenderBlockStyle? = null) {
+        if (currentBuilder.length == 0) return
+        _contents.add(RichTextContent.Text(currentBuilder.toAnnotatedString(), block))
+        currentBuilder = AnnotatedString.Builder()
+        restoreStyles()
+    }
+
     fun build(): ImmutableList<RichTextContent> {
-        if (currentBuilder.length > 0) {
-            _contents.add(RichTextContent.Text(currentBuilder.toAnnotatedString()))
-        }
+        flushText()
         return _contents.toImmutableList()
     }
 }
@@ -246,11 +252,17 @@ private fun ContentBuilder.renderContents(
         when (content) {
             is RenderContent.BlockImage -> appendBlockImage(content.url, content.href)
             is RenderContent.Text -> {
-                renderTextContent(content, styleData)
-                appendSeparatorIfNeeded(
-                    current = content,
-                    next = renderContents.getOrNull(index + 1),
-                )
+                if (content.block.isBlockQuote) {
+                    flushText()
+                    renderTextContent(content, styleData)
+                    flushText(content.block)
+                } else {
+                    renderTextContent(content, styleData)
+                    appendSeparatorIfNeeded(
+                        current = content,
+                        next = renderContents.getOrNull(index + 1),
+                    )
+                }
             }
         }
     }
@@ -320,6 +332,7 @@ private fun ContentBuilder.appendSeparatorIfNeeded(
     next: RenderContent?,
 ) {
     if (next !is RenderContent.Text) return
+    if (next.block.isBlockQuote) return
     when {
         current.block.headingLevel != null -> appendLine()
         current.block.isListItem -> appendLine()
@@ -353,7 +366,6 @@ private fun StyleData.blockTextStyle(block: RenderBlockStyle): TextStyle =
         block.isBlockQuote ->
             textStyle.copy(
                 color = color.copy(alpha = 0.7f),
-                background = color.copy(alpha = 0.05f),
             )
         block.textAlignment == RenderTextAlignment.Center ->
             textStyle.copy(

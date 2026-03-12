@@ -2,7 +2,6 @@ package dev.dimension.flare.data.datasource.microblog
 
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.TestFormatter

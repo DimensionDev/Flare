@@ -8,8 +8,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
-import kotlin.time.Clock
 import kotlinx.collections.immutable.persistentListOf
+import kotlin.time.Clock
 
 public fun createSampleStatus(user: UiProfile): UiTimelineV2.Post =
     UiTimelineV2.Post(

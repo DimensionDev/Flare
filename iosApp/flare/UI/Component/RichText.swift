@@ -6,6 +6,7 @@ struct RichText: View {
     let text: UiRichText
     @State private var images: [String: Image] = [:]
     @ScaledMetric(relativeTo: .body) var imageSize = 17
+    @ScaledMetric(relativeTo: .body) private var quoteBarWidth = 3
     @Environment(\.openURL) var openURL
 
     var body: some View {
@@ -13,12 +14,7 @@ struct RichText: View {
             ForEach(Array(contents.enumerated()), id: \.offset) { _, content in
                 switch content {
                 case let textContent as PlatformTextTextContent:
-                    if textContent.alignment == .center {
-                        render(textContent: textContent)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    } else {
-                        render(textContent: textContent)
-                    }
+                    renderBlock(textContent: textContent)
                 case let imageContent as PlatformTextBlockImageContent:
                     if let url = URL(string: imageContent.url) {
                         KFImage(url)
@@ -71,6 +67,28 @@ struct RichText: View {
         (text.platformText as? NSArray)?.compactMap { $0 as? PlatformTextContent } ?? []
     }
 
+    @ViewBuilder
+    private func renderBlock(textContent: PlatformTextTextContent) -> some View {
+        let renderedText = render(textContent: textContent)
+        if textContent.isBlockQuote {
+            HStack(alignment: .top, spacing: 11) {
+                Rectangle()
+                    .fill(.secondary.opacity(0.18))
+                    .frame(width: quoteBarWidth)
+                renderedText
+                    .frame(maxWidth: .infinity, alignment: textAlignment(textContent.alignment))
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+        } else if textContent.alignment == .center {
+            renderedText
+                .frame(maxWidth: .infinity, alignment: .center)
+        } else {
+            renderedText
+        }
+    }
+
     private func render(textContent: PlatformTextTextContent) -> Text {
         textContent.runs.reduce(Text("")) { partial, run in
             switch run {
@@ -85,6 +103,17 @@ struct RichText: View {
             default:
                 partial
             }
+        }
+    }
+
+    private func textAlignment(_ alignment: TextAlignment?) -> Alignment {
+        switch alignment {
+        case .center:
+            return .center
+        case .trailing:
+            return .trailing
+        default:
+            return .leading
         }
     }
 }

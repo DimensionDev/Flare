@@ -6,10 +6,12 @@ class PlatformTextContent: NSObject {}
 final class PlatformTextTextContent: PlatformTextContent {
     let runs: [PlatformTextRun]
     let alignment: TextAlignment?
+    let isBlockQuote: Bool
 
-    init(runs: [PlatformTextRun], alignment: TextAlignment?) {
+    init(runs: [PlatformTextRun], alignment: TextAlignment?, isBlockQuote: Bool) {
         self.runs = runs
         self.alignment = alignment
+        self.isBlockQuote = isBlockQuote
         super.init()
     }
 }
@@ -123,7 +125,8 @@ private final class RenderContext {
         contents.append(
             PlatformTextTextContent(
                 runs: renderedRuns,
-                alignment: textAlignment(from: content.block)
+                alignment: textAlignment(from: content.block),
+                isBlockQuote: content.block.isBlockQuote
             )
         )
     }
@@ -152,7 +155,6 @@ private final class RenderContext {
         }
         if block.isBlockQuote {
             container.foregroundColor = .secondary
-            container.backgroundColor = .secondary.opacity(0.08)
         }
         if style.time {
             container.foregroundColor = .secondary

@@ -12,9 +12,7 @@ internal data class HtmlRenderResult(
     val imageUrls: ImmutableList<String>,
 )
 
-internal fun mapHtmlToRenderContents(element: Element): ImmutableList<RenderContent> {
-    return mapHtmlToRenderResult(element).contents
-}
+internal fun mapHtmlToRenderContents(element: Element): ImmutableList<RenderContent> = mapHtmlToRenderResult(element).contents
 
 internal fun mapHtmlToRenderResult(element: Element): HtmlRenderResult {
     val builder = RenderRunBuilder()

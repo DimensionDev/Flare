@@ -4,9 +4,9 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.ui.humanizer.Formatter.absolute
 import dev.dimension.flare.ui.humanizer.Formatter.full
 import dev.dimension.flare.ui.humanizer.Formatter.relative
+import kotlinx.serialization.Serializable
 import kotlin.time.Clock
 import kotlin.time.Instant
-import kotlinx.serialization.Serializable
 
 public expect class PlatformDateTime
 

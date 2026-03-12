@@ -14,6 +14,7 @@ import dev.dimension.flare.data.network.xqt.model.Entities
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
 import dev.dimension.flare.data.network.xqt.model.InstructionUnion
 import dev.dimension.flare.data.network.xqt.model.Media
+import dev.dimension.flare.data.network.xqt.model.NoteTweetResultRichTextTag
 import dev.dimension.flare.data.network.xqt.model.TimelineAddEntries
 import dev.dimension.flare.data.network.xqt.model.TimelineAddToModule
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineModule
@@ -1381,13 +1382,11 @@ internal fun Tweet.renderContent(accountKey: MicroBlogKey): UiRichText {
                                         RenderTextStyle(
                                             bold =
                                                 tag.richtextTypes.any {
-                                                    it ==
-                                                        dev.dimension.flare.data.network.xqt.model.NoteTweetResultRichTextTag.RichtextTypes.bold
+                                                    it == NoteTweetResultRichTextTag.RichtextTypes.bold
                                                 },
                                             italic =
                                                 tag.richtextTypes.any {
-                                                    it ==
-                                                        dev.dimension.flare.data.network.xqt.model.NoteTweetResultRichTextTag.RichtextTypes.italic
+                                                    it == NoteTweetResultRichTextTag.RichtextTypes.italic
                                                 },
                                         ),
                                 ),

@@ -214,11 +214,8 @@ class RichTextStateTest {
         val state = RichTextState(ui, defaultStyleData())
 
         val textContent = state.contents.single() as RichTextContent.Text
+        assertTrue(textContent.block?.isBlockQuote == true)
         val paragraphStyles = textContent.content.paragraphStyles
         assertTrue(paragraphStyles.isNotEmpty())
-
-        val spanStyles = textContent.content.spanStyles
-        val backgroundStyle = spanStyles.firstOrNull { it.item.background != androidx.compose.ui.graphics.Color.Unspecified }
-        assertNotNull(backgroundStyle)
     }
 }

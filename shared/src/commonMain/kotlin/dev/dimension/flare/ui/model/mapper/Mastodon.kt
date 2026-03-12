@@ -41,7 +41,6 @@ import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.Url
-import kotlin.time.Instant
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -49,6 +48,7 @@ import kotlinx.collections.immutable.toPersistentList
 import moe.tlaster.twitter.parser.HashTagToken
 import moe.tlaster.twitter.parser.TwitterParser
 import moe.tlaster.twitter.parser.UserNameToken
+import kotlin.time.Instant
 
 private val mastodonParser by lazy {
     TwitterParser(

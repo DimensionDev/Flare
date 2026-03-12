@@ -1,12 +1,15 @@
 package dev.dimension.flare.ui.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -17,6 +20,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
@@ -38,6 +43,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
@@ -127,55 +133,78 @@ public fun RichText(
                 state.contents.forEach { content ->
                     when (content) {
                         is RichTextContent.Text -> {
-                            PlatformText(
-                                modifier =
-                                    Modifier
-                                        .let {
-                                            if (allowLinkAnnotation) {
-                                                it
-                                            } else {
-                                                it.pointerInput(Unit) {
-                                                    awaitEachGesture {
-                                                        val change = awaitFirstDown()
-                                                        val annotation =
-                                                            layoutResult?.getOffsetForPosition(change.position)?.let {
-                                                                content.content
-                                                                    .getStringAnnotations(start = it, end = it)
-                                                                    .firstOrNull()
+                            val textModifier =
+                                Modifier
+                                    .let {
+                                        if (allowLinkAnnotation) {
+                                            it
+                                        } else {
+                                            it.pointerInput(Unit) {
+                                                awaitEachGesture {
+                                                    val change = awaitFirstDown()
+                                                    val annotation =
+                                                        layoutResult?.getOffsetForPosition(change.position)?.let {
+                                                            content.content
+                                                                .getStringAnnotations(start = it, end = it)
+                                                                .firstOrNull()
+                                                        }
+                                                    if (annotation != null && annotation.tag == TAG_URL) {
+                                                        if (change.pressed != change.previousPressed) change.consume()
+                                                        val up =
+                                                            waitForUpOrCancellation()?.also {
+                                                                if (it.pressed != it.previousPressed) it.consume()
                                                             }
-                                                        if (annotation != null && annotation.tag == TAG_URL) {
-                                                            if (change.pressed != change.previousPressed) change.consume()
-                                                            val up =
-                                                                waitForUpOrCancellation()?.also {
-                                                                    if (it.pressed != it.previousPressed) it.consume()
-                                                                }
-                                                            if (up != null) {
-                                                                uriHandler.openUri(annotation.item)
-                                                            }
+                                                        if (up != null) {
+                                                            uriHandler.openUri(annotation.item)
                                                         }
                                                     }
                                                 }
                                             }
-                                        },
-                                maxLines = maxLines,
-                                color = color,
-                                fontSize = fontSize,
-                                fontStyle = fontStyle,
-                                fontWeight = fontWeight,
-                                fontFamily = fontFamily,
-                                letterSpacing = letterSpacing,
-                                textDecoration = textDecoration,
-                                textAlign = textAlign,
-                                lineHeight = lineHeight,
-                                overflow = overflow,
-                                softWrap = softWrap,
-                                text = content.content,
-                                onTextLayout = {
-                                    layoutResult = it
-                                    onTextLayout.invoke(it)
-                                },
-                                inlineContent = inlineContentMap,
-                            )
+                                        }
+                                    }
+                            val textContent: @Composable (Modifier) -> Unit = { currentModifier ->
+                                PlatformText(
+                                    modifier = currentModifier,
+                                    maxLines = maxLines,
+                                    color = color,
+                                    fontSize = fontSize,
+                                    fontStyle = fontStyle,
+                                    fontWeight = fontWeight,
+                                    fontFamily = fontFamily,
+                                    letterSpacing = letterSpacing,
+                                    textDecoration = textDecoration,
+                                    textAlign = textAlign,
+                                    lineHeight = lineHeight,
+                                    overflow = overflow,
+                                    softWrap = softWrap,
+                                    text = content.content,
+                                    onTextLayout = {
+                                        layoutResult = it
+                                        onTextLayout.invoke(it)
+                                    },
+                                    inlineContent = inlineContentMap,
+                                )
+                            }
+                            if (content.block?.isBlockQuote == true) {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .background(
+                                                color = color.copy(alpha = 0.05f),
+                                                shape = PlatformTheme.shapes.small,
+                                            ).drawBehind {
+                                                drawRect(
+                                                    color = color.copy(alpha = 0.18f),
+                                                    size = Size(3.dp.toPx(), size.height),
+                                                )
+                                            }.padding(start = 14.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
+                                ) {
+                                    textContent(textModifier.fillMaxWidth())
+                                }
+                            } else {
+                                textContent(textModifier)
+                            }
                         }
                         is RichTextContent.BlockImage -> {
                             SubcomposeNetworkImage(

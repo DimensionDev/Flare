@@ -1,13 +1,21 @@
 package dev.dimension.flare.data.datasource.microblog.handler
 
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadType
+import androidx.paging.PagingState
 import androidx.paging.testing.asSnapshot
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.mapper.toDbUser
+import dev.dimension.flare.data.database.cache.mapper.upsertUsers
+import dev.dimension.flare.data.database.cache.model.DbListMember
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
+import dev.dimension.flare.data.datasource.microblog.paging.createPagingRemoteMediator
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -33,7 +41,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPagingApi::class)
 class ListMemberHandlerTest : RobolectricTest() {
     private lateinit var db: CacheDatabase
     private lateinit var fakeLoader: FakeListMemberLoader
@@ -290,6 +298,7 @@ class ListMemberHandlerTest : RobolectricTest() {
     fun listMembersPagerHandlesRefresh() =
         runTest {
             val listId = "list-refresh"
+            val listKey = MicroBlogKey(listId, accountKey.host)
             val initialMembers =
                 (1..20).map { i ->
                     createUiProfile(
@@ -305,12 +314,50 @@ class ListMemberHandlerTest : RobolectricTest() {
             val updatedMembers = initialMembers.take(10)
             fakeLoader.setMembers(listId, updatedMembers)
 
-            val refreshedSnapshot = handler.listMembers(listId).asSnapshot()
+            val refreshMediator =
+                createPagingRemoteMediator<Any, UiProfile>(
+                    pagingKey = "${pagingKey}_members_$listId",
+                    database = db,
+                    onLoad = { pageSize, request ->
+                        fakeLoader.loadMembers(
+                            pageSize = pageSize,
+                            request = request,
+                            listId = listId,
+                        )
+                    },
+                    onSave = { request, data ->
+                        db.connect {
+                            if (request == PagingRequest.Refresh) {
+                                db.listDao().deleteMembersByListKey(listKey)
+                            }
+                            db.listDao().insertAllMember(
+                                data.map { item ->
+                                    DbListMember(
+                                        listKey = listKey,
+                                        memberKey = item.key,
+                                    )
+                                },
+                            )
+                            db.upsertUsers(data.map { it.toDbUser() })
+                        }
+                    },
+                )
+            refreshMediator.doLoad(
+                loadType = LoadType.REFRESH,
+                state =
+                    PagingState(
+                        pages = emptyList(),
+                        anchorPosition = null,
+                        config = dev.dimension.flare.data.datasource.microblog.pagingConfig,
+                        leadingPlaceholderCount = 0,
+                    ),
+            )
 
-            assertEquals(10, refreshedSnapshot.size)
-            val names = refreshedSnapshot.map { it.name.raw }.toSet()
-            assertTrue(names.contains("Refresh User 1"))
-            assertFalse(names.contains("Refresh User 20"))
+            val refreshedMembers = db.listDao().getListMembersFlow(listKey).first()
+            assertEquals(10, refreshedMembers.size)
+            val memberKeys = refreshedMembers.map { it.member.memberKey.id }.toSet()
+            assertTrue(memberKeys.contains("refresh-user-1"))
+            assertFalse(memberKeys.contains("refresh-user-20"))
         }
 
     private fun createUiProfile(

@@ -1,8 +1,6 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.InAppNotification
-import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
@@ -10,7 +8,6 @@ import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoade
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.network.xqt.XQTService
-import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.render
@@ -21,7 +18,6 @@ import kotlinx.serialization.Serializable
 internal class HomeTimelineRemoteMediator(
     private val service: XQTService,
     private val accountKey: MicroBlogKey,
-    private val inAppNotification: InAppNotification,
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String = "home_$accountKey"
 
@@ -29,58 +25,48 @@ internal class HomeTimelineRemoteMediator(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
-        return try {
-            val response =
-                when (request) {
-                    PagingRequest.Refresh -> {
-                        service.getHomeLatestTimeline(
-                            variables =
-                                HomeTimelineRequest(
-                                    count = pageSize.toLong(),
-                                ).encodeJson(),
-                        )
-                    }
+        val response =
+            when (request) {
+                PagingRequest.Refresh -> {
+                    service.getHomeLatestTimeline(
+                        variables =
+                            HomeTimelineRequest(
+                                count = pageSize.toLong(),
+                            ).encodeJson(),
+                    )
+                }
 
-                    is PagingRequest.Prepend -> {
-                        return PagingResult(
-                            endOfPaginationReached = true,
-                        )
-                    }
+                is PagingRequest.Prepend -> {
+                    return PagingResult(
+                        endOfPaginationReached = true,
+                    )
+                }
 
-                    is PagingRequest.Append -> {
-                        service.getHomeLatestTimeline(
-                            variables =
-                                HomeTimelineRequest(
-                                    count = pageSize.toLong(),
-                                    cursor = request.nextKey,
-                                ).encodeJson(),
-                        )
-                    }
-                }.body()
-            val instructions =
-                response
-                    ?.data
-                    ?.home
-                    ?.homeTimelineUrt
-                    ?.instructions
-                    .orEmpty()
-            val cursor = instructions.cursor()
-            val tweet = instructions.tweets()
+                is PagingRequest.Append -> {
+                    service.getHomeLatestTimeline(
+                        variables =
+                            HomeTimelineRequest(
+                                count = pageSize.toLong(),
+                                cursor = request.nextKey,
+                            ).encodeJson(),
+                    )
+                }
+            }.body()
+        val instructions =
+            response
+                ?.data
+                ?.home
+                ?.homeTimelineUrt
+                ?.instructions
+                .orEmpty()
+        val cursor = instructions.cursor()
+        val tweet = instructions.tweets()
 
-            PagingResult(
-                endOfPaginationReached = tweet.isEmpty(),
-                data = tweet.mapNotNull { it.render(accountKey) },
-                nextKey = cursor,
-            )
-        } catch (e: Throwable) {
-            if (e is LoginExpiredException) {
-                inAppNotification.onError(
-                    Message.LoginExpired,
-                    e,
-                )
-            }
-            throw e
-        }
+        return PagingResult(
+            endOfPaginationReached = tweet.isEmpty(),
+            data = tweet.mapNotNull { it.render(accountKey) },
+            nextKey = cursor,
+        )
     }
 }
 

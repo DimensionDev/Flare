@@ -4,7 +4,6 @@ import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.FileType
-import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
@@ -62,7 +61,6 @@ internal class VVODataSource(
     PostDataSource,
     PostEventHandler.Handler {
     private val accountRepository: AccountRepository by inject()
-    private val inAppNotification: InAppNotification by inject()
     private val imageCompressor: ImageCompressor by inject()
     private val service by lazy {
         VVOService(
@@ -150,7 +148,6 @@ internal class VVODataSource(
         HomeTimelineRemoteMediator(
             service = service,
             accountKey = accountKey,
-            inAppNotification = inAppNotification,
         )
 
     override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =

@@ -7,6 +7,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.LoadState
+import androidx.paging.LoadStates
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.compose.LazyPagingItems
@@ -211,25 +212,19 @@ internal fun <T : Any> UiState<LazyPagingItems<T>>.toPagingState(): PagingState<
     }
 
 internal fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
+    val snapshot = snapshot()
     if (itemCount > 0) {
         return PagingState.Success.PagingSuccess(
             data = this,
             appendState = loadState.append,
         )
-    } else if (loadState.refresh == LoadState.Loading ||
-        loadState.prepend == LoadState.Loading ||
-        loadState.append == LoadState.Loading
-    ) {
-        return PagingState.Loading()
-    } else if (loadState.refresh is LoadState.Error ||
-        loadState.prepend is LoadState.Error
-    ) {
+    } else if (snapshot.initialErrorOrNull() != null) {
         return PagingState.Error(
-            error =
-                (loadState.refresh as? LoadState.Error)?.error
-                    ?: (loadState.prepend as LoadState.Error).error,
+            error = snapshot.initialErrorOrNull()!!,
             onRetry = { retry() },
         )
+    } else if (!snapshot.isResolvedEmpty()) {
+        return PagingState.Loading()
     } else {
         return PagingState.Empty(this::refresh)
     }
@@ -238,6 +233,52 @@ internal fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
 @Composable
 internal fun <T : Any> Flow<PagingData<T>>.cachePagingState(scope: CoroutineScope = rememberCoroutineScope()) =
     remember(this) { this.cachedIn(scope) }.collectAsLazyPagingItems().toPagingState()
+
+@Immutable
+internal data class PagingSnapshot(
+    val itemCount: Int,
+    val refresh: LoadState,
+    val prepend: LoadState,
+    val append: LoadState,
+    val source: LoadStates,
+    val mediator: LoadStates?,
+)
+
+internal fun PagingSnapshot.initialErrorOrNull(): Throwable? =
+    (refresh as? LoadState.Error)?.error
+        ?: (source.refresh as? LoadState.Error)?.error
+        ?: (mediator?.refresh as? LoadState.Error)?.error
+        ?: (prepend as? LoadState.Error)?.error
+        ?: (append as? LoadState.Error)?.error
+        ?: (source.prepend as? LoadState.Error)?.error
+        ?: (source.append as? LoadState.Error)?.error
+        ?: (mediator?.prepend as? LoadState.Error)?.error
+        ?: (mediator?.append as? LoadState.Error)?.error
+
+internal fun PagingSnapshot.hasPendingRefresh(): Boolean =
+    refresh is LoadState.Loading ||
+        source.refresh is LoadState.Loading ||
+        mediator?.refresh is LoadState.Loading
+
+internal fun PagingSnapshot.isResolvedEmpty(): Boolean =
+    itemCount == 0 &&
+        !hasPendingRefresh() &&
+        initialErrorOrNull() == null &&
+        source.refresh is LoadState.NotLoading &&
+        prepend.isEndOfList &&
+        append.isEndOfList &&
+        source.prepend.isEndOfList &&
+        source.append.isEndOfList
+
+internal fun <T : Any> LazyPagingItems<T>.snapshot(): PagingSnapshot =
+    PagingSnapshot(
+        itemCount = itemCount,
+        refresh = loadState.refresh,
+        prepend = loadState.prepend,
+        append = loadState.append,
+        source = loadState.source,
+        mediator = loadState.mediator,
+    )
 
 internal fun <T : Any> UiState<PagingState<T>>.flatten(): PagingState<T> =
     when (this) {

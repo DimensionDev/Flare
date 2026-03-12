@@ -62,6 +62,7 @@ import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
@@ -94,6 +95,8 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     accountType: AccountType,
     onFollowListClick: (userKey: MicroBlogKey) -> Unit,
     onFansListClick: (userKey: MicroBlogKey) -> Unit,
+    onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
+    onRawMediaClick: (url: String) -> Unit,
     onBack: () -> Unit = {},
 ) {
     val state by producePresenter(key = "acct_${accountType}_$userName@$host") {
@@ -109,6 +112,8 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
                 accountType = accountType,
                 onFollowListClick = onFollowListClick,
                 onFansListClick = onFansListClick,
+                onMediaClick = onMediaClick,
+                onRawMediaClick = onRawMediaClick,
                 userKey = it.key,
             )
         }.onLoading {
@@ -179,6 +184,8 @@ internal fun ProfileScreen(
     userKey: MicroBlogKey?,
     onFollowListClick: (userKey: MicroBlogKey) -> Unit = {},
     onFansListClick: (userKey: MicroBlogKey) -> Unit = {},
+    onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit = { _, _, _ -> },
+    onRawMediaClick: (url: String) -> Unit = {},
 ) {
     val state by producePresenter(
         key = "profile_${accountType}_$userKey",
@@ -216,8 +223,16 @@ internal fun ProfileScreen(
                                     )
                                 },
                                 onAvatarClick = {
+                                    state.state.userState.onSuccess {
+                                        if (it.avatar.isNotBlank()) {
+                                            onRawMediaClick(it.avatar)
+                                        }
+                                    }
                                 },
                                 onBannerClick = {
+                                    state.state.userState.onSuccess {
+                                        it.banner?.let(onRawMediaClick)
+                                    }
                                 },
                                 isBigScreen = true,
                                 onFollowListClick = onFollowListClick,
@@ -344,16 +359,16 @@ internal fun ProfileScreen(
                                                     ).clipToBounds()
                                                     .clickable {
                                                         if (item.status is UiTimelineV2.Post) {
-//                                                onItemClicked(
-//                                                    content.statusKey,
-//                                                    item.index,
-//                                                    when (media) {
-//                                                        is UiMedia.Image -> media.previewUrl
-//                                                        is UiMedia.Video -> media.thumbnailUrl
-//                                                        is UiMedia.Gif -> media.previewUrl
-//                                                        else -> null
-//                                                    },
-//                                                )
+                                                            onMediaClick(
+                                                                item.statusKey,
+                                                                item.index,
+                                                                when (media) {
+                                                                    is UiMedia.Image -> media.previewUrl
+                                                                    is UiMedia.Video -> media.thumbnailUrl
+                                                                    is UiMedia.Gif -> media.previewUrl
+                                                                    else -> null
+                                                                },
+                                                            )
                                                         }
                                                     },
                                         )

@@ -13,12 +13,23 @@ import kotlinx.collections.immutable.toImmutableList
 internal class TimelineRemoteMediator(
     private val loader: CacheableRemoteLoader<UiTimelineV2>,
     private val database: CacheDatabase,
+    private val notifyError: (Throwable) -> Unit = {},
 ) : BasePagingRemoteMediator<DbPagingTimelineWithStatus, DbPagingTimelineWithStatus>(
         database = database,
     ),
     RemoteLoader<DbPagingTimelineWithStatus> {
     override val pagingKey: String
         get() = loader.pagingKey
+
+    init {
+        if (loader is ReportableRemoteLoader) {
+            loader.reportError = notifyError
+        }
+    }
+
+    override fun onError(e: Throwable) {
+        notifyError(e)
+    }
 
     override suspend fun load(
         pageSize: Int,

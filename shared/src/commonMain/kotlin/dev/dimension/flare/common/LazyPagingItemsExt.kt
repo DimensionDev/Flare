@@ -21,47 +21,47 @@ internal suspend fun <T : Any> LazyPagingItems<T>.refreshSuspend() {
 }
 
 internal inline fun <reified T : Any> LazyPagingItems<T>.onLoading(block: () -> Unit): LazyPagingItems<T> {
-    if (loadState.refresh is LoadState.Loading && itemCount == 0) {
+    if (itemCount == 0 && !snapshot().isResolvedEmpty() && snapshot().initialErrorOrNull() == null) {
         block()
     }
     return this
 }
 
 internal val <T : Any> LazyPagingItems<T>.isLoading: Boolean
-    get() = loadState.refresh is LoadState.Loading && itemCount == 0
+    get() = itemCount == 0 && !snapshot().isResolvedEmpty() && snapshot().initialErrorOrNull() == null
 
 internal val <T : Any> LazyPagingItems<T>.isRefreshing: Boolean
     get() = loadState.refresh is LoadState.Loading
 
 internal inline fun <reified T : Any> LazyPagingItems<T>.onError(block: (Throwable) -> Unit): LazyPagingItems<T> {
-    if (loadState.refresh is LoadState.Error && itemCount == 0) {
-        block((loadState.refresh as LoadState.Error).error)
+    snapshot().initialErrorOrNull()?.takeIf { itemCount == 0 }?.let {
+        block(it)
     }
     return this
 }
 
 internal val <T : Any> LazyPagingItems<T>.isError: Boolean
-    get() = loadState.refresh is LoadState.Error && itemCount == 0
+    get() = itemCount == 0 && snapshot().initialErrorOrNull() != null
 
 internal inline fun <reified T : Any> LazyPagingItems<T>.onEmpty(block: () -> Unit): LazyPagingItems<T> {
-    if (loadState.refresh is LoadState.NotLoading && itemCount == 0) {
+    if (snapshot().isResolvedEmpty()) {
         block()
     }
     return this
 }
 
 internal val <T : Any> LazyPagingItems<T>.isEmpty: Boolean
-    get() = loadState.refresh is LoadState.NotLoading && itemCount == 0
+    get() = snapshot().isResolvedEmpty()
 
 internal inline fun <reified T : Any> LazyPagingItems<T>.onNotEmptyOrLoading(block: () -> Unit): LazyPagingItems<T> {
-    if (itemCount > 0 || loadState.refresh is LoadState.Loading) {
+    if (itemCount > 0 || isLoading) {
         block()
     }
     return this
 }
 
 internal val <T : Any> LazyPagingItems<T>.isNotEmptyOrLoading: Boolean
-    get() = itemCount > 0 || loadState.refresh is LoadState.Loading
+    get() = itemCount > 0 || isLoading
 
 internal inline fun <reified T : Any> LazyPagingItems<T>.onSuccess(block: () -> Unit): LazyPagingItems<T> {
     if (itemCount > 0) {

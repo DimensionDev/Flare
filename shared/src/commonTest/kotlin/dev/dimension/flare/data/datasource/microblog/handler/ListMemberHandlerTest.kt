@@ -286,7 +286,12 @@ class ListMemberHandlerTest : RobolectricTest() {
                 }
             fakeLoader.setMembers(listId, members)
 
-            val snapshot = handler.listMembers(listId).asSnapshot()
+            val snapshot =
+                handler.listMembers(listId).asSnapshot {
+                    appendScrollWhile {
+                        it.name.raw != "User 50"
+                    }
+                }
 
             assertEquals(50, snapshot.size)
             val names = snapshot.map { it.name.raw }.toSet()

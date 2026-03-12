@@ -7,7 +7,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -26,6 +25,7 @@ import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
@@ -380,7 +380,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
                     host = key.host,
                 ),
             avatar = "https://${key.host}/${key.id}.png",
-            nameInternal = Element("span").apply { appendText(name) }.toUi(),
+            nameInternal = name.toUiPlainText(),
             platformType = PlatformType.Mastodon,
             clickEvent = ClickEvent.Noop,
             banner = null,
@@ -405,7 +405,7 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             contentWarning = null,
             user = user,
             quote = persistentListOf(),
-            content = Element("span").apply { appendText(text) }.toUi(),
+            content = text.toUiPlainText(),
             actions = persistentListOf(),
             poll = null,
             statusKey = statusKey,

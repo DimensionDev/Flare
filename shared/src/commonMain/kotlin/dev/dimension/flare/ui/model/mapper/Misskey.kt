@@ -1,7 +1,5 @@
 package dev.dimension.flare.ui.model.mapper
 
-import com.fleeksoft.ksoup.nodes.Element
-import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
@@ -33,7 +31,15 @@ import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.render.RenderBlockStyle
+import dev.dimension.flare.ui.render.RenderContent
+import dev.dimension.flare.ui.render.RenderRun
+import dev.dimension.flare.ui.render.RenderTextAlignment
+import dev.dimension.flare.ui.render.RenderTextStyle
+import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
+import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.persistentListOf
@@ -444,7 +450,7 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                 }?.toPersistentList() ?: persistentListOf(),
         contentWarning =
             if (!cw.isNullOrEmpty() && !text.isNullOrEmpty()) {
-                misskeyParser.parse(cw).toHtml(accountKey, emojis, remoteHost).toUi()
+                parseMisskeyText(cw, accountKey, emojis, remoteHost)
             } else {
                 null
             },
@@ -459,11 +465,11 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
             ).toImmutableList(),
         content =
             if (!text.isNullOrEmpty()) {
-                misskeyParser.parse(text).toHtml(accountKey, emojis, remoteHost).toUi()
+                parseMisskeyText(text, accountKey, emojis, remoteHost)
             } else if (!cw.isNullOrEmpty()) {
-                misskeyParser.parse(cw).toHtml(accountKey, emojis, remoteHost).toUi()
+                parseMisskeyText(cw, accountKey, emojis, remoteHost)
             } else {
-                Element("span").toUi()
+                "".toUiPlainText()
             },
         actions =
             listOfNotNull(
@@ -795,7 +801,7 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatarUrl.orEmpty(),
-        nameInternal = parseName(name.orEmpty(), accountKey, emojis).toUi(),
+        nameInternal = parseName(name.orEmpty(), accountKey, emojis),
         handle =
             UiHandle(
                 raw = username.orEmpty(),
@@ -838,7 +844,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatarUrl.orEmpty(),
-        nameInternal = parseName(name.orEmpty(), accountKey, emojis).toUi(),
+        nameInternal = parseName(name.orEmpty(), accountKey, emojis),
         handle =
             UiHandle(
                 raw = username.orEmpty(),
@@ -848,7 +854,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         banner = bannerUrl,
         description =
             description?.let {
-                misskeyParser.parse(it).toHtml(accountKey, emojis, remoteHost).toUi()
+                parseMisskeyText(it, accountKey, emojis, remoteHost)
             },
         matrices =
             UiProfile.Matrices(
@@ -879,10 +885,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                             it
                                 .associate { (key, value) ->
                                     key to
-                                        misskeyParser
-                                            .parse(value)
-                                            .toHtml(accountKey, emojis, remoteHost)
-                                            .toUi()
+                                        parseMisskeyText(value, accountKey, emojis, remoteHost)
                                 }.toImmutableMap(),
                     )
                 },
@@ -934,243 +937,236 @@ private fun parseName(
     name: String,
     accountKey: MicroBlogKey,
     emojis: Map<String, String>,
-): Element {
+): UiRichText {
     if (name.isEmpty()) {
-        return Element("body")
+        return "".toUiPlainText()
     }
-    return misskeyNameParser.parse(name).toHtml(accountKey, emojis, accountKey.host)
+    return misskeyNameParser.parse(name).toUiRichText(accountKey, emojis, accountKey.host)
 }
 
-private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
+private fun parseMisskeyText(
+    text: String,
     accountKey: MicroBlogKey,
     emojis: Map<String, String>,
     remoteHost: String,
-): Element =
-    when (this) {
-        is CenterNode -> {
-            Element("center").apply {
-                content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
-                }
-            }
-        }
+): UiRichText = misskeyParser.parse(text).toUiRichText(accountKey, emojis, remoteHost)
 
-        is CodeBlockNode -> {
-            Element("pre").apply {
-                appendChild(
-                    Element("code").apply {
-                        language?.let {
-//                            attributes["lang"] = it
-                            attributes().put("lang", it)
-                        }
-                        appendChild(TextNode(code))
-                    },
-                )
-            }
-        }
+private fun moe.tlaster.mfm.parser.tree.Node.toUiRichText(
+    accountKey: MicroBlogKey,
+    emojis: Map<String, String>,
+    remoteHost: String,
+): UiRichText {
+    val builder = MisskeyRichTextBuilder(accountKey, emojis, remoteHost)
+    builder.renderNode(this, RenderTextStyle(), RenderBlockStyle())
+    return builder.build()
+}
 
-        is MathBlockNode -> {
-            Element("pre").apply {
-                appendChild(
-                    Element("code").apply {
-//                        attributes["lang"] = "math"
-                        attributes().put("lang", "math")
-                        appendChild(TextNode(formula))
-                    },
-                )
-            }
-        }
+private class MisskeyRichTextBuilder(
+    private val accountKey: MicroBlogKey,
+    private val emojis: Map<String, String>,
+    private val remoteHost: String,
+) {
+    private val contents = mutableListOf<RenderContent>()
+    private val currentRuns = mutableListOf<RenderRun>()
+    private var currentBlock = RenderBlockStyle()
+    private var shouldTrimLeadingQuoteSpacing = false
 
-        is QuoteNode -> {
-            Element("blockquote").apply {
-                content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
-                }
-            }
-        }
+    fun build(): UiRichText {
+        flushTextContent()
+        return uiRichTextOf(contents)
+    }
 
-        is SearchNode -> {
-            Element("search").apply {
-                appendChild(TextNode(query))
+    fun renderNode(
+        node: moe.tlaster.mfm.parser.tree.Node,
+        style: RenderTextStyle,
+        block: RenderBlockStyle,
+    ) {
+        when (node) {
+            is CenterNode -> renderChildren(node.content, style, block.copy(textAlignment = RenderTextAlignment.Center), asBlock = true)
+            is CodeBlockNode -> appendText(node.code, style.copy(monospace = true, code = true), block)
+            is MathBlockNode -> appendText(node.formula, style.copy(monospace = true, code = true), block)
+            is QuoteNode -> {
+                trimTrailingQuoteSpacing()
+                renderChildren(node.content, style, block.copy(isBlockQuote = true), asBlock = true)
+                shouldTrimLeadingQuoteSpacing = true
             }
-        }
-
-        is BoldNode -> {
-            Element("strong").apply {
-                content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
-                }
-            }
-        }
-
-        is FnNode -> {
-            if (name == "unixtime") {
-                // for example: 1771316689.8110971
-                val time =
-                    content
-                        .firstOrNull()
-                        ?.let { it as? moe.tlaster.mfm.parser.tree.TextNode }
-                        ?.content
-                        ?.toFloatOrNull()
-                if (time != null) {
-                    Element("time").apply {
-                        appendChild(
-                            TextNode(
-                                Instant.fromEpochSeconds(time.roundToLong()).toUi().full,
-                            ),
-                        )
-                        attributes().put("datetime", time.toString())
-                    }
-                } else {
-                    Element("span").apply {
-                        content.forEach {
-                            appendChild(it.toHtml(accountKey, emojis, remoteHost))
-                        }
-                    }
-                }
-            } else {
-                Element("fn").apply {
-//                attributes["name"] = name
-                    attributes().put("name", name)
-                    content.forEach {
-                        appendChild(it.toHtml(accountKey, emojis, remoteHost))
-                    }
-                }
-            }
-        }
-
-        is ItalicNode -> {
-            Element("em").apply {
-                content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
-                }
-            }
-        }
-
-        is RootNode -> {
-            Element("body").apply {
-                content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
-                }
-            }
-        }
-
-        is SmallNode -> {
-            Element("small").apply {
-                content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
-                }
-            }
-        }
-
-        is StrikeNode -> {
-            Element("s").apply {
-                content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
-                }
-            }
-        }
-
-        is CashNode -> {
-            Element("a").apply {
-//                attributes["href"] = AppDeepLink.Search(accountKey, "$$content")
-                attributes().put(
-                    "href",
-                    DeeplinkRoute.Search(AccountType.Specific(accountKey), "$$content").toUri(),
-                )
-                appendChild(TextNode("$$content"))
-            }
-        }
-
-        is EmojiCodeNode -> {
-            Element("img").apply {
-//                attributes["src"] = resolveMisskeyEmoji(emoji, accountKey.host)
-//                attributes["alt"] = emoji
-                attributes().put("src", resolveMisskeyEmoji(emoji, accountKey.host, emojis))
-                attributes().put("alt", emoji)
-            }
-        }
-
-        is HashtagNode -> {
-            Element("a").apply {
-//                attributes["href"] = AppDeepLink.Search(accountKey, "#$tag")
-                attributes().put(
-                    "href",
-                    DeeplinkRoute.Search(AccountType.Specific(accountKey), "#$tag").toUri(),
-                )
-                appendChild(TextNode("#$tag"))
-            }
-        }
-
-        is InlineCodeNode -> {
-            Element("code").apply {
-                appendChild(TextNode(code))
-            }
-        }
-
-        is LinkNode -> {
-            Element("a").apply {
-//                attributes["href"] = url
-                attributes().put("href", url)
-                content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
-                }
-            }
-        }
-
-        is MathInlineNode -> {
-            Element("code").apply {
-//                attributes["lang"] = "math"
-                attributes().put("lang", "math")
-                appendChild(TextNode(formula))
-            }
-        }
-
-        is MentionNode -> {
-            Element("a").apply {
-                val deeplink =
-                    DeeplinkRoute.Profile
-                        .UserNameWithHost(
-                            AccountType.Specific(accountKey),
-                            userName,
-                            host ?: remoteHost,
-                        ).toUri()
-//                attributes["href"] = deeplink
-                attributes().put("href", deeplink)
-                appendChild(
-                    TextNode(
-                        buildString {
-                            append("@")
-                            append(userName)
-                            if (host != null) {
-                                append("@")
-                                append(host)
-                            }
-                        },
+            is SearchNode -> appendText(node.query, style, block)
+            is BoldNode -> renderChildren(node.content, style.copy(bold = true), block)
+            is FnNode -> renderFnNode(node, style, block)
+            is ItalicNode -> renderChildren(node.content, style.copy(italic = true), block)
+            is RootNode -> renderChildren(node.content, style, block)
+            is SmallNode -> renderChildren(node.content, style.copy(small = true), block)
+            is StrikeNode -> renderChildren(node.content, style.copy(strikethrough = true), block)
+            is CashNode ->
+                appendText(
+                    "$${node.content}",
+                    style.copy(
+                        link = DeeplinkRoute.Search(AccountType.Specific(accountKey), "$${node.content}").toUri(),
                     ),
+                    block,
                 )
-            }
-        }
 
-        is moe.tlaster.mfm.parser.tree.TextNode -> {
-            Element("span").apply {
-                content.split("\n").forEachIndexed { index, line ->
-                    if (index != 0) {
-                        appendChild(Element("br"))
-                    }
-                    appendChild(TextNode(line))
-                }
-            }
-        }
+            is EmojiCodeNode ->
+                appendImage(
+                    url = resolveMisskeyEmoji(node.emoji, accountKey.host, emojis),
+                    alt = node.emoji,
+                    block = block,
+                )
 
-        is UrlNode -> {
-            Element("a").apply {
-//                attributes["href"] = url
-                attributes().put("href", url)
-                appendChild(TextNode(url))
-            }
+            is HashtagNode ->
+                appendText(
+                    "#${node.tag}",
+                    style.copy(
+                        link = DeeplinkRoute.Search(AccountType.Specific(accountKey), "#${node.tag}").toUri(),
+                    ),
+                    block,
+                )
+
+            is InlineCodeNode -> appendText(node.code, style.copy(monospace = true, code = true), block)
+            is LinkNode -> renderChildren(node.content, style.copy(link = node.url), block)
+            is MathInlineNode -> appendText(node.formula, style.copy(monospace = true, code = true), block)
+            is MentionNode ->
+                appendText(
+                    buildString {
+                        append("@")
+                        append(node.userName)
+                        if (node.host != null) {
+                            append("@")
+                            append(node.host)
+                        }
+                    },
+                    style.copy(
+                        link =
+                            DeeplinkRoute.Profile
+                                .UserNameWithHost(
+                                    AccountType.Specific(accountKey),
+                                    node.userName,
+                                    node.host ?: remoteHost,
+                                ).toUri(),
+                    ),
+                    block,
+                )
+
+            is moe.tlaster.mfm.parser.tree.TextNode -> appendText(node.content, style, block)
+            is UrlNode -> appendText(node.url, style.copy(link = node.url), block)
         }
     }
+
+    private fun renderFnNode(
+        node: FnNode,
+        style: RenderTextStyle,
+        block: RenderBlockStyle,
+    ) {
+        if (node.name == "unixtime") {
+            val time =
+                node.content
+                    .firstOrNull()
+                    ?.let { it as? moe.tlaster.mfm.parser.tree.TextNode }
+                    ?.content
+                    ?.toFloatOrNull()
+            if (time != null) {
+                appendText(
+                    Instant.fromEpochSeconds(time.roundToLong()).toUi().full,
+                    style.copy(time = true),
+                    block,
+                )
+                return
+            }
+        }
+        renderChildren(node.content, style, block)
+    }
+
+    private fun renderChildren(
+        children: List<moe.tlaster.mfm.parser.tree.Node>,
+        style: RenderTextStyle,
+        block: RenderBlockStyle,
+        asBlock: Boolean = false,
+    ) {
+        if (asBlock) {
+            runInBlock(block) {
+                children.forEach { renderNode(it, style, block) }
+            }
+        } else {
+            children.forEach { renderNode(it, style, block) }
+        }
+    }
+
+    private inline fun runInBlock(
+        block: RenderBlockStyle,
+        content: () -> Unit,
+    ) {
+        flushTextContent()
+        val previousBlock = currentBlock
+        currentBlock = block
+        try {
+            content()
+        } finally {
+            flushTextContent()
+            currentBlock = previousBlock
+        }
+    }
+
+    private fun appendText(
+        text: String,
+        style: RenderTextStyle,
+        block: RenderBlockStyle,
+    ) {
+        var actualText = text
+        if (shouldTrimLeadingQuoteSpacing && actualText.startsWith("\n\n")) {
+            actualText = actualText.removePrefix("\n\n")
+        }
+        if (actualText.isEmpty()) {
+            shouldTrimLeadingQuoteSpacing = false
+            return
+        }
+        shouldTrimLeadingQuoteSpacing = false
+        ensureBlock(block)
+        val lastRun = currentRuns.lastOrNull()
+        if (lastRun is RenderRun.Text && lastRun.style == style) {
+            currentRuns[currentRuns.lastIndex] = lastRun.copy(text = lastRun.text + actualText)
+        } else {
+            currentRuns.add(RenderRun.Text(text = actualText, style = style))
+        }
+    }
+
+    private fun appendImage(
+        url: String,
+        alt: String,
+        block: RenderBlockStyle,
+    ) {
+        ensureBlock(block)
+        currentRuns.add(RenderRun.Image(url = url, alt = alt))
+    }
+
+    private fun flushTextContent() {
+        if (currentRuns.isEmpty()) return
+        contents.add(
+            RenderContent.Text(
+                runs = currentRuns.toImmutableList(),
+                block = currentBlock,
+            ),
+        )
+        currentRuns.clear()
+    }
+
+    private fun ensureBlock(block: RenderBlockStyle) {
+        if (currentRuns.isNotEmpty() && currentBlock != block) {
+            flushTextContent()
+        }
+        currentBlock = block
+    }
+
+    private fun trimTrailingQuoteSpacing() {
+        val lastRun = currentRuns.lastOrNull() as? RenderRun.Text ?: return
+        if (!lastRun.text.endsWith("\n\n")) return
+        val trimmed = lastRun.text.removeSuffix("\n\n")
+        if (trimmed.isEmpty()) {
+            currentRuns.removeAt(currentRuns.lastIndex)
+        } else {
+            currentRuns[currentRuns.lastIndex] = lastRun.copy(text = trimmed)
+        }
+    }
+}
 
 internal fun UserList.render(): UiList.List =
     UiList.List(
@@ -1243,7 +1239,7 @@ internal fun Channel.render(accountKey: MicroBlogKey): UiList.Channel =
                 ?.takeIf {
                     it.isNotEmpty()
                 }?.let {
-                    misskeyParser.parse(it).toHtml(accountKey, emptyMap(), accountKey.host).toUi()
+                    parseMisskeyText(it, accountKey, emptyMap(), accountKey.host)
                 },
         isArchived = isArchived ?: false,
         notesCount = notesCount ?: 0.0,

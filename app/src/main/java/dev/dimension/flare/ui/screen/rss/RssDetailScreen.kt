@@ -240,7 +240,7 @@ internal fun RssDetailScreen(
                                 .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
                     ) {
                         RssRichText(
-                            element = data.richText.data,
+                            element = data.element,
                             imageHeader = state.headers,
                         )
                     }

@@ -5,9 +5,13 @@ class PlatformTextContent: NSObject {}
 
 final class PlatformTextTextContent: PlatformTextContent {
     let runs: [PlatformTextRun]
+    let alignment: TextAlignment?
+    let isBlockQuote: Bool
 
-    init(runs: [PlatformTextRun]) {
+    init(runs: [PlatformTextRun], alignment: TextAlignment?, isBlockQuote: Bool) {
         self.runs = runs
+        self.alignment = alignment
+        self.isBlockQuote = isBlockQuote
         super.init()
     }
 }
@@ -50,181 +54,161 @@ final class PlatformTextRenderer: SwiftPlatformTextRenderer {
 
     private init() {}
 
-    func render(richText: UiRichText) -> [Any] {
+    func render(renderRuns: [RenderContent]) -> [Any] {
+        dispatchPrecondition(condition: .onQueue(.main))
+
         let context = RenderContext()
+        let count = renderRuns.count
 
-        func renderNode(_ node: KsoupNode) {
-            if let element = node as? KsoupElement {
-                renderElement(element)
-            } else if let textNode = node as? KsoupTextNode {
-                context.appendAttributedText(
-                    AttributedString(
-                        textNode.text(),
-                        attributes: context.attributeContainer
-                    )
-                )
-            }
-        }
+        for index in 0..<count {
+            let content = renderRuns[index]
 
-        func renderChildren(of element: KsoupElement) {
-            element.childNodes().forEach { renderNode($0) }
-        }
-
-        func renderElement(_ element: KsoupElement) {
-            switch element.tagName().lowercased() {
-            case "a":
-                let href = element.attribute(key: "href")?.value ?? ""
-                context.withAttributes {
-                    $0.link = URL(string: href)
-                } render: {
-                    renderChildren(of: element)
-                }
-            case "strong", "b":
-                context.withAttributes {
-                    $0.font = .system(size: UIFont.systemFontSize, weight: .bold)
-                } render: {
-                    renderChildren(of: element)
-                }
-            case "em", "i":
-                context.withAttributes {
-                    $0.font = .system(size: UIFont.systemFontSize, weight: .regular).italic()
-                } render: {
-                    renderChildren(of: element)
-                }
-            case "br":
-                context.appendAttributedText(
-                    AttributedString(
-                        "\n",
-                        attributes: context.attributeContainer
-                    )
+            switch content {
+            case let textContent as RenderContent.Text:
+                context.appendTextContent(textContent)
+            case let blockImage as RenderContent.BlockImage:
+                context.appendBlockImage(
+                    url: blockImage.url,
+                    href: blockImage.href
                 )
-            case "p", "div":
-                renderChildren(of: element)
-                if element.parent()?.childNodes().last != element {
-                    context.appendAttributedText(
-                        AttributedString(
-                            "\n\n",
-                            attributes: context.attributeContainer
-                        )
-                    )
-                }
-            case "span":
-                renderChildren(of: element)
-            case "del", "s":
-                context.withAttributes {
-                    $0.strikethroughStyle = .single
-                } render: {
-                    renderChildren(of: element)
-                }
-            case "code":
-                context.withAttributes {
-                    $0.font = .system(.body, design: .monospaced)
-                } render: {
-                    renderChildren(of: element)
-                }
-            case "blockquote":
-                context.withAttributes {
-                    $0.font = .system(size: UIFont.systemFontSize, weight: .regular).italic()
-                    $0.foregroundColor = .secondary
-                } render: {
-                    renderChildren(of: element)
-                }
-            case "u":
-                context.withAttributes {
-                    $0.underlineStyle = .single
-                } render: {
-                    renderChildren(of: element)
-                }
-            case "small":
-                context.withAttributes {
-                    $0.font = .system(size: UIFont.smallSystemFontSize)
-                } render: {
-                    renderChildren(of: element)
-                }
-            case "emoji":
-                context.appendImage(
-                    url: element.attribute(key: "target")?.value ?? "",
-                    alt: element.attribute(key: "alt")?.value ?? ""
-                )
-            case "figure":
-                context.pushBlockState()
-                renderChildren(of: element)
-                context.popBlockState()
-            case "img":
-                let src = element.attribute(key: "src")?.value ?? ""
-                if context.isInBlockState {
-                    context.appendBlockImage(
-                        url: src,
-                        href: element.attribute(key: "href")?.value
-                    )
-                } else {
-                    context.appendImage(
-                        url: src,
-                        alt: element.attribute(key: "alt")?.value ?? ""
-                    )
-                }
             default:
-                renderChildren(of: element)
+                continue
             }
         }
 
-        renderElement(richText.data)
-        context.flushTextContent()
         return context.contents
     }
 }
 
 private final class RenderContext {
     var contents: [PlatformTextContent] = []
-    var currentRuns: [PlatformTextRun] = []
-    var attributedString = AttributedString()
-    var attributeContainer = AttributeContainer()
-    private(set) var isInBlockState = false
 
-    func appendAttributedText(_ text: AttributedString) {
-        attributedString = attributedString + text
-    }
+    func appendTextContent(_ content: RenderContent.Text) {
+        let runCount = content.runs.count
+        var renderedRuns: [PlatformTextRun] = []
+        var attributedBuffer = AttributedString()
 
-    func appendImage(url: String, alt: String) {
-        commitAttributedString()
-        currentRuns.append(PlatformTextImageRun(url: url, alt: alt))
+        func commitAttributedBuffer() {
+            guard !attributedBuffer.characters.isEmpty else { return }
+            renderedRuns.append(PlatformTextAttributedRun(text: attributedBuffer))
+            attributedBuffer = AttributedString()
+        }
+
+        for index in 0..<runCount {
+            let run = content.runs[index]
+
+            switch run {
+            case let textRun as RenderRun.Text:
+                attributedBuffer += AttributedString(
+                    textRun.text,
+                    attributes: attributes(
+                        for: textRun.style,
+                        block: content.block
+                    )
+                )
+            case let imageRun as RenderRun.Image:
+                commitAttributedBuffer()
+                renderedRuns.append(
+                    PlatformTextImageRun(
+                        url: imageRun.url,
+                        alt: imageRun.alt
+                    )
+                )
+            default:
+                continue
+            }
+        }
+
+        commitAttributedBuffer()
+
+        guard !renderedRuns.isEmpty else { return }
+        contents.append(
+            PlatformTextTextContent(
+                runs: renderedRuns,
+                alignment: textAlignment(from: content.block),
+                isBlockQuote: content.block.isBlockQuote
+            )
+        )
     }
 
     func appendBlockImage(url: String, href: String?) {
-        flushTextContent()
         contents.append(PlatformTextBlockImageContent(url: url, href: href))
     }
 
-    func flushTextContent() {
-        commitAttributedString()
-        guard !currentRuns.isEmpty else { return }
-        contents.append(PlatformTextTextContent(runs: currentRuns))
-        currentRuns = []
+    private func attributes(
+        for style: RenderTextStyle,
+        block: RenderBlockStyle
+    ) -> AttributeContainer {
+        var container = AttributeContainer()
+        if let font = font(for: style, block: block) {
+            container.font = font
+        }
+
+        if let link = style.link, let url = URL(string: link) {
+            container.link = url
+        }
+        if style.strikethrough {
+            container.strikethroughStyle = .single
+        }
+        if style.underline {
+            container.underlineStyle = .single
+        }
+        if block.isBlockQuote {
+            container.foregroundColor = .secondary
+        }
+        if style.time {
+            container.foregroundColor = .secondary
+            container.backgroundColor = .secondary.opacity(0.08)
+        }
+
+        return container
     }
 
-    func pushBlockState() {
-        isInBlockState = true
+    private func font(
+        for style: RenderTextStyle,
+        block: RenderBlockStyle
+    ) -> Font? {
+        if let headingLevel = block.headingLevel {
+            switch headingLevel.intValue {
+            case 1:
+                return .title
+            case 2:
+                return .title2
+            case 3:
+                return .title3
+            case 4:
+                return .headline
+            case 5:
+                return .subheadline
+            default:
+                return .body
+            }
+        }
+
+        if style.code || style.monospace {
+            return .system(.body, design: .monospaced)
+        }
+
+        guard style.small || style.bold || style.italic || block.isBlockQuote || block.isFigCaption else {
+            return nil
+        }
+
+        var font = Font.system(size: style.small ? UIFont.smallSystemFontSize : UIFont.systemFontSize)
+        if style.bold {
+            font = font.weight(.bold)
+        }
+        if style.italic || block.isBlockQuote || block.isFigCaption {
+            font = font.italic()
+        }
+        return font
     }
 
-    func popBlockState() {
-        isInBlockState = false
-    }
-
-    func withAttributes(
-        _ update: (inout AttributeContainer) -> Void,
-        render: () -> Void
-    ) {
-        let currentAttributes = attributeContainer
-        var nextAttributes = currentAttributes
-        update(&nextAttributes)
-        attributeContainer = nextAttributes
-        render()
-        attributeContainer = currentAttributes
-    }
-
-    private func commitAttributedString() {
-        guard attributedString.characters.count > 0 else { return }
-        currentRuns.append(PlatformTextAttributedRun(text: attributedString))
-        attributedString = AttributedString()
+    private func textAlignment(from block: RenderBlockStyle) -> TextAlignment? {
+        switch block.textAlignment {
+        case .center:
+            return .center
+        default:
+            return nil
+        }
     }
 }

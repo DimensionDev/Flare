@@ -1,14 +1,13 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
-import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.common.SerializableImmutableList
 import dev.dimension.flare.common.SerializableImmutableMap
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.Formatter.humanize
 import dev.dimension.flare.ui.render.UiRichText
-import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.serialization.Serializable
@@ -31,10 +30,7 @@ public data class UiProfile internal constructor(
     // If name is blank, use handle without @ as display name
     val name: UiRichText by lazy {
         if (nameInternal.raw.isEmpty() || nameInternal.raw.isBlank()) {
-            Element("span")
-                .apply {
-                    appendText(handleWithoutAtAndHost)
-                }.toUi()
+            handleWithoutAtAndHost.toUiPlainText()
         } else {
             nameInternal
         }
@@ -137,7 +133,7 @@ public fun createSampleUser(): UiProfile =
                 host = "sampleHost",
             ),
         avatar = "https://example.com/avatar.jpg",
-        nameInternal = Element("span").toUi(),
+        nameInternal = "".toUiPlainText(),
         platformType = PlatformType.Mastodon,
         clickEvent = ClickEvent.Noop,
         banner = "https://example.com/banner.jpg",

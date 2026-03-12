@@ -1,10 +1,10 @@
 package dev.dimension.flare.data.network.rss
 
 import androidx.compose.runtime.Immutable
+import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.ui.render.UiDateTime
-import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.coroutines.channels.awaitClose
@@ -58,7 +58,7 @@ public data class DocumentData(
             }.getOrNull()?.toUi()
         }
     }
-    val richText: UiRichText by lazy {
-        parseHtml(content).toUi()
+    val element: Element by lazy {
+        parseHtml(content)
     }
 }

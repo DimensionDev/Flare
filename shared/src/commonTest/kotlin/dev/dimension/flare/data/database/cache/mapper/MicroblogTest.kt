@@ -5,7 +5,6 @@ import androidx.paging.PagingSource
 import androidx.paging.testing.TestPager
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -21,6 +20,7 @@ import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
@@ -536,7 +536,7 @@ class MicroblogTest : RobolectricTest() {
 
             val overwrittenUser =
                 user.copy(
-                    nameInternal = Element("span").apply { appendText("Joined User") }.toUi(),
+                    nameInternal = "Joined User".toUiPlainText(),
                 )
             db.userDao().insert(overwrittenUser.toDbUser())
 
@@ -911,7 +911,7 @@ class MicroblogTest : RobolectricTest() {
                 createUser(userKey, "Detailed").copy(
                     platformType = dev.dimension.flare.model.PlatformType.Bluesky,
                     banner = "https://bsky.social/banner.png",
-                    description = Element("span").apply { appendText("full profile") }.toUi(),
+                    description = "full profile".toUiPlainText(),
                     matrices = UiProfile.Matrices(fansCount = 12, followsCount = 34, statusesCount = 56),
                 )
             val partialUser =
@@ -972,7 +972,7 @@ class MicroblogTest : RobolectricTest() {
                     host = key.host,
                 ),
             avatar = "https://${key.host}/${key.id}.png",
-            nameInternal = Element("span").apply { appendText(name) }.toUi(),
+            nameInternal = name.toUiPlainText(),
             platformType = dev.dimension.flare.model.PlatformType.Mastodon,
             clickEvent = ClickEvent.Noop,
             banner = null,
@@ -998,7 +998,7 @@ class MicroblogTest : RobolectricTest() {
             contentWarning = null,
             user = user,
             quote = quote.toPersistentList(),
-            content = Element("span").apply { appendText(text) }.toUi(),
+            content = text.toUiPlainText(),
             actions = persistentListOf(),
             poll = null,
             statusKey = statusKey,

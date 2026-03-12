@@ -2,7 +2,6 @@ package dev.dimension.flare.data.datasource.microblog.handler
 
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.TestFormatter
@@ -22,6 +21,7 @@ import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
@@ -165,7 +165,7 @@ class PostHandlerTest : RobolectricTest() {
             val repost = createPost(statusKey = repostKey)
             val wrapper =
                 createPost(statusKey = postKey).copy(
-                    content = Element("span").apply { appendText("wrapper content") }.toUi(),
+                    content = "wrapper content".toUiPlainText(),
                     internalRepost = repost,
                 )
 
@@ -400,7 +400,7 @@ class PostHandlerTest : RobolectricTest() {
             contentWarning = null,
             user = null,
             quote = persistentListOf(),
-            content = Element("span").apply { appendText("post content") }.toUi(),
+            content = "post content".toUiPlainText(),
             actions = persistentListOf(),
             poll = null,
             statusKey = statusKey,

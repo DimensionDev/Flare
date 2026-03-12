@@ -216,6 +216,20 @@ class MisskeyRenderTest {
         )
     }
 
+    @Test
+    fun mfmQuoteDoesNotIntroduceExtraBlankLines() {
+        val note =
+            createNote(
+                id = "note-mfm-quote",
+                user = createUser("user-mfm-quote"),
+                text = "before\n\n> quoted\n\nafter",
+            )
+
+        val rendered = assertIs<UiTimelineV2.Post>(note.render(accountKey))
+
+        assertEquals("beforequotedafter", rendered.content.innerText)
+    }
+
     private fun createUser(id: String): UserLite =
         UserLite(
             id = id,

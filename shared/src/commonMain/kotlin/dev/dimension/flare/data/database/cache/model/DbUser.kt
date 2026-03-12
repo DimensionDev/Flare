@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.database.cache.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -19,6 +20,7 @@ internal data class DbUser(
     val name: String,
     val canonicalHandle: String,
     val host: String,
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     val content: UiProfile,
 )
 
@@ -31,5 +33,6 @@ internal data class DbUser(
 internal data class DbUserRelation(
     val accountType: DbAccountType,
     val userKey: MicroBlogKey,
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     val relation: UiRelation,
 )

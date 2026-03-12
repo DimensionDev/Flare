@@ -3,7 +3,6 @@ package dev.dimension.flare.data.datasource.microblog.handler
 import androidx.paging.LoadState
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.CacheState
 import dev.dimension.flare.common.TestFormatter
@@ -17,7 +16,7 @@ import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -194,7 +193,7 @@ class UserHandlerTest : RobolectricTest() {
                     host = host,
                 ),
             avatar = "https://$host/$id.png",
-            nameInternal = Element("span").apply { appendText(id) }.toUi(),
+            nameInternal = id.toUiPlainText(),
             platformType = PlatformType.Mastodon,
             clickEvent = ClickEvent.Noop,
             banner = null,

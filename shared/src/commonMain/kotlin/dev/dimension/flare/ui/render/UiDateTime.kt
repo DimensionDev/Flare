@@ -20,9 +20,9 @@ public data class UiDateTime internal constructor(
     val platformValue: PlatformDateTime by lazy {
         value.toPlatform()
     }
-    val relative: String = value.relative()
-    val full: String = value.full()
-    val absolute: String = value.absolute()
+    val relative: String by lazy { value.relative() }
+    val full: String by lazy { value.full() }
+    val absolute: String by lazy { value.absolute() }
 
     val shouldShowFull: Boolean by lazy {
         val compareTo = Clock.System.now()

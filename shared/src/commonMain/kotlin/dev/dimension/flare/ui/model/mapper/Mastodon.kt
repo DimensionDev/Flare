@@ -34,8 +34,10 @@ import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.Url
@@ -349,15 +351,10 @@ private fun Status.renderStatus(
                     attachment.toUi(sensitive = sensitive ?: false)
                 }?.toPersistentList() ?: persistentListOf(),
         contentWarning =
-            spoilerText?.takeIf { it.isNotEmpty() && it.isNotBlank() }?.let {
-                Element("span")
-                    .apply {
-                        appendText(it)
-                    }.toUi()
-            },
+            spoilerText?.takeIf { it.isNotEmpty() && it.isNotBlank() }?.toUiPlainText(),
         user = actualUser,
         quote = listOfNotNull(quoteStatus).toImmutableList(),
-        content = parseMastodonContent(this, accountKey, host).toUi(),
+        content = parseMastodonContent(this, accountKey, host),
         card =
             card?.url?.let { url ->
                 UiCard(
@@ -841,7 +838,7 @@ internal fun Account.render(
         )
     return UiProfile(
         avatar = avatar.orEmpty(),
-        nameInternal = parseName(this).toUi(),
+        nameInternal = parseName(this),
         handle =
             UiHandle(
                 raw = username.orEmpty(),
@@ -853,7 +850,7 @@ internal fun Account.render(
             parseNote(
                 this,
                 accountKey = accountKey,
-            ).toUi(),
+            ),
         matrices =
             UiProfile.Matrices(
                 fansCount = followersCount ?: 0,
@@ -911,7 +908,7 @@ internal fun Account.render(
 private fun parseNote(
     account: Account,
     accountKey: MicroBlogKey?,
-): Element {
+): UiRichText {
     val emoji = account.emojis.orEmpty()
     var content = account.note.orEmpty()
     emoji.forEach {
@@ -923,7 +920,7 @@ private fun parseNote(
     }
     return parseHtml(content).let {
         updateHtmlTagToken(it, accountKey)
-        it
+        it.toUi()
     }
 }
 
@@ -988,60 +985,8 @@ internal fun RelationshipResponse.toUi(): UiRelation =
         muted = muting ?: false,
         hasPendingFollowRequestFromYou = requested ?: false,
     )
-//
-// internal fun DbEmoji.toUi(): List<UiEmoji> =
-//    when (content) {
-//        is EmojiContent.Mastodon -> {
-//            content.data.filter { it.visibleInPicker == true }.map {
-//                val shortCode =
-//                    it.shortcode
-//                        .orEmpty()
-//                        .let { if (!it.startsWith(':') && !it.endsWith(':')) ":$it:" else it }
-//                UiEmoji(
-//                    shortcode = shortCode,
-//                    url = it.url.orEmpty(),
-//                    category = it.category.orEmpty(),
-//                    searchKeywords =
-//                        listOfNotNull(
-//                            it.shortcode,
-//                        ),
-//                    insertText = " $shortCode ",
-//                )
-//            }
-//        }
-//
-//        is EmojiContent.Misskey -> {
-//            content.data.map {
-//                it.toUi()
-//            }
-//        }
-//
-//        is EmojiContent.VVO ->
-//            content.data.data
-//                ?.emoticon
-//                ?.zhCN
-//                ?.flatMap { (category, items) ->
-//                    items.mapNotNull { item ->
-//                        if (item.phrase.isNullOrEmpty() || item.url.isNullOrEmpty()) {
-//                            return@mapNotNull null
-//                        }
-//                        UiEmoji(
-//                            shortcode = item.phrase,
-//                            url = item.url,
-//                            category = category,
-//                            searchKeywords =
-//                                listOfNotNull(
-//                                    item.phrase,
-//                                ),
-//                            insertText = item.phrase,
-//                        )
-//                    }
-//                }.orEmpty()
-//
-//        is EmojiContent.FavIcon -> emptyList()
-//    }
 
-private fun parseName(status: Account): Element {
+private fun parseName(status: Account): UiRichText {
     val emoji = status.emojis.orEmpty()
     var content = status.displayName.orEmpty().ifEmpty { status.username.orEmpty() }
     emoji.forEach {
@@ -1051,7 +996,7 @@ private fun parseName(status: Account): Element {
                 "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
             )
     }
-    return parseHtml(content)
+    return parseHtml(content).toUi()
 }
 
 internal fun parseMastodonContent(
@@ -1059,7 +1004,7 @@ internal fun parseMastodonContent(
 //    text: String,
     accountKey: MicroBlogKey?,
     host: String,
-): Element {
+): UiRichText {
     val emoji = status.emojis.orEmpty()
     val mentions = status.mentions.orEmpty()
     var content = status.content.orEmpty()
@@ -1074,7 +1019,7 @@ internal fun parseMastodonContent(
     body.childNodes().forEach {
         replaceMentionAndHashtag(mentions, it, accountKey, host)
     }
-    return body
+    return body.toUi()
 }
 
 private fun replaceMentionAndHashtag(

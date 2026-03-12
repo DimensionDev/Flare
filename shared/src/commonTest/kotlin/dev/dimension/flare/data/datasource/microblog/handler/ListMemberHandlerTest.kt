@@ -1,11 +1,13 @@
 package dev.dimension.flare.data.datasource.microblog.handler
 
-import androidx.paging.testing.asSnapshot
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.mapper.toDbUser
+import dev.dimension.flare.data.database.cache.mapper.upsertUsers
+import dev.dimension.flare.data.database.cache.model.DbListMember
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -17,7 +19,7 @@ import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -254,10 +256,11 @@ class ListMemberHandlerTest : RobolectricTest() {
                 ),
             )
 
-            val snapshot = handler.listMembers(listId).asSnapshot()
+            syncListMembersPage(listId, PagingRequest.Refresh)
 
-            assertEquals(2, snapshot.size)
-            val names = snapshot.map { it.name.raw }.toSet()
+            val rendered = handler.listMembersListFlow(listId).first()
+            assertEquals(2, rendered.size)
+            val names = rendered.map { it.name.raw }.toSet()
             assertTrue(names.contains("Paged Alice"))
             assertTrue(names.contains("Paged Bob"))
 
@@ -279,18 +282,23 @@ class ListMemberHandlerTest : RobolectricTest() {
                 }
             fakeLoader.setMembers(listId, members)
 
-            val snapshot = handler.listMembers(listId).asSnapshot()
+            syncListMembersPage(listId, PagingRequest.Refresh)
+            syncListMembersPage(listId, PagingRequest.Append("2"))
+            syncListMembersPage(listId, PagingRequest.Append("3"))
 
-            assertEquals(50, snapshot.size)
-            val names = snapshot.map { it.name.raw }.toSet()
-            assertTrue(names.contains("User 1"))
-            assertTrue(names.contains("User 50"))
+            val listKey = MicroBlogKey(listId, accountKey.host)
+            val dbMembers = db.listDao().getListMembersFlow(listKey).first()
+            assertEquals(50, dbMembers.size)
+            val memberIds = dbMembers.map { it.member.memberKey.id }.toSet()
+            assertTrue(memberIds.contains("user-1"))
+            assertTrue(memberIds.contains("user-50"))
         }
 
     @Test
     fun listMembersPagerHandlesRefresh() =
         runTest {
             val listId = "list-refresh"
+            val listKey = MicroBlogKey(listId, accountKey.host)
             val initialMembers =
                 (1..20).map { i ->
                     createUiProfile(
@@ -300,19 +308,50 @@ class ListMemberHandlerTest : RobolectricTest() {
                 }
             fakeLoader.setMembers(listId, initialMembers)
 
-            val initialSnapshot = handler.listMembers(listId).asSnapshot()
-            assertEquals(20, initialSnapshot.size)
+            syncListMembersPage(listId, PagingRequest.Refresh)
+
+            val initialMembersInDb = db.listDao().getListMembersFlow(listKey).first()
+            assertEquals(20, initialMembersInDb.size)
 
             val updatedMembers = initialMembers.take(10)
             fakeLoader.setMembers(listId, updatedMembers)
 
-            val refreshedSnapshot = handler.listMembers(listId).asSnapshot()
+            syncListMembersPage(listId, PagingRequest.Refresh)
 
-            assertEquals(10, refreshedSnapshot.size)
-            val names = refreshedSnapshot.map { it.name.raw }.toSet()
-            assertTrue(names.contains("Refresh User 1"))
-            assertFalse(names.contains("Refresh User 20"))
+            val refreshedMembers = db.listDao().getListMembersFlow(listKey).first()
+            assertEquals(10, refreshedMembers.size)
+            val memberKeys = refreshedMembers.map { it.member.memberKey.id }.toSet()
+            assertTrue(memberKeys.contains("refresh-user-1"))
+            assertFalse(memberKeys.contains("refresh-user-20"))
         }
+
+    private suspend fun syncListMembersPage(
+        listId: String,
+        request: PagingRequest,
+    ) {
+        val listKey = MicroBlogKey(listId, accountKey.host)
+        val result =
+            fakeLoader.loadMembers(
+                pageSize = 20,
+                request = request,
+                listId = listId,
+            )
+
+        db.connect {
+            if (request == PagingRequest.Refresh) {
+                db.listDao().deleteMembersByListKey(listKey)
+            }
+            db.listDao().insertAllMember(
+                result.data.map { item ->
+                    DbListMember(
+                        listKey = listKey,
+                        memberKey = item.key,
+                    )
+                },
+            )
+            db.upsertUsers(result.data.map { it.toDbUser() })
+        }
+    }
 
     private fun createUiProfile(
         userKey: MicroBlogKey,
@@ -326,7 +365,7 @@ class ListMemberHandlerTest : RobolectricTest() {
                     host = userKey.host,
                 ),
             avatar = "https://${userKey.host}/${userKey.id}.png",
-            nameInternal = Element("span").apply { appendText(name) }.toUi(),
+            nameInternal = name.toUiPlainText(),
             platformType = PlatformType.Mastodon,
             clickEvent = ClickEvent.Noop,
             banner = null,

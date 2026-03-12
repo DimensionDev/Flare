@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.model.mapper
 
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
-import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.network.vvo.model.Attitude
@@ -22,8 +21,10 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
+import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.decodeURLPart
@@ -42,7 +43,7 @@ internal fun Attitude.render(accountKey: MicroBlogKey): UiTimelineV2 {
         message =
             UiTimelineV2.Message(
                 user = user,
-                statusKey = MicroBlogKey(id.toString(), vvoHost),
+                statusKey = MicroBlogKey(id.toString(), accountKey.host),
                 icon = UiIcon.Like,
                 type = UiTimelineV2.Message.Type.Localized(UiTimelineV2.Message.Type.Localized.MessageId.Favourite),
                 createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
@@ -63,7 +64,7 @@ internal fun Attitude.render(accountKey: MicroBlogKey): UiTimelineV2 {
         users = listOfNotNull(user).toImmutableList(),
         post = content,
         createdAt = createdAt?.toUi() ?: Clock.System.now().toUi(),
-        statusKey = MicroBlogKey(id.toString(), vvoHost),
+        statusKey = MicroBlogKey(id.toString(), accountKey.host),
         accountType = AccountType.Specific(accountKey),
     )
 }
@@ -153,7 +154,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
     val user = this.user?.render(accountKey)
     val isFromMe = user?.key == accountKey
     val displayUser = user
-    val statusKey = MicroBlogKey(id = id, host = vvoHost)
+    val statusKey = MicroBlogKey(id = id, host = accountKey.host)
     val canReblog = visible?.type == null || visible.type == 0L
     val url =
         buildString {
@@ -189,7 +190,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
         contentWarning = null,
         user = displayUser,
         quote = listOfNotNull(retweetedStatus?.renderStatusV2(accountKey)).toImmutableList(),
-        content = renderVVOText(text.orEmpty(), accountKey).toUi(),
+        content = renderVVOText(text.orEmpty(), accountKey),
         actions =
             listOfNotNull(
                 if (canReblog) {
@@ -291,7 +292,7 @@ private fun Status.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
 }
 
 private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post {
-    val statusKey = MicroBlogKey(id = id, host = vvoHost)
+    val statusKey = MicroBlogKey(id = id, host = accountKey.host)
     val statusMid =
         status?.mid ?: analysis_extra
             ?.split('|')
@@ -352,7 +353,7 @@ private fun Comment.renderStatusV2(accountKey: MicroBlogKey): UiTimelineV2.Post 
         contentWarning = null,
         user = user,
         quote = quote,
-        content = renderVVOText(text.orEmpty(), accountKey).toUi(),
+        content = renderVVOText(text.orEmpty(), accountKey),
         actions =
             listOfNotNull(
                 statusMid?.let {
@@ -441,7 +442,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
     val userKey =
         MicroBlogKey(
             id = id.toString(),
-            host = vvoHost,
+            host = accountKey.host,
         )
     return UiProfile(
         key = userKey,
@@ -449,20 +450,10 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         handle =
             UiHandle(
                 raw = screenName.orEmpty(),
-                host = vvoHost.removePrefix("m."),
+                host = accountKey.host,
             ),
-        nameInternal =
-            Element("span")
-                .apply {
-                    appendChild(TextNode(screenName.toString()))
-                }.toUi(),
-        description =
-            description?.let {
-                Element("span")
-                    .apply {
-                        appendChild(TextNode(it))
-                    }.toUi()
-            },
+        nameInternal = screenName.toString().toUiPlainText(),
+        description = description?.toUiPlainText(),
         banner = coverImagePhone,
         matrices =
             UiProfile.Matrices(
@@ -488,10 +479,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                         items =
                             mapOf(
                                 UiProfile.BottomContent.Iconify.Icon.Verify to
-                                    Element("span")
-                                        .apply {
-                                            appendChild(TextNode(it))
-                                        }.toUi(),
+                                    it.toUiPlainText(),
                             ).toImmutableMap(),
                     )
                 },
@@ -587,13 +575,13 @@ internal fun ActionMenu.Companion.vvoFavorite(
 internal fun renderVVOText(
     text: String,
     accountKey: MicroBlogKey,
-): Element {
+): UiRichText {
     val element = parseHtml(text)
 
     element.childNodes().forEach {
         replaceMentionAndHashtag(element, it, accountKey)
     }
-    return element
+    return element.toUi()
 }
 
 private fun replaceMentionAndHashtag(

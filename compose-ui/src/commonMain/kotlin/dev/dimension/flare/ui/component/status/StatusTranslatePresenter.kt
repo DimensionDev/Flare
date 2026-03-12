@@ -7,6 +7,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.server.AiTLDRPresenter
 import dev.dimension.flare.ui.presenter.status.TranslatePresenter
 import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.render.toTranslatableText
 
 @Composable
 internal fun statusTranslatePresenter(
@@ -42,16 +43,15 @@ internal fun statusTldrPresenter(
     targetLanguage: String,
 ): UiState<String> =
     remember(contentWarning, content, targetLanguage) {
-        val html =
+        val text =
             buildString {
                 contentWarning?.takeIf { !it.isEmpty }?.let {
-                    append("<content-warning>")
-                    append(it.html)
-                    append("</content-warning>")
+                    append("Content warning:\n")
+                    append(it.toTranslatableText())
+                    append("\n\n")
                 }
-                append("<content>")
-                append(content.html)
-                append("</content>")
+                append("Content:\n")
+                append(content.toTranslatableText())
             }
-        AiTLDRPresenter(html, targetLanguage)
+        AiTLDRPresenter(text, targetLanguage)
     }.invoke()

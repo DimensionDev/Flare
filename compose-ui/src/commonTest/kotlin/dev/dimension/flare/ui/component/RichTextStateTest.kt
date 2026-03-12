@@ -5,6 +5,7 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.TextStyle
 import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.ui.render.UiRichText
+import dev.dimension.flare.ui.render.toUi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -27,7 +28,7 @@ class RichTextStateTest {
 
     private fun htmlToUiRichText(html: String): UiRichText {
         val element = Ksoup.parse(html).body()
-        return UiRichText(data = element, isRtl = false)
+        return element.toUi()
     }
 
     @Test
@@ -80,6 +81,19 @@ class RichTextStateTest {
         val blockContent = state.contents.filterIsInstance<RichTextContent.BlockImage>().firstOrNull()
         assertNotNull(blockContent)
         assertEquals(imgUrl, blockContent.url)
+    }
+
+    @Test
+    fun inline_image_creates_inline_content_entry_with_image_url() {
+        val imgUrl = "https://example.com/inline.png"
+        val ui = htmlToUiRichText("<p>Hi <img src=\"$imgUrl\" alt=\"inline image\"/></p>")
+        val state = RichTextState(ui, defaultStyleData())
+
+        val anyInlineImage =
+            state.inlineContent.values.any {
+                it is BuildContentAnnotatedStringContext.InlineType.Emoji && it.url == imgUrl
+            }
+        assertTrue(anyInlineImage, "Expected an inline image entry with the provided URL")
     }
 
     @Test
@@ -200,11 +214,8 @@ class RichTextStateTest {
         val state = RichTextState(ui, defaultStyleData())
 
         val textContent = state.contents.single() as RichTextContent.Text
+        assertTrue(textContent.block?.isBlockQuote == true)
         val paragraphStyles = textContent.content.paragraphStyles
         assertTrue(paragraphStyles.isNotEmpty())
-
-        val spanStyles = textContent.content.spanStyles
-        val backgroundStyle = spanStyles.firstOrNull { it.item.background != androidx.compose.ui.graphics.Color.Unspecified }
-        assertNotNull(backgroundStyle)
     }
 }

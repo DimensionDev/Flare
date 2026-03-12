@@ -279,4 +279,4 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 room = { id = "androidx.room", version.ref = "room" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 stability-analyzer = { id = "com.github.skydoves.compose.stability.analyzer", version = "0.6.6" }
-nucleus = { id = "io.github.kdroidfilter.nucleus", version.ref = "nucleus" }
+nucleus = { id = "io.github.kdroidfilter.nucleus", version = "1.3.8" }

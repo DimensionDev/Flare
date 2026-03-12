@@ -101,6 +101,7 @@ nucleus.application {
             bundleID = "dev.dimension.flare"
             minimumSystemVersion = "14.0"
             appCategory = "public.app-category.social-networking"
+            appStore = hasSigningProps
 
             jvmArgs(
                 "-Dapple.awt.application.appearance=system",
@@ -119,7 +120,6 @@ nucleus.application {
                 signing {
                     sign.set(true)
                     identity.set("SUJITEKU LIMITED LIABILITY CO. (7LFDZ96332)")
-                    keychain.set("${System.getProperty("user.home")}/Library/Keychains/signing_temp.keychain-db")
                 }
 
                 entitlementsFile.set(project.file("entitlements.plist"))

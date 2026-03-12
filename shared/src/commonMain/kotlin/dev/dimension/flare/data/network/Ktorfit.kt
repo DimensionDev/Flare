@@ -14,6 +14,8 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
+import kotlin.experimental.ExperimentalObjCRefinement
+import kotlin.native.HiddenFromObjC
 import kotlinx.serialization.json.Json
 
 internal fun ktorfit(
@@ -37,7 +39,8 @@ internal fun ktorfit(
         MastodonPagingConverterFactory(),
     )
 }
-
+@OptIn(ExperimentalObjCRefinement::class)
+@HiddenFromObjC
 public fun ktorClient(
     config: HttpClientConfig<*>.() -> Unit = {
         install(ContentNegotiation) {

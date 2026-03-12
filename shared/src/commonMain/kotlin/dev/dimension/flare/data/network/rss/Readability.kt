@@ -7,11 +7,13 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
+import kotlin.experimental.ExperimentalObjCRefinement
+import kotlin.native.HiddenFromObjC
+import kotlin.time.Instant
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.serialization.Serializable
-import kotlin.time.Instant
 
 internal class Readability(
     private val scraper: NativeWebScraper,
@@ -58,6 +60,8 @@ public data class DocumentData(
             }.getOrNull()?.toUi()
         }
     }
+    @OptIn(ExperimentalObjCRefinement::class)
+    @HiddenFromObjC
     val element: Element by lazy {
         parseHtml(content)
     }

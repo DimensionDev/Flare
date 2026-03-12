@@ -8,7 +8,6 @@ import androidx.paging.map
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileType
-import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -113,7 +112,6 @@ internal class XQTDataSource(
     private val database: CacheDatabase by inject()
     private val coroutineScope: CoroutineScope by inject()
     private val accountRepository: AccountRepository by inject()
-    private val inAppNotification: InAppNotification by inject()
     private val imageCompressor: ImageCompressor by inject()
     private val credentialFlow by lazy {
         accountRepository
@@ -269,7 +267,6 @@ internal class XQTDataSource(
         HomeTimelineRemoteMediator(
             service,
             accountKey,
-            inAppNotification,
         )
 
     fun featuredTimelineLoader() =

@@ -2,14 +2,18 @@ package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
+import dev.dimension.flare.common.InAppNotification
+import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.cachePagingState
 import dev.dimension.flare.common.emptyFlow
@@ -25,6 +29,7 @@ import dev.dimension.flare.data.datasource.microblog.paging.TimelineRemoteMediat
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
@@ -47,6 +52,7 @@ public abstract class TimelinePresenter :
     private val database: CacheDatabase by inject()
 
     private val localFilterRepository: LocalFilterRepository by inject()
+    private val inAppNotification: InAppNotification by inject()
 
     private val filterFlow by lazy {
         localFilterRepository.getFlow(forTimeline = true)
@@ -131,6 +137,7 @@ public abstract class TimelinePresenter :
             remember {
                 createPager(scope)
             }.cachePagingState()
+        handleNotificationError(listState)
         return object : TimelineState {
             override val listState = listState
 
@@ -149,6 +156,31 @@ public abstract class TimelinePresenter :
 
     internal abstract val loader: Flow<RemoteLoader<UiTimelineV2>>
     protected open val useDbKeyInItemKey: Boolean = false
+
+    @Composable
+    private fun handleNotificationError(listState: PagingState<UiTimelineV2>) {
+        when (listState) {
+            is PagingState.Error -> {
+                val error = listState.error as? LoginExpiredException
+                LaunchedEffect(error) {
+                    error?.let {
+                        inAppNotification.onError(Message.LoginExpired, it)
+                    }
+                }
+            }
+
+            is PagingState.Success -> {
+                val error = (listState.appendState as? LoadState.Error)?.error as? LoginExpiredException
+                LaunchedEffect(error) {
+                    error?.let {
+                        inAppNotification.onError(Message.LoginExpired, it)
+                    }
+                }
+            }
+
+            else -> Unit
+        }
+    }
 }
 
 @Immutable

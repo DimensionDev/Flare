@@ -1,8 +1,6 @@
 package dev.dimension.flare.data.datasource.vvo
 
 import androidx.paging.ExperimentalPagingApi
-import dev.dimension.flare.common.InAppNotification
-import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
@@ -17,7 +15,6 @@ import dev.dimension.flare.ui.model.mapper.render
 internal class HomeTimelineRemoteMediator(
     private val service: VVOService,
     private val accountKey: MicroBlogKey,
-    private val inAppNotification: InAppNotification,
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String = "home_$accountKey"
 
@@ -27,13 +24,6 @@ internal class HomeTimelineRemoteMediator(
     ): PagingResult<UiTimelineV2> {
         val config = service.config()
         if (config.data?.login != true) {
-            inAppNotification.onError(
-                Message.LoginExpired,
-                LoginExpiredException(
-                    accountKey = accountKey,
-                    platformType = PlatformType.VVo,
-                ),
-            )
             throw LoginExpiredException(
                 accountKey = accountKey,
                 platformType = PlatformType.VVo,

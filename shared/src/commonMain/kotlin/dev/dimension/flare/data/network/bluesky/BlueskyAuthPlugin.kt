@@ -165,8 +165,10 @@ internal class BlueskyAuthPlugin(
                                 shouldRetry = false
                             }
                         } else {
-                            // No new tokens available, do not retry
-                            shouldRetry = false
+                            throw LoginExpiredException(
+                                plugin.accountKey ?: MicroBlogKey("unknown", "unknown"),
+                                PlatformType.Bluesky,
+                            )
                         }
                     }
 

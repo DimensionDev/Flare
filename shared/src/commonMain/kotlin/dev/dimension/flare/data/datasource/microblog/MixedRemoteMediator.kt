@@ -14,6 +14,7 @@ import kotlinx.coroutines.coroutineScope
 internal class MixedRemoteMediator(
     private val database: CacheDatabase,
     private val mediators: List<CacheableRemoteLoader<UiTimelineV2>>,
+    private val onNonFatalError: (Throwable) -> Unit = {},
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey =
         buildString {
@@ -45,6 +46,7 @@ internal class MixedRemoteMediator(
                                 runCatching {
                                     subRequest.load(pageSize)
                                 }.getOrElse {
+                                    onNonFatalError(it)
                                     PagingResult(endOfPaginationReached = true)
                                 }.let {
                                     SubResponse(subRequest.mediator, it)

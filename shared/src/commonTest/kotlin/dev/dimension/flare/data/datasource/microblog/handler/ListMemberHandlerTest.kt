@@ -1,9 +1,5 @@
 package dev.dimension.flare.data.datasource.microblog.handler
 
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
-import androidx.paging.testing.asSnapshot
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import dev.dimension.flare.RobolectricTest
@@ -15,7 +11,6 @@ import dev.dimension.flare.data.database.cache.model.DbListMember
 import dev.dimension.flare.data.datasource.microblog.loader.ListMemberLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
-import dev.dimension.flare.data.datasource.microblog.paging.createPagingRemoteMediator
 import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -41,7 +36,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalPagingApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class ListMemberHandlerTest : RobolectricTest() {
     private lateinit var db: CacheDatabase
     private lateinit var fakeLoader: FakeListMemberLoader
@@ -261,10 +256,11 @@ class ListMemberHandlerTest : RobolectricTest() {
                 ),
             )
 
-            val snapshot = handler.listMembers(listId).asSnapshot()
+            syncListMembersPage(listId, PagingRequest.Refresh)
 
-            assertEquals(2, snapshot.size)
-            val names = snapshot.map { it.name.raw }.toSet()
+            val rendered = handler.listMembersListFlow(listId).first()
+            assertEquals(2, rendered.size)
+            val names = rendered.map { it.name.raw }.toSet()
             assertTrue(names.contains("Paged Alice"))
             assertTrue(names.contains("Paged Bob"))
 
@@ -286,17 +282,16 @@ class ListMemberHandlerTest : RobolectricTest() {
                 }
             fakeLoader.setMembers(listId, members)
 
-            val snapshot =
-                handler.listMembers(listId).asSnapshot {
-                    appendScrollWhile {
-                        it.name.raw != "User 50"
-                    }
-                }
+            syncListMembersPage(listId, PagingRequest.Refresh)
+            syncListMembersPage(listId, PagingRequest.Append("2"))
+            syncListMembersPage(listId, PagingRequest.Append("3"))
 
-            assertEquals(50, snapshot.size)
-            val names = snapshot.map { it.name.raw }.toSet()
-            assertTrue(names.contains("User 1"))
-            assertTrue(names.contains("User 50"))
+            val listKey = MicroBlogKey(listId, accountKey.host)
+            val dbMembers = db.listDao().getListMembersFlow(listKey).first()
+            assertEquals(50, dbMembers.size)
+            val memberIds = dbMembers.map { it.member.memberKey.id }.toSet()
+            assertTrue(memberIds.contains("user-1"))
+            assertTrue(memberIds.contains("user-50"))
         }
 
     @Test
@@ -313,50 +308,15 @@ class ListMemberHandlerTest : RobolectricTest() {
                 }
             fakeLoader.setMembers(listId, initialMembers)
 
-            val initialSnapshot = handler.listMembers(listId).asSnapshot()
-            assertEquals(20, initialSnapshot.size)
+            syncListMembersPage(listId, PagingRequest.Refresh)
+
+            val initialMembersInDb = db.listDao().getListMembersFlow(listKey).first()
+            assertEquals(20, initialMembersInDb.size)
 
             val updatedMembers = initialMembers.take(10)
             fakeLoader.setMembers(listId, updatedMembers)
 
-            val refreshMediator =
-                createPagingRemoteMediator<Any, UiProfile>(
-                    pagingKey = "${pagingKey}_members_$listId",
-                    database = db,
-                    onLoad = { pageSize, request ->
-                        fakeLoader.loadMembers(
-                            pageSize = pageSize,
-                            request = request,
-                            listId = listId,
-                        )
-                    },
-                    onSave = { request, data ->
-                        db.connect {
-                            if (request == PagingRequest.Refresh) {
-                                db.listDao().deleteMembersByListKey(listKey)
-                            }
-                            db.listDao().insertAllMember(
-                                data.map { item ->
-                                    DbListMember(
-                                        listKey = listKey,
-                                        memberKey = item.key,
-                                    )
-                                },
-                            )
-                            db.upsertUsers(data.map { it.toDbUser() })
-                        }
-                    },
-                )
-            refreshMediator.doLoad(
-                loadType = LoadType.REFRESH,
-                state =
-                    PagingState(
-                        pages = emptyList(),
-                        anchorPosition = null,
-                        config = dev.dimension.flare.data.datasource.microblog.pagingConfig,
-                        leadingPlaceholderCount = 0,
-                    ),
-            )
+            syncListMembersPage(listId, PagingRequest.Refresh)
 
             val refreshedMembers = db.listDao().getListMembersFlow(listKey).first()
             assertEquals(10, refreshedMembers.size)
@@ -364,6 +324,34 @@ class ListMemberHandlerTest : RobolectricTest() {
             assertTrue(memberKeys.contains("refresh-user-1"))
             assertFalse(memberKeys.contains("refresh-user-20"))
         }
+
+    private suspend fun syncListMembersPage(
+        listId: String,
+        request: PagingRequest,
+    ) {
+        val listKey = MicroBlogKey(listId, accountKey.host)
+        val result =
+            fakeLoader.loadMembers(
+                pageSize = 20,
+                request = request,
+                listId = listId,
+            )
+
+        db.connect {
+            if (request == PagingRequest.Refresh) {
+                db.listDao().deleteMembersByListKey(listKey)
+            }
+            db.listDao().insertAllMember(
+                result.data.map { item ->
+                    DbListMember(
+                        listKey = listKey,
+                        memberKey = item.key,
+                    )
+                },
+            )
+            db.upsertUsers(result.data.map { it.toDbUser() })
+        }
+    }
 
     private fun createUiProfile(
         userKey: MicroBlogKey,

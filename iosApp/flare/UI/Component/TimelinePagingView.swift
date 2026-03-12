@@ -6,52 +6,24 @@ struct TimelinePagingView: View {
     let data: PagingState<UiTimelineV2>
     let detailStatusKey: MicroBlogKey?
     var body: some View {
-        switch onEnum(of: data) {
-        case .empty:
+        PagingView(data: data) {
             ListEmptyView()
-        case .error(let error):
-            ListErrorView(error: error.error) {
-                error.onRetry()
+        } errorContent: { error, retry in
+            ListErrorView(error: error) {
+                retry()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        case .loading:
-            ForEach(0..<5, id: \.self) { index in
-                ListCardView(index: index, totalCount: 5) {
-                    TimelinePlaceholderView()
-                        .padding(.horizontal)
-                        .padding(.vertical, 12)
-                }
+        } loadingContent: { index, totalCount in
+            ListCardView(index: index, totalCount: totalCount) {
+                TimelinePlaceholderView()
+                    .padding(.horizontal)
+                    .padding(.vertical, 12)
             }
-        case .success(let success):
-            ForEach(TimelineCollection(data: success)) { item in
-                ListCardView(index: item.index, totalCount: Int(success.itemCount)) {
-                    if let timeline = item.data {
-                        TimelineView(data: timeline, detailStatusKey: detailStatusKey)
-                            .padding(.horizontal)
-                            .padding(.vertical, 12)
-                    } else {
-                        TimelinePlaceholderView()
-                            .padding(.horizontal)
-                            .padding(.vertical, 12)
-                    }
-                }
-                .onAppear {
-                    _ = success.get(index: Int32(item.index))
-                }
-            }
-
-            switch onEnum(of: success.appendState) {
-            case .error(let error):
-                ListErrorView(error: error.error) {
-                    success.retry()
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-            case .loading:
-                ProgressView()
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .center)
-            case .notLoading:
-                EmptyView()
+        } successContent: { item, index, totalCount in
+            ListCardView(index: index, totalCount: totalCount) {
+                TimelineView(data: item, detailStatusKey: detailStatusKey)
+                    .padding(.horizontal)
+                    .padding(.vertical, 12)
             }
         }
     }

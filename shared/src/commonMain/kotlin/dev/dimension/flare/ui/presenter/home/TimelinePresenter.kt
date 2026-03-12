@@ -2,11 +2,9 @@ package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -106,6 +104,11 @@ public abstract class TimelinePresenter :
                 TimelineRemoteMediator(
                     loader = loader,
                     database = database,
+                    notifyError = { e ->
+                        if (e is LoginExpiredException) {
+                            inAppNotification.onError(Message.LoginExpired, e)
+                        }
+                    },
                 ),
             pagingSourceFactory = {
                 database.pagingTimelineDao().getPagingSource(
@@ -137,7 +140,6 @@ public abstract class TimelinePresenter :
             remember {
                 createPager(scope)
             }.cachePagingState()
-        handleNotificationError(listState)
         return object : TimelineState {
             override val listState = listState
 
@@ -156,31 +158,6 @@ public abstract class TimelinePresenter :
 
     internal abstract val loader: Flow<RemoteLoader<UiTimelineV2>>
     protected open val useDbKeyInItemKey: Boolean = false
-
-    @Composable
-    private fun handleNotificationError(listState: PagingState<UiTimelineV2>) {
-        when (listState) {
-            is PagingState.Error -> {
-                val error = listState.error as? LoginExpiredException
-                LaunchedEffect(error) {
-                    error?.let {
-                        inAppNotification.onError(Message.LoginExpired, it)
-                    }
-                }
-            }
-
-            is PagingState.Success -> {
-                val error = (listState.appendState as? LoadState.Error)?.error as? LoginExpiredException
-                LaunchedEffect(error) {
-                    error?.let {
-                        inAppNotification.onError(Message.LoginExpired, it)
-                    }
-                }
-            }
-
-            else -> Unit
-        }
-    }
 }
 
 @Immutable

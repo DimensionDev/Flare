@@ -1,12 +1,9 @@
 package dev.dimension.flare.ui.presenter.home
 
-import dev.dimension.flare.common.InAppNotification
-import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.MixedRemoteMediator
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
-import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.ui.model.UiTimelineV2
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -18,7 +15,6 @@ public class MixedTimelinePresenter(
 ) : TimelinePresenter(),
     KoinComponent {
     private val database: CacheDatabase by inject()
-    private val inAppNotification: InAppNotification by inject()
     override val useDbKeyInItemKey: Boolean = true
     override val loader: Flow<RemoteLoader<UiTimelineV2>>
         get() =
@@ -26,11 +22,6 @@ public class MixedTimelinePresenter(
                 MixedRemoteMediator(
                     database = database,
                     mediators = it.filterIsInstance<CacheableRemoteLoader<UiTimelineV2>>(),
-                    onNonFatalError = { throwable ->
-                        if (throwable is LoginExpiredException) {
-                            inAppNotification.onError(Message.LoginExpired, throwable)
-                        }
-                    },
                 )
             }
 }

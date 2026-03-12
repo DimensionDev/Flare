@@ -100,7 +100,6 @@ nucleus.application {
                 ?.toIntOrNull()?.toString() ?: "1"
             bundleID = "dev.dimension.flare"
             minimumSystemVersion = "14.0"
-            appStore = hasSigningProps
             appCategory = "public.app-category.social-networking"
 
             jvmArgs(

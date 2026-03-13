@@ -131,7 +131,7 @@
     <string name="settings_status_appearance_subtitle">自定义帖子外观</string>
     <string name="settings_appearance_subtitle">自定义 Flare 的外观和感觉</string>
     <string name="settings_storage_title">存储</string>
-    <string name="settings_draft_box_title">方框草稿</string>
+    <string name="settings_draft_box_title">草稿箱</string>
     <string name="settings_draft_box_description">查看发送、失败和未发送的草稿</string>
     <string name="settings_storage_subtitle">管理 Flare 的存储</string>
     <string name="settings_about_title">关于</string>
@@ -227,7 +227,7 @@
     <string name="settings_about_source_code">源代码</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">加入Telegram 群组</string>
-    <string name="settings_about_line_description">加入我们的 LINE 组</string>
+    <string name="settings_about_discord_description">加入我们的 Discord 服务器</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">帮助我们翻译 Flare</string>
     <string name="settings_privacy_policy">隐私政策</string>
@@ -313,7 +313,7 @@
     <string name="settings_storage_app_log_description">查看应用日志</string>
     <string name="settings_rss_management_title">RSS 管理</string>
     <string name="settings_rss_management_description">管理 RSS 源</string>
-    <string name="draft_box_title">方框草稿</string>
+    <string name="draft_box_title">草稿箱</string>
     <string name="draft_box_empty">还没有草稿</string>
     <string name="draft_box_retry">重试</string>
     <string name="draft_box_edit">编辑</string>

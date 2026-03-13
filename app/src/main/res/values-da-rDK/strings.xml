@@ -381,7 +381,7 @@
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
                 <li>Tilføjet fuld udkast support.</li>
-                <li>Reworked AI konfiguration til understøttelse af både on-device AI og OpenAI-kompatible API'er.</li>
+                <li>Reworked AI konfiguration til understøttelse af både on-device AI og OpenAI-kompatible API\'er.</li>
                 <li>Tilføjet Misskey Kanalunderstøttelse.</li>
                 <li>Fejlrettelser og forbedringer af ydeevnen.</li>
             </ul>

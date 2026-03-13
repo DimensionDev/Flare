@@ -131,7 +131,7 @@
     <string name="settings_about_source_code">Програмен код</string>
     <string name="settings_about_telegram">Телеграм</string>
     <string name="settings_about_telegram_description">Присъединете се към нашата група в Телеграм</string>
-    <string name="settings_about_line_description">Присъединете се към нашата група в Line</string>
+    <string name="settings_about_discord_description">Присъединете се към нашия сървър в Дискорд</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Помогнете ни да преведем Flare</string>
     <string name="settings_privacy_policy">Политика за поверителност</string>

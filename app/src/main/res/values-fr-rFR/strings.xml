@@ -376,7 +376,10 @@
     <string name="import_confirmation_message">Cela va importer des données à partir du fichier. Les enregistrements existants avec des identifiants correspondants seront remplacés. Voulez-vous continuer ?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Corrections de bugs et améliorations de performances.</li>
+                <li>Ajout du support complet du brouillon.</li>
+                <li>Configuration IA retravaillée pour prendre en charge à la fois les API AI sur le périphérique et les API compatibles OpenAI.</li>
+                <li>Ajout du support des canaux Misskey.</li>
+                <li>Corrections de bugs et améliorations des performances.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Ajouter un groupe</string>

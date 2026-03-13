@@ -380,7 +380,10 @@
     <string name="import_confirmation_message">Tämä tuo tiedostosta tietoja. Olemassa olevat tietueet ja vastaavat ID:t korvataan. Haluatko jatkaa?</string>
     <string name="changelog_current"><![CDATA[            <span>Versio %1$s:</span>
             <ul>
-                <li>Virhekorjauksia ja suorituskyvyn parannuksia.</li>
+                <li>Lisätty täysi luonnos tueksi.</li>
+                <li>Päivitettiin tekoälyn konfiguraatio sekä laitteen AI- että OpenAI-yhteensopivien APIen tueksi.</li>
+                <li>Lisätty Misskey Channel-tuki.</li>
+                <li>Virheenkorjauksia ja suorituskyvyn parannuksia.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Lisää Ryhmä</string>

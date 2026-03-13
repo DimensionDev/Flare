@@ -97,13 +97,13 @@ internal class MastodonLoader(
         return timeline.size
     }
 
-    override suspend fun emojis(): ImmutableMap<String, ImmutableList<UiEmoji>> {
-        return service
+    override suspend fun emojis(): ImmutableMap<String, ImmutableList<UiEmoji>> =
+        service
             .emojis()
             .filter { it.visibleInPicker == true }
             .groupBy { it.category }
             .mapNotNull {
-                val category = it.key ?: return@mapNotNull null
+                val category = it.key.orEmpty()
                 category to it.value
             }.map { (category, value) ->
                 category to
@@ -126,5 +126,4 @@ internal class MastodonLoader(
                         }.toImmutableList()
             }.toMap()
             .toImmutableMap()
-    }
 }

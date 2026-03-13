@@ -58,6 +58,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.CardExpanderItem
+import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.MenuFlyout
 import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.SubtleButton
@@ -151,30 +152,29 @@ internal fun TabSettingScreen(
                             imageVector = FontAwesomeIcons.Solid.Plus,
                             contentDescription = stringResource(Res.string.tab_settings_add),
                         )
-                        Box {
-                            Text(
-                                text = stringResource(Res.string.tab_settings_add),
-                            )
-                            MenuFlyout(
-                                visible = showMenu,
-                                onDismissRequest = { showMenu = false },
-                            ) {
-                                MenuFlyoutItem(
-                                    text = { Text(stringResource(Res.string.tab_settings_add_group)) },
-                                    onClick = {
-                                        showMenu = false
-                                        toGroupConfig(null)
-                                    },
-                                )
-                                MenuFlyoutItem(
-                                    text = { Text(stringResource(Res.string.tab_settings_add_tab)) },
-                                    onClick = {
-                                        showMenu = false
-                                        state.setAddTab(true)
-                                    },
-                                )
-                            }
-                        }
+                        Text(
+                            text = stringResource(Res.string.tab_settings_add),
+                        )
+                    }
+                    MenuFlyout(
+                        visible = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        placement = FlyoutPlacement.BottomAlignedEnd,
+                    ) {
+                        MenuFlyoutItem(
+                            text = { Text(stringResource(Res.string.tab_settings_add_group)) },
+                            onClick = {
+                                showMenu = false
+                                toGroupConfig(null)
+                            },
+                        )
+                        MenuFlyoutItem(
+                            text = { Text(stringResource(Res.string.tab_settings_add_tab)) },
+                            onClick = {
+                                showMenu = false
+                                state.setAddTab(true)
+                            },
+                        )
                     }
                 }
             }

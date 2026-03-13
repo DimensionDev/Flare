@@ -11,6 +11,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -275,12 +276,12 @@ fun ComposeDialog(
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Row(
+            FlowRow(
                 modifier =
                     Modifier
-                        .horizontalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 state.state.selectedUsers.onSuccess { users ->
                     users.forEach { userState ->
@@ -323,6 +324,8 @@ fun ComposeDialog(
                                         }
                                     }
                                 },
+                                adaptivePlacement = true,
+                                placement = FlyoutPlacement.BottomAlignedEnd,
                             ) {
                                 PillButton(
                                     selected = isFlyoutVisible,
@@ -818,11 +821,13 @@ fun ComposeDialog(
                                     modifier =
                                         Modifier
                                             .sizeIn(
-                                                maxWidth = 300.dp,
+                                                maxWidth = 280.dp,
                                                 maxHeight = 200.dp,
                                             ),
                                 )
                             },
+                            adaptivePlacement = true,
+                            placement = FlyoutPlacement.BottomAlignedStart,
                         ) {
                             SubtleButton(
                                 onClick = {

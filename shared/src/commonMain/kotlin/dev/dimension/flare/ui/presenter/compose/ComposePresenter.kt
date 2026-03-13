@@ -127,8 +127,8 @@ public class ComposePresenter(
 
     private val composeConfigFlow by lazy {
         combine(selectedAccountServicesFlow, activeStatusFlow) { services, composeStatus ->
-            services
-                .mapNotNull {
+            val configs =
+                services.mapNotNull {
                     if (it is AuthenticatedMicroblogDataSource) {
                         it.composeConfig(
                             type =
@@ -141,7 +141,13 @@ public class ComposePresenter(
                     } else {
                         null
                     }
-                }.reduceOrNull { acc, config -> acc.merge(config) } ?: ComposeConfig()
+                }
+
+            when (configs.size) {
+                0 -> ComposeConfig()
+                1 -> configs.first()
+                else -> configs.reduce { acc, config -> acc.merge(config) }
+            }
         }
     }
 
@@ -214,7 +220,7 @@ public class ComposePresenter(
                         )
                     }
                 } ?: flowOf(UiState.Error(Exception("No emoji config")))
-            }.distinctUntilChanged()
+            }
     }
 
     private val textFlow by lazy {

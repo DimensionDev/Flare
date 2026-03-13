@@ -228,7 +228,7 @@
     <string name="settings_about_source_code">Quellcode</string>
     <string name="settings_about_telegram">Telegram</string>
     <string name="settings_about_telegram_description">Trete unserer Telegram-Gruppe bei</string>
-    <string name="settings_about_line_description">Trete unserer Line-Gruppe bei</string>
+    <string name="settings_about_discord_description">Trete unserem Discord Server bei</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Hilf uns, Flare zu übersetzen</string>
     <string name="settings_privacy_policy">Datenschutzerklärung</string>

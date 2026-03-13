@@ -174,7 +174,7 @@ jobs:
 
           & $makeAppx.FullName bundle /o /bv $appxVersion /f $mapping /p $bundlePath
       - name: Upload AppxBundle package
-        if: startsWith(github.ref, 'refs/tags/')
+        # if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-artifact@v6
         with:
           name: Windows-package

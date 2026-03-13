@@ -17,6 +17,12 @@ internal interface EmojiDao {
     @Query("SELECT * FROM DbEmoji WHERE host = :host")
     fun get(host: String): Flow<DbEmoji?>
 
+    @Query("SELECT content FROM DbEmoji WHERE host = :host")
+    fun getContent(host: String): Flow<ByteArray?>
+
+    @Query("DELETE FROM DbEmoji WHERE host = :host")
+    suspend fun delete(host: String)
+
     @Query("DELETE FROM DbEmoji")
     suspend fun clear()
 

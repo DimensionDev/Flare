@@ -94,6 +94,21 @@ class EmojiHandlerTest : RobolectricTest() {
         }
 
     @Test
+    fun refreshWritesEmptyEmojiMapIntoDatabase() =
+        runTest {
+            fakeLoader.nextResult = persistentMapOf()
+
+            val state =
+                handler.emoji.refreshState
+                    .drop(1)
+                    .first()
+            assertTrue(state is LoadState.NotLoading)
+
+            val saved = db.emojiDao().get(host).first()
+            assertNull(saved)
+        }
+
+    @Test
     fun dataReadsCachedEmojiFromDatabase() =
         runTest {
             val cached =

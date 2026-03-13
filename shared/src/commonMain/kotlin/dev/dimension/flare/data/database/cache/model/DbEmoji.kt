@@ -22,7 +22,12 @@ internal class EmojiContentConverter {
     fun fromEmojiContent(emojiContent: EmojiContent): ByteArray = emojiContent.encodeProtobuf()
 
     @TypeConverter
-    fun toEmojiContent(data: ByteArray): EmojiContent = data.decodeProtobuf()
+    fun toEmojiContent(data: ByteArray): EmojiContent =
+        if (data.isEmpty()) {
+            EmojiContent()
+        } else {
+            data.decodeProtobuf()
+        }
 }
 
 @Entity

@@ -15,6 +15,8 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import kotlin.experimental.ExperimentalObjCRefinement
+import kotlin.native.HiddenFromObjC
 
 internal fun ktorfit(
     baseUrl: String,
@@ -38,6 +40,8 @@ internal fun ktorfit(
     )
 }
 
+@OptIn(ExperimentalObjCRefinement::class)
+@HiddenFromObjC
 public fun ktorClient(
     config: HttpClientConfig<*>.() -> Unit = {
         install(ContentNegotiation) {

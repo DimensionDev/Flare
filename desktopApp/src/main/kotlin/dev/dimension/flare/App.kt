@@ -75,7 +75,6 @@ import dev.dimension.flare.ui.route.TopLevelBackStack
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.background.Layer
 import io.github.composefluent.component.Badge
-import io.github.composefluent.component.BadgeStatus
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.Icon
 import io.github.composefluent.component.SubtleButton
@@ -219,13 +218,12 @@ internal fun WindowScope.FlareApp(backButtonState: NavigationBackButtonState) {
                         },
                         badge =
                             if (tab is NotificationTabItem || tab is AllNotificationTabItem) {
-                                {
-                                    if (state.notificationState.count > 0) {
-                                        Badge(
-                                            status = BadgeStatus.Attention,
-                                            content = { Text(state.notificationState.count.toString()) },
-                                        )
+                                if (state.notificationState.count > 0) {
+                                    {
+                                        Text(state.notificationState.count.toString())
                                     }
+                                } else {
+                                    null
                                 }
                             } else {
                                 null
@@ -348,7 +346,7 @@ private fun NavigationItemIcon(
         Box {
             iconContent.invoke()
             Badge(
-                status = BadgeStatus.Informational,
+                backgroundColor = FluentTheme.colors.text.accent.tertiary,
                 content = {
                     badge.invoke()
                 },

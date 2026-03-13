@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.invalidateDraw
@@ -66,12 +67,15 @@ internal fun FlareTheme(
     content: @Composable () -> Unit,
 ) {
     val accentColor = systemAccentColor() ?: Color(0xFF00F5F0)
-    val accentShades = remember(accentColor) { accentColor.toFluentAccentShades() }
     FluentTheme(
         compactMode = false,
         colors =
             Colors(
-                accentShades,
+                remember(
+                    accentColor,
+                ) {
+                    generateFluentShades(accentColor)
+                },
                 darkMode = isDarkTheme,
             ),
     ) {
@@ -91,6 +95,153 @@ internal fun FlareTheme(
             }
         }
     }
+}
+
+private fun generateFluentShades(accentColor: Color): Shades {
+    val accentHsl = accentColor.toHsl()
+    val isNeutral = accentHsl.saturation <= 0.08f
+    val hueScale = if (isNeutral) 0f else 1f
+
+    return Shades(
+        base = accentColor,
+        light1 =
+            accentHsl
+                .shifted(
+                    hue = -1.5f * hueScale,
+                    saturation = 0f,
+                    lightness = accentHsl.lightness + 0.07f,
+                ).toColor(),
+        light2 =
+            accentHsl
+                .shifted(
+                    hue = -7f * hueScale,
+                    saturation = -0.12f,
+                    lightness = accentHsl.lightness + 0.27f,
+                ).toColor(),
+        light3 =
+            accentHsl
+                .shifted(
+                    hue = -15f * hueScale,
+                    saturation = -0.24f,
+                    lightness = accentHsl.lightness + 0.38f,
+                ).toColor(),
+        dark1 =
+            accentHsl
+                .shifted(
+                    hue = 3f * hueScale,
+                    saturation = 0.02f,
+                    lightness = accentHsl.lightness - 0.06f,
+                ).toColor(),
+        dark2 =
+            accentHsl
+                .shifted(
+                    hue = 9f * hueScale,
+                    saturation = 0.04f,
+                    lightness = accentHsl.lightness - 0.13f,
+                ).toColor(),
+        dark3 =
+            accentHsl
+                .shifted(
+                    hue = 20f * hueScale,
+                    saturation = 0.06f,
+                    lightness = accentHsl.lightness - dark3LightnessDrop(accentColor),
+                ).toColor(),
+    )
+}
+
+private fun dark3LightnessDrop(color: Color): Float =
+    if (color.luminance() < 0.08f) {
+        0.12f
+    } else {
+        0.21f
+    }
+
+private data class HslColor(
+    val hue: Float,
+    val saturation: Float,
+    val lightness: Float,
+)
+
+private fun Color.toHsl(): HslColor {
+    val red = red
+    val green = green
+    val blue = blue
+    val max = maxOf(red, green, blue)
+    val min = minOf(red, green, blue)
+    val lightness = (max + min) / 2f
+    val delta = max - min
+
+    if (delta == 0f) {
+        return HslColor(
+            hue = 0f,
+            saturation = 0f,
+            lightness = lightness,
+        )
+    }
+
+    val saturation =
+        if (lightness > 0.5f) {
+            delta / (2f - max - min)
+        } else {
+            delta / (max + min)
+        }
+
+    val rawHue =
+        when (max) {
+            red -> ((green - blue) / delta).mod(6f)
+            green -> ((blue - red) / delta) + 2f
+            else -> ((red - green) / delta) + 4f
+        }
+
+    return HslColor(
+        hue = (rawHue * 60f).normalizeHue(),
+        saturation = saturation.coerceIn(0f, 1f),
+        lightness = lightness.coerceIn(0f, 1f),
+    )
+}
+
+private fun HslColor.shifted(
+    hue: Float = 0f,
+    saturation: Float = 0f,
+    lightness: Float = this.lightness,
+): HslColor =
+    HslColor(
+        hue = (this.hue + hue).normalizeHue(),
+        saturation = (this.saturation + saturation).coerceIn(0f, 1f),
+        lightness = lightness.coerceIn(0f, 1f),
+    )
+
+private fun HslColor.toColor(): Color {
+    if (saturation == 0f) {
+        return Color(lightness, lightness, lightness, 1f)
+    }
+
+    val chroma = (1f - kotlin.math.abs(2f * lightness - 1f)) * saturation
+    val hueSection = hue / 60f
+    val secondComponent = chroma * (1f - kotlin.math.abs(hueSection.mod(2f) - 1f))
+    val match = lightness - chroma / 2f
+
+    val (redPrime, greenPrime, bluePrime) =
+        when {
+            hueSection < 1f -> Triple(chroma, secondComponent, 0f)
+            hueSection < 2f -> Triple(secondComponent, chroma, 0f)
+            hueSection < 3f -> Triple(0f, chroma, secondComponent)
+            hueSection < 4f -> Triple(0f, secondComponent, chroma)
+            hueSection < 5f -> Triple(secondComponent, 0f, chroma)
+            else -> Triple(chroma, 0f, secondComponent)
+        }
+
+    return Color(
+        red = (redPrime + match).coerceIn(0f, 1f),
+        green = (greenPrime + match).coerceIn(0f, 1f),
+        blue = (bluePrime + match).coerceIn(0f, 1f),
+        alpha = 1f,
+    )
+}
+
+private fun Float.normalizeHue(): Float {
+    val normalized = this % 360f
+    return if (normalized < 0f) normalized + 360f else normalized
 }
 
 @Composable
@@ -195,97 +346,6 @@ private class FluentIndication(
             } else if (isHovered || isFocused) {
                 drawRect(color = hover, size = size)
             }
-        }
-    }
-}
-
-private fun Color.toFluentAccentShades(): Shades {
-    val hsl = HslColor.from(this)
-    return Shades(
-        base = this,
-        light1 = hsl.lightVariant(lightnessAmount = 0.18f, saturationAmount = 0.06f).toColor(alpha),
-        light2 = hsl.lightVariant(lightnessAmount = 0.34f, saturationAmount = 0.10f).toColor(alpha),
-        light3 = hsl.lightVariant(lightnessAmount = 0.52f, saturationAmount = 0.16f).toColor(alpha),
-        dark1 = hsl.darkVariant(lightnessAmount = 0.16f, saturationAmount = 0.04f).toColor(alpha),
-        dark2 = hsl.darkVariant(lightnessAmount = 0.30f, saturationAmount = 0.08f).toColor(alpha),
-        dark3 = hsl.darkVariant(lightnessAmount = 0.42f, saturationAmount = 0.12f).toColor(alpha),
-    )
-}
-
-private data class HslColor(
-    val hue: Float,
-    val saturation: Float,
-    val lightness: Float,
-) {
-    fun lightVariant(
-        lightnessAmount: Float,
-        saturationAmount: Float,
-    ): HslColor =
-        copy(
-            lightness = (lightness + (1f - lightness) * lightnessAmount).coerceIn(0f, 1f),
-            saturation = (saturation * (1f - saturationAmount)).coerceIn(0f, 1f),
-        )
-
-    fun darkVariant(
-        lightnessAmount: Float,
-        saturationAmount: Float,
-    ): HslColor =
-        copy(
-            lightness = (lightness * (1f - lightnessAmount)).coerceIn(0f, 1f),
-            saturation = (saturation + (1f - saturation) * saturationAmount).coerceIn(0f, 1f),
-        )
-
-    fun toColor(alpha: Float): Color {
-        val chroma = (1f - kotlin.math.abs(2f * lightness - 1f)) * saturation
-        val hueSegment = ((hue / 60f) % 6f + 6f) % 6f
-        val second = chroma * (1f - kotlin.math.abs(hueSegment % 2f - 1f))
-        val match = lightness - chroma / 2f
-        val (r1, g1, b1) =
-            when {
-                hueSegment < 1f -> Triple(chroma, second, 0f)
-                hueSegment < 2f -> Triple(second, chroma, 0f)
-                hueSegment < 3f -> Triple(0f, chroma, second)
-                hueSegment < 4f -> Triple(0f, second, chroma)
-                hueSegment < 5f -> Triple(second, 0f, chroma)
-                else -> Triple(chroma, 0f, second)
-            }
-        return Color(
-            red = (r1 + match).coerceIn(0f, 1f),
-            green = (g1 + match).coerceIn(0f, 1f),
-            blue = (b1 + match).coerceIn(0f, 1f),
-            alpha = alpha,
-        )
-    }
-
-    companion object {
-        fun from(color: Color): HslColor {
-            val red = color.red
-            val green = color.green
-            val blue = color.blue
-            val max = maxOf(red, green, blue)
-            val min = minOf(red, green, blue)
-            val delta = max - min
-            val lightness = (max + min) / 2f
-            if (delta == 0f) {
-                return HslColor(
-                    hue = 0f,
-                    saturation = 0f,
-                    lightness = lightness,
-                )
-            }
-            val saturation =
-                (delta / (1f - kotlin.math.abs(2f * lightness - 1f))).coerceIn(0f, 1f)
-            val rawHue =
-                when (max) {
-                    red -> ((green - blue) / delta) % 6f
-                    green -> ((blue - red) / delta) + 2f
-                    else -> ((red - green) / delta) + 4f
-                } * 60f
-            return HslColor(
-                hue = if (rawHue < 0f) rawHue + 360f else rawHue,
-                saturation = saturation,
-                lightness = lightness,
-            )
         }
     }
 }

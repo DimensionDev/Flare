@@ -11,6 +11,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.serialization.Serializable
+import kotlin.experimental.ExperimentalObjCRefinement
+import kotlin.native.HiddenFromObjC
 import kotlin.time.Instant
 
 internal class Readability(
@@ -58,6 +60,9 @@ public data class DocumentData(
             }.getOrNull()?.toUi()
         }
     }
+
+    @OptIn(ExperimentalObjCRefinement::class)
+    @HiddenFromObjC
     val element: Element by lazy {
         parseHtml(content)
     }

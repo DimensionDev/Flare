@@ -100,8 +100,8 @@ nucleus.application {
                 ?.toIntOrNull()?.toString() ?: "1"
             bundleID = "dev.dimension.flare"
             minimumSystemVersion = "14.0"
-            appCategory = "public.app-category.social-networking"
             appStore = hasSigningProps
+            appCategory = "public.app-category.social-networking"
 
             jvmArgs(
                 "-Dapple.awt.application.appearance=system",

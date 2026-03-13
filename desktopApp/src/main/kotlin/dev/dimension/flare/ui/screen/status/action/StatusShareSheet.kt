@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -58,13 +59,13 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.LocalContentColor
 import io.github.composefluent.LocalTextStyle
+import io.github.composefluent.background.Layer
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.FluentDialog
 import io.github.composefluent.component.LiteFilter
 import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.Text
-import io.github.composefluent.surface.Card
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
@@ -130,61 +131,67 @@ internal fun StatusShareSheet(
                 }
             }
 
-            FlareTheme(
-                isDarkTheme = previewTheme == SharePreviewTheme.Dark,
+            Box(
+                modifier = Modifier.weight(1f),
             ) {
-                ViewBox {
-                    Box(
-                        modifier =
-                            Modifier.drawWithContent {
-                                previewGraphicsLayer.record {
-                                    this@drawWithContent.drawContent()
-                                }
-                                drawContent()
-                            },
-                    ) {
+                FlareTheme(
+                    isDarkTheme = previewTheme == SharePreviewTheme.Dark,
+                ) {
+                    ViewBox {
                         Box(
-                            modifier = Modifier.background(FluentTheme.colors.background.mica.base),
+                            modifier =
+                                Modifier.drawWithContent {
+                                    previewGraphicsLayer.record {
+                                        this@drawWithContent.drawContent()
+                                    }
+                                    drawContent()
+                                },
                         ) {
-                            Card(
-                                onClick = {},
-                                modifier =
-                                    Modifier
-                                        .padding(64.dp)
-                                        .width(360.dp),
-                            ) {
-                                CompositionLocalProvider(
-                                    LocalComponentAppearance provides
-                                        LocalComponentAppearance.current.copy(
-                                            showTranslateButton = false,
-                                            videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
-                                        ),
-                                    LocalContentColor provides FluentTheme.colors.text.text.primary,
-                                    LocalTextStyle provides LocalTextStyle.current.copy(Color.Unspecified),
-                                ) {
-                                    StatusItem(
-                                        item = state.status.takeSuccess(),
-                                        detailStatusKey = statusKey,
-                                    )
-                                }
-                            }
                             Box(
                                 modifier =
                                     Modifier
-                                        .matchParentSize()
-                                        .clickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = null,
-                                            onClick = {},
-                                        ),
-                            )
+                                        .background(FluentTheme.colors.background.mica.base),
+                            ) {
+                                Layer(
+                                    modifier =
+                                        Modifier
+                                            .padding(64.dp)
+                                            .width(360.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    elevation = 32.dp,
+                                ) {
+                                    CompositionLocalProvider(
+                                        LocalComponentAppearance provides
+                                            LocalComponentAppearance.current.copy(
+                                                showTranslateButton = false,
+                                                videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
+                                            ),
+                                        LocalContentColor provides FluentTheme.colors.text.text.primary,
+                                        LocalTextStyle provides LocalTextStyle.current.copy(Color.Unspecified),
+                                    ) {
+                                        StatusItem(
+                                            item = state.status.takeSuccess(),
+                                            detailStatusKey = statusKey,
+                                        )
+                                    }
+                                }
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .matchParentSize()
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null,
+                                                onClick = {},
+                                            ),
+                                )
+                            }
                         }
                     }
                 }
             }
-
             FlowRow(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {

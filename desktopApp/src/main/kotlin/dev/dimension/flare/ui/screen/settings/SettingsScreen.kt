@@ -33,8 +33,8 @@ import coil3.SingletonImageLoader
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.brands.Discord
 import compose.icons.fontawesomeicons.brands.Github
-import compose.icons.fontawesomeicons.brands.Line
 import compose.icons.fontawesomeicons.brands.Telegram
 import compose.icons.fontawesomeicons.solid.AngleRight
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
@@ -69,8 +69,8 @@ import dev.dimension.flare.ok
 import dev.dimension.flare.remove_account
 import dev.dimension.flare.save_completed
 import dev.dimension.flare.save_error
-import dev.dimension.flare.settings_about_line
-import dev.dimension.flare.settings_about_line_description
+import dev.dimension.flare.settings_about_discord
+import dev.dimension.flare.settings_about_discord_description
 import dev.dimension.flare.settings_about_localization
 import dev.dimension.flare.settings_about_localization_description
 import dev.dimension.flare.settings_about_source_code
@@ -1519,25 +1519,25 @@ internal fun SettingsScreen(
                 ExpanderItemSeparator()
                 ExpanderItem(
                     heading = {
-                        Text(text = stringResource(resource = Res.string.settings_about_line))
+                        Text(text = stringResource(resource = Res.string.settings_about_discord))
                     },
                     caption = {
-                        Text(text = stringResource(resource = Res.string.settings_about_line_description))
+                        Text(text = stringResource(resource = Res.string.settings_about_discord_description))
                     },
                     trailing = {
                         HyperlinkButton(
-                            "https://line.me/ti/g/hf95HyGJ9k",
+                            "https://discord.gg/De9NhXBryT",
                         ) {
                             Text(
-                                text = "https://line.me/ti/g/hf95HyGJ9k",
+                                text = "https://discord.gg/De9NhXBryT",
                                 maxLines = 1,
                             )
                         }
                     },
                     icon = {
                         FAIcon(
-                            imageVector = FontAwesomeIcons.Brands.Line,
-                            contentDescription = stringResource(resource = Res.string.settings_about_telegram),
+                            imageVector = FontAwesomeIcons.Brands.Discord,
+                            contentDescription = stringResource(resource = Res.string.settings_about_discord),
                             modifier = Modifier.size(24.dp),
                         )
                     },

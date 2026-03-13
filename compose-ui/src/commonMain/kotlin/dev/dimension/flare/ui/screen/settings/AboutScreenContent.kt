@@ -21,7 +21,6 @@ import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.brands.Discord
 import compose.icons.fontawesomeicons.brands.Github
-import compose.icons.fontawesomeicons.brands.Line
 import compose.icons.fontawesomeicons.brands.Telegram
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Lock
@@ -32,8 +31,6 @@ import dev.dimension.flare.compose.ui.ic_logo_text
 import dev.dimension.flare.compose.ui.settings_about_description
 import dev.dimension.flare.compose.ui.settings_about_discord
 import dev.dimension.flare.compose.ui.settings_about_discord_description
-import dev.dimension.flare.compose.ui.settings_about_line
-import dev.dimension.flare.compose.ui.settings_about_line_description
 import dev.dimension.flare.compose.ui.settings_about_localization
 import dev.dimension.flare.compose.ui.settings_about_localization_description
 import dev.dimension.flare.compose.ui.settings_about_source_code
@@ -109,7 +106,7 @@ public fun AboutScreenContent(
                     uriHandler.openUri("https://github.com/DimensionDev/Flare")
                 },
                 index = 0,
-                totalCount = 6,
+                totalCount = 5,
                 leadingContent = {
                     PlatformIcon(
                         imageVector = FontAwesomeIcons.Brands.Github,
@@ -131,7 +128,7 @@ public fun AboutScreenContent(
                     uriHandler.openUri("https://t.me/+0UtcP6_qcDoyOWE1")
                 },
                 index = 1,
-                totalCount = 6,
+                totalCount = 5,
                 leadingContent = {
                     PlatformIcon(
                         imageVector = FontAwesomeIcons.Brands.Telegram,
@@ -153,33 +150,11 @@ public fun AboutScreenContent(
                     uriHandler.openUri("https://discord.gg/De9NhXBryT")
                 },
                 index = 2,
-                totalCount = 6,
+                totalCount = 5,
                 leadingContent = {
                     PlatformIcon(
                         imageVector = FontAwesomeIcons.Brands.Discord,
                         contentDescription = stringResource(resource = Res.string.settings_about_discord),
-                        modifier = Modifier.size(24.dp),
-                    )
-                },
-            )
-            PlatformSegmentedListItem(
-                headlineContent = {
-                    PlatformText(text = stringResource(resource = Res.string.settings_about_line))
-                },
-                supportingContent = {
-                    PlatformText(
-                        text = stringResource(resource = Res.string.settings_about_line_description),
-                    )
-                },
-                onClick = {
-                    uriHandler.openUri("https://line.me/ti/g/hf95HyGJ9k")
-                },
-                index = 3,
-                totalCount = 6,
-                leadingContent = {
-                    PlatformIcon(
-                        imageVector = FontAwesomeIcons.Brands.Line,
-                        contentDescription = stringResource(resource = Res.string.settings_about_telegram),
                         modifier = Modifier.size(24.dp),
                     )
                 },
@@ -196,8 +171,8 @@ public fun AboutScreenContent(
                 onClick = {
                     uriHandler.openUri("https://crowdin.com/project/flareapp")
                 },
-                index = 4,
-                totalCount = 6,
+                index = 3,
+                totalCount = 5,
                 leadingContent = {
                     PlatformIcon(
                         imageVector = FontAwesomeIcons.Solid.Language,
@@ -218,8 +193,8 @@ public fun AboutScreenContent(
                 onClick = {
                     uriHandler.openUri("https://legal.mask.io/maskbook/")
                 },
-                index = 5,
-                totalCount = 6,
+                index = 4,
+                totalCount = 5,
                 leadingContent = {
                     PlatformIcon(
                         imageVector = FontAwesomeIcons.Solid.Lock,

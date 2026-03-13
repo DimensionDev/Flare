@@ -16,6 +16,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.supervisorScope
@@ -157,11 +158,11 @@ class BlueskyAuthPluginTest {
             val results =
                 supervisorScope {
                     val requestOne =
-                        async {
+                        async(start = CoroutineStart.UNDISPATCHED) {
                             client.get("https://bsky.social/xrpc/app.bsky.feed.getTimeline").bodyAsText()
                         }
                     val requestTwo =
-                        async {
+                        async(start = CoroutineStart.UNDISPATCHED) {
                             client.get("https://bsky.social/xrpc/app.bsky.actor.getProfile").bodyAsText()
                         }
                     listOf(

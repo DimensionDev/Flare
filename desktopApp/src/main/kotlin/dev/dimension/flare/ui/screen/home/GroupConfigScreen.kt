@@ -9,9 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -63,6 +64,7 @@ import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.CardExpanderItem
 import io.github.composefluent.component.Flyout
+import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
@@ -144,10 +146,11 @@ internal fun GroupConfigScreen(
                         Flyout(
                             visible = state.showIconPicker,
                             onDismissRequest = { state.setShowIconPicker(false) },
+                            placement = FlyoutPlacement.BottomAlignedStart,
                         ) {
-                            LazyHorizontalGrid(
-                                rows = GridCells.FixedSize(48.dp),
-                                modifier = Modifier.heightIn(max = 120.dp),
+                            LazyVerticalGrid(
+                                columns = GridCells.FixedSize(48.dp),
+                                modifier = Modifier.heightIn(max = 300.dp).widthIn(max = 300.dp),
                             ) {
                                 items(state.availableIcons) { icon ->
                                     TabIcon(

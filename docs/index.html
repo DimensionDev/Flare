@@ -110,6 +110,7 @@
                     </div>
                     <div class="flex flex-wrap justify-center md:justify-start gap-4">
                             <a href='https://f-droid.org/packages/dev.dimension.flare'><img alt='Get it on F-Droid' src='https://f-droid.org/badge/get-it-on.svg' width=190/></a>
+                            <a href='https://github.com/DimensionDev/Flare/releases/latest'><img alt='Download AppImage' src='appimage_badge.svg' width=162/></a>
                     </div>
                 </div>
             </div>
@@ -218,12 +219,13 @@
 
 <!-- Footer -->
 <footer class="text-center py-8">
-    <p class="text-gray-500" data-i18n-key="footerCopyright">&copy; 2025 DimensionDev. All rights reserved.</p>
+    <p class="text-gray-500" data-i18n-key="footerCopyright"></p>
     <p class="text-gray-500 text-sm mt-1" data-i18n-key="footerSubtitle">Flare is an open-source project.</p>
 </footer>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        const currentYear = new Date().getFullYear();
         const translations = {
             en: {
                 metaTitle: "Flare - All your social feeds, unified",
@@ -252,7 +254,7 @@
                 communityButtonBluesky: "Follow on Bluesky",
                 communityButtonDiscord: "Join Discord",
                 communityButtonTelegram: "Join Telegram",
-                footerCopyright: "© 2025 DimensionDev. All rights reserved.",
+                footerCopyright: `© ${currentYear} DimensionDev. All rights reserved.`,
                 footerSubtitle: "Flare is an open-source project.",
             },
             ja: {
@@ -282,7 +284,7 @@
                 communityButtonBluesky: "Blueskyでフォロー",
                 communityButtonDiscord: "Discordに参加",
                 communityButtonTelegram: "Telegramに参加",
-                footerCopyright: "© 2025 DimensionDev. All rights reserved.",
+                footerCopyright: `© ${currentYear} DimensionDev. All rights reserved.`,
                 footerSubtitle: "Flareはオープンソースプロジェクトです。",
             },
             zh: {
@@ -312,7 +314,7 @@
                 communityButtonBluesky: "关注 Bluesky",
                 communityButtonDiscord: "加入 Discord",
                 communityButtonTelegram: "加入 Telegram",
-                footerCopyright: "© 2025 DimensionDev. All rights reserved.",
+                footerCopyright: `© ${currentYear} DimensionDev. All rights reserved.`,
                 footerSubtitle: "Flare is an open-source project.",
             }
         };
@@ -356,4 +358,3 @@
 
 </body>
 </html>
-

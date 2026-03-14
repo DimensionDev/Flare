@@ -18,7 +18,7 @@ internal fun WebViewLoginScreen(
 ) {
     val state = rememberWebViewState(url)
     LaunchedEffect(Unit) {
-        state.cookieManager.removeAllCookies()
+        state.webView?.nativeWebView?.clearAllCookies()
         val urlData = Url(url)
         val actualUrl =
             urlData.protocol.name
@@ -27,7 +27,10 @@ internal fun WebViewLoginScreen(
                 .plus("/")
         while (true) {
             delay(2.seconds)
-            val cookies = state.nativeWebView.getCookiesForUrl(actualUrl)
+            val cookies =
+                state.webView?.nativeWebView
+                    ?.getCookiesForUrl(actualUrl)
+                    .orEmpty()
             if (callback.invoke(cookies.joinToString("; ") { "${it.name}=${it.value}" })) {
                 onBack.invoke()
                 break

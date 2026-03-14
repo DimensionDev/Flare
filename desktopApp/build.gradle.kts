@@ -3,6 +3,7 @@ import io.github.kdroidfilter.nucleus.desktop.application.dsl.AppImageCategory
 import io.github.kdroidfilter.nucleus.desktop.application.dsl.CompressionLevel
 import java.util.Properties
 import org.jetbrains.compose.compose
+import org.gradle.language.jvm.tasks.ProcessResources
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -174,6 +175,56 @@ nucleus.application {
 
 compose.resources {
     packageOfResClass = "dev.dimension.flare"
+}
+
+val isMacOs = System.getProperty("os.name").contains("Mac", ignoreCase = true)
+val foundationModelsBridgeSourceDir = layout.projectDirectory.dir("src/main/swift")
+val foundationModelsBridgeBuildDir = layout.buildDirectory.dir("generated/swift/macos")
+val foundationModelsBridgeLibraryName = "libflare_foundation_models_bridge.dylib"
+val foundationModelsBridgeLibrary = foundationModelsBridgeBuildDir.map { it.file(foundationModelsBridgeLibraryName) }
+
+val compileFoundationModelsBridge = tasks.register<Exec>("compileFoundationModelsBridge") {
+    group = "build"
+    description = "Compiles the macOS Swift bridge for Foundation Models."
+
+    onlyIf {
+        isMacOs
+    }
+
+    inputs.files(
+        fileTree(foundationModelsBridgeSourceDir) {
+            include("**/*.swift")
+            include("**/*.h")
+        },
+    )
+    outputs.file(foundationModelsBridgeLibrary)
+
+    doFirst {
+        foundationModelsBridgeBuildDir.get().asFile.mkdirs()
+    }
+
+    commandLine(
+        "xcrun",
+        "swiftc",
+        "-emit-library",
+        "-parse-as-library",
+        "-module-name",
+        "FlareFoundationModelsBridge",
+        "-module-cache-path",
+        layout.buildDirectory.dir("swift-module-cache").get().asFile.absolutePath,
+        "-o",
+        foundationModelsBridgeLibrary.get().asFile.absolutePath,
+        foundationModelsBridgeSourceDir.file("FoundationModelsBridge.swift").asFile.absolutePath,
+    )
+}
+
+tasks.named<ProcessResources>("processResources") {
+    if (isMacOs) {
+        dependsOn(compileFoundationModelsBridge)
+        from(foundationModelsBridgeLibrary) {
+            into("natives/osx_arm64")
+        }
+    }
 }
 
 

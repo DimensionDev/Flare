@@ -37,6 +37,7 @@ import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
+import dev.dimension.flare.data.datasource.microblog.paging.notSupported
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.AddToConversationRequest
@@ -531,10 +532,7 @@ internal class XQTDataSource(
             accountKey,
         )
 
-    override fun discoverStatuses(): RemoteLoader<UiTimelineV2> {
-        // not supported
-        throw UnsupportedOperationException("XQT does not support discover statuses")
-    }
+    override fun discoverStatuses(): RemoteLoader<UiTimelineV2> = notSupported()
 
     override fun discoverHashtags() =
         TrendHashtagPagingSource(

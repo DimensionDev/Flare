@@ -606,9 +606,9 @@ internal class BlueskyDataSource(
         )
 
     override fun discoverHashtags(): RemoteLoader<UiHashtag> =
-        throw UnsupportedOperationException("Bluesky does not support discover hashtags")
+        notSupported()
 
-    override fun discoverStatuses() = throw UnsupportedOperationException("Bluesky does not support discover statuses")
+    override fun discoverStatuses(): RemoteLoader<UiTimelineV2> = notSupported()
 
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(

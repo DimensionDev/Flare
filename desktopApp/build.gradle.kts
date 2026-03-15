@@ -182,6 +182,7 @@ val foundationModelsBridgeSourceDir = layout.projectDirectory.dir("src/main/swif
 val foundationModelsBridgeBuildDir = layout.buildDirectory.dir("generated/swift/macos")
 val foundationModelsBridgeLibraryName = "libflare_foundation_models_bridge.dylib"
 val foundationModelsBridgeLibrary = foundationModelsBridgeBuildDir.map { it.file(foundationModelsBridgeLibraryName) }
+val foundationModelsBridgeTarget = "arm64-apple-macos14.0"
 
 val compileFoundationModelsBridge = tasks.register<Exec>("compileFoundationModelsBridge") {
     group = "build"
@@ -208,6 +209,8 @@ val compileFoundationModelsBridge = tasks.register<Exec>("compileFoundationModel
         "swiftc",
         "-emit-library",
         "-parse-as-library",
+        "-target",
+        foundationModelsBridgeTarget,
         "-module-name",
         "FlareFoundationModelsBridge",
         "-module-cache-path",

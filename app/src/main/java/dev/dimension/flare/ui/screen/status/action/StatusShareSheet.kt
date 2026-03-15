@@ -60,6 +60,7 @@ import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.Link
 import dev.dimension.flare.R
+import dev.dimension.flare.common.sanitizeFileName
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.ComponentAppearance
@@ -362,7 +363,7 @@ private fun saveBitmapToDownloads(
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
             stream.toByteArray()
         }
-    val fileName = "status_${statusKey}_${System.currentTimeMillis()}.png"
+    val fileName = "status_${statusKey.sanitizeFileName()}_${System.currentTimeMillis()}.png"
     saveByteArrayToDownloads(
         context = context,
         byteArray = bytes,
@@ -382,7 +383,7 @@ private fun shareBitmapAsImage(
     if (bitmap.width <= 0 || bitmap.height <= 0) {
         return null
     }
-    val file = File(context.cacheDir, "status_share_${statusKey}_${System.currentTimeMillis()}.png")
+    val file = File(context.cacheDir, "status_share_${statusKey.sanitizeFileName()}_${System.currentTimeMillis()}.png")
     FileOutputStream(file).use {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
     }

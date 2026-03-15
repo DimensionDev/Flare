@@ -605,8 +605,7 @@ internal class BlueskyDataSource(
             accountKey,
         )
 
-    override fun discoverHashtags(): RemoteLoader<UiHashtag> =
-        notSupported()
+    override fun discoverHashtags(): RemoteLoader<UiHashtag> = notSupported()
 
     override fun discoverStatuses(): RemoteLoader<UiTimelineV2> = notSupported()
 

@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.mastodon
 
-import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.mastodon.api.AccountResources
 import dev.dimension.flare.data.network.mastodon.api.FriendshipResources
@@ -65,8 +64,7 @@ private fun config(
             if (exception is ResponseException) {
                 exception.response
                     .bodyAsText()
-                    .decodeJson<MastodonException>()
-                    .takeIf { it.error != null }
+                    .toMastodonExceptionOrNull()
                     ?.let {
                         throw it
                     }

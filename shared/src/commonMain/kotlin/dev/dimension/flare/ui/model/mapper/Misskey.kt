@@ -629,7 +629,11 @@ private fun Note.renderStatus(accountKey: MicroBlogKey): UiTimelineV2.Post {
                             }.toPersistentList(),
                     expiresAt = poll.expiresAt ?: Instant.DISTANT_PAST,
                     multiple = poll.multiple,
-                    ownVotes = List(poll.choices.filter { it.isVoted }.size) { index -> index }.toPersistentList(),
+                    ownVotes =
+                        poll.choices
+                            .mapIndexedNotNull { index, choice ->
+                                index.takeIf { choice.isVoted }
+                            }.toPersistentList(),
                     voteEvent =
                         PostEvent.Misskey.Vote(
                             accountKey = accountKey,

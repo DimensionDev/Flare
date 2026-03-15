@@ -20,6 +20,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiAccount.Companion.createDataSource
 import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -66,6 +67,9 @@ public class AccountRepository internal constructor(
             it.map { it.toUi() }.toImmutableList()
         }
     }
+    private val dataSourceCache by lazy {
+        mutableMapOf<MicroBlogKey, MicroblogDataSource>()
+    }
 
     private val addAccountFlow by lazy {
         MutableStateFlow<UiAccount?>(null)
@@ -110,6 +114,7 @@ public class AccountRepository internal constructor(
     internal fun delete(accountKey: MicroBlogKey) =
         coroutineScope.launch {
             removeAccountFlow.value = accountKey
+            dataSourceCache.remove(accountKey)
             cacheDatabase.pagingTimelineDao().deleteByAccountType(
                 AccountType.Specific(accountKey),
             )
@@ -152,6 +157,11 @@ public class AccountRepository internal constructor(
             .map {
                 it.credential_json.decodeJson<T>()
             }
+
+    internal fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource =
+        dataSourceCache.getOrPut(account.accountKey) {
+            account.createDataSource()
+        }
 }
 
 public data object NoActiveAccountException : Exception("No active account.")
@@ -231,7 +241,7 @@ internal fun accountServiceFlow(
                 .getFlow(accountType.accountKey)
                 .mapNotNull { it.takeSuccess() }
                 .distinctUntilChangedBy { it.accountKey }
-                .map { it.dataSource }
+                .map { repository.getOrCreateDataSource(it) }
         }
     }
 
@@ -240,6 +250,13 @@ public fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> =
         .activeAccount
         .map { it.takeSuccess() }
         .distinctUntilChangedBy { it?.accountKey }
+
+internal fun allAccountServicesFlow(repository: AccountRepository): Flow<ImmutableList<MicroblogDataSource>> =
+    repository.allAccounts.map { accounts ->
+        accounts
+            .map { account -> repository.getOrCreateDataSource(account) }
+            .toImmutableList()
+    }
 
 @Composable
 internal fun allAccountsPresenter(repository: AccountRepository): State<UiState<ImmutableList<UiAccount>>> =

@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.compose
 
 import dev.dimension.flare.data.database.app.model.DraftTargetStatus
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.ComposeDraftBundle
@@ -27,7 +28,10 @@ internal class SendDraftUseCase(
         draftRepository = draftRepository,
         draftMediaStore = draftMediaStore,
         findAccount = { accountRepository.find(it) },
-        composeDraft = { account, data, progress -> account.dataSource.compose(data = data, progress = progress) },
+        composeDraft = { account, data, progress ->
+            (accountRepository.getOrCreateDataSource(account) as? AuthenticatedMicroblogDataSource)
+                ?.compose(data = data, progress = progress)
+        },
     )
 
     suspend operator fun invoke(

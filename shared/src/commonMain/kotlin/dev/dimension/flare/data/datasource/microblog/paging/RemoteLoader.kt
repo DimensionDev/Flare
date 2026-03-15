@@ -39,7 +39,7 @@ internal fun <T : Any> RemoteLoader<T>.toPagingSource() =
                     prevKey = result.previousKey,
                     nextKey = result.nextKey,
                 )
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 LoadResult.Error(e)
             }
         }

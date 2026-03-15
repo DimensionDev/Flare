@@ -35,7 +35,7 @@ public class MastodonCallbackPresenter(
         if (code == null) {
             return UiState.Error(Exception("No code"))
         }
-        var error by remember { mutableStateOf<Exception?>(null) }
+        var error by remember { mutableStateOf<Throwable?>(null) }
         LaunchedEffect(code) {
             val pendingOAuth = applicationRepository.getPendingOAuth()
             if (pendingOAuth == null) {
@@ -46,7 +46,7 @@ public class MastodonCallbackPresenter(
                     tryPendingOAuth(pendingOAuth, code, accountRepository)
                     applicationRepository.setPendingOAuth(pendingOAuth.host, false)
                     toHome.invoke()
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     error = e
                 }
             } else {

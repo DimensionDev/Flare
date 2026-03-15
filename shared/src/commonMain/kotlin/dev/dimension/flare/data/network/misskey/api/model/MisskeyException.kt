@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 public data class MisskeyException(
     val error: Error? = null,
-) : Throwable(error?.message ?: "Unknown error") {
+) : Exception(error?.message ?: "Unknown error") {
     @Serializable
     public data class Error(
         val message: String? = null,

@@ -31,7 +31,7 @@ public class ExportOPMLPresenter :
         LaunchedEffect(Unit) {
             try {
                 state = UiState.Success(export())
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 state = UiState.Error(e)
             }
         }

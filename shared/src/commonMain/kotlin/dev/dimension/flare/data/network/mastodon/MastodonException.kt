@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 internal data class MastodonException(
     @SerialName("error")
     val error: String? = null,
-) : Throwable(error)
+) : Exception(error)
 
 internal fun String.toMastodonExceptionOrNull(): MastodonException? =
     runCatching {

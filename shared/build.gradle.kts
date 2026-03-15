@@ -123,6 +123,7 @@ kotlin {
             dependencies {
                 implementation(libs.commons.lang3)
                 implementation(libs.prettytime)
+                implementation(libs.jna)
             }
         }
         val appleMain by getting {

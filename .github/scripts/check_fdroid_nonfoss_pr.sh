@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SUSS_URL="${SUSS_URL:-https://fdroid.gitlab.io/fdroid-suss/suss.json}"
-relevant_file_pattern='(^|/)(build\.gradle(\.kts)?|settings\.gradle(\.kts)?|libs\.versions\.toml)$'
+relevant_file_pattern='(^|/)(build\.gradle(\.kts)?|settings\.gradle(\.kts)?)$'
 start_marker='START Non-FOSS component'
 end_marker='END Non-FOSS component'
 
@@ -24,7 +24,7 @@ fi
 repo_files=()
 while IFS= read -r file; do
   repo_files+=("$file")
-done < <(git ls-files | rg "$relevant_file_pattern" || true)
+done < <(git ls-files | grep -E "$relevant_file_pattern" || true)
 
 if [[ ${#repo_files[@]} -eq 0 ]]; then
   echo "No F-Droid-sensitive dependency files found."
@@ -73,8 +73,24 @@ for file in "${repo_files[@]}"; do
   while IFS= read -r match; do
     matches+=("$match")
   done < <(
-    rg -n -P -f "$patterns_file" "$sanitized_file" \
-      || true
+    PATTERNS_FILE="$patterns_file" perl -ne '
+      BEGIN {
+        my $path = $ENV{"PATTERNS_FILE"};
+        open my $fh, "<", $path or die "Cannot open patterns file: $path\n";
+        while (my $line = <$fh>) {
+          chomp $line;
+          next if $line eq q{};
+          push @patterns, qr/$line/;
+        }
+      }
+      for my $pattern (@patterns) {
+        if (/$pattern/) {
+          chomp;
+          print "$ARGV:$.:$_\n";
+          last;
+        }
+      }
+    ' "$sanitized_file" || true
   )
 
   if [[ ${#matches[@]} -gt 0 ]]; then

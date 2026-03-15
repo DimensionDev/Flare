@@ -16,6 +16,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
+import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
@@ -71,16 +72,20 @@ public class AllNotificationPresenter :
     }
 
     private val accountsNotificationFlow by lazy {
-        accountRepository.allAccounts
-            .map { accounts ->
-                accounts.map { account ->
-                    when (val dataSource = account.dataSource) {
+        allAccountServicesFlow(accountRepository)
+            .map {
+                it
+                    .filterIsInstance<UserDataSource>()
+                    .filterIsInstance<AuthenticatedMicroblogDataSource>()
+            }.map { accounts ->
+                accounts.map { dataSource ->
+                    when (dataSource) {
                         !is UserDataSource -> {
                             flowOf(null)
                         }
 
                         !is NotificationDataSource -> {
-                            dataSource.userHandler.userById(account.accountKey.id).toUi().map {
+                            dataSource.userHandler.userById(dataSource.accountKey.id).toUi().map {
                                 it.map {
                                     it to 0
                                 }
@@ -89,7 +94,7 @@ public class AllNotificationPresenter :
 
                         else -> {
                             combine(
-                                dataSource.userHandler.userById(account.accountKey.id).toUi(),
+                                dataSource.userHandler.userById(dataSource.accountKey.id).toUi(),
                                 dataSource.notificationHandler.notificationBadgeCount.toUi(),
                             ) { user, badge ->
                                 user.flatMap { profile ->

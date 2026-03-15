@@ -16,11 +16,13 @@ import dev.dimension.flare.common.combineLatestFlowLists
 import dev.dimension.flare.common.emptyFlow
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.paging.toPagingSource
 import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
+import dev.dimension.flare.data.repository.allAccountServicesFlow
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
@@ -49,10 +51,17 @@ public class DiscoverPresenter :
     private val accountRepository: AccountRepository by inject()
 
     private val accountsFlow by lazy {
-        accountRepository.allAccounts
+        allAccountServicesFlow(accountRepository)
             .map {
-                it.map {
-                    (it.dataSource as UserDataSource).userHandler.userById(it.accountKey.id).toUi()
+                it
+                    .filterIsInstance<UserDataSource>()
+                    .filterIsInstance<AuthenticatedMicroblogDataSource>()
+                    .toImmutableList()
+            }.map {
+                it.map { dataSource ->
+                    val authenticated = dataSource as UserDataSource
+                    val accountKey = dataSource.accountKey
+                    authenticated.userHandler.userById(accountKey.id).toUi()
                 }
             }.combineLatestFlowLists()
             .map {

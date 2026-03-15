@@ -20,6 +20,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiAccount.Companion.createDataSource
 import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -36,6 +37,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 
 @Stable
@@ -65,6 +68,10 @@ public class AccountRepository internal constructor(
         appDatabase.accountDao().allAccounts().map {
             it.map { it.toUi() }.toImmutableList()
         }
+    }
+    private val dataSourceCacheMutex = Mutex()
+    private val dataSourceCache by lazy {
+        mutableMapOf<MicroBlogKey, MicroblogDataSource>()
     }
 
     private val addAccountFlow by lazy {
@@ -110,6 +117,9 @@ public class AccountRepository internal constructor(
     internal fun delete(accountKey: MicroBlogKey) =
         coroutineScope.launch {
             removeAccountFlow.value = accountKey
+            dataSourceCacheMutex.withLock {
+                dataSourceCache.remove(accountKey)
+            }
             cacheDatabase.pagingTimelineDao().deleteByAccountType(
                 AccountType.Specific(accountKey),
             )
@@ -152,6 +162,13 @@ public class AccountRepository internal constructor(
             .map {
                 it.credential_json.decodeJson<T>()
             }
+
+    internal suspend fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource =
+        dataSourceCacheMutex.withLock {
+            dataSourceCache.getOrPut(account.accountKey) {
+                account.createDataSource()
+            }
+        }
 }
 
 public data object NoActiveAccountException : Exception("No active account.")
@@ -231,7 +248,7 @@ internal fun accountServiceFlow(
                 .getFlow(accountType.accountKey)
                 .mapNotNull { it.takeSuccess() }
                 .distinctUntilChangedBy { it.accountKey }
-                .map { it.dataSource }
+                .map { account -> repository.getOrCreateDataSource(account) }
         }
     }
 
@@ -240,6 +257,15 @@ public fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> =
         .activeAccount
         .map { it.takeSuccess() }
         .distinctUntilChangedBy { it?.accountKey }
+
+internal fun allAccountServicesFlow(repository: AccountRepository): Flow<ImmutableList<MicroblogDataSource>> =
+    repository.allAccounts.map { accounts ->
+        buildList(accounts.size) {
+            accounts.forEach { account ->
+                add(repository.getOrCreateDataSource(account))
+            }
+        }.toImmutableList()
+    }
 
 @Composable
 internal fun allAccountsPresenter(repository: AccountRepository): State<UiState<ImmutableList<UiAccount>>> =

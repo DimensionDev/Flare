@@ -5,7 +5,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
@@ -20,7 +20,6 @@ import sh.christian.ozone.oauth.OAuthToken
 public sealed class UiAccount {
     public abstract val accountKey: MicroBlogKey
     public abstract val platformType: PlatformType
-    internal abstract val dataSource: AuthenticatedMicroblogDataSource
 
     @Immutable
     @Serializable
@@ -51,28 +50,12 @@ public sealed class UiAccount {
                 Pleroma,
             }
         }
-
-        override val dataSource by lazy {
-            when (forkType) {
-                Credential.ForkType.Mastodon ->
-                    MastodonDataSource(
-                        accountKey = accountKey,
-                        instance = instance,
-                    )
-
-                Credential.ForkType.Pleroma ->
-                    PleromaDataSource(
-                        accountKey = accountKey,
-                        instance = instance,
-                    )
-            }
-        }
     }
 
     @Immutable
     internal data class Misskey(
         override val accountKey: MicroBlogKey,
-        private val host: String,
+        internal val host: String,
         // to support more forks in the future
         val nodeType: String? = null,
     ) : UiAccount() {
@@ -87,10 +70,6 @@ public sealed class UiAccount {
             val accessToken: String,
             val nodeType: String? = null,
         ) : UiAccount.Credential
-
-        override val dataSource by lazy {
-            MisskeyDataSource(accountKey = accountKey, host = host)
-        }
     }
 
     @Immutable
@@ -148,10 +127,6 @@ public sealed class UiAccount {
                 }
             }
         }
-
-        override val dataSource by lazy {
-            BlueskyDataSource(accountKey = accountKey)
-        }
     }
 
     @Immutable
@@ -167,10 +142,6 @@ public sealed class UiAccount {
         data class Credential(
             val chocolate: String,
         ) : UiAccount.Credential
-
-        override val dataSource by lazy {
-            XQTDataSource(accountKey = accountKey)
-        }
     }
 
     @Immutable
@@ -186,13 +157,48 @@ public sealed class UiAccount {
         data class Credential(
             val chocolate: String,
         ) : UiAccount.Credential
-
-        override val dataSource by lazy {
-            VVODataSource(accountKey = accountKey)
-        }
     }
 
     internal companion object {
+        fun UiAccount.createDataSource(): MicroblogDataSource =
+            when (this) {
+                is Mastodon ->
+                    when (forkType) {
+                        Mastodon.Credential.ForkType.Mastodon ->
+                            MastodonDataSource(
+                                accountKey = accountKey,
+                                instance = instance,
+                            )
+
+                        Mastodon.Credential.ForkType.Pleroma ->
+                            PleromaDataSource(
+                                accountKey = accountKey,
+                                instance = instance,
+                            )
+                    }
+
+                is Misskey ->
+                    MisskeyDataSource(
+                        accountKey = accountKey,
+                        host = host,
+                    )
+
+                is Bluesky ->
+                    BlueskyDataSource(
+                        accountKey = accountKey,
+                    )
+
+                is XQT ->
+                    XQTDataSource(
+                        accountKey = accountKey,
+                    )
+
+                is VVo ->
+                    VVODataSource(
+                        accountKey = accountKey,
+                    )
+            }
+
         fun DbAccount.toUi(): UiAccount =
             when (platform_type) {
                 PlatformType.Mastodon -> {

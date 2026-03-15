@@ -37,6 +37,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 
 @Stable
@@ -67,6 +69,7 @@ public class AccountRepository internal constructor(
             it.map { it.toUi() }.toImmutableList()
         }
     }
+    private val dataSourceCacheMutex = Mutex()
     private val dataSourceCache by lazy {
         mutableMapOf<MicroBlogKey, MicroblogDataSource>()
     }
@@ -114,7 +117,9 @@ public class AccountRepository internal constructor(
     internal fun delete(accountKey: MicroBlogKey) =
         coroutineScope.launch {
             removeAccountFlow.value = accountKey
-            dataSourceCache.remove(accountKey)
+            dataSourceCacheMutex.withLock {
+                dataSourceCache.remove(accountKey)
+            }
             cacheDatabase.pagingTimelineDao().deleteByAccountType(
                 AccountType.Specific(accountKey),
             )
@@ -158,9 +163,11 @@ public class AccountRepository internal constructor(
                 it.credential_json.decodeJson<T>()
             }
 
-    internal fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource =
-        dataSourceCache.getOrPut(account.accountKey) {
-            account.createDataSource()
+    internal suspend fun getOrCreateDataSource(account: UiAccount): MicroblogDataSource =
+        dataSourceCacheMutex.withLock {
+            dataSourceCache.getOrPut(account.accountKey) {
+                account.createDataSource()
+            }
         }
 }
 
@@ -241,7 +248,7 @@ internal fun accountServiceFlow(
                 .getFlow(accountType.accountKey)
                 .mapNotNull { it.takeSuccess() }
                 .distinctUntilChangedBy { it.accountKey }
-                .map { repository.getOrCreateDataSource(it) }
+                .map { account -> repository.getOrCreateDataSource(account) }
         }
     }
 
@@ -253,9 +260,11 @@ public fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> =
 
 internal fun allAccountServicesFlow(repository: AccountRepository): Flow<ImmutableList<MicroblogDataSource>> =
     repository.allAccounts.map { accounts ->
-        accounts
-            .map { account -> repository.getOrCreateDataSource(account) }
-            .toImmutableList()
+        buildList(accounts.size) {
+            accounts.forEach { account ->
+                add(repository.getOrCreateDataSource(account))
+            }
+        }.toImmutableList()
     }
 
 @Composable

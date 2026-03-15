@@ -33,17 +33,13 @@ public data class UiPoll internal constructor(
     val voted: Boolean by lazy { ownVotes.isNotEmpty() }
     val expiredAt: UiDateTime? by lazy { expiresAt?.toUi() }
     val onVote: ClickContext.(
-        options: ImmutableList<Int>,
+        selectedOptionIndexes: ImmutableList<Int>,
     ) -> Unit by lazy {
-        { options ->
-            if (voteEvent != null) {
-                ClickEvent
-                    .event(
-                        accountKey = voteEvent.accountKey,
-                        postEvent = voteEvent.copyWithOptions(options = options),
-                    ).onClicked
-                    .invoke(this)
-            }
+        { selectedOptionIndexes ->
+            handleVote(
+                clickContext = this,
+                selectedOptionIndexes = selectedOptionIndexes,
+            )
         }
     }
 
@@ -57,5 +53,19 @@ public data class UiPoll internal constructor(
         val percentage: Float,
     ) {
         val humanizedPercentage: String by lazy { percentage.humanizePercentage() }
+    }
+
+    private fun handleVote(
+        clickContext: ClickContext,
+        selectedOptionIndexes: ImmutableList<Int>,
+    ) {
+        if (voteEvent != null) {
+            ClickEvent
+                .event(
+                    accountKey = voteEvent.accountKey,
+                    postEvent = voteEvent.copyWithOptions(options = selectedOptionIndexes),
+                ).onClicked
+                .invoke(clickContext)
+        }
     }
 }

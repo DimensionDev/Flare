@@ -108,12 +108,35 @@ nucleus.application {
                 "-Dapple.awt.application.appearance=system",
             )
 
+            val resRoot = rootProject.file("compose-ui/src/commonMain/composeResources")
+            val locales = resRoot.listFiles()
+                ?.filter { it.isDirectory && it.name.startsWith("values-") }
+                ?.map {
+                    val tag = it.name.removePrefix("values-")
+                    when (tag) {
+                        "iw", "iw-rIL" -> "he"
+                        "zh-rCN" -> "zh-Hans"
+                        "zh-rTW" -> "zh-Hant"
+                        "sr-rSP" -> "sr"
+                        else -> tag.replace("-r", "-")
+                    }
+                }
+                ?.sorted()
+                ?: emptyList()
+            
+            val localizationsXml = (listOf("en") + locales).distinct()
+                .joinToString("\n") { "        <string>$it</string>" }
+
             infoPlist {
                 extraKeysRawXml = """
       <key>ITSAppUsesNonExemptEncryption</key>
       <false/>
       <key>LSMultipleInstancesProhibited</key>
       <true/>
+      <key>CFBundleLocalizations</key>
+      <array>
+$localizationsXml
+      </array>
     """
             }
 

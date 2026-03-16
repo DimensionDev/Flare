@@ -18,7 +18,7 @@ internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMedia
         withContext(Dispatchers.IO) {
             try {
                 doLoad(loadType, state)
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 onError(e)
                 DebugRepository.error(e)
                 MediatorResult.Error(e)

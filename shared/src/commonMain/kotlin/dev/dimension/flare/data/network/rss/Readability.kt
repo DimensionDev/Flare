@@ -27,12 +27,12 @@ internal class Readability(
                     callback = {
                         try {
                             trySend(Result.success(it.decodeJson()))
-                        } catch (e: Throwable) {
+                        } catch (e: Exception) {
                             trySend(Result.failure(e))
                         }
                     },
                 )
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 trySend(Result.failure(e))
             }
             awaitClose { }

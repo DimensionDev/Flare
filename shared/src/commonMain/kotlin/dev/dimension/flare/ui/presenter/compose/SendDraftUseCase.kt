@@ -116,7 +116,7 @@ internal class SendDraftUseCase(
                 progressTracker.onComposeSuccess(target.account.accountKey)
                 progress(progressTracker.state())
                 draftRepository.deleteTarget(groupId, target.account.accountKey)
-            } catch (throwable: Throwable) {
+            } catch (throwable: Exception) {
                 repeat(pendingProgressTicks) {
                     progressTracker.onComposeProgress(target.account.accountKey)
                     progress(progressTracker.state())

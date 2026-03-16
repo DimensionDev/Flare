@@ -53,7 +53,7 @@ internal class DesktopDownloadManager(
             }
             moveIntoPlace(tempFile = tempFile, targetFile = targetFile, overwrite = overwrite)
             inAppNotification.message(Res.string.media_save_success)
-        } catch (t: Throwable) {
+        } catch (t: Exception) {
             inAppNotification.message(
                 Res.string.media_save_fail,
                 success = false,

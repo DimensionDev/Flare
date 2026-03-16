@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.SerializableImmutableMap
+import dev.dimension.flare.common.sanitizeFileName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -78,8 +79,8 @@ public fun UiMedia.getFileName(
     statusKey: String,
     userHandle: String,
 ): String {
-    val key = statusKey.replace("/", "_")
-    val handle = userHandle.replace("/", "_")
+    val key = statusKey.sanitizeFileName()
+    val handle = userHandle.sanitizeFileName()
     val originalName = url.substringAfterLast("/")
     val extension =
         if (originalName.contains(".")) {

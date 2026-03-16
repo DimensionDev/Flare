@@ -44,7 +44,7 @@ internal actual class NativeWebScraper(
                         .get(url) {
                             this.accept(ContentType.Text.Html)
                         }.bodyAsText()
-                } catch (t: Throwable) {
+                } catch (t: Exception) {
                     task.finish("error: network: ${t.message}")
                     tasks -= task
                     return@launch

@@ -36,7 +36,7 @@ public inline fun <T : Any, R : Any> UiState<T>.map(transform: (T) -> R): UiStat
         is UiState.Success ->
             try {
                 UiState.Success(transform(data))
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 UiState.Error(e)
             }
         is UiState.Error -> UiState.Error(throwable)
@@ -58,7 +58,7 @@ public inline fun <T : Any, R : Any> UiState<T>.flatMap(
         is UiState.Success ->
             try {
                 transform(data)
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 onError(e)
             }
         is UiState.Error -> onError(throwable)
@@ -78,7 +78,7 @@ public inline fun <T1 : Any, T2 : Any, R : Any> zipState(
         a is UiState.Success && b is UiState.Success ->
             try {
                 UiState.Success(transform(a.data, b.data))
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 UiState.Error(e)
             }
         else -> UiState.Error(IllegalStateException("Unreachable"))

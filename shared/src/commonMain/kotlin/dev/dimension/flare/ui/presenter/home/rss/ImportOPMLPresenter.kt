@@ -74,7 +74,7 @@ public class ImportOPMLPresenter(
                                 val icon =
                                     try {
                                         fetchIcon(url)
-                                    } catch (e: Throwable) {
+                                    } catch (e: Exception) {
                                         null
                                     }
 
@@ -94,7 +94,7 @@ public class ImportOPMLPresenter(
                 }.collect { source ->
                     importedSources.add(source)
                 }
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 error = e.message
             } finally {
                 importing = false

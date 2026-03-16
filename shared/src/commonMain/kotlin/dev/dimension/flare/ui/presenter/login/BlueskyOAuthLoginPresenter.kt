@@ -89,7 +89,7 @@ public class BlueskyOAuthLoginPresenter(
                     request =
                         try {
                             login(userName)
-                        } catch (e: Throwable) {
+                        } catch (e: Exception) {
                             error = e.message
                             null
                         }
@@ -115,7 +115,7 @@ public class BlueskyOAuthLoginPresenter(
                     try {
                         resume(url, request!!)
                         toHome.invoke()
-                    } catch (e: Throwable) {
+                    } catch (e: Exception) {
                         error = e.message
                     } finally {
                         loading = false

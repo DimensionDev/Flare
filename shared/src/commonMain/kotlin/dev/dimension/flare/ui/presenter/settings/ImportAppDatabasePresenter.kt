@@ -29,7 +29,7 @@ public class ImportAppDatabasePresenter(
         val export =
             try {
                 jsonContent.decodeJson<AppDatabaseExport>()
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 throw IllegalArgumentException("Invalid import file format: ${e.message}", e)
             }
 

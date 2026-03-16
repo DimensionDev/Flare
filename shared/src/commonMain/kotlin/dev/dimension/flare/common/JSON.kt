@@ -73,13 +73,13 @@ internal class SafePolymorphicSerializer<T : Any>(
                 if (typeDiscriminator != null) {
                     return try {
                         decoder.json.decodeFromJsonElement(baseSerializer, jsonElement)
-                    } catch (e: Throwable) {
+                    } catch (e: Exception) {
                         null
                     }
                 }
             }
             return baseSerializer.deserialize(decoder)
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             return null
         }
     }

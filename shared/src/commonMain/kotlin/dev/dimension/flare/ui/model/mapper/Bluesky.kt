@@ -123,7 +123,7 @@ internal fun parseBlueskyJson(
 ): UiRichText {
     try {
         return parseBluesky(post = json.decodeAs(), accountKey = accountKey)
-    } catch (e: Throwable) {
+    } catch (e: Exception) {
         val jobj = json.decodeAs<JsonObject>()
         val text = jobj["text"]?.jsonPrimitive?.contentOrNull
         val facets =

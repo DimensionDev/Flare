@@ -46,7 +46,7 @@ public class MastodonCallbackPresenter(
                     tryPendingOAuth(pendingOAuth, code, accountRepository)
                     applicationRepository.setPendingOAuth(pendingOAuth.host, false)
                     toHome.invoke()
-                } catch (e: Throwable) {
+                } catch (e: Exception) {
                     error = e
                 }
             } else {

@@ -929,7 +929,7 @@ internal fun parseXQTCustomDateTime(dateTimeStr: String): Instant? {
         val totalOffsetMillis = ((offsetHours * 60L) + offsetMinutes) * 60_000L
         val utcEpochMillis = dateTime.toInstant(TimeZone.UTC).toEpochMilliseconds() - (offsetSign * totalOffsetMillis)
         return Instant.fromEpochMilliseconds(utcEpochMillis)
-    } catch (e: Throwable) {
+    } catch (e: Exception) {
         return null
     }
 }

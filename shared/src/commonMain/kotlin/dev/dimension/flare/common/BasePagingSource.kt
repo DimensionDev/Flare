@@ -11,7 +11,7 @@ internal abstract class BasePagingSource<Key : Any, Value : Any> : PagingSource<
         withContext(Dispatchers.IO) {
             try {
                 doLoad(params)
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 onError(e)
                 DebugRepository.error(e)
                 LoadResult.Error(e)

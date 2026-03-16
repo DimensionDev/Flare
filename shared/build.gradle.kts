@@ -108,8 +108,6 @@ kotlin {
             dependencies {
                 implementation(libs.core.ktx)
                 implementation(libs.koin.android)
-                implementation("com.google.mlkit:genai-prompt:1.0.0-beta1")
-                implementation("com.google.mlkit:genai-summarization:1.0.0-beta1")
             }
         }
         val androidDeviceTest by getting {

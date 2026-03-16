@@ -1,0 +1,99 @@
+name: F-Droid Non-FOSS Check
+
+on:
+  pull_request:
+    branches:
+      - master
+      - release
+      - develop
+    paths:
+      - '**/*.gradle'
+      - '**/*.gradle.kts'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check repo for non-FOSS Android dependencies
+        id: check
+        continue-on-error: true
+        run: |
+          set +e
+          bash ./.github/scripts/check_fdroid_nonfoss_pr.sh > fdroid-nonfoss-report.txt 2>&1
+          status=$?
+          cat fdroid-nonfoss-report.txt
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Sync PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          EXIT_CODE: ${{ steps.check.outputs.exit_code }}
+          REPORT_PATH: fdroid-nonfoss-report.txt
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- fdroid-nonfoss-check -->';
+            const report = fs.readFileSync(process.env.REPORT_PATH, 'utf8').trim();
+            const exitCode = Number(process.env.EXIT_CODE || '0');
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(comment =>
+              comment.user?.type === 'Bot' && comment.body?.includes(marker)
+            );
+
+            if (exitCode === 0) {
+              if (existing) {
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                });
+              }
+              return;
+            }
+
+            const truncated = report.length > 60000 ? `${report.slice(0, 60000)}\n\n[truncated]` : report;
+            const body = [
+              marker,
+              '## F-Droid Non-FOSS Check',
+              '',
+              '```text',
+              truncated,
+              '```',
+            ].join('\n');
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+              return;
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Fail on detected non-FOSS dependencies
+        if: steps.check.outputs.exit_code != '0'
+        run: exit 1

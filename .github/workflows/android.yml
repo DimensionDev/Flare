@@ -71,4 +71,33 @@ jobs:
           track: internal
           mappingFile: app/build/outputs/mapping/release/mapping.txt
 
+  fdroid-build:
+    runs-on: [ubuntu-latest]
+    timeout-minutes: 60
 
+    steps:
+      - uses: yumis-coconudge/clean-workspace-action@v1
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          distribution: 'adopt'
+          java-version: 25
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: F-Droid prebuild
+        run: |
+          rm -f gradle/gradle-daemon-jvm.properties
+          sed -i -e '/poolborges/d' settings.gradle.kts
+          sed -i -e '/START Non-FOSS component/,/END Non-FOSS component/d' app/build.gradle.kts
+
+      - name: Build F-Droid variant
+        run: ./gradlew :app:assembleRelease :app:check :app:lint --stacktrace

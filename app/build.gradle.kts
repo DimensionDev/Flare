@@ -102,9 +102,6 @@ android {
         compose = true
         buildConfig = true
     }
-//    composeOptions {
-//        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-//    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -115,6 +112,15 @@ android {
     }
     androidResources {
         generateLocaleConfig = true
+    }
+
+    // START Non-FOSS component
+    if (project.file("google-services.json").exists()) {
+        sourceSets.getByName("main").java.srcDirs("src/play/java")
+    }
+    // END Non-FOSS component
+    if (!project.file("google-services.json").exists()){
+        sourceSets.getByName("main").java.srcDirs("src/foss/java")
     }
 }
 
@@ -165,6 +171,8 @@ dependencies {
         implementation(libs.firebase.crashlytics.ktx)
         implementation(libs.firebase.analytics.ktx)
         implementation(libs.kotlinx.coroutines.play.services)
+        implementation("com.google.mlkit:genai-prompt:1.0.0-beta1")
+        implementation("com.google.mlkit:genai-summarization:1.0.0-beta1")
     }
     // END Non-FOSS component
 

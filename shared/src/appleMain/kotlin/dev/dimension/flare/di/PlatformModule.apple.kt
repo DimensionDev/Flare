@@ -1,5 +1,6 @@
 package dev.dimension.flare.di
 
+import dev.dimension.flare.common.AppleOnDeviceAI
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -26,5 +27,5 @@ internal actual val platformModule: Module =
         singleOf(::AppleFormatter) bind PlatformFormatter::class
         singleOf(::ApplePlatformTextRenderer) bind PlatformTextRendering::class
         singleOf(::IosImageCompressor) bind ImageCompressor::class
-        singleOf(::OnDeviceAI)
+        singleOf(::AppleOnDeviceAI) bind OnDeviceAI::class
     }

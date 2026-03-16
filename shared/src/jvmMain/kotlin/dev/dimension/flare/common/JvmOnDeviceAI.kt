@@ -15,7 +15,7 @@ internal actual class OnDeviceAI {
             FoundationModelsBridge.isAvailable()
         }
 
-    actual suspend fun translate(
+    override suspend fun translate(
         source: String,
         targetLanguage: String,
         prompt: String,
@@ -24,7 +24,7 @@ internal actual class OnDeviceAI {
             FoundationModelsBridge.generate(prompt)
         }
 
-    actual suspend fun tldr(
+    override suspend fun tldr(
         source: String,
         targetLanguage: String,
         prompt: String,

@@ -1,5 +1,6 @@
 package dev.dimension.flare.di
 
+import dev.dimension.flare.common.JvmOnDeviceAI
 import dev.dimension.flare.common.OnDeviceAI
 import dev.dimension.flare.data.database.DriverFactory
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -21,5 +22,5 @@ internal actual val platformModule: Module =
         singleOf(::JvmPlatformPathProducer) bind PlatformPathProducer::class
         singleOf(::JVMFormatter) bind PlatformFormatter::class
         singleOf(::JvmImageCompressor) bind ImageCompressor::class
-        singleOf(::OnDeviceAI)
+        singleOf(::JvmOnDeviceAI) bind OnDeviceAI::class
     }

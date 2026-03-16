@@ -97,7 +97,7 @@ jobs:
         run: |
           rm -f gradle/gradle-daemon-jvm.properties
           sed -i -e '/poolborges/d' settings.gradle.kts
-          find . -name "*.gradle.kts" -type f -exec sed -i -e '/START Non-FOSS component/,/END Non-FOSS component/d' {} +
+          sed -i -e '/START Non-FOSS component/,/END Non-FOSS component/d' app/build.gradle.kts
 
       - name: Build F-Droid variant
         run: ./gradlew :app:assembleRelease :app:check :app:lint --stacktrace

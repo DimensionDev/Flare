@@ -13,10 +13,10 @@ import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-internal actual class OnDeviceAI(
+internal class AndroidOnDeviceAI(
     private val context: Context,
-) {
-    actual suspend fun isAvailable(): Boolean =
+) : OnDeviceAI {
+    override suspend fun isAvailable(): Boolean =
         runCatching {
             val summarizer = createSummarizer("en")
             try {
@@ -29,7 +29,7 @@ internal actual class OnDeviceAI(
             }
         }.getOrDefault(false)
 
-    actual suspend fun translate(
+    override suspend fun translate(
         source: String,
         targetLanguage: String,
         prompt: String,
@@ -52,7 +52,7 @@ internal actual class OnDeviceAI(
             }
         }.getOrNull()
 
-    actual suspend fun tldr(
+    override suspend fun tldr(
         source: String,
         targetLanguage: String,
         prompt: String,

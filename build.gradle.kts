@@ -42,7 +42,6 @@ subprojects {
             }
             jvmToolchain {
                 languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt())
-                vendor = JvmVendorSpec.JETBRAINS
             }
         }
     }
@@ -56,7 +55,6 @@ subprojects {
             }
             jvmToolchain {
                 languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt())
-                vendor = JvmVendorSpec.JETBRAINS
             }
         }
     }
@@ -69,7 +67,6 @@ subprojects {
             }
             jvmToolchain {
                 languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt())
-                vendor = JvmVendorSpec.JETBRAINS
             }
         }
     }

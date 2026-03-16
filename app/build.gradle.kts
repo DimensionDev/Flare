@@ -102,9 +102,6 @@ android {
         compose = true
         buildConfig = true
     }
-//    composeOptions {
-//        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-//    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -120,9 +117,9 @@ android {
     // START Non-FOSS component
     if (project.file("google-services.json").exists()) {
         sourceSets.getByName("main").java.srcDirs("src/play/java")
-    } else
+    }
     // END Non-FOSS component
-    {
+    if (!project.file("google-services.json").exists()){
         sourceSets.getByName("main").java.srcDirs("src/foss/java")
     }
 }

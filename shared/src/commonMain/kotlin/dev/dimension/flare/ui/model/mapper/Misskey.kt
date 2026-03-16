@@ -16,6 +16,7 @@ import dev.dimension.flare.data.network.misskey.api.model.UserList
 import dev.dimension.flare.data.network.misskey.api.model.UserLite
 import dev.dimension.flare.data.network.misskey.api.model.Visibility
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.AccountType.Specific
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.toAccountType
@@ -41,6 +42,8 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import dev.dimension.flare.ui.route.DeeplinkRoute.Profile.UserNameWithHost
+import dev.dimension.flare.ui.route.DeeplinkRoute.Search
 import dev.dimension.flare.ui.route.toUri
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -65,6 +68,8 @@ import moe.tlaster.mfm.parser.tree.RootNode
 import moe.tlaster.mfm.parser.tree.SearchNode
 import moe.tlaster.mfm.parser.tree.SmallNode
 import moe.tlaster.mfm.parser.tree.StrikeNode
+import moe.tlaster.mfm.parser.tree.TextNode
+import moe.tlaster.mfm.parser.tree.UnicodeEmojiNode
 import moe.tlaster.mfm.parser.tree.UrlNode
 import kotlin.jvm.JvmName
 import kotlin.math.roundToLong
@@ -1005,7 +1010,7 @@ private class MisskeyRichTextBuilder(
                 appendText(
                     "$${node.content}",
                     style.copy(
-                        link = DeeplinkRoute.Search(AccountType.Specific(accountKey), "$${node.content}").toUri(),
+                        link = Search(Specific(accountKey), "$${node.content}").toUri(),
                     ),
                     block,
                 )
@@ -1021,7 +1026,7 @@ private class MisskeyRichTextBuilder(
                 appendText(
                     "#${node.tag}",
                     style.copy(
-                        link = DeeplinkRoute.Search(AccountType.Specific(accountKey), "#${node.tag}").toUri(),
+                        link = Search(Specific(accountKey), "#${node.tag}").toUri(),
                     ),
                     block,
                 )
@@ -1041,18 +1046,18 @@ private class MisskeyRichTextBuilder(
                     },
                     style.copy(
                         link =
-                            DeeplinkRoute.Profile
-                                .UserNameWithHost(
-                                    AccountType.Specific(accountKey),
-                                    node.userName,
-                                    node.host ?: remoteHost,
-                                ).toUri(),
+                            UserNameWithHost(
+                                Specific(accountKey),
+                                node.userName,
+                                node.host ?: remoteHost,
+                            ).toUri(),
                     ),
                     block,
                 )
 
-            is moe.tlaster.mfm.parser.tree.TextNode -> appendText(node.content, style, block)
+            is TextNode -> appendText(node.content, style, block)
             is UrlNode -> appendText(node.url, style.copy(link = node.url), block)
+            is UnicodeEmojiNode -> appendText(node.emoji, style, block)
         }
     }
 
@@ -1116,8 +1121,8 @@ private class MisskeyRichTextBuilder(
         block: RenderBlockStyle,
     ) {
         var actualText = text
-        if (shouldTrimLeadingQuoteSpacing && actualText.startsWith("\n\n")) {
-            actualText = actualText.removePrefix("\n\n")
+        if (shouldTrimLeadingQuoteSpacing) {
+            actualText = actualText.trimStart()
         }
         if (actualText.isEmpty()) {
             shouldTrimLeadingQuoteSpacing = false
@@ -1162,8 +1167,8 @@ private class MisskeyRichTextBuilder(
 
     private fun trimTrailingQuoteSpacing() {
         val lastRun = currentRuns.lastOrNull() as? RenderRun.Text ?: return
-        if (!lastRun.text.endsWith("\n\n")) return
-        val trimmed = lastRun.text.removeSuffix("\n\n")
+//        if (!lastRun.text.endsWith("\n\n")) return
+        val trimmed = lastRun.text.trimEnd()
         if (trimmed.isEmpty()) {
             currentRuns.removeAt(currentRuns.lastIndex)
         } else {

@@ -14,7 +14,9 @@ import com.eygraber.compose.placeholder.PlaceholderHighlight
 import com.eygraber.compose.placeholder.fade
 import com.eygraber.compose.placeholder.placeholder
 import dev.dimension.flare.ui.theme.PlatformTheme
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 @ReadOnlyComposable
 public fun Modifier.placeholder(
@@ -35,6 +37,7 @@ public fun Modifier.placeholder(
         contentFadeAnimationSpec = contentFadeAnimationSpec,
     )
 
+@HiddenFromObjC
 @Composable
 @ReadOnlyComposable
 public fun PlaceholderDefaults.color(

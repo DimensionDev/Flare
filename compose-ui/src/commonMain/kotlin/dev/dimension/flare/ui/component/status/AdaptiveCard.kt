@@ -9,7 +9,9 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.theme.PlatformTheme
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun AdaptiveCard(
     modifier: Modifier = Modifier,

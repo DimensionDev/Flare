@@ -23,7 +23,9 @@ import dev.dimension.flare.ui.component.uiListItemComponent
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.onSuccess
 import org.jetbrains.compose.resources.stringResource
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public fun LazyListScope.myBlueskyFeedWithTabs(
     state: BlueskyFeedsWithTabsPresenter.State,
     toFeed: (UiList) -> Unit,
@@ -68,6 +70,7 @@ public fun LazyListScope.myBlueskyFeedWithTabs(
     )
 }
 
+@HiddenFromObjC
 public fun LazyListScope.popularBlueskyFeedWithTabs(
     state: BlueskyFeedsWithTabsPresenter.State,
     toFeed: (UiList) -> Unit,

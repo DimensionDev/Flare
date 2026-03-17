@@ -5,7 +5,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import dev.dimension.flare.ui.theme.PlatformShapes
 import dev.dimension.flare.ui.theme.PlatformTheme
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun Modifier.listCard(
     index: Int = 0,
@@ -28,8 +30,10 @@ public fun Modifier.listCard(
         clip(shape = PlatformTheme.shapes.listCardContainerShape)
     }
 
+@HiddenFromObjC
 @Composable
 public fun Modifier.listCardContainer(): Modifier = this.clip(PlatformShapes.listCardContainerShape)
 
+@HiddenFromObjC
 @Composable
 public fun Modifier.listCardItem(): Modifier = this.clip(PlatformShapes.listCardItemShape)

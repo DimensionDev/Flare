@@ -16,7 +16,9 @@ import dev.dimension.flare.ui.component.uiListItemComponent
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.onSuccess
 import org.jetbrains.compose.resources.stringResource
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public fun LazyListScope.misskeyAntennasWithTabs(
     state: MisskeyAntennasListWithTabsPresenter.State,
     onClick: (UiList) -> Unit,

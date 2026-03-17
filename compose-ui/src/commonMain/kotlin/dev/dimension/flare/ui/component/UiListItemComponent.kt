@@ -32,7 +32,9 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public fun <T : UiList> LazyListScope.uiListItemComponent(
     items: PagingState<T>,
     onClicked: ((T) -> Unit)? = null,
@@ -96,6 +98,7 @@ public fun <T : UiList> LazyListScope.uiListItemComponent(
     }
 }
 
+@HiddenFromObjC
 @Composable
 public fun <T : UiList> UiListItem(
     onClicked: (() -> Unit)?,
@@ -572,6 +575,7 @@ private fun UiChannelCard(
     }
 }
 
+@HiddenFromObjC
 @Composable
 public fun ItemPlaceHolder(modifier: Modifier = Modifier) {
     PlatformListItem(

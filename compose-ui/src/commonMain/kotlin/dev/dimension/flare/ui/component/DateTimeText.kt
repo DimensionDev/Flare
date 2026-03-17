@@ -19,7 +19,9 @@ import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.render.UiDateTime
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun DateTimeText(
     data: UiDateTime,

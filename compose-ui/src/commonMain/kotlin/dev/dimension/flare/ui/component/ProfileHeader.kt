@@ -63,7 +63,9 @@ import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun ProfileHeader(
     state: ProfileState,
@@ -346,6 +348,7 @@ private enum class FollowButtonState {
 private fun ProfileHeaderError() {
 }
 
+@HiddenFromObjC
 @Composable
 public fun ProfileHeaderLoading(
     withStatusBarHeight: Boolean,

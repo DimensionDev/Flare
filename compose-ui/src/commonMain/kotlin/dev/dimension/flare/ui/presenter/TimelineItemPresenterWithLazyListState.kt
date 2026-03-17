@@ -16,7 +16,9 @@ import dev.dimension.flare.data.model.TimelineTabItem
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public class TimelineItemPresenterWithLazyListState(
     private val timelineTabItem: TimelineTabItem,
     private val lazyStaggeredGridState: LazyStaggeredGridState? = null,

@@ -29,7 +29,9 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @OptIn(FlowPreview::class)
 @Composable
 public fun LazyStatusVerticalStaggeredGrid(

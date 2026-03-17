@@ -3,7 +3,9 @@ package dev.dimension.flare.ui.common
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.LayoutDirection
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public operator fun PaddingValues.plus(contentPadding: PaddingValues): PaddingValues =
     AdditionalPaddingValues(
         this,

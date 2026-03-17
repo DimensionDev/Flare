@@ -13,7 +13,9 @@ import dev.dimension.flare.ui.presenter.login.ServiceSelectPresenter
 import dev.dimension.flare.ui.presenter.login.ServiceSelectState
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public class SelectionPresenter(
     private val onBack: () -> Unit,
 ) : PresenterBase<SelectionPresenter.State>() {

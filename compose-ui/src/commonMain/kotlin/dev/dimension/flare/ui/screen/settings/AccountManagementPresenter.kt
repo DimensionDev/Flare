@@ -9,6 +9,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsState
 import kotlinx.coroutines.launch
@@ -30,7 +31,7 @@ public class AccountManagementPresenter :
         val state =
             remember {
                 AccountsPresenter()
-            }.body()
+            }.invoke()
 
         return object : State, AccountsState by state {
             override fun logout(accountKey: MicroBlogKey) {

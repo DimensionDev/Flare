@@ -166,7 +166,9 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun CommonStatusComponent(
     item: UiTimelineV2.Post,
@@ -754,6 +756,7 @@ private fun TranslationComponent(
     }
 }
 
+@HiddenFromObjC
 @Composable
 public fun StatusVisibilityComponent(
     visibility: UiTimelineV2.Post.Visibility,

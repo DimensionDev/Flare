@@ -25,6 +25,7 @@ plugins {
 subprojects {
     val commonOptIn = listOf(
         "kotlin.time.ExperimentalTime",
+        "kotlin.experimental.ExperimentalObjCRefinement"
     )
 
     val freeArgs = listOf(

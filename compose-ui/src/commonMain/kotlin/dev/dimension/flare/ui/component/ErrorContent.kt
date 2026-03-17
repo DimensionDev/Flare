@@ -27,7 +27,9 @@ import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import org.jetbrains.compose.resources.stringResource
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun ErrorContent(
     error: Throwable,

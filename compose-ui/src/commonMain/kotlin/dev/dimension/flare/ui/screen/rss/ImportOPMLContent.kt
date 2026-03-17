@@ -21,7 +21,9 @@ import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.presenter.home.rss.ImportOPMLPresenter
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun ImportOPMLContent(
     state: ImportOPMLPresenter.State,

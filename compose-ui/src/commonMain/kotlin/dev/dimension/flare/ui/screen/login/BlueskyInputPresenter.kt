@@ -10,7 +10,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public class BlueskyInputPresenter : PresenterBase<BlueskyInputPresenter.State>() {
     @Immutable
     public interface State {

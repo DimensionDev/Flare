@@ -368,13 +368,14 @@ public class ComposePresenter(
 
         DisposableEffect(Unit) {
             onDispose {
-                println("ComposePresenter: onDispose, saving last used accounts: ${selectedAccountsKeyFlow.value}")
                 ioScope.launch {
                     val accounts = selectedAccountsKeyFlow.value
-                    appDataStore.composeConfigData.updateData {
-                        it.copy(
-                            lastAccounts = accounts,
-                        )
+                    if (accounts.isNotEmpty()) {
+                        appDataStore.composeConfigData.updateData {
+                            it.copy(
+                                lastAccounts = accounts,
+                            )
+                        }
                     }
                 }
             }

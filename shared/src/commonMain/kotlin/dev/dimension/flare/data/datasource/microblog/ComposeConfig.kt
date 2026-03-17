@@ -327,13 +327,19 @@ public data class ComposeConfig internal constructor(
             } else {
                 null
             }
+        val visibility =
+            if (visibility != null && other.visibility != null) {
+                visibility
+            } else {
+                null
+            }
         return ComposeConfig(
             text = text,
             media = media,
             poll = poll,
             emoji = emoji,
             contentWarning = contentWarning,
-            visibility = null,
+            visibility = visibility,
         )
     }
 }

@@ -116,6 +116,11 @@ public class AccountRepository internal constructor(
 
     internal fun delete(accountKey: MicroBlogKey) =
         coroutineScope.launch {
+            appDataStore.composeConfigData.updateData {
+                it.copy(
+                    lastAccounts = it.lastAccounts.filterNot { key -> key == accountKey },
+                )
+            }
             removeAccountFlow.value = accountKey
             dataSourceCacheMutex.withLock {
                 dataSourceCache.remove(accountKey)

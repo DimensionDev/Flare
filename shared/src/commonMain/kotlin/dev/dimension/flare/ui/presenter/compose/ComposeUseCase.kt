@@ -52,6 +52,7 @@ internal class ComposeUseCase(
                 appDataStore.composeConfigData.updateData {
                     it.copy(
                         visibility = data.visibility,
+                        lastAccounts = accounts.map { it.accountKey },
                     )
                 }
                 sendDraftUseCase(

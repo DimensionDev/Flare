@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.compose
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,6 +40,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,6 +68,7 @@ public class ComposePresenter(
     private val appDataStore: AppDataStore by inject()
     private val restoreDraftUseCase: RestoreDraftUseCase by inject()
     private val draftRepository: DraftRepository by inject()
+    private val ioScope: CoroutineScope by inject()
 
     private val showDraftFlow by lazy {
         combine(draftRepository.visibleDrafts, draftRepository.sendingDrafts) { visible, sending ->
@@ -340,18 +343,41 @@ public class ComposePresenter(
                 selectedAccountsKeyFlow.value = listOf(accountType.accountKey).toImmutableList()
             }
         } else {
-            // load active account
+            // load last used accounts or active account
             LaunchedEffect(Unit) {
-                accountRepository.activeAccount.firstOrNull()?.let { account ->
-                    selectedAccountsKeyFlow.value =
-                        listOfNotNull(account.takeSuccess()?.accountKey)
-                            .toImmutableList()
-                }
+                selectedAccountsKeyFlow.value = appDataStore
+                    .composeConfigData
+                    .data
+                    .firstOrNull()
+                    ?.lastAccounts
+                    ?.takeIf { it.isNotEmpty() }
+                    ?.toImmutableList() ?: accountRepository
+                    .activeAccount
+                    .firstOrNull()
+                    ?.takeSuccess()
+                    ?.accountKey
+                    ?.let { persistentListOf(it) }
+                    ?: persistentListOf()
             }
         }
         LaunchedEffect(draftGroupId) {
             draftGroupId?.let {
                 loadDraftInternal(it)
+            }
+        }
+
+        DisposableEffect(Unit) {
+            onDispose {
+                ioScope.launch {
+                    val accounts = selectedAccountsKeyFlow.value
+                    if (accounts.isNotEmpty()) {
+                        appDataStore.composeConfigData.updateData {
+                            it.copy(
+                                lastAccounts = accounts,
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -449,7 +475,8 @@ public class ComposePresenter(
                 scope.launch {
                     val selectedAccounts = selectedAccountsFlow.firstOrNull().orEmpty()
                     if (selectedAccounts.isNotEmpty()) {
-                        val groupId = editingDraftGroupIdFlow.value ?: draftGroupId ?: newDraftGroupId()
+                        val groupId =
+                            editingDraftGroupIdFlow.value ?: draftGroupId ?: newDraftGroupId()
                         composeUseCase.saveDraft(
                             accounts = selectedAccounts,
                             data = data,
@@ -482,7 +509,8 @@ public class ComposePresenter(
             }
             editingDraftGroupIdFlow.value = draft.groupId
             activeStatusFlow.value = draft.data.referenceStatus?.composeStatus
-            selectedAccountsKeyFlow.value = draft.accounts.map { it.account.accountKey }.toImmutableList()
+            selectedAccountsKeyFlow.value =
+                draft.accounts.map { it.account.accountKey }.toImmutableList()
             textFlow.value = draft.data.content
             mediaSizeFlow.value = draft.medias.size
             loadedDraftStateFlow.value = UiState.Success(draft)
@@ -503,9 +531,9 @@ public class ComposePresenter(
             mutableStateOf(false)
         }
         LaunchedEffect(Unit) {
-            appDataStore.composeConfigData.data.firstOrNull()?.let {
+            appDataStore.composeConfigData.data.firstOrNull()?.let { data ->
                 if (!hasExplicitVisibility) {
-                    visibility = it.visibility
+                    visibility = data.visibility
                 }
             }
         }

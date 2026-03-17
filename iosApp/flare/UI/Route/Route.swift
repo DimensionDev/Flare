@@ -17,7 +17,7 @@ enum Route: Hashable, Identifiable {
         clearToHome: @escaping () -> Void
     ) -> some View {
         switch self {
-        case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew(accountType)) }, toTabSetting: { onNavigate(.tabSettings) })
+        case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew) }, toTabSetting: { onNavigate(.tabSettings) })
         case .timeline(let item):
             switch onEnum(of: item) {
             case .ListTimelineTabItem(let listTabItem):
@@ -41,8 +41,8 @@ enum Route: Hashable, Identifiable {
             AccountManagementScreen()
         case .search(let accountType, let query):
             SearchScreen(accountType: accountType, initialQuery: query)
-        case .composeNew(let accountType):
-            ComposeScreen(accountType: accountType)
+        case .composeNew:
+            ComposeScreen(accountType: nil)
         case .composeDraft(let groupId):
             ComposeScreen(accountType: nil, draftGroupId: groupId)
         case .composeQuote(let accountType, let statusKey):
@@ -115,7 +115,7 @@ enum Route: Hashable, Identifiable {
 
     case home(AccountType)
     case timeline(TimelineTabItem)
-    case composeNew(AccountType?)
+    case composeNew
     case composeDraft(String)
     case composeQuote(AccountType, MicroBlogKey)
     case composeReply(AccountType, MicroBlogKey)
@@ -168,7 +168,7 @@ enum Route: Hashable, Identifiable {
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {
         case .new(let data):
-            return Route.composeNew(nil)
+            return Route.composeNew
         case .quote(let data):
             return Route.composeQuote(AccountType.Specific(accountKey: data.accountKey), data.statusKey)
         case .reply(let data):

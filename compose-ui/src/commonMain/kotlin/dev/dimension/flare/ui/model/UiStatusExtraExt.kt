@@ -5,7 +5,9 @@ package dev.dimension.flare.ui.model
 import androidx.compose.ui.unit.LayoutDirection
 import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.datetime.format.FormatStringsInDatetimeFormats
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public val UiRichText.direction: LayoutDirection
     get() =
         if (isRtl) {

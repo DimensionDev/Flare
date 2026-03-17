@@ -71,12 +71,15 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.FavIconPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
+import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun TabTitle(
     title: TitleType,
@@ -99,6 +102,7 @@ public fun TabTitle(
     )
 }
 
+@HiddenFromObjC
 @Composable
 public fun TabIcon(
     tabItem: TabItem,
@@ -116,6 +120,7 @@ public fun TabIcon(
     )
 }
 
+@HiddenFromObjC
 @Composable
 public fun TabIcon(
     accountType: AccountType,
@@ -134,7 +139,7 @@ public fun TabIcon(
                         accountType,
                         icon.userKey,
                     )
-                }.body()
+                }.invoke()
             }
             userState.user
                 .onSuccess {
@@ -180,7 +185,7 @@ public fun TabIcon(
                             accountType,
                             icon.userKey,
                         )
-                    }.body()
+                    }.invoke()
                 }
                 Box(
                     modifier = modifier,
@@ -234,7 +239,7 @@ public fun TabIcon(
                     FavIconPresenter(
                         icon.host,
                     )
-                }.body()
+                }.invoke()
             }
             iconState
                 .onSuccess {

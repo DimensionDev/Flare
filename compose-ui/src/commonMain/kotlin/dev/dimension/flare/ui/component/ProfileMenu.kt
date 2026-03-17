@@ -8,7 +8,9 @@ import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.status.StatusActions
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.theme.PlatformTheme
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun ProfileMenu(
     profileState: ProfileState,

@@ -8,7 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun AvatarComponent(
     data: String?,
@@ -33,6 +35,7 @@ public fun AvatarComponent(
     )
 }
 
+@HiddenFromObjC
 public object AvatarComponentDefaults {
     public val size: Dp = 44.dp
     public val compatSize: Dp = 20.dp

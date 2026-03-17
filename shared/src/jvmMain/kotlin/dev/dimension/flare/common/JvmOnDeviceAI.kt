@@ -9,7 +9,7 @@ import com.sun.jna.ptr.PointerByReference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-internal class JvmOnDeviceAI: OnDeviceAI {
+internal class JvmOnDeviceAI : OnDeviceAI {
     override suspend fun isAvailable(): Boolean =
         withContext(Dispatchers.IO) {
             FoundationModelsBridge.isAvailable()

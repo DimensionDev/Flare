@@ -3,7 +3,9 @@ package dev.dimension.flare.ui.component
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public fun Modifier.ignoreHorizontalParentPadding(horizontal: Dp): Modifier =
     this.layout { measurable, constraints ->
         val overridenWidth = constraints.maxWidth + 2 * horizontal.roundToPx()

@@ -3,7 +3,9 @@ package dev.dimension.flare.ui.component
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 import dev.dimension.flare.data.model.PostActionStyle
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public val LocalComponentAppearance: ProvidableCompositionLocal<ComponentAppearance> =
     staticCompositionLocalOf {
         error("No ComponentAppearance provided")

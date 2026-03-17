@@ -41,7 +41,9 @@ import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import dev.dimension.flare.ui.theme.PlatformTheme
 import org.jetbrains.compose.resources.stringResource
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun DMItem(
     item: UiDMItem,
@@ -192,6 +194,7 @@ public fun DMItem(
     }
 }
 
+@HiddenFromObjC
 @Composable
 public fun DMLoadingItem(modifier: Modifier = Modifier) {
     Box(

@@ -8,7 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
-import kotlin.experimental.ExperimentalObjCRefinement
 
 public actual abstract class PresenterBase<Model : Any> : AutoCloseable {
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -23,13 +22,7 @@ public actual abstract class PresenterBase<Model : Any> : AutoCloseable {
         scope.cancel()
     }
 
-    @OptIn(ExperimentalObjCRefinement::class)
     @HiddenFromObjC
     @Composable
     public actual abstract fun body(): Model
 }
-
-@OptIn(ExperimentalObjCRefinement::class)
-@HiddenFromObjC
-@Composable
-public operator fun <Model : Any> PresenterBase<Model>.invoke(): Model = body()

@@ -22,7 +22,9 @@ import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.theme.PlatformTheme
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun CommonStatusHeaderComponent(
     data: UiProfile,
@@ -82,6 +84,7 @@ public fun CommonStatusHeaderComponent(
     )
 }
 
+@HiddenFromObjC
 @Composable
 public fun ListComponent(
     headlineContent: @Composable ColumnScope.() -> Unit,

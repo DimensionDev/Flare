@@ -20,7 +20,9 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableMap
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun NetworkImage(
     model: String?,
@@ -80,6 +82,7 @@ public fun NetworkImage(
     )
 }
 
+@HiddenFromObjC
 @Composable
 public fun SubcomposeNetworkImage(
     model: String?,

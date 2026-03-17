@@ -54,6 +54,7 @@ import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.isLightTheme
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
+import kotlin.native.HiddenFromObjC
 
 internal const val TAG_URL = "url"
 private val lightLinkColor = Color(0xff0066cc)
@@ -61,6 +62,7 @@ private val darkLinkColor = Color(0xff99c3ff)
 
 internal expect val allowLinkAnnotation: Boolean
 
+@HiddenFromObjC
 @Composable
 public fun RichText(
     text: UiRichText,

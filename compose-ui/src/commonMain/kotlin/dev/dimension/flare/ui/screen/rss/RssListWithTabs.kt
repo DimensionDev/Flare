@@ -41,7 +41,9 @@ import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.theme.PlatformTheme
 import org.jetbrains.compose.resources.stringResource
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public fun LazyListScope.rssListWithTabs(
     state: RssListWithTabsPresenter.State,
     onClicked: (item: UiRssSource) -> Unit,

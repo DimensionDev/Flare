@@ -330,6 +330,7 @@ private fun CupertinoBorderedTextField(
     }
 }
 
+@HiddenFromObjC
 @Composable
 public fun CupertinoTextField(
     state: TextFieldState,
@@ -411,6 +412,7 @@ public fun CupertinoTextField(
     }
 }
 
+@HiddenFromObjC
 @Composable
 public fun CupertinoSecureTextField(
     state: TextFieldState,
@@ -488,6 +490,7 @@ public fun CupertinoSecureTextField(
     }
 }
 
+@HiddenFromObjC
 @Composable
 public fun CupertinoBorderedTextField(
     state: TextFieldState,
@@ -545,6 +548,7 @@ public fun CupertinoBorderedTextField(
     }
 }
 
+@HiddenFromObjC
 @Composable
 public fun CupertinoBorderedSecureTextField(
     state: TextFieldState,
@@ -598,6 +602,7 @@ public fun CupertinoBorderedSecureTextField(
     }
 }
 
+@HiddenFromObjC
 @Immutable
 public class CupertinoTextFieldColors internal constructor(
     private val focusedTextColor: Color,
@@ -866,6 +871,7 @@ public class CupertinoTextFieldColors internal constructor(
     }
 }
 
+@HiddenFromObjC
 @Immutable
 public object CupertinoBorderedTextFieldDefaults {
     public val StrokeWidth: Dp = 1.dp

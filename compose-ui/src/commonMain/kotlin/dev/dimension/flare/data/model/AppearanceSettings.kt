@@ -14,7 +14,9 @@ import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 import okio.BufferedSink
 import okio.BufferedSource
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 public val LocalAppearanceSettings: ProvidableCompositionLocal<AppearanceSettings> =
     staticCompositionLocalOf { AppearanceSettings() }
 

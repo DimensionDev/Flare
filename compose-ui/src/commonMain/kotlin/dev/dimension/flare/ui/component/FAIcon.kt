@@ -8,7 +8,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.platform.PlatformIcon
 import dev.dimension.flare.ui.theme.PlatformContentColor
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun FAIcon(
     imageVector: ImageVector,

@@ -39,8 +39,10 @@ import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlin.native.HiddenFromObjC
 import org.jetbrains.compose.resources.stringResource
 
+@HiddenFromObjC
 public fun LazyStaggeredGridScope.status(
     pagingState: PagingState<UiTimelineV2>,
     detailStatusKey: MicroBlogKey? = null,
@@ -219,6 +221,7 @@ private fun OnError(
     )
 }
 
+@HiddenFromObjC
 @Composable
 public fun StatusItem(
     item: UiTimelineV2?,
@@ -244,6 +247,7 @@ public fun StatusItem(
     }
 }
 
+@HiddenFromObjC
 @Composable
 public fun StatusPlaceholder(modifier: Modifier = Modifier) {
     Column(
@@ -263,6 +267,7 @@ public fun StatusPlaceholder(modifier: Modifier = Modifier) {
     }
 }
 
+@HiddenFromObjC
 @Composable
 public fun UserPlaceholder(modifier: Modifier = Modifier) {
     Row(

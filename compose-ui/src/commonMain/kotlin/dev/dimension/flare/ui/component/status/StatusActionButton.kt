@@ -42,7 +42,9 @@ import dev.dimension.flare.ui.component.platform.rippleIndication
 import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
+import kotlin.native.HiddenFromObjC
 
+@HiddenFromObjC
 @Composable
 public fun StatusActionButton(
     icon: ImageVector,

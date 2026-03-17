@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.theme.PlatformTheme
+import kotlin.native.HiddenFromObjC
 
 @Composable
 internal fun HorizontalDivider(
@@ -41,6 +42,7 @@ internal fun VerticalDivider(
     )
 }
 
+@HiddenFromObjC
 public object FlareDividerDefaults {
     public val color: Color
         @Composable

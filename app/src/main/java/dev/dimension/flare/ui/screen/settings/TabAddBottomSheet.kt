@@ -26,7 +26,6 @@ import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -44,29 +43,18 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TabRowIndicator
 import dev.dimension.flare.ui.component.listCard
-import dev.dimension.flare.ui.model.UiRssSource
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.flatMap
-import dev.dimension.flare.ui.model.isSuccess
-import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toTabItem
-import dev.dimension.flare.ui.presenter.home.rss.RssSourcesPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
-import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -311,82 +299,3 @@ internal fun TabAddBottomSheet(
         }
     }
 }
-
-@Immutable
-internal interface AllTabsState {
-    val defaultTabs: ImmutableList<TabItem>
-    val rssTabs: ImmutableList<UiRssSource>
-    val accountTabs: UiState<ImmutableList<UiState<AccountTabs>>>
-}
-
-@Composable
-internal fun allTabsPresenter(filterIsTimeline: Boolean = false): AllTabsState =
-    run {
-        val accountState = remember { AccountsPresenter() }.invoke()
-        val accountTabs =
-            accountState.accounts.map {
-                it
-                    .toImmutableList()
-                    .filter {
-                        it.second.isSuccess
-                    }.map { (_, userState) ->
-                        userState.flatMap { user ->
-                            val tabs =
-                                remember(user.key) {
-                                    (
-                                        TimelineTabItem.defaultPrimary(user) +
-                                            TimelineTabItem.secondaryFor(
-                                                user,
-                                            )
-                                    ).let {
-                                        if (filterIsTimeline) {
-                                            it.filterIsInstance<TimelineTabItem>()
-                                        } else {
-                                            it
-                                        }
-                                    }
-                                }
-                            userState
-                                .flatMap { user ->
-                                    listTabPresenter(accountKey = user.key).tabs.map {
-                                        it.toImmutableList()
-                                    }
-                                }.map { extraTabs ->
-                                    AccountTabs(
-                                        profile = user,
-                                        tabs = tabs.toImmutableList(),
-                                        extraTabs = extraTabs,
-                                    )
-                                }
-                        }
-                    }.toImmutableList()
-            }
-
-        val rssTabs =
-            remember {
-                RssSourcesPresenter()
-            }.invoke()
-
-        object : AllTabsState {
-            override val defaultTabs =
-                TimelineTabItem
-                    .mainSidePanel(null)
-                    .let {
-                        if (filterIsTimeline) {
-                            it.filterIsInstance<TimelineTabItem>()
-                        } else {
-                            it
-                        }
-                    }.toImmutableList()
-            override val accountTabs: UiState<ImmutableList<UiState<AccountTabs>>> = accountTabs
-            override val rssTabs = rssTabs.sources
-        }
-    }
-
-@Composable
-private fun listTabPresenter(accountKey: MicroBlogKey) =
-    run {
-        remember(accountKey) {
-            PinnableTimelineTabPresenter(accountType = AccountType.Specific(accountKey))
-        }.invoke()
-    }

@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.database.app.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import dev.dimension.flare.model.MicroBlogKey
@@ -13,4 +14,8 @@ internal data class DbAccount(
     val credential_json: String,
     val platform_type: PlatformType,
     val last_active: Long,
+    @ColumnInfo(
+        defaultValue = "0",
+    )
+    val sort_id: Long = 0L,
 )

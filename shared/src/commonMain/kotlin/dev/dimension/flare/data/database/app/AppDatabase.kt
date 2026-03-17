@@ -24,7 +24,7 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
         dev.dimension.flare.data.database.app.model.DbSearchHistory::class,
         dev.dimension.flare.data.database.app.model.DbRssSources::class,
     ],
-    version = 6,
+    version = 7,
     autoMigrations = [
         AutoMigration(
             from = 3,
@@ -37,6 +37,10 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
         AutoMigration(
             from = 5,
             to = 6,
+        ),
+        AutoMigration(
+            from = 6,
+            to = 7,
         ),
     ],
     exportSchema = true,

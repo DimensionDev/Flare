@@ -92,11 +92,9 @@ import dev.dimension.flare.ui.presenter.profile.ProfileMedia
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
-import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.screen.home.RegisterTabCallback
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.launch
 import moe.tlaster.nestedscrollview.VerticalNestedScrollView
 import moe.tlaster.nestedscrollview.rememberNestedScrollViewState
@@ -618,13 +616,6 @@ private fun profilePresenter(
                 accountType = accountType,
             )
         }.invoke()
-    var showMoreMenus by remember {
-        mutableStateOf(false)
-    }
-    val allAccounts =
-        remember {
-            AccountsPresenter()
-        }.invoke()
 
     val tabs =
         state.tabs.map {
@@ -655,21 +646,7 @@ private fun profilePresenter(
         val state = state
         val tabs = tabs
         val pagerState = pagerState
-        val allAccountsState =
-            allAccounts.accounts.map {
-                it
-                    .toImmutableList()
-                    .groupBy { it.first.platformType }
-                    .map { it.key to (it.value.map { it.second }.toImmutableList()) }
-                    .toMap()
-                    .toImmutableMap()
-            }
-        val showMoreMenus = showMoreMenus
         val isRefreshing = isRefreshing
-
-        fun setShowMoreMenus(value: Boolean) {
-            showMoreMenus = value
-        }
 
         fun refresh() {
             scope.launch {

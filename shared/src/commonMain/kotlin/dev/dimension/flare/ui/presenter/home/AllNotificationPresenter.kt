@@ -111,10 +111,7 @@ public class AllNotificationPresenter :
                 it
                     .mapNotNull { it?.takeSuccess() }
                     .sortedWith(
-                        compareByDescending<Pair<UiProfile, Int>> { it.second }
-                            .thenBy { it.first.handle.canonical }
-                            .thenBy { it.first.key.host }
-                            .thenBy { it.first.key.id },
+                        compareByDescending { it.second },
                     ).map { (profile, badge) ->
                         NotificationAccountItem(
                             stableKey = "${profile.key.host}:${profile.key.id}",

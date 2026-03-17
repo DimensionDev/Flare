@@ -73,7 +73,6 @@ import dev.dimension.flare.ui.presenter.profile.ProfileMedia
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
-import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.LiteFilter
@@ -81,8 +80,6 @@ import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.Text
 import io.github.composefluent.surface.Card
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
@@ -432,14 +429,6 @@ private fun presenter(
     var selectedTabIndex by remember {
         mutableStateOf(0)
     }
-    var showMoreMenus by remember {
-        mutableStateOf(false)
-    }
-
-    val allAccounts =
-        remember {
-            AccountsPresenter()
-        }.invoke()
 
     val tabs =
         state.tabs.map {
@@ -461,22 +450,8 @@ private fun presenter(
 
     object {
         val state = state
-        val allAccountsState =
-            allAccounts.accounts.map {
-                it
-                    .toImmutableList()
-                    .groupBy { it.first.platformType }
-                    .map { it.key to (it.value.map { it.second }.toImmutableList()) }
-                    .toMap()
-                    .toImmutableMap()
-            }
         val selectedTabIndex = selectedTabIndex
         val selectedTabItem = selectedTab
-        val showMoreMenus = showMoreMenus
-
-        fun setShowMoreMenus(value: Boolean) {
-            showMoreMenus = value
-        }
 
         fun refresh() {
             scope.launch {

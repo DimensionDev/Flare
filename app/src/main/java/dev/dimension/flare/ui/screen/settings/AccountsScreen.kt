@@ -116,7 +116,7 @@ internal fun AccountsScreen(
         ) {
             state.accounts
                 .onSuccess { accountState ->
-                    itemsIndexed(accountState.toImmutableList()) { index, (account, data) ->
+                    itemsIndexed(accountState) { index, (account, data) ->
                         val swipeState =
                             rememberSwipeToDismissBoxState()
                         val shape = ListItemDefaults.segmentedShapes2(index, accountState.size)

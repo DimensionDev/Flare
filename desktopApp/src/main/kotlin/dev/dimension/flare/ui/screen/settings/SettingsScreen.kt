@@ -296,7 +296,7 @@ internal fun SettingsScreen(
                             repeat(accounts.size) { index ->
                                 val account = accounts[index]
                                 AccountItem(
-                                    account.second,
+                                    account.profile,
                                     onClick = {
                                         state.accountState.setActiveAccount(it)
                                     },
@@ -309,7 +309,7 @@ internal fun SettingsScreen(
                                             if (it == null) {
                                                 SubtleButton(
                                                     onClick = {
-                                                        state.accountState.logout(account.first.accountKey)
+                                                        state.accountState.logout(account.account.accountKey)
                                                     },
                                                 ) {
                                                     FAIcon(
@@ -1753,7 +1753,7 @@ private fun appearancePresenter() =
     }
 
 @Composable
-private fun accountsPresenter(settingsRepository: SettingsRepository = koinInject()) =
+private fun accountsPresenter() =
     run {
         var expanded by remember { mutableStateOf(false) }
         val activeAccountState = remember { ActiveAccountPresenter() }.invoke()

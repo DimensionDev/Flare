@@ -178,6 +178,55 @@ class BlueskyAuthPluginTest {
             assertEquals("refresh-new", credentialFlow.value.refreshToken)
         }
 
+    @Test
+    fun credentialFlowChangeUsesNewCredential() =
+        runTest {
+            val credentialFlow =
+                MutableStateFlow<UiAccount.Bluesky.Credential>(
+                    credential(
+                        accessToken = "access-old",
+                        refreshToken = "refresh-old",
+                    ),
+                )
+
+            val client =
+                createClient(
+                    credentialFlow = credentialFlow,
+                    onTokensChanged = { credentialFlow.value = it },
+                ) { path, authorization ->
+                    when (authorization) {
+                        "Bearer access-old" ->
+                            jsonResponse(
+                                HttpStatusCode.OK,
+                                """{"ok":"old"}""",
+                            )
+
+                        "Bearer access-new" ->
+                            jsonResponse(
+                                HttpStatusCode.OK,
+                                """{"ok":"new"}""",
+                            )
+
+                        else -> error("Unexpected authorization header: $authorization")
+                    }
+                }
+
+            // First request uses old credential
+            val responseOne = client.get("https://bsky.social/xrpc/app.bsky.feed.getTimeline").bodyAsText()
+            assertEquals("""{"ok":"old"}""", responseOne)
+
+            // Change credential flow to new credential
+            credentialFlow.value =
+                credential(
+                    accessToken = "access-new",
+                    refreshToken = "refresh-new",
+                )
+
+            // Second request uses new credential
+            val responseTwo = client.get("https://bsky.social/xrpc/app.bsky.feed.getTimeline").bodyAsText()
+            assertEquals("""{"ok":"new"}""", responseTwo)
+        }
+
     private fun credential(
         accessToken: String,
         refreshToken: String,
@@ -189,7 +238,7 @@ class BlueskyAuthPluginTest {
 
     private fun createClient(
         credentialFlow: MutableStateFlow<UiAccount.Bluesky.Credential>,
-        onTokensChanged: (UiAccount.Bluesky.Credential) -> Unit,
+        onTokensChanged: suspend (UiAccount.Bluesky.Credential) -> Unit,
         handler: suspend MockRequestHandleScope.(path: String, authorization: String?) -> HttpResponseData,
     ): HttpClient =
         HttpClient(

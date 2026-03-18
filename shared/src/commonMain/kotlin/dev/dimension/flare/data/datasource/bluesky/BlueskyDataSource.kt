@@ -147,12 +147,10 @@ internal class BlueskyDataSource(
             accountKey = accountKey,
             credentialFlow = credentialFlow,
             onCredentialRefreshed = { credential ->
-                coroutineScope.launch {
-                    appDatabase.accountDao().setCredential(
-                        accountKey,
-                        credential.encodeJson(),
-                    )
-                }
+                appDatabase.accountDao().setCredential(
+                    accountKey,
+                    credential.encodeJson(),
+                )
             },
         )
     }

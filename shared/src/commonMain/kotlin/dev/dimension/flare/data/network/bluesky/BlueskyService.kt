@@ -47,7 +47,7 @@ internal data class BlueskyService private constructor(
     private val baseUrlFlow: Flow<String>,
     private val accountKey: MicroBlogKey? = null,
     private val authTokenFlow: Flow<UiAccount.Bluesky.Credential>? = null,
-    private val onCredentialRefreshed: (UiAccount.Bluesky.Credential) -> Unit = {},
+    private val onCredentialRefreshed: suspend (UiAccount.Bluesky.Credential) -> Unit = {},
 ) : BlueskyApi by XrpcBlueskyApi(
         ktorClient {
             install(AtprotoProxyPlugin)
@@ -74,7 +74,7 @@ internal data class BlueskyService private constructor(
     constructor(
         accountKey: MicroBlogKey,
         credentialFlow: Flow<UiAccount.Bluesky.Credential>,
-        onCredentialRefreshed: (UiAccount.Bluesky.Credential) -> Unit,
+        onCredentialRefreshed: suspend (UiAccount.Bluesky.Credential) -> Unit,
     ) : this(
         baseUrlFlow = credentialFlow.map { it.baseUrl },
         accountKey = accountKey,

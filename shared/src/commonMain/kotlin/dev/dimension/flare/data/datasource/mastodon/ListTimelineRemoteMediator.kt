@@ -17,6 +17,9 @@ internal class ListTimelineRemoteMediator(
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey = "list_${accountKey}_$listId"
 
+    override val supportPrepend: Boolean
+        get() = true
+
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
@@ -32,8 +35,10 @@ internal class ListTimelineRemoteMediator(
                 }
 
                 is PagingRequest.Prepend -> {
-                    return PagingResult(
-                        endOfPaginationReached = true,
+                    service.listTimeline(
+                        listId = listId,
+                        limit = pageSize,
+                        min_id = request.previousKey,
                     )
                 }
 
@@ -50,6 +55,7 @@ internal class ListTimelineRemoteMediator(
             endOfPaginationReached = response.isEmpty(),
             data = response.render(accountKey),
             nextKey = response.next,
+            previousKey = response.prev,
         )
     }
 }

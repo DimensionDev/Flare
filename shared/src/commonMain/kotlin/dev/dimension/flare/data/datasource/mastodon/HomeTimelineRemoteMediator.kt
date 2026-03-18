@@ -16,6 +16,9 @@ internal class HomeTimelineRemoteMediator(
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String = "home_$accountKey"
 
+    override val supportPrepend: Boolean
+        get() = true
+
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,

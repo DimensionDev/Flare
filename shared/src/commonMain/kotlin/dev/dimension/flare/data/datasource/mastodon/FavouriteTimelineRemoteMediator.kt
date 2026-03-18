@@ -16,6 +16,9 @@ internal class FavouriteTimelineRemoteMediator(
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String = "favourite_$accountKey"
 
+    override val supportPrepend: Boolean
+        get() = true
+
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
@@ -30,8 +33,9 @@ internal class FavouriteTimelineRemoteMediator(
                 }
 
                 is PagingRequest.Prepend -> {
-                    return PagingResult(
-                        endOfPaginationReached = true,
+                    service.favorites(
+                        limit = pageSize,
+                        min_id = request.previousKey,
                     )
                 }
 
@@ -47,6 +51,7 @@ internal class FavouriteTimelineRemoteMediator(
             endOfPaginationReached = response.isEmpty() || response.next == null,
             data = response.render(accountKey),
             nextKey = response.next,
+            previousKey = response.prev,
         )
     }
 }

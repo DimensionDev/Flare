@@ -15,15 +15,23 @@ internal class HybridTimelineRemoteMediator(
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey = "hybrid_timeline_$accountKey"
 
+    override val supportPrepend: Boolean
+        get() = true
+
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
         val response =
             when (request) {
-                is PagingRequest.Prepend -> return PagingResult(
-                    endOfPaginationReached = true,
-                )
+                is PagingRequest.Prepend -> {
+                    service.notesHybridTimeline(
+                        NotesHybridTimelineRequest(
+                            limit = pageSize,
+                            sinceId = request.previousKey,
+                        ),
+                    )
+                }
                 PagingRequest.Refresh -> {
                     service.notesHybridTimeline(
                         NotesHybridTimelineRequest(
@@ -47,6 +55,7 @@ internal class HybridTimelineRemoteMediator(
             data =
                 response.render(accountKey),
             nextKey = response.lastOrNull()?.id,
+            previousKey = response.firstOrNull()?.id,
         )
     }
 }

@@ -238,7 +238,7 @@ class BlueskyAuthPluginTest {
 
     private fun createClient(
         credentialFlow: MutableStateFlow<UiAccount.Bluesky.Credential>,
-        onTokensChanged: (UiAccount.Bluesky.Credential) -> Unit,
+        onTokensChanged: suspend (UiAccount.Bluesky.Credential) -> Unit,
         handler: suspend MockRequestHandleScope.(path: String, authorization: String?) -> HttpResponseData,
     ): HttpClient =
         HttpClient(

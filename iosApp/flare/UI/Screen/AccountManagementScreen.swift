@@ -24,6 +24,7 @@ struct AccountManagementScreen: View {
                         }
                         .contextMenu {
                             Button(role: .destructive) {
+                                tabItems.removeAll(where: { item in item.account.accountKey == user.key })
                                 presenter.state.logout(accountKey: user.key)
                             } label: {
                                 Label {
@@ -35,6 +36,7 @@ struct AccountManagementScreen: View {
                         }
                         .swipeActions {
                             Button(role: .destructive) {
+                                tabItems.removeAll(where: { item in item.account.accountKey == user.key })
                                 presenter.state.logout(accountKey: user.key)
                             } label: {
                                 Label {
@@ -48,6 +50,7 @@ struct AccountManagementScreen: View {
                         UserErrorView(error: error)
                             .swipeActions {
                                 Button(role: .destructive) {
+                                    tabItems.removeAll(where: { item in item.account.accountKey == account.account.accountKey })
                                     presenter.state.logout(accountKey: account.account.accountKey)
                                 } label: {
                                     Label {

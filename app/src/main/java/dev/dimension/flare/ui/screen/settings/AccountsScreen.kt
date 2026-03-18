@@ -36,6 +36,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -416,6 +417,13 @@ private fun accountsPresenter() =
             }
         }
 
+        LaunchedEffect(Unit) {
+            snapshotFlow { cacheItems.toList() }
+                .collect {
+                    state.setOrder(cacheItems.map { it.account.accountKey })
+                }
+        }
+
         object : AccountManagementPresenter.State by state {
             val currentItems = cacheItems
 
@@ -429,10 +437,11 @@ private fun accountsPresenter() =
                 val toIndex = cacheItems.indexOfFirst { it.account.accountKey == toKey }
                 if (fromIndex == -1 || toIndex == -1) return
                 cacheItems.add(toIndex, cacheItems.removeAt(fromIndex))
-                state.setOrder(cacheItems.map { it.account.accountKey })
             }
 
             fun deleteItem(accountKey: MicroBlogKey) {
+                cacheItems.removeIf { it.account.accountKey == accountKey }
+//                state.updateOrder(cacheItems.map { it.account.accountKey })
                 state.logout(accountKey)
             }
         }

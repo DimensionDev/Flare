@@ -74,6 +74,7 @@ public class HomeTimelineWithTabsPresenter(
                 AccountEventPresenter()
             }.body()
 
+        // TODO: on android, it might not trigger to add tabs when new account is added
         LaunchedEffect(accountEvent.onAdded) {
             accountEvent.onAdded.collect { account ->
                 val tab =

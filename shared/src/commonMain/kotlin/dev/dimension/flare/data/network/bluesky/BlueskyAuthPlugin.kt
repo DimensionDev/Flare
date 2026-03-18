@@ -46,7 +46,6 @@ internal class BlueskyAuthPlugin(
     private val onAuthTokensChanged: (UiAccount.Bluesky.Credential) -> Unit,
 ) {
     private val refreshMutex = Mutex()
-    private var cachedCredential: UiAccount.Bluesky.Credential? = null
 
     class Config(
         var json: Json = BlueskyJson,
@@ -303,15 +302,9 @@ internal class BlueskyAuthPlugin(
         }
     }
 
-    private suspend fun currentCredential(): UiAccount.Bluesky.Credential? {
-        cachedCredential?.let { return it }
-        return authTokenFlow?.firstOrNull()?.also {
-            cachedCredential = it
-        }
-    }
+    private suspend fun currentCredential(): UiAccount.Bluesky.Credential? = authTokenFlow?.firstOrNull()
 
     private fun cacheCredential(credential: UiAccount.Bluesky.Credential) {
-        cachedCredential = credential
         onAuthTokensChanged(credential)
     }
 

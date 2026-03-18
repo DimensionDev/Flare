@@ -96,11 +96,10 @@ struct StatusView: View {
                         }
                         if let contentWarning = data.contentWarning, !contentWarning.isEmpty {
                             RichText(text: contentWarning)
-                                .if(isDetail) { richText in
-                                    richText
-                                        .textSelection(.enabled)
-                                }
                                 .fixedSize(horizontal: false, vertical: true)
+                                .if(isDetail) { view in
+                                    view.textSelection(.enabled)
+                                }
                             
                             Button {
                                 withAnimation {
@@ -196,7 +195,6 @@ struct StatusView: View {
                                 }
                             }
                             .padding(8)
-                            .clipShape(.rect(cornerRadius: 16))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 16)
                                     .stroke(Color(.separator), lineWidth: 1)
@@ -231,13 +229,10 @@ struct StatusView: View {
                         }
                     }
                 }
-                .contextMenu {
-                    StatusActionsView(data: data.actions, useText: true, allowSpacer: false)
-                }
 //                .if(!isDetail) { view in
 //                    view
 //                        .contextMenu {
-//                            StatusActionsView(data: data.actions, useText: true)
+//                            StatusActionsView(data: data.actions, useText: true, allowSpacer: false)
 //                        }
 //                }
             }

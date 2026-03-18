@@ -18,6 +18,8 @@ public class AccountManagementPresenter :
     KoinComponent {
     public interface State : AccountsState {
         public fun logout(accountKey: MicroBlogKey)
+
+        public fun setOrder(value: List<MicroBlogKey>)
     }
 
     @Composable
@@ -44,6 +46,11 @@ public class AccountManagementPresenter :
         return object : State, AccountsState by state {
             override fun logout(accountKey: MicroBlogKey) {
                 removeAccount(accountKey)
+            }
+
+            override fun setOrder(value: List<MicroBlogKey>) {
+                order.clear()
+                order.addAll(value)
             }
         }
     }

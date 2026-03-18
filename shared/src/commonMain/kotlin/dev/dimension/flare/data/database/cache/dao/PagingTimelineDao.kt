@@ -58,7 +58,7 @@ internal interface PagingTimelineDao {
     ): Flow<DbPagingTimelineWithStatus?>
 
     @Transaction
-    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId")
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId DESC")
     fun getStatusHistoryPagingSource(pagingKey: String): PagingSource<Int, DbPagingTimelineWithStatus>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

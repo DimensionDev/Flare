@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.microblog.paging
 
 import androidx.paging.ExperimentalPagingApi
+import dev.dimension.flare.common.SnowflakeIdGenerator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -30,6 +31,17 @@ internal class TimelineRemoteMediator(
     override fun onError(e: Throwable) {
         notifyError(e)
     }
+
+    override suspend fun initialize(): InitializeAction =
+        if (loader.supportPrepend) {
+            if (database.pagingTimelineDao().anyPaging(loader.pagingKey)) {
+                InitializeAction.SKIP_INITIAL_REFRESH
+            } else {
+                InitializeAction.LAUNCH_INITIAL_REFRESH
+            }
+        } else {
+            InitializeAction.LAUNCH_INITIAL_REFRESH
+        }
 
     override suspend fun load(
         pageSize: Int,
@@ -78,6 +90,21 @@ internal class TimelineRemoteMediator(
                     .pagingTimelineDao()
                     .delete(pagingKey = key)
             }
+        }
+        if (request is PagingRequest.Prepend && loader.supportPrepend) {
+            // load current timeline caches
+            val currentCaches =
+                database
+                    .pagingTimelineDao()
+                    .getByPagingKey(pagingKey)
+                    .map {
+                        it.copy(
+                            sortId = SnowflakeIdGenerator.nextId(),
+                        )
+                    }
+            database.pagingTimelineDao().insertAll(
+                currentCaches,
+            )
         }
         saveToDatabase(database, data)
     }

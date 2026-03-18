@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.datasource.microblog.paging
 
-import SnowflakeIdGenerator
+import dev.dimension.flare.common.SnowflakeIdGenerator
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
@@ -26,7 +26,7 @@ internal object TimelinePagingMapper {
                 DbPagingTimeline(
                     pagingKey = pagingKey,
                     statusKey = data.statusKey,
-                    sortId = -SnowflakeIdGenerator.nextId(),
+                    sortId = SnowflakeIdGenerator.nextId(),
                 ),
             status =
                 DbStatusWithReference(

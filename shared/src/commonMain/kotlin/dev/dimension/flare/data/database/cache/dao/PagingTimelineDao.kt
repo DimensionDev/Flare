@@ -24,7 +24,7 @@ internal interface PagingTimelineDao {
         "SELECT DbPagingTimeline.* FROM DbPagingTimeline " +
             "INNER JOIN DbStatus ON DbStatus.statusKey = DbPagingTimeline.statusKey " +
             "WHERE DbPagingTimeline.pagingKey = :pagingKey AND DbStatus.accountType = :accountType " +
-            "ORDER BY DbPagingTimeline.sortId DESC",
+            "ORDER BY DbPagingTimeline.sortId",
     )
     fun getPagingSource(
         pagingKey: String,
@@ -33,7 +33,7 @@ internal interface PagingTimelineDao {
 
     @Transaction
     @Query(
-        "SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId DESC",
+        "SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId",
     )
     fun getPagingSource(pagingKey: String): PagingSource<Int, DbPagingTimelineWithStatus>
 
@@ -72,6 +72,12 @@ internal interface PagingTimelineDao {
         pagingKey: String,
         statusKeys: List<MicroBlogKey>,
     ): List<DbPagingTimeline>
+
+    @Query(
+        "SELECT * FROM DbPagingTimeline " +
+            "WHERE pagingKey = :pagingKey ORDER BY sortId",
+    )
+    suspend fun getByPagingKey(pagingKey: String): List<DbPagingTimeline>
 
     @Delete
     suspend fun delete(timeline: List<DbPagingTimeline>)
@@ -154,9 +160,8 @@ internal interface PagingTimelineDao {
     @Query("DELETE FROM DbPagingTimeline")
     suspend fun clear()
 
-    @Transaction
-    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId ASC LIMIT 1")
-    suspend fun getLastPagingTimeline(pagingKey: String): DbPagingTimelineWithStatus?
+    @Query("SELECT EXISTS(SELECT 1 FROM DbPagingTimeline WHERE pagingKey = :pagingKey)")
+    suspend fun anyPaging(pagingKey: String): Boolean
 
     @Query("SELECT * FROM DbPagingKey WHERE pagingKey = :pagingKey LIMIT 1")
     suspend fun getPagingKey(pagingKey: String): DbPagingKey?

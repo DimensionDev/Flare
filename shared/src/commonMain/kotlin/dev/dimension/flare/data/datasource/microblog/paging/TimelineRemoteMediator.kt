@@ -34,7 +34,11 @@ internal class TimelineRemoteMediator(
 
     override suspend fun initialize(): InitializeAction =
         if (loader.supportPrepend) {
-            InitializeAction.SKIP_INITIAL_REFRESH
+            if (database.pagingTimelineDao().anyPaging(loader.pagingKey)) {
+                InitializeAction.SKIP_INITIAL_REFRESH
+            } else {
+                InitializeAction.LAUNCH_INITIAL_REFRESH
+            }
         } else {
             InitializeAction.LAUNCH_INITIAL_REFRESH
         }

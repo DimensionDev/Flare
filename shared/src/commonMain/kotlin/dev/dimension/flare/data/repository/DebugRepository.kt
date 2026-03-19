@@ -19,12 +19,18 @@ internal object DebugRepository {
 
     fun setEnabled(enabled: Boolean) {
         _enabled.value = enabled
+        if (!enabled) {
+            _messages.value = _messages.value.takeLast(MAX_MESSAGES)
+        }
     }
+
+    private val messageLimit: Int
+        get() = if (_enabled.value) Int.MAX_VALUE else MAX_MESSAGES
 
     fun log(message: String) {
         if (_enabled.value) {
             scope.launch {
-                _messages.value = (_messages.value + message).takeLast(MAX_MESSAGES)
+                _messages.value = (_messages.value + message).takeLast(messageLimit)
             }
         }
     }
@@ -42,7 +48,7 @@ internal object DebugRepository {
                     appendLine("Stacktrace:")
                     append(exception.stackTraceToString())
                 }
-            _messages.value = (_messages.value + message).takeLast(MAX_MESSAGES)
+            _messages.value = (_messages.value + message).takeLast(messageLimit)
         }
     }
 

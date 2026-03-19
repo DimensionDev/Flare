@@ -12,7 +12,7 @@ import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
 internal class SearchStatusRemoteMediator(
-    private val service: BlueskyService,
+    private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
     private val query: String,
 ) : CacheableRemoteLoader<UiTimelineV2> {
@@ -27,6 +27,7 @@ internal class SearchStatusRemoteMediator(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
+        val service = getService()
         val response =
             when (request) {
                 is PagingRequest.Prepend -> {

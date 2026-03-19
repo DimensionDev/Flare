@@ -27,13 +27,14 @@ import sh.christian.ozone.api.RKey
 import kotlin.time.Clock
 
 internal class BlueskyListLoader(
-    private val service: BlueskyService,
+    private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
 ) : ListLoader {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiList> {
+        val service = getService()
         val cursor =
             when (request) {
                 is PagingRequest.Append -> request.nextKey
@@ -63,7 +64,7 @@ internal class BlueskyListLoader(
     }
 
     override suspend fun info(listId: String): UiList =
-        service
+        getService()
             .getList(
                 GetListQueryParams(
                     list = AtUri(listId),
@@ -92,6 +93,7 @@ internal class BlueskyListLoader(
         description: String?,
         icon: FileItem?,
     ): UiList {
+        val service = getService()
         val iconInfo =
             if (icon != null) {
                 service.uploadBlob(icon.readBytes()).maybeResponse()
@@ -148,6 +150,7 @@ internal class BlueskyListLoader(
         description: String?,
         icon: FileItem?,
     ) {
+        val service = getService()
         val currentInfo: app.bsky.graph.List =
             service
                 .getRecord(
@@ -191,6 +194,7 @@ internal class BlueskyListLoader(
     }
 
     override suspend fun delete(listId: String) {
+        val service = getService()
         val id = listId.substringAfterLast('/')
         service.applyWrites(
             request =

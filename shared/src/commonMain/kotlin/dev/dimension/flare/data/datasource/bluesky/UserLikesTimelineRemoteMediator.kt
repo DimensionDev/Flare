@@ -13,7 +13,7 @@ import sh.christian.ozone.api.Did
 
 @OptIn(ExperimentalPagingApi::class)
 internal class UserLikesTimelineRemoteMediator(
-    private val service: BlueskyService,
+    private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey = "user_timeline_likes_$accountKey"
@@ -22,6 +22,7 @@ internal class UserLikesTimelineRemoteMediator(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
+        val service = getService()
         val response =
             when (request) {
                 PagingRequest.Refresh ->

@@ -10,13 +10,14 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.mapper.render
 
 internal class TrendsUserPagingSource(
-    private val service: BlueskyService,
+    private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
 ) : RemoteLoader<UiProfile> {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiProfile> {
+        val service = getService()
         val response =
             when (request) {
                 is PagingRequest.Prepend -> {

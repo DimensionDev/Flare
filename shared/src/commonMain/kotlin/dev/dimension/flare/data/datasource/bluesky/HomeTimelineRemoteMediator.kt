@@ -12,7 +12,7 @@ import dev.dimension.flare.ui.model.mapper.render
 
 @OptIn(ExperimentalPagingApi::class)
 internal class HomeTimelineRemoteMediator(
-    private val service: BlueskyService,
+    private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String = "home_$accountKey"
@@ -21,6 +21,7 @@ internal class HomeTimelineRemoteMediator(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
+        val service = getService()
         val response =
             when (request) {
                 is PagingRequest.Prepend -> return PagingResult(

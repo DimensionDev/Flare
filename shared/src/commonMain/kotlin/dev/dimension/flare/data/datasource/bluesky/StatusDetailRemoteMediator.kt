@@ -25,7 +25,7 @@ import sh.christian.ozone.api.AtUri
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
     private val statusKey: MicroBlogKey,
-    private val service: BlueskyService,
+    private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
     private val statusOnly: Boolean,
 ) : CacheableRemoteLoader<UiTimelineV2> {
@@ -44,6 +44,7 @@ internal class StatusDetailRemoteMediator(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
+        val service = getService()
         val result =
             when (request) {
                 is PagingRequest.Append -> {

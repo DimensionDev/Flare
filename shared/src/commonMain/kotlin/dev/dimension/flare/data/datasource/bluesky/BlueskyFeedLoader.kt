@@ -30,13 +30,14 @@ import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 internal class BlueskyFeedLoader(
-    private val service: BlueskyService,
+    private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
 ) : ListLoader {
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiList> {
+        val service = getService()
         val cursor =
             when (request) {
                 is PagingRequest.Append -> request.nextKey
@@ -93,7 +94,7 @@ internal class BlueskyFeedLoader(
     }
 
     override suspend fun info(listId: String): UiList =
-        service
+        getService()
             .getFeedGenerator(
                 GetFeedGeneratorQueryParams(
                     feed = AtUri(listId),
@@ -113,6 +114,7 @@ internal class BlueskyFeedLoader(
     ): UiList = throw UnsupportedOperationException("Update feed is not supported")
 
     override suspend fun delete(listId: String) {
+        val service = getService()
         val currentPreferences = service.getPreferencesForActor().requireResponse()
         val feedInfo =
             service
@@ -157,6 +159,7 @@ internal class BlueskyFeedLoader(
     }
 
     suspend fun subscribe(feedUri: String) {
+        val service = getService()
         val currentPreferences = service.getPreferencesForActor().requireResponse()
         val feedInfo =
             service
@@ -202,6 +205,7 @@ internal class BlueskyFeedLoader(
     }
 
     suspend fun favourite(feedUri: String) {
+        val service = getService()
         val feedInfo =
             service
                 .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(feedUri)))
@@ -219,6 +223,7 @@ internal class BlueskyFeedLoader(
     }
 
     suspend fun unfavourite(feedUri: String) {
+        val service = getService()
         val feedInfo =
             service
                 .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(feedUri)))
@@ -237,6 +242,7 @@ internal class BlueskyFeedLoader(
         cid: String,
         uri: String,
     ) {
+        val service = getService()
         service
             .createRecord(
                 CreateRecordRequest(
@@ -257,7 +263,7 @@ internal class BlueskyFeedLoader(
     }
 
     private suspend fun deleteLikeRecord(likedUri: String) =
-        service.deleteRecord(
+        getService().deleteRecord(
             DeleteRecordRequest(
                 repo = Did(did = accountKey.id),
                 collection = Nsid("app.bsky.feed.like"),

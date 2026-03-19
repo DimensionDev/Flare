@@ -13,7 +13,7 @@ import sh.christian.ozone.api.AtUri
 
 @OptIn(ExperimentalPagingApi::class)
 internal class ListTimelineRemoteMediator(
-    private val service: BlueskyService,
+    private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
     private val uri: String,
 ) : CacheableRemoteLoader<UiTimelineV2> {
@@ -23,6 +23,7 @@ internal class ListTimelineRemoteMediator(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
+        val service = getService()
         val response =
             when (request) {
                 PagingRequest.Refresh ->

@@ -211,7 +211,7 @@ struct StatusView: View {
                                 .foregroundStyle(.secondary)
                             }
                             if !data.emojiReactions.isEmpty {
-                                StatusReactionView(data: Array(data.emojiReactions))
+                                StatusReactionView(data: Array(data.emojiReactions), isDetail: isDetail)
                             }
                         }
 

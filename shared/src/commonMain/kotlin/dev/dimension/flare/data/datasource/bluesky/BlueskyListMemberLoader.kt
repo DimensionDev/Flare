@@ -130,7 +130,6 @@ internal class BlueskyListMemberLoader(
         request: PagingRequest,
         userKey: MicroBlogKey,
     ): PagingResult<UiList> {
-        val service = getService()
         if (request is PagingRequest.Prepend) {
             return PagingResult()
         }
@@ -140,6 +139,7 @@ internal class BlueskyListMemberLoader(
             return PagingResult(nextKey = null)
         }
 
+        val service = getService()
         var cursor: String? = null
         val lists = mutableListOf<UiList.List>()
         val allLists =

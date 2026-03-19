@@ -10,6 +10,7 @@ import kotlin.coroutines.cancellation.CancellationException
 
 internal object DebugRepository {
     private const val MAX_MESSAGES = 25
+    private const val DEBUG_MAX_MESSAGES = 1000
     private val _messages = MutableStateFlow<List<String>>(emptyList())
     private val _enabled = MutableStateFlow(false)
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -19,12 +20,18 @@ internal object DebugRepository {
 
     fun setEnabled(enabled: Boolean) {
         _enabled.value = enabled
+        if (!enabled) {
+            _messages.value = _messages.value.takeLast(MAX_MESSAGES)
+        }
     }
+
+    private val messageLimit: Int
+        get() = if (_enabled.value) DEBUG_MAX_MESSAGES else MAX_MESSAGES
 
     fun log(message: String) {
         if (_enabled.value) {
             scope.launch {
-                _messages.value = (_messages.value + message).takeLast(MAX_MESSAGES)
+                _messages.value = (_messages.value + message).takeLast(messageLimit)
             }
         }
     }
@@ -42,7 +49,7 @@ internal object DebugRepository {
                     appendLine("Stacktrace:")
                     append(exception.stackTraceToString())
                 }
-            _messages.value = (_messages.value + message).takeLast(MAX_MESSAGES)
+            _messages.value = (_messages.value + message).takeLast(messageLimit)
         }
     }
 

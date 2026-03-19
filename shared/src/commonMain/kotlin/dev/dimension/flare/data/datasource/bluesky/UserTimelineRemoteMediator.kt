@@ -14,7 +14,7 @@ import sh.christian.ozone.api.Did
 
 @OptIn(ExperimentalPagingApi::class)
 internal class UserTimelineRemoteMediator(
-    private val service: BlueskyService,
+    private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
     private val onlyMedia: Boolean = false,
@@ -37,6 +37,7 @@ internal class UserTimelineRemoteMediator(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
+        val service = getService()
         val filter =
             when {
                 onlyMedia -> GetAuthorFeedFilter.PostsWithMedia

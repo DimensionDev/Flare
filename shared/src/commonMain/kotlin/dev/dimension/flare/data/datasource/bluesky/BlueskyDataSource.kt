@@ -109,6 +109,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import sh.christian.ozone.api.AtUri
@@ -121,6 +123,8 @@ import sh.christian.ozone.api.RKey
 import sh.christian.ozone.api.model.JsonContent
 import sh.christian.ozone.api.model.JsonContent.Companion.encodeAsJsonContent
 import kotlin.time.Clock
+
+private const val AT_PROTO_PERSONAL_DATA_SERVER = "AtprotoPersonalDataServer"
 
 @OptIn(ExperimentalPagingApi::class)
 internal class BlueskyDataSource(
@@ -142,41 +146,49 @@ internal class BlueskyDataSource(
     private val credentialFlow by lazy {
         accountRepository.credentialFlow<UiAccount.Bluesky.Credential>(accountKey)
     }
-    private val service by lazy {
-        BlueskyService(
-            accountKey = accountKey,
-            credentialFlow = credentialFlow,
-            onCredentialRefreshed = { credential ->
-                appDatabase.accountDao().setCredential(
-                    accountKey,
-                    credential.encodeJson(),
-                )
-            },
-        )
-    }
+    private var cachedPdsService: BlueskyService? = null
 
-    private var cachedEndpoint: String? = null
+    private val mutex = Mutex(locked = false)
 
-    private suspend fun pdsService(): BlueskyService {
-        if (cachedEndpoint == null) {
-            val didDoc: DidDoc? =
-                service
-                    .getSession()
-                    .requireResponse()
-                    .didDoc
-                    ?.decodeAs()
-            val entryPoint = didDoc?.service?.firstOrNull()?.serviceEndpoint
-            cachedEndpoint = entryPoint
+    private suspend fun pdsService(): BlueskyService =
+        mutex.withLock {
+            cachedPdsService ?: run {
+                val service =
+                    BlueskyService(
+                        accountKey = accountKey,
+                        credentialFlow = credentialFlow,
+                        onCredentialRefreshed = { credential ->
+                            appDatabase.accountDao().setCredential(
+                                accountKey,
+                                credential.encodeJson(),
+                            )
+                        },
+                    )
+                val didDoc: DidDoc? =
+                    service
+                        .getSession()
+                        .requireResponse()
+                        .didDoc
+                        ?.decodeAs()
+                val entryPoint =
+                    didDoc
+                        ?.service
+                        ?.firstOrNull { it.type == AT_PROTO_PERSONAL_DATA_SERVER }
+                        ?.serviceEndpoint
+                if (entryPoint.isNullOrEmpty()) {
+                    service
+                } else {
+                    service.newBaseUrlService(entryPoint)
+                }.also {
+                    cachedPdsService = it
+                }
+            }
         }
-        return cachedEndpoint?.let {
-            service.newBaseUrlService(it)
-        } ?: service
-    }
 
     val loader by lazy {
         BlueskyLoader(
             accountKey = accountKey,
-            service = service,
+            getService = this::pdsService,
         )
     }
 
@@ -226,8 +238,10 @@ internal class BlueskyDataSource(
         when (event) {
             is PostEvent.Bluesky.Bookmark ->
                 bookmark(event, updater)
+
             is PostEvent.Bluesky.Like ->
                 like(event, updater)
+
             is PostEvent.Bluesky.Reblog ->
                 reblog(event, updater)
         }
@@ -235,7 +249,7 @@ internal class BlueskyDataSource(
 
     override fun homeTimeline() =
         HomeTimelineRemoteMediator(
-            service,
+            getService = this::pdsService,
             accountKey,
         )
 
@@ -243,7 +257,7 @@ internal class BlueskyDataSource(
         when (type) {
             NotificationFilter.All ->
                 NotificationRemoteMediator(
-                    service,
+                    getService = this::pdsService,
                     accountKey,
                     onClearMarker = {
                         notificationHandler.clear()
@@ -260,7 +274,7 @@ internal class BlueskyDataSource(
         userKey: MicroBlogKey,
         mediaOnly: Boolean,
     ) = UserTimelineRemoteMediator(
-        service,
+        getService = this::pdsService,
         accountKey,
         userKey,
         onlyMedia = mediaOnly,
@@ -269,7 +283,7 @@ internal class BlueskyDataSource(
     override fun context(statusKey: MicroBlogKey) =
         StatusDetailRemoteMediator(
             statusKey,
-            service,
+            getService = this::pdsService,
             accountKey,
             statusOnly = false,
         )
@@ -278,6 +292,7 @@ internal class BlueskyDataSource(
         data: ComposeData,
         progress: () -> Unit,
     ) {
+        val service = pdsService()
         val quoteId =
             data.referenceStatus
                 ?.composeStatus
@@ -408,6 +423,7 @@ internal class BlueskyDataSource(
         reason: BlueskyReportStatusState.ReportReason,
     ) {
         tryRun {
+            val service = pdsService()
             val post =
                 service
                     .getPosts(GetPostsQueryParams(persistentListOf(AtUri(statusKey.id))))
@@ -444,6 +460,7 @@ internal class BlueskyDataSource(
         event: PostEvent.Bluesky.Reblog,
         updater: DatabaseUpdater,
     ) {
+        val service = pdsService()
         val cid = event.cid
         val uri = event.uri
         val repostUri = event.repostUri
@@ -529,6 +546,7 @@ internal class BlueskyDataSource(
         event: PostEvent.Bluesky.Bookmark,
         updater: DatabaseUpdater,
     ) {
+        val service = pdsService()
         val cid = event.cid
         val uri = event.uri
         if (event.bookmarked) {
@@ -553,6 +571,7 @@ internal class BlueskyDataSource(
         cid: String,
         uri: String,
     ): CreateRecordResponse {
+        val service = pdsService()
         val result =
             service
                 .createRecord(
@@ -575,7 +594,7 @@ internal class BlueskyDataSource(
     }
 
     private suspend fun deleteLikeRecord(likedUri: String) =
-        service.deleteRecord(
+        pdsService().deleteRecord(
             DeleteRecordRequest(
                 repo = Did(did = accountKey.id),
                 collection = Nsid("app.bsky.feed.like"),
@@ -585,21 +604,21 @@ internal class BlueskyDataSource(
 
     override fun searchStatus(query: String) =
         SearchStatusRemoteMediator(
-            service,
+            getService = this::pdsService,
             accountKey,
             query,
         )
 
     override fun searchUser(query: String): RemoteLoader<UiProfile> =
         SearchUserPagingSource(
-            service,
+            getService = this::pdsService,
             accountKey,
             query,
         )
 
     override fun discoverUsers(): RemoteLoader<UiProfile> =
         TrendsUserPagingSource(
-            service,
+            getService = this::pdsService,
             accountKey,
         )
 
@@ -624,7 +643,7 @@ internal class BlueskyDataSource(
 
     internal val feedLoader by lazy {
         BlueskyFeedLoader(
-            service = service,
+            getService = this::pdsService,
             accountKey = accountKey,
         )
     }
@@ -649,7 +668,7 @@ internal class BlueskyDataSource(
 
                 override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiList.Feed> {
                     val result =
-                        service
+                        pdsService()
                             .getPopularFeedGeneratorsUnspecced(
                                 GetPopularFeedGeneratorsQueryParams(
                                     limit = params.loadSize.toLong(),
@@ -684,7 +703,7 @@ internal class BlueskyDataSource(
 
     fun feedTimelineLoader(uri: String) =
         FeedTimelineRemoteMediator(
-            service = service,
+            getService = this::pdsService,
             accountKey = accountKey,
             uri = uri,
         )
@@ -718,7 +737,7 @@ internal class BlueskyDataSource(
 
     override fun listTimeline(listId: String) =
         ListTimelineRemoteMediator(
-            service = service,
+            getService = this::pdsService,
             accountKey = accountKey,
             uri = listId,
         )
@@ -727,14 +746,14 @@ internal class BlueskyDataSource(
 
     val listLoader: ListLoader by lazy {
         BlueskyListLoader(
-            service = service,
+            getService = this::pdsService,
             accountKey = accountKey,
         )
     }
 
     val listMemberLoader: ListMemberLoader by lazy {
         BlueskyListMemberLoader(
-            service = service,
+            getService = this::pdsService,
             accountKey = accountKey,
         )
     }
@@ -1113,14 +1132,14 @@ internal class BlueskyDataSource(
 
     override fun following(userKey: MicroBlogKey): RemoteLoader<UiProfile> =
         FollowingPagingSource(
-            service = service,
+            getService = this::pdsService,
             userKey = userKey,
             accountKey = accountKey,
         )
 
     override fun fans(userKey: MicroBlogKey): RemoteLoader<UiProfile> =
         FansPagingSource(
-            service = service,
+            getService = this::pdsService,
             userKey = userKey,
             accountKey = accountKey,
         )
@@ -1131,7 +1150,7 @@ internal class BlueskyDataSource(
                 type = ProfileTab.Timeline.Type.Status,
                 loader =
                     UserTimelineRemoteMediator(
-                        service = service,
+                        getService = this::pdsService,
                         accountKey = accountKey,
                         userKey = userKey,
                         onlyMedia = false,
@@ -1142,7 +1161,7 @@ internal class BlueskyDataSource(
                 type = ProfileTab.Timeline.Type.StatusWithReplies,
                 loader =
                     UserTimelineRemoteMediator(
-                        service,
+                        getService = this::pdsService,
                         accountKey,
                         userKey,
                         withReplies = true,
@@ -1154,7 +1173,7 @@ internal class BlueskyDataSource(
                     type = ProfileTab.Timeline.Type.Likes,
                     loader =
                         UserLikesTimelineRemoteMediator(
-                            service,
+                            getService = this::pdsService,
                             accountKey,
                         ),
                 )
@@ -1165,7 +1184,7 @@ internal class BlueskyDataSource(
 
     fun bookmarkTimeline(): RemoteLoader<UiTimelineV2> =
         BookmarkTimelineRemoteMediator(
-            service = service,
+            getService = this::pdsService,
             accountKey = accountKey,
         )
 }

@@ -22,7 +22,7 @@ import sh.christian.ozone.api.RKey
 import kotlin.time.Clock
 
 internal class BlueskyListMemberLoader(
-    private val service: BlueskyService,
+    private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
 ) : ListMemberLoader {
     override suspend fun loadMembers(
@@ -30,6 +30,7 @@ internal class BlueskyListMemberLoader(
         request: PagingRequest,
         listId: String,
     ): PagingResult<UiProfile> {
+        val service = getService()
         val cursor =
             when (request) {
                 is PagingRequest.Append -> request.nextKey
@@ -61,6 +62,7 @@ internal class BlueskyListMemberLoader(
         listId: String,
         userKey: MicroBlogKey,
     ): UiProfile {
+        val service = getService()
         val user =
             service
                 .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
@@ -86,6 +88,7 @@ internal class BlueskyListMemberLoader(
         listId: String,
         userKey: MicroBlogKey,
     ) {
+        val service = getService()
         var record: com.atproto.repo.ListRecordsRecord? = null
         var cursor: String? = null
         while (record == null) {
@@ -136,6 +139,7 @@ internal class BlueskyListMemberLoader(
             return PagingResult(nextKey = null)
         }
 
+        val service = getService()
         var cursor: String? = null
         val lists = mutableListOf<UiList.List>()
         val allLists =

@@ -30,7 +30,7 @@ import kotlin.time.Clock
 
 internal class BlueskyLoader(
     val accountKey: MicroBlogKey,
-    private val service: BlueskyService,
+    private val getService: suspend () -> BlueskyService,
 ) : NotificationLoader,
     UserLoader,
     PostLoader,
@@ -43,18 +43,19 @@ internal class BlueskyLoader(
         )
 
     override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile =
-        service
+        getService()
             .getProfile(GetProfileQueryParams(actor = Handle(handle = uiHandle.normalizedRaw)))
             .requireResponse()
             .render(accountKey)
 
     override suspend fun userById(id: String): UiProfile =
-        service
+        getService()
             .getProfile(GetProfileQueryParams(actor = Did(did = id)))
             .requireResponse()
             .render(accountKey)
 
     override suspend fun relation(userKey: MicroBlogKey): UiRelation {
+        val service = getService()
         val user =
             service
                 .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
@@ -68,6 +69,7 @@ internal class BlueskyLoader(
     }
 
     override suspend fun status(statusKey: MicroBlogKey): UiTimelineV2 {
+        val service = getService()
         val isDid = statusKey.id.startsWith("at://did:")
         if (isDid) {
             return service
@@ -102,6 +104,7 @@ internal class BlueskyLoader(
     }
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
+        val service = getService()
         service.deleteRecord(
             DeleteRecordRequest(
                 repo = Did(did = accountKey.id),
@@ -112,6 +115,7 @@ internal class BlueskyLoader(
     }
 
     override suspend fun follow(userKey: MicroBlogKey) {
+        val service = getService()
         service.createRecord(
             CreateRecordRequest(
                 repo = Did(did = accountKey.id),
@@ -127,6 +131,7 @@ internal class BlueskyLoader(
     }
 
     override suspend fun unfollow(userKey: MicroBlogKey) {
+        val service = getService()
         val user =
             service
                 .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
@@ -145,6 +150,7 @@ internal class BlueskyLoader(
     }
 
     override suspend fun block(userKey: MicroBlogKey) {
+        val service = getService()
         service.createRecord(
             CreateRecordRequest(
                 repo = Did(did = accountKey.id),
@@ -160,6 +166,7 @@ internal class BlueskyLoader(
     }
 
     override suspend fun unblock(userKey: MicroBlogKey) {
+        val service = getService()
         val user =
             service
                 .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
@@ -178,14 +185,15 @@ internal class BlueskyLoader(
     }
 
     override suspend fun mute(userKey: MicroBlogKey) {
-        service.muteActor(MuteActorRequest(actor = Did(did = userKey.id)))
+        getService().muteActor(MuteActorRequest(actor = Did(did = userKey.id)))
     }
 
     override suspend fun unmute(userKey: MicroBlogKey) {
-        service.unmuteActor(UnmuteActorRequest(actor = Did(did = userKey.id)))
+        getService().unmuteActor(UnmuteActorRequest(actor = Did(did = userKey.id)))
     }
 
     override suspend fun notificationBadgeCount(): Int {
+        val service = getService()
         val notifications =
             service
                 .listNotifications(

@@ -20,7 +20,7 @@ import kotlin.time.Clock
 
 @OptIn(ExperimentalPagingApi::class)
 internal class NotificationRemoteMediator(
-    private val service: BlueskyService,
+    private val getService: suspend () -> BlueskyService,
     private val accountKey: MicroBlogKey,
     private val onClearMarker: () -> Unit,
 ) : CacheableRemoteLoader<UiTimelineV2> {
@@ -34,6 +34,7 @@ internal class NotificationRemoteMediator(
         pageSize: Int,
         request: PagingRequest,
     ): PagingResult<UiTimelineV2> {
+        val service = getService()
         val response =
             when (request) {
                 PagingRequest.Refresh -> {

@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -21,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -37,6 +41,7 @@ import compose.icons.fontawesomeicons.brands.Discord
 import compose.icons.fontawesomeicons.brands.Github
 import compose.icons.fontawesomeicons.brands.Telegram
 import compose.icons.fontawesomeicons.solid.AngleRight
+import compose.icons.fontawesomeicons.solid.Bars
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Lock
@@ -65,6 +70,7 @@ import dev.dimension.flare.import_completed
 import dev.dimension.flare.import_confirmation_message
 import dev.dimension.flare.import_confirmation_title
 import dev.dimension.flare.import_error
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ok
 import dev.dimension.flare.remove_account
 import dev.dimension.flare.save_completed
@@ -163,6 +169,7 @@ import dev.dimension.flare.settings_storage_import_data
 import dev.dimension.flare.settings_storage_import_data_description
 import dev.dimension.flare.settings_storage_subtitle
 import dev.dimension.flare.settings_storage_title
+import dev.dimension.flare.tab_settings_drag
 import dev.dimension.flare.ui.component.AccountItem
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.ComposeInAppNotification
@@ -216,6 +223,8 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.io.File
 import java.util.Locale
 
@@ -292,80 +301,107 @@ internal fun SettingsScreen(
                             Text(text = activeAccount.handle.canonical)
                         },
                     ) {
-                        state.accountState.accounts.onSuccess { accounts ->
-                            repeat(accounts.size) { index ->
-                                val account = accounts[index]
-                                AccountItem(
-                                    account.profile,
-                                    onClick = {
-                                        state.accountState.setActiveAccount(it)
-                                    },
-                                    toLogin = toLogin,
-                                    trailingContent = {
-                                        Row(
-                                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                        ) {
-                                            if (it == null) {
-                                                SubtleButton(
-                                                    onClick = {
-                                                        state.accountState.logout(account.account.accountKey)
-                                                    },
-                                                ) {
-                                                    FAIcon(
-                                                        FontAwesomeIcons.Solid.Trash,
-                                                        contentDescription = stringResource(Res.string.remove_account),
-                                                        tint = FluentTheme.colors.system.critical,
-                                                    )
-                                                }
-                                            } else {
-                                                RadioButton(
-                                                    selected = activeAccount.key == it.key,
-                                                    onClick = {
-                                                        state.accountState.setActiveAccount(it.key)
-                                                    },
-                                                )
-                                                MenuFlyoutContainer(
-                                                    flyout = {
-                                                        MenuFlyoutItem(
-                                                            text = {
-                                                                Text(
-                                                                    stringResource(Res.string.remove_account),
-                                                                    color = FluentTheme.colors.system.critical,
-                                                                )
-                                                            },
-                                                            onClick = {
-                                                                state.accountState.logout(it.key)
-                                                            },
-                                                            icon = {
-                                                                FAIcon(
-                                                                    FontAwesomeIcons.Solid.Trash,
-                                                                    contentDescription =
-                                                                        stringResource(
-                                                                            Res.string.remove_account,
-                                                                        ),
-                                                                    tint = FluentTheme.colors.system.critical,
-                                                                )
-                                                            },
-                                                        )
-                                                    },
-                                                ) {
+                        val accountListState = rememberLazyListState()
+                        val reorderableLazyColumnState =
+                            rememberReorderableLazyListState(accountListState) { from, to ->
+                                state.accountState.moveItem(from.key, to.key)
+                            }
+                        LazyColumn(
+                            state = accountListState,
+                            userScrollEnabled = false,
+                            modifier = Modifier.heightIn(max = 480.dp),
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                        ) {
+                            itemsIndexed(
+                                state.accountState.currentItems,
+                                key = { _, item -> item.account.accountKey.toString() },
+                            ) { _, account ->
+                                ReorderableItem(
+                                    reorderableLazyColumnState,
+                                    key = account.account.accountKey.toString(),
+                                ) {
+                                    AccountItem(
+                                        account.profile,
+                                        onClick = {
+                                            state.accountState.setActiveAccount(it)
+                                        },
+                                        toLogin = toLogin,
+                                        trailingContent = { user ->
+                                            Row(
+                                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                            ) {
+                                                if (user == null) {
                                                     SubtleButton(
                                                         onClick = {
-                                                            isFlyoutVisible = !isFlyoutVisible
+                                                            state.accountState.deleteItem(account.account.accountKey)
                                                         },
+                                                    ) {
+                                                        FAIcon(
+                                                            FontAwesomeIcons.Solid.Trash,
+                                                            contentDescription = stringResource(Res.string.remove_account),
+                                                            tint = FluentTheme.colors.system.critical,
+                                                        )
+                                                    }
+                                                } else {
+                                                    RadioButton(
+                                                        selected = activeAccount.key == user.key,
+                                                        onClick = {
+                                                            state.accountState.setActiveAccount(user.key)
+                                                        },
+                                                    )
+                                                    SubtleButton(
+                                                        modifier = Modifier.draggableHandle(),
+                                                        onClick = {},
                                                         iconOnly = true,
                                                     ) {
                                                         FAIcon(
-                                                            FontAwesomeIcons.Solid.EllipsisVertical,
-                                                            contentDescription = stringResource(Res.string.remove_account),
+                                                            FontAwesomeIcons.Solid.Bars,
+                                                            contentDescription = stringResource(Res.string.tab_settings_drag),
                                                         )
+                                                    }
+                                                    MenuFlyoutContainer(
+                                                        flyout = {
+                                                            MenuFlyoutItem(
+                                                                text = {
+                                                                    Text(
+                                                                        stringResource(Res.string.remove_account),
+                                                                        color = FluentTheme.colors.system.critical,
+                                                                    )
+                                                                },
+                                                                onClick = {
+                                                                    state.accountState.deleteItem(user.key)
+                                                                },
+                                                                icon = {
+                                                                    FAIcon(
+                                                                        FontAwesomeIcons.Solid.Trash,
+                                                                        contentDescription =
+                                                                            stringResource(
+                                                                                Res.string.remove_account,
+                                                                            ),
+                                                                        tint = FluentTheme.colors.system.critical,
+                                                                    )
+                                                                },
+                                                            )
+                                                        },
+                                                    ) {
+                                                        SubtleButton(
+                                                            onClick = {
+                                                                isFlyoutVisible = !isFlyoutVisible
+                                                            },
+                                                            iconOnly = true,
+                                                        ) {
+                                                            FAIcon(
+                                                                FontAwesomeIcons.Solid.EllipsisVertical,
+                                                                contentDescription = stringResource(Res.string.remove_account),
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
-                                    },
-                                )
+                                        },
+                                    )
+                                }
                             }
                         }
                         ExpanderItem(
@@ -1756,17 +1792,53 @@ private fun appearancePresenter() =
 private fun accountsPresenter() =
     run {
         var expanded by remember { mutableStateOf(false) }
-        val activeAccountState = remember { ActiveAccountPresenter() }.invoke()
         val state =
             remember {
                 AccountManagementPresenter()
             }.invoke()
+        val activeAccountState = remember { ActiveAccountPresenter() }.invoke()
+        val cacheItems =
+            remember {
+                mutableStateListOf<dev.dimension.flare.ui.presenter.settings.AccountsState.AccountItem>()
+            }
+
+        state.accounts.onSuccess {
+            LaunchedEffect(it) {
+                cacheItems.clear()
+                cacheItems.addAll(it)
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            snapshotFlow { cacheItems.toList() }
+                .collect {
+                    state.setOrder(cacheItems.map { item -> item.account.accountKey })
+                }
+        }
 
         object : AccountManagementPresenter.State by state, UserState by activeAccountState {
             val expanded = expanded
+            val currentItems = cacheItems
 
             fun setExpanded(value: Boolean) {
                 expanded = value
+            }
+
+            fun moveItem(
+                from: Any,
+                to: Any,
+            ) {
+                val fromKey = MicroBlogKey.valueOf(from.toString())
+                val toKey = MicroBlogKey.valueOf(to.toString())
+                val fromIndex = cacheItems.indexOfFirst { it.account.accountKey == fromKey }
+                val toIndex = cacheItems.indexOfFirst { it.account.accountKey == toKey }
+                if (fromIndex == -1 || toIndex == -1) return
+                cacheItems.add(toIndex, cacheItems.removeAt(fromIndex))
+            }
+
+            fun deleteItem(accountKey: MicroBlogKey) {
+                cacheItems.removeIf { it.account.accountKey == accountKey }
+                state.logout(accountKey)
             }
         }
     }

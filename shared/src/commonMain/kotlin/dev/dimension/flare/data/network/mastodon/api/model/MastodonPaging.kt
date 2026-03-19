@@ -51,13 +51,13 @@ internal class MastodonPagingConverterFactory : Converter.Factory {
                             val link = result.response.headers["link"]
                             if (result.response.headers.contains("link") && link != null) {
                                 val next =
-                                    "max_id=(\\d+)"
+                                    "max_id=([\\dabcdef]+)"
                                         .toRegex()
                                         .find(link)
                                         ?.groupValues
                                         ?.getOrNull(1)
                                 val prev =
-                                    "min_id=(\\d+)"
+                                    "(?:since|min)_id=([\\dabcdef]+)"
                                         .toRegex()
                                         .find(link)
                                         ?.groupValues

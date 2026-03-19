@@ -56,7 +56,7 @@ public class DraftBoxPresenter :
                     accountsState.accounts
                         .takeSuccess()
                         ?.toImmutableList()
-                        ?.associate { it.first.accountKey to it.first }
+                        ?.associate { it.account.accountKey to it.account }
                         .orEmpty()
                 (visibleDrafts + sendingDrafts)
                     .associateBy { it.groupId }

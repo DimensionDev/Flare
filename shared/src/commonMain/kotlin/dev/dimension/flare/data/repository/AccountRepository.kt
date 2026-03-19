@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.Locale
@@ -13,6 +12,7 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -65,7 +65,7 @@ public class AccountRepository internal constructor(
             }
     }
     internal val allAccounts: Flow<ImmutableList<UiAccount>> by lazy {
-        appDatabase.accountDao().allAccounts().map {
+        appDatabase.accountDao().sortedAccounts().map {
             it.map { it.toUi() }.toImmutableList()
         }
     }
@@ -95,16 +95,33 @@ public class AccountRepository internal constructor(
         account: UiAccount,
         credential: UiAccount.Credential,
     ) = coroutineScope.launch {
-        appDatabase.accountDao().insert(
-            DbAccount(
+        val existingAccount = appDatabase.accountDao().getAccount(account.accountKey)
+        val dbAccount =
+            existingAccount?.copy(
+                credential_json = credential.encodeJson(),
+                last_active = Clock.System.now().toEpochMilliseconds(),
+            ) ?: DbAccount(
                 account_key = account.accountKey,
                 platform_type = account.platformType,
-                last_active = Clock.System.now().toEpochMilliseconds(),
                 credential_json = credential.encodeJson(),
-            ),
-        )
+                last_active = Clock.System.now().toEpochMilliseconds(),
+                sort_id = appDatabase.accountDao().getMaxSortId()?.plus(1) ?: 0L,
+            )
+        appDatabase.accountDao().insert(dbAccount)
         addAccountFlow.value = account
     }
+
+    internal fun updateAccountOrder(accounts: List<MicroBlogKey>) =
+        coroutineScope.launch {
+            appDatabase.connect {
+                accounts.forEachIndexed { index, accountKey ->
+                    appDatabase.accountDao().setSortId(
+                        accountKey,
+                        index.toLong(),
+                    )
+                }
+            }
+        }
 
     internal fun setActiveAccount(accountKey: MicroBlogKey) =
         coroutineScope.launch {
@@ -265,18 +282,8 @@ public fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> =
 
 internal fun allAccountServicesFlow(repository: AccountRepository): Flow<ImmutableList<MicroblogDataSource>> =
     repository.allAccounts.map { accounts ->
-        buildList(accounts.size) {
-            accounts.forEach { account ->
-                add(repository.getOrCreateDataSource(account))
-            }
-        }.toImmutableList()
-    }
-
-@Composable
-internal fun allAccountsPresenter(repository: AccountRepository): State<UiState<ImmutableList<UiAccount>>> =
-    remember(repository) {
-        repository.allAccounts
+        accounts
             .map {
-                UiState.Success(it.toImmutableList())
-            }
-    }.collectAsState(initial = UiState.Loading())
+                repository.getOrCreateDataSource(it)
+            }.toImmutableList()
+    }

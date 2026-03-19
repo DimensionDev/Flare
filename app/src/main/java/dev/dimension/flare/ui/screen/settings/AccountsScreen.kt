@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -31,17 +32,22 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Bars
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.FaceSadTear
 import compose.icons.fontawesomeicons.solid.Plus
@@ -67,10 +73,13 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.settings.AccountsState.AccountItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.ui.theme.segmentedShapes2
 import kotlinx.coroutines.delay
 import moe.tlaster.precompose.molecule.producePresenter
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,6 +91,13 @@ internal fun AccountsScreen(
     val state by producePresenter {
         accountsPresenter()
     }
+    val lazyListState = rememberLazyListState()
+    val haptics = LocalHapticFeedback.current
+    val reorderableLazyColumnState =
+        rememberReorderableLazyListState(lazyListState) { from, to ->
+            state.moveItem(from.key, to.key)
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        }
     FlareScaffold(
         topBar = {
             FlareLargeFlexibleTopAppBar(
@@ -113,119 +129,141 @@ internal fun AccountsScreen(
                 Modifier
                     .padding(horizontal = screenHorizontalPadding),
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+            state = lazyListState,
         ) {
-            state.accounts
-                .onSuccess { accountState ->
-                    itemsIndexed(accountState.toImmutableList()) { index, (account, data) ->
-                        val swipeState =
-                            rememberSwipeToDismissBoxState()
-                        val shape = ListItemDefaults.segmentedShapes2(index, accountState.size)
-                        var showMenu by remember { mutableStateOf(false) }
-                        val isSwiping =
-                            swipeState.dismissDirection != SwipeToDismissBoxValue.Settled
-                        LaunchedEffect(swipeState.settledValue) {
-                            if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {
-                                delay(AnimationConstants.DefaultDurationMillis.toLong())
-                                state.logout(account.accountKey)
+            itemsIndexed(state.currentItems, key = { _, item -> item.account.accountKey.toString() }) { index, (account, data) ->
+                val swipeState =
+                    rememberSwipeToDismissBoxState()
+                val shape = ListItemDefaults.segmentedShapes2(index, state.currentItems.size)
+                var showMenu by remember { mutableStateOf(false) }
+                val isSwiping =
+                    swipeState.dismissDirection != SwipeToDismissBoxValue.Settled
+                LaunchedEffect(swipeState.settledValue) {
+                    if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {
+                        delay(AnimationConstants.DefaultDurationMillis.toLong())
+                        state.deleteItem(account.accountKey)
+                    }
+                }
+                ReorderableItem(
+                    reorderableLazyColumnState,
+                    key = account.accountKey.toString(),
+                ) { isDragging ->
+                    SwipeToDismissBox(
+                        state = swipeState,
+                        backgroundContent = {
+                            if (swipeState.dismissDirection != SwipeToDismissBoxValue.Settled) {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxSize()
+                                            .background(
+                                                color = MaterialTheme.colorScheme.error,
+                                                shape = shape.draggedShape,
+                                            ).padding(16.dp),
+                                    contentAlignment = Alignment.CenterEnd,
+                                ) {
+                                    Text(
+                                        text = stringResource(id = R.string.settings_accounts_remove),
+                                        color = MaterialTheme.colorScheme.onError,
+                                    )
+                                }
                             }
-                        }
-                        SwipeToDismissBox(
-                            state = swipeState,
-                            backgroundContent = {
-                                if (swipeState.dismissDirection != SwipeToDismissBoxValue.Settled) {
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .fillMaxSize()
-                                                .background(color = MaterialTheme.colorScheme.error, shape = shape.draggedShape)
-                                                .padding(16.dp),
-                                        contentAlignment = Alignment.CenterEnd,
-                                    ) {
-                                        Text(
-                                            text = stringResource(id = R.string.settings_accounts_remove),
-                                            color = MaterialTheme.colorScheme.onError,
+                        },
+                        enableDismissFromStartToEnd = false,
+                        enableDismissFromEndToStart = data.isSuccess || data.isError,
+                    ) {
+                        AccountItem(
+                            selected = isSwiping || isDragging,
+                            userState = data,
+                            shapes = shape,
+                            onClick = {
+                                state.setActiveAccount(it)
+                            },
+                            onLongClick = {
+                                showMenu = true
+                            },
+                            toLogin = toLogin,
+                            trailingContent = { user ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    state.activeAccount.onSuccess {
+                                        RadioButton(
+                                            selected = it.accountKey == user.key,
+                                            onClick = {
+                                                state.setActiveAccount(user.key)
+                                            },
                                         )
+                                    }
+
+                                    IconButton(
+                                        modifier =
+                                            Modifier.draggableHandle(
+                                                onDragStarted = {
+                                                    haptics.performHapticFeedback(
+                                                        HapticFeedbackType.Confirm,
+                                                    )
+                                                },
+                                                onDragStopped = {
+                                                    haptics.performHapticFeedback(
+                                                        HapticFeedbackType.Confirm,
+                                                    )
+                                                },
+                                            ),
+                                        onClick = {},
+                                    ) {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Bars,
+                                            contentDescription = stringResource(id = R.string.tab_settings_drag),
+                                        )
+                                    }
+
+                                    IconButton(
+                                        onClick = {
+                                            showMenu = true
+                                        },
+                                    ) {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.EllipsisVertical,
+                                            contentDescription = stringResource(id = R.string.more),
+                                        )
+                                        DropdownMenu(
+                                            expanded = showMenu,
+                                            onDismissRequest = {
+                                                showMenu = false
+                                            },
+                                        ) {
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(
+                                                        text = stringResource(id = R.string.settings_accounts_remove),
+                                                        color = MaterialTheme.colorScheme.error,
+                                                    )
+                                                },
+                                                onClick = {
+                                                    showMenu = false
+                                                    state.deleteItem(account.accountKey)
+                                                },
+                                                leadingIcon = {
+                                                    FAIcon(
+                                                        imageVector = FontAwesomeIcons.Solid.Trash,
+                                                        contentDescription =
+                                                            stringResource(
+                                                                id = R.string.settings_accounts_remove,
+                                                            ),
+                                                        tint = MaterialTheme.colorScheme.error,
+                                                    )
+                                                },
+                                            )
+                                        }
                                     }
                                 }
                             },
-                            enableDismissFromStartToEnd = false,
-                            enableDismissFromEndToStart = data.isSuccess || data.isError,
-                        ) {
-                            AccountItem(
-                                selected = isSwiping,
-                                userState = data,
-                                shapes = shape,
-                                onClick = {
-                                    state.setActiveAccount(it)
-                                },
-                                onLongClick = {
-                                    showMenu = true
-                                },
-                                toLogin = toLogin,
-                                trailingContent = { user ->
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    ) {
-                                        state.activeAccount.onSuccess {
-                                            RadioButton(
-                                                selected = it.accountKey == user.key,
-                                                onClick = {
-                                                    state.setActiveAccount(user.key)
-                                                },
-                                            )
-                                        }
-                                        IconButton(
-                                            onClick = {
-                                                showMenu = true
-                                            },
-                                        ) {
-                                            FAIcon(
-                                                FontAwesomeIcons.Solid.EllipsisVertical,
-                                                contentDescription = stringResource(id = R.string.more),
-                                            )
-                                            DropdownMenu(
-                                                expanded = showMenu,
-                                                onDismissRequest = {
-                                                    showMenu = false
-                                                },
-                                            ) {
-                                                DropdownMenuItem(
-                                                    text = {
-                                                        Text(
-                                                            text = stringResource(id = R.string.settings_accounts_remove),
-                                                            color = MaterialTheme.colorScheme.error,
-                                                        )
-                                                    },
-                                                    onClick = {
-                                                        showMenu = false
-                                                        state.logout(account.accountKey)
-                                                    },
-                                                    leadingIcon = {
-                                                        FAIcon(
-                                                            imageVector = FontAwesomeIcons.Solid.Trash,
-                                                            contentDescription = stringResource(id = R.string.settings_accounts_remove),
-                                                            tint = MaterialTheme.colorScheme.error,
-                                                        )
-                                                    },
-                                                )
-                                            }
-                                        }
-                                    }
-                                },
-                            )
-                        }
-                    }
-                }.onLoading {
-                    items(3) {
-                        AccountItem(
-                            userState = UiState.Loading(),
-                            onClick = {},
-                            toLogin = {},
-                            shapes = ListItemDefaults.segmentedShapes2(it, 3),
                         )
                     }
                 }
+            }
         }
     }
 }
@@ -317,7 +355,13 @@ fun AccountItem(
                 shapes = shapes,
                 content = {
                     if (throwable is LoginExpiredException) {
-                        Text(text = stringResource(id = R.string.login_expired, throwable.accountKey.toString()))
+                        Text(
+                            text =
+                                stringResource(
+                                    id = R.string.login_expired,
+                                    throwable.accountKey.toString(),
+                                ),
+                        )
                     } else {
                         Text(text = stringResource(id = R.string.account_item_error_title))
                     }
@@ -356,7 +400,49 @@ fun AccountItem(
 @Composable
 private fun accountsPresenter() =
     run {
-        remember {
-            AccountManagementPresenter()
-        }.invoke()
+        val cacheItems =
+            remember {
+                mutableStateListOf<AccountItem>()
+            }
+
+        val state =
+            remember {
+                AccountManagementPresenter()
+            }.invoke()
+
+        state.accounts.onSuccess {
+            LaunchedEffect(it) {
+                cacheItems.clear()
+                cacheItems.addAll(it)
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            snapshotFlow { cacheItems.toList() }
+                .collect {
+                    state.setOrder(cacheItems.map { it.account.accountKey })
+                }
+        }
+
+        object : AccountManagementPresenter.State by state {
+            val currentItems = cacheItems
+
+            fun moveItem(
+                from: Any,
+                to: Any,
+            ) {
+                val fromKey = MicroBlogKey.valueOf(from.toString())
+                val toKey = MicroBlogKey.valueOf(to.toString())
+                val fromIndex = cacheItems.indexOfFirst { it.account.accountKey == fromKey }
+                val toIndex = cacheItems.indexOfFirst { it.account.accountKey == toKey }
+                if (fromIndex == -1 || toIndex == -1) return
+                cacheItems.add(toIndex, cacheItems.removeAt(fromIndex))
+            }
+
+            fun deleteItem(accountKey: MicroBlogKey) {
+                cacheItems.removeIf { it.account.accountKey == accountKey }
+//                state.updateOrder(cacheItems.map { it.account.accountKey })
+                state.logout(accountKey)
+            }
+        }
     }

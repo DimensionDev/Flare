@@ -13,6 +13,9 @@ internal interface AccountDao {
     @Query("SELECT * FROM DbAccount ORDER BY last_active DESC LIMIT 1")
     fun activeAccount(): Flow<DbAccount?>
 
+    @Query("SELECT * FROM DbAccount ORDER BY sort_id")
+    fun sortedAccounts(): Flow<List<DbAccount>>
+
     @Query("SELECT * FROM DbAccount")
     fun allAccounts(): Flow<List<DbAccount>>
 
@@ -28,6 +31,9 @@ internal interface AccountDao {
     @Query("SELECT * FROM DbAccount WHERE account_key = :accountKey")
     fun get(accountKey: MicroBlogKey): Flow<DbAccount?>
 
+    @Query("SELECT * FROM DbAccount WHERE account_key = :accountKey")
+    suspend fun getAccount(accountKey: MicroBlogKey): DbAccount?
+
     @Query("DELETE FROM DbAccount WHERE account_key = :accountKey")
     suspend fun delete(accountKey: MicroBlogKey)
 
@@ -36,4 +42,13 @@ internal interface AccountDao {
         accountKey: MicroBlogKey,
         credentialJson: String,
     )
+
+    @Query("UPDATE DbAccount SET sort_id = :sortId WHERE account_key = :accountKey")
+    suspend fun setSortId(
+        accountKey: MicroBlogKey,
+        sortId: Long,
+    )
+
+    @Query("SELECT MAX(sort_id) FROM DbAccount")
+    suspend fun getMaxSortId(): Long?
 }

@@ -31,7 +31,7 @@ public class AllTabsPresenter(
             accountState.accounts.map {
                 it
                     .toImmutableList()
-                    .mapNotNull { it.second.takeSuccess() }
+                    .mapNotNull { it.profile.takeSuccess() }
                     .map { user ->
                         val tabs =
                             remember(user.key) {

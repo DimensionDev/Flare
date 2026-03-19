@@ -9,6 +9,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,8 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
@@ -404,6 +403,7 @@ public fun CommonStatusComponent(
                 Spacer(modifier = Modifier.height(4.dp))
                 StatusReactionComponent(
                     data = item,
+                    isDetail = isDetail,
                 )
             }
 
@@ -555,9 +555,11 @@ private fun StatusQuoteComponent(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun StatusReactionComponent(
     data: UiTimelineV2.Post,
+    isDetail: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -587,11 +589,28 @@ private fun StatusReactionComponent(
             }
         }
         if (data.emojiReactions.isNotEmpty()) {
-            LazyRow(
+            // the original FlowRow without overflow just call the
+            // FlowRow with overflow, so suppress the deprecation
+            // since the original one just call the FlowRow with overflow
+            @Suppress("DEPRECATION")
+            androidx.compose.foundation.layout.FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+                maxLines = if (isDetail) Int.MAX_VALUE else 2,
+                overflow =
+                    androidx.compose.foundation.layout.FlowRowOverflow.expandIndicator {
+                        PlatformText(
+                            text =
+                                stringResource(
+                                    resource = Res.string.mastodon_item_show_more,
+                                ),
+                            style = PlatformTheme.typography.caption,
+                            color = PlatformTheme.colorScheme.caption,
+                        )
+                    },
             ) {
-                items(data.emojiReactions) { reaction ->
+                data.emojiReactions.forEach { reaction ->
                     val color =
                         if (reaction.me) {
                             PlatformTheme.colorScheme.primaryContainer

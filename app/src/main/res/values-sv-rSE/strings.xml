@@ -380,9 +380,6 @@
     <string name="import_confirmation_message">Detta kommer att importera data från filen. Befintliga poster med matchande ID kommer att ersättas. Vill du fortsätta?</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Lade till fullt utkaststöd.</li>
-                <li>Omarbetade AI-konfiguration för att stödja både on-device AI och OpenAI-kompatibla API:er.</li>
-                <li>Stöd för Misskey kanaler.</li>
                 <li>Felrättelser och prestandaförbättringar.</li>
             </ul>
         ]]></string>

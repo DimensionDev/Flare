@@ -367,6 +367,11 @@
     <string name="import_error">Veri içe aktarma başarısız oldu</string>
     <string name="import_confirmation_title">İçe Aktarmayı Onayla</string>
     <string name="import_confirmation_message">Bu işlem dosyadan verileri içe aktaracaktır. Eşleşen kimlik numaralarına sahip mevcut kayıtlar değiştirilecektir. Devam etmek istiyor musunuz?</string>
+    <string name="changelog_current"><![CDATA[<span>Sürüm %1$s:</span>
+            <ul>
+                <li>Hata düzeltmeleri ve performans iyileştirmeleri.</li>
+            </ul>
+        ]]></string>
     <string name="tab_settings_add_group">Grup Ekle</string>
     <string name="tab_settings_add_tab">Sekme Ekle</string>
     <string name="tab_settings_edit_group">Grup Düzenleme</string>

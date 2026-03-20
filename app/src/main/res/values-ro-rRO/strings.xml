@@ -381,10 +381,7 @@
     <string name="import_confirmation_message">Acest lucru va importa date din fișier. Înregistrările existente cu ID-uri de potrivire vor fi înlocuite. Doriți să continuați?</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
-                <li>a adăugat întregul proiect de sprijin.</li>
-                <li>a relucrat configurația AI pentru a sprijini atât AI pe dispozitiv cât și API-uri compatibile cu OpenAI.</li>
-                <li>Adăugat la canalele Misskey suport.</li>
-                <li>Remedierea erorilor şi îmbunătăţirea performanţei.</li>
+                <li>Remedieri ale erorilor şi îmbunătăţiri de performanţă.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Adaugă grup</string>

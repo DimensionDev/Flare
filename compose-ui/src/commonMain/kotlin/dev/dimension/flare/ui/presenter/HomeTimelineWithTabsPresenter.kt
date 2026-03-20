@@ -9,8 +9,7 @@ import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.vvo
+import dev.dimension.flare.model.displayName
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.home.UserPresenter
@@ -80,14 +79,7 @@ public class HomeTimelineWithTabsPresenter(
                 val tab =
                     HomeTimelineTabItem(
                         accountKey = account.accountKey,
-                        title =
-                            when (account.platformType) {
-                                PlatformType.Mastodon -> "Mastodon"
-                                PlatformType.Misskey -> "Misskey"
-                                PlatformType.Bluesky -> "Bluesky"
-                                PlatformType.xQt -> "X"
-                                PlatformType.VVo -> vvo
-                            },
+                        title = account.platformType.displayName,
                     )
                 settingsRepository.updateTabSettings {
                     if (mainTabs.any { it.key == tab.key }) {

@@ -58,6 +58,12 @@ import dev.dimension.flare.compose.ui.eula_privacy_policy
 import dev.dimension.flare.compose.ui.login_agreement
 import dev.dimension.flare.compose.ui.login_button
 import dev.dimension.flare.compose.ui.mastodon_login_verify_message
+import dev.dimension.flare.compose.ui.nostr_login_generate_button
+import dev.dimension.flare.compose.ui.nostr_login_hint
+import dev.dimension.flare.compose.ui.nostr_login_npub_hint
+import dev.dimension.flare.compose.ui.nostr_login_nsec_hint
+import dev.dimension.flare.compose.ui.nostr_login_relays_hint
+import dev.dimension.flare.compose.ui.nostr_login_title
 import dev.dimension.flare.compose.ui.service_select_compatibility_warning
 import dev.dimension.flare.compose.ui.service_select_empty_message
 import dev.dimension.flare.compose.ui.service_select_instance_input_placeholder
@@ -67,6 +73,7 @@ import dev.dimension.flare.compose.ui.service_select_welcome_list_hint
 import dev.dimension.flare.compose.ui.service_select_welcome_message
 import dev.dimension.flare.compose.ui.service_select_welcome_title
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.agreementUrl
 import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
@@ -220,6 +227,10 @@ public fun ServiceSelectionScreenContent(
                             val passwordFocusRequester = remember { FocusRequester() }
                             val pinCodeFocusRequester = remember { FocusRequester() }
                             when (nodeData.platformType) {
+                                PlatformType.Nostr -> {
+                                    NostrLoginContent(state)
+                                }
+
                                 PlatformType.Bluesky -> {
                                     val oauthString =
                                         stringResource(Res.string.bluesky_login_oauth_button)
@@ -603,6 +614,139 @@ public fun ServiceSelectionScreenContent(
 }
 
 @Composable
+private fun NostrLoginContent(state: SelectionPresenter.State) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            NetworkImage(
+                PlatformType.Nostr.logoUrl,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                contentScale = ContentScale.Fit,
+            )
+            PlatformText(
+                text = stringResource(Res.string.nostr_login_title),
+                style = PlatformTheme.typography.title,
+            )
+        }
+        PlatformText(
+            text = stringResource(Res.string.nostr_login_hint),
+            textAlign = TextAlign.Center,
+            style = PlatformTheme.typography.caption,
+        )
+        PlatformTextField(
+            state = state.nostrInputState.publicKey,
+            label = {
+                PlatformText(text = stringResource(Res.string.nostr_login_npub_hint))
+            },
+            enabled = !state.nostrLoginState.loading,
+            modifier = Modifier.width(300.dp),
+            lineLimits = TextFieldLineLimits.SingleLine,
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next,
+                    autoCorrectEnabled = false,
+                ),
+        )
+        PlatformSecureTextField(
+            state = state.nostrInputState.secretKey,
+            label = {
+                PlatformText(text = stringResource(Res.string.nostr_login_nsec_hint))
+            },
+            enabled = !state.nostrLoginState.loading,
+            modifier = Modifier.width(300.dp),
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Next,
+                    autoCorrectEnabled = false,
+                ),
+        )
+        PlatformTextField(
+            state = state.nostrInputState.relays,
+            label = {
+                PlatformText(text = stringResource(Res.string.nostr_login_relays_hint))
+            },
+            enabled = !state.nostrLoginState.loading,
+            modifier = Modifier.width(300.dp),
+            lineLimits = TextFieldLineLimits.SingleLine,
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Uri,
+                    imeAction = ImeAction.Done,
+                    autoCorrectEnabled = false,
+                ),
+            onKeyboardAction = {
+                if (state.nostrInputState.canLogin) {
+                    state.nostrLoginState.login(
+                        publicKey =
+                            state.nostrInputState.publicKey.text
+                                .toString(),
+                        secretKey =
+                            state.nostrInputState.secretKey.text
+                                .toString(),
+                        relays =
+                            state.nostrInputState.relays.text
+                                .toString(),
+                    )
+                }
+            },
+        )
+        PlatformFilledTonalButton(
+            onClick = {
+                state.nostrLoginState.login(
+                    publicKey =
+                        state.nostrInputState.publicKey.text
+                            .toString(),
+                    secretKey =
+                        state.nostrInputState.secretKey.text
+                            .toString(),
+                    relays =
+                        state.nostrInputState.relays.text
+                            .toString(),
+                )
+            },
+            modifier = Modifier.width(300.dp),
+            enabled = state.nostrInputState.canLogin && !state.nostrLoginState.loading,
+        ) {
+            PlatformText(text = stringResource(Res.string.login_button))
+        }
+        PlatformFilledTonalButton(
+            onClick = {
+                state.nostrLoginState.generateAndLogin(
+                    relays =
+                        state.nostrInputState.relays.text
+                            .toString(),
+                )
+            },
+            modifier = Modifier.width(300.dp),
+            enabled = !state.nostrLoginState.loading,
+        ) {
+            PlatformText(text = stringResource(Res.string.nostr_login_generate_button))
+        }
+        state.nostrLoginState.error?.let {
+            PlatformText(
+                text = it.message ?: "Unknown error",
+                textAlign = TextAlign.Center,
+            )
+        }
+        if (state.nostrLoginState.loading) {
+            PlatformLinearProgressIndicator()
+        }
+    }
+}
+
+@Composable
 private fun ServiceSelectItem(
     instance: UiInstance?,
     onClick: () -> Unit,
@@ -677,18 +821,12 @@ private fun LoginAgreement(
     openUri: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (platformType == PlatformType.VVo) return
+    val url = platformType.agreementUrl(host) ?: return
     val linkText = stringResource(Res.string.eula_privacy_policy)
     val fullText = stringResource(Res.string.login_agreement, linkText)
     val color = PlatformTheme.colorScheme.primary
     val annotatedString =
-        remember {
-            val url =
-                when (platformType) {
-                    PlatformType.Bluesky -> "https://bsky.social/about/support/tos"
-                    PlatformType.xQt -> "https://help.x.com/en/rules-and-policies/x-rules"
-                    else -> "https://$host/about"
-                }
+        remember(platformType, host, url, linkText, fullText, color) {
             buildAnnotatedString {
                 append(fullText)
                 val startIndex = fullText.indexOf(linkText)

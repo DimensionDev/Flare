@@ -23,18 +23,21 @@ public class ServiceSelectPresenter(
     @Composable
     override fun body(): ServiceSelectState {
         val nodeInfoState = remember { NodeInfoPresenter() }.body()
+        val nostrLoginState = remember { NostrLoginPresenter(toHome) }.body()
         val blueskyLoginState = remember { BlueskyLoginPresenter(toHome) }.body()
         val blueskyOauthLoginState = remember { BlueskyOAuthLoginPresenter(toHome) }.body()
         val mastodonLoginState = mastodonLoginPresenter(toHome)
         val misskeyLoginState = misskeyLoginPresenter(toHome)
         val loading =
-            blueskyLoginState.loading ||
+            nostrLoginState.loading ||
+                blueskyLoginState.loading ||
                 mastodonLoginState.loading ||
                 mastodonLoginState.resumedState is UiState.Loading ||
                 misskeyLoginState.loading ||
                 misskeyLoginState.resumedState is UiState.Loading
 
         return object : ServiceSelectState, NodeInfoState by nodeInfoState {
+            override val nostrLoginState = nostrLoginState
             override val blueskyLoginState = blueskyLoginState
             override val blueskyOauthLoginState = blueskyOauthLoginState
             override val mastodonLoginState = mastodonLoginState
@@ -144,6 +147,7 @@ public class ServiceSelectPresenter(
 
 @Immutable
 public interface ServiceSelectState : NodeInfoState {
+    public val nostrLoginState: NostrLoginState
     public val blueskyLoginState: BlueskyLoginState
     public val blueskyOauthLoginState: BlueskyOAuthLoginPresenter.State
     public val mastodonLoginState: MastodonLoginState

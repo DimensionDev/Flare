@@ -7,6 +7,7 @@ import kotlin.io.encoding.Base64
 @Immutable
 @Serializable
 public enum class PlatformType {
+    Nostr,
     Mastodon,
     Misskey,
     Bluesky,
@@ -17,21 +18,70 @@ public enum class PlatformType {
     VVo,
 }
 
-public val PlatformType.logoUrl: String
+@Immutable
+public data class PlatformTypeMetadata(
+    val displayName: String,
+    val logoUrl: String,
+)
+
+public val PlatformType.metadata: PlatformTypeMetadata
     get() =
         when (this) {
-            PlatformType.Mastodon -> "https://joinmastodon.org/logos/logo-purple.svg"
+            PlatformType.Nostr ->
+                PlatformTypeMetadata(
+                    displayName = "Nostr",
+                    logoUrl = "https://nostr.com/favicon.ico",
+                )
+            PlatformType.Mastodon ->
+                PlatformTypeMetadata(
+                    displayName = "Mastodon",
+                    logoUrl = "https://joinmastodon.org/logos/logo-purple.svg",
+                )
             PlatformType.Misskey ->
-                "https://github.com/misskey-dev/misskey/blob/develop/packages" +
-                    "/backend/assets/favicon.png?raw=true"
-            PlatformType.Bluesky -> "https://blueskyweb.xyz/images/apple-touch-icon.png"
+                PlatformTypeMetadata(
+                    displayName = "Misskey",
+                    logoUrl =
+                        "https://github.com/misskey-dev/misskey/blob/develop/packages" +
+                            "/backend/assets/favicon.png?raw=true",
+                )
+            PlatformType.Bluesky ->
+                PlatformTypeMetadata(
+                    displayName = "Bluesky",
+                    logoUrl = "https://blueskyweb.xyz/images/apple-touch-icon.png",
+                )
             PlatformType.xQt ->
-                "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53" +
-                    "/X_logo_2023_original.svg/1920px-X_logo_2023_original.svg.png"
+                PlatformTypeMetadata(
+                    displayName = "X",
+                    logoUrl =
+                        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53" +
+                            "/X_logo_2023_original.svg/1920px-X_logo_2023_original.svg.png",
+                )
             PlatformType.VVo ->
-                "https://upload.wikimedia.org/wikipedia/en/thumb/6/" +
-                    "6e/Sina_Weibo.svg/2560px-Sina_Weibo.svg.png"
+                PlatformTypeMetadata(
+                    displayName = vvo,
+                    logoUrl =
+                        "https://upload.wikimedia.org/wikipedia/en/thumb/6/" +
+                            "6e/Sina_Weibo.svg/2560px-Sina_Weibo.svg.png",
+                )
         }
+
+public val PlatformType.displayName: String
+    get() = metadata.displayName
+
+public val PlatformType.logoUrl: String
+    get() = metadata.logoUrl
+
+public fun PlatformType.agreementUrl(host: String): String? =
+    when (this) {
+        PlatformType.Nostr,
+        PlatformType.VVo,
+        -> null
+        PlatformType.Bluesky -> "https://bsky.social/about/support/tos"
+        PlatformType.xQt -> "https://help.x.com/en/rules-and-policies/x-rules"
+        PlatformType.Mastodon,
+        PlatformType.Misskey,
+        -> "https://$host/about"
+    }
 
 public val xqtOldHost: String =
     buildString {

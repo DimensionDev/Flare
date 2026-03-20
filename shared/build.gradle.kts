@@ -88,6 +88,7 @@ kotlin {
                 implementation(libs.ktor.client.resources)
                 implementation(libs.cryptography.provider.optimal)
                 implementation(libs.openai.client)
+                implementation(libs.quartz)
             }
         }
         val commonTest by getting {

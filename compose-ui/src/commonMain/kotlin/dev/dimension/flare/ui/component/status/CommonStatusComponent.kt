@@ -46,13 +46,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Regular
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.brands.Bluesky
-import compose.icons.fontawesomeicons.brands.Mastodon
-import compose.icons.fontawesomeicons.brands.Weibo
-import compose.icons.fontawesomeicons.brands.XTwitter
 import compose.icons.fontawesomeicons.regular.Bookmark
 import compose.icons.fontawesomeicons.regular.CommentDots
 import compose.icons.fontawesomeicons.regular.Heart
@@ -125,7 +120,6 @@ import dev.dimension.flare.compose.ui.user_unmute
 import dev.dimension.flare.compose.ui.vote
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.model.PostActionStyle
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.DateTimeText
@@ -146,13 +140,13 @@ import dev.dimension.flare.ui.component.platform.PlatformRadioButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextButton
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
-import dev.dimension.flare.ui.icons.Misskey
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.brandIcon
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -235,21 +229,8 @@ public fun CommonStatusComponent(
                             )
                         }
                         if (appearanceSettings.showPlatformLogo) {
-                            val icon =
-                                when (item.platformType) {
-                                    PlatformType.Mastodon ->
-                                        FontAwesomeIcons.Brands.Mastodon
-                                    PlatformType.Misskey ->
-                                        FontAwesomeIcons.Brands.Misskey
-                                    PlatformType.Bluesky ->
-                                        FontAwesomeIcons.Brands.Bluesky
-                                    PlatformType.xQt ->
-                                        FontAwesomeIcons.Brands.XTwitter
-                                    PlatformType.VVo ->
-                                        FontAwesomeIcons.Brands.Weibo
-                                }
                             FAIcon(
-                                imageVector = icon,
+                                imageVector = item.platformType.brandIcon,
                                 contentDescription = null,
                                 modifier =
                                     Modifier

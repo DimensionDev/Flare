@@ -88,6 +88,8 @@ internal object DeepLinkMapping {
         host: String,
     ): List<DeepLinkPattern<out Type>> =
         when (platformType) {
+            PlatformType.Nostr -> emptyList()
+
             PlatformType.Mastodon -> {
                 listOf(
                     DeepLinkPattern(

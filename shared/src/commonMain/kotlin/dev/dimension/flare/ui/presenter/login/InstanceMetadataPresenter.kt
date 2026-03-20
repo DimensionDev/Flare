@@ -32,6 +32,9 @@ public class InstanceMetadataPresenter(
                 tryRun {
                     emit(UiState.Loading())
                     when (platformType) {
+                        PlatformType.Nostr -> throw UnsupportedOperationException(
+                            "Nostr is not supported yet",
+                        )
                         PlatformType.Mastodon ->
                             MastodonInstanceService("https://$host/").instance().render()
                         PlatformType.Misskey ->

@@ -65,6 +65,8 @@ public sealed class UiTimelineV2 {
         override val itemKey: String =
             buildString {
                 append("Message_")
+                append(accountType)
+                append("_")
                 append(statusKey)
                 if (extraKey != null) {
                     append("_")
@@ -162,6 +164,8 @@ public sealed class UiTimelineV2 {
         override val itemKey: String =
             buildString {
                 append("Feed_")
+                append(accountType)
+                append("_")
                 append(url)
                 if (extraKey != null) {
                     append("_")
@@ -237,6 +241,8 @@ public sealed class UiTimelineV2 {
             buildString {
                 append(platformType.name)
                 append("_")
+                append(accountType)
+                append("_")
                 append(statusKey)
                 message?.let {
                     append("_")
@@ -311,6 +317,8 @@ public sealed class UiTimelineV2 {
         override val itemKey: String =
             buildString {
                 append("User_")
+                append(accountType)
+                append("_")
                 append(value.key)
                 message?.let {
                     append("_")
@@ -340,6 +348,8 @@ public sealed class UiTimelineV2 {
         override val itemKey: String =
             buildString {
                 append("UserList_")
+                append(accountType)
+                append("_")
                 append(users.hashCode())
                 post?.let {
                     append("_")

@@ -336,6 +336,113 @@ class MixedRemoteMediatorTest : RobolectricTest() {
             assertEquals(listOf(postA.statusKey, postB.statusKey), post.parents.map { it.statusKey })
         }
 
+    @Test
+    fun refreshDeduplicatesSamePostReturnedByMultipleSubTimelines() =
+        runTest {
+            val accountKey = MicroBlogKey("timeline", "mastodon.example")
+            val accountType = AccountType.Specific(accountKey)
+            val user = profile(MicroBlogKey("user", "mastodon.example"), "User")
+            val duplicatedPost =
+                createPost(
+                    accountType = accountType,
+                    user = user,
+                    statusKey = MicroBlogKey("same", "mastodon.example"),
+                    text = "duplicate",
+                )
+
+            val first =
+                FakeLoader("home") { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(duplicatedPost),
+                                nextKey = null,
+                            )
+
+                        is PagingRequest.Append -> error("No append expected")
+                        is PagingRequest.Prepend -> error("No prepend expected")
+                    }
+                }
+            val second =
+                FakeLoader("list") { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(duplicatedPost),
+                                nextKey = null,
+                            )
+
+                        is PagingRequest.Append -> error("No append expected")
+                        is PagingRequest.Prepend -> error("No prepend expected")
+                    }
+                }
+
+            val mediator = MixedRemoteMediator(db, listOf(first, second))
+            val result = mediator.load(pageSize = 20, request = PagingRequest.Refresh)
+
+            assertEquals(1, result.data.size)
+            assertEquals(duplicatedPost.itemKey, result.data.single().itemKey)
+        }
+
+    @Test
+    fun refreshKeepsSamePostFromDifferentAccountsAsSeparateItems() =
+        runTest {
+            val firstAccount = AccountType.Specific(MicroBlogKey("timeline-a", "mastodon.example"))
+            val secondAccount = AccountType.Specific(MicroBlogKey("timeline-b", "mastodon.example"))
+            val sharedStatusKey = MicroBlogKey("same", "mastodon.example")
+
+            val firstPost =
+                createPost(
+                    accountType = firstAccount,
+                    user = profile(MicroBlogKey("user-a", "mastodon.example"), "User A"),
+                    statusKey = sharedStatusKey,
+                    text = "duplicate",
+                )
+            val secondPost =
+                createPost(
+                    accountType = secondAccount,
+                    user = profile(MicroBlogKey("user-b", "mastodon.example"), "User B"),
+                    statusKey = sharedStatusKey,
+                    text = "duplicate",
+                )
+
+            val first =
+                FakeLoader("home_a") { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(firstPost),
+                                nextKey = null,
+                            )
+
+                        is PagingRequest.Append -> error("No append expected")
+                        is PagingRequest.Prepend -> error("No prepend expected")
+                    }
+                }
+            val second =
+                FakeLoader("home_b") { request ->
+                    when (request) {
+                        PagingRequest.Refresh ->
+                            PagingResult(
+                                data = listOf(secondPost),
+                                nextKey = null,
+                            )
+
+                        is PagingRequest.Append -> error("No append expected")
+                        is PagingRequest.Prepend -> error("No prepend expected")
+                    }
+                }
+
+            val mediator = MixedRemoteMediator(db, listOf(first, second))
+            val result = mediator.load(pageSize = 20, request = PagingRequest.Refresh)
+
+            assertEquals(2, result.data.size)
+            assertEquals(
+                setOf(firstPost.itemKey, secondPost.itemKey),
+                result.data.map { it.itemKey }.toSet(),
+            )
+        }
+
     private class FakeLoader(
         override val pagingKey: String,
         private val onLoad: suspend (PagingRequest) -> PagingResult<UiTimelineV2>,

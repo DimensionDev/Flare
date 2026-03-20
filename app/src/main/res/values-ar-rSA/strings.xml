@@ -384,10 +384,7 @@
     <string name="import_confirmation_message">سيتم استيراد البيانات من الملف. سيتم استبدال السجلات الموجودة مع مطابقة المعرفات. هل تريد المتابعة؟</string>
     <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
             <ul>
-                <li>إضافة مشروع دعم كامل.</li>
-                <li>إعادة تعديل تكوين AI لدعم AI على الجهاز و API المتوافقة مع OpenAI.</li>
-                <li>إضافة دعم لقنوات ميسكي</li>
-                <li>إصلاحات الشوائب وتحسينات الأداء.</li>
+                <li>إصلاحات الشوائب وتحسين الأداء.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">إضافة مجموعة</string>

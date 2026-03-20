@@ -379,10 +379,7 @@
     <string name="import_confirmation_message">Dit zal gegevens uit het bestand importeren. Bestaande records met bijpassende IDs zullen worden vervangen. Wilt u doorgaan?</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
-                <li>Volledige conceptondersteuning toegevoegd.</li>
-                <li>Reworked AI configuratie om zowel AI en OpenAI-compatibele API\'s te ondersteunen.</li>
-                <li>Toegevoegde Misskey Kanalen ondersteuning.</li>
-                <li>bugfixes en prestatieverbeteringen.</li>
+                <li>Bugs fixes en prestatieverbeteringen.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Groep toevoegen</string>

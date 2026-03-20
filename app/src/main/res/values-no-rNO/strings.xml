@@ -380,10 +380,7 @@
     <string name="import_confirmation_message">Dette vil importere data fra filen. Eksisterende poster med samsvarende ID-er vil bli erstattet. Vil du fortsette?</string>
     <string name="changelog_current"><![CDATA[            <span>Versjon %1$s:</span>
             <ul>
-                <li>la til hele utkast støtte.</li>
-                <li>Omarbeidet AI-konfigurasjon for å støtte både AI og OpenAI-kompatible APIer.</li>
-                <li>Lagt til Misskey Kanaler støtte.</li>
-                <li>Feilrettinger og ytelsesforbedringer.</li>
+                <li>Bug fikser og ytelsesforbedringer.</li>
             </ul>
         ]]></string>
     <string name="tab_settings_add_group">Legg til gruppe</string>

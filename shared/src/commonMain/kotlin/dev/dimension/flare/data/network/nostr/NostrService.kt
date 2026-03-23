@@ -43,19 +43,21 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlin.time.Clock
 import kotlin.time.Instant
 
+public val defaultNostrRelays: List<String> =
+    listOf(
+        "wss://relay.damus.io",
+        "wss://nos.lol",
+        "wss://relay.primal.net",
+        "wss://relay.snort.social",
+        "wss://relay.nostr.band",
+        "wss://offchain.pub",
+        "wss://purplepag.es",
+    )
+
 internal object NostrService {
     internal const val NOSTR_HOST: String = "nostr"
 
-    internal val defaultRelays: List<String> =
-        listOf(
-            "wss://relay.damus.io",
-            "wss://nos.lol",
-            "wss://relay.primal.net",
-            "wss://relay.snort.social",
-            "wss://relay.nostr.band",
-            "wss://offchain.pub",
-            "wss://purplepag.es",
-        )
+    internal val defaultRelays: List<String> = defaultNostrRelays
 
     internal data class ImportedAccount(
         val pubkeyHex: String,

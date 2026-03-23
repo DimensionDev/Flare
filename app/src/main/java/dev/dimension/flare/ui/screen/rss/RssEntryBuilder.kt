@@ -78,7 +78,7 @@ internal fun EntryProviderScope<NavKey>.rssEntryBuilder(
                         title = TitleType.Text(args.title ?: args.url),
                         icon = args.favIcon?.let {
                             IconType.Url(args.favIcon)
-                        } ?: IconType.Material(IconType.Material.MaterialIcon.Rss)
+                        } ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss)
                     )
                 )
             },

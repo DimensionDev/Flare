@@ -179,7 +179,7 @@ struct IconPicker: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedIcon: IconType
     
-    let availableIcons: [IconType] = IconType.MaterialMaterialIcon.allCases.map { IconType.Material(icon: $0) }
+    let availableIcons: [IconType] = UiIcon.allCases.map { IconType.Material(icon: $0) }
     
     var body: some View {
         ScrollView {

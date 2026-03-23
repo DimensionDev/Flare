@@ -1,9 +1,9 @@
-package dev.dimension.flare.ui.screen.misskey
+package dev.dimension.flare.ui.screen.list
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.Misskey
+import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
@@ -11,32 +11,37 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.presenter.PinTabsPresenter
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.presenter.list.AntennasListPresenter
+import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.list.AllListPresenter
+import dev.dimension.flare.ui.presenter.list.AllListState
 
-public class MisskeyAntennasListWithTabsPresenter(
+public class AllListWithTabsPresenter(
     private val accountType: AccountType,
-) : PresenterBase<MisskeyAntennasListWithTabsPresenter.State>() {
+) : PresenterBase<AllListWithTabsPresenter.State>() {
     private val pinTabsPresenter by lazy {
         object : PinTabsPresenter<UiList>() {
             override fun List<TimelineTabItem>.filterPinned(): List<String> =
-                filterIsInstance<Misskey.AntennasTimelineTabItem>()
-                    .map { it.antennasId }
+                filterIsInstance<ListTimelineTabItem>()
+                    .map { it.listId }
 
             override fun getTimelineTabItem(item: UiList): TimelineTabItem =
-                Misskey.AntennasTimelineTabItem(
+                ListTimelineTabItem(
                     account = accountType,
-                    antennasId = item.id,
+                    listId = item.id,
                     metaData =
                         TabMetaData(
                             title = TitleType.Text(item.title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                            icon =
+                                item.let { it as? UiList.List }?.avatar?.let {
+                                    IconType.Url(it)
+                                } ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
                         ),
                 )
 
             override fun List<TimelineTabItem>.filter(item: UiList): List<TimelineTabItem> =
                 filter {
-                    if (it is Misskey.AntennasTimelineTabItem) {
-                        it.antennasId != item.id
+                    if (it is ListTimelineTabItem) {
+                        it.listId != item.id
                     } else {
                         true
                     }
@@ -48,17 +53,19 @@ public class MisskeyAntennasListWithTabsPresenter(
     override fun body(): State {
         val state =
             remember(accountType) {
-                AntennasListPresenter(accountType)
-            }.body()
+                AllListPresenter(accountType)
+            }.invoke()
 
-        val pinTabsState = pinTabsPresenter.body()
+        val pinState = pinTabsPresenter.invoke()
+
         return object :
             State,
-            AntennasListPresenter.State by state,
-            PinTabsPresenter.State<UiList> by pinTabsState {}
+            AllListState by state,
+            PinTabsPresenter.State<UiList> by pinState {
+        }
     }
 
     public interface State :
-        PinTabsPresenter.State<UiList>,
-        AntennasListPresenter.State
+        AllListState,
+        PinTabsPresenter.State<UiList>
 }

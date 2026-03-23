@@ -5,14 +5,11 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
-import dev.dimension.flare.data.network.misskey.MisskeyService
-import dev.dimension.flare.data.network.misskey.api.model.MetaRequest
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.flow
 
@@ -31,24 +28,7 @@ public class InstanceMetadataPresenter(
             flow {
                 tryRun {
                     emit(UiState.Loading())
-                    when (platformType) {
-                        PlatformType.Nostr -> throw UnsupportedOperationException(
-                            "Nostr is not supported yet",
-                        )
-                        PlatformType.Mastodon ->
-                            MastodonInstanceService("https://$host/").instance().render()
-                        PlatformType.Misskey ->
-                            MisskeyService("https://$host/api/").meta(MetaRequest()).render()
-                        PlatformType.Bluesky -> throw UnsupportedOperationException(
-                            "Bluesky is not supported yet",
-                        )
-                        PlatformType.xQt -> throw UnsupportedOperationException(
-                            "xQt is not supported yet",
-                        )
-                        PlatformType.VVo -> throw UnsupportedOperationException(
-                            "VVo is not supported yet",
-                        )
-                    }
+                    platformType.spec.instanceMetadata(host)
                 }.fold(
                     onSuccess = {
                         emit(UiState.Success<UiInstanceMetadata>(it))

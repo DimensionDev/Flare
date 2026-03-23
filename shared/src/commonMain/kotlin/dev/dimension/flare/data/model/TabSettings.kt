@@ -5,17 +5,36 @@ import androidx.datastore.core.okio.OkioSerializer
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.model.spec
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiList
-import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRssSource
+import dev.dimension.flare.ui.presenter.home.DiscoverStatusTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.MixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
+import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyBookmarkTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.mastodon.MastodonBookmarkTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.mastodon.MastodonFavouriteTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.mastodon.MastodonLocalTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.mastodon.MastodonPublicTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.misskey.MissKeyLocalTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.misskey.MissKeyPublicTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.misskey.MisskeyFavouriteTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.misskey.MisskeyHybridTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.rss.AllRssTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.rss.RssTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.vvo.VVOFavouriteTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.vvo.VVOLikeTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.xqt.XQTBookmarkTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.xqt.XQTDeviceFollowTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.xqt.XQTFeaturedTimelinePresenter
+import dev.dimension.flare.ui.presenter.list.AntennasTimelinePresenter
+import dev.dimension.flare.ui.presenter.list.ChannelTimelinePresenter
 import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -120,37 +139,13 @@ public sealed class IconType {
     @Immutable
     @Serializable
     public data class Material(
-        val icon: MaterialIcon,
-    ) : IconType() {
-        @Serializable
-        public enum class MaterialIcon {
-            Home,
-            Notification,
-            Search,
-            Profile,
-            Settings,
-            Local,
-            World,
-            Featured,
-            Bookmark,
-            Heart,
-            Twitter,
-            Mastodon,
-            Misskey,
-            Bluesky,
-            List,
-            Feeds,
-            Messages,
-            Rss,
-            Weibo,
-            Channel,
-        }
-    }
+        val icon: UiIcon,
+    ) : IconType()
 
     @Immutable
     @Serializable
     public data class Mixed(
-        val icon: Material.MaterialIcon,
+        val icon: UiIcon,
         val userKey: MicroBlogKey,
     ) : IconType()
 }
@@ -160,7 +155,7 @@ public data object AllNotificationTabItem : TabItem() {
     override val metaData: TabMetaData =
         TabMetaData(
             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
-            icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
+            icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Notification),
         )
     override val account: AccountType = AccountType.Guest
     override val key: String = "all_notification"
@@ -185,8 +180,8 @@ public data class NotificationTabItem(
 public sealed class TimelineTabItem : TabItem() {
     public abstract fun createPresenter(): TimelinePresenter
 
-    public companion object {
-        public fun default(accountKey: MicroBlogKey?): ImmutableList<TabItem> =
+    internal companion object {
+        internal fun default(accountKey: MicroBlogKey?): ImmutableList<TabItem> =
             accountKey?.let {
                 val accountType = AccountType.Specific(it)
                 persistentListOf(
@@ -195,7 +190,7 @@ public sealed class TimelineTabItem : TabItem() {
                         metaData =
                             TabMetaData(
                                 title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-                                icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Home),
                             ),
                     ),
                     NotificationTabItem(
@@ -203,7 +198,7 @@ public sealed class TimelineTabItem : TabItem() {
                         metaData =
                             TabMetaData(
                                 title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
-                                icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
+                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Notification),
                             ),
                     ),
                     DiscoverTabItem(
@@ -211,13 +206,13 @@ public sealed class TimelineTabItem : TabItem() {
                         metaData =
                             TabMetaData(
                                 title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
-                                icon = IconType.Material(IconType.Material.MaterialIcon.Search),
+                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Search),
                             ),
                     ),
                 )
             } ?: guest
 
-        public fun mainSidePanel(accountKey: MicroBlogKey?): ImmutableList<TabItem> =
+        internal fun mainSidePanel(accountKey: MicroBlogKey?): ImmutableList<TabItem> =
             accountKey?.let {
                 val accountType = AccountType.Specific(it)
                 persistentListOf(
@@ -226,7 +221,7 @@ public sealed class TimelineTabItem : TabItem() {
                         metaData =
                             TabMetaData(
                                 title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-                                icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Home),
                             ),
                     ),
                     NotificationTabItem(
@@ -234,14 +229,14 @@ public sealed class TimelineTabItem : TabItem() {
                         metaData =
                             TabMetaData(
                                 title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
-                                icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
+                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Notification),
                             ),
                     ),
                     RssTabItem(
                         metaData =
                             TabMetaData(
                                 title = TitleType.Localized(TitleType.Localized.LocalizedKey.Rss),
-                                icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
                             ),
                     ),
                     DiscoverTabItem(
@@ -249,20 +244,20 @@ public sealed class TimelineTabItem : TabItem() {
                         metaData =
                             TabMetaData(
                                 title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
-                                icon = IconType.Material(IconType.Material.MaterialIcon.Search),
+                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Search),
                             ),
                     ),
                 )
             } ?: guest
 
-        public val guest: ImmutableList<TabItem> =
+        internal val guest: ImmutableList<TabItem> =
             persistentListOf(
                 HomeTimelineTabItem(
                     account = AccountType.Guest,
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                            icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Home),
                         ),
                 ),
                 DiscoverTabItem(
@@ -270,356 +265,16 @@ public sealed class TimelineTabItem : TabItem() {
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Search),
+                            icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Search),
                         ),
                 ),
                 SettingsTabItem,
             )
 
-        public fun defaultPrimary(user: UiProfile): ImmutableList<TabItem> =
-            when (user.platformType) {
-                PlatformType.Mastodon -> mastodon(user.key)
-                PlatformType.Misskey -> misskey(user.key)
-                PlatformType.Bluesky -> bluesky(user.key)
-                PlatformType.xQt -> xqt(user.key)
-                PlatformType.VVo -> vvo(user.key)
-            }
-
-        public fun defaultSecondary(user: UiAccount): ImmutableList<TabItem> {
-            val result =
-                when (user.platformType) {
-                    PlatformType.Mastodon -> defaultMastodonSecondaryItems(user.accountKey)
-                    PlatformType.Misskey -> defaultMisskeySecondaryItems(user.accountKey)
-                    PlatformType.Bluesky -> defaultBlueskySecondaryItems(user.accountKey)
-                    PlatformType.xQt -> defaultXqtSecondaryItems(user.accountKey)
-                    PlatformType.VVo -> defaultVVOSecondaryItems(user.accountKey)
-                }
-            return result.toImmutableList()
-        }
-
-        public fun secondaryFor(user: UiProfile): ImmutableList<TabItem> =
-            when (user.platformType) {
-                PlatformType.Mastodon -> defaultMastodonSecondaryItems(user.key)
-                PlatformType.Misskey -> defaultMisskeySecondaryItems(user.key)
-                PlatformType.Bluesky -> defaultBlueskySecondaryItems(user.key)
-                PlatformType.xQt -> defaultXqtSecondaryItems(user.key)
-                PlatformType.VVo -> defaultVVOSecondaryItems(user.key)
-            }
-
-        private fun mastodon(accountKey: MicroBlogKey) =
-            persistentListOf(
-                HomeTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
-                        ),
-                ),
-                DiscoverTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
-                        ),
-                ),
-                ProfileTabItem(
-                    accountKey = accountKey,
-                    userKey = accountKey,
-                ),
-            )
-
-        private fun defaultMastodonSecondaryItems(accountKey: MicroBlogKey) =
-            persistentListOf(
-                Mastodon.LocalTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.MastodonLocal),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Local, accountKey),
-                        ),
-                ),
-                Mastodon.PublicTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.MastodonPublic),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.World, accountKey),
-                        ),
-                ),
-                Mastodon.BookmarkTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Bookmark),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Bookmark, accountKey),
-                        ),
-                ),
-                Mastodon.FavouriteTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Favourite),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Heart, accountKey),
-                        ),
-                ),
-                AllListTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.List, accountKey),
-                        ),
-                ),
-            )
-
-        private fun misskey(accountKey: MicroBlogKey) =
-            persistentListOf(
-                HomeTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
-                        ),
-                ),
-                DiscoverTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
-                        ),
-                ),
-                ProfileTabItem(
-                    accountKey = accountKey,
-                    userKey = accountKey,
-                ),
-            )
-
-        private fun defaultMisskeySecondaryItems(accountKey: MicroBlogKey) =
-            persistentListOf(
-                Misskey.FavouriteTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Favourite),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Heart, accountKey),
-                        ),
-                ),
-                AllListTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.List, accountKey),
-                        ),
-                ),
-                Misskey.HybridTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Social),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Featured, accountKey),
-                        ),
-                ),
-                Misskey.LocalTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.MastodonLocal),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Local, accountKey),
-                        ),
-                ),
-                Misskey.GlobalTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.MastodonPublic),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.World, accountKey),
-                        ),
-                ),
-                Misskey.AntennasListTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Antenna),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Rss, accountKey),
-                        ),
-                ),
-                Misskey.ChannelListTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Channel),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Channel, accountKey),
-                        ),
-                ),
-            )
-
-        private fun bluesky(accountKey: MicroBlogKey) =
-            persistentListOf(
-                HomeTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
-                        ),
-                ),
-                DiscoverTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
-                        ),
-                ),
-            )
-
-        private fun defaultBlueskySecondaryItems(accountKey: MicroBlogKey) =
-            persistentListOf(
-                AllListTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.List, accountKey),
-                        ),
-                ),
-                Bluesky.FeedsTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Feeds),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Feeds, accountKey),
-                        ),
-                ),
-                Bluesky.BookmarkTimelineTabItem(
-                    accountType = AccountType.Specific(accountKey),
-                ),
-                DirectMessageTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.DirectMessage),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Messages, accountKey),
-                        ),
-                ),
-            )
-
-        private fun xqt(accountKey: MicroBlogKey) =
-            persistentListOf(
-                HomeTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
-                        ),
-                ),
-                DiscoverTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
-                        ),
-                ),
-                ProfileTabItem(
-                    accountKey = accountKey,
-                    userKey = accountKey,
-                ),
-            )
-
-        private fun defaultXqtSecondaryItems(accountKey: MicroBlogKey) =
-            persistentListOf(
-                XQT.FeaturedTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Featured),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Featured, accountKey),
-                        ),
-                ),
-                XQT.BookmarkTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Bookmark),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Bookmark, accountKey),
-                        ),
-                ),
-                AllListTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.List, accountKey),
-                        ),
-                ),
-                DirectMessageTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.DirectMessage),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Messages, accountKey),
-                        ),
-                ),
-            )
-
-        private fun vvo(accountKey: MicroBlogKey) =
-            persistentListOf(
-                HomeTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Home, accountKey),
-                        ),
-                ),
-                DiscoverTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
-                        ),
-                ),
-                ProfileTabItem(
-                    accountKey = accountKey,
-                    userKey = accountKey,
-                ),
-            )
-
-        private fun defaultVVOSecondaryItems(accountKey: MicroBlogKey) =
-            persistentListOf<TimelineTabItem>(
-                VVo.FeaturedTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Featured),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Featured, accountKey),
-                        ),
-                ),
-                VVo.FavoriteTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Bookmark),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Bookmark, accountKey),
-                        ),
-                ),
-                VVo.LikedTimelineTabItem(
-                    account = AccountType.Specific(accountKey),
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Liked),
-                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Heart, accountKey),
-                        ),
-                ),
-            )
+        internal fun secondaryFor(
+            platformType: PlatformType,
+            accountKey: MicroBlogKey,
+        ): ImmutableList<TabItem> = platformType.spec.secondary(accountKey)
     }
 }
 
@@ -640,17 +295,17 @@ public data class HomeTimelineTabItem(
             metaData =
                 TabMetaData(
                     title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-                    icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                    icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Home),
                 ),
         )
 
-    public constructor(accountKey: MicroBlogKey, title: String) :
+    public constructor(accountKey: MicroBlogKey, title: String, icon: IconType = IconType.FavIcon(accountKey.host)) :
         this(
             account = AccountType.Specific(accountKey),
             metaData =
                 TabMetaData(
                     title = TitleType.Text(title),
-                    icon = IconType.FavIcon(accountKey.host),
+                    icon = icon,
                 ),
         )
 }
@@ -662,7 +317,7 @@ public data class MixedTimelineTabItem(
     override val metaData: TabMetaData =
         TabMetaData(
             title = TitleType.Localized(TitleType.Localized.LocalizedKey.MixedTimeline),
-            icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+            icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
         ),
 ) : TimelineTabItem() {
     override fun createPresenter(): TimelinePresenter = MixedTimelinePresenter(subTimelineTabItem.map { it.createPresenter() })
@@ -697,7 +352,7 @@ public data class ListTimelineTabItem(
                 title = TitleType.Text(data.title),
                 icon =
                     IconType.Mixed(
-                        icon = IconType.Material.MaterialIcon.List,
+                        icon = dev.dimension.flare.ui.model.UiIcon.List,
                         userKey = accountKey,
                     ),
             ),
@@ -730,9 +385,7 @@ public object Mastodon {
     ) : TimelineTabItem() {
         override val key: String = "local_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.mastodon
-                .MastodonLocalTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = MastodonLocalTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -745,9 +398,7 @@ public object Mastodon {
     ) : TimelineTabItem() {
         override val key: String = "public_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.mastodon
-                .MastodonPublicTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = MastodonPublicTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -760,9 +411,7 @@ public object Mastodon {
     ) : TimelineTabItem() {
         override val key: String = "bookmark_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.mastodon
-                .MastodonBookmarkTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = MastodonBookmarkTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -775,9 +424,7 @@ public object Mastodon {
     ) : TimelineTabItem() {
         override val key: String = "favourite_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.mastodon
-                .MastodonFavouriteTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = MastodonFavouriteTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -792,9 +439,7 @@ public object Misskey {
     ) : TimelineTabItem() {
         override val key: String = "local_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.misskey
-                .MissKeyLocalTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = MissKeyLocalTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -807,9 +452,7 @@ public object Misskey {
     ) : TimelineTabItem() {
         override val key: String = "global_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.misskey
-                .MissKeyPublicTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = MissKeyPublicTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -822,9 +465,7 @@ public object Misskey {
     ) : TimelineTabItem() {
         override val key: String = "hybrid_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.misskey
-                .MisskeyHybridTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = MisskeyHybridTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -837,9 +478,7 @@ public object Misskey {
     ) : TimelineTabItem() {
         override val key: String = "favourite_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.misskey
-                .MisskeyFavouriteTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = MisskeyFavouriteTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -870,7 +509,7 @@ public object Misskey {
                     title = TitleType.Text(data.title),
                     icon =
                         IconType.Mixed(
-                            icon = IconType.Material.MaterialIcon.Rss,
+                            icon = dev.dimension.flare.ui.model.UiIcon.Rss,
                             userKey = accountKey,
                         ),
                 ),
@@ -878,9 +517,7 @@ public object Misskey {
 
         override val key: String = "antennas_${account}_$antennasId"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.list
-                .AntennasTimelinePresenter(account, antennasId)
+        override fun createPresenter(): TimelinePresenter = AntennasTimelinePresenter(account, antennasId)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -900,7 +537,7 @@ public object Misskey {
                     title = TitleType.Text(data.title),
                     icon =
                         IconType.Mixed(
-                            icon = IconType.Material.MaterialIcon.List,
+                            icon = dev.dimension.flare.ui.model.UiIcon.List,
                             userKey = accountKey,
                         ),
                 ),
@@ -908,9 +545,7 @@ public object Misskey {
 
         override val key: String = "channel_${account}_$channelId"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.list
-                .ChannelTimelinePresenter(account, channelId)
+        override fun createPresenter(): TimelinePresenter = ChannelTimelinePresenter(account, channelId)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -936,9 +571,7 @@ public object XQT {
     ) : TimelineTabItem() {
         override val key: String = "featured_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.xqt
-                .XQTFeaturedTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = XQTFeaturedTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -951,9 +584,7 @@ public object XQT {
     ) : TimelineTabItem() {
         override val key: String = "bookmark_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.xqt
-                .XQTBookmarkTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = XQTBookmarkTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -965,14 +596,12 @@ public object XQT {
         override val metaData: TabMetaData =
             TabMetaData(
                 title = TitleType.Localized(TitleType.Localized.LocalizedKey.Posts),
-                icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
             ),
     ) : TimelineTabItem() {
         override val key: String = "device_follow_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.xqt
-                .XQTDeviceFollowTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = XQTDeviceFollowTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -1005,15 +634,13 @@ public object Bluesky {
                     title = TitleType.Text(data.title),
                     icon =
                         IconType.Mixed(
-                            icon = IconType.Material.MaterialIcon.Feeds,
+                            icon = dev.dimension.flare.ui.model.UiIcon.Feeds,
                             userKey = accountKey,
                         ),
                 ),
         )
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.bluesky
-                .BlueskyFeedTimelinePresenter(account, uri)
+        override fun createPresenter(): TimelinePresenter = BlueskyFeedTimelinePresenter(account, uri)
 
         override val key: String = "feed_${account}_$uri"
 
@@ -1028,9 +655,7 @@ public object Bluesky {
     ) : TimelineTabItem() {
         override val key: String = "bookmark_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.bluesky
-                .BlueskyBookmarkTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = BlueskyBookmarkTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 
@@ -1040,7 +665,7 @@ public object Bluesky {
                 metaData =
                     TabMetaData(
                         title = TitleType.Localized(TitleType.Localized.LocalizedKey.Bookmark),
-                        icon = IconType.Material(IconType.Material.MaterialIcon.Bookmark),
+                        icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Bookmark),
                     ),
             )
     }
@@ -1055,9 +680,7 @@ public object VVo {
     ) : TimelineTabItem() {
         override val key: String = "featured_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home
-                .DiscoverStatusTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = DiscoverStatusTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -1070,9 +693,7 @@ public object VVo {
     ) : TimelineTabItem() {
         override val key: String = "favorite_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.vvo
-                .VVOFavouriteTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = VVOFavouriteTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -1085,9 +706,7 @@ public object VVo {
     ) : TimelineTabItem() {
         override val key: String = "liked_$account"
 
-        override fun createPresenter(): TimelinePresenter =
-            dev.dimension.flare.ui.presenter.home.vvo
-                .VVOLikeTimelinePresenter(account)
+        override fun createPresenter(): TimelinePresenter = VVOLikeTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -1104,9 +723,7 @@ public data class RssTimelineTabItem(
     override val account: AccountType = AccountType.Guest
     override val key: String = "rss_$feedUrl"
 
-    override fun createPresenter(): TimelinePresenter =
-        dev.dimension.flare.ui.presenter.home.rss
-            .RssTimelinePresenter(feedUrl)
+    override fun createPresenter(): TimelinePresenter = RssTimelinePresenter(feedUrl)
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 
@@ -1119,7 +736,7 @@ public data class RssTimelineTabItem(
                 icon =
                     data.favIcon ?.let {
                         IconType.Url(it)
-                    } ?: IconType.Material(IconType.Material.MaterialIcon.Rss),
+                    } ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
             ),
     )
 //    public constructor(
@@ -1141,7 +758,7 @@ public data class AllRssTimelineTabItem(
     override val metaData: TabMetaData =
         TabMetaData(
             title = TitleType.Localized(TitleType.Localized.LocalizedKey.AllRssFeeds),
-            icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+            icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
         ),
     override val account: AccountType = AccountType.Guest,
 ) : TimelineTabItem() {
@@ -1149,9 +766,7 @@ public data class AllRssTimelineTabItem(
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 
-    override fun createPresenter(): TimelinePresenter =
-        dev.dimension.flare.ui.presenter.home.rss
-            .AllRssTimelinePresenter()
+    override fun createPresenter(): TimelinePresenter = AllRssTimelinePresenter()
 }
 
 @Immutable
@@ -1170,7 +785,7 @@ public data class ProfileTabItem(
         metaData =
             TabMetaData(
                 title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
-                icon = IconType.Mixed(IconType.Material.MaterialIcon.Profile, accountKey),
+                icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Profile, accountKey),
             ),
     )
 
@@ -1200,7 +815,7 @@ public data object SettingsTabItem : TabItem() {
         get() =
             TabMetaData(
                 title = TitleType.Localized(TitleType.Localized.LocalizedKey.Settings),
-                icon = IconType.Material(IconType.Material.MaterialIcon.Settings),
+                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Settings),
             )
 
     override fun update(metaData: TabMetaData): TabItem = this
@@ -1229,7 +844,7 @@ public data class RssTabItem(
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-public object TabSettingsSerializer : OkioSerializer<TabSettings> {
+internal object TabSettingsSerializer : OkioSerializer<TabSettings> {
     override val defaultValue: TabSettings
         get() = TabSettings()
 

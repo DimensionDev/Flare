@@ -425,7 +425,7 @@ internal fun WindowScope.Router(
                                         metaData =
                                             TabMetaData(
                                                 title = TitleType.Text(it.title),
-                                                icon = Material(Material.MaterialIcon.List),
+                                                icon = Material(dev.dimension.flare.ui.model.UiIcon.List),
                                             ),
                                     ),
                                 ),
@@ -450,7 +450,7 @@ internal fun WindowScope.Router(
                                         metaData =
                                             TabMetaData(
                                                 title = TitleType.Text(it.title),
-                                                icon = Material(Material.MaterialIcon.Feeds),
+                                                icon = Material(dev.dimension.flare.ui.model.UiIcon.Feeds),
                                             ),
                                     ),
                                 ),
@@ -857,7 +857,7 @@ internal fun WindowScope.Router(
                                         metaData =
                                             TabMetaData(
                                                 title = TitleType.Text(it.title),
-                                                icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+                                                icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
                                             ),
                                     ),
                                 ),
@@ -989,7 +989,7 @@ internal fun WindowScope.Router(
                                     metaData =
                                         TabMetaData(
                                             title = TitleType.Text(args.title),
-                                            icon = IconType.Material(IconType.Material.MaterialIcon.Channel),
+                                            icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Channel),
                                         ),
                                 )
                             },

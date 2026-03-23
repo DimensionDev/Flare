@@ -10,6 +10,7 @@ import dev.dimension.flare.data.repository.DraftMediaStore
 import dev.dimension.flare.data.repository.DraftRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.SearchHistoryRepository
+import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.presenter.compose.ComposeUseCase
 import dev.dimension.flare.ui.presenter.compose.RestoreDraftUseCase
 import dev.dimension.flare.ui.presenter.compose.SaveDraftUseCase
@@ -48,6 +49,7 @@ internal val commonModule =
         }
         singleOf(::ComposeUseCase)
         singleOf(::SearchHistoryRepository)
+        singleOf(::SettingsRepository)
         singleOf(::Readability)
         singleOf(::OpenAIService)
     }

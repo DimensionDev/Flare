@@ -65,7 +65,7 @@ public class EditTabPresenter(
 
                         else -> emptyList()
                     } +
-                        IconType.Material.MaterialIcon.entries.map {
+                        dev.dimension.flare.ui.model.UiIcon.entries.map {
                             IconType.Material(it)
                         } +
                         if (tabItem is RssTimelineTabItem) {

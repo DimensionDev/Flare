@@ -11,33 +11,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Brands
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.brands.Bluesky
-import compose.icons.fontawesomeicons.brands.Mastodon
-import compose.icons.fontawesomeicons.brands.Weibo
-import compose.icons.fontawesomeicons.brands.XTwitter
-import compose.icons.fontawesomeicons.solid.Bell
-import compose.icons.fontawesomeicons.solid.BookBookmark
-import compose.icons.fontawesomeicons.solid.CircleUser
-import compose.icons.fontawesomeicons.solid.Gear
-import compose.icons.fontawesomeicons.solid.Globe
-import compose.icons.fontawesomeicons.solid.Heart
-import compose.icons.fontawesomeicons.solid.House
-import compose.icons.fontawesomeicons.solid.List
-import compose.icons.fontawesomeicons.solid.MagnifyingGlass
-import compose.icons.fontawesomeicons.solid.Message
-import compose.icons.fontawesomeicons.solid.RectangleList
-import compose.icons.fontawesomeicons.solid.SquareRss
-import compose.icons.fontawesomeicons.solid.Tv
-import compose.icons.fontawesomeicons.solid.Users
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.all_rss_feeds_title
 import dev.dimension.flare.compose.ui.antenna_title
@@ -65,8 +43,8 @@ import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.platform.PlatformText
+import dev.dimension.flare.ui.component.status.toImageVector
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
-import dev.dimension.flare.ui.icons.Misskey
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.FavIconPresenter
@@ -151,7 +129,7 @@ public fun TabIcon(
 
         is IconType.Material -> {
             FAIcon(
-                imageVector = icon.icon.toIcon(),
+                imageVector = icon.icon.toImageVector(),
                 contentDescription =
                     when (title) {
                         is TitleType.Localized -> stringResource(title.res)
@@ -167,7 +145,7 @@ public fun TabIcon(
         is IconType.Mixed -> {
             if (iconOnly) {
                 FAIcon(
-                    imageVector = icon.icon.toIcon(),
+                    imageVector = icon.icon.toImageVector(),
                     contentDescription =
                         when (title) {
                             is TitleType.Localized -> stringResource(title.res)
@@ -201,7 +179,7 @@ public fun TabIcon(
                             )
                         }
                     FAIcon(
-                        imageVector = icon.icon.toIcon(),
+                        imageVector = icon.icon.toImageVector(),
                         contentDescription =
                             when (title) {
                                 is TitleType.Localized -> stringResource(title.res)
@@ -290,28 +268,4 @@ internal val TitleType.Localized.res: StringResource
             TitleType.Localized.LocalizedKey.AllRssFeeds -> Res.string.all_rss_feeds_title
             TitleType.Localized.LocalizedKey.Posts -> Res.string.posts_title
             TitleType.Localized.LocalizedKey.Channel -> Res.string.channel_title
-        }
-
-internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =
-    when (this) {
-        IconType.Material.MaterialIcon.Home -> FontAwesomeIcons.Solid.House
-        IconType.Material.MaterialIcon.Notification -> FontAwesomeIcons.Solid.Bell
-        IconType.Material.MaterialIcon.Search -> FontAwesomeIcons.Solid.MagnifyingGlass
-        IconType.Material.MaterialIcon.Profile -> FontAwesomeIcons.Solid.CircleUser
-        IconType.Material.MaterialIcon.Settings -> FontAwesomeIcons.Solid.Gear
-        IconType.Material.MaterialIcon.Local -> FontAwesomeIcons.Solid.Users
-        IconType.Material.MaterialIcon.World -> FontAwesomeIcons.Solid.Globe
-        IconType.Material.MaterialIcon.Featured -> FontAwesomeIcons.Solid.RectangleList
-        IconType.Material.MaterialIcon.Bookmark -> FontAwesomeIcons.Solid.BookBookmark
-        IconType.Material.MaterialIcon.Heart -> FontAwesomeIcons.Solid.Heart
-        IconType.Material.MaterialIcon.Twitter -> FontAwesomeIcons.Brands.XTwitter
-        IconType.Material.MaterialIcon.Mastodon -> FontAwesomeIcons.Brands.Mastodon
-        IconType.Material.MaterialIcon.Misskey -> FontAwesomeIcons.Brands.Misskey
-        IconType.Material.MaterialIcon.Bluesky -> FontAwesomeIcons.Brands.Bluesky
-        IconType.Material.MaterialIcon.List -> FontAwesomeIcons.Solid.List
-        IconType.Material.MaterialIcon.Feeds -> FontAwesomeIcons.Solid.SquareRss
-        IconType.Material.MaterialIcon.Messages -> FontAwesomeIcons.Solid.Message
-        IconType.Material.MaterialIcon.Rss -> FontAwesomeIcons.Solid.SquareRss
-        IconType.Material.MaterialIcon.Weibo -> FontAwesomeIcons.Brands.Weibo
-        IconType.Material.MaterialIcon.Channel -> FontAwesomeIcons.Solid.Tv
-    }
+}

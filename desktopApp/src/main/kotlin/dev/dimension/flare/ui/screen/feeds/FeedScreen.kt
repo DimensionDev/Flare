@@ -47,7 +47,7 @@ internal fun FeedScreen(accountType: AccountType) {
                                 metaData =
                                     TabMetaData(
                                         title = TitleType.Text(it.title),
-                                        icon = IconType.Material(IconType.Material.MaterialIcon.Feeds),
+                                        icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Feeds),
                                     ),
                             )
                         },

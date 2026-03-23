@@ -46,36 +46,50 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Regular
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.brands.Bluesky
+import compose.icons.fontawesomeicons.brands.Mastodon
+import compose.icons.fontawesomeicons.brands.Weibo
+import compose.icons.fontawesomeicons.brands.XTwitter
 import compose.icons.fontawesomeicons.regular.Bookmark
 import compose.icons.fontawesomeicons.regular.CommentDots
 import compose.icons.fontawesomeicons.regular.Heart
 import compose.icons.fontawesomeicons.solid.At
+import compose.icons.fontawesomeicons.solid.Bell
+import compose.icons.fontawesomeicons.solid.BookBookmark
 import compose.icons.fontawesomeicons.solid.Bookmark
 import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.CircleInfo
+import compose.icons.fontawesomeicons.solid.CircleUser
 import compose.icons.fontawesomeicons.solid.Ellipsis
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
+import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Heart
+import compose.icons.fontawesomeicons.solid.House
 import compose.icons.fontawesomeicons.solid.Image
 import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.LockOpen
+import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Message
 import compose.icons.fontawesomeicons.solid.Minus
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.RectangleList
 import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
 import compose.icons.fontawesomeicons.solid.ShareNodes
+import compose.icons.fontawesomeicons.solid.SquareRss
 import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
 import compose.icons.fontawesomeicons.solid.Thumbtack
 import compose.icons.fontawesomeicons.solid.Trash
 import compose.icons.fontawesomeicons.solid.Tv
 import compose.icons.fontawesomeicons.solid.UserPlus
 import compose.icons.fontawesomeicons.solid.UserSlash
+import compose.icons.fontawesomeicons.solid.Users
 import compose.icons.fontawesomeicons.solid.VolumeXmark
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.bookmark_add
@@ -140,6 +154,8 @@ import dev.dimension.flare.ui.component.platform.PlatformRadioButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextButton
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
+import dev.dimension.flare.ui.icons.Misskey
+import dev.dimension.flare.ui.icons.Nostr
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiIcon
@@ -996,6 +1012,26 @@ internal fun UiIcon.toImageVector(): ImageVector =
         UiIcon.Info -> FontAwesomeIcons.Solid.CircleInfo
         UiIcon.Pin -> FontAwesomeIcons.Solid.Thumbtack
         UiIcon.Check -> FontAwesomeIcons.Solid.Check
+        UiIcon.Home -> FontAwesomeIcons.Solid.House
+        UiIcon.Notification -> FontAwesomeIcons.Solid.Bell
+        UiIcon.Search -> FontAwesomeIcons.Solid.MagnifyingGlass
+        UiIcon.Profile -> FontAwesomeIcons.Solid.CircleUser
+        UiIcon.Settings -> FontAwesomeIcons.Solid.Gear
+        UiIcon.Local -> FontAwesomeIcons.Solid.Users
+        UiIcon.World -> FontAwesomeIcons.Solid.Globe
+        UiIcon.Featured -> FontAwesomeIcons.Solid.RectangleList
+        UiIcon.Feeds -> FontAwesomeIcons.Solid.SquareRss
+        UiIcon.Messages -> FontAwesomeIcons.Solid.Message
+        UiIcon.Rss -> FontAwesomeIcons.Solid.SquareRss
+        UiIcon.Channel -> FontAwesomeIcons.Solid.Tv
+        UiIcon.Heart -> FontAwesomeIcons.Solid.Heart
+        UiIcon.Mastodon -> FontAwesomeIcons.Brands.Mastodon
+        UiIcon.Misskey -> FontAwesomeIcons.Brands.Misskey
+        UiIcon.Bluesky -> FontAwesomeIcons.Brands.Bluesky
+        UiIcon.Nostr -> FontAwesomeIcons.Brands.Nostr
+        UiIcon.Twitter -> FontAwesomeIcons.Brands.XTwitter
+        UiIcon.X -> FontAwesomeIcons.Brands.XTwitter
+        UiIcon.Weibo -> FontAwesomeIcons.Brands.Weibo
     }
 
 @Composable

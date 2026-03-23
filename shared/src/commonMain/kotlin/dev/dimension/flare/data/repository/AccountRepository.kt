@@ -13,12 +13,12 @@ import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiAccount.Companion.createDataSource
 import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
@@ -253,15 +253,10 @@ internal fun accountServiceFlow(
         AccountType.Guest -> {
             val guestData = repository.appDataStore.guestDataStore.data
             guestData.map {
-                when (it.platformType) {
-                    PlatformType.Mastodon ->
-                        GuestMastodonDataSource(
-                            host = it.host,
-                            locale = Locale.language,
-                        )
-
-                    else -> throw UnsupportedOperationException()
-                }
+                it.platformType.spec.guestDataSource(
+                    host = it.host,
+                    locale = Locale.language,
+                )
             }
         }
 

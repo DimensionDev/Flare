@@ -286,7 +286,7 @@ private fun GroupConfigPresenter(
 
     var icon by remember {
         mutableStateOf<IconType>(
-            initialItem?.metaData?.icon ?: IconType.Material(IconType.Material.MaterialIcon.Rss),
+            initialItem?.metaData?.icon ?: IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
         )
     }
 
@@ -309,7 +309,7 @@ private fun GroupConfigPresenter(
         val showIconPicker = showIconPicker
         val allTabs = allTabs
         val availableIcons =
-            IconType.Material.MaterialIcon.entries
+            dev.dimension.flare.ui.model.UiIcon.entries
                 .map { IconType.Material(it) }
 
         fun setIcon(newIcon: IconType) {

@@ -46,7 +46,6 @@ public object ComposeUIHelper {
                     } bind SwiftPlatformTextRenderer::class
                 },
             )
-            modules(dev.dimension.flare.di.composeUiModule)
         }
         SingletonImageLoader.setSafe { context ->
             ImageLoader

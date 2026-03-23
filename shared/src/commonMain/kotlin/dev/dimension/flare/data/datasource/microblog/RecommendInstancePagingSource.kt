@@ -7,7 +7,7 @@ import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
 import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.logoUrl
+import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.UiInstance
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -63,12 +63,12 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                                         description = it.title,
                                         iconUrl =
                                             it.thumbnail?.url
-                                                ?: PlatformType.Mastodon.logoUrl,
+                                                ?: PlatformType.Mastodon.spec.metadata.logoUrl,
                                         domain = it.domain ?: "pawoo.net",
                                         type = PlatformType.Mastodon,
                                         bannerUrl =
                                             it.thumbnail?.url
-                                                ?: PlatformType.Mastodon.logoUrl,
+                                                ?: PlatformType.Mastodon.spec.metadata.logoUrl,
                                         usersCount = it.usage?.users?.activeMonth ?: 0,
                                     ),
                                 )
@@ -82,7 +82,7 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                 UiInstance(
                     name = "mstdn.jp",
                     description = "mstdn.jp",
-                    iconUrl = PlatformType.Mastodon.logoUrl,
+                    iconUrl = PlatformType.Mastodon.spec.metadata.logoUrl,
                     domain = "mstdn.jp",
                     type = PlatformType.Mastodon,
                     bannerUrl = null,
@@ -94,7 +94,7 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                 UiInstance(
                     name = "pawoo.net",
                     description = "pawoo.net",
-                    iconUrl = PlatformType.Mastodon.logoUrl,
+                    iconUrl = PlatformType.Mastodon.spec.metadata.logoUrl,
                     domain = "pawoo.net",
                     type = PlatformType.Mastodon,
                     bannerUrl = null,
@@ -110,7 +110,7 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                     description =
                         "From breaking news and entertainment to sports and politics," +
                             " get the full story with all the live commentary.",
-                    iconUrl = PlatformType.xQt.logoUrl,
+                    iconUrl = PlatformType.xQt.spec.metadata.logoUrl,
                     domain = "x.com",
                     type = PlatformType.xQt,
                     bannerUrl = null,
@@ -122,7 +122,7 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                         "The web. Email. RSS feeds. XMPP chats. " +
                             "What all these technologies had in common is they allowed people to freely interact " +
                             "and create content, without a single intermediary.",
-                    iconUrl = PlatformType.Bluesky.logoUrl,
+                    iconUrl = PlatformType.Bluesky.spec.metadata.logoUrl,
                     domain = "bsky.social",
                     type = PlatformType.Bluesky,
                     bannerUrl = null,

@@ -43,8 +43,8 @@ import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.platform.PlatformText
-import dev.dimension.flare.ui.component.status.toImageVector
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
+import dev.dimension.flare.ui.component.status.toImageVector
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.FavIconPresenter
@@ -268,4 +268,4 @@ internal val TitleType.Localized.res: StringResource
             TitleType.Localized.LocalizedKey.AllRssFeeds -> Res.string.all_rss_feeds_title
             TitleType.Localized.LocalizedKey.Posts -> Res.string.posts_title
             TitleType.Localized.LocalizedKey.Channel -> Res.string.channel_title
-}
+        }

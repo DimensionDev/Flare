@@ -11,6 +11,7 @@ import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
+import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
 import dev.dimension.flare.data.datasource.microblog.paging.RemoteLoader
@@ -73,7 +74,9 @@ internal class NostrDataSource(
         get() = loader.supportedTypes
 
     override fun homeTimeline(): RemoteLoader<UiTimelineV2> =
-        object : RemoteLoader<UiTimelineV2> {
+        object : CacheableRemoteLoader<UiTimelineV2> {
+            override val pagingKey: String = "home_$accountKey"
+
             override suspend fun load(
                 pageSize: Int,
                 request: PagingRequest,
@@ -123,7 +126,17 @@ internal class NostrDataSource(
         userKey: MicroBlogKey,
         mediaOnly: Boolean,
     ): RemoteLoader<UiTimelineV2> =
-        object : RemoteLoader<UiTimelineV2> {
+        object : CacheableRemoteLoader<UiTimelineV2> {
+            override val pagingKey: String =
+                buildString {
+                    append("user_timeline")
+                    if (mediaOnly) {
+                        append("media")
+                    }
+                    append(accountKey.toString())
+                    append(userKey.toString())
+                }
+
             override suspend fun load(
                 pageSize: Int,
                 request: PagingRequest,

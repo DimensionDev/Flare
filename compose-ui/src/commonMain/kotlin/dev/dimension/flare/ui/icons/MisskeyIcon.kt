@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.addPathNodes
+import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.graphics.vector.group
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
@@ -200,35 +200,47 @@ public val BrandsGroup.Misskey: ImageVector
 @HiddenFromObjC
 public val BrandsGroup.Nostr: ImageVector
     get() {
-        return ImageVector
-            .Builder(
-                name = "NostrIcon",
-                defaultWidth = 256.dp,
-                defaultHeight = 256.dp,
-                viewportWidth = 256f,
-                viewportHeight = 256f,
-            ).apply {
-                path(
-                    fill = SolidColor(Color(0xFF000000)),
-                    stroke = null,
-                    strokeLineWidth = 0f,
-                    strokeLineCap = StrokeCap.Butt,
-                    strokeLineJoin = StrokeJoin.Miter,
-                    strokeLineMiter = 4f,
-                    pathFillType = PathFillType.NonZero,
-                    pathBuilder = {
-                        addPathNodes(
-                            "M210.8 199.4c0 3.1-2.5 5.7-5.7 5.7h-68c-3.1 0-5.7-2.5-5.7-5." +
-                                "7v-15.5c.3-19 2.3-37.2 6.5-45.5c2.5-5 6.7-7.7 11.5-9.1c9.1-2.7 " +
-                                "24.9-.9 31.7-1.2c0 0 20.4.8 20.4-10.7s-9.1-8.6-9.1-8.6c-10 .3-17" +
-                                ".7-.4-22.6-2.4c-8.3-3.3-8.6-9.2-8.6-11.2c-.4-23.1-34.5-25.9-64.5-" +
-                                "20.1c-32.8 6.2.4 53.3.4 116.1v8.4c0 3.1-2.6 5.6-5.7 5.6H57.7c-3.1" +
-                                " 0-5.7-2.5-5.7-5.7v-144c0-3.1 2.5-5.7 5.7-5.7h31.7c3.1 0 5.7 2.5" +
-                                " 5.7 5.7c0 4.7 5.2 7.2 9 4.5c11.4-8.2 26-12.5 42.4-12.5c36.6 0" +
-                                " 64.4 21.4 64.4 68.7v83.2ZM150 99.3c0-6.7-5.4-12.1-12.1-12.1s-" +
-                                "12.1 5.4-12.1 12.1s5.4 12.1 12.1 12.1S150 106 150 99.3Z",
-                        )
-                    },
-                )
-            }.build()
+        if (_nostr != null) {
+            return _nostr!!
+        }
+        _nostr =
+            ImageVector
+                .Builder(
+                    name = "NostrIcon",
+                    defaultWidth = 159.dp,
+                    defaultHeight = 158.dp,
+                    viewportWidth = 159f,
+                    viewportHeight = 158f,
+                ).apply {
+                    addPath(
+                        pathData =
+                            PathParser()
+                                .parsePathString(
+                                    "M158.8 151.9C158.8 155 156.3 157.6 153.1 157.6H85.1C82 157.6 " +
+                                        "79.4 155.1 79.4 151.9V136.4C79.7 117.4 81.7 99.2 85.9 90.9C88.4 " +
+                                        "85.9 92.6 83.2 97.4 81.8C106.5 79.1 122.3 80.9 129.1 80.6C129.1 " +
+                                        "80.6 149.5 81.4 149.5 69.9C149.5 58.4 140.4 61.3 140.4 61.3C130.4 " +
+                                        "61.6 122.7 60.9 117.8 58.9C109.5 55.6 109.2 49.7 109.2 47.7C108.8 " +
+                                        "24.6 74.7 21.8 44.7 27.6C11.9 33.8 45.1 80.9 45.1 143.7V152.1C45.1 " +
+                                        "155.2 42.5 157.7 39.4 157.7H5.7C2.6 157.7 0 155.2 0 152V8C0 4.9 " +
+                                        "2.5 2.3 5.7 2.3H37.4C40.5 2.3 43.1 4.8 43.1 8C43.1 12.7 48.3 15.2 " +
+                                        "52.1 12.5C63.5 4.3 78.1 0 94.5 0C131.1 0 158.9 21.4 158.9 68.7V151." +
+                                        "9H158.8ZM98 51.8C98 45.1 92.6 39.7 85.9 39.7C79.2 39.7 73.8 45.1 " +
+                                        "73.8 51.8C73.8 58.5 79.2 63.9 85.9 63.9C92.6 63.9 98 58.5 98 51.8Z",
+                                ).toNodes(),
+                        fill = SolidColor(Color(0xFF000000)),
+                        fillAlpha = 1.0f,
+                        stroke = null,
+                        strokeAlpha = 1.0f,
+                        strokeLineWidth = 0f,
+                        strokeLineCap = StrokeCap.Butt,
+                        strokeLineJoin = StrokeJoin.Miter,
+                        strokeLineMiter = 4f,
+                        pathFillType = PathFillType.NonZero,
+                    )
+                }.build()
+        return _nostr!!
     }
+
+@Suppress("ktlint:standard:backing-property-naming")
+private var _nostr: ImageVector? = null

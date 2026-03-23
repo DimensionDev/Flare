@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
@@ -111,8 +111,8 @@ internal fun EditTabDialog(
                                     defaultElevation = 3.dp,
                                 ),
                         ) {
-                            LazyHorizontalGrid(
-                                rows = GridCells.FixedSize(48.dp),
+                            LazyVerticalGrid(
+                                columns = GridCells.FixedSize(48.dp),
                             ) {
                                 items(state.availableIcons) { icon ->
                                     TabIcon(

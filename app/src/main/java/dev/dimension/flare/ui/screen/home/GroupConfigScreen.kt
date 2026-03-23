@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -166,7 +166,7 @@ internal fun GroupConfigScreen(
                                     modifier = Modifier.sizeIn(maxHeight = 256.dp, maxWidth = 384.dp),
                                     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp),
                                 ) {
-                                    LazyHorizontalGrid(rows = GridCells.FixedSize(48.dp)) {
+                                    LazyVerticalGrid(columns = GridCells.FixedSize(48.dp)) {
                                         items(state.availableIcons) { icon ->
                                             TabIcon(
                                                 accountType = AccountType.Guest,

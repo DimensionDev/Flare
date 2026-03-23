@@ -58,7 +58,6 @@ import compose.icons.fontawesomeicons.regular.CommentDots
 import compose.icons.fontawesomeicons.regular.Heart
 import compose.icons.fontawesomeicons.solid.At
 import compose.icons.fontawesomeicons.solid.Bell
-import compose.icons.fontawesomeicons.solid.BookBookmark
 import compose.icons.fontawesomeicons.solid.Bookmark
 import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.CircleInfo
@@ -82,8 +81,8 @@ import compose.icons.fontawesomeicons.solid.RectangleList
 import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
 import compose.icons.fontawesomeicons.solid.ShareNodes
-import compose.icons.fontawesomeicons.solid.SquareRss
 import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
+import compose.icons.fontawesomeicons.solid.SquareRss
 import compose.icons.fontawesomeicons.solid.Thumbtack
 import compose.icons.fontawesomeicons.solid.Trash
 import compose.icons.fontawesomeicons.solid.Tv

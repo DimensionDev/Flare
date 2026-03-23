@@ -33,13 +33,15 @@ import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import kotlin.coroutines.coroutineContext
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -58,6 +60,11 @@ internal object NostrService {
     internal const val NOSTR_HOST: String = "nostr"
 
     internal val defaultRelays: List<String> = defaultNostrRelays
+    private val client by lazy {
+        ktorClient {
+            install(WebSockets)
+        }
+    }
 
     internal data class ImportedAccount(
         val pubkeyHex: String,
@@ -292,34 +299,80 @@ internal object NostrService {
         relays: List<String>,
         filters: List<Filter>,
     ): List<Event> =
-        relays
-            .firstNotNullOfOrNull { relay ->
-                runCatching { queryRelay(relay, filters) }.getOrNull()?.takeIf { it.isNotEmpty() }
-            }.orEmpty()
+        queryRelays(
+            relays = relays,
+            filters = filters,
+            waitForAllRelays = false,
+        )
 
     private suspend fun queryAllRelays(
         relays: List<String>,
         filters: List<Filter>,
     ): List<Event> =
+        queryRelays(
+            relays = relays,
+            filters = filters,
+            waitForAllRelays = true,
+        )
+
+    private suspend fun queryRelays(
+        relays: List<String>,
+        filters: List<Filter>,
+        waitForAllRelays: Boolean,
+    ): List<Event> =
         coroutineScope {
-            relays
-                .map { relay ->
-                    async {
-                        runCatching { queryRelay(relay, filters) }.getOrDefault(emptyList())
+            if (relays.isEmpty()) {
+                return@coroutineScope emptyList()
+            }
+            val results = Channel<List<Event>>(Channel.UNLIMITED)
+            relays.forEach { relay ->
+                launch {
+                    val events = runCatching { queryRelay(relay, filters) }.getOrDefault(emptyList())
+                    results.send(events)
+                }
+            }
+
+            val eventsById = LinkedHashMap<String, Event>()
+            var remaining = relays.size
+            var hasNonEmptyResult = false
+
+            try {
+                while (remaining > 0) {
+                    val timeout =
+                        if (hasNonEmptyResult) {
+                            RELAY_SETTLE_TIMEOUT_MILLIS
+                        } else {
+                            RELAY_TIMEOUT_MILLIS
+                        }
+                    val result =
+                        withTimeoutOrNull(timeout) {
+                            results.receive()
+                        } ?: break
+                    remaining -= 1
+                    if (result.isEmpty()) {
+                        continue
                     }
-                }.awaitAll()
-                .flatten()
-                .distinctBy { it.id }
+                    hasNonEmptyResult = true
+                    result.forEach { event ->
+                        if (event.id !in eventsById) {
+                            eventsById[event.id] = event
+                        }
+                    }
+                    if (!waitForAllRelays) {
+                        break
+                    }
+                }
+            } finally {
+                coroutineContext.cancelChildren()
+                results.close()
+            }
+            eventsById.values.toList()
         }
 
     private suspend fun queryRelay(
         relay: String,
         filters: List<Filter>,
     ): List<Event> {
-        val client =
-            ktorClient {
-                install(WebSockets)
-            }
         val session = client.webSocketSession(urlString = relay)
         val subscriptionId = "flare-${Clock.System.now().toEpochMilliseconds()}"
         val events = mutableListOf<Event>()
@@ -357,7 +410,6 @@ internal object NostrService {
         } finally {
             runCatching { session.send(Frame.Text("[\"CLOSE\",\"$subscriptionId\"]")) }
             runCatching { session.close() }
-            client.close()
         }
     }
 
@@ -546,7 +598,8 @@ internal object NostrService {
 
     private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
     private val HEX_DIGITS = "0123456789abcdef".toCharArray()
-    private const val RELAY_TIMEOUT_MILLIS = 8_000L
+    private const val RELAY_TIMEOUT_MILLIS = 3_500L
+    private const val RELAY_SETTLE_TIMEOUT_MILLIS = 350L
     private const val MAX_HOME_AUTHORS = 250
     private const val MIN_METADATA_EVENT_LIMIT = 50
 }

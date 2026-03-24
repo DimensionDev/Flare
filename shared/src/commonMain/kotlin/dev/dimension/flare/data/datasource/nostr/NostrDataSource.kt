@@ -66,7 +66,11 @@ internal class NostrDataSource(
         )
     }
 
-    override val supportedNotificationFilter: List<NotificationFilter> = emptyList()
+    override val supportedNotificationFilter: List<NotificationFilter> =
+        listOf(
+            NotificationFilter.All,
+            NotificationFilter.Mention,
+        )
     override val userHandler by lazy {
         UserHandler(
             host = NostrService.NOSTR_HOST,
@@ -213,11 +217,109 @@ internal class NostrDataSource(
             }
         }
 
-    override fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> = notSupported()
+    override fun context(statusKey: MicroBlogKey): RemoteLoader<UiTimelineV2> =
+        StatusDetailRemoteMediator(
+            statusKey = statusKey,
+            accountKey = accountKey,
+            credentialProvider = {
+                accountRepository
+                    .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
+                    .first()
+                    .let {
+                        if (relayHint != null && relayHint !in it.relays) {
+                            it.copy(relays = listOf(relayHint) + it.relays)
+                        } else {
+                            it
+                        }
+                    }
+            },
+        )
 
-    override fun searchStatus(query: String): RemoteLoader<UiTimelineV2> = notSupported()
+    override fun searchStatus(query: String): RemoteLoader<UiTimelineV2> =
+        object : CacheableRemoteLoader<UiTimelineV2> {
+            override val pagingKey: String = "search_status_${accountKey}_$query"
 
-    override fun searchUser(query: String): RemoteLoader<UiProfile> = notSupported()
+            override suspend fun load(
+                pageSize: Int,
+                request: PagingRequest,
+            ): PagingResult<UiTimelineV2> {
+                if (request is PagingRequest.Prepend) {
+                    return PagingResult(endOfPaginationReached = true)
+                }
+                val credential =
+                    accountRepository
+                        .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
+                        .first()
+                        .let {
+                            if (relayHint != null && relayHint !in it.relays) {
+                                it.copy(relays = listOf(relayHint) + it.relays)
+                            } else {
+                                it
+                            }
+                        }
+                val until =
+                    when (request) {
+                        PagingRequest.Refresh -> null
+                        is PagingRequest.Append -> request.nextKey.toLongOrNull()
+                        is PagingRequest.Prepend -> null
+                    }
+                val data =
+                    NostrService.searchStatus(
+                        credential = credential,
+                        accountKey = accountKey,
+                        query = query,
+                        pageSize = pageSize,
+                        until = until,
+                    )
+                val nextKey =
+                    data
+                        .filterIsInstance<UiTimelineV2.Post>()
+                        .minOfOrNull { it.createdAt.value.epochSeconds - 1 }
+                        ?.takeIf { data.isNotEmpty() }
+                        ?.toString()
+                return PagingResult(
+                    endOfPaginationReached = data.isEmpty(),
+                    data = data,
+                    nextKey = nextKey,
+                )
+            }
+        }
+
+    override fun searchUser(query: String): RemoteLoader<UiProfile> =
+        object : CacheableRemoteLoader<UiProfile> {
+            override val pagingKey: String = "search_user_${accountKey}_$query"
+
+            override suspend fun load(
+                pageSize: Int,
+                request: PagingRequest,
+            ): PagingResult<UiProfile> {
+                if (request is PagingRequest.Prepend || request is PagingRequest.Append) {
+                    return PagingResult(endOfPaginationReached = true)
+                }
+                val credential =
+                    accountRepository
+                        .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
+                        .first()
+                        .let {
+                            if (relayHint != null && relayHint !in it.relays) {
+                                it.copy(relays = listOf(relayHint) + it.relays)
+                            } else {
+                                it
+                            }
+                        }
+                val data =
+                    NostrService.searchUser(
+                        credential = credential,
+                        accountKey = accountKey,
+                        query = query,
+                        pageSize = pageSize,
+                    )
+                return PagingResult(
+                    endOfPaginationReached = true,
+                    data = data,
+                )
+            }
+        }
 
     override fun discoverUsers(): RemoteLoader<UiProfile> = notSupported()
 
@@ -237,7 +339,55 @@ internal class NostrDataSource(
             ),
         )
 
-    override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> = notSupported()
+    override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> =
+        object : CacheableRemoteLoader<UiTimelineV2> {
+            override val pagingKey: String = "notification_${type.name.lowercase()}_$accountKey"
+
+            override suspend fun load(
+                pageSize: Int,
+                request: PagingRequest,
+            ): PagingResult<UiTimelineV2> {
+                if (request is PagingRequest.Prepend) {
+                    return PagingResult(endOfPaginationReached = true)
+                }
+                val credential =
+                    accountRepository
+                        .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
+                        .first()
+                        .let {
+                            if (relayHint != null && relayHint !in it.relays) {
+                                it.copy(relays = listOf(relayHint) + it.relays)
+                            } else {
+                                it
+                            }
+                        }
+                val until =
+                    when (request) {
+                        PagingRequest.Refresh -> null
+                        is PagingRequest.Append -> request.nextKey.toLongOrNull()
+                        is PagingRequest.Prepend -> null
+                    }
+                val data =
+                    NostrService.loadNotifications(
+                        credential = credential,
+                        accountKey = accountKey,
+                        pageSize = pageSize,
+                        until = until,
+                        type = type,
+                    )
+                val nextKey =
+                    data
+                        .filterIsInstance<UiTimelineV2.Post>()
+                        .minOfOrNull { it.createdAt.value.epochSeconds - 1 }
+                        ?.takeIf { data.isNotEmpty() }
+                        ?.toString()
+                return PagingResult(
+                    endOfPaginationReached = data.isEmpty(),
+                    data = data,
+                    nextKey = nextKey,
+                )
+            }
+        }
 
     override suspend fun handle(
         event: PostEvent,

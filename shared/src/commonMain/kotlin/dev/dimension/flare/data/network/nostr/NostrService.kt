@@ -3,16 +3,20 @@ package dev.dimension.flare.data.network.nostr
 import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.hexToByteArray
+import com.vitorpamplona.quartz.nip01Core.crypto.KeyPair
 import com.vitorpamplona.quartz.nip01Core.hints.EventHintBundle
 import com.vitorpamplona.quartz.nip01Core.metadata.MetadataEvent
 import com.vitorpamplona.quartz.nip01Core.metadata.UserMetadata
 import com.vitorpamplona.quartz.nip01Core.relay.filters.Filter
 import com.vitorpamplona.quartz.nip01Core.relay.normalizer.RelayUrlNormalizer
 import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
+import com.vitorpamplona.quartz.nip01Core.signers.NostrSigner
 import com.vitorpamplona.quartz.nip01Core.tags.dTag.dTag
 import com.vitorpamplona.quartz.nip01Core.tags.events.ETag
 import com.vitorpamplona.quartz.nip01Core.tags.people.pTag
 import com.vitorpamplona.quartz.nip02FollowList.ContactListEvent
+import com.vitorpamplona.quartz.nip02FollowList.ReadWrite
+import com.vitorpamplona.quartz.nip02FollowList.tags.ContactTag
 import com.vitorpamplona.quartz.nip09Deletions.DeletionEvent
 import com.vitorpamplona.quartz.nip10Notes.TextNoteEvent
 import com.vitorpamplona.quartz.nip10Notes.tags.MarkedETag
@@ -29,8 +33,15 @@ import com.vitorpamplona.quartz.nip19Bech32.entities.NPub
 import com.vitorpamplona.quartz.nip19Bech32.entities.NSec
 import com.vitorpamplona.quartz.nip19Bech32.toNsec
 import com.vitorpamplona.quartz.nip25Reactions.ReactionEvent
+import com.vitorpamplona.quartz.nip51Lists.muteList.MuteListEvent
+import com.vitorpamplona.quartz.nip51Lists.muteList.mutedUserIdSet
+import com.vitorpamplona.quartz.nip51Lists.muteList.tags.UserTag
+import com.vitorpamplona.quartz.nip51Lists.peopleList.PeopleListEvent
+import com.vitorpamplona.quartz.nip51Lists.peopleList.userIdSet
 import com.vitorpamplona.quartz.nip56Reports.ReportEvent
 import com.vitorpamplona.quartz.nip56Reports.ReportType
+import com.vitorpamplona.quartz.nip57Zaps.LnZapPrivateEvent
+import com.vitorpamplona.quartz.nip57Zaps.LnZapRequestEvent
 import com.vitorpamplona.quartz.nip92IMeta.IMetaTag
 import com.vitorpamplona.quartz.nip94FileMetadata.tags.DimensionTag
 import dev.dimension.flare.common.JSON
@@ -541,10 +552,148 @@ internal object NostrService : KoinComponent {
         targetPubkey: String,
     ): dev.dimension.flare.ui.model.UiRelation {
         val relays = credential.relays.ifEmpty { defaultRelays }
-        val follows = loadAuthors(relays, credential.pubkey)
+        val follows = loadLatestContactList(relays, credential.pubkey)?.verifiedFollowKeySet().orEmpty()
+        val blocks = loadLatestBlockList(relays, credential.pubkey)?.tags?.userIdSet().orEmpty()
+        val mutes = loadLatestMuteList(relays, credential.pubkey)?.tags?.mutedUserIdSet().orEmpty()
         return dev.dimension.flare.ui.model.UiRelation(
             following = targetPubkey in follows,
+            blocking = targetPubkey in blocks,
+            muted = targetPubkey in mutes,
         )
+    }
+
+    internal suspend fun follow(
+        credential: UiAccount.Nostr.Credential,
+        targetPubkey: String,
+    ) {
+        val relays = credential.relays.ifEmpty { defaultRelays }
+        val signer = createSigner(requireNotNull(exportAccount(credential).nsec))
+        val latest = loadLatestContactList(relays, credential.pubkey)
+        val event =
+            if (latest != null) {
+                ContactListEvent.followUser(
+                    earlierVersion = latest,
+                    pubKeyHex = targetPubkey,
+                    signer = signer,
+                )
+            } else {
+                ContactListEvent.createFromScratch(
+                    followUsers = listOf(ContactTag(targetPubkey)),
+                    relayUse = defaultRelaySet(relays),
+                    signer = signer,
+                )
+            }
+        publishEvent(credential, event)
+    }
+
+    internal suspend fun unfollow(
+        credential: UiAccount.Nostr.Credential,
+        targetPubkey: String,
+    ) {
+        val relays = credential.relays.ifEmpty { defaultRelays }
+        val signer = createSigner(requireNotNull(exportAccount(credential).nsec))
+        val latest = loadLatestContactList(relays, credential.pubkey)
+        val event =
+            if (latest != null) {
+                ContactListEvent.unfollowUser(
+                    earlierVersion = latest,
+                    pubKeyHex = targetPubkey,
+                    signer = signer,
+                )
+            } else {
+                ContactListEvent.createFromScratch(
+                    followUsers = emptyList(),
+                    relayUse = defaultRelaySet(relays),
+                    signer = signer,
+                )
+            }
+        publishEvent(credential, event)
+    }
+
+    internal suspend fun block(
+        credential: UiAccount.Nostr.Credential,
+        targetPubkey: String,
+    ) {
+        val relays = credential.relays.ifEmpty { defaultRelays }
+        val signer = createSigner(requireNotNull(exportAccount(credential).nsec))
+        val latest = loadLatestBlockList(relays, credential.pubkey)
+        val event =
+            if (latest != null) {
+                PeopleListEvent.addUser(
+                    earlierVersion = latest,
+                    pubKeyHex = targetPubkey,
+                    relayHint = null,
+                    isPrivate = false,
+                    signer = signer,
+                )
+            } else {
+                PeopleListEvent.create(
+                    name = "Block list",
+                    publicMembers = listOf(UserTag(targetPubkey)),
+                    privateMembers = emptyList(),
+                    signer = signer,
+                    dTag = PeopleListEvent.BLOCK_LIST_D_TAG,
+                )
+            }
+        publishEvent(credential, event)
+    }
+
+    internal suspend fun unblock(
+        credential: UiAccount.Nostr.Credential,
+        targetPubkey: String,
+    ) {
+        val relays = credential.relays.ifEmpty { defaultRelays }
+        val signer = createSigner(requireNotNull(exportAccount(credential).nsec))
+        val latest = loadLatestBlockList(relays, credential.pubkey) ?: return
+        val event =
+            PeopleListEvent.removeUser(
+                earlierVersion = latest,
+                pubKeyHex = targetPubkey,
+                isUserPrivate = false,
+                signer = signer,
+            )
+        publishEvent(credential, event)
+    }
+
+    internal suspend fun mute(
+        credential: UiAccount.Nostr.Credential,
+        targetPubkey: String,
+    ) {
+        val relays = credential.relays.ifEmpty { defaultRelays }
+        val signer = createSigner(requireNotNull(exportAccount(credential).nsec))
+        val latest = loadLatestMuteList(relays, credential.pubkey)
+        val event =
+            if (latest != null) {
+                MuteListEvent.add(
+                    earlierVersion = latest,
+                    mute = UserTag(targetPubkey),
+                    isPrivate = false,
+                    signer = signer,
+                )
+            } else {
+                MuteListEvent.create(
+                    mute = UserTag(targetPubkey),
+                    isPrivate = false,
+                    signer = signer,
+                )
+            }
+        publishEvent(credential, event)
+    }
+
+    internal suspend fun unmute(
+        credential: UiAccount.Nostr.Credential,
+        targetPubkey: String,
+    ) {
+        val relays = credential.relays.ifEmpty { defaultRelays }
+        val signer = createSigner(requireNotNull(exportAccount(credential).nsec))
+        val latest = loadLatestMuteList(relays, credential.pubkey) ?: return
+        val event =
+            MuteListEvent.remove(
+                earlierVersion = latest,
+                mute = UserTag(targetPubkey),
+                signer = signer,
+            )
+        publishEvent(credential, event)
     }
 
     internal fun createTextNoteEvent(
@@ -718,24 +867,67 @@ internal object NostrService : KoinComponent {
         relays: List<String>,
         accountPubkey: String,
     ): List<String> {
-        val latestContacts =
-            queryAllRelays(
-                relays = relays,
-                filters =
-                    listOf(
-                        Filter(
-                            authors = listOf(accountPubkey),
-                            kinds = listOf(ContactListEvent.KIND),
-                            limit = 1,
-                        ),
-                    ),
-            ).filterIsInstance<ContactListEvent>()
-                .maxByOrNull { it.createdAt }
+        val latestContacts = loadLatestContactList(relays, accountPubkey)
 
         return (latestContacts?.verifiedFollowKeySet().orEmpty() + accountPubkey)
             .distinct()
             .take(MAX_HOME_AUTHORS)
     }
+
+    private suspend fun loadLatestContactList(
+        relays: List<String>,
+        accountPubkey: String,
+    ): ContactListEvent? =
+        queryAllRelays(
+            relays = relays,
+            filters =
+                listOf(
+                    Filter(
+                        authors = listOf(accountPubkey),
+                        kinds = listOf(ContactListEvent.KIND),
+                        limit = 1,
+                    ),
+                ),
+        ).filterIsInstance<ContactListEvent>()
+            .maxByOrNull { it.createdAt }
+
+    private suspend fun loadLatestMuteList(
+        relays: List<String>,
+        accountPubkey: String,
+    ): MuteListEvent? =
+        queryAllRelays(
+            relays = relays,
+            filters =
+                listOf(
+                    Filter(
+                        authors = listOf(accountPubkey),
+                        kinds = listOf(MuteListEvent.KIND),
+                        limit = 1,
+                    ),
+                ),
+        ).filterIsInstance<MuteListEvent>()
+            .maxByOrNull { it.createdAt }
+
+    private suspend fun loadLatestBlockList(
+        relays: List<String>,
+        accountPubkey: String,
+    ): PeopleListEvent? =
+        queryAllRelays(
+            relays = relays,
+            filters =
+                listOf(
+                    Filter(
+                        authors = listOf(accountPubkey),
+                        kinds = listOf(PeopleListEvent.KIND),
+                        tags = mapOf("d" to listOf(PeopleListEvent.BLOCK_LIST_D_TAG)),
+                        limit = 10,
+                    ),
+                ),
+        ).filterIsInstance<PeopleListEvent>()
+            .maxByOrNull { it.createdAt }
+
+    private fun defaultRelaySet(relays: List<String>): Map<String, ReadWrite> =
+        relays.associateWith { ReadWrite(read = true, write = true) }
 
     private suspend fun loadMetadata(
         relays: List<String>,
@@ -1140,6 +1332,49 @@ internal object NostrService : KoinComponent {
             privKey = normalizedSecretHex.hexToByteArray(),
             pubKeyByteArray = pubkeyHex.hexToByteArray(),
         )
+    }
+
+    private fun createSigner(secretKey: String): NostrSigner {
+        val syncSigner =
+            com.vitorpamplona.quartz.nip01Core.signers.NostrSignerSync(
+                keyPair = KeyPair(privKey = normalizeSecret(secretKey).hex.hexToByteArray()),
+            )
+        return object : NostrSigner(syncSigner.pubKey) {
+            override fun isWriteable(): Boolean = true
+
+            override suspend fun <T : Event> sign(
+                createdAt: Long,
+                kind: Int,
+                tags: Array<Array<String>>,
+                content: String,
+            ): T = syncSigner.sign(createdAt, kind, tags, content)
+
+            override suspend fun nip04Encrypt(
+                plaintext: String,
+                toPublicKey: String,
+            ): String = syncSigner.nip04Encrypt(plaintext, toPublicKey)
+
+            override suspend fun nip04Decrypt(
+                ciphertext: String,
+                fromPublicKey: String,
+            ): String = syncSigner.nip04Decrypt(ciphertext, fromPublicKey)
+
+            override suspend fun nip44Encrypt(
+                plaintext: String,
+                toPublicKey: String,
+            ): String = syncSigner.nip44Encrypt(plaintext, toPublicKey)
+
+            override suspend fun nip44Decrypt(
+                ciphertext: String,
+                fromPublicKey: String,
+            ): String = syncSigner.nip44Decrypt(ciphertext, fromPublicKey)
+
+            override suspend fun decryptZapEvent(event: LnZapRequestEvent): LnZapPrivateEvent = syncSigner.decryptZapEvent(event)
+
+            override suspend fun deriveKey(nonce: String): String = syncSigner.deriveKey(nonce)
+
+            override fun hasForegroundSupport(): Boolean = false
+        }
     }
 
     private fun <T : Event> EventTemplate<T>.sign(

@@ -18,7 +18,12 @@ internal class NostrLoader(
 ) : UserLoader,
     RelationLoader,
     PostLoader {
-    override val supportedTypes: Set<RelationActionType> = emptySet()
+    override val supportedTypes: Set<RelationActionType> =
+        setOf(
+            RelationActionType.Follow,
+            RelationActionType.Block,
+            RelationActionType.Mute,
+        )
 
     override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile =
         NostrService.loadProfile(
@@ -54,16 +59,45 @@ internal class NostrLoader(
         )
     }
 
-    override suspend fun follow(userKey: MicroBlogKey): Unit = throw UnsupportedOperationException("Nostr follow is not implemented yet")
+    override suspend fun follow(userKey: MicroBlogKey) {
+        NostrService.follow(
+            credential = credentialProvider(),
+            targetPubkey = userKey.id,
+        )
+    }
 
-    override suspend fun unfollow(userKey: MicroBlogKey): Unit =
-        throw UnsupportedOperationException("Nostr unfollow is not implemented yet")
+    override suspend fun unfollow(userKey: MicroBlogKey) {
+        NostrService.unfollow(
+            credential = credentialProvider(),
+            targetPubkey = userKey.id,
+        )
+    }
 
-    override suspend fun block(userKey: MicroBlogKey): Unit = throw UnsupportedOperationException("Nostr block is not implemented yet")
+    override suspend fun block(userKey: MicroBlogKey) {
+        NostrService.block(
+            credential = credentialProvider(),
+            targetPubkey = userKey.id,
+        )
+    }
 
-    override suspend fun unblock(userKey: MicroBlogKey): Unit = throw UnsupportedOperationException("Nostr unblock is not implemented yet")
+    override suspend fun unblock(userKey: MicroBlogKey) {
+        NostrService.unblock(
+            credential = credentialProvider(),
+            targetPubkey = userKey.id,
+        )
+    }
 
-    override suspend fun mute(userKey: MicroBlogKey): Unit = throw UnsupportedOperationException("Nostr mute is not implemented yet")
+    override suspend fun mute(userKey: MicroBlogKey) {
+        NostrService.mute(
+            credential = credentialProvider(),
+            targetPubkey = userKey.id,
+        )
+    }
 
-    override suspend fun unmute(userKey: MicroBlogKey): Unit = throw UnsupportedOperationException("Nostr unmute is not implemented yet")
+    override suspend fun unmute(userKey: MicroBlogKey) {
+        NostrService.unmute(
+            credential = credentialProvider(),
+            targetPubkey = userKey.id,
+        )
+    }
 }

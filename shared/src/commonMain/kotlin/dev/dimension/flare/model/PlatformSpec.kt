@@ -11,6 +11,7 @@ import dev.dimension.flare.data.platform.MisskeyPlatformSpec
 import dev.dimension.flare.data.platform.NostrPlatformSpec
 import dev.dimension.flare.data.platform.VvoPlatformSpec
 import dev.dimension.flare.data.platform.XqtPlatformSpec
+import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiInstanceMetadata
 import kotlinx.collections.immutable.ImmutableList
 
@@ -33,10 +34,7 @@ internal interface PlatformSpec {
     ): MicroblogDataSource
 }
 
-public val PlatformType.logoUrl: String
-    get() = spec.metadata.logoUrl
-
-public val PlatformType.icon: dev.dimension.flare.ui.model.UiIcon
+public val PlatformType.icon: UiIcon
     get() = spec.metadata.icon
 
 public fun PlatformType.agreementUrl(host: String): String? = spec.agreementUrl(host)

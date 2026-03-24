@@ -30,7 +30,6 @@ internal data object MastodonPlatformSpec : PlatformSpec {
     override val metadata =
         PlatformTypeMetadata(
             displayName = "Mastodon",
-            logoUrl = "https://joinmastodon.org/logos/logo-purple.svg",
             icon = UiIcon.Mastodon,
         )
     override val detector: PlatformDetector = MastodonPlatformDetector

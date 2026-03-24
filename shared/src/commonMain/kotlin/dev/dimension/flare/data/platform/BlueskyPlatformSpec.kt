@@ -29,7 +29,6 @@ internal data object BlueskyPlatformSpec : PlatformSpec {
     override val metadata =
         PlatformTypeMetadata(
             displayName = "Bluesky",
-            logoUrl = "https://blueskyweb.xyz/images/apple-touch-icon.png",
             icon = UiIcon.Bluesky,
         )
     override val detector: PlatformDetector = BlueskyPlatformDetector

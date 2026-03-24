@@ -20,7 +20,6 @@ internal data object NostrPlatformSpec : PlatformSpec {
     override val metadata =
         PlatformTypeMetadata(
             displayName = "Nostr",
-            logoUrl = "https://nostr.com/favicon.ico",
             icon = UiIcon.Nostr,
         )
     override val detector: PlatformDetector = NostrPlatformDetector

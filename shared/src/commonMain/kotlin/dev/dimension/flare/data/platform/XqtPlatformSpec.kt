@@ -31,9 +31,6 @@ internal data object XqtPlatformSpec : PlatformSpec {
     override val metadata =
         PlatformTypeMetadata(
             displayName = "X",
-            logoUrl =
-                "https://upload.wikimedia.org/wikipedia/commons" +
-                    "/thumb/5/53/X_logo_2023_original.svg/1920px-X_logo_2023_original.svg.png",
             icon = UiIcon.X,
         )
     override val detector: PlatformDetector = XQTPlatformDetector

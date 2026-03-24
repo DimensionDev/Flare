@@ -22,7 +22,6 @@ public enum class PlatformType {
 @Immutable
 public data class PlatformTypeMetadata(
     val displayName: String,
-    val logoUrl: String,
     val icon: UiIcon,
 )
 

@@ -31,7 +31,6 @@ import androidx.compose.ui.autofill.contentType
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -74,7 +73,7 @@ import dev.dimension.flare.compose.ui.service_select_welcome_message
 import dev.dimension.flare.compose.ui.service_select_welcome_title
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.agreementUrl
-import dev.dimension.flare.model.logoUrl
+import dev.dimension.flare.model.icon
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.placeholder
@@ -88,6 +87,7 @@ import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextField
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
+import dev.dimension.flare.ui.component.toImageVector
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
@@ -179,11 +179,10 @@ public fun ServiceSelectionScreenContent(
                     leadingIcon = {
                         state.detectedPlatformType
                             .onSuccess {
-                                NetworkImage(
-                                    it.platformType.logoUrl,
+                                FAIcon(
+                                    imageVector = it.platformType.icon.toImageVector(),
                                     contentDescription = null,
                                     modifier = Modifier.size(24.dp),
-                                    contentScale = ContentScale.Fit,
                                 )
                             }.onError {
                                 FAIcon(
@@ -627,11 +626,10 @@ private fun NostrLoginContent(state: SelectionPresenter.State) {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            NetworkImage(
-                PlatformType.Nostr.logoUrl,
+            FAIcon(
+                imageVector = PlatformType.Nostr.icon.toImageVector(),
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                contentScale = ContentScale.Fit,
             )
             PlatformText(
                 text = stringResource(Res.string.nostr_login_title),
@@ -788,6 +786,12 @@ private fun ServiceSelectItem(
                         modifier =
                             Modifier
                                 .size(24.dp),
+                    )
+                } else if (instance != null) {
+                    FAIcon(
+                        imageVector = instance.type.icon.toImageVector(),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
                     )
                 }
                 PlatformText(

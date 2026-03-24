@@ -30,7 +30,6 @@ internal data object MisskeyPlatformSpec : PlatformSpec {
     override val metadata =
         PlatformTypeMetadata(
             displayName = "Misskey",
-            logoUrl = "https://github.com/misskey-dev/misskey/blob/develop/packages/backend/assets/favicon.png?raw=true",
             icon = UiIcon.Misskey,
         )
     override val detector: PlatformDetector = MisskeyPlatformDetector

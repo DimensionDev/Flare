@@ -1,8 +1,6 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.spec
 import dev.dimension.flare.model.vvo
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.vvoHostLong
@@ -38,7 +36,7 @@ public data class UiRssSource internal constructor(
             if (parsedUrl.host == BSKY_SOCIAL.host) {
                 return "https://web-cdn.bsky.app/static/apple-touch-icon.png"
             } else if (parsedUrl.host in listOf(vvo, vvoHostShort, vvoHost, vvoHostLong)) {
-                return PlatformType.VVo.spec.metadata.logoUrl
+                return "https://upload.wikimedia.org/wikipedia/en/thumb/6/6e/Sina_Weibo.svg/2560px-Sina_Weibo.svg.png"
             } else {
                 return "https://${parsedUrl.host}/favicon.ico"
             }

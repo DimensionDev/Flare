@@ -26,7 +26,6 @@ internal data object VvoPlatformSpec : PlatformSpec {
     override val metadata =
         PlatformTypeMetadata(
             displayName = vvo,
-            logoUrl = "https://upload.wikimedia.org/wikipedia/en/thumb/6/6e/Sina_Weibo.svg/2560px-Sina_Weibo.svg.png",
             icon = UiIcon.Weibo,
         )
     override val detector: PlatformDetector = VVOPlatformDetector

@@ -111,6 +111,16 @@ public class AccountRepository internal constructor(
         addAccountFlow.value = account
     }
 
+    internal fun updateCredential(
+        accountKey: MicroBlogKey,
+        credential: UiAccount.Credential,
+    ) = coroutineScope.launch {
+        appDatabase.accountDao().setCredential(
+            accountKey,
+            credential.encodeJson(),
+        )
+    }
+
     internal fun updateAccountOrder(accounts: List<MicroBlogKey>) =
         coroutineScope.launch {
             appDatabase.connect {

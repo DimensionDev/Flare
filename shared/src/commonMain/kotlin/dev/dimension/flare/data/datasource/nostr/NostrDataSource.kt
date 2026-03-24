@@ -40,7 +40,6 @@ import org.koin.core.component.inject
 
 internal class NostrDataSource(
     override val accountKey: MicroBlogKey,
-    private val relayHint: String? = null,
 ) : AuthenticatedMicroblogDataSource,
     UserDataSource,
     RelationDataSource,
@@ -55,13 +54,6 @@ internal class NostrDataSource(
                 accountRepository
                     .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
                     .first()
-                    .let {
-                        if (relayHint != null && relayHint !in it.relays) {
-                            it.copy(relays = listOf(relayHint) + it.relays)
-                        } else {
-                            it
-                        }
-                    }
             },
         )
     }
@@ -121,13 +113,6 @@ internal class NostrDataSource(
                     accountRepository
                         .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
                         .first()
-                        .let {
-                            if (relayHint != null && relayHint !in it.relays) {
-                                it.copy(relays = listOf(relayHint) + it.relays)
-                            } else {
-                                it
-                            }
-                        }
                 val until =
                     when (request) {
                         PagingRequest.Refresh -> null
@@ -181,13 +166,6 @@ internal class NostrDataSource(
                     accountRepository
                         .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
                         .first()
-                        .let {
-                            if (relayHint != null && relayHint !in it.relays) {
-                                it.copy(relays = listOf(relayHint) + it.relays)
-                            } else {
-                                it
-                            }
-                        }
                 val until =
                     when (request) {
                         PagingRequest.Refresh -> null
@@ -225,13 +203,6 @@ internal class NostrDataSource(
                 accountRepository
                     .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
                     .first()
-                    .let {
-                        if (relayHint != null && relayHint !in it.relays) {
-                            it.copy(relays = listOf(relayHint) + it.relays)
-                        } else {
-                            it
-                        }
-                    }
             },
         )
 
@@ -250,13 +221,6 @@ internal class NostrDataSource(
                     accountRepository
                         .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
                         .first()
-                        .let {
-                            if (relayHint != null && relayHint !in it.relays) {
-                                it.copy(relays = listOf(relayHint) + it.relays)
-                            } else {
-                                it
-                            }
-                        }
                 val until =
                     when (request) {
                         PagingRequest.Refresh -> null
@@ -300,13 +264,6 @@ internal class NostrDataSource(
                     accountRepository
                         .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
                         .first()
-                        .let {
-                            if (relayHint != null && relayHint !in it.relays) {
-                                it.copy(relays = listOf(relayHint) + it.relays)
-                            } else {
-                                it
-                            }
-                        }
                 val data =
                     NostrService.searchUser(
                         credential = credential,
@@ -354,13 +311,6 @@ internal class NostrDataSource(
                     accountRepository
                         .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
                         .first()
-                        .let {
-                            if (relayHint != null && relayHint !in it.relays) {
-                                it.copy(relays = listOf(relayHint) + it.relays)
-                            } else {
-                                it
-                            }
-                        }
                 val until =
                     when (request) {
                         PagingRequest.Refresh -> null
@@ -398,13 +348,6 @@ internal class NostrDataSource(
             accountRepository
                 .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
                 .first()
-                .let {
-                    if (relayHint != null && relayHint !in it.relays) {
-                        it.copy(relays = listOf(relayHint) + it.relays)
-                    } else {
-                        it
-                    }
-                }
         when (event) {
             is PostEvent.Nostr.Like -> {
                 if (event.reactionEventId != null) {
@@ -470,13 +413,6 @@ internal class NostrDataSource(
             accountRepository
                 .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
                 .first()
-                .let {
-                    if (relayHint != null && relayHint !in it.relays) {
-                        it.copy(relays = listOf(relayHint) + it.relays)
-                    } else {
-                        it
-                    }
-                }
         when (val composeStatus = data.referenceStatus?.composeStatus) {
             is ComposeStatus.Quote ->
                 NostrService.composeQuote(

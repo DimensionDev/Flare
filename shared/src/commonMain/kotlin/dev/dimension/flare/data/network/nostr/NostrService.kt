@@ -68,7 +68,6 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import dev.whyoleg.cryptography.random.CryptographyRandom
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocketSession
@@ -118,47 +117,27 @@ internal object NostrService : KoinComponent {
         val pubkeyHex: String,
         val npub: String,
         val nsec: String?,
-        val relays: List<String>,
     )
 
-    internal fun importAccount(
-        publicKeyInput: String,
-        secretKeyInput: String,
-        relayInput: String,
-    ): ImportedAccount {
+    internal fun importAccount(secretKeyInput: String): ImportedAccount {
         val normalizedSecret = secretKeyInput.trim().takeIf { it.isNotEmpty() }?.let(::normalizeSecret)
-        val normalizedPublic = publicKeyInput.trim().takeIf { it.isNotEmpty() }?.let(::normalizePublic)
 
         val secretHex = normalizedSecret?.hex
-        val explicitPubkeyHex = normalizedPublic?.hex
         val derivedPubkeyHex = secretHex?.let { NSec(it).toPubKeyHex() }
-        val pubkeyHex = explicitPubkeyHex ?: derivedPubkeyHex ?: error("A public key or secret key is required")
-        if (explicitPubkeyHex != null && derivedPubkeyHex != null) {
-            require(explicitPubkeyHex == derivedPubkeyHex) {
-                "Public key does not match the provided secret key"
-            }
-        }
+        val pubkeyHex = derivedPubkeyHex ?: error("A public key or secret key is required")
 
-        val normalizedRelays = normalizeRelays(relayInput)
         return ImportedAccount(
             pubkeyHex = pubkeyHex,
-            npub = NPub.Companion.create(pubkeyHex),
-            nsec = secretHex?.hexToByteArray()?.toNsec(),
-            relays = normalizedRelays,
+            npub = NPub.create(pubkeyHex),
+            nsec = secretHex.hexToByteArray().toNsec(),
         )
     }
 
-    internal fun generateAccount(relayInput: String): ImportedAccount {
-        while (true) {
-            val secretHex = CryptographyRandom.nextBytes(32).toHexString()
-            runCatching {
-                return importAccount(
-                    publicKeyInput = "",
-                    secretKeyInput = secretHex,
-                    relayInput = relayInput,
-                )
-            }
-        }
+    internal fun generateAccount(): ImportedAccount {
+        val randomKey = KeyPair().privKey ?: error("Failed to generate a random key")
+        return importAccount(
+            secretKeyInput = randomKey.toHexString(),
+        )
     }
 
     internal fun exportAccount(credential: UiAccount.Nostr.Credential): ImportedAccount {
@@ -167,9 +146,7 @@ internal object NostrService : KoinComponent {
                 "Nostr account does not have an exportable private key"
             }
         return importAccount(
-            publicKeyInput = credential.pubkey,
             secretKeyInput = secretKey,
-            relayInput = credential.relays.joinToString(","),
         )
     }
 
@@ -696,19 +673,6 @@ internal object NostrService : KoinComponent {
         publishEvent(credential, event)
     }
 
-    internal fun createTextNoteEvent(
-        secretKey: String,
-        content: String,
-        createdAt: Long = Clock.System.now().toEpochMilliseconds() / 1000,
-    ): TextNoteEvent {
-        val imported = importAccount(publicKeyInput = "", secretKeyInput = secretKey, relayInput = "")
-        return signEvent(
-            pubkeyHex = imported.pubkeyHex,
-            secretKey = requireNotNull(imported.nsec),
-            template = TextNoteEvent.Companion.build(content, createdAt) {},
-        )
-    }
-
     internal suspend fun composeNote(
         credential: UiAccount.Nostr.Credential,
         content: String,
@@ -1231,21 +1195,6 @@ internal object NostrService : KoinComponent {
             }
             null
         }
-
-    private fun normalizeRelays(relayInput: String): List<String> {
-        val candidates =
-            relayInput
-                .split(Regex("[,\\n\\r\\t ]+"))
-                .map(String::trim)
-                .filter(String::isNotEmpty)
-                .ifEmpty { defaultRelays }
-
-        return candidates
-            .map {
-                RelayUrlNormalizer.Companion.normalizeOrNull(it)?.url
-                    ?: error("Invalid relay URL: $it")
-            }.distinct()
-    }
 
     private const val PUBLISH_SUCCESS_QUORUM = 3
 

@@ -29,7 +29,6 @@ public sealed class UiAccount {
     @Immutable
     internal data class Nostr(
         override val accountKey: MicroBlogKey,
-        internal val relayHint: String? = null,
     ) : UiAccount() {
         override val platformType: PlatformType
             get() = PlatformType.Nostr
@@ -184,7 +183,6 @@ public sealed class UiAccount {
                 is Nostr ->
                     NostrDataSource(
                         accountKey = accountKey,
-                        relayHint = relayHint,
                     )
 
                 is Mastodon ->
@@ -227,10 +225,8 @@ public sealed class UiAccount {
         fun DbAccount.toUi(): UiAccount =
             when (platform_type) {
                 PlatformType.Nostr -> {
-                    val credential = credential_json.decodeJson<Nostr.Credential>()
                     Nostr(
                         accountKey = account_key,
-                        relayHint = credential.relays.firstOrNull(),
                     )
                 }
 

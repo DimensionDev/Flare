@@ -65,7 +65,7 @@ zoomable = "0.18.0"
 bouncycastle = "1.83"
 cupertino = "2.3.1"
 robolectric = "4.16.1"
-quartz = "1.04.2"
+quartz = "1.05.1"
 
 
 [libraries]

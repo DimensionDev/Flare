@@ -38,11 +38,7 @@ public class NostrLoginPresenter(
                     runCatching {
                         loginWith(
                             NostrService.importAccount(
-                                publicKeyInput = "",
                                 secretKeyInput = secretKey,
-                                relayInput =
-                                    dev.dimension.flare.data.network.nostr.defaultNostrRelays
-                                        .joinToString(","),
                             ),
                         )
                     }.onFailure {
@@ -52,7 +48,7 @@ public class NostrLoginPresenter(
                 }
             }
 
-            private suspend fun loginWith(imported: NostrService.ImportedAccount) {
+            private fun loginWith(imported: NostrService.ImportedAccount) {
                 accountRepository.addAccount(
                     account =
                         UiAccount.Nostr(
@@ -61,13 +57,12 @@ public class NostrLoginPresenter(
                                     id = imported.pubkeyHex,
                                     host = NostrService.NOSTR_HOST,
                                 ),
-                            relayHint = imported.relays.firstOrNull(),
                         ),
                     credential =
                         UiAccount.Nostr.Credential(
                             pubkey = imported.pubkeyHex,
                             nsec = imported.nsec,
-                            relays = imported.relays,
+                            relays = dev.dimension.flare.data.network.nostr.defaultNostrRelays,
                         ),
                 )
                 toHome.invoke()

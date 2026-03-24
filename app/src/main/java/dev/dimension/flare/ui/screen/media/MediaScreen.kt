@@ -307,7 +307,22 @@ private fun mediaPresenter(
             scope.launch {
                 context.imageLoader.diskCache?.openSnapshot(uri)?.use {
                     val byteArray = it.data.toFile().readBytes()
-                    val fileName = uri.substringAfterLast("/")
+                    var fileName = uri.substringBefore("?").substringBefore("#").substringAfterLast("/")
+                    val lastAt = fileName.lastIndexOf('@')
+                    val lastDot = fileName.lastIndexOf('.')
+                    if (lastAt > lastDot && lastAt < fileName.length - 1) {
+                        fileName = fileName.substring(0, lastAt) + "." + fileName.substring(lastAt + 1)
+                    }
+                    if (fileName.isEmpty()) {
+                        fileName = "image"
+                    }
+                    if (!fileName.contains(".")) {
+                        val extension =
+                            android.webkit.MimeTypeMap
+                                .getSingleton()
+                                .getExtensionFromMimeType(getMimeType(byteArray)) ?: "jpg"
+                        fileName = "$fileName.$extension"
+                    }
                     saveByteArrayToDownloads(context, byteArray, fileName)
                 }
                 withContext(Dispatchers.Main) {
@@ -325,10 +340,28 @@ private fun mediaPresenter(
             scope.launch {
                 context.imageLoader.diskCache?.openSnapshot(uri)?.use {
                     val originFile = it.data.toFile()
+                    var fileName = uri.substringBefore("?").substringBefore("#").substringAfterLast("/")
+                    val lastAt = fileName.lastIndexOf('@')
+                    val lastDot = fileName.lastIndexOf('.')
+                    if (lastAt > lastDot && lastAt < fileName.length - 1) {
+                        fileName = fileName.substring(0, lastAt) + "." + fileName.substring(lastAt + 1)
+                    }
+                    if (fileName.isEmpty()) {
+                        fileName = "image"
+                    }
+                    if (!fileName.contains(".")) {
+                        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                        BitmapFactory.decodeFile(originFile.absolutePath, options)
+                        val extension =
+                            android.webkit.MimeTypeMap
+                                .getSingleton()
+                                .getExtensionFromMimeType(options.outMimeType) ?: "jpg"
+                        fileName = "$fileName.$extension"
+                    }
                     val targetFile =
                         File(
                             context.cacheDir,
-                            uri.substringAfterLast("/"),
+                            fileName,
                         )
                     originFile.copyTo(targetFile, overwrite = true)
                     val uri =

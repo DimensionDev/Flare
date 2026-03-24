@@ -927,10 +927,13 @@ private fun statusMediaPresenter(
                     scope.launch {
                         context.imageLoader.diskCache?.openSnapshot(data.url)?.use {
                             val originFile = it.data.toFile()
+                            val status = state.status.takeSuccess() as? UiTimelineV2.Post
+                            val statusKeyString = statusKey.toString()
+                            val userHandle = status?.user?.handle?.canonical ?: "unknown"
                             val targetFile =
                                 File(
                                     context.cacheDir,
-                                    data.url.substringAfterLast("/"),
+                                    data.getFileName(statusKeyString, userHandle),
                                 )
                             originFile.copyTo(targetFile, overwrite = true)
                             val uri =

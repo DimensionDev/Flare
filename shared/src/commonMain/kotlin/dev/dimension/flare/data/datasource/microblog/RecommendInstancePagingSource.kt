@@ -125,6 +125,17 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                     bannerUrl = null,
                     usersCount = 0,
                 ),
+                UiInstance(
+                    name = "Nostr",
+                    description =
+                        "A decentralized network based on cryptographic keypairs and that is not peer-to-peer, " +
+                            "it is super simple and scalable and therefore has a chance of working.",
+                    iconUrl = null,
+                    domain = "nostr",
+                    type = PlatformType.Nostr,
+                    bannerUrl = null,
+                    usersCount = 0,
+                ),
             )
         return LoadResult.Page(
             data = extra + (instances.sortedByDescending { it.usersCount }.filter { it !in extra }),

@@ -7,7 +7,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import dev.dimension.flare.data.network.nostr.defaultNostrRelays
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlin.native.HiddenFromObjC
 
@@ -15,31 +14,22 @@ import kotlin.native.HiddenFromObjC
 public class NostrInputPresenter : PresenterBase<NostrInputPresenter.State>() {
     @Immutable
     public interface State {
-        public val publicKey: TextFieldState
         public val secretKey: TextFieldState
-        public val relays: TextFieldState
         public val canLogin: Boolean
     }
 
     @Composable
     override fun body(): State {
-        val publicKey = rememberTextFieldState()
         val secretKey = rememberTextFieldState()
-        val relays =
-            rememberTextFieldState(
-                initialText = defaultNostrRelays.joinToString(", "),
-            )
 
-        val canLogin by remember(publicKey, secretKey) {
+        val canLogin by remember(secretKey) {
             derivedStateOf {
-                publicKey.text.isNotEmpty() || secretKey.text.isNotEmpty()
+                secretKey.text.isNotEmpty()
             }
         }
 
         return object : State {
-            override val publicKey: TextFieldState = publicKey
             override val secretKey: TextFieldState = secretKey
-            override val relays: TextFieldState = relays
             override val canLogin: Boolean = canLogin
         }
     }

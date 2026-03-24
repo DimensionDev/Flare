@@ -57,12 +57,7 @@ import dev.dimension.flare.compose.ui.eula_privacy_policy
 import dev.dimension.flare.compose.ui.login_agreement
 import dev.dimension.flare.compose.ui.login_button
 import dev.dimension.flare.compose.ui.mastodon_login_verify_message
-import dev.dimension.flare.compose.ui.nostr_login_generate_button
-import dev.dimension.flare.compose.ui.nostr_login_hint
-import dev.dimension.flare.compose.ui.nostr_login_npub_hint
 import dev.dimension.flare.compose.ui.nostr_login_nsec_hint
-import dev.dimension.flare.compose.ui.nostr_login_relays_hint
-import dev.dimension.flare.compose.ui.nostr_login_title
 import dev.dimension.flare.compose.ui.service_select_compatibility_warning
 import dev.dimension.flare.compose.ui.service_select_empty_message
 import dev.dimension.flare.compose.ui.service_select_instance_input_placeholder
@@ -622,40 +617,6 @@ private fun NostrLoginContent(state: SelectionPresenter.State) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            FAIcon(
-                imageVector = PlatformType.Nostr.icon.toImageVector(),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-            )
-            PlatformText(
-                text = stringResource(Res.string.nostr_login_title),
-                style = PlatformTheme.typography.title,
-            )
-        }
-        PlatformText(
-            text = stringResource(Res.string.nostr_login_hint),
-            textAlign = TextAlign.Center,
-            style = PlatformTheme.typography.caption,
-        )
-        PlatformTextField(
-            state = state.nostrInputState.publicKey,
-            label = {
-                PlatformText(text = stringResource(Res.string.nostr_login_npub_hint))
-            },
-            enabled = !state.nostrLoginState.loading,
-            modifier = Modifier.width(300.dp),
-            lineLimits = TextFieldLineLimits.SingleLine,
-            keyboardOptions =
-                KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Next,
-                    autoCorrectEnabled = false,
-                ),
-        )
         PlatformSecureTextField(
             state = state.nostrInputState.secretKey,
             label = {
@@ -666,35 +627,14 @@ private fun NostrLoginContent(state: SelectionPresenter.State) {
             keyboardOptions =
                 KeyboardOptions(
                     keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Next,
-                    autoCorrectEnabled = false,
-                ),
-        )
-        PlatformTextField(
-            state = state.nostrInputState.relays,
-            label = {
-                PlatformText(text = stringResource(Res.string.nostr_login_relays_hint))
-            },
-            enabled = !state.nostrLoginState.loading,
-            modifier = Modifier.width(300.dp),
-            lineLimits = TextFieldLineLimits.SingleLine,
-            keyboardOptions =
-                KeyboardOptions(
-                    keyboardType = KeyboardType.Uri,
                     imeAction = ImeAction.Done,
                     autoCorrectEnabled = false,
                 ),
             onKeyboardAction = {
                 if (state.nostrInputState.canLogin) {
                     state.nostrLoginState.login(
-                        publicKey =
-                            state.nostrInputState.publicKey.text
-                                .toString(),
                         secretKey =
                             state.nostrInputState.secretKey.text
-                                .toString(),
-                        relays =
-                            state.nostrInputState.relays.text
                                 .toString(),
                     )
                 }
@@ -703,14 +643,8 @@ private fun NostrLoginContent(state: SelectionPresenter.State) {
         PlatformFilledTonalButton(
             onClick = {
                 state.nostrLoginState.login(
-                    publicKey =
-                        state.nostrInputState.publicKey.text
-                            .toString(),
                     secretKey =
                         state.nostrInputState.secretKey.text
-                            .toString(),
-                    relays =
-                        state.nostrInputState.relays.text
                             .toString(),
                 )
             },
@@ -718,19 +652,6 @@ private fun NostrLoginContent(state: SelectionPresenter.State) {
             enabled = state.nostrInputState.canLogin && !state.nostrLoginState.loading,
         ) {
             PlatformText(text = stringResource(Res.string.login_button))
-        }
-        PlatformFilledTonalButton(
-            onClick = {
-                state.nostrLoginState.generateAndLogin(
-                    relays =
-                        state.nostrInputState.relays.text
-                            .toString(),
-                )
-            },
-            modifier = Modifier.width(300.dp),
-            enabled = !state.nostrLoginState.loading,
-        ) {
-            PlatformText(text = stringResource(Res.string.nostr_login_generate_button))
         }
         state.nostrLoginState.error?.let {
             PlatformText(

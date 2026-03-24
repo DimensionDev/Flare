@@ -31,35 +31,20 @@ public class NostrLoginPresenter(
             override val loading: Boolean = loading
             override val error: Throwable? = error
 
-            override fun login(
-                publicKey: String,
-                secretKey: String,
-                relays: String,
-            ) {
+            override fun login(secretKey: String) {
                 scope.launch {
                     loading = true
                     error = null
                     runCatching {
                         loginWith(
                             NostrService.importAccount(
-                                publicKeyInput = publicKey,
+                                publicKeyInput = "",
                                 secretKeyInput = secretKey,
-                                relayInput = relays,
+                                relayInput =
+                                    dev.dimension.flare.data.network.nostr.defaultNostrRelays
+                                        .joinToString(","),
                             ),
                         )
-                    }.onFailure {
-                        error = it
-                    }
-                    loading = false
-                }
-            }
-
-            override fun generateAndLogin(relays: String) {
-                scope.launch {
-                    loading = true
-                    error = null
-                    runCatching {
-                        loginWith(NostrService.generateAccount(relayInput = relays))
                     }.onFailure {
                         error = it
                     }
@@ -96,11 +81,5 @@ public interface NostrLoginState {
     public val loading: Boolean
     public val error: Throwable?
 
-    public fun login(
-        publicKey: String,
-        secretKey: String,
-        relays: String,
-    )
-
-    public fun generateAndLogin(relays: String)
+    public fun login(secretKey: String)
 }

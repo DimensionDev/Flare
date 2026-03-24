@@ -81,10 +81,14 @@ public fun UiMedia.getFileName(
 ): String {
     val key = statusKey.sanitizeFileName()
     val handle = userHandle.sanitizeFileName()
-    val originalName = url.substringAfterLast("/")
+    val path = url.substringBefore("?").substringBefore("#")
+    val originalName = path.substringAfterLast("/")
+    val lastDotIndex = originalName.lastIndexOf('.')
+    val lastAtIndex = originalName.lastIndexOf('@')
+    val separatorIndex = maxOf(lastDotIndex, lastAtIndex)
     val extension =
-        if (originalName.contains(".")) {
-            originalName.substringAfterLast(".")
+        if (separatorIndex >= 0 && separatorIndex < originalName.length - 1) {
+            originalName.substring(separatorIndex + 1)
         } else {
             when (this) {
                 is UiMedia.Audio -> "mp3"
@@ -92,6 +96,6 @@ public fun UiMedia.getFileName(
                 is UiMedia.Image -> "jpg"
                 is UiMedia.Video -> "mp4"
             }
-        }.removeSuffix("?name=orig")
+        }
     return "${key}_$handle.$extension"
 }

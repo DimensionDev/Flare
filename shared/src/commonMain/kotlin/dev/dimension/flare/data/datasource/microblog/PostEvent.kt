@@ -11,6 +11,8 @@ import dev.dimension.flare.ui.model.mapper.mastodonRepost
 import dev.dimension.flare.ui.model.mapper.misskeyFavourite
 import dev.dimension.flare.ui.model.mapper.misskeyReact
 import dev.dimension.flare.ui.model.mapper.misskeyRenote
+import dev.dimension.flare.ui.model.mapper.nostrLike
+import dev.dimension.flare.ui.model.mapper.nostrRepost
 import dev.dimension.flare.ui.model.mapper.vvoFavorite
 import dev.dimension.flare.ui.model.mapper.vvoLike
 import dev.dimension.flare.ui.model.mapper.vvoLikeComment
@@ -373,6 +375,59 @@ internal sealed interface PostEvent {
                     accountKey = accountKey,
                 )
         }
+    }
+
+    @Serializable
+    sealed interface Nostr : PostEvent {
+        @Serializable
+        data class Repost(
+            override val postKey: MicroBlogKey,
+            val repostEventId: String?,
+            val count: Long = 0,
+            val accountKey: MicroBlogKey,
+        ) : Nostr,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.nostrRepost(
+                    statusKey = postKey,
+                    repostEventId =
+                        if (repostEventId == null) {
+                            ""
+                        } else {
+                            null
+                        },
+                    count = (count + if (repostEventId == null) 1 else -1).coerceAtLeast(0),
+                    accountKey = accountKey,
+                )
+        }
+
+        @Serializable
+        data class Like(
+            override val postKey: MicroBlogKey,
+            val reactionEventId: String?,
+            val count: Long = 0,
+            val accountKey: MicroBlogKey,
+        ) : Nostr,
+            UpdatePostActionMenuEvent {
+            override fun nextActionMenu(): ActionMenu.Item =
+                ActionMenu.nostrLike(
+                    statusKey = postKey,
+                    reactionEventId =
+                        if (reactionEventId == null) {
+                            ""
+                        } else {
+                            null
+                        },
+                    count = (count + if (reactionEventId == null) 1 else -1).coerceAtLeast(0),
+                    accountKey = accountKey,
+                )
+        }
+
+        @Serializable
+        data class Report(
+            override val postKey: MicroBlogKey,
+            val accountKey: MicroBlogKey,
+        ) : Nostr
     }
 }
 

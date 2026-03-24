@@ -2,6 +2,8 @@ package dev.dimension.flare.di
 
 import dev.dimension.flare.data.database.provideAppDatabase
 import dev.dimension.flare.data.database.provideCacheDatabase
+import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
+import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.repository.AccountRepository
@@ -26,6 +28,7 @@ internal val commonModule =
         singleOf(::AccountRepository)
         singleOf(::provideAppDatabase)
         singleOf(::provideCacheDatabase)
+        single<NostrCache> { DatabaseNostrCache(get()) }
         singleOf(::ApplicationRepository)
         single {
             DraftMediaStore(get())

@@ -1,11 +1,19 @@
 package dev.dimension.flare.data.network.nostr
 
+import androidx.room.Room
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import dev.dimension.flare.RobolectricTest
 import dev.dimension.flare.common.TestFormatter
+import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.datasource.nostr.DatabaseNostrCache
+import dev.dimension.flare.data.datasource.nostr.NostrCache
+import dev.dimension.flare.memoryDatabaseBuilder
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
@@ -20,13 +28,25 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class NostrServiceJvmIntegrationTest {
+class NostrServiceJvmIntegrationTest : RobolectricTest() {
+    private lateinit var database: CacheDatabase
+    private lateinit var cache: DatabaseNostrCache
+
     @BeforeTest
     fun setUp() {
+        database =
+            Room
+                .memoryDatabaseBuilder<CacheDatabase>()
+                .setDriver(BundledSQLiteDriver())
+                .setQueryCoroutineContext(Dispatchers.Unconfined)
+                .build()
+        cache = DatabaseNostrCache(database)
         stopKoin()
         startKoin {
             modules(
                 module {
+                    single { database }
+                    single<NostrCache> { cache }
                     single<PlatformFormatter> { TestFormatter() }
                 },
             )
@@ -35,6 +55,7 @@ class NostrServiceJvmIntegrationTest {
 
     @AfterTest
     fun tearDown() {
+        database.close()
         stopKoin()
     }
 

@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.nostr
 
+import dev.dimension.flare.data.datasource.microblog.loader.PostLoader
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
 import dev.dimension.flare.data.datasource.microblog.loader.RelationLoader
 import dev.dimension.flare.data.datasource.microblog.loader.UserLoader
@@ -9,12 +10,14 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
+import dev.dimension.flare.ui.model.UiTimelineV2
 
 internal class NostrLoader(
     private val accountKey: MicroBlogKey,
     private val credentialProvider: suspend () -> UiAccount.Nostr.Credential,
 ) : UserLoader,
-    RelationLoader {
+    RelationLoader,
+    PostLoader {
     override val supportedTypes: Set<RelationActionType> = emptySet()
 
     override suspend fun userByHandleAndHost(uiHandle: UiHandle): UiProfile =
@@ -36,6 +39,20 @@ internal class NostrLoader(
             credential = credentialProvider(),
             targetPubkey = userKey.id,
         )
+
+    override suspend fun status(statusKey: MicroBlogKey): UiTimelineV2 =
+        NostrService.loadStatus(
+            credential = credentialProvider(),
+            accountKey = accountKey,
+            statusKey = statusKey,
+        )
+
+    override suspend fun deleteStatus(statusKey: MicroBlogKey) {
+        NostrService.deleteStatus(
+            credential = credentialProvider(),
+            statusKey = statusKey,
+        )
+    }
 
     override suspend fun follow(userKey: MicroBlogKey): Unit = throw UnsupportedOperationException("Nostr follow is not implemented yet")
 

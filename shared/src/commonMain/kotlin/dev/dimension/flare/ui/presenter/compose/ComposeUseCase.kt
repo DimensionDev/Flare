@@ -5,6 +5,7 @@ import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datastore.AppDataStore
+import dev.dimension.flare.data.repository.DebugRepository
 import dev.dimension.flare.data.repository.newDraftGroupId
 import dev.dimension.flare.data.repository.toComposeDraftBundle
 import dev.dimension.flare.data.repository.tryRun
@@ -27,6 +28,9 @@ internal class ComposeUseCase(
         groupId: String,
     ) {
         invoke(accounts = accounts, data = data, groupId = groupId) {
+            if (it is ComposeProgressState.Error) {
+                DebugRepository.error(it.throwable)
+            }
             withContext(Dispatchers.Main) {
                 when (it) {
                     is ComposeProgressState.Error ->

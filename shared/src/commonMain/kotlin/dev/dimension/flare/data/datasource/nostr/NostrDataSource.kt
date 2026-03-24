@@ -1,13 +1,19 @@
 package dev.dimension.flare.data.datasource.nostr
 
+import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeType
+import dev.dimension.flare.data.datasource.microblog.DatabaseUpdater
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.datasource.microblog.PostEvent
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.RelationDataSource
 import dev.dimension.flare.data.datasource.microblog.datasource.UserDataSource
+import dev.dimension.flare.data.datasource.microblog.handler.PostEventHandler
+import dev.dimension.flare.data.datasource.microblog.handler.PostHandler
 import dev.dimension.flare.data.datasource.microblog.handler.RelationHandler
 import dev.dimension.flare.data.datasource.microblog.handler.UserHandler
 import dev.dimension.flare.data.datasource.microblog.loader.RelationActionType
@@ -23,6 +29,9 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.mapper.nostrLike
+import dev.dimension.flare.ui.model.mapper.nostrRepost
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.first
@@ -35,6 +44,8 @@ internal class NostrDataSource(
 ) : AuthenticatedMicroblogDataSource,
     UserDataSource,
     RelationDataSource,
+    PostDataSource,
+    PostEventHandler.Handler,
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
     private val loader by lazy {
@@ -72,6 +83,24 @@ internal class NostrDataSource(
     }
     override val supportedRelationTypes: Set<RelationActionType>
         get() = loader.supportedTypes
+
+    override val postHandler by lazy {
+        PostHandler(
+            accountType =
+                dev.dimension.flare.model.AccountType
+                    .Specific(accountKey),
+            loader = loader,
+        )
+    }
+
+    override val postEventHandler by lazy {
+        PostEventHandler(
+            accountType =
+                dev.dimension.flare.model.AccountType
+                    .Specific(accountKey),
+            handler = this,
+        )
+    }
 
     override fun homeTimeline(): RemoteLoader<UiTimelineV2> =
         object : CacheableRemoteLoader<UiTimelineV2> {
@@ -210,11 +239,116 @@ internal class NostrDataSource(
 
     override fun notification(type: NotificationFilter): RemoteLoader<UiTimelineV2> = notSupported()
 
+    override suspend fun handle(
+        event: PostEvent,
+        updater: DatabaseUpdater,
+    ) {
+        require(event is PostEvent.Nostr)
+        val credential =
+            accountRepository
+                .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
+                .first()
+                .let {
+                    if (relayHint != null && relayHint !in it.relays) {
+                        it.copy(relays = listOf(relayHint) + it.relays)
+                    } else {
+                        it
+                    }
+                }
+        when (event) {
+            is PostEvent.Nostr.Like -> {
+                if (event.reactionEventId != null) {
+                    NostrService.deleteStatus(
+                        credential = credential,
+                        statusKey = MicroBlogKey(event.reactionEventId, NostrService.NOSTR_HOST),
+                    )
+                } else {
+                    val reactionEventId =
+                        NostrService.react(
+                            credential = credential,
+                            statusKey = event.postKey,
+                        )
+                    updater.updateActionMenu(
+                        event.postKey,
+                        ActionMenu.nostrLike(
+                            statusKey = event.postKey,
+                            reactionEventId = reactionEventId,
+                            count = event.count + 1,
+                            accountKey = accountKey,
+                        ),
+                    )
+                }
+            }
+
+            is PostEvent.Nostr.Report ->
+                NostrService.report(
+                    credential = credential,
+                    statusKey = event.postKey,
+                )
+
+            is PostEvent.Nostr.Repost -> {
+                if (event.repostEventId != null) {
+                    NostrService.deleteStatus(
+                        credential = credential,
+                        statusKey = MicroBlogKey(event.repostEventId, NostrService.NOSTR_HOST),
+                    )
+                } else {
+                    val repostEventId =
+                        NostrService.repost(
+                            credential = credential,
+                            statusKey = event.postKey,
+                        )
+                    updater.updateActionMenu(
+                        event.postKey,
+                        ActionMenu.nostrRepost(
+                            statusKey = event.postKey,
+                            repostEventId = repostEventId,
+                            count = event.count + 1,
+                            accountKey = accountKey,
+                        ),
+                    )
+                }
+            }
+        }
+    }
+
     override suspend fun compose(
         data: ComposeData,
         progress: () -> Unit,
     ) {
-        error("Nostr compose is not implemented yet. relayHint=$relayHint")
+        val credential =
+            accountRepository
+                .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
+                .first()
+                .let {
+                    if (relayHint != null && relayHint !in it.relays) {
+                        it.copy(relays = listOf(relayHint) + it.relays)
+                    } else {
+                        it
+                    }
+                }
+        when (val composeStatus = data.referenceStatus?.composeStatus) {
+            is ComposeStatus.Quote ->
+                NostrService.composeQuote(
+                    accountKey = accountKey,
+                    credential = credential,
+                    statusKey = composeStatus.statusKey,
+                    content = data.content,
+                )
+
+            is ComposeStatus.Reply ->
+                NostrService.composeReply(
+                    credential = credential,
+                    statusKey = composeStatus.statusKey,
+                    content = data.content,
+                )
+
+            null ->
+                NostrService.composeNote(
+                    credential = credential,
+                    content = data.content,
+                )
+        }
     }
 
     override fun composeConfig(type: ComposeType): ComposeConfig =

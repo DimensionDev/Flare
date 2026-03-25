@@ -50,45 +50,33 @@ internal data class Filter(
 }
 
 internal sealed class Event(
-    internal val native: RustEvent,
+    val id: String,
+    val pubKey: String,
+    val createdAt: Long,
+    val kind: Int,
+    val content: String,
+    val tags: Array<Array<String>>,
+    private val rawJson: String,
 ) {
-    val id: String
-        get() = native.id().toHex()
+    fun toJson(): String = rawJson
 
-    val pubKey: String
-        get() = native.author().toHex()
-
-    val createdAt: Long
-        get() = native.createdAt().asSecs().toLong()
-
-    val kind: Int
-        get() = native.kind().asU16().toInt()
-
-    val content: String
-        get() = native.content()
-
-    val tags: Array<Array<String>> by lazy {
-        runCatching {
-            native
-                .tags()
-                .toVec()
-                .map { it.asVec().toTypedArray() }
-                .toTypedArray()
-        }.getOrDefault(emptyArray())
-    }
-
-    fun toJson(): String = native.asJson()
+    fun toRust(): RustEvent = RustEvent.Companion.fromJson(rawJson)
 
     open fun dTag(): String = tags.firstOrNull { it.size > 1 && it[0] == "d" }?.get(1).orEmpty()
 
     companion object {
-        fun fromJson(raw: String): Event = RustEvent.Companion.fromJson(raw).toCompatEvent()
+        fun fromJson(raw: String): Event = RustEvent.Companion.fromJson(raw).use { it.toCompatEvent() }
     }
 }
 
 internal class MetadataEvent(
-    native: RustEvent,
-) : Event(native) {
+    id: String,
+    pubKey: String,
+    createdAt: Long,
+    content: String,
+    tags: Array<Array<String>>,
+    rawJson: String,
+) : Event(id, pubKey, createdAt, KIND, content, tags, rawJson) {
     fun contactMetaData(): UserMetadata? =
         runCatching {
             JSON.decodeFromString<UserMetadata>(content).also(UserMetadata::cleanBlankNames)
@@ -100,16 +88,26 @@ internal class MetadataEvent(
 }
 
 internal class TextNoteEvent(
-    native: RustEvent,
-) : Event(native) {
+    id: String,
+    pubKey: String,
+    createdAt: Long,
+    content: String,
+    tags: Array<Array<String>>,
+    rawJson: String,
+) : Event(id, pubKey, createdAt, KIND, content, tags, rawJson) {
     companion object {
         const val KIND: Int = 1
     }
 }
 
 internal class ContactListEvent(
-    native: RustEvent,
-) : Event(native) {
+    id: String,
+    pubKey: String,
+    createdAt: Long,
+    content: String,
+    tags: Array<Array<String>>,
+    rawJson: String,
+) : Event(id, pubKey, createdAt, KIND, content, tags, rawJson) {
     fun verifiedFollowKeySet(): Set<String> = tags.userIdSet()
 
     companion object {
@@ -118,16 +116,26 @@ internal class ContactListEvent(
 }
 
 internal class DeletionEvent(
-    native: RustEvent,
-) : Event(native) {
+    id: String,
+    pubKey: String,
+    createdAt: Long,
+    content: String,
+    tags: Array<Array<String>>,
+    rawJson: String,
+) : Event(id, pubKey, createdAt, KIND, content, tags, rawJson) {
     companion object {
         const val KIND: Int = 5
     }
 }
 
 internal class RepostEvent(
-    native: RustEvent,
-) : Event(native) {
+    id: String,
+    pubKey: String,
+    createdAt: Long,
+    content: String,
+    tags: Array<Array<String>>,
+    rawJson: String,
+) : Event(id, pubKey, createdAt, KIND, content, tags, rawJson) {
     fun boostedEventId(): String? =
         tags
             .asList()
@@ -165,8 +173,13 @@ internal class RepostEvent(
 }
 
 internal class ReactionEvent(
-    native: RustEvent,
-) : Event(native) {
+    id: String,
+    pubKey: String,
+    createdAt: Long,
+    content: String,
+    tags: Array<Array<String>>,
+    rawJson: String,
+) : Event(id, pubKey, createdAt, KIND, content, tags, rawJson) {
     fun originalPost(): List<String> =
         tags.mapNotNull { tag ->
             tag
@@ -183,8 +196,13 @@ internal class ReactionEvent(
 }
 
 internal class GenericRepostEvent(
-    native: RustEvent,
-) : Event(native) {
+    id: String,
+    pubKey: String,
+    createdAt: Long,
+    content: String,
+    tags: Array<Array<String>>,
+    rawJson: String,
+) : Event(id, pubKey, createdAt, KIND, content, tags, rawJson) {
     fun boostedEventId(): String? =
         tags
             .asList()
@@ -222,39 +240,160 @@ internal class GenericRepostEvent(
 }
 
 internal class MuteListEvent(
-    native: RustEvent,
-) : Event(native) {
+    id: String,
+    pubKey: String,
+    createdAt: Long,
+    content: String,
+    tags: Array<Array<String>>,
+    rawJson: String,
+) : Event(id, pubKey, createdAt, KIND, content, tags, rawJson) {
     companion object {
         const val KIND: Int = 10000
     }
 }
 
 internal class PeopleListEvent(
-    native: RustEvent,
-) : Event(native) {
+    id: String,
+    pubKey: String,
+    createdAt: Long,
+    content: String,
+    tags: Array<Array<String>>,
+    rawJson: String,
+) : Event(id, pubKey, createdAt, KIND, content, tags, rawJson) {
     companion object {
         const val KIND: Int = 30000
         const val BLOCK_LIST_D_TAG: String = "mute"
     }
 }
 
-internal fun RustEvent.toCompatEvent(): Event =
-    when (kind().asU16().toInt()) {
-        MetadataEvent.KIND -> MetadataEvent(this)
-        TextNoteEvent.KIND -> TextNoteEvent(this)
-        ContactListEvent.KIND -> ContactListEvent(this)
-        DeletionEvent.KIND -> DeletionEvent(this)
-        RepostEvent.KIND -> RepostEvent(this)
-        ReactionEvent.KIND -> ReactionEvent(this)
-        GenericRepostEvent.KIND -> GenericRepostEvent(this)
-        MuteListEvent.KIND -> MuteListEvent(this)
-        PeopleListEvent.KIND -> PeopleListEvent(this)
-        else -> GenericEvent(this)
+internal fun RustEvent.toCompatEvent(): Event {
+    val snapshot = snapshot()
+    return when (snapshot.kind) {
+        MetadataEvent.KIND ->
+            MetadataEvent(
+                snapshot.id,
+                snapshot.pubKey,
+                snapshot.createdAt,
+                snapshot.content,
+                snapshot.tags,
+                snapshot.rawJson,
+            )
+        TextNoteEvent.KIND ->
+            TextNoteEvent(
+                snapshot.id,
+                snapshot.pubKey,
+                snapshot.createdAt,
+                snapshot.content,
+                snapshot.tags,
+                snapshot.rawJson,
+            )
+        ContactListEvent.KIND ->
+            ContactListEvent(
+                snapshot.id,
+                snapshot.pubKey,
+                snapshot.createdAt,
+                snapshot.content,
+                snapshot.tags,
+                snapshot.rawJson,
+            )
+        DeletionEvent.KIND ->
+            DeletionEvent(
+                snapshot.id,
+                snapshot.pubKey,
+                snapshot.createdAt,
+                snapshot.content,
+                snapshot.tags,
+                snapshot.rawJson,
+            )
+        RepostEvent.KIND -> RepostEvent(snapshot.id, snapshot.pubKey, snapshot.createdAt, snapshot.content, snapshot.tags, snapshot.rawJson)
+        ReactionEvent.KIND ->
+            ReactionEvent(
+                snapshot.id,
+                snapshot.pubKey,
+                snapshot.createdAt,
+                snapshot.content,
+                snapshot.tags,
+                snapshot.rawJson,
+            )
+        GenericRepostEvent.KIND ->
+            GenericRepostEvent(
+                snapshot.id,
+                snapshot.pubKey,
+                snapshot.createdAt,
+                snapshot.content,
+                snapshot.tags,
+                snapshot.rawJson,
+            )
+        MuteListEvent.KIND ->
+            MuteListEvent(
+                snapshot.id,
+                snapshot.pubKey,
+                snapshot.createdAt,
+                snapshot.content,
+                snapshot.tags,
+                snapshot.rawJson,
+            )
+        PeopleListEvent.KIND ->
+            PeopleListEvent(
+                snapshot.id,
+                snapshot.pubKey,
+                snapshot.createdAt,
+                snapshot.content,
+                snapshot.tags,
+                snapshot.rawJson,
+            )
+        else ->
+            GenericEvent(
+                snapshot.id,
+                snapshot.pubKey,
+                snapshot.createdAt,
+                snapshot.kind,
+                snapshot.content,
+                snapshot.tags,
+                snapshot.rawJson,
+            )
     }
+}
+
+private data class EventSnapshot(
+    val id: String,
+    val pubKey: String,
+    val createdAt: Long,
+    val kind: Int,
+    val content: String,
+    val tags: Array<Array<String>>,
+    val rawJson: String,
+)
+
+private fun RustEvent.snapshot(): EventSnapshot =
+    EventSnapshot(
+        id = id().use { it.toHex() },
+        pubKey = author().use { it.toHex() },
+        createdAt = createdAt().use { it.asSecs().toLong() },
+        kind = kind().use { it.asU16().toInt() },
+        content = content(),
+        tags =
+            runCatching {
+                tags().use { tags ->
+                    tags
+                        .toVec()
+                        .map { tag ->
+                            tag.use { it.asVec().toTypedArray() }
+                        }.toTypedArray()
+                }
+            }.getOrDefault(emptyArray()),
+        rawJson = asJson(),
+    )
 
 internal class GenericEvent(
-    native: RustEvent,
-) : Event(native)
+    id: String,
+    pubKey: String,
+    createdAt: Long,
+    kind: Int,
+    content: String,
+    tags: Array<Array<String>>,
+    rawJson: String,
+) : Event(id, pubKey, createdAt, kind, content, tags, rawJson)
 
 internal data class Address(
     val kind: Int,
@@ -291,11 +430,13 @@ internal typealias NormalizedRelayUrl = String
 internal object RelayUrlNormalizer {
     fun normalizeOrNull(raw: String): NormalizedRelayUrl? =
         runCatching {
-            RustRelayUrl.Companion.parse(raw).toString().let {
-                if (it.endsWith("/")) {
-                    it
-                } else {
-                    "$it/"
+            RustRelayUrl.Companion.parse(raw).use { relayUrl ->
+                relayUrl.toString().let {
+                    if (it.endsWith("/")) {
+                        it
+                    } else {
+                        "$it/"
+                    }
                 }
             }
         }.getOrNull()
@@ -549,11 +690,17 @@ internal fun Array<Array<String>>.userIdSet(): Set<String> =
 
 internal fun Array<Array<String>>.mutedUserIdSet(): Set<String> = userIdSet()
 
-internal fun bech32PublicKey(hex: String): String = RustPublicKey.Companion.parse(hex).toBech32()
+internal fun bech32PublicKey(hex: String): String = RustPublicKey.Companion.parse(hex).use { it.toBech32() }
 
-internal fun parseNip19(value: String): RustNip19Enum? =
+internal inline fun <T> withNip19(
+    value: String,
+    block: (RustNip19Enum) -> T,
+): T? =
     runCatching {
-        RustNip19.Companion.fromBech32(value).asEnum()
+        RustNip19.Companion
+            .fromBech32(value)
+            .asEnum()
+            .use(block)
     }.getOrNull()
 
 private fun isHexKey(value: String): Boolean = value.length == 64 && value.all { it.isDigit() || it.lowercaseChar() in 'a'..'f' }

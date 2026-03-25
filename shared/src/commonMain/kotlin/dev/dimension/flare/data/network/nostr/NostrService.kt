@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.nostr
 
-import androidx.compose.runtime.key
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.model.AccountType
@@ -81,25 +80,27 @@ internal class NostrService(
         internal fun importAccount(secretKeyInput: String): ImportedAccount {
             val normalizedSecret =
                 secretKeyInput.trim().takeIf { it.isNotEmpty() }?.let(::normalizeSecret)
-            val keys = normalizedSecret?.let { RustKeys(it) }
-            val pubkeyHex =
-                keys?.publicKey()?.toHex() ?: error("A public key or secret key is required")
-
-            return ImportedAccount(
-                pubkeyHex = pubkeyHex,
-                npub = bech32PublicKey(pubkeyHex),
-                nsec = normalizedSecret.toBech32(),
-            )
+            return normalizedSecret?.use { secretKey ->
+                val pubkeyHex =
+                    RustKeys(secretKey).use { keys ->
+                        keys.publicKey().use { it.toHex() }
+                    }
+                ImportedAccount(
+                    pubkeyHex = pubkeyHex,
+                    npub = bech32PublicKey(pubkeyHex),
+                    nsec = secretKey.toBech32(),
+                )
+            } ?: error("A public key or secret key is required")
         }
 
-        internal fun generateAccount(): ImportedAccount {
-            val keys = RustKeys.Companion.generate()
-            return ImportedAccount(
-                pubkeyHex = keys.publicKey().toHex(),
-                npub = keys.publicKey().toBech32(),
-                nsec = keys.secretKey().toBech32(),
-            )
-        }
+        internal fun generateAccount(): ImportedAccount =
+            RustKeys.Companion.generate().use { keys ->
+                ImportedAccount(
+                    pubkeyHex = keys.publicKey().use { it.toHex() },
+                    npub = keys.publicKey().use { it.toBech32() },
+                    nsec = keys.secretKey().use { it.toBech32() },
+                )
+            }
 
         internal fun exportAccount(credential: UiAccount.Nostr.Credential): ImportedAccount {
             val secretKey =
@@ -115,7 +116,11 @@ internal class NostrService(
             val value = raw.removePrefix("nostr:").trim()
             return when {
                 value.startsWith("nsec1", ignoreCase = true) ->
-                    ((parseNip19(value) as? RustNip19Enum.Secret)?.nsec)
+                    withNip19(value) { nip19 ->
+                        (nip19 as? RustNip19Enum.Secret)?.nsec?.use {
+                            RustSecretKey.Companion.parse(it.toBech32())
+                        }
+                    }
                         ?: error("Invalid NIP-19 secret key")
 
                 HEX_KEY_REGEX.matches(value) -> RustSecretKey.Companion.parse(value.lowercase())
@@ -637,7 +642,7 @@ internal class NostrService(
         return sendEventBuilder(
             builder =
                 RustEventBuilder.Companion.repost(
-                    target.native,
+                    target.toRust(),
                 ),
         )
     }
@@ -647,7 +652,7 @@ internal class NostrService(
             loadEvent(statusKey = statusKey)
                 ?: error("Reaction target not found: $statusKey")
         return sendEventBuilder(
-            builder = RustEventBuilder.Companion.reaction(target.native, ReactionEvent.LIKE),
+            builder = RustEventBuilder.Companion.reaction(target.toRust(), ReactionEvent.LIKE),
         )
     }
 
@@ -825,7 +830,7 @@ internal class NostrService(
                     .flatten()
 
             events
-                .map { it.toCompatEvent() }
+                .map { it.use { it.toCompatEvent() } }
         }
 
     private suspend fun sendEventBuilder(builder: RustEventBuilder): String {
@@ -870,10 +875,16 @@ internal class NostrService(
         val value = raw.removePrefix("nostr:").trim()
         return when {
             value.startsWith("npub1", ignoreCase = true) ->
-                (parseNip19(value) as? RustNip19Enum.Pubkey)?.npub?.toHex()
+                withNip19(value) { nip19 ->
+                    (nip19 as? RustNip19Enum.Pubkey)?.npub?.use { it.toHex() }
+                }
 
             value.startsWith("nprofile1", ignoreCase = true) ->
-                (parseNip19(value) as? RustNip19Enum.Profile)?.nprofile?.publicKey()?.toHex()
+                withNip19(value) { nip19 ->
+                    (nip19 as? RustNip19Enum.Profile)?.nprofile?.use { profile ->
+                        profile.publicKey().use { it.toHex() }
+                    }
+                }
 
             HEX_KEY_REGEX.matches(value) -> value.lowercase()
 
@@ -885,10 +896,16 @@ internal class NostrService(
         val value = raw.removePrefix("nostr:").trim()
         return when {
             value.startsWith("note1", ignoreCase = true) ->
-                (parseNip19(value) as? RustNip19Enum.Note)?.eventId?.toHex()
+                withNip19(value) { nip19 ->
+                    (nip19 as? RustNip19Enum.Note)?.eventId?.use { it.toHex() }
+                }
 
             value.startsWith("nevent1", ignoreCase = true) ->
-                (parseNip19(value) as? RustNip19Enum.Event)?.event?.eventId()?.toHex()
+                withNip19(value) { nip19 ->
+                    (nip19 as? RustNip19Enum.Event)?.event?.use { event ->
+                        event.eventId().use { it.toHex() }
+                    }
+                }
 
             HEX_KEY_REGEX.matches(value) -> value.lowercase()
 

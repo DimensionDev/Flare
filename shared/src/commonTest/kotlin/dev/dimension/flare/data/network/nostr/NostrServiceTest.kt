@@ -1,9 +1,5 @@
 package dev.dimension.flare.data.network.nostr
 
-import com.vitorpamplona.quartz.nip01Core.core.Event
-import com.vitorpamplona.quartz.nip01Core.metadata.MetadataEvent
-import com.vitorpamplona.quartz.nip01Core.relay.normalizer.RelayUrlNormalizer
-import com.vitorpamplona.quartz.nip19Bech32.entities.NPub
 import dev.dimension.flare.common.TestFormatter
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
@@ -47,7 +43,6 @@ class NostrServiceTest {
         val exported =
             NostrService.exportAccount(
                 UiAccount.Nostr.Credential(
-                    pubkey = generated.pubkeyHex,
                     nsec = generated.nsec,
                 ),
             )
@@ -78,7 +73,7 @@ class NostrServiceTest {
                 secretKeyInput = normalizedSecret,
             )
         assertEquals(account.pubkeyHex, reImported.pubkeyHex)
-        assertEquals(account.npub, NPub.create(account.pubkeyHex))
+        assertEquals(account.npub, bech32PublicKey(account.pubkeyHex))
     }
 
     @Test

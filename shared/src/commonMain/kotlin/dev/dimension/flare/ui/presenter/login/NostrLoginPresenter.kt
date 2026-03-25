@@ -60,7 +60,6 @@ public class NostrLoginPresenter(
                         ),
                     credential =
                         UiAccount.Nostr.Credential(
-                            pubkey = imported.pubkeyHex,
                             nsec = imported.nsec,
                             relays = dev.dimension.flare.data.network.nostr.defaultNostrRelays,
                         ),

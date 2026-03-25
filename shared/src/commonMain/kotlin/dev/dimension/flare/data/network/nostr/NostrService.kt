@@ -1,53 +1,8 @@
 package dev.dimension.flare.data.network.nostr
 
-import com.vitorpamplona.quartz.nip01Core.core.Address
-import com.vitorpamplona.quartz.nip01Core.core.Event
-import com.vitorpamplona.quartz.nip01Core.core.hexToByteArray
-import com.vitorpamplona.quartz.nip01Core.crypto.KeyPair
-import com.vitorpamplona.quartz.nip01Core.hints.EventHintBundle
-import com.vitorpamplona.quartz.nip01Core.metadata.MetadataEvent
-import com.vitorpamplona.quartz.nip01Core.metadata.UserMetadata
-import com.vitorpamplona.quartz.nip01Core.relay.filters.Filter
-import com.vitorpamplona.quartz.nip01Core.relay.normalizer.RelayUrlNormalizer
-import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
-import com.vitorpamplona.quartz.nip01Core.signers.NostrSigner
-import com.vitorpamplona.quartz.nip01Core.tags.dTag.dTag
-import com.vitorpamplona.quartz.nip01Core.tags.events.ETag
-import com.vitorpamplona.quartz.nip01Core.tags.people.pTag
-import com.vitorpamplona.quartz.nip02FollowList.ContactListEvent
-import com.vitorpamplona.quartz.nip02FollowList.ReadWrite
-import com.vitorpamplona.quartz.nip02FollowList.tags.ContactTag
-import com.vitorpamplona.quartz.nip09Deletions.DeletionEvent
-import com.vitorpamplona.quartz.nip10Notes.TextNoteEvent
-import com.vitorpamplona.quartz.nip10Notes.tags.MarkedETag
-import com.vitorpamplona.quartz.nip18Reposts.GenericRepostEvent
-import com.vitorpamplona.quartz.nip18Reposts.RepostEvent
-import com.vitorpamplona.quartz.nip18Reposts.quotes.QAddressableTag
-import com.vitorpamplona.quartz.nip18Reposts.quotes.QEventTag
-import com.vitorpamplona.quartz.nip18Reposts.quotes.toQTagArray
-import com.vitorpamplona.quartz.nip19Bech32.Nip19Parser
-import com.vitorpamplona.quartz.nip19Bech32.entities.NEvent
-import com.vitorpamplona.quartz.nip19Bech32.entities.NNote
-import com.vitorpamplona.quartz.nip19Bech32.entities.NProfile
-import com.vitorpamplona.quartz.nip19Bech32.entities.NPub
-import com.vitorpamplona.quartz.nip19Bech32.entities.NSec
-import com.vitorpamplona.quartz.nip19Bech32.toNsec
-import com.vitorpamplona.quartz.nip25Reactions.ReactionEvent
-import com.vitorpamplona.quartz.nip51Lists.muteList.MuteListEvent
-import com.vitorpamplona.quartz.nip51Lists.muteList.mutedUserIdSet
-import com.vitorpamplona.quartz.nip51Lists.muteList.tags.UserTag
-import com.vitorpamplona.quartz.nip51Lists.peopleList.PeopleListEvent
-import com.vitorpamplona.quartz.nip51Lists.peopleList.userIdSet
-import com.vitorpamplona.quartz.nip56Reports.ReportEvent
-import com.vitorpamplona.quartz.nip56Reports.ReportType
-import com.vitorpamplona.quartz.nip57Zaps.LnZapPrivateEvent
-import com.vitorpamplona.quartz.nip57Zaps.LnZapRequestEvent
-import com.vitorpamplona.quartz.nip92IMeta.IMetaTag
-import com.vitorpamplona.quartz.nip94FileMetadata.tags.DimensionTag
-import dev.dimension.flare.common.JSON
+import androidx.compose.runtime.key
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.nostr.NostrCache
-import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -68,28 +23,29 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
-import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
-import io.ktor.client.plugins.websocket.WebSockets
-import io.ktor.client.plugins.websocket.webSocketSession
-import io.ktor.websocket.Frame
-import io.ktor.websocket.close
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
-import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
-import kotlin.time.Clock
+import rust.nostr.sdk.Client
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
+import rust.nostr.sdk.Contact as RustContact
+import rust.nostr.sdk.EventBuilder as RustEventBuilder
+import rust.nostr.sdk.EventDeletionRequest as RustEventDeletionRequest
+import rust.nostr.sdk.EventId as RustEventId
+import rust.nostr.sdk.Keys as RustKeys
+import rust.nostr.sdk.MuteList as RustMuteList
+import rust.nostr.sdk.Nip19Enum as RustNip19Enum
+import rust.nostr.sdk.NostrSigner as RustNostrSigner
+import rust.nostr.sdk.PublicKey as RustPublicKey
+import rust.nostr.sdk.RelayUrl as RustRelayUrl
+import rust.nostr.sdk.Report as RustReport
+import rust.nostr.sdk.SecretKey as RustSecretKey
+import rust.nostr.sdk.SendEventOutput as RustSendEventOutput
+import rust.nostr.sdk.Tag as RustTag
 
 public val defaultNostrRelays: List<String> =
     listOf(
@@ -102,65 +58,134 @@ public val defaultNostrRelays: List<String> =
         "wss://purplepag.es",
     )
 
-internal object NostrService : KoinComponent {
-    internal const val NOSTR_HOST: String = "nostr"
+internal class NostrService(
+    private val cache: NostrCache,
+    private val accountKey: MicroBlogKey,
+    private val credential: UiAccount.Nostr.Credential,
+) : AutoCloseable {
+    companion object {
+        private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
+        private val HEX_DIGITS = "0123456789abcdef".toCharArray()
+        internal const val NOSTR_HOST: String = "nostr"
+        private const val MIN_EARLY_RETURN_EVENTS = 4
+        private const val PUBLISH_SUCCESS_QUORUM = 3
+        private const val RELAY_PUBLISH_TIMEOUT_MILLIS = 1_500L
+        private const val RELAY_TIMEOUT_MILLIS = 3_500L
+        private const val RELAY_SETTLE_TIMEOUT_MILLIS = 350L
+        private const val MAX_REFERENCE_FETCH_ROUNDS = 4
+        private const val MAX_EVENT_ID_BATCH = 100
+        private const val MAX_ADDRESS_FILTER_BATCH = 32
+        private const val MAX_HOME_AUTHORS = 250
+        private const val MIN_METADATA_EVENT_LIMIT = 50
+
+        internal fun importAccount(secretKeyInput: String): ImportedAccount {
+            val normalizedSecret =
+                secretKeyInput.trim().takeIf { it.isNotEmpty() }?.let(::normalizeSecret)
+            val keys = normalizedSecret?.let { RustKeys(it) }
+            val pubkeyHex =
+                keys?.publicKey()?.toHex() ?: error("A public key or secret key is required")
+
+            return ImportedAccount(
+                pubkeyHex = pubkeyHex,
+                npub = bech32PublicKey(pubkeyHex),
+                nsec = normalizedSecret.toBech32(),
+            )
+        }
+
+        internal fun generateAccount(): ImportedAccount {
+            val keys = RustKeys.Companion.generate()
+            return ImportedAccount(
+                pubkeyHex = keys.publicKey().toHex(),
+                npub = keys.publicKey().toBech32(),
+                nsec = keys.secretKey().toBech32(),
+            )
+        }
+
+        internal fun exportAccount(credential: UiAccount.Nostr.Credential): ImportedAccount {
+            val secretKey =
+                requireNotNull(credential.nsec) {
+                    "Nostr account does not have an exportable private key"
+                }
+            return importAccount(
+                secretKeyInput = secretKey,
+            )
+        }
+
+        private fun normalizeSecret(raw: String): RustSecretKey {
+            val value = raw.removePrefix("nostr:").trim()
+            return when {
+                value.startsWith("nsec1", ignoreCase = true) ->
+                    ((parseNip19(value) as? RustNip19Enum.Secret)?.nsec)
+                        ?: error("Invalid NIP-19 secret key")
+
+                HEX_KEY_REGEX.matches(value) -> RustSecretKey.Companion.parse(value.lowercase())
+
+                else -> error("Unsupported secret key format")
+            }
+        }
+    }
 
     internal val defaultRelays: List<String> = defaultNostrRelays
-    private val cache: NostrCache by inject()
-    private val client by lazy {
-        ktorClient {
-            install(WebSockets)
+    private var connected = false
+
+    private val secretKey by lazy {
+        RustSecretKey.parse(credential.nsec)
+    }
+
+    private val keys by lazy {
+        RustKeys(secretKey)
+    }
+
+    private val pubKey by lazy {
+        keys.publicKey()
+    }
+
+    private val pubKeyHex by lazy {
+        pubKey.toHex()
+    }
+
+    private val relays by lazy {
+        credential.relays.map {
+            RustRelayUrl.parse(it)
         }
+    }
+
+    private val client by lazy {
+        Client(RustNostrSigner.keys(keys))
+    }
+
+    override fun close() {
+        client.close()
+        relays.forEach { it.close() }
+        pubKey.close()
+        keys.close()
+        secretKey.close()
+    }
+
+    suspend fun ensureConnection() {
+        if (connected) {
+            return
+        }
+        relays.forEach { relay ->
+            client.addRelay(relay)
+        }
+        client.connect()
+        connected = false
     }
 
     internal data class ImportedAccount(
         val pubkeyHex: String,
         val npub: String,
-        val nsec: String?,
+        val nsec: String,
     )
 
-    internal fun importAccount(secretKeyInput: String): ImportedAccount {
-        val normalizedSecret = secretKeyInput.trim().takeIf { it.isNotEmpty() }?.let(::normalizeSecret)
-
-        val secretHex = normalizedSecret?.hex
-        val derivedPubkeyHex = secretHex?.let { NSec(it).toPubKeyHex() }
-        val pubkeyHex = derivedPubkeyHex ?: error("A public key or secret key is required")
-
-        return ImportedAccount(
-            pubkeyHex = pubkeyHex,
-            npub = NPub.create(pubkeyHex),
-            nsec = secretHex.hexToByteArray().toNsec(),
-        )
-    }
-
-    internal fun generateAccount(): ImportedAccount {
-        val randomKey = KeyPair().privKey ?: error("Failed to generate a random key")
-        return importAccount(
-            secretKeyInput = randomKey.toHexString(),
-        )
-    }
-
-    internal fun exportAccount(credential: UiAccount.Nostr.Credential): ImportedAccount {
-        val secretKey =
-            requireNotNull(credential.nsec) {
-                "Nostr account does not have an exportable private key"
-            }
-        return importAccount(
-            secretKeyInput = secretKey,
-        )
-    }
-
     internal suspend fun loadHomeTimeline(
-        credential: UiAccount.Nostr.Credential,
-        accountKey: MicroBlogKey,
         pageSize: Int,
         until: Long?,
     ): List<UiTimelineV2> {
-        val relays = credential.relays.ifEmpty { defaultRelays }
-        val authors = loadAuthors(relays, credential.pubkey)
+        val authors = loadAuthors(pubKeyHex)
         val events =
             queryFirstRelay(
-                relays = relays,
                 filters =
                     listOf(
                         Filter(
@@ -170,7 +195,10 @@ internal object NostrService : KoinComponent {
                             limit = pageSize,
                         ),
                     ),
-                minEventsBeforeReturn = pageSize.coerceAtMost(MIN_EARLY_RETURN_EVENTS).coerceAtLeast(1),
+                minEventsBeforeReturn =
+                    pageSize
+                        .coerceAtMost(MIN_EARLY_RETURN_EVENTS)
+                        .coerceAtLeast(1),
             ).filter(::isTimelineRootEvent)
                 .sortedByDescending { it.createdAt }
 
@@ -178,49 +206,36 @@ internal object NostrService : KoinComponent {
             return emptyList()
         }
 
-        val eventGraph = loadEventGraph(relays = relays, roots = events)
+        val eventGraph = loadEventGraph(roots = events)
         val interactionStats =
             loadInteractionStats(
-                relays = relays,
-                accountPubkey = credential.pubkey,
+                accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
 
         val profiles =
             loadProfiles(
-                relays = relays,
                 pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
-                accountKey = accountKey,
             )
         return events.toUiTimeline(
-            accountKey = accountKey,
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
         )
     }
 
-    internal suspend fun loadProfile(
-        credential: UiAccount.Nostr.Credential,
-        accountKey: MicroBlogKey,
-        targetPubkey: String,
-    ): UiProfile {
-        val relays = credential.relays.ifEmpty { defaultRelays }
+    internal suspend fun loadProfile(targetPubkey: String): UiProfile {
         val metadata =
             loadMetadata(
-                relays = relays,
                 authors = listOf(targetPubkey),
             )[targetPubkey]
         return profileOf(
             pubKey = targetPubkey,
             metadata = metadata,
-            accountKey = accountKey,
         )
     }
 
     internal suspend fun loadUserTimeline(
-        credential: UiAccount.Nostr.Credential,
-        accountKey: MicroBlogKey,
         targetPubkey: String,
         pageSize: Int,
         until: Long?,
@@ -229,10 +244,9 @@ internal object NostrService : KoinComponent {
         if (mediaOnly) {
             return emptyList()
         }
-        val relays = credential.relays.ifEmpty { defaultRelays }
+
         val events =
             queryAllRelays(
-                relays = relays,
                 filters =
                     listOf(
                         Filter(
@@ -247,21 +261,17 @@ internal object NostrService : KoinComponent {
         if (events.isEmpty()) {
             return emptyList()
         }
-        val eventGraph = loadEventGraph(relays = relays, roots = events)
+        val eventGraph = loadEventGraph(roots = events)
         val interactionStats =
             loadInteractionStats(
-                relays = relays,
-                accountPubkey = credential.pubkey,
+                accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
         val profiles =
             loadProfiles(
-                relays = relays,
                 pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
-                accountKey = accountKey,
             )
         return events.toUiTimeline(
-            accountKey = accountKey,
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
@@ -269,8 +279,6 @@ internal object NostrService : KoinComponent {
     }
 
     internal suspend fun searchStatus(
-        credential: UiAccount.Nostr.Credential,
-        accountKey: MicroBlogKey,
         query: String,
         pageSize: Int,
         until: Long?,
@@ -279,13 +287,11 @@ internal object NostrService : KoinComponent {
         if (normalizedQuery.isEmpty()) {
             return emptyList()
         }
-        val relays = credential.relays.ifEmpty { defaultRelays }
+
         parseSearchStatusEventId(normalizedQuery)?.let { eventId ->
             return runCatching {
                 listOf(
                     loadStatus(
-                        credential = credential,
-                        accountKey = accountKey,
                         statusKey = MicroBlogKey(eventId, NOSTR_HOST),
                     ),
                 )
@@ -294,7 +300,6 @@ internal object NostrService : KoinComponent {
 
         val events =
             queryAllRelays(
-                relays = relays,
                 filters =
                     listOf(
                         Filter(
@@ -306,28 +311,28 @@ internal object NostrService : KoinComponent {
                     ),
             ).filter(::isTimelineRootEvent)
                 .filter { event ->
-                    event is TextNoteEvent && event.content.contains(normalizedQuery, ignoreCase = true)
+                    event is TextNoteEvent &&
+                        event.content.contains(
+                            normalizedQuery,
+                            ignoreCase = true,
+                        )
                 }.sortedByDescending { it.createdAt }
                 .take(pageSize)
         if (events.isEmpty()) {
             return emptyList()
         }
 
-        val eventGraph = loadEventGraph(relays = relays, roots = events)
+        val eventGraph = loadEventGraph(roots = events)
         val interactionStats =
             loadInteractionStats(
-                relays = relays,
-                accountPubkey = credential.pubkey,
+                accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
         val profiles =
             loadProfiles(
-                relays = relays,
                 pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
-                accountKey = accountKey,
             )
         return events.toUiTimeline(
-            accountKey = accountKey,
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
@@ -335,8 +340,6 @@ internal object NostrService : KoinComponent {
     }
 
     internal suspend fun searchUser(
-        credential: UiAccount.Nostr.Credential,
-        accountKey: MicroBlogKey,
         query: String,
         pageSize: Int,
     ): List<UiProfile> {
@@ -344,12 +347,10 @@ internal object NostrService : KoinComponent {
         if (normalizedQuery.isEmpty()) {
             return emptyList()
         }
-        val relays = credential.relays.ifEmpty { defaultRelays }
+
         parseSearchProfilePubkey(normalizedQuery)?.let { pubkey ->
             return listOf(
                 loadProfile(
-                    credential = credential,
-                    accountKey = accountKey,
                     targetPubkey = pubkey,
                 ),
             )
@@ -357,7 +358,6 @@ internal object NostrService : KoinComponent {
 
         val metadataEvents =
             queryAllRelays(
-                relays = relays,
                 filters =
                     listOf(
                         Filter(
@@ -382,7 +382,6 @@ internal object NostrService : KoinComponent {
                 profileOf(
                     pubKey = pubkey,
                     metadata = metadata,
-                    accountKey = accountKey,
                 )
             }.sortedBy { profile ->
                 profile.name.raw.indexOf(normalizedQuery, ignoreCase = true).let {
@@ -396,81 +395,63 @@ internal object NostrService : KoinComponent {
     }
 
     internal suspend fun loadNotifications(
-        credential: UiAccount.Nostr.Credential,
-        accountKey: MicroBlogKey,
         pageSize: Int,
         until: Long?,
         type: dev.dimension.flare.data.datasource.microblog.NotificationFilter,
     ): List<UiTimelineV2> {
-        val relays = credential.relays.ifEmpty { defaultRelays }
         val events =
             notificationFilters(
-                accountPubkey = credential.pubkey,
+                accountPubkey = pubKeyHex,
                 pageSize = pageSize,
                 until = until,
                 type = type,
             ).flatMap { filter ->
                 queryAllRelays(
-                    relays = relays,
                     filters = listOf(filter),
                 )
             }.distinctBy { it.id }
-                .filterNot { it.pubKey == credential.pubkey }
+                .filterNot { it.pubKey == pubKeyHex }
                 .sortedByDescending { it.createdAt }
                 .take(pageSize)
         if (events.isEmpty()) {
             return emptyList()
         }
 
-        val eventGraph = loadEventGraph(relays = relays, roots = events)
+        val eventGraph = loadEventGraph(roots = events)
         val interactionStats =
             loadInteractionStats(
-                relays = relays,
-                accountPubkey = credential.pubkey,
+                accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
         val profiles =
             loadProfiles(
-                relays = relays,
                 pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
-                accountKey = accountKey,
             )
         return events.toUiNotifications(
-            accountKey = accountKey,
-            accountPubkey = credential.pubkey,
+            accountPubkey = pubKeyHex,
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
         )
     }
 
-    internal suspend fun loadStatus(
-        credential: UiAccount.Nostr.Credential,
-        accountKey: MicroBlogKey,
-        statusKey: MicroBlogKey,
-    ): UiTimelineV2 {
-        val relays = credential.relays.ifEmpty { defaultRelays }
+    internal suspend fun loadStatus(statusKey: MicroBlogKey): UiTimelineV2 {
         val event =
             loadEvent(
-                relays = relays,
                 statusKey = statusKey,
             ) ?: error("Nostr status not found: $statusKey")
-        val eventGraph = loadEventGraph(relays = relays, roots = listOf(event))
+        val eventGraph = loadEventGraph(roots = listOf(event))
         val interactionStats =
             loadInteractionStats(
-                relays = relays,
-                accountPubkey = credential.pubkey,
+                accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
         val profiles =
             loadProfiles(
-                relays = relays,
                 pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
-                accountKey = accountKey,
             )
         return listOf(event)
             .toUiTimeline(
-                accountKey = accountKey,
                 profiles = profiles,
                 eventsById = eventGraph,
                 interactionStats = interactionStats,
@@ -478,22 +459,17 @@ internal object NostrService : KoinComponent {
     }
 
     internal suspend fun loadStatusContext(
-        credential: UiAccount.Nostr.Credential,
-        accountKey: MicroBlogKey,
         statusKey: MicroBlogKey,
         pageSize: Int,
     ): List<UiTimelineV2.Post> {
-        val relays = credential.relays.ifEmpty { defaultRelays }
         val event =
             loadEvent(
-                relays = relays,
                 statusKey = statusKey,
             ) ?: error("Nostr status not found: $statusKey")
 
-        val ancestorEvents = buildAncestorChain(event = event, relays = relays)
+        val ancestorEvents = buildAncestorChain(event = event)
         val replyEvents =
             loadDirectReplies(
-                relays = relays,
                 statusKey = statusKey,
                 pageSize = pageSize,
             )
@@ -502,36 +478,29 @@ internal object NostrService : KoinComponent {
             return emptyList()
         }
 
-        val eventGraph = loadEventGraph(relays = relays, roots = threadEvents)
+        val eventGraph = loadEventGraph(roots = threadEvents)
         val interactionStats =
             loadInteractionStats(
-                relays = relays,
-                accountPubkey = credential.pubkey,
+                accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
         val profiles =
             loadProfiles(
-                relays = relays,
                 pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
-                accountKey = accountKey,
             )
 
         return threadEvents.toUiTimeline(
-            accountKey = accountKey,
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
         )
     }
 
-    internal suspend fun relation(
-        credential: UiAccount.Nostr.Credential,
-        targetPubkey: String,
-    ): dev.dimension.flare.ui.model.UiRelation {
-        val relays = credential.relays.ifEmpty { defaultRelays }
-        val follows = loadLatestContactList(relays, credential.pubkey)?.verifiedFollowKeySet().orEmpty()
-        val blocks = loadLatestBlockList(relays, credential.pubkey)?.tags?.userIdSet().orEmpty()
-        val mutes = loadLatestMuteList(relays, credential.pubkey)?.tags?.mutedUserIdSet().orEmpty()
+    internal suspend fun relation(targetPubkey: String): dev.dimension.flare.ui.model.UiRelation {
+        val follows =
+            loadLatestContactList(pubKeyHex)?.verifiedFollowKeySet().orEmpty()
+        val blocks = loadLatestBlockList(pubKeyHex)?.tags?.userIdSet().orEmpty()
+        val mutes = loadLatestMuteList(pubKeyHex)?.tags?.mutedUserIdSet().orEmpty()
         return dev.dimension.flare.ui.model.UiRelation(
             following = targetPubkey in follows,
             blocking = targetPubkey in blocks,
@@ -539,311 +508,194 @@ internal object NostrService : KoinComponent {
         )
     }
 
-    internal suspend fun follow(
-        credential: UiAccount.Nostr.Credential,
-        targetPubkey: String,
-    ) {
-        val relays = credential.relays.ifEmpty { defaultRelays }
-        val signer = createSigner(requireNotNull(exportAccount(credential).nsec))
-        val latest = loadLatestContactList(relays, credential.pubkey)
-        val event =
-            if (latest != null) {
-                ContactListEvent.followUser(
-                    earlierVersion = latest,
-                    pubKeyHex = targetPubkey,
-                    signer = signer,
-                )
-            } else {
-                ContactListEvent.createFromScratch(
-                    followUsers = listOf(ContactTag(targetPubkey)),
-                    relayUse = defaultRelaySet(relays),
-                    signer = signer,
-                )
-            }
-        publishEvent(credential, event)
+    internal suspend fun follow(targetPubkey: String) {
+        val latest = loadLatestContactList(pubKeyHex)
+        val follows = (latest?.verifiedFollowKeySet().orEmpty() + targetPubkey).distinct()
+        sendEventBuilder(
+            builder =
+                RustEventBuilder.Companion.contactList(
+                    follows.map { RustContact(publicKey(it), null, null) },
+                ),
+        )
     }
 
-    internal suspend fun unfollow(
-        credential: UiAccount.Nostr.Credential,
-        targetPubkey: String,
-    ) {
-        val relays = credential.relays.ifEmpty { defaultRelays }
-        val signer = createSigner(requireNotNull(exportAccount(credential).nsec))
-        val latest = loadLatestContactList(relays, credential.pubkey)
-        val event =
-            if (latest != null) {
-                ContactListEvent.unfollowUser(
-                    earlierVersion = latest,
-                    pubKeyHex = targetPubkey,
-                    signer = signer,
-                )
-            } else {
-                ContactListEvent.createFromScratch(
-                    followUsers = emptyList(),
-                    relayUse = defaultRelaySet(relays),
-                    signer = signer,
-                )
-            }
-        publishEvent(credential, event)
+    internal suspend fun unfollow(targetPubkey: String) {
+        val latest = loadLatestContactList(pubKeyHex)
+        val follows = latest?.verifiedFollowKeySet().orEmpty().filterNot { it == targetPubkey }
+        sendEventBuilder(
+            builder =
+                RustEventBuilder.Companion.contactList(
+                    follows.map { RustContact(publicKey(it), null, null) },
+                ),
+        )
     }
 
-    internal suspend fun block(
-        credential: UiAccount.Nostr.Credential,
-        targetPubkey: String,
-    ) {
-        val relays = credential.relays.ifEmpty { defaultRelays }
-        val signer = createSigner(requireNotNull(exportAccount(credential).nsec))
-        val latest = loadLatestBlockList(relays, credential.pubkey)
-        val event =
-            if (latest != null) {
-                PeopleListEvent.addUser(
-                    earlierVersion = latest,
-                    pubKeyHex = targetPubkey,
-                    relayHint = null,
-                    isPrivate = false,
-                    signer = signer,
-                )
-            } else {
-                PeopleListEvent.create(
-                    name = "Block list",
-                    publicMembers = listOf(UserTag(targetPubkey)),
-                    privateMembers = emptyList(),
-                    signer = signer,
-                    dTag = PeopleListEvent.BLOCK_LIST_D_TAG,
-                )
-            }
-        publishEvent(credential, event)
+    internal suspend fun block(targetPubkey: String) {
+        val latest = loadLatestBlockList(pubKeyHex)
+        val blockList = (latest?.tags?.userIdSet().orEmpty() + targetPubkey).distinct()
+        sendEventBuilder(
+            builder =
+                RustEventBuilder.Companion.followSet(
+                    PeopleListEvent.BLOCK_LIST_D_TAG,
+                    blockList.map(::publicKey),
+                ),
+        )
     }
 
-    internal suspend fun unblock(
-        credential: UiAccount.Nostr.Credential,
-        targetPubkey: String,
-    ) {
-        val relays = credential.relays.ifEmpty { defaultRelays }
-        val signer = createSigner(requireNotNull(exportAccount(credential).nsec))
-        val latest = loadLatestBlockList(relays, credential.pubkey) ?: return
-        val event =
-            PeopleListEvent.removeUser(
-                earlierVersion = latest,
-                pubKeyHex = targetPubkey,
-                isUserPrivate = false,
-                signer = signer,
-            )
-        publishEvent(credential, event)
+    internal suspend fun unblock(targetPubkey: String) {
+        val latest = loadLatestBlockList(pubKeyHex) ?: return
+        val blockList = latest.tags.userIdSet().filterNot { it == targetPubkey }
+        sendEventBuilder(
+            builder =
+                RustEventBuilder.Companion.followSet(
+                    PeopleListEvent.BLOCK_LIST_D_TAG,
+                    blockList.map(::publicKey),
+                ),
+        )
     }
 
-    internal suspend fun mute(
-        credential: UiAccount.Nostr.Credential,
-        targetPubkey: String,
-    ) {
-        val relays = credential.relays.ifEmpty { defaultRelays }
-        val signer = createSigner(requireNotNull(exportAccount(credential).nsec))
-        val latest = loadLatestMuteList(relays, credential.pubkey)
-        val event =
-            if (latest != null) {
-                MuteListEvent.add(
-                    earlierVersion = latest,
-                    mute = UserTag(targetPubkey),
-                    isPrivate = false,
-                    signer = signer,
-                )
-            } else {
-                MuteListEvent.create(
-                    mute = UserTag(targetPubkey),
-                    isPrivate = false,
-                    signer = signer,
-                )
-            }
-        publishEvent(credential, event)
+    internal suspend fun mute(targetPubkey: String) {
+        val latest = loadLatestMuteList(pubKeyHex)
+        val mutedUsers = (latest?.tags?.mutedUserIdSet().orEmpty() + targetPubkey).distinct()
+        sendEventBuilder(
+            builder =
+                RustEventBuilder.Companion.muteList(
+                    RustMuteList(
+                        mutedUsers.map(::publicKey),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                    ),
+                ),
+        )
     }
 
-    internal suspend fun unmute(
-        credential: UiAccount.Nostr.Credential,
-        targetPubkey: String,
-    ) {
-        val relays = credential.relays.ifEmpty { defaultRelays }
-        val signer = createSigner(requireNotNull(exportAccount(credential).nsec))
-        val latest = loadLatestMuteList(relays, credential.pubkey) ?: return
-        val event =
-            MuteListEvent.remove(
-                earlierVersion = latest,
-                mute = UserTag(targetPubkey),
-                signer = signer,
-            )
-        publishEvent(credential, event)
+    internal suspend fun unmute(targetPubkey: String) {
+        val latest = loadLatestMuteList(pubKeyHex) ?: return
+        val mutedUsers = latest.tags.mutedUserIdSet().filterNot { it == targetPubkey }
+        sendEventBuilder(
+            builder =
+                RustEventBuilder.Companion.muteList(
+                    RustMuteList(
+                        mutedUsers.map(::publicKey),
+                        emptyList(),
+                        emptyList(),
+                        emptyList(),
+                    ),
+                ),
+        )
     }
 
-    internal suspend fun composeNote(
-        credential: UiAccount.Nostr.Credential,
-        content: String,
-    ): String {
-        val imported = exportAccount(credential)
-        val event =
-            signEvent(
-                pubkeyHex = imported.pubkeyHex,
-                secretKey = requireNotNull(imported.nsec),
-                template = TextNoteEvent.build(content),
-            )
-        publishEvent(credential, event)
-        return event.id
-    }
+    internal suspend fun composeNote(content: String): String = sendEventBuilder(RustEventBuilder.Companion.textNote(content))
 
     internal suspend fun composeReply(
-        credential: UiAccount.Nostr.Credential,
         statusKey: MicroBlogKey,
         content: String,
     ): String {
-        val relays = credential.relays.ifEmpty { defaultRelays }
         val target =
-            loadEvent(relays = relays, statusKey = statusKey)
+            loadEvent(statusKey = statusKey)
                 ?: error("Reply target not found: $statusKey")
-        val imported = exportAccount(credential)
-        val template =
-            if (target is TextNoteEvent) {
-                TextNoteEvent.build(
-                    note = content,
-                    replyingTo = EventHintBundle(target),
-                )
-            } else {
-                TextNoteEvent.build(content) {
-                    add(ETag(target.id).toTagArray())
-                    pTag(target.pubKey)
-                }
-            }
-        val event =
-            signEvent(
-                pubkeyHex = imported.pubkeyHex,
-                secretKey = requireNotNull(imported.nsec),
-                template = template,
-            )
-        publishEvent(credential, event)
-        return event.id
+        return sendEventBuilder(
+            builder = textNoteBuilder(content = content, tags = buildReplyTags(target)),
+        )
     }
 
     internal suspend fun composeQuote(
-        accountKey: MicroBlogKey,
-        credential: UiAccount.Nostr.Credential,
         statusKey: MicroBlogKey,
         content: String,
     ): String {
-        val relays = credential.relays.ifEmpty { defaultRelays }
         val target =
-            loadEvent(relays = relays, statusKey = statusKey)
-        val cachedPost = target?.let { null } ?: cache.getPost(accountKey = accountKey, statusKey = statusKey)
+            loadEvent(statusKey = statusKey)
+        val cachedPost =
+            target?.let { null } ?: cache.getPost(accountKey = accountKey, statusKey = statusKey)
         val quoteTag =
             quoteTagArray(
                 target = target,
                 statusKey = statusKey,
-                relayHint = relays.firstNotNullOfOrNull(RelayUrlNormalizer::normalizeOrNull),
                 cachedAuthorPubKey = cachedPost?.user?.key?.id,
             ) ?: error("Quote target not found: $statusKey")
-        val authorPubKey = target?.pubKey ?: cachedPost?.user?.key?.id ?: error("Quote target not found: $statusKey")
-        val imported = exportAccount(credential)
-        val event =
-            signEvent(
-                pubkeyHex = imported.pubkeyHex,
-                secretKey = requireNotNull(imported.nsec),
-                template =
-                    TextNoteEvent.build(content) {
-                        add(quoteTag)
-                        pTag(authorPubKey)
-                    },
-            )
-        publishEvent(credential, event)
-        return event.id
+        val authorPubKey =
+            target?.pubKey ?: cachedPost?.user?.key?.id
+                ?: error("Quote target not found: $statusKey")
+        return sendEventBuilder(
+            builder =
+                textNoteBuilder(
+                    content = content,
+                    tags =
+                        buildList {
+                            add(quoteTag)
+                            add(pTag(authorPubKey))
+                        },
+                ),
+        )
     }
 
-    internal suspend fun repost(
-        credential: UiAccount.Nostr.Credential,
-        statusKey: MicroBlogKey,
-    ): String {
-        val relays = credential.relays.ifEmpty { defaultRelays }
+    internal suspend fun repost(statusKey: MicroBlogKey): String {
         val target =
-            loadEvent(relays = relays, statusKey = statusKey)
+            loadEvent(statusKey = statusKey)
                 ?: error("Repost target not found: $statusKey")
-        val imported = exportAccount(credential)
-        val event =
-            signEvent(
-                pubkeyHex = imported.pubkeyHex,
-                secretKey = requireNotNull(imported.nsec),
-                template = GenericRepostEvent.build(target, null, null),
-            )
-        publishEvent(credential, event)
-        return event.id
+        return sendEventBuilder(
+            builder =
+                RustEventBuilder.Companion.repost(
+                    target.native,
+                ),
+        )
     }
 
-    internal suspend fun react(
-        credential: UiAccount.Nostr.Credential,
-        statusKey: MicroBlogKey,
-    ): String {
-        val relays = credential.relays.ifEmpty { defaultRelays }
+    internal suspend fun react(statusKey: MicroBlogKey): String {
         val target =
-            loadEvent(relays = relays, statusKey = statusKey)
+            loadEvent(statusKey = statusKey)
                 ?: error("Reaction target not found: $statusKey")
-        val imported = exportAccount(credential)
-        val event =
-            signEvent(
-                pubkeyHex = imported.pubkeyHex,
-                secretKey = requireNotNull(imported.nsec),
-                template = ReactionEvent.like(EventHintBundle(target)),
-            )
-        publishEvent(credential, event)
-        return event.id
+        return sendEventBuilder(
+            builder = RustEventBuilder.Companion.reaction(target.native, ReactionEvent.LIKE),
+        )
     }
 
-    internal suspend fun report(
-        credential: UiAccount.Nostr.Credential,
-        statusKey: MicroBlogKey,
-    ) {
-        val relays = credential.relays.ifEmpty { defaultRelays }
+    internal suspend fun report(statusKey: MicroBlogKey) {
         val target =
-            loadEvent(relays = relays, statusKey = statusKey)
+            loadEvent(statusKey = statusKey)
                 ?: error("Report target not found: $statusKey")
-        val imported = exportAccount(credential)
-        val event =
-            signEvent(
-                pubkeyHex = imported.pubkeyHex,
-                secretKey = requireNotNull(imported.nsec),
-                template = ReportEvent.build(target, ReportType.SPAM),
-            )
-        publishEvent(credential, event)
+        sendEventBuilder(
+            builder =
+                RustEventBuilder.Companion.report(
+                    listOf(
+                        RustTag.Companion.eventReport(eventId(target.id), RustReport.SPAM),
+                        RustTag.Companion.publicKeyReport(
+                            publicKey(target.pubKey),
+                            RustReport.SPAM,
+                        ),
+                    ),
+                    "",
+                ),
+        )
     }
 
-    internal suspend fun deleteStatus(
-        credential: UiAccount.Nostr.Credential,
-        statusKey: MicroBlogKey,
-    ) {
-        val relays = credential.relays.ifEmpty { defaultRelays }
+    internal suspend fun deleteStatus(statusKey: MicroBlogKey) {
         val target =
-            loadEvent(relays = relays, statusKey = statusKey)
+            loadEvent(statusKey = statusKey)
                 ?: error("Delete target not found: $statusKey")
-        val imported = exportAccount(credential)
-        val deletionEvent =
-            signEvent(
-                pubkeyHex = imported.pubkeyHex,
-                secretKey = requireNotNull(imported.nsec),
-                template = DeletionEvent.build(listOf(target)),
-            )
-        publishEvent(credential, deletionEvent)
+        sendEventBuilder(
+            builder =
+                RustEventBuilder.Companion.delete(
+                    RustEventDeletionRequest(
+                        listOf(eventId(target.id)),
+                        emptyList(),
+                        "",
+                    ),
+                ),
+        )
     }
 
-    private suspend fun loadAuthors(
-        relays: List<String>,
-        accountPubkey: String,
-    ): List<String> {
-        val latestContacts = loadLatestContactList(relays, accountPubkey)
+    private suspend fun loadAuthors(accountPubkey: String): List<String> {
+        val latestContacts = loadLatestContactList(accountPubkey)
 
         return (latestContacts?.verifiedFollowKeySet().orEmpty() + accountPubkey)
             .distinct()
             .take(MAX_HOME_AUTHORS)
     }
 
-    private suspend fun loadLatestContactList(
-        relays: List<String>,
-        accountPubkey: String,
-    ): ContactListEvent? =
+    private suspend fun loadLatestContactList(accountPubkey: String): ContactListEvent? =
         queryAllRelays(
-            relays = relays,
             filters =
                 listOf(
                     Filter(
@@ -855,12 +707,8 @@ internal object NostrService : KoinComponent {
         ).filterIsInstance<ContactListEvent>()
             .maxByOrNull { it.createdAt }
 
-    private suspend fun loadLatestMuteList(
-        relays: List<String>,
-        accountPubkey: String,
-    ): MuteListEvent? =
+    private suspend fun loadLatestMuteList(accountPubkey: String): MuteListEvent? =
         queryAllRelays(
-            relays = relays,
             filters =
                 listOf(
                     Filter(
@@ -872,12 +720,8 @@ internal object NostrService : KoinComponent {
         ).filterIsInstance<MuteListEvent>()
             .maxByOrNull { it.createdAt }
 
-    private suspend fun loadLatestBlockList(
-        relays: List<String>,
-        accountPubkey: String,
-    ): PeopleListEvent? =
+    private suspend fun loadLatestBlockList(accountPubkey: String): PeopleListEvent? =
         queryAllRelays(
-            relays = relays,
             filters =
                 listOf(
                     Filter(
@@ -890,19 +734,12 @@ internal object NostrService : KoinComponent {
         ).filterIsInstance<PeopleListEvent>()
             .maxByOrNull { it.createdAt }
 
-    private fun defaultRelaySet(relays: List<String>): Map<String, ReadWrite> =
-        relays.associateWith { ReadWrite(read = true, write = true) }
-
-    private suspend fun loadMetadata(
-        relays: List<String>,
-        authors: List<String>,
-    ): Map<String, UserMetadata> {
+    private suspend fun loadMetadata(authors: List<String>): Map<String, UserMetadata> {
         if (authors.isEmpty()) {
             return emptyMap()
         }
         val eventsByPubkey =
             queryAllRelays(
-                relays = relays,
                 filters =
                     listOf(
                         Filter(
@@ -930,11 +767,7 @@ internal object NostrService : KoinComponent {
                 runCatching { event.contactMetaData() }.getOrNull()
             }
 
-    private suspend fun loadProfiles(
-        relays: List<String>,
-        pubKeys: List<String>,
-        accountKey: MicroBlogKey,
-    ): Map<String, UiProfile> {
+    private suspend fun loadProfiles(pubKeys: List<String>): Map<String, UiProfile> {
         if (pubKeys.isEmpty()) {
             return emptyMap()
         }
@@ -946,13 +779,12 @@ internal object NostrService : KoinComponent {
         }
 
         val fetchedProfiles =
-            loadMetadata(relays, missingPubKeys)
+            loadMetadata(missingPubKeys)
                 .let { metadata ->
                     missingPubKeys.associateWith { pubKey ->
                         profileOf(
                             pubKey = pubKey,
                             metadata = metadata[pubKey],
-                            accountKey = accountKey,
                         )
                     }
                 }
@@ -961,242 +793,70 @@ internal object NostrService : KoinComponent {
     }
 
     private suspend fun queryFirstRelay(
-        relays: List<String>,
         filters: List<Filter>,
         minEventsBeforeReturn: Int = MIN_EARLY_RETURN_EVENTS,
     ): List<Event> =
         queryRelays(
-            relays = relays,
             filters = filters,
             waitForAllRelays = false,
             minEventsBeforeReturn = minEventsBeforeReturn,
         )
 
-    private suspend fun queryAllRelays(
-        relays: List<String>,
-        filters: List<Filter>,
-    ): List<Event> =
+    private suspend fun queryAllRelays(filters: List<Filter>): List<Event> =
         queryRelays(
-            relays = relays,
             filters = filters,
             waitForAllRelays = true,
             minEventsBeforeReturn = null,
         )
 
     private suspend fun queryRelays(
-        relays: List<String>,
         filters: List<Filter>,
         waitForAllRelays: Boolean,
         minEventsBeforeReturn: Int?,
     ): List<Event> =
         coroutineScope {
-            if (relays.isEmpty()) {
-                return@coroutineScope emptyList()
-            }
-            val results = Channel<List<Event>>(Channel.UNLIMITED)
-            relays.forEach { relay ->
-                launch {
-                    val events =
-                        withTimeoutOrNull(RELAY_TIMEOUT_MILLIS + RELAY_SETTLE_TIMEOUT_MILLIS) {
-                            runCatching { queryRelay(relay, filters) }.getOrDefault(emptyList())
-                        } ?: emptyList()
-                    results.send(events)
-                }
-            }
+            val events =
+                filters
+                    .map {
+                        async {
+                            client.fetchEvents(it.toRust(), timeout = 1.minutes).toVec()
+                        }
+                    }.awaitAll()
+                    .flatten()
 
-            val eventsById = LinkedHashMap<String, Event>()
-            var remaining = relays.size
-            var hasNonEmptyResult = false
-
-            try {
-                while (remaining > 0) {
-                    val result =
-                        if (waitForAllRelays) {
-                            results.receive()
-                        } else {
-                            val timeout =
-                                if (hasNonEmptyResult) {
-                                    RELAY_SETTLE_TIMEOUT_MILLIS
-                                } else {
-                                    RELAY_TIMEOUT_MILLIS
-                                }
-                            withTimeoutOrNull(timeout) {
-                                results.receive()
-                            } ?: break
-                        }
-                    remaining -= 1
-                    if (result.isEmpty()) {
-                        continue
-                    }
-                    hasNonEmptyResult = true
-                    result.forEach { event ->
-                        if (event.id !in eventsById) {
-                            eventsById[event.id] = event
-                        }
-                    }
-                    if (!waitForAllRelays) {
-                        if (eventsById.size >= (minEventsBeforeReturn ?: 1)) {
-                            break
-                        }
-                    }
-                }
-            } finally {
-                coroutineContext.cancelChildren()
-                results.close()
-            }
-            eventsById.values.toList()
-        }
-
-    private suspend fun queryRelay(
-        relay: String,
-        filters: List<Filter>,
-    ): List<Event> {
-        val session = client.webSocketSession(urlString = relay)
-        val subscriptionId = "flare-${Clock.System.now().toEpochMilliseconds()}"
-        val events = mutableListOf<Event>()
-        return try {
-            session.send(
-                Frame.Text(
-                    buildString {
-                        append("[\"REQ\",\"")
-                        append(subscriptionId)
-                        append("\"")
-                        filters.forEach { filter ->
-                            append(",")
-                            append(filter.toJson())
-                        }
-                        append("]")
-                    },
-                ),
-            )
-            withTimeoutOrNull(RELAY_TIMEOUT_MILLIS) {
-                while (true) {
-                    when (val frame = session.incoming.receive()) {
-                        is Frame.Text -> {
-                            when (val message = parseRelayMessage(frame.data.decodeToString())) {
-                                RelayMessage.EndOfStoredEvents -> break
-                                is RelayMessage.EventEnvelope -> events += message.event
-                                else -> Unit
-                            }
-                        }
-
-                        else -> Unit
-                    }
-                }
-            }
             events
-        } finally {
-            runCatching { session.send(Frame.Text("[\"CLOSE\",\"$subscriptionId\"]")) }
-            runCatching { session.close() }
+                .map { it.toCompatEvent() }
         }
-    }
 
-    private const val MIN_EARLY_RETURN_EVENTS = 4
-
-    private suspend fun publishEvent(
-        credential: UiAccount.Nostr.Credential,
-        event: Event,
-    ) {
-        val relays = credential.relays.ifEmpty { defaultRelays }
+    private suspend fun sendEventBuilder(builder: RustEventBuilder): String {
         val requiredSuccessCount = minOf(PUBLISH_SUCCESS_QUORUM, relays.size)
         if (requiredSuccessCount == 0) {
+            error("No valid relay URLs available for publishing")
+        }
+
+        return try {
+            val output = client.sendEventBuilder(builder)
+            ensurePublishQuorum(output, requiredSuccessCount)
+            output.id.toHex()
+        } finally {
+            runCatching { client.close() }
+        }
+    }
+
+    private fun ensurePublishQuorum(
+        output: RustSendEventOutput,
+        requiredSuccessCount: Int,
+    ) {
+        val successCount = output.success.size
+        if (successCount >= requiredSuccessCount) {
             return
         }
-        supervisorScope {
-            val results = Channel<Result<Unit>>(Channel.UNLIMITED)
-            relays.forEach { relay ->
-                launch {
-                    results.send(
-                        runCatching {
-                            publishEventToRelay(
-                                relay = relay,
-                                event = event,
-                            )
-                        },
-                    )
-                }
-            }
-            var successCount = 0
-            var failureCount = 0
-            val failures = mutableListOf<Throwable>()
-            try {
-                repeat(relays.size) {
-                    val result = results.receive()
-                    result
-                        .onSuccess {
-                            successCount += 1
-                            if (successCount >= requiredSuccessCount) {
-                                return@supervisorScope
-                            }
-                        }.onFailure {
-                            failureCount += 1
-                            failures += it
-                            val remainingRelays = relays.size - successCount - failureCount
-                            if (successCount + remainingRelays < requiredSuccessCount) {
-                                throw PublishToRelayException(
-                                    requiredSuccessCount = requiredSuccessCount,
-                                    successCount = successCount,
-                                    failures = failures.toList(),
-                                )
-                            }
-                        }
-                }
-            } finally {
-                coroutineContext.cancelChildren()
-                results.close()
-            }
-        }
+        throw PublishToRelayException(
+            requiredSuccessCount = requiredSuccessCount,
+            successCount = successCount,
+            failures = output.failed.map { (relay, message) -> IllegalStateException("$relay: $message") },
+        )
     }
-
-    private suspend fun publishEventToRelay(
-        relay: String,
-        event: Event,
-    ) {
-        val session = client.webSocketSession(urlString = relay)
-        try {
-            session.send(
-                Frame.Text(
-                    buildString {
-                        append("[\"EVENT\",")
-                        append(event.toJson())
-                        append("]")
-                    },
-                ),
-            )
-            val ack =
-                awaitRelayAck(
-                    session = session,
-                    eventId = event.id,
-                ) ?: throw IllegalStateException("Timed out waiting for relay OK: $relay")
-            if (!ack.accepted) {
-                throw IllegalStateException("Relay rejected event: $relay${ack.message?.let { " ($it)" } ?: ""}")
-            }
-        } finally {
-            runCatching { session.close() }
-        }
-    }
-
-    private suspend fun awaitRelayAck(
-        session: DefaultClientWebSocketSession,
-        eventId: String,
-    ): RelayMessage.OkEnvelope? =
-        withTimeoutOrNull(RELAY_PUBLISH_TIMEOUT_MILLIS) {
-            while (true) {
-                when (val frame = session.incoming.receive()) {
-                    is Frame.Text -> {
-                        val message = parseRelayMessage(frame.data.decodeToString())
-                        if (message is RelayMessage.OkEnvelope && message.eventId == eventId) {
-                            return@withTimeoutOrNull message
-                        }
-                    }
-
-                    else -> Unit
-                }
-            }
-            null
-        }
-
-    private const val PUBLISH_SUCCESS_QUORUM = 3
 
     private class PublishToRelayException(
         requiredSuccessCount: Int,
@@ -1206,48 +866,14 @@ internal object NostrService : KoinComponent {
             "Failed to publish event to enough relays: $successCount/$requiredSuccessCount succeeded.",
         )
 
-    private fun normalizeSecret(raw: String): NSec {
-        val value = raw.removePrefix("nostr:").trim()
-        return when {
-            value.startsWith("nsec1", ignoreCase = true) -> {
-                Nip19Parser
-                    .parseAll(value)
-                    .singleOrNull()
-                    ?.let { it as? NSec }
-                    ?: error("Invalid NIP-19 secret key")
-            }
-
-            HEX_KEY_REGEX.matches(value) -> NSec(value)
-
-            else -> error("Unsupported secret key format")
-        }
-    }
-
-    private fun normalizePublic(raw: String): NPub {
-        val value = raw.removePrefix("nostr:").trim()
-        return when {
-            value.startsWith("npub1", ignoreCase = true) -> {
-                Nip19Parser
-                    .parseAll(value)
-                    .singleOrNull()
-                    ?.let { it as? NPub }
-                    ?: error("Invalid NIP-19 public key")
-            }
-
-            HEX_KEY_REGEX.matches(value) -> NPub(value)
-
-            else -> error("Unsupported public key format")
-        }
-    }
-
     private fun parseSearchProfilePubkey(raw: String): String? {
         val value = raw.removePrefix("nostr:").trim()
         return when {
             value.startsWith("npub1", ignoreCase = true) ->
-                (Nip19Parser.parseAll(value).singleOrNull() as? NPub)?.hex
+                (parseNip19(value) as? RustNip19Enum.Pubkey)?.npub?.toHex()
 
             value.startsWith("nprofile1", ignoreCase = true) ->
-                (Nip19Parser.parseAll(value).singleOrNull() as? NProfile)?.hex
+                (parseNip19(value) as? RustNip19Enum.Profile)?.nprofile?.publicKey()?.toHex()
 
             HEX_KEY_REGEX.matches(value) -> value.lowercase()
 
@@ -1259,10 +885,10 @@ internal object NostrService : KoinComponent {
         val value = raw.removePrefix("nostr:").trim()
         return when {
             value.startsWith("note1", ignoreCase = true) ->
-                (Nip19Parser.parseAll(value).singleOrNull() as? NNote)?.hex
+                (parseNip19(value) as? RustNip19Enum.Note)?.eventId?.toHex()
 
             value.startsWith("nevent1", ignoreCase = true) ->
-                (Nip19Parser.parseAll(value).singleOrNull() as? NEvent)?.hex
+                (parseNip19(value) as? RustNip19Enum.Event)?.event?.eventId()?.toHex()
 
             HEX_KEY_REGEX.matches(value) -> value.lowercase()
 
@@ -1270,125 +896,44 @@ internal object NostrService : KoinComponent {
         }
     }
 
-    private fun <T : Event> signEvent(
-        pubkeyHex: String,
-        secretKey: String,
-        template: EventTemplate<T>,
-    ): T {
-        val normalizedSecretHex = normalizeSecret(secretKey).hex
-        return template.sign(
-            pubKey = pubkeyHex,
-            privKey = normalizedSecretHex.hexToByteArray(),
-            pubKeyByteArray = pubkeyHex.hexToByteArray(),
-        )
-    }
+    private fun publicKey(hex: String): RustPublicKey = RustPublicKey.Companion.parse(hex)
 
-    private fun createSigner(secretKey: String): NostrSigner {
-        val syncSigner =
-            com.vitorpamplona.quartz.nip01Core.signers.NostrSignerSync(
-                keyPair = KeyPair(privKey = normalizeSecret(secretKey).hex.hexToByteArray()),
-            )
-        return object : NostrSigner(syncSigner.pubKey) {
-            override fun isWriteable(): Boolean = true
+    private fun eventId(hex: String): RustEventId = RustEventId.Companion.parse(hex)
 
-            override suspend fun <T : Event> sign(
-                createdAt: Long,
-                kind: Int,
-                tags: Array<Array<String>>,
-                content: String,
-            ): T = syncSigner.sign(createdAt, kind, tags, content)
+    private fun pTag(pubKey: String): Array<String> = arrayOf("p", pubKey)
 
-            override suspend fun nip04Encrypt(
-                plaintext: String,
-                toPublicKey: String,
-            ): String = syncSigner.nip04Encrypt(plaintext, toPublicKey)
+    private fun textNoteBuilder(
+        content: String,
+        tags: List<Array<String>> = emptyList(),
+    ): RustEventBuilder =
+        RustEventBuilder.Companion
+            .textNote(content)
+            .tags(tags.map { RustTag.Companion.parse(it.toList()) })
 
-            override suspend fun nip04Decrypt(
-                ciphertext: String,
-                fromPublicKey: String,
-            ): String = syncSigner.nip04Decrypt(ciphertext, fromPublicKey)
-
-            override suspend fun nip44Encrypt(
-                plaintext: String,
-                toPublicKey: String,
-            ): String = syncSigner.nip44Encrypt(plaintext, toPublicKey)
-
-            override suspend fun nip44Decrypt(
-                ciphertext: String,
-                fromPublicKey: String,
-            ): String = syncSigner.nip44Decrypt(ciphertext, fromPublicKey)
-
-            override suspend fun decryptZapEvent(event: LnZapRequestEvent): LnZapPrivateEvent = syncSigner.decryptZapEvent(event)
-
-            override suspend fun deriveKey(nonce: String): String = syncSigner.deriveKey(nonce)
-
-            override fun hasForegroundSupport(): Boolean = false
-        }
-    }
-
-    private fun <T : Event> EventTemplate<T>.sign(
-        pubKey: String,
-        privKey: ByteArray,
-        pubKeyByteArray: ByteArray,
-    ): T =
-        com.vitorpamplona.quartz.nip01Core.crypto.EventAssembler.Companion.hashAndSign(
-            pubKey,
-            createdAt,
-            kind,
-            tags,
-            content,
-            privKey,
-            pubKeyByteArray,
-        )
-
-    private fun parseRelayMessage(raw: String): RelayMessage? =
-        runCatching {
-            val payload = JSON.parseToJsonElement(raw).jsonArray
-            when (payload.firstOrNull()?.jsonPrimitive?.contentOrNull) {
-                "EVENT" ->
-                    payload.getOrNull(2)?.let {
-                        RelayMessage.EventEnvelope(
-                            Event.Companion.fromJson(it.toString()),
-                        )
-                    }
-
-                "EOSE" -> RelayMessage.EndOfStoredEvents
-                "OK" ->
-                    payload.getOrNull(1)?.jsonPrimitive?.contentOrNull?.let { eventId ->
-                        RelayMessage.OkEnvelope(
-                            eventId = eventId,
-                            accepted = payload.getOrNull(2)?.jsonPrimitive?.booleanOrNull == true,
-                            message = payload.getOrNull(3)?.jsonPrimitive?.contentOrNull,
-                        )
-                    }
-
-                else -> null
+    private fun buildReplyTags(target: Event): List<Array<String>> =
+        when (target) {
+            is TextNoteEvent -> {
+                val rootId = target.parentEventIds().firstOrNull() ?: target.id
+                buildList {
+                    add(arrayOf("e", rootId, "", "root"))
+                    add(arrayOf("e", target.id, "", "reply"))
+                    add(pTag(target.pubKey))
+                }.distinctBy { it.joinToString(separator = "\u0000") }
             }
-        }.getOrNull()
 
-    private fun ByteArray.toHexString(): String {
-        val chars = CharArray(size * 2)
-        forEachIndexed { index, byte ->
-            val value = byte.toInt() and 0xff
-            chars[index * 2] = HEX_DIGITS[value ushr 4]
-            chars[index * 2 + 1] = HEX_DIGITS[value and 0x0f]
+            else ->
+                listOf(
+                    arrayOf("e", target.id),
+                    pTag(target.pubKey),
+                )
         }
-        return chars.concatToString()
-    }
 
-    private suspend fun loadEvent(
-        relays: List<String>,
-        statusKey: MicroBlogKey,
-    ): Event? =
+    private suspend fun loadEvent(statusKey: MicroBlogKey): Event? =
         queryAllRelays(
-            relays = relays,
             filters = listOf(Filter(ids = listOf(statusKey.id))),
         ).maxByOrNull { it.createdAt }
 
-    private suspend fun buildAncestorChain(
-        event: Event,
-        relays: List<String>,
-    ): List<Event> {
+    private suspend fun buildAncestorChain(event: Event): List<Event> {
         val chain = mutableListOf<Event>()
         var current: Event? = event
         val visited = mutableSetOf<String>()
@@ -1399,7 +944,6 @@ internal object NostrService : KoinComponent {
             }
             val parent =
                 loadEvent(
-                    relays = relays,
                     statusKey = MicroBlogKey(parentId, NOSTR_HOST),
                 ) ?: break
             chain += parent
@@ -1409,12 +953,10 @@ internal object NostrService : KoinComponent {
     }
 
     private suspend fun loadDirectReplies(
-        relays: List<String>,
         statusKey: MicroBlogKey,
         pageSize: Int,
     ): List<Event> =
         queryAllRelays(
-            relays = relays,
             filters =
                 listOf(
                     Filter(
@@ -1431,17 +973,21 @@ internal object NostrService : KoinComponent {
     internal fun quoteTagArray(
         target: Event?,
         statusKey: MicroBlogKey,
-        relayHint: com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl?,
         cachedAuthorPubKey: String?,
     ): Array<String>? =
         when {
-            target != null -> EventHintBundle(target).toQTagArray()
-            cachedAuthorPubKey != null && statusKey.id.length == 64 -> QEventTag.assemble(statusKey.id, relayHint, cachedAuthorPubKey)
+            target != null -> arrayOf("q", target.id, "", target.pubKey)
+            cachedAuthorPubKey != null && statusKey.id.length == 64 ->
+                buildList {
+                    add("q")
+                    add(statusKey.id)
+                    add(cachedAuthorPubKey)
+                }.toTypedArray()
+
             else -> null
         }
 
     private suspend fun loadInteractionStats(
-        relays: List<String>,
         accountPubkey: String,
         targetEventIds: List<String>,
     ): Map<String, InteractionStats> {
@@ -1455,11 +1001,15 @@ internal object NostrService : KoinComponent {
                 .chunked(MAX_EVENT_ID_BATCH)
                 .flatMap { ids ->
                     queryAllRelays(
-                        relays = relays,
                         filters =
                             listOf(
                                 Filter(
-                                    kinds = listOf(ReactionEvent.KIND, RepostEvent.KIND, GenericRepostEvent.KIND),
+                                    kinds =
+                                        listOf(
+                                            ReactionEvent.KIND,
+                                            RepostEvent.KIND,
+                                            GenericRepostEvent.KIND,
+                                        ),
                                     tags = mapOf("e" to ids),
                                     limit = maxOf(ids.size * 20, 200),
                                 ),
@@ -1531,7 +1081,6 @@ internal object NostrService : KoinComponent {
     }
 
     internal fun List<Event>.toUiTimeline(
-        accountKey: MicroBlogKey,
         profiles: Map<String, UiProfile>,
         eventsById: Map<String, Event>,
         interactionStats: Map<String, InteractionStats> = emptyMap(),
@@ -1551,30 +1100,34 @@ internal object NostrService : KoinComponent {
                 when (event) {
                     is TextNoteEvent ->
                         event.toUi(
-                            accountKey = accountKey,
-                            profile = profiles[event.pubKey] ?: profileOf(event.pubKey, null, accountKey),
+                            profile =
+                                profiles[event.pubKey] ?: profileOf(
+                                    event.pubKey,
+                                    null,
+                                ),
                             eventsById = eventsById,
                             profiles = profiles,
                             interactionStats = interactionStats,
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
+
                     is RepostEvent ->
                         event.toUiRepost(
-                            accountKey = accountKey,
                             profiles = profiles,
                             eventsById = eventsById,
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
+
                     is GenericRepostEvent ->
                         event.toUiGenericRepost(
-                            accountKey = accountKey,
                             profiles = profiles,
                             eventsById = eventsById,
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
+
                     else -> null
                 }
             if (resolved != null) {
@@ -1589,7 +1142,6 @@ internal object NostrService : KoinComponent {
     }
 
     private fun List<Event>.toUiNotifications(
-        accountKey: MicroBlogKey,
         accountPubkey: String,
         profiles: Map<String, UiProfile>,
         eventsById: Map<String, Event>,
@@ -1610,30 +1162,34 @@ internal object NostrService : KoinComponent {
                 when (event) {
                     is TextNoteEvent ->
                         event.toUi(
-                            accountKey = accountKey,
-                            profile = profiles[event.pubKey] ?: profileOf(event.pubKey, null, accountKey),
+                            profile =
+                                profiles[event.pubKey] ?: profileOf(
+                                    event.pubKey,
+                                    null,
+                                ),
                             eventsById = eventsById,
                             profiles = profiles,
                             interactionStats = interactionStats,
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
+
                     is RepostEvent ->
                         event.toUiRepost(
-                            accountKey = accountKey,
                             profiles = profiles,
                             eventsById = eventsById,
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
+
                     is GenericRepostEvent ->
                         event.toUiGenericRepost(
-                            accountKey = accountKey,
                             profiles = profiles,
                             eventsById = eventsById,
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
+
                     else -> null
                 }
             if (resolved != null) {
@@ -1644,7 +1200,6 @@ internal object NostrService : KoinComponent {
 
         return mapNotNull { event ->
             event.toUiNotification(
-                accountKey = accountKey,
                 accountPubkey = accountPubkey,
                 profiles = profiles,
                 eventsById = eventsById,
@@ -1655,7 +1210,6 @@ internal object NostrService : KoinComponent {
     }
 
     private fun TextNoteEvent.toUi(
-        accountKey: MicroBlogKey,
         profile: UiProfile,
         eventsById: Map<String, Event>,
         profiles: Map<String, UiProfile>,
@@ -1744,7 +1298,10 @@ internal object NostrService : KoinComponent {
                                             clickEvent =
                                                 ClickEvent.Deeplink(
                                                     DeeplinkRoute.Status.DeleteConfirm(
-                                                        accountType = AccountType.Specific(accountKey),
+                                                        accountType =
+                                                            AccountType.Specific(
+                                                                accountKey,
+                                                            ),
                                                         statusKey = statusKey,
                                                     ),
                                                 ),
@@ -1811,7 +1368,12 @@ internal object NostrService : KoinComponent {
                         } +
                         quoteAddressReferences()
                             .mapNotNull { address ->
-                                resolveAddressReference(address, eventsById, visited, resolveEvent)
+                                resolveAddressReference(
+                                    address,
+                                    eventsById,
+                                    visited,
+                                    resolveEvent,
+                                )
                             }
                 ).distinctBy { it.statusKey }
                     .toImmutableList(),
@@ -1914,6 +1476,7 @@ internal object NostrService : KoinComponent {
                     height = height,
                     width = width,
                 )
+
             isGifUrl(url) ->
                 UiMedia.Gif(
                     url = url,
@@ -1922,12 +1485,14 @@ internal object NostrService : KoinComponent {
                     height = height,
                     width = width,
                 )
+
             isAudioUrl(url) ->
                 UiMedia.Audio(
                     url = url,
                     description = description,
                     previewUrl = null,
                 )
+
             isImageUrl(url) ->
                 UiMedia.Image(
                     url = url,
@@ -1937,6 +1502,7 @@ internal object NostrService : KoinComponent {
                     width = width,
                     sensitive = false,
                 )
+
             else ->
                 UiMedia.Image(
                     url = url,
@@ -1953,7 +1519,13 @@ internal object NostrService : KoinComponent {
 
     private fun isImageUrl(url: String): Boolean =
         url.substringBefore('?').lowercase().let {
-            it.endsWith(".jpg") || it.endsWith(".jpeg") || it.endsWith(".png") || it.endsWith(".webp") || it.endsWith(".heic")
+            it.endsWith(".jpg") ||
+                it.endsWith(".jpeg") ||
+                it.endsWith(".png") ||
+                it.endsWith(".webp") ||
+                it.endsWith(
+                    ".heic",
+                )
         }
 
     private fun isVideoUrl(url: String): Boolean =
@@ -1965,11 +1537,16 @@ internal object NostrService : KoinComponent {
 
     private fun isAudioUrl(url: String): Boolean =
         url.substringBefore('?').lowercase().let {
-            it.endsWith(".mp3") || it.endsWith(".m4a") || it.endsWith(".aac") || it.endsWith(".wav") || it.endsWith(".ogg")
+            it.endsWith(".mp3") ||
+                it.endsWith(".m4a") ||
+                it.endsWith(".aac") ||
+                it.endsWith(".wav") ||
+                it.endsWith(
+                    ".ogg",
+                )
         }
 
     private fun RepostEvent.toUiRepost(
-        accountKey: MicroBlogKey,
         profiles: Map<String, UiProfile>,
         eventsById: Map<String, Event>,
         visited: Set<String>,
@@ -1980,8 +1557,7 @@ internal object NostrService : KoinComponent {
         return boostedPost.copy(
             message =
                 repostMessage(
-                    accountKey = accountKey,
-                    actor = profiles[pubKey] ?: profileOf(pubKey, null, accountKey),
+                    actor = profiles[pubKey] ?: profileOf(pubKey, null),
                     statusKey = MicroBlogKey(id, NOSTR_HOST),
                     createdAt = createdAt,
                 ),
@@ -1991,7 +1567,6 @@ internal object NostrService : KoinComponent {
     }
 
     private fun GenericRepostEvent.toUiGenericRepost(
-        accountKey: MicroBlogKey,
         profiles: Map<String, UiProfile>,
         eventsById: Map<String, Event>,
         visited: Set<String>,
@@ -2002,8 +1577,7 @@ internal object NostrService : KoinComponent {
         return boostedPost.copy(
             message =
                 repostMessage(
-                    accountKey = accountKey,
-                    actor = profiles[pubKey] ?: profileOf(pubKey, null, accountKey),
+                    actor = profiles[pubKey] ?: profileOf(pubKey, null),
                     statusKey = MicroBlogKey(id, NOSTR_HOST),
                     createdAt = createdAt,
                 ),
@@ -2031,7 +1605,6 @@ internal object NostrService : KoinComponent {
             }
 
     private fun repostMessage(
-        accountKey: MicroBlogKey,
         actor: UiProfile,
         statusKey: MicroBlogKey,
         createdAt: Long,
@@ -2064,7 +1637,6 @@ internal object NostrService : KoinComponent {
             ?.let { resolveEvent(it, visited) }
 
     private fun Event.toUiNotification(
-        accountKey: MicroBlogKey,
         accountPubkey: String,
         profiles: Map<String, UiProfile>,
         eventsById: Map<String, Event>,
@@ -2075,8 +1647,7 @@ internal object NostrService : KoinComponent {
             is TextNoteEvent -> {
                 val post =
                     toUi(
-                        accountKey = accountKey,
-                        profile = profiles[pubKey] ?: profileOf(pubKey, null, accountKey),
+                        profile = profiles[pubKey] ?: profileOf(pubKey, null),
                         eventsById = eventsById,
                         profiles = profiles,
                         interactionStats = interactionStats,
@@ -2087,8 +1658,11 @@ internal object NostrService : KoinComponent {
                 post.copy(
                     message =
                         notificationMessage(
-                            accountKey = accountKey,
-                            actor = post.user ?: profiles[pubKey] ?: profileOf(pubKey, null, accountKey),
+                            actor =
+                                post.user ?: profiles[pubKey] ?: profileOf(
+                                    pubKey,
+                                    null,
+                                ),
                             statusKey = MicroBlogKey(id, NOSTR_HOST),
                             createdAt = createdAt,
                             icon = if (hasParent) UiIcon.Reply else UiIcon.Mention,
@@ -2118,8 +1692,7 @@ internal object NostrService : KoinComponent {
                 target.copy(
                     message =
                         notificationMessage(
-                            accountKey = accountKey,
-                            actor = profiles[pubKey] ?: profileOf(pubKey, null, accountKey),
+                            actor = profiles[pubKey] ?: profileOf(pubKey, null),
                             statusKey = MicroBlogKey(id, NOSTR_HOST),
                             createdAt = createdAt,
                             icon = UiIcon.Favourite,
@@ -2142,8 +1715,7 @@ internal object NostrService : KoinComponent {
                 boosted.copy(
                     message =
                         notificationMessage(
-                            accountKey = accountKey,
-                            actor = profiles[pubKey] ?: profileOf(pubKey, null, accountKey),
+                            actor = profiles[pubKey] ?: profileOf(pubKey, null),
                             statusKey = MicroBlogKey(id, NOSTR_HOST),
                             createdAt = createdAt,
                             icon = UiIcon.Retweet,
@@ -2168,8 +1740,7 @@ internal object NostrService : KoinComponent {
                 boosted.copy(
                     message =
                         notificationMessage(
-                            accountKey = accountKey,
-                            actor = profiles[pubKey] ?: profileOf(pubKey, null, accountKey),
+                            actor = profiles[pubKey] ?: profileOf(pubKey, null),
                             statusKey = MicroBlogKey(id, NOSTR_HOST),
                             createdAt = createdAt,
                             icon = UiIcon.Retweet,
@@ -2187,10 +1758,7 @@ internal object NostrService : KoinComponent {
             else -> null
         }
 
-    private suspend fun loadEventGraph(
-        relays: List<String>,
-        roots: List<Event>,
-    ): Map<String, Event> {
+    private suspend fun loadEventGraph(roots: List<Event>): Map<String, Event> {
         val eventsById = LinkedHashMap<String, Event>()
         val pendingEventIds = LinkedHashSet<String>()
         val pendingAddresses = LinkedHashMap<String, Address>()
@@ -2215,7 +1783,8 @@ internal object NostrService : KoinComponent {
         roots.forEach(::register)
 
         repeat(MAX_REFERENCE_FETCH_ROUNDS) {
-            val eventIdsToFetch = pendingEventIds.filterNot(eventsById::containsKey).take(MAX_EVENT_ID_BATCH)
+            val eventIdsToFetch =
+                pendingEventIds.filterNot(eventsById::containsKey).take(MAX_EVENT_ID_BATCH)
             val addressesToFetch =
                 pendingAddresses.values
                     .filter { address ->
@@ -2230,8 +1799,8 @@ internal object NostrService : KoinComponent {
             addressesToFetch.forEach { pendingAddresses.remove(it.toValue()) }
 
             val fetchedEvents =
-                fetchEventsByIds(relays, eventIdsToFetch) +
-                    fetchEventsByAddress(relays, addressesToFetch)
+                fetchEventsByIds(eventIdsToFetch) +
+                    fetchEventsByAddress(addressesToFetch)
 
             if (fetchedEvents.isEmpty()) {
                 return@repeat
@@ -2243,10 +1812,7 @@ internal object NostrService : KoinComponent {
         return eventsById
     }
 
-    private suspend fun fetchEventsByIds(
-        relays: List<String>,
-        eventIds: List<String>,
-    ): List<Event> =
+    private suspend fun fetchEventsByIds(eventIds: List<String>): List<Event> =
         if (eventIds.isEmpty()) {
             emptyList()
         } else {
@@ -2254,16 +1820,12 @@ internal object NostrService : KoinComponent {
                 .chunked(MAX_EVENT_ID_BATCH)
                 .flatMap { ids ->
                     queryAllRelays(
-                        relays = relays,
                         filters = listOf(Filter(ids = ids)),
                     )
                 }.distinctBy { it.id }
         }
 
-    private suspend fun fetchEventsByAddress(
-        relays: List<String>,
-        addresses: List<Address>,
-    ): List<Event> {
+    private suspend fun fetchEventsByAddress(addresses: List<Address>): List<Event> {
         if (addresses.isEmpty()) {
             return emptyList()
         }
@@ -2277,7 +1839,6 @@ internal object NostrService : KoinComponent {
                 )
             }
         return queryAllRelays(
-            relays = relays,
             filters = filters,
         ).groupBy { it.addressValue() }
             .mapNotNull { (_, values) -> values.maxByOrNull { it.createdAt } }
@@ -2323,10 +1884,9 @@ internal object NostrService : KoinComponent {
     private fun profileOf(
         pubKey: String,
         metadata: UserMetadata?,
-        accountKey: MicroBlogKey,
     ): UiProfile {
         val bestName = metadata?.bestName().orEmpty()
-        val npub = NPub.Companion.create(pubKey)
+        val npub = bech32PublicKey(pubKey)
         val handleRaw =
             metadata?.name?.takeIf { it.isNotBlank() }
                 ?: metadata?.nip05?.substringBefore("@")?.takeIf { it.isNotBlank() }
@@ -2458,20 +2018,6 @@ internal object NostrService : KoinComponent {
             "https://$this"
         }
 
-    private sealed interface RelayMessage {
-        data class EventEnvelope(
-            val event: Event,
-        ) : RelayMessage
-
-        data class OkEnvelope(
-            val eventId: String,
-            val accepted: Boolean,
-            val message: String?,
-        ) : RelayMessage
-
-        data object EndOfStoredEvents : RelayMessage
-    }
-
     internal data class InteractionStats(
         val reactionCount: Long = 0,
         val repostCount: Long = 0,
@@ -2479,18 +2025,10 @@ internal object NostrService : KoinComponent {
         val myRepostEventId: String? = null,
     )
 
-    private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
-    private val HEX_DIGITS = "0123456789abcdef".toCharArray()
-    private val timelineEventKinds = listOf(TextNoteEvent.KIND, RepostEvent.KIND, GenericRepostEvent.KIND)
-    private val notificationInteractionKinds = listOf(ReactionEvent.KIND, RepostEvent.KIND, GenericRepostEvent.KIND)
-    private const val RELAY_PUBLISH_TIMEOUT_MILLIS = 1_500L
-    private const val RELAY_TIMEOUT_MILLIS = 3_500L
-    private const val RELAY_SETTLE_TIMEOUT_MILLIS = 350L
-    private const val MAX_REFERENCE_FETCH_ROUNDS = 4
-    private const val MAX_EVENT_ID_BATCH = 100
-    private const val MAX_ADDRESS_FILTER_BATCH = 32
-    private const val MAX_HOME_AUTHORS = 250
-    private const val MIN_METADATA_EVENT_LIMIT = 50
+    private val timelineEventKinds =
+        listOf(TextNoteEvent.KIND, RepostEvent.KIND, GenericRepostEvent.KIND)
+    private val notificationInteractionKinds =
+        listOf(ReactionEvent.KIND, RepostEvent.KIND, GenericRepostEvent.KIND)
 
     private fun notificationFilters(
         accountPubkey: String,
@@ -2529,7 +2067,6 @@ internal object NostrService : KoinComponent {
         }
 
     private fun notificationMessage(
-        accountKey: MicroBlogKey,
         actor: UiProfile,
         statusKey: MicroBlogKey,
         createdAt: Long,

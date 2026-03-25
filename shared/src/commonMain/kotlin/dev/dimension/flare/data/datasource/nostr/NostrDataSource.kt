@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.nostr
 
+import dev.dimension.flare.common.SwitchingServiceManager
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
@@ -34,9 +35,12 @@ import dev.dimension.flare.ui.model.mapper.nostrRepost
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+
+internal typealias NostrServiceManager = SwitchingServiceManager<UiAccount.Nostr.Credential, NostrService>
 
 internal class NostrDataSource(
     override val accountKey: MicroBlogKey,
@@ -47,13 +51,27 @@ internal class NostrDataSource(
     PostEventHandler.Handler,
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
+    private val ioScope: CoroutineScope by inject()
+    private val nostrCache: NostrCache by inject()
     private val loader by lazy {
         NostrLoader(
             accountKey = accountKey,
-            credentialProvider = {
-                accountRepository
-                    .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
-                    .first()
+            serviceManager = serviceManager,
+        )
+    }
+
+    private val serviceManager by lazy {
+        SwitchingServiceManager(
+            accountRepository.credentialFlow<UiAccount.Nostr.Credential>(accountKey),
+            ioScope,
+            {
+                NostrService(
+                    nostrCache,
+                    accountKey,
+                    it,
+                ).also {
+                    it.ensureConnection()
+                }
             },
         )
     }
@@ -120,12 +138,12 @@ internal class NostrDataSource(
                         is PagingRequest.Prepend -> null
                     }
                 val data =
-                    NostrService.loadHomeTimeline(
-                        credential = credential,
-                        accountKey = accountKey,
-                        pageSize = pageSize,
-                        until = until,
-                    )
+                    serviceManager.withService { service ->
+                        service.loadHomeTimeline(
+                            pageSize = pageSize,
+                            until = until,
+                        )
+                    }
                 val nextKey =
                     data
                         .filterIsInstance<UiTimelineV2.Post>()
@@ -173,14 +191,14 @@ internal class NostrDataSource(
                         is PagingRequest.Prepend -> null
                     }
                 val data =
-                    NostrService.loadUserTimeline(
-                        credential = credential,
-                        accountKey = accountKey,
-                        targetPubkey = userKey.id,
-                        pageSize = pageSize,
-                        until = until,
-                        mediaOnly = mediaOnly,
-                    )
+                    serviceManager.withService {
+                        it.loadUserTimeline(
+                            targetPubkey = userKey.id,
+                            pageSize = pageSize,
+                            until = until,
+                            mediaOnly = mediaOnly,
+                        )
+                    }
                 val nextKey =
                     data
                         .filterIsInstance<UiTimelineV2.Post>()
@@ -199,11 +217,7 @@ internal class NostrDataSource(
         StatusDetailRemoteMediator(
             statusKey = statusKey,
             accountKey = accountKey,
-            credentialProvider = {
-                accountRepository
-                    .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
-                    .first()
-            },
+            serviceManager = serviceManager,
         )
 
     override fun searchStatus(query: String): RemoteLoader<UiTimelineV2> =
@@ -228,13 +242,13 @@ internal class NostrDataSource(
                         is PagingRequest.Prepend -> null
                     }
                 val data =
-                    NostrService.searchStatus(
-                        credential = credential,
-                        accountKey = accountKey,
-                        query = query,
-                        pageSize = pageSize,
-                        until = until,
-                    )
+                    serviceManager.withService {
+                        it.searchStatus(
+                            query = query,
+                            pageSize = pageSize,
+                            until = until,
+                        )
+                    }
                 val nextKey =
                     data
                         .filterIsInstance<UiTimelineV2.Post>()
@@ -265,12 +279,12 @@ internal class NostrDataSource(
                         .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
                         .first()
                 val data =
-                    NostrService.searchUser(
-                        credential = credential,
-                        accountKey = accountKey,
-                        query = query,
-                        pageSize = pageSize,
-                    )
+                    serviceManager.withService {
+                        it.searchUser(
+                            query = query,
+                            pageSize = pageSize,
+                        )
+                    }
                 return PagingResult(
                     endOfPaginationReached = true,
                     data = data,
@@ -318,13 +332,13 @@ internal class NostrDataSource(
                         is PagingRequest.Prepend -> null
                     }
                 val data =
-                    NostrService.loadNotifications(
-                        credential = credential,
-                        accountKey = accountKey,
-                        pageSize = pageSize,
-                        until = until,
-                        type = type,
-                    )
+                    serviceManager.withService {
+                        it.loadNotifications(
+                            pageSize = pageSize,
+                            until = until,
+                            type = type,
+                        )
+                    }
                 val nextKey =
                     data
                         .filterIsInstance<UiTimelineV2.Post>()
@@ -351,16 +365,18 @@ internal class NostrDataSource(
         when (event) {
             is PostEvent.Nostr.Like -> {
                 if (event.reactionEventId != null) {
-                    NostrService.deleteStatus(
-                        credential = credential,
-                        statusKey = MicroBlogKey(event.reactionEventId, NostrService.NOSTR_HOST),
-                    )
+                    serviceManager.withService {
+                        it.deleteStatus(
+                            statusKey = MicroBlogKey(event.reactionEventId, NostrService.NOSTR_HOST),
+                        )
+                    }
                 } else {
                     val reactionEventId =
-                        NostrService.react(
-                            credential = credential,
-                            statusKey = event.postKey,
-                        )
+                        serviceManager.withService {
+                            it.react(
+                                statusKey = event.postKey,
+                            )
+                        }
                     updater.updateActionMenu(
                         event.postKey,
                         ActionMenu.nostrLike(
@@ -374,23 +390,26 @@ internal class NostrDataSource(
             }
 
             is PostEvent.Nostr.Report ->
-                NostrService.report(
-                    credential = credential,
-                    statusKey = event.postKey,
-                )
+                serviceManager.withService {
+                    it.report(
+                        statusKey = event.postKey,
+                    )
+                }
 
             is PostEvent.Nostr.Repost -> {
                 if (event.repostEventId != null) {
-                    NostrService.deleteStatus(
-                        credential = credential,
-                        statusKey = MicroBlogKey(event.repostEventId, NostrService.NOSTR_HOST),
-                    )
+                    serviceManager.withService {
+                        it.deleteStatus(
+                            statusKey = MicroBlogKey(event.repostEventId, NostrService.NOSTR_HOST),
+                        )
+                    }
                 } else {
                     val repostEventId =
-                        NostrService.repost(
-                            credential = credential,
-                            statusKey = event.postKey,
-                        )
+                        serviceManager.withService {
+                            it.repost(
+                                statusKey = event.postKey,
+                            )
+                        }
                     updater.updateActionMenu(
                         event.postKey,
                         ActionMenu.nostrRepost(
@@ -415,25 +434,27 @@ internal class NostrDataSource(
                 .first()
         when (val composeStatus = data.referenceStatus?.composeStatus) {
             is ComposeStatus.Quote ->
-                NostrService.composeQuote(
-                    accountKey = accountKey,
-                    credential = credential,
-                    statusKey = composeStatus.statusKey,
-                    content = data.content,
-                )
+                serviceManager.withService {
+                    it.composeQuote(
+                        statusKey = composeStatus.statusKey,
+                        content = data.content,
+                    )
+                }
 
             is ComposeStatus.Reply ->
-                NostrService.composeReply(
-                    credential = credential,
-                    statusKey = composeStatus.statusKey,
-                    content = data.content,
-                )
+                serviceManager.withService {
+                    it.composeReply(
+                        statusKey = composeStatus.statusKey,
+                        content = data.content,
+                    )
+                }
 
             null ->
-                NostrService.composeNote(
-                    credential = credential,
-                    content = data.content,
-                )
+                serviceManager.withService {
+                    it.composeNote(
+                        content = data.content,
+                    )
+                }
         }
     }
 

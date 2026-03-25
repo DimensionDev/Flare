@@ -4,16 +4,14 @@ import androidx.paging.ExperimentalPagingApi
 import dev.dimension.flare.data.datasource.microblog.paging.CacheableRemoteLoader
 import dev.dimension.flare.data.datasource.microblog.paging.PagingRequest
 import dev.dimension.flare.data.datasource.microblog.paging.PagingResult
-import dev.dimension.flare.data.network.nostr.NostrService
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimelineV2
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
     private val statusKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
-    private val credentialProvider: suspend () -> UiAccount.Nostr.Credential,
+    private val serviceManager: NostrServiceManager,
 ) : CacheableRemoteLoader<UiTimelineV2> {
     override val pagingKey: String =
         buildString {
@@ -26,19 +24,18 @@ internal class StatusDetailRemoteMediator(
     override suspend fun load(
         pageSize: Int,
         request: PagingRequest,
-    ): PagingResult<UiTimelineV2> {
-        val credential = credentialProvider()
-        return when (request) {
+    ): PagingResult<UiTimelineV2> =
+        when (request) {
             PagingRequest.Refresh ->
                 PagingResult(
                     endOfPaginationReached = false,
                     data =
                         listOf(
-                            NostrService.loadStatus(
-                                credential = credential,
-                                accountKey = accountKey,
-                                statusKey = statusKey,
-                            ),
+                            serviceManager.withService {
+                                it.loadStatus(
+                                    statusKey = statusKey,
+                                )
+                            },
                         ),
                     nextKey = pagingKey,
                 )
@@ -47,12 +44,12 @@ internal class StatusDetailRemoteMediator(
                 PagingResult(
                     endOfPaginationReached = true,
                     data =
-                        NostrService.loadStatusContext(
-                            credential = credential,
-                            accountKey = accountKey,
-                            statusKey = statusKey,
-                            pageSize = pageSize,
-                        ),
+                        serviceManager.withService {
+                            it.loadStatusContext(
+                                statusKey = statusKey,
+                                pageSize = pageSize,
+                            )
+                        },
                 )
 
             is PagingRequest.Prepend ->
@@ -60,5 +57,4 @@ internal class StatusDetailRemoteMediator(
                     endOfPaginationReached = true,
                 )
         }
-    }
 }

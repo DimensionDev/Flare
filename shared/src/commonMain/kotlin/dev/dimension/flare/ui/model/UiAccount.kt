@@ -37,8 +37,8 @@ public sealed class UiAccount {
         @Serializable
         @SerialName("NostrCredential")
         data class Credential(
-            val pubkey: String,
-            val nsec: String? = null,
+//            val pubkey: String,
+            val nsec: String,
             val relays: List<String> = emptyList(),
         ) : UiAccount.Credential
     }

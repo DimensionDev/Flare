@@ -1,11 +1,13 @@
 package dev.dimension.flare.data.network.nostr
 
 import dev.dimension.flare.common.TestFormatter
+import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.humanizer.PlatformFormatter
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -53,7 +55,7 @@ class NostrServiceTest {
     }
 
     @Test
-    fun importAccountAcceptsSecretOnlyAndNormalizesRelays() {
+    fun importAccountAcceptsSecretOnly() {
         val imported =
             NostrService.importAccount(
                 secretKeyInput = SECRET_KEY_HEX,
@@ -89,13 +91,17 @@ class NostrServiceTest {
             }
 
         val eventGraph = events.associateBy { it.id }
+        val service = createService()
         val timeline =
-            NostrService.run {
-                events.toUiTimeline(
-                    accountKey = MicroBlogKey("nostr-test", NostrService.NOSTR_HOST),
-                    profiles = emptyMap<String, dev.dimension.flare.ui.model.UiProfile>(),
-                    eventsById = eventGraph,
-                )
+            try {
+                service.run {
+                    events.toUiTimeline(
+                        profiles = emptyMap<String, UiProfile>(),
+                        eventsById = eventGraph,
+                    )
+                }
+            } finally {
+                service.close()
             }
 
         val root = timeline.first { it.statusKey.id == ROOT_EVENT_ID }
@@ -132,14 +138,18 @@ class NostrServiceTest {
     @Test
     fun quoteTagArrayUsesEventWhenAvailable() {
         val target = Event.fromJson(ROOT_EVENT_JSON)
+        val service = createService()
 
         val tag =
-            NostrService.quoteTagArray(
-                target = target,
-                statusKey = MicroBlogKey(ROOT_EVENT_ID, NostrService.NOSTR_HOST),
-                relayHint = RelayUrlNormalizer.normalizeOrNull("wss://relay.damus.io"),
-                cachedAuthorPubKey = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-            )
+            try {
+                service.quoteTagArray(
+                    target = target,
+                    statusKey = MicroBlogKey(ROOT_EVENT_ID, NostrService.NOSTR_HOST),
+                    cachedAuthorPubKey = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                )
+            } finally {
+                service.close()
+            }
 
         assertContentEquals(
             arrayOf("q", ROOT_EVENT_ID, "", target.pubKey),
@@ -149,19 +159,22 @@ class NostrServiceTest {
 
     @Test
     fun quoteTagArrayFallsBackToCachedAuthorWhenTargetMissing() {
+        val service = createService()
         val tag =
-            NostrService.quoteTagArray(
-                target = null,
-                statusKey = MicroBlogKey(ROOT_EVENT_ID, NostrService.NOSTR_HOST),
-                relayHint = RelayUrlNormalizer.normalizeOrNull("wss://relay.damus.io"),
-                cachedAuthorPubKey = "0fe0b18b4dbf0e0aa40fcd47209b2a49b3431fc453b460efcf45ca0bd16bd6ac",
-            )
+            try {
+                service.quoteTagArray(
+                    target = null,
+                    statusKey = MicroBlogKey(ROOT_EVENT_ID, NostrService.NOSTR_HOST),
+                    cachedAuthorPubKey = "0fe0b18b4dbf0e0aa40fcd47209b2a49b3431fc453b460efcf45ca0bd16bd6ac",
+                )
+            } finally {
+                service.close()
+            }
 
         assertContentEquals(
             arrayOf(
                 "q",
                 ROOT_EVENT_ID,
-                "wss://relay.damus.io/",
                 "0fe0b18b4dbf0e0aa40fcd47209b2a49b3431fc453b460efcf45ca0bd16bd6ac",
             ),
             tag,
@@ -170,13 +183,18 @@ class NostrServiceTest {
 
     @Test
     fun resolveMetadataFallsBackToOlderParsableEvent() {
+        val service = createService()
         val metadata =
-            NostrService.resolveMetadata(
-                listOf(
-                    Event.fromJson(INVALID_LATEST_METADATA_EVENT_JSON) as MetadataEvent,
-                    Event.fromJson(VALID_OLDER_METADATA_EVENT_JSON) as MetadataEvent,
-                ),
-            )
+            try {
+                service.resolveMetadata(
+                    listOf(
+                        Event.fromJson(INVALID_LATEST_METADATA_EVENT_JSON) as MetadataEvent,
+                        Event.fromJson(VALID_OLDER_METADATA_EVENT_JSON) as MetadataEvent,
+                    ),
+                )
+            } finally {
+                service.close()
+            }
 
         assertNotNull(metadata)
         assertEquals("alice", metadata.name)
@@ -184,6 +202,21 @@ class NostrServiceTest {
     }
 
     private companion object {
+        fun createService(): NostrService =
+            NostrService(
+                cache =
+                    object : NostrCache {
+                        override suspend fun getProfiles(pubKeys: List<String>): Map<String, UiProfile> = emptyMap()
+
+                        override suspend fun getPost(
+                            accountKey: MicroBlogKey,
+                            statusKey: MicroBlogKey,
+                        ): UiTimelineV2.Post? = null
+                    },
+                accountKey = MicroBlogKey("nostr-test", NostrService.NOSTR_HOST),
+                credential = UiAccount.Nostr.Credential(nsec = NostrService.generateAccount().nsec),
+            )
+
         const val SECRET_KEY_HEX = "1111111111111111111111111111111111111111111111111111111111111111"
         const val ROOT_EVENT_ID = "1b14014e85b5a3f554dc92198ce118d83562147ca08a98e4bb07b00d003108f7"
         const val ROOT_EVENT_PUBKEY = "0fe0b18b4dbf0e0aa40fcd47209b2a49b3431fc453b460efcf45ca0bd16bd6ac"

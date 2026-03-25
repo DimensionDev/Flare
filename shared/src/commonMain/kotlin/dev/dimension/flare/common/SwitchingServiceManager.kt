@@ -2,7 +2,9 @@ package dev.dimension.flare.common
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -15,7 +17,7 @@ internal class SwitchingServiceManager<C, S : AutoCloseable>(
     credentialFlow: Flow<C?>,
     parentScope: CoroutineScope,
     private val createService: suspend (C) -> S,
-) {
+) : AutoCloseable {
     private class Entry<S : AutoCloseable>(
         val service: S,
         var refCount: Int = 0,
@@ -26,35 +28,43 @@ internal class SwitchingServiceManager<C, S : AutoCloseable>(
     private val scope = CoroutineScope(parentScope.coroutineContext + SupervisorJob())
     private val mutex = Mutex()
     private val current = MutableStateFlow<Entry<S>?>(null)
+    private val job: Job
+
+    override fun close() {
+        job.cancel()
+        scope.cancel()
+        current.value?.service?.close()
+    }
 
     init {
-        scope.launch {
-            credentialFlow.collect { credential ->
-                val newEntry = credential?.let { Entry(createService(it)) }
+        job =
+            scope.launch {
+                credentialFlow.collect { credential ->
+                    val newEntry = credential?.let { Entry(createService(it)) }
 
-                val retired =
-                    mutex.withLock {
-                        val old = current.value
+                    val retired =
+                        mutex.withLock {
+                            val old = current.value
 
-                        if (old != null) {
-                            old.acceptingNewCalls = false
-                            if (old.refCount == 0) {
-                                old.drained.complete(Unit)
+                            if (old != null) {
+                                old.acceptingNewCalls = false
+                                if (old.refCount == 0) {
+                                    old.drained.complete(Unit)
+                                }
                             }
+
+                            current.value = newEntry
+                            old
                         }
 
-                        current.value = newEntry
-                        old
-                    }
-
-                if (retired != null) {
-                    scope.launch {
-                        retired.drained.await()
-                        retired.service.close()
+                    if (retired != null) {
+                        scope.launch {
+                            retired.drained.await()
+                            retired.service.close()
+                        }
                     }
                 }
             }
-        }
     }
 
     suspend fun <T> withService(block: suspend (S) -> T): T {

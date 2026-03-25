@@ -11,119 +11,117 @@ struct FlareRoot: View {
     @State var selectedTab: String?
     
     var body: some View {
-        if !activeAccountPresenter.state.user.isLoading {
-            StateView(state: homeTabsPresenter.state.tabs) { tabs in
-                TabView(selection: $selectedTab) {
-                    if horizontalSizeClass == .regular {
-                        ForEach(tabs.primary, id: \.key) { data in
-                            let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
-                                Int(notificationBadgePresenter.state.count)
-                            } else {
-                                0
-                            }
-                            Tab(value: data.key) {
-                                Router { onNavigate in
-                                    data.view(onNavigate: onNavigate)
-                                }
-                            } label: {
-                                Label {
-                                    TabTitle(title: data.metaData.title)
-                                } icon: {
-                                    TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
-                                }
-                            }
-                            .badge(badge)
+        StateView(state: homeTabsPresenter.state.tabs) { tabs in
+            TabView(selection: $selectedTab) {
+                if horizontalSizeClass == .regular {
+                    ForEach(tabs.primary, id: \.key) { data in
+                        let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
+                            Int(notificationBadgePresenter.state.count)
+                        } else {
+                            0
                         }
-                        ForEach(tabs.secondary, id: \.key) { data in
-                            Tab(value: data.key) {
-                                Router { onNavigate in
-                                    data.view(onNavigate: onNavigate)
-                                }
-                            } label: {
-                                Label {
-                                    TabTitle(title: data.metaData.title)
-                                } icon: {
-                                    TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
-                                }
-                            }
-                            .tabPlacement(.sidebarOnly)
-                        }
-                        if let profileRoute = tabs.extraProfileRoute {
-                            Tab(value: profileRoute.key) {
-                                Router { onNavigate in
-                                    profileRoute.view(onNavigate: onNavigate)
-                                }
-                            } label: {
-                                Label {
-                                    TabTitle(title: profileRoute.metaData.title)
-                                } icon: {
-                                    TabIcon(icon: profileRoute.metaData.icon, accountType: profileRoute.account, iconOnly: true)
-                                }
-                            }
-                            .tabPlacement(.sidebarOnly)
-                            .defaultVisibility(.hidden, for: .sidebar)
-                        }
-                        Tab(value: "settings") {
-                            Router { _ in
-                                SettingsScreen()
+                        Tab(value: data.key, role: data is DiscoverTabItem ? .some(.search) : .none) {
+                            Router { onNavigate in
+                                data.view(onNavigate: onNavigate)
                             }
                         } label: {
                             Label {
-                                Text("settings_title")
+                                TabTitle(title: data.metaData.title)
                             } icon: {
-                                Image("fa-gear")
+                                TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
+                            }
+                        }
+                        .badge(badge)
+                    }
+                    ForEach(tabs.secondary, id: \.key) { data in
+                        Tab(value: data.key) {
+                            Router { onNavigate in
+                                data.view(onNavigate: onNavigate)
+                            }
+                        } label: {
+                            Label {
+                                TabTitle(title: data.metaData.title)
+                            } icon: {
+                                TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
                             }
                         }
                         .tabPlacement(.sidebarOnly)
-                    } else {
-                        ForEach(tabs.primary, id: \.key) { data in
-                            let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
-                                Int(notificationBadgePresenter.state.count)
-                            } else {
-                                0
-                            }
-                            Tab(value: data.key) {
-                                Router { onNavigate in
-                                    data.view(onNavigate: onNavigate)
-                                }
-                            } label: {
-                                Label {
-                                    TabTitle(title: data.metaData.title)
-                                } icon: {
-                                    TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
-                                }
-                            }
-                            .badge(badge)
-                        }
                     }
-                    if case .success = onEnum(of: activeAccountPresenter.state.user) {
-                        Tab(value: "more", role: .search) {
-                            SecondaryTabsScreen(tabs: tabs.secondary)
+                    if let profileRoute = tabs.extraProfileRoute {
+                        Tab(value: profileRoute.key) {
+                            Router { onNavigate in
+                                profileRoute.view(onNavigate: onNavigate)
+                            }
                         } label: {
                             Label {
-                                Text("More")
+                                TabTitle(title: profileRoute.metaData.title)
                             } icon: {
-                                Image("fa-ellipsis")
+                                TabIcon(icon: profileRoute.metaData.icon, accountType: profileRoute.account, iconOnly: true)
                             }
                         }
+                        .tabPlacement(.sidebarOnly)
+                        .defaultVisibility(.hidden, for: .sidebar)
                     }
-                }
-                .tabViewStyle(.sidebarAdaptable)
-                .backport
-                .tabBarMinimizeBehavior(.onScrollDown)
-                .tabViewSidebarHeader {
-                    if let profileRoute = tabs.extraProfileRoute {
-                        StateView(state: activeAccountPresenter.state.user) { user in
-                            UserCompatView(data: user)
-                                .onTapGesture {
-                                    selectedTab = profileRoute.key
-                                }
+                    Tab(value: "settings") {
+                        Router { _ in
+                            SettingsScreen()
+                        }
+                    } label: {
+                        Label {
+                            Text("settings_title")
+                        } icon: {
+                            Image("fa-gear")
                         }
                     }
+                    .tabPlacement(.sidebarOnly)
+                } else {
+                    ForEach(tabs.primary, id: \.key) { data in
+                        let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
+                            Int(notificationBadgePresenter.state.count)
+                        } else {
+                            0
+                        }
+                        Tab(value: data.key, role: data is DiscoverTabItem ? .some(.search) : .none) {
+                            Router { onNavigate in
+                                data.view(onNavigate: onNavigate)
+                            }
+                        } label: {
+                            Label {
+                                TabTitle(title: data.metaData.title)
+                            } icon: {
+                                TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
+                            }
+                        }
+                        .badge(badge)
+                    }
                 }
-                .background(Color(.systemGroupedBackground))
+//                if case .success = onEnum(of: activeAccountPresenter.state.user) {
+//                    Tab(value: "more", role: .search) {
+//                        SecondaryTabsScreen(tabs: tabs.secondary)
+//                    } label: {
+//                        Label {
+//                            Text("More")
+//                        } icon: {
+//                            Image("fa-ellipsis")
+//                        }
+//                    }
+//                }
             }
-        } else {
+            .tabViewStyle(.sidebarAdaptable)
+            .backport
+            .tabBarMinimizeBehavior(.onScrollDown)
+            .tabViewSidebarHeader {
+                if let profileRoute = tabs.extraProfileRoute {
+                    StateView(state: activeAccountPresenter.state.user) { user in
+                        UserCompatView(data: user)
+                            .onTapGesture {
+                                selectedTab = profileRoute.key
+                            }
+                    }
+                }
+            }
+            .background(Color(.systemGroupedBackground))
+        } loadingContent: {
             SplashScreen()
         }
     }
@@ -137,102 +135,100 @@ struct BackportFlareRoot: View {
     @State var selectedTab: String?
     
     var body: some View {
-        if !activeAccountPresenter.state.user.isLoading {
-            StateView(state: homeTabsPresenter.state.tabs) { tabs in
-                TabView(selection: $selectedTab) {
-                    if horizontalSizeClass == .regular {
-                        ForEach(tabs.primary, id: \.key) { data in
-                            let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
-                                Int(notificationBadgePresenter.state.count)
-                            } else {
-                                0
-                            }
-                            Router { onNavigate in
-                                data.view(onNavigate: onNavigate)
-                            }
-                            .tabItem {
-                                Label {
-                                    TabTitle(title: data.metaData.title)
-                                } icon: {
-                                    TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
-                                }
-                            }
-                            .badge(badge)
-                            .tag(data.key)
+        StateView(state: homeTabsPresenter.state.tabs) { tabs in
+            TabView(selection: $selectedTab) {
+                if horizontalSizeClass == .regular {
+                    ForEach(tabs.primary, id: \.key) { data in
+                        let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
+                            Int(notificationBadgePresenter.state.count)
+                        } else {
+                            0
                         }
-                        ForEach(tabs.secondary, id: \.key) { data in
-                            Router { onNavigate in
-                                data.view(onNavigate: onNavigate)
-                            }
-                            .tabItem {
-                                Label {
-                                    TabTitle(title: data.metaData.title)
-                                } icon: {
-                                    TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
-                                }
-                            }
-                            .tag(data.key)
-                        }
-                        if let profileRoute = tabs.extraProfileRoute {
-                            Router { onNavigate in
-                                profileRoute.view(onNavigate: onNavigate)
-                            }
-                            .tabItem {
-                                Label {
-                                    TabTitle(title: profileRoute.metaData.title)
-                                } icon: {
-                                    TabIcon(icon: profileRoute.metaData.icon, accountType: profileRoute.account, iconOnly: true)
-                                }
-                            }
-                            .tag(profileRoute.key)
-                        }
-                        Router { _ in
-                            SettingsScreen()
+                        Router { onNavigate in
+                            data.view(onNavigate: onNavigate)
                         }
                         .tabItem {
                             Label {
-                                Text("settings_title")
+                                TabTitle(title: data.metaData.title)
                             } icon: {
-                                Image("fa-gear")
+                                TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
                             }
                         }
-                        .tag("settings")
-                    } else {
-                        ForEach(tabs.primary, id: \.key) { data in
-                            let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
-                                Int(notificationBadgePresenter.state.count)
-                            } else {
-                                0
+                        .badge(badge)
+                        .tag(data.key)
+                    }
+                    ForEach(tabs.secondary, id: \.key) { data in
+                        Router { onNavigate in
+                            data.view(onNavigate: onNavigate)
+                        }
+                        .tabItem {
+                            Label {
+                                TabTitle(title: data.metaData.title)
+                            } icon: {
+                                TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
                             }
-                            Router { onNavigate in
-                                data.view(onNavigate: onNavigate)
+                        }
+                        .tag(data.key)
+                    }
+                    if let profileRoute = tabs.extraProfileRoute {
+                        Router { onNavigate in
+                            profileRoute.view(onNavigate: onNavigate)
+                        }
+                        .tabItem {
+                            Label {
+                                TabTitle(title: profileRoute.metaData.title)
+                            } icon: {
+                                TabIcon(icon: profileRoute.metaData.icon, accountType: profileRoute.account, iconOnly: true)
                             }
-                            .tabItem {
-                                Label {
-                                    TabTitle(title: data.metaData.title)
-                                } icon: {
-                                    TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
-                                }
-                            }
-                            .badge(badge)
-                            .tag(data.key)
+                        }
+                        .tag(profileRoute.key)
+                    }
+                    Router { _ in
+                        SettingsScreen()
+                    }
+                    .tabItem {
+                        Label {
+                            Text("settings_title")
+                        } icon: {
+                            Image("fa-gear")
                         }
                     }
-                    if case .success = onEnum(of: activeAccountPresenter.state.user) {
-                        SecondaryTabsScreen(tabs: tabs.secondary)
-                            .tabItem {
-                                Label {
-                                    Text("More")
-                                } icon: {
-                                    Image("fa-ellipsis")
-                                }
+                    .tag("settings")
+                } else {
+                    ForEach(tabs.primary, id: \.key) { data in
+                        let badge = if data is NotificationTabItem || data is AllNotificationTabItem {
+                            Int(notificationBadgePresenter.state.count)
+                        } else {
+                            0
+                        }
+                        Router { onNavigate in
+                            data.view(onNavigate: onNavigate)
+                        }
+                        .tabItem {
+                            Label {
+                                TabTitle(title: data.metaData.title)
+                            } icon: {
+                                TabIcon(icon: data.metaData.icon, accountType: data.account, iconOnly: true)
                             }
-                            .tag("more")
+                        }
+                        .badge(badge)
+                        .tag(data.key)
                     }
                 }
-                .background(Color(.systemGroupedBackground))
+//                if case .success = onEnum(of: activeAccountPresenter.state.user) {
+//                    SecondaryTabsScreen(tabs: tabs.secondary)
+//                        .tabItem {
+//                            Label {
+//                                Text("More")
+//                            } icon: {
+//                                Image("fa-ellipsis")
+//                            }
+//                        }
+//                        .tag("more")
+//                }
             }
-        } else {
+            .background(Color(.systemGroupedBackground))
+        } loadingContent: {
             SplashScreen()
         }
     }

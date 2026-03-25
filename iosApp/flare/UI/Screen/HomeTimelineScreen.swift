@@ -34,50 +34,45 @@ struct HomeTimelineScreen: View {
                     }
                 })
                 .toolbar {
-                    let placement = if #available(iOS 26.0, *) {
-                        ToolbarItemPlacement.automatic
-                    } else {
-                        ToolbarItemPlacement.title
-                    }
-                    ToolbarItem(placement: placement) {
-                        ScrollView(.horizontal) {
-                            HStack(
-                                spacing: 8,
-                            ) {
-                                ForEach(0..<tabs.count, id: \.self) { index in
-                                    let tab = tabs[index]
-                                    Label {
-                                        TabTitle(title: tab.metaData.title)
-                                            .font(.subheadline)
-                                    } icon: {
-                                        TabIcon(icon: tab.metaData.icon, accountType: tab.account, size: 20)
-                                    }
-                                    .onTapGesture {
-                                        withAnimation(.spring) {
-                                            selectedTabIndex = index
-                                        }
-                                    }
-                                    .padding(.horizontal)
-                                    .padding(.vertical, 8)
-                                    .foregroundStyle(selectedTabIndex == index ? Color.white : .primary)
-                                    .backport
-                                    .glassEffect(selectedTabIndex == index ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedTabIndex == index ? Color.accentColor : Color(.systemBackground))
-                                }
+                    ToolbarItem(placement: .title) {
+                        Menu {
+                            ForEach(0..<tabs.count, id: \.self) { index in
+                                let item = tabs[index]
                                 Button {
-                                    toTabSetting()
+                                    selectedTabIndex = index
                                 } label: {
+                                    Label {
+                                        TabTitle(title: item.metaData.title)
+                                    } icon: {
+                                        TabIcon(icon: item.metaData.icon, accountType: item.account)
+                                            .frame(width: 24)
+                                            .scaledToFit()
+                                    }
+                                }
+                            }
+                            Divider()
+                            Button {
+                                toTabSetting()
+                            } label: {
+                                Label {
+                                    Text("tab_settings_add_tab")
+                                } icon: {
                                     Image("fa-plus")
                                 }
-                                .backport
-                                .glassButtonStyle()
                             }
-//                            .padding(.horizontal)
-                            .padding(.vertical, 8)
+                        } label: {
+                            TabTitle(title: tab.metaData.title)
+                            Image("fa-chevron-down")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                                .scaledToFit()
+                                .frame(width: 8, height: 8)
+                                .padding(8)
+                                .background(
+                                    Circle()
+                                        .fill(Color.secondary.opacity(0.2))
+                                )
                         }
-                        .scrollIndicators(.hidden)
-                    }
-                    if #available(iOS 26.0, *) {
-                        ToolbarSpacer(.fixed)
                     }
                     ToolbarItem(placement: .primaryAction) {
                         if case .error = onEnum(of: presenter.state.user) {

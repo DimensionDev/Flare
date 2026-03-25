@@ -11,6 +11,7 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHandle
 import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiNumber
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimelineV2
 import dev.dimension.flare.ui.model.mapper.nostrLike
@@ -839,13 +840,9 @@ internal class NostrService(
             error("No valid relay URLs available for publishing")
         }
 
-        return try {
-            val output = client.sendEventBuilder(builder)
-            ensurePublishQuorum(output, requiredSuccessCount)
-            output.id.toHex()
-        } finally {
-            runCatching { client.close() }
-        }
+        val output = client.sendEventBuilder(builder)
+        ensurePublishQuorum(output, requiredSuccessCount)
+        return output.id.toHex()
     }
 
     private fun ensurePublishQuorum(
@@ -1257,6 +1254,7 @@ internal class NostrService(
                                         statusKey = statusKey,
                                     ),
                                 ),
+                            count = UiNumber(0L),
                         ),
                     )
                     add(

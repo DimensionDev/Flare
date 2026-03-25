@@ -290,7 +290,7 @@ extension UiIcon {
         case .mastodon: return "fa-mastodon"
         case .misskey: return "fa-misskey"
         case .bluesky: return "fa-bluesky"
-        case .nostr: return "fa-circle-question"
+        case .nostr: return "fa-nostr"
         case .twitter: return "fa-x-twitter"
         case .x: return "fa-x-twitter"
         case .weibo: return "fa-weibo"

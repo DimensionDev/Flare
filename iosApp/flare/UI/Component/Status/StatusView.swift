@@ -272,6 +272,11 @@ struct StatusView: View {
                     Image("fa-weibo")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                case .nostr:
+                    Image("fa-nostr")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
                 }
             }
             if !isDetail {

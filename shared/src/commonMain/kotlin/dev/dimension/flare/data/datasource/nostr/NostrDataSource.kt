@@ -36,7 +36,6 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -49,7 +48,8 @@ internal class NostrDataSource(
     RelationDataSource,
     PostDataSource,
     PostEventHandler.Handler,
-    KoinComponent {
+    KoinComponent,
+    AutoCloseable {
     private val accountRepository: AccountRepository by inject()
     private val ioScope: CoroutineScope by inject()
     private val nostrCache: NostrCache by inject()
@@ -74,6 +74,10 @@ internal class NostrDataSource(
                 }
             },
         )
+    }
+
+    override fun close() {
+        serviceManager.close()
     }
 
     override val supportedNotificationFilter: List<NotificationFilter> =
@@ -127,10 +131,6 @@ internal class NostrDataSource(
                 if (request is PagingRequest.Prepend) {
                     return PagingResult(endOfPaginationReached = true)
                 }
-                val credential =
-                    accountRepository
-                        .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
-                        .first()
                 val until =
                     when (request) {
                         PagingRequest.Refresh -> null
@@ -180,10 +180,6 @@ internal class NostrDataSource(
                 if (request is PagingRequest.Prepend) {
                     return PagingResult(endOfPaginationReached = true)
                 }
-                val credential =
-                    accountRepository
-                        .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
-                        .first()
                 val until =
                     when (request) {
                         PagingRequest.Refresh -> null
@@ -231,10 +227,6 @@ internal class NostrDataSource(
                 if (request is PagingRequest.Prepend) {
                     return PagingResult(endOfPaginationReached = true)
                 }
-                val credential =
-                    accountRepository
-                        .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
-                        .first()
                 val until =
                     when (request) {
                         PagingRequest.Refresh -> null
@@ -274,10 +266,6 @@ internal class NostrDataSource(
                 if (request is PagingRequest.Prepend || request is PagingRequest.Append) {
                     return PagingResult(endOfPaginationReached = true)
                 }
-                val credential =
-                    accountRepository
-                        .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
-                        .first()
                 val data =
                     serviceManager.withService {
                         it.searchUser(
@@ -321,10 +309,6 @@ internal class NostrDataSource(
                 if (request is PagingRequest.Prepend) {
                     return PagingResult(endOfPaginationReached = true)
                 }
-                val credential =
-                    accountRepository
-                        .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
-                        .first()
                 val until =
                     when (request) {
                         PagingRequest.Refresh -> null
@@ -358,10 +342,6 @@ internal class NostrDataSource(
         updater: DatabaseUpdater,
     ) {
         require(event is PostEvent.Nostr)
-        val credential =
-            accountRepository
-                .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
-                .first()
         when (event) {
             is PostEvent.Nostr.Like -> {
                 if (event.reactionEventId != null) {
@@ -428,10 +408,6 @@ internal class NostrDataSource(
         data: ComposeData,
         progress: () -> Unit,
     ) {
-        val credential =
-            accountRepository
-                .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
-                .first()
         when (val composeStatus = data.referenceStatus?.composeStatus) {
             is ComposeStatus.Quote ->
                 serviceManager.withService {

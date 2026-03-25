@@ -150,7 +150,10 @@ public class AccountRepository internal constructor(
             }
             removeAccountFlow.value = accountKey
             dataSourceCacheMutex.withLock {
-                dataSourceCache.remove(accountKey)
+                val datasource = dataSourceCache.remove(accountKey)
+                if (datasource is AutoCloseable) {
+                    datasource.close()
+                }
             }
             cacheDatabase.pagingTimelineDao().deleteByAccountType(
                 AccountType.Specific(accountKey),

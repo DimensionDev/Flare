@@ -1765,6 +1765,9 @@
         }
       }
     },
+    "Add relay" : {
+
+    },
     "add_rss_title" : {
       "localizations" : {
         "ar" : {
@@ -25579,6 +25582,9 @@
         }
       }
     },
+    "Enter relay URL" : {
+
+    },
     "error" : {
       "localizations" : {
         "af" : {
@@ -35319,6 +35325,9 @@
           }
         }
       }
+    },
+    "Manage relays" : {
+
     },
     "mastodon_item_pinned" : {
       "localizations" : {
@@ -75854,6 +75863,9 @@
         }
       }
     },
+    "No relays configured" : {
+
+    },
     "Not done yet for %@" : {
       "localizations" : {
         "ar" : {
@@ -77861,6 +77873,9 @@
           }
         }
       }
+    },
+    "OK" : {
+
     },
     "On Device" : {
       "localizations" : {

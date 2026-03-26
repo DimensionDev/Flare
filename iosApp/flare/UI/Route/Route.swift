@@ -39,6 +39,8 @@ enum Route: Hashable, Identifiable {
             tabItem.view(onNavigate: onNavigate)
         case .accountManagement:
             AccountManagementScreen()
+        case .nostrRelays(let accountKey):
+            NostrRelaysScreen(accountKey: accountKey)
         case .search(let accountType, let query):
             SearchScreen(accountType: accountType, initialQuery: query)
         case .composeNew:
@@ -141,6 +143,7 @@ enum Route: Hashable, Identifiable {
     case statusShareSheet(AccountType, MicroBlogKey, String, String?, String?)
     case serviceSelect
     case accountManagement
+    case nostrRelays(MicroBlogKey)
     case localFilter
     case localHostory
     case moreMenuCustomize

@@ -36,8 +36,12 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.time.Duration.Companion.minutes
 
 internal typealias NostrServiceManager = SwitchingServiceManager<UiAccount.Nostr.Credential, NostrService>
 
@@ -60,9 +64,13 @@ internal class NostrDataSource(
         )
     }
 
+    @OptIn(FlowPreview::class)
     private val serviceManager by lazy {
         SwitchingServiceManager(
-            accountRepository.credentialFlow<UiAccount.Nostr.Credential>(accountKey),
+            accountRepository
+                .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
+                .distinctUntilChanged()
+                .debounce(30.minutes),
             ioScope,
             {
                 NostrService(

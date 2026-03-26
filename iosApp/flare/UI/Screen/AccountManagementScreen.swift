@@ -4,6 +4,7 @@ import KotlinSharedUI
 struct AccountManagementScreen: View {
     @StateObject private var presenter = KotlinPresenter(presenter: AccountManagementPresenter())
     @State private var tabItems: [AccountsStateAccountItem] = []
+
     var body: some View {
         List {
             StateView(state: presenter.state.activeAccount) { currentAcount in
@@ -23,6 +24,15 @@ struct AccountManagementScreen: View {
                             presenter.state.setActiveAccount(accountKey: user.key)
                         }
                         .contextMenu {
+                            if account.account.platformType == .nostr {
+                                NavigationLink(value: Route.nostrRelays(account.account.accountKey)) {
+                                    Label {
+                                        Text("Manage relays")
+                                    } icon: {
+                                        Image("fa-list")
+                                    }
+                                }
+                            }
                             Button(role: .destructive) {
                                 tabItems.removeAll(where: { item in item.account.accountKey == user.key })
                                 presenter.state.logout(accountKey: user.key)
@@ -35,6 +45,16 @@ struct AccountManagementScreen: View {
                             }
                         }
                         .swipeActions {
+                            if account.account.platformType == .nostr {
+                                NavigationLink(value: Route.nostrRelays(account.account.accountKey)) {
+                                    Label {
+                                        Text("Manage relays")
+                                    } icon: {
+                                        Image("fa-list")
+                                    }
+                                }
+                                .tint(.accentColor)
+                            }
                             Button(role: .destructive) {
                                 tabItems.removeAll(where: { item in item.account.accountKey == user.key })
                                 presenter.state.logout(accountKey: user.key)
@@ -48,7 +68,38 @@ struct AccountManagementScreen: View {
                         }
                     } errorContent: { error in
                         UserErrorView(error: error)
+                            .contextMenu {
+                                if account.account.platformType == .nostr {
+                                    NavigationLink(value: Route.nostrRelays(account.account.accountKey)) {
+                                        Label {
+                                            Text("Manage relays")
+                                        } icon: {
+                                            Image("fa-square-rss")
+                                        }
+                                    }
+                                }
+                                Button(role: .destructive) {
+                                    tabItems.removeAll(where: { item in item.account.accountKey == account.account.accountKey })
+                                    presenter.state.logout(accountKey: account.account.accountKey)
+                                } label: {
+                                    Label {
+                                        Text("logout_title")
+                                    } icon: {
+                                        Image("fa-trash")
+                                    }
+                                }
+                            }
                             .swipeActions {
+                                if account.account.platformType == .nostr {
+                                    NavigationLink(value: Route.nostrRelays(account.account.accountKey)) {
+                                        Label {
+                                            Text("Manage relays")
+                                        } icon: {
+                                            Image("fa-square-rss")
+                                        }
+                                    }
+                                    .tint(.accentColor)
+                                }
                                 Button(role: .destructive) {
                                     tabItems.removeAll(where: { item in item.account.accountKey == account.account.accountKey })
                                     presenter.state.logout(accountKey: account.account.accountKey)

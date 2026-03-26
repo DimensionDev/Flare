@@ -1,5 +1,4 @@
 import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
-import org.jetbrains.compose.compose
 import java.util.Locale
 
 plugins {
@@ -10,7 +9,6 @@ plugins {
     alias(libs.plugins.ktorfit)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.room)
     alias(libs.plugins.stability.analyzer)
 }
@@ -62,7 +60,8 @@ kotlin {
         }
         val commonMain by getting {
             dependencies {
-                implementation(compose("org.jetbrains.compose.runtime:runtime"))
+                implementation(dependencies.platform(libs.compose.bom))
+                implementation(libs.compose.runtime)
                 implementation(libs.bundles.kotlinx)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
@@ -101,7 +100,6 @@ kotlin {
         }
         val androidJvmMain by getting {
             dependencies {
-                implementation(compose("org.jetbrains.compose.foundation:foundation"))
                 implementation(libs.ktor.client.okhttp)
             }
         }

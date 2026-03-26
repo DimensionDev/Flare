@@ -6,9 +6,11 @@ import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.DirectMessageTabItem
+import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TabMetaData
+import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.network.bluesky.BlueskyPlatformDetector
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
@@ -44,6 +46,15 @@ internal data object BlueskyPlatformSpec : PlatformSpec {
                 add(DeepLinkPattern(DeepLinkMapping.Type.BlueskyPost.serializer(), Url("https://bsky.app/profile/{handle}/post/{id}")))
             }
         }.toImmutableList()
+
+    override fun defaultTimelineTabs(accountKey: MicroBlogKey): ImmutableList<TimelineTabItem> =
+        persistentListOf(
+            HomeTimelineTabItem(
+                accountKey = accountKey,
+                title = "Bluesky",
+                icon = IconType.FavIcon(accountKey.host),
+            ),
+        )
 
     override fun secondary(accountKey: MicroBlogKey): ImmutableList<TabItem> =
         persistentListOf(

@@ -49,7 +49,6 @@ import rust.nostr.sdk.Tag as RustTag
 
 public val defaultNostrRelays: List<String> =
     listOf(
-        "wss://nostr.mutinywallet.com",
         "wss://relay.damus.io",
         "wss://nos.lol",
         "wss://relay.nostr.band",
@@ -123,7 +122,6 @@ internal class NostrService(
         }
     }
 
-    internal val defaultRelays: List<String> = defaultNostrRelays
     private var connected = false
 
     private val secretKey by lazy {

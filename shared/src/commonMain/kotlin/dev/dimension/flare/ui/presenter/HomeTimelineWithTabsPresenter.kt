@@ -1,22 +1,17 @@
 package dev.dimension.flare.ui.presenter
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.HomeTimelineTabItem
-import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.icon
-import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
-import dev.dimension.flare.ui.presenter.settings.AccountEventPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -69,67 +64,6 @@ public class HomeTimelineWithTabsPresenter(
                     userKey = null,
                 )
             }.body()
-
-        val accountEvent =
-            remember {
-                AccountEventPresenter()
-            }.body()
-
-        // TODO: on android, it might not trigger to add tabs when new account is added
-        LaunchedEffect(accountEvent.onAdded) {
-            accountEvent.onAdded.collect { account ->
-                val tab =
-                    HomeTimelineTabItem(
-                        accountKey = account.accountKey,
-                        title = account.platformType.spec.metadata.displayName,
-                        icon = IconType.Material(account.platformType.icon),
-                    )
-                settingsRepository.updateTabSettings {
-                    if (mainTabs.any { it.key == tab.key }) {
-                        copy()
-                    } else {
-                        copy(
-                            mainTabs =
-                                (mainTabs + tab).distinctBy {
-                                    it.key
-                                },
-                        )
-                    }
-                }
-            }
-        }
-
-        LaunchedEffect(accountEvent.onRemoved) {
-            accountEvent.onRemoved.collect { accountKey ->
-                settingsRepository.updateTabSettings {
-                    copy(
-                        mainTabs =
-                            mainTabs
-                                .filterNot {
-                                    it.account ==
-                                        AccountType.Specific(
-                                            accountKey,
-                                        )
-                                }.map {
-                                    if (it is MixedTimelineTabItem) {
-                                        it.copy(
-                                            subTimelineTabItem =
-                                                it.subTimelineTabItem
-                                                    .filterNot {
-                                                        it.account ==
-                                                            AccountType.Specific(
-                                                                accountKey,
-                                                            )
-                                                    }.toImmutableList(),
-                                        )
-                                    } else {
-                                        it
-                                    }
-                                },
-                    )
-                }
-            }
-        }
 
         val tabs by tabsState.collectAsUiState()
 //        val tabState =

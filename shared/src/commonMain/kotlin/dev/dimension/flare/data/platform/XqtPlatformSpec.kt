@@ -5,9 +5,11 @@ import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.DirectMessageTabItem
+import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TabMetaData
+import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.XQT
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
@@ -35,7 +37,7 @@ internal data object XqtPlatformSpec : PlatformSpec {
         )
     override val detector: PlatformDetector = XQTPlatformDetector
 
-    override fun agreementUrl(host: String): String? = "https://help.x.com/en/rules-and-policies/x-rules"
+    override fun agreementUrl(host: String): String = "https://help.x.com/en/rules-and-policies/x-rules"
 
     override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> {
         val profile =
@@ -66,34 +68,50 @@ internal data object XqtPlatformSpec : PlatformSpec {
         ).toImmutableList()
     }
 
+    override fun defaultTimelineTabs(accountKey: MicroBlogKey): ImmutableList<TimelineTabItem> =
+        persistentListOf(
+            HomeTimelineTabItem(
+                accountKey = accountKey,
+                title = "X",
+                icon = IconType.FavIcon(accountKey.host),
+            ),
+            XQT.FeaturedTimelineTabItem(
+                AccountType.Specific(accountKey),
+                TabMetaData(
+                    title = TitleType.Localized(TitleType.Localized.LocalizedKey.Featured),
+                    icon = IconType.FavIcon(accountKey.host),
+                ),
+            ),
+        )
+
     override fun secondary(accountKey: MicroBlogKey): ImmutableList<TabItem> =
         persistentListOf(
             XQT.FeaturedTimelineTabItem(
                 AccountType.Specific(accountKey),
                 TabMetaData(
                     title = TitleType.Localized(TitleType.Localized.LocalizedKey.Featured),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Featured, accountKey),
+                    icon = IconType.Mixed(UiIcon.Featured, accountKey),
                 ),
             ),
             XQT.BookmarkTimelineTabItem(
                 AccountType.Specific(accountKey),
                 TabMetaData(
                     title = TitleType.Localized(TitleType.Localized.LocalizedKey.Bookmark),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Bookmark, accountKey),
+                    icon = IconType.Mixed(UiIcon.Bookmark, accountKey),
                 ),
             ),
             AllListTabItem(
                 AccountType.Specific(accountKey),
                 TabMetaData(
                     title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.List, accountKey),
+                    icon = IconType.Mixed(UiIcon.List, accountKey),
                 ),
             ),
             DirectMessageTabItem(
                 AccountType.Specific(accountKey),
                 TabMetaData(
                     title = TitleType.Localized(TitleType.Localized.LocalizedKey.DirectMessage),
-                    icon = IconType.Mixed(dev.dimension.flare.ui.model.UiIcon.Messages, accountKey),
+                    icon = IconType.Mixed(UiIcon.Messages, accountKey),
                 ),
             ),
         )

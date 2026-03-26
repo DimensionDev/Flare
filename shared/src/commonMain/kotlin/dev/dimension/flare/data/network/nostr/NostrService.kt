@@ -1,6 +1,8 @@
 package dev.dimension.flare.data.network.nostr
 
+import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -23,20 +25,24 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import rust.nostr.sdk.Client
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Instant
 import rust.nostr.sdk.Contact as RustContact
 import rust.nostr.sdk.EventBuilder as RustEventBuilder
 import rust.nostr.sdk.EventDeletionRequest as RustEventDeletionRequest
 import rust.nostr.sdk.EventId as RustEventId
 import rust.nostr.sdk.Keys as RustKeys
+import rust.nostr.sdk.Kind as RustKind
 import rust.nostr.sdk.MuteList as RustMuteList
 import rust.nostr.sdk.Nip19Enum as RustNip19Enum
 import rust.nostr.sdk.NostrSigner as RustNostrSigner
@@ -46,19 +52,22 @@ import rust.nostr.sdk.Report as RustReport
 import rust.nostr.sdk.SecretKey as RustSecretKey
 import rust.nostr.sdk.SendEventOutput as RustSendEventOutput
 import rust.nostr.sdk.Tag as RustTag
+import rust.nostr.sdk.TagKind as RustTagKind
+import rust.nostr.sdk.Timestamp as RustTimestamp
 
 public val defaultNostrRelays: List<String> =
     listOf(
-        "wss://nostr.mutinywallet.com",
         "wss://relay.damus.io",
         "wss://nos.lol",
-        "wss://relay.nostr.band",
+        "wss://relay.plebstr.com",
+        "wss://nostr.bitcoiner.social",
     )
 
 internal class NostrService(
     private val cache: NostrCache,
     private val accountKey: MicroBlogKey,
-    private val credential: UiAccount.Nostr.Credential,
+    nsec: String,
+    initialRelays: List<String> = emptyList(),
 ) : AutoCloseable {
     companion object {
         private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
@@ -123,11 +132,13 @@ internal class NostrService(
         }
     }
 
-    internal val defaultRelays: List<String> = defaultNostrRelays
     private var connected = false
+    private val relayMutex = Mutex()
+    private val currentRelays = linkedMapOf<String, RustRelayUrl>()
+    private val initialRelays = initialRelays.normalizeRelayUrls()
 
     private val secretKey by lazy {
-        RustSecretKey.parse(credential.nsec)
+        RustSecretKey.parse(nsec)
     }
 
     private val keys by lazy {
@@ -142,33 +153,67 @@ internal class NostrService(
         pubKey.toHex()
     }
 
-    private val relays by lazy {
-        credential.relays.map {
-            RustRelayUrl.parse(it)
-        }
-    }
-
     private val client by lazy {
         Client(RustNostrSigner.keys(keys))
+    }
+    private val blossomUploader by lazy {
+        NostrBlossomUploader(
+            buildAuthHeader = { sha256 ->
+                buildBlossomAuthorizationHeader(
+                    buildBlossomUploadAuthEvent(sha256 = sha256),
+                )
+            },
+        )
     }
 
     override fun close() {
         client.close()
-        relays.forEach { it.close() }
+        currentRelays.values.forEach { it.close() }
+        currentRelays.clear()
         pubKey.close()
         keys.close()
         secretKey.close()
     }
 
     suspend fun ensureConnection() {
-        if (connected) {
-            return
+        relayMutex.withLock {
+            syncRelaysLocked(initialRelays)
+            if (connected) {
+                return
+            }
+            client.connect()
+            connected = true
         }
+    }
+
+    suspend fun updateRelays(relays: List<String>) {
+        relayMutex.withLock {
+            syncRelaysLocked(relays.normalizeRelayUrls())
+        }
+    }
+
+    private suspend fun syncRelaysLocked(relays: List<String>) {
+        val targetRelays = relays.toSet()
+        val removedRelays = currentRelays.keys - targetRelays
+
+        removedRelays.forEach { relay ->
+            currentRelays.remove(relay)?.let { url ->
+                client.removeRelay(url)
+                url.close()
+            }
+        }
+
         relays.forEach { relay ->
-            client.addRelay(relay)
+            if (relay in currentRelays) {
+                return@forEach
+            }
+            val url = RustRelayUrl.parse(relay)
+            currentRelays[relay] = url
+            client.addRelay(url)
+            if (connected) {
+                client.connectRelay(url)
+            }
         }
-        client.connect()
-        connected = false
     }
 
     internal data class ImportedAccount(
@@ -176,6 +221,12 @@ internal class NostrService(
         val npub: String,
         val nsec: String,
     )
+
+    private fun List<String>.normalizeRelayUrls(): List<String> =
+        ifEmpty { defaultNostrRelays }
+            .map(String::trim)
+            .filter(String::isNotEmpty)
+            .distinct()
 
     internal suspend fun loadHomeTimeline(
         pageSize: Int,
@@ -211,14 +262,16 @@ internal class NostrService(
                 targetEventIds = eventGraph.keys.toList(),
             )
 
+        val renderContexts = eventGraph.buildRenderContexts()
         val profiles =
             loadProfiles(
-                pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
+                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
             )
         return events.toUiTimeline(
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
+            renderContexts = renderContexts,
         )
     }
 
@@ -265,14 +318,16 @@ internal class NostrService(
                 accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
+        val renderContexts = eventGraph.buildRenderContexts()
         val profiles =
             loadProfiles(
-                pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
+                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
             )
         return events.toUiTimeline(
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
+            renderContexts = renderContexts,
         )
     }
 
@@ -326,14 +381,16 @@ internal class NostrService(
                 accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
+        val renderContexts = eventGraph.buildRenderContexts()
         val profiles =
             loadProfiles(
-                pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
+                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
             )
         return events.toUiTimeline(
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
+            renderContexts = renderContexts,
         )
     }
 
@@ -421,15 +478,17 @@ internal class NostrService(
                 accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
+        val renderContexts = eventGraph.buildRenderContexts()
         val profiles =
             loadProfiles(
-                pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
+                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
             )
         return events.toUiNotifications(
             accountPubkey = pubKeyHex,
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
+            renderContexts = renderContexts,
         )
     }
 
@@ -444,15 +503,17 @@ internal class NostrService(
                 accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
+        val renderContexts = eventGraph.buildRenderContexts()
         val profiles =
             loadProfiles(
-                pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
+                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
             )
         return listOf(event)
             .toUiTimeline(
                 profiles = profiles,
                 eventsById = eventGraph,
                 interactionStats = interactionStats,
+                renderContexts = renderContexts,
             ).first()
     }
 
@@ -482,15 +543,17 @@ internal class NostrService(
                 accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
+        val renderContexts = eventGraph.buildRenderContexts()
         val profiles =
             loadProfiles(
-                pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
+                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
             )
 
         return threadEvents.toUiTimeline(
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
+            renderContexts = renderContexts,
         )
     }
 
@@ -584,23 +647,56 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun composeNote(content: String): String = sendEventBuilder(RustEventBuilder.Companion.textNote(content))
+    internal suspend fun uploadMedia(
+        serverUrl: String,
+        name: String?,
+        bytes: ByteArray,
+        fileType: FileType,
+        altText: String?,
+    ): UploadedMedia =
+        blossomUploader.upload(
+            serverUrl = serverUrl,
+            name = name,
+            bytes = bytes,
+            fileType = fileType,
+            altText = altText,
+        )
+
+    internal suspend fun composeNote(
+        content: String,
+        media: List<UploadedMedia> = emptyList(),
+        contentWarning: String? = null,
+    ): String =
+        sendEventBuilder(
+            textNoteBuilder(
+                content = contentWithMediaUrls(content, media),
+                tags = contentWarningTag(contentWarning) + mediaTags(media),
+            ),
+        )
 
     internal suspend fun composeReply(
         statusKey: MicroBlogKey,
         content: String,
+        media: List<UploadedMedia> = emptyList(),
+        contentWarning: String? = null,
     ): String {
         val target =
             loadEvent(statusKey = statusKey)
                 ?: error("Reply target not found: $statusKey")
         return sendEventBuilder(
-            builder = textNoteBuilder(content = content, tags = buildReplyTags(target)),
+            builder =
+                textNoteBuilder(
+                    content = contentWithMediaUrls(content, media),
+                    tags = buildReplyTags(target) + contentWarningTag(contentWarning) + mediaTags(media),
+                ),
         )
     }
 
     internal suspend fun composeQuote(
         statusKey: MicroBlogKey,
         content: String,
+        media: List<UploadedMedia> = emptyList(),
+        contentWarning: String? = null,
     ): String {
         val target =
             loadEvent(statusKey = statusKey)
@@ -618,11 +714,13 @@ internal class NostrService(
         return sendEventBuilder(
             builder =
                 textNoteBuilder(
-                    content = content,
+                    content = contentWithMediaUrls(content, media),
                     tags =
                         buildList {
                             add(quoteTag)
                             add(pTag(authorPubKey))
+                            addAll(contentWarningTag(contentWarning))
+                            addAll(mediaTags(media))
                         },
                 ),
         )
@@ -790,6 +888,23 @@ internal class NostrService(
         return cachedProfiles + fetchedProfiles
     }
 
+    private fun Map<String, Event>.buildRenderContexts(): Map<String, NostrTextRenderContext> =
+        values
+            .asSequence()
+            .filterIsInstance<TextNoteEvent>()
+            .associate { it.id to buildNostrTextRenderContext(it.content, it.tags) }
+
+    private fun Map<String, Event>.profilePubKeysForRendering(renderContexts: Map<String, NostrTextRenderContext>): List<String> =
+        values
+            .flatMap { event ->
+                buildList {
+                    add(event.pubKey)
+                    if (event is TextNoteEvent) {
+                        addAll(renderContexts[event.id]?.mentionedProfilePubKeys.orEmpty())
+                    }
+                }
+            }.distinct()
+
     private suspend fun queryFirstRelay(
         filters: List<Filter>,
         minEventsBeforeReturn: Int = MIN_EARLY_RETURN_EVENTS,
@@ -827,7 +942,10 @@ internal class NostrService(
         }
 
     private suspend fun sendEventBuilder(builder: RustEventBuilder): String {
-        val requiredSuccessCount = minOf(PUBLISH_SUCCESS_QUORUM, relays.size)
+        val requiredSuccessCount =
+            relayMutex.withLock {
+                minOf(PUBLISH_SUCCESS_QUORUM, currentRelays.size)
+            }
         if (requiredSuccessCount == 0) {
             error("No valid relay URLs available for publishing")
         }
@@ -908,6 +1026,47 @@ internal class NostrService(
 
     private fun pTag(pubKey: String): Array<String> = arrayOf("p", pubKey)
 
+    private fun contentWarningTag(contentWarning: String?): List<Array<String>> =
+        contentWarning
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { listOf(arrayOf("content-warning", it)) }
+            ?: emptyList()
+
+    private fun mediaTags(media: List<UploadedMedia>): List<Array<String>> =
+        media.flatMap { item ->
+            buildList {
+                add(
+                    buildList {
+                        add("imeta")
+                        add("url ${item.url}")
+                        add("m ${item.mimeType}")
+                        add("x ${item.sha256}")
+                        add("size ${item.size}")
+                        item.altText?.takeIf { it.isNotBlank() }?.let { add("alt $it") }
+                    }.toTypedArray(),
+                )
+                add(arrayOf("r", item.url))
+            }
+        }
+
+    private fun contentWithMediaUrls(
+        content: String,
+        media: List<UploadedMedia>,
+    ): String {
+        if (media.isEmpty()) {
+            return content
+        }
+        val mediaUrls = media.joinToString(separator = "\n") { it.url }
+        return buildString {
+            append(content.trimEnd())
+            if (isNotEmpty()) {
+                append("\n")
+            }
+            append(mediaUrls)
+        }
+    }
+
     private fun textNoteBuilder(
         content: String,
         tags: List<Array<String>> = emptyList(),
@@ -915,6 +1074,25 @@ internal class NostrService(
         RustEventBuilder.Companion
             .textNote(content)
             .tags(tags.map { RustTag.Companion.parse(it.toList()) })
+
+    private suspend fun buildBlossomUploadAuthEvent(sha256: String): String {
+        val expirationSeconds =
+            (Clock.System.now().toEpochMilliseconds() / 1000L).toULong() +
+                5.minutes.inWholeSeconds.toULong()
+        return client
+            .signEventBuilder(
+                RustEventBuilder(
+                    RustKind(24242u),
+                    "",
+                ).tags(
+                    listOf(
+                        RustTag.Companion.hashtag("upload"),
+                        RustTag.Companion.custom(RustTagKind.Unknown("x"), listOf(sha256)),
+                        RustTag.Companion.expiration(RustTimestamp.fromSecs(expirationSeconds)),
+                    ),
+                ),
+            ).use { it.asJson() }
+    }
 
     private fun buildReplyTags(target: Event): List<Array<String>> =
         when (target) {
@@ -1090,6 +1268,7 @@ internal class NostrService(
         profiles: Map<String, UiProfile>,
         eventsById: Map<String, Event>,
         interactionStats: Map<String, InteractionStats> = emptyMap(),
+        renderContexts: Map<String, NostrTextRenderContext> = emptyMap(),
     ): List<UiTimelineV2.Post> {
         val cache = mutableMapOf<String, UiTimelineV2.Post>()
 
@@ -1114,6 +1293,7 @@ internal class NostrService(
                             eventsById = eventsById,
                             profiles = profiles,
                             interactionStats = interactionStats,
+                            renderContext = renderContexts[event.id],
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
@@ -1152,6 +1332,7 @@ internal class NostrService(
         profiles: Map<String, UiProfile>,
         eventsById: Map<String, Event>,
         interactionStats: Map<String, InteractionStats> = emptyMap(),
+        renderContexts: Map<String, NostrTextRenderContext> = emptyMap(),
     ): List<UiTimelineV2.Post> {
         val cache = mutableMapOf<String, UiTimelineV2.Post>()
 
@@ -1176,6 +1357,7 @@ internal class NostrService(
                             eventsById = eventsById,
                             profiles = profiles,
                             interactionStats = interactionStats,
+                            renderContext = renderContexts[event.id],
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
@@ -1220,19 +1402,22 @@ internal class NostrService(
         eventsById: Map<String, Event>,
         profiles: Map<String, UiProfile>,
         interactionStats: Map<String, InteractionStats>,
+        renderContext: NostrTextRenderContext?,
         visited: Set<String>,
         resolveEvent: (Event, Set<String>) -> UiTimelineV2.Post?,
     ): UiTimelineV2.Post {
         val statusKey = MicroBlogKey(id, NOSTR_HOST)
         val stats = interactionStats[id] ?: InteractionStats()
+        val actualRenderContext = renderContext ?: buildNostrTextRenderContext(content, tags)
+        val contentWarning = contentWarningReason()?.toUiPlainText()
         return UiTimelineV2.Post(
             message = null,
             platformType = PlatformType.Nostr,
-            images = mediaFromTags().toImmutableList(),
+            images = mediaFromTextAndTags(actualRenderContext.preprocessedText.extractedMediaUrls).toImmutableList(),
             sensitive = false,
-            contentWarning = null,
+            contentWarning = contentWarning,
             user = profile,
-            content = content.toUiPlainText(),
+            content = parseNostrRichText(actualRenderContext, accountKey = accountKey, profiles = profiles),
             actions =
                 buildList {
                     add(
@@ -1296,38 +1481,65 @@ internal class NostrService(
                                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                                 ),
                             actions =
-                                listOf(
-                                    if (pubKey == accountKey.id) {
+                                buildList {
+                                    add(
                                         ActionMenu.Item(
-                                            icon = UiIcon.Delete,
-                                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
-                                            color = ActionMenu.Item.Color.Red,
+                                            icon = UiIcon.Share,
+                                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
                                             clickEvent =
                                                 ClickEvent.Deeplink(
-                                                    DeeplinkRoute.Status.DeleteConfirm(
-                                                        accountType =
-                                                            AccountType.Specific(
-                                                                accountKey,
-                                                            ),
+                                                    DeeplinkRoute.Status.ShareSheet(
                                                         statusKey = statusKey,
+                                                        accountType = AccountType.Specific(accountKey),
+                                                        shareUrl = statusShareUrl(statusKey.id),
                                                     ),
                                                 ),
+                                        ),
+                                    )
+                                    if (pubKey == accountKey.id) {
+                                        add(
+                                            ActionMenu.Item(
+                                                icon = UiIcon.Delete,
+                                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                                color = ActionMenu.Item.Color.Red,
+                                                clickEvent =
+                                                    ClickEvent.Deeplink(
+                                                        DeeplinkRoute.Status.DeleteConfirm(
+                                                            accountType =
+                                                                AccountType.Specific(
+                                                                    accountKey,
+                                                                ),
+                                                            statusKey = statusKey,
+                                                        ),
+                                                    ),
+                                            ),
                                         )
                                     } else {
-                                        ActionMenu.Item(
-                                            icon = UiIcon.Report,
-                                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
-                                            color = ActionMenu.Item.Color.Red,
-                                            clickEvent =
-                                                ClickEvent.event(accountKey) {
-                                                    dev.dimension.flare.data.datasource.microblog.PostEvent.Nostr.Report(
-                                                        postKey = statusKey,
-                                                        accountKey = accountKey,
-                                                    )
-                                                },
+                                        add(ActionMenu.Divider)
+                                        addAll(
+                                            userActionsMenu(
+                                                accountKey = accountKey,
+                                                userKey = profile.key,
+                                                handle = profile.handle.canonical,
+                                            ),
                                         )
-                                    },
-                                ).toImmutableList(),
+                                        add(ActionMenu.Divider)
+                                        add(
+                                            ActionMenu.Item(
+                                                icon = UiIcon.Report,
+                                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                                color = ActionMenu.Item.Color.Red,
+                                                clickEvent =
+                                                    ClickEvent.event(accountKey) {
+                                                        dev.dimension.flare.data.datasource.microblog.PostEvent.Nostr.Report(
+                                                            postKey = statusKey,
+                                                            accountKey = accountKey,
+                                                        )
+                                                    },
+                                            ),
+                                        )
+                                    }
+                                }.toImmutableList(),
                         ),
                     )
                 }.toImmutableList(),
@@ -1397,6 +1609,8 @@ internal class NostrService(
         )
     }
 
+    private fun statusShareUrl(eventIdHex: String): String = "https://nostter.app/${eventId(eventIdHex).toBech32()}"
+
     private fun TextNoteEvent.parentEventIds(): List<String> {
         val rootIds = tags.mapNotNull(MarkedETag::parseRootId)
         val replyIds = tags.mapNotNull(MarkedETag::parseReply).map { it.eventId }
@@ -1436,13 +1650,20 @@ internal class NostrService(
 
     private fun TextNoteEvent.quoteEventIds(): List<String> = tags.mapNotNull(QEventTag::parse).map { it.eventId }.distinct()
 
+    private fun TextNoteEvent.contentWarningReason(): String? =
+        tags
+            .firstOrNull { it.getOrNull(0) == "content-warning" }
+            ?.getOrNull(1)
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+
     private fun TextNoteEvent.quoteAddressReferences(): List<Address> =
         tags
             .mapNotNull(QAddressableTag::parse)
             .map { it.address }
             .distinctBy { it.toValue() }
 
-    private fun TextNoteEvent.mediaFromTags(): List<UiMedia> {
+    private fun TextNoteEvent.mediaFromTextAndTags(textMediaUrls: List<String> = emptyList()): List<UiMedia> {
         val mediaFromIMeta =
             tags
                 .mapNotNull(IMetaTag::parse)
@@ -1457,7 +1678,12 @@ internal class NostrService(
                 .filterNot { url -> mediaFromIMeta.any { it.url == url } }
                 .mapNotNull { url -> toUiMedia(url = url, dimensions = null, description = null) }
 
-        return (mediaFromIMeta + urlsFromR).distinctBy { it.url }
+        val urlsFromText =
+            textMediaUrls
+                .filterNot { url -> mediaFromIMeta.any { it.url == url } || urlsFromR.any { it.url == url } }
+                .mapNotNull { url -> toUiMedia(url = url, dimensions = null, description = null) }
+
+        return (mediaFromIMeta + urlsFromR + urlsFromText).distinctBy { it.url }
     }
 
     private fun toUiMedia(iMeta: IMetaTag): UiMedia? =
@@ -1658,6 +1884,7 @@ internal class NostrService(
                         eventsById = eventsById,
                         profiles = profiles,
                         interactionStats = interactionStats,
+                        renderContext = null,
                         visited = setOf(id),
                         resolveEvent = { event, visited -> resolveEvent(event, visited) },
                     )

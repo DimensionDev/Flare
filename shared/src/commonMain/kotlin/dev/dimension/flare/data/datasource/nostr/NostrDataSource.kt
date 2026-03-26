@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.datasource.nostr
 
+import dev.dimension.flare.common.FileType
 import dev.dimension.flare.common.SwitchingServiceManager
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
@@ -36,12 +37,11 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.time.Duration.Companion.seconds
 
 internal typealias NostrServiceManager = SwitchingServiceManager<UiAccount.Nostr.Credential, NostrService>
 
@@ -57,6 +57,9 @@ internal class NostrDataSource(
     private val accountRepository: AccountRepository by inject()
     private val ioScope: CoroutineScope by inject()
     private val nostrCache: NostrCache by inject()
+    private val credentialFlow by lazy {
+        accountRepository.credentialFlow<UiAccount.Nostr.Credential>(accountKey)
+    }
     private val loader by lazy {
         NostrLoader(
             accountKey = accountKey,
@@ -64,27 +67,36 @@ internal class NostrDataSource(
         )
     }
 
-    @OptIn(FlowPreview::class)
     private val serviceManager by lazy {
         SwitchingServiceManager(
-            accountRepository
-                .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
-                .distinctUntilChanged()
-                .debounce(30.seconds),
+            credentialFlow.distinctUntilChangedBy { it.nsec },
             ioScope,
             {
                 NostrService(
                     nostrCache,
                     accountKey,
-                    it,
+                    nsec = it.nsec,
+                    initialRelays = it.relays,
                 ).also {
                     it.ensureConnection()
                 }
             },
         )
     }
+    private val relaySyncJob by lazy {
+        ioScope.launch {
+            credentialFlow
+                .distinctUntilChangedBy { it.relays }
+                .collect { credential ->
+                    serviceManager.withService {
+                        it.updateRelays(credential.relays)
+                    }
+                }
+        }
+    }
 
     override fun close() {
+        relaySyncJob.cancel()
         serviceManager.close()
     }
 
@@ -93,6 +105,11 @@ internal class NostrDataSource(
             NotificationFilter.All,
             NotificationFilter.Mention,
         )
+
+    init {
+        relaySyncJob
+    }
+
     override val userHandler by lazy {
         UserHandler(
             host = NostrService.NOSTR_HOST,
@@ -416,12 +433,34 @@ internal class NostrDataSource(
         data: ComposeData,
         progress: () -> Unit,
     ) {
+        val credential = credentialFlow.first()
+        val medias =
+            data.medias.map { media ->
+                val bytes = media.file.readBytes()
+                require(media.file.type != FileType.Other) {
+                    "Unsupported Nostr media type: ${media.file.name.orEmpty()}"
+                }
+                serviceManager
+                    .withService {
+                        it.uploadMedia(
+                            serverUrl = credential.mediaServerUrl,
+                            name = media.file.name,
+                            bytes = bytes,
+                            fileType = media.file.type,
+                            altText = media.altText,
+                        )
+                    }.also {
+                        progress()
+                    }
+            }
         when (val composeStatus = data.referenceStatus?.composeStatus) {
             is ComposeStatus.Quote ->
                 serviceManager.withService {
                     it.composeQuote(
                         statusKey = composeStatus.statusKey,
                         content = data.content,
+                        media = medias,
+                        contentWarning = data.spoilerText,
                     )
                 }
 
@@ -430,6 +469,8 @@ internal class NostrDataSource(
                     it.composeReply(
                         statusKey = composeStatus.statusKey,
                         content = data.content,
+                        media = medias,
+                        contentWarning = data.spoilerText,
                     )
                 }
 
@@ -437,6 +478,8 @@ internal class NostrDataSource(
                 serviceManager.withService {
                     it.composeNote(
                         content = data.content,
+                        media = medias,
+                        contentWarning = data.spoilerText,
                     )
                 }
         }
@@ -445,5 +488,13 @@ internal class NostrDataSource(
     override fun composeConfig(type: ComposeType): ComposeConfig =
         ComposeConfig(
             text = ComposeConfig.Text(65535),
+            contentWarning = ComposeConfig.ContentWarning,
+            media =
+                ComposeConfig.Media(
+                    maxCount = 4,
+                    canSensitive = true,
+                    altTextMaxLength = 2000,
+                    allowMediaOnly = true,
+                ),
         )
 }

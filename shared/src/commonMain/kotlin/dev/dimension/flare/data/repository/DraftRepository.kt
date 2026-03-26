@@ -164,6 +164,22 @@ internal class DraftRepository(
         }
     }
 
+    suspend fun markSendingAsFailed(errorMessage: String? = null) {
+        val now = Clock.System.now().toEpochMilliseconds()
+        database.connect {
+            database.draftDao().touchGroupsByTargetStatus(
+                status = DraftTargetStatus.SENDING,
+                updatedAt = now,
+            )
+            database.draftDao().updateTargetsByStatus(
+                fromStatus = DraftTargetStatus.SENDING,
+                toStatus = DraftTargetStatus.FAILED,
+                errorMessage = errorMessage,
+                updatedAt = now,
+            )
+        }
+    }
+
     private fun targetId(
         groupId: String,
         accountKey: MicroBlogKey,

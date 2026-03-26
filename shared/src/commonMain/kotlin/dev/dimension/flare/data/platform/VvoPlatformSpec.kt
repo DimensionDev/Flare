@@ -3,9 +3,11 @@ package dev.dimension.flare.data.platform
 import dev.dimension.flare.common.deeplink.DeepLinkMapping
 import dev.dimension.flare.common.deeplink.DeepLinkPattern
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TabMetaData
+import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.VVo
 import dev.dimension.flare.data.network.nodeinfo.PlatformDetector
@@ -33,6 +35,15 @@ internal data object VvoPlatformSpec : PlatformSpec {
     override fun agreementUrl(host: String): String? = null
 
     override fun deepLinkPatterns(host: String): ImmutableList<DeepLinkPattern<out DeepLinkMapping.Type>> = persistentListOf()
+
+    override fun defaultTimelineTabs(accountKey: MicroBlogKey): ImmutableList<TimelineTabItem> =
+        persistentListOf(
+            HomeTimelineTabItem(
+                accountKey = accountKey,
+                title = vvo,
+                icon = IconType.Material(UiIcon.Weibo),
+            ),
+        )
 
     override fun secondary(accountKey: MicroBlogKey): ImmutableList<TabItem> =
         persistentListOf(

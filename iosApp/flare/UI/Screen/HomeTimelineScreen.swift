@@ -40,7 +40,11 @@ struct HomeTimelineScreen: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         StateView(state: activeAccountPresenter.state.user) { user in
-                            AvatarView(data: user.avatar)
+                            if user.avatar.isEmpty {
+                                Image(.faGear)
+                            } else {
+                                AvatarView(data: user.avatar)
+                            }
                         } errorContent: { _ in
                             Image(.faGear)
                         } loadingContent: {

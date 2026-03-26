@@ -219,7 +219,7 @@ class DraftRepositoryTest : RobolectricTest() {
         }
 
     @Test
-    fun markSendingAsDraftIfExpiredResetsStatus() =
+    fun markSendingAsFailedResetsStatus() =
         runTest {
             val account = MicroBlogKey("alice", "example.com")
             val now = 2_000L
@@ -242,16 +242,13 @@ class DraftRepositoryTest : RobolectricTest() {
                     ),
                 )
 
-            repository.markSendingAsDraftIfExpired(
-                expiredBefore = 1_500L,
-                errorMessage = "timeout",
-            )
+            repository.markSendingAsFailed(errorMessage = "interrupted")
 
             val draft = repository.draft(groupId).first()
 
             assertNotNull(draft)
-            assertEquals(DraftTargetStatus.DRAFT, draft.targets.single().status)
-            assertEquals("timeout", draft.targets.single().errorMessage)
+            assertEquals(DraftTargetStatus.FAILED, draft.targets.single().status)
+            assertEquals("interrupted", draft.targets.single().errorMessage)
             assertEquals(
                 groupId,
                 repository.visibleDrafts

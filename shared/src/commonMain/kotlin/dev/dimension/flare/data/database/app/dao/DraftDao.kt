@@ -174,4 +174,35 @@ internal interface DraftDao {
         expiredBefore: Long,
         updatedAt: Long,
     )
+
+    @Query(
+        """
+        UPDATE DbDraftTarget
+        SET status = :toStatus,
+            error_message = :errorMessage,
+            updated_at = :updatedAt
+        WHERE status = :fromStatus
+        """,
+    )
+    suspend fun updateTargetsByStatus(
+        fromStatus: DraftTargetStatus,
+        toStatus: DraftTargetStatus,
+        errorMessage: String?,
+        updatedAt: Long,
+    )
+
+    @Query(
+        """
+        UPDATE DbDraftGroup
+        SET updated_at = :updatedAt
+        WHERE group_id IN (
+            SELECT DISTINCT group_id FROM DbDraftTarget
+            WHERE status = :status
+        )
+        """,
+    )
+    suspend fun touchGroupsByTargetStatus(
+        status: DraftTargetStatus,
+        updatedAt: Long,
+    )
 }

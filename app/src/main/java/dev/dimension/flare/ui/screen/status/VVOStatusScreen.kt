@@ -11,9 +11,8 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -205,7 +204,6 @@ private fun StatusContent(
         }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun LazyStaggeredGridScope.reactionContent(
     comment: PagingState<UiTimelineV2>,
     repost: PagingState<UiTimelineV2>,
@@ -219,20 +217,21 @@ private fun LazyStaggeredGridScope.reactionContent(
             DetailType.entries.associate {
                 it to stringResource(it.title)
             }
-        ButtonGroup(
-            overflowIndicator = {},
+        Row(
             modifier =
                 Modifier
                     .padding(horizontal = screenHorizontalPadding),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items.forEach { (type, title) ->
-                toggleableItem(
-                    checked = detailType == type,
-                    onCheckedChange = {
+                FilterChip(
+                    selected = detailType == type,
+                    onClick = {
                         onDetailTypeChange(type)
                     },
-                    label = title,
-                    weight = 1f,
+                    label = {
+                        Text(title)
+                    },
                 )
             }
         }

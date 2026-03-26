@@ -214,7 +214,7 @@ class NostrServiceTest {
                         ): UiTimelineV2.Post? = null
                     },
                 accountKey = MicroBlogKey("nostr-test", NostrService.NOSTR_HOST),
-                credential = UiAccount.Nostr.Credential(nsec = NostrService.generateAccount().nsec),
+                nsec = NostrService.generateAccount().nsec,
             )
 
         const val SECRET_KEY_HEX = "1111111111111111111111111111111111111111111111111111111111111111"

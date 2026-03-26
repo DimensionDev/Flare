@@ -20,6 +20,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.toAccountType
 import dev.dimension.flare.ui.model.ClickEvent
 import dev.dimension.flare.ui.model.UiCard
@@ -41,6 +42,7 @@ import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import dev.dimension.flare.ui.route.toUri
 import io.ktor.http.Url
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -189,7 +191,11 @@ internal fun Notification.render(accountKey: MicroBlogKey): UiTimelineV2 {
     }
 }
 
-internal fun List<Status>.render(accountKey: MicroBlogKey) = this.map { it.render(host = accountKey.host, accountKey = accountKey) }
+internal fun List<Status>.render(accountKey: MicroBlogKey): List<UiTimelineV2> =
+    this
+        .map { it.render(host = accountKey.host, accountKey = accountKey) }
+        .resolveParents()
+        .collapseStandaloneParents()
 
 internal fun Status.render(
     host: String,
@@ -658,6 +664,15 @@ private fun Status.renderStatus(
         statusKey = statusKey,
         createdAt = createdAt?.toUi() ?: Instant.DISTANT_PAST.toUi(),
         visibility = renderedVisibility,
+        references =
+            listOfNotNull(
+                inReplyToID?.let {
+                    UiTimelineV2.Post.Reference(
+                        statusKey = MicroBlogKey(id = it, host = statusKey.host),
+                        type = ReferenceType.Reply,
+                    )
+                },
+            ).toImmutableList(),
         sensitive = sensitive ?: false,
         clickEvent =
             ClickEvent.Deeplink(
@@ -673,6 +688,60 @@ private fun Status.renderStatus(
         emojiReactions = reactions,
         accountType = accountKey.toAccountType(),
     )
+}
+
+private fun List<UiTimelineV2>.resolveParents(): List<UiTimelineV2> {
+    val postsByKey =
+        this
+            .filterIsInstance<UiTimelineV2.Post>()
+            .associateBy { it.statusKey }
+    if (postsByKey.isEmpty()) {
+        return this
+    }
+
+    fun resolveParents(
+        post: UiTimelineV2.Post,
+        visiting: MutableSet<MicroBlogKey> = mutableSetOf(),
+    ): ImmutableList<UiTimelineV2.Post> {
+        if (!visiting.add(post.statusKey)) {
+            return persistentListOf()
+        }
+        val parent =
+            post.references
+                .firstOrNull { it.type == ReferenceType.Reply }
+                ?.let { postsByKey[it.statusKey] }
+                ?: return persistentListOf()
+        return listOf(parent.copy(parents = resolveParents(parent, visiting))).toImmutableList()
+    }
+
+    return map { item ->
+        if (item is UiTimelineV2.Post && item.parents.isEmpty()) {
+            item.copy(parents = resolveParents(item))
+        } else {
+            item
+        }
+    }
+}
+
+private fun List<UiTimelineV2>.collapseStandaloneParents(): List<UiTimelineV2> {
+    fun UiTimelineV2.Post.collectParentKeys(): Set<MicroBlogKey> =
+        parents
+            .flatMap { parent ->
+                listOf(parent.statusKey) + parent.collectParentKeys()
+            }.toSet()
+
+    val parentKeys =
+        filterIsInstance<UiTimelineV2.Post>()
+            .flatMap { it.collectParentKeys() }
+            .toSet()
+    if (parentKeys.isEmpty()) {
+        return this
+    }
+    return filterNot { item ->
+        item is UiTimelineV2.Post &&
+            item.message == null &&
+            item.statusKey in parentKeys
+    }
 }
 
 internal fun ActionMenu.Companion.mastodonLike(

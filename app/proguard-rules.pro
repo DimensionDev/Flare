@@ -74,3 +74,15 @@
   *;
 }
 -keepnames class ** { *; }
+
+# for JNA
+-keep class com.sun.jna.* { *; }
+-keepclassmembers class * extends com.sun.jna.* { public *; }
+
+# UniFFI/JNA generated bindings for nostr-sdk-kmp live under rust.nostr.sdk.
+# The upstream consumer rules only keep rust.nostr.*, which misses the actual
+# Android package and lets R8 rewrite the JNA interfaces used by Native.load().
+-keep class rust.nostr.sdk.** { *; }
+-keep interface rust.nostr.sdk.** { *; }
+-keepclassmembers class rust.nostr.sdk.** { *; }
+-keepclassmembers interface rust.nostr.sdk.** { *; }

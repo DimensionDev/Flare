@@ -7,9 +7,11 @@ import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.data.network.ai.OpenAIService
 import dev.dimension.flare.data.network.rss.Readability
 import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.data.repository.AccountTabSyncCoordinator
 import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.data.repository.DraftMediaStore
 import dev.dimension.flare.data.repository.DraftRepository
+import dev.dimension.flare.data.repository.DraftSendingRecoveryCoordinator
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.SearchHistoryRepository
 import dev.dimension.flare.data.repository.SettingsRepository
@@ -26,6 +28,7 @@ import org.koin.dsl.module
 internal val commonModule =
     module {
         singleOf(::AccountRepository)
+        single(createdAtStart = true) { AccountTabSyncCoordinator(get(), get(), get()) }
         singleOf(::provideAppDatabase)
         singleOf(::provideCacheDatabase)
         single<NostrCache> { DatabaseNostrCache(get()) }
@@ -39,6 +42,7 @@ internal val commonModule =
                 draftMediaStore = get(),
             )
         }
+        single(createdAtStart = true) { DraftSendingRecoveryCoordinator(get(), get()) }
         singleOf(::LocalFilterRepository)
         single { CoroutineScope(Dispatchers.IO) }
         singleOf(::SaveDraftUseCase)

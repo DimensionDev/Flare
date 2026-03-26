@@ -4,7 +4,7 @@ clikt = "5.1.0"
 collection = "1.6.0"
 compileSdk = "36"
 composemediaplayer = "0.8.7"
-composewebview = "1.0.0-alpha-12"
+composewebview = "1.0.0-beta-01"
 cryptographyProviderOptimal = "0.5.0"
 jna = "5.18.1"
 junique = "1.0.4"
@@ -19,12 +19,12 @@ androidx-test-ext-junit = "1.3.0"
 espresso-core = "3.7.0"
 lifecycle-runtime-ktx = "2.10.0"
 activity-compose = "1.13.0"
-compose-bom = "2026.03.00"
+compose-bom = "2026.03.01"
 ksp = "2.3.6"
-nucleus = "1.4.7"
+nucleus = "1.7.2"
 openaiClient = "4.1.0"
 paging = "3.4.2"
-kotlinx-datetime = "0.7.1-0.6.x-compat"
+kotlinx-datetime = "0.7.1"
 kotlinx-collections-immutable = "0.4.0"
 kotlinx-serialization = "1.10.0"
 coil3 = "3.4.0"
@@ -48,7 +48,7 @@ ksoup = "0.2.0"
 versionUpdate = "0.53.0"
 bluesky = "0.3.4-SNAPSHOT"
 kotlinx-coroutines = "1.10.2"
-koin = "4.1.1"
+koin = "4.2.0"
 composeIcons = "1.3.0"
 media3 = "1.9.3"
 desugar_jdk_libs = "2.1.5"
@@ -65,7 +65,7 @@ zoomable = "0.18.0"
 bouncycastle = "1.83"
 cupertino = "2.3.1"
 robolectric = "4.16.1"
-nostrSdkKmp = "0.44.2"
+nostrSdkKmp = "0.44.3"
 
 
 [libraries]
@@ -102,6 +102,7 @@ richtext-ui-material3 = { module = "com.halilibo.compose-richtext:richtext-ui-ma
 stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 ui = { group = "androidx.compose.ui", name = "ui" }
 ui-util = { group = "androidx.compose.ui", name = "ui-util" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
@@ -109,7 +110,7 @@ ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha15" }
+material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha16" }
 material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
 material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive" }
@@ -129,7 +130,7 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
 nestedScrollView = { group = "com.github.Tlaster", name = "NestedScrollView", version = "1.0.3" }
 webkit = { group = "androidx.webkit", name = "webkit", version = "1.15.0" }
-androidx-browser = { group = "androidx.browser", name = "browser", version = "1.9.0" }
+androidx-browser = { group = "androidx.browser", name = "browser", version = "1.10.0" }
 
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 media3-ui-compose = { group = "androidx.media3", name = "media3-ui-compose", version.ref = "media3" }
@@ -282,5 +283,4 @@ firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 room = { id = "androidx.room", version.ref = "room" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
-stability-analyzer = { id = "com.github.skydoves.compose.stability.analyzer", version = "0.6.6" }
-nucleus = { id = "io.github.kdroidfilter.nucleus", version = "1.3.8" }
+nucleus = { id = "io.github.kdroidfilter.nucleus", version.ref = "nucleus" }

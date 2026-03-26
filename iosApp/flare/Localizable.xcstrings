@@ -22823,6 +22823,7 @@
       }
     },
     "discover_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {

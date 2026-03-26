@@ -34,8 +34,9 @@ jobs:
           distribution: 'jetbrains'
           java-version: 25
       # Run tests
-      - name: Run Tests
-        run: ./gradlew allTests
+      # temporarily disabled due to https://github.com/rust-nostr/nostr-sdk-ffi/issues/72
+#      - name: Run Tests
+#        run: ./gradlew allTests
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:

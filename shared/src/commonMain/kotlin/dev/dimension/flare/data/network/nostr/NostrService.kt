@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.network.nostr
 
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
+import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.datasource.nostr.NostrCache
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -1334,38 +1335,65 @@ internal class NostrService(
                                     text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.More),
                                 ),
                             actions =
-                                listOf(
-                                    if (pubKey == accountKey.id) {
+                                buildList {
+                                    add(
                                         ActionMenu.Item(
-                                            icon = UiIcon.Delete,
-                                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
-                                            color = ActionMenu.Item.Color.Red,
+                                            icon = UiIcon.Share,
+                                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Share),
                                             clickEvent =
                                                 ClickEvent.Deeplink(
-                                                    DeeplinkRoute.Status.DeleteConfirm(
-                                                        accountType =
-                                                            AccountType.Specific(
-                                                                accountKey,
-                                                            ),
+                                                    DeeplinkRoute.Status.ShareSheet(
                                                         statusKey = statusKey,
+                                                        accountType = AccountType.Specific(accountKey),
+                                                        shareUrl = statusShareUrl(statusKey.id),
                                                     ),
                                                 ),
+                                        ),
+                                    )
+                                    if (pubKey == accountKey.id) {
+                                        add(
+                                            ActionMenu.Item(
+                                                icon = UiIcon.Delete,
+                                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Delete),
+                                                color = ActionMenu.Item.Color.Red,
+                                                clickEvent =
+                                                    ClickEvent.Deeplink(
+                                                        DeeplinkRoute.Status.DeleteConfirm(
+                                                            accountType =
+                                                                AccountType.Specific(
+                                                                    accountKey,
+                                                                ),
+                                                            statusKey = statusKey,
+                                                        ),
+                                                    ),
+                                            ),
                                         )
                                     } else {
-                                        ActionMenu.Item(
-                                            icon = UiIcon.Report,
-                                            text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
-                                            color = ActionMenu.Item.Color.Red,
-                                            clickEvent =
-                                                ClickEvent.event(accountKey) {
-                                                    dev.dimension.flare.data.datasource.microblog.PostEvent.Nostr.Report(
-                                                        postKey = statusKey,
-                                                        accountKey = accountKey,
-                                                    )
-                                                },
+                                        add(ActionMenu.Divider)
+                                        addAll(
+                                            userActionsMenu(
+                                                accountKey = accountKey,
+                                                userKey = profile.key,
+                                                handle = profile.handle.canonical,
+                                            ),
                                         )
-                                    },
-                                ).toImmutableList(),
+                                        add(ActionMenu.Divider)
+                                        add(
+                                            ActionMenu.Item(
+                                                icon = UiIcon.Report,
+                                                text = ActionMenu.Item.Text.Localized(ActionMenu.Item.Text.Localized.Type.Report),
+                                                color = ActionMenu.Item.Color.Red,
+                                                clickEvent =
+                                                    ClickEvent.event(accountKey) {
+                                                        dev.dimension.flare.data.datasource.microblog.PostEvent.Nostr.Report(
+                                                            postKey = statusKey,
+                                                            accountKey = accountKey,
+                                                        )
+                                                    },
+                                            ),
+                                        )
+                                    }
+                                }.toImmutableList(),
                         ),
                     )
                 }.toImmutableList(),
@@ -1434,6 +1462,8 @@ internal class NostrService(
             accountType = AccountType.Specific(accountKey),
         )
     }
+
+    private fun statusShareUrl(eventIdHex: String): String = "https://nostter.app/${eventId(eventIdHex).toBech32()}"
 
     private fun TextNoteEvent.parentEventIds(): List<String> {
         val rootIds = tags.mapNotNull(MarkedETag::parseRootId)

@@ -15,10 +15,10 @@ import dev.dimension.flare.data.io.PlatformPathProducer
 import okio.FileSystem
 import okio.SYSTEM
 
-public class AppDataStore(
+internal class AppDataStore(
     private val platformPathProducer: PlatformPathProducer,
 ) {
-    internal val guestDataStore: DataStore<GuestData> by lazy {
+    val guestDataStore: DataStore<GuestData> by lazy {
         DataStoreFactory.create(
             storage =
                 OkioStorage(
@@ -31,7 +31,7 @@ public class AppDataStore(
         )
     }
 
-    internal val flareDataStore: DataStore<FlareConfig> by lazy {
+    val flareDataStore: DataStore<FlareConfig> by lazy {
         DataStoreFactory.create(
             storage =
                 OkioStorage(
@@ -44,7 +44,7 @@ public class AppDataStore(
         )
     }
 
-    internal val composeConfigData: DataStore<ComposeConfigData> by lazy {
+    val composeConfigData: DataStore<ComposeConfigData> by lazy {
         DataStoreFactory.create(
             storage =
                 OkioStorage(
@@ -57,7 +57,7 @@ public class AppDataStore(
         )
     }
 
-    public val appSettingsStore: DataStore<AppSettings> by lazy {
+    val appSettingsStore: DataStore<AppSettings> by lazy {
         DataStoreFactory.create(
             storage =
                 OkioStorage(

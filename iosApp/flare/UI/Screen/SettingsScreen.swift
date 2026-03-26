@@ -72,30 +72,6 @@ struct SettingsScreen: View {
                             Image("fa-filter")
                         }
                     }
-                    NavigationLink(value: Route.localHostory) {
-                        Label {
-                            Text("local_history_title")
-                            Text("local_history_description")
-                        } icon: {
-                            Image("fa-clock-rotate-left")
-                        }
-                    }
-                }
-                NavigationLink(value: Route.rssManagement) {
-                    Label {
-                        Text("settings_rss_management_title")
-                        Text("settings_rss_management_description")
-                    } icon: {
-                        Image("fa-square-rss")
-                    }
-                }
-                NavigationLink(value: Route.draftBox) {
-                    Label {
-                        Text("Drafts")
-                        Text("View and manage saved drafts")
-                    } icon: {
-                        Image(.faPenToSquare)
-                    }
                 }
                 NavigationLink(value: Route.storage) {
                     Label {

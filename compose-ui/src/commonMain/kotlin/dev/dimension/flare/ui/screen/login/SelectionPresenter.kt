@@ -23,6 +23,7 @@ public class SelectionPresenter(
     public interface State : ServiceSelectState {
         public val instanceInputState: TextFieldState
         public val blueskyInputState: BlueskyInputPresenter.State
+        public val nostrInputState: NostrInputPresenter.State
 
         public fun selectInstance(instance: UiInstance)
 
@@ -53,10 +54,12 @@ public class SelectionPresenter(
         }
 
         val blueskyInputState = remember { BlueskyInputPresenter() }.body()
+        val nostrInputState = remember { NostrInputPresenter() }.body()
 
         return object : State, ServiceSelectState by baseState {
             override val instanceInputState: TextFieldState = instanceInputState
             override val blueskyInputState: BlueskyInputPresenter.State = blueskyInputState
+            override val nostrInputState: NostrInputPresenter.State = nostrInputState
 
             override fun selectInstance(instance: UiInstance) {
                 instanceInputState.edit {

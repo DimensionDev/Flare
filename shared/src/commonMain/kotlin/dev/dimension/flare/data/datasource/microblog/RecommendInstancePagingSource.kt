@@ -7,7 +7,6 @@ import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
 import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.ui.model.UiInstance
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -62,13 +61,11 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                                         name = it.domain ?: "pawoo.net",
                                         description = it.title,
                                         iconUrl =
-                                            it.thumbnail?.url
-                                                ?: PlatformType.Mastodon.logoUrl,
+                                            it.thumbnail?.url,
                                         domain = it.domain ?: "pawoo.net",
                                         type = PlatformType.Mastodon,
                                         bannerUrl =
-                                            it.thumbnail?.url
-                                                ?: PlatformType.Mastodon.logoUrl,
+                                            it.thumbnail?.url,
                                         usersCount = it.usage?.users?.activeMonth ?: 0,
                                     ),
                                 )
@@ -82,7 +79,7 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                 UiInstance(
                     name = "mstdn.jp",
                     description = "mstdn.jp",
-                    iconUrl = PlatformType.Mastodon.logoUrl,
+                    iconUrl = null,
                     domain = "mstdn.jp",
                     type = PlatformType.Mastodon,
                     bannerUrl = null,
@@ -94,7 +91,7 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                 UiInstance(
                     name = "pawoo.net",
                     description = "pawoo.net",
-                    iconUrl = PlatformType.Mastodon.logoUrl,
+                    iconUrl = null,
                     domain = "pawoo.net",
                     type = PlatformType.Mastodon,
                     bannerUrl = null,
@@ -110,7 +107,7 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                     description =
                         "From breaking news and entertainment to sports and politics," +
                             " get the full story with all the live commentary.",
-                    iconUrl = PlatformType.xQt.logoUrl,
+                    iconUrl = null,
                     domain = "x.com",
                     type = PlatformType.xQt,
                     bannerUrl = null,
@@ -122,9 +119,20 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                         "The web. Email. RSS feeds. XMPP chats. " +
                             "What all these technologies had in common is they allowed people to freely interact " +
                             "and create content, without a single intermediary.",
-                    iconUrl = PlatformType.Bluesky.logoUrl,
+                    iconUrl = null,
                     domain = "bsky.social",
                     type = PlatformType.Bluesky,
+                    bannerUrl = null,
+                    usersCount = 0,
+                ),
+                UiInstance(
+                    name = "Nostr",
+                    description =
+                        "A decentralized network based on cryptographic keypairs and that is not peer-to-peer, " +
+                            "it is super simple and scalable and therefore has a chance of working.",
+                    iconUrl = null,
+                    domain = "nostr",
+                    type = PlatformType.Nostr,
                     bannerUrl = null,
                     usersCount = 0,
                 ),

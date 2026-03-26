@@ -65,6 +65,7 @@ zoomable = "0.18.0"
 bouncycastle = "1.83"
 cupertino = "2.3.1"
 robolectric = "4.16.1"
+nostrSdkKmp = "0.44.2"
 
 
 [libraries]
@@ -174,6 +175,7 @@ ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-conte
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-serialization-kotlinx-xml = { group = "io.ktor", name = "ktor-serialization-kotlinx-xml", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+ktor-client-websockets = { group = "io.ktor", name = "ktor-client-websockets", version.ref = "ktor" }
 ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-curl = { group = "io.ktor", name = "ktor-client-curl", version.ref = "ktor" }
@@ -218,6 +220,8 @@ fluent-ui = { module = "io.github.compose-fluent:fluent", version = "0.2.0-SNAPS
 
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.20.0" }
 
+nostr-sdk-kmp = { module = "org.rust-nostr:nostr-sdk-kmp", version.ref = "nostrSdkKmp" }
+
 jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version = "3.9.1" }
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
@@ -249,7 +253,7 @@ ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref 
 compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3", "material3WindowSizeClass", "material3-adaptive-navigation-suite", "material3-adaptive", "material3-adaptive-navigation", "material3-adaptive-layout"]
 kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json", "kotlinx-coroutines-core"]
 koin = ["koin-core", "koin-android", "koin-compose", "koin-androidx-compose"]
-ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging", "ktor-serialization-kotlinx-xml"]
+ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging", "ktor-client-websockets", "ktor-serialization-kotlinx-xml"]
 coil3 = ["coil3-compose", "coil3-svg", "coil3-ktor3", "coil3-network"]
 coil3-extensions = ["apng", "awebp", "vectordrawable-animated", "zoomable-image", "coil3-gif", "coil3-video"]
 accompanist = ["accompanist-permissions", "accompanist-drawablepainter"]

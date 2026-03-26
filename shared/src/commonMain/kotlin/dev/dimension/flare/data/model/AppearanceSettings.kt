@@ -1,8 +1,5 @@
 package dev.dimension.flare.data.model
 
-import androidx.compose.runtime.ProvidableCompositionLocal
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.Color
 import androidx.datastore.core.okio.OkioSerializer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -14,17 +11,12 @@ import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 import okio.BufferedSink
 import okio.BufferedSource
-import kotlin.native.HiddenFromObjC
-
-@HiddenFromObjC
-public val LocalAppearanceSettings: ProvidableCompositionLocal<AppearanceSettings> =
-    staticCompositionLocalOf { AppearanceSettings() }
 
 @Serializable
 public data class AppearanceSettings(
     val theme: Theme = Theme.SYSTEM,
     val dynamicTheme: Boolean = true,
-    val colorSeed: ULong = Color(red = 103, green = 80, blue = 164).value,
+    val colorSeed: ULong = 4284960932u,
     val avatarShape: AvatarShape = AvatarShape.CIRCLE,
     @Deprecated(
         "Use postActionStyle instead",
@@ -96,7 +88,7 @@ public enum class VideoAutoplay {
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-public object AccountPreferencesSerializer : OkioSerializer<AppearanceSettings> {
+internal object AccountPreferencesSerializer : OkioSerializer<AppearanceSettings> {
     override val defaultValue: AppearanceSettings
         get() = AppearanceSettings()
 

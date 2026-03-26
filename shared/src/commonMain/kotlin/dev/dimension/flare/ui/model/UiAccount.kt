@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.nostr.NostrDataSource
 import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
@@ -24,6 +25,23 @@ public sealed class UiAccount {
     @Immutable
     @Serializable
     internal sealed interface Credential
+
+    @Immutable
+    internal data class Nostr(
+        override val accountKey: MicroBlogKey,
+    ) : UiAccount() {
+        override val platformType: PlatformType
+            get() = PlatformType.Nostr
+
+        @Immutable
+        @Serializable
+        @SerialName("NostrCredential")
+        data class Credential(
+//            val pubkey: String,
+            val nsec: String,
+            val relays: List<String> = emptyList(),
+        ) : UiAccount.Credential
+    }
 
     @Immutable
     internal data class Mastodon(
@@ -162,6 +180,11 @@ public sealed class UiAccount {
     internal companion object {
         fun UiAccount.createDataSource(): MicroblogDataSource =
             when (this) {
+                is Nostr ->
+                    NostrDataSource(
+                        accountKey = accountKey,
+                    )
+
                 is Mastodon ->
                     when (forkType) {
                         Mastodon.Credential.ForkType.Mastodon ->
@@ -201,6 +224,12 @@ public sealed class UiAccount {
 
         fun DbAccount.toUi(): UiAccount =
             when (platform_type) {
+                PlatformType.Nostr -> {
+                    Nostr(
+                        accountKey = account_key,
+                    )
+                }
+
                 PlatformType.Mastodon -> {
                     val credential = credential_json.decodeJson<Mastodon.Credential>()
                     Mastodon(

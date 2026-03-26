@@ -2,9 +2,6 @@ package dev.dimension.flare.common.deeplink
 
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.xqtHost
-import dev.dimension.flare.model.xqtOldHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.Url
@@ -82,109 +79,6 @@ internal object DeepLinkMapping {
                 )
         }
     }
-
-    fun generatePattern(
-        platformType: PlatformType,
-        host: String,
-    ): List<DeepLinkPattern<out Type>> =
-        when (platformType) {
-            PlatformType.Mastodon -> {
-                listOf(
-                    DeepLinkPattern(
-                        Type.Profile.serializer(),
-                        Url("https://$host/@{handle}"),
-                    ),
-                    DeepLinkPattern(
-                        Type.Post.serializer(),
-                        Url("https://$host/@{handle}/{id}"),
-                    ),
-                )
-            }
-
-            PlatformType.Misskey -> {
-                listOf(
-                    DeepLinkPattern(
-                        Type.Profile.serializer(),
-                        Url("https://$host/@{handle}"),
-                    ),
-                    DeepLinkPattern(
-                        Type.Post.serializer(),
-                        Url("https://$host/notes/{id}"),
-                    ),
-                )
-            }
-
-            PlatformType.Bluesky -> {
-                listOf(
-                    DeepLinkPattern(
-                        Type.Profile.serializer(),
-                        Url("https://$host/profile/{handle}"),
-                    ),
-                    DeepLinkPattern(
-                        Type.BlueskyPost.serializer(),
-                        Url("https://$host/profile/{handle}/post/{id}"),
-                    ),
-                ) +
-                    if (host == "bsky.social") {
-                        listOf(
-                            DeepLinkPattern(
-                                Type.Profile.serializer(),
-                                Url("https://bsky.app/profile/{handle}"),
-                            ),
-                            DeepLinkPattern(
-                                Type.BlueskyPost.serializer(),
-                                Url("https://bsky.app/profile/{handle}/post/{id}"),
-                            ),
-                        )
-                    } else {
-                        emptyList()
-                    }
-            }
-
-            PlatformType.xQt -> {
-                val profile =
-                    listOf(
-                        "https://$xqtHost/{handle}",
-                        "https://$xqtOldHost/{handle}",
-                        "https://www.$xqtHost/{handle}",
-                        "https://www.$xqtOldHost/{handle}",
-                    )
-                val post =
-                    listOf(
-                        "https://$xqtHost/{handle}/status/{id}",
-                        "https://$xqtOldHost/{handle}/",
-                        "https://www.$xqtHost/{handle}/status/{id}",
-                        "https://www.$xqtOldHost/{handle}/",
-                    )
-                val media =
-                    listOf(
-                        "https://$xqtHost/{handle}/status/{id}/photo/{index}",
-                        "https://$xqtOldHost/{handle}/status/{id}/photo/{index}",
-                        "https://www.$xqtHost/{handle}/status/{id}/photo/{index}",
-                        "https://www.$xqtOldHost/{handle}/status/{id}/photo/{index}",
-                    )
-                profile.map {
-                    DeepLinkPattern(
-                        Type.Profile.serializer(),
-                        Url(it),
-                    )
-                } +
-                    post.map {
-                        DeepLinkPattern(
-                            Type.Post.serializer(),
-                            Url(it),
-                        )
-                    } +
-                    media.map {
-                        DeepLinkPattern(
-                            Type.PostMedia.serializer(),
-                            Url(it),
-                        )
-                    }
-            }
-
-            PlatformType.VVo -> emptyList()
-        }
 
     fun matches(
         url: String,

@@ -17,7 +17,7 @@ enum Route: Hashable, Identifiable {
         clearToHome: @escaping () -> Void
     ) -> some View {
         switch self {
-        case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew) }, toTabSetting: { onNavigate(.tabSettings) })
+        case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew) }, toTabSetting: { onNavigate(.tabSettings) }, toSecondaryMenu: { onNavigate(.secondaryMenu) })
         case .timeline(let item):
             switch onEnum(of: item) {
             case .ListTimelineTabItem(let listTabItem):
@@ -39,6 +39,8 @@ enum Route: Hashable, Identifiable {
             tabItem.view(onNavigate: onNavigate)
         case .accountManagement:
             AccountManagementScreen()
+        case .nostrRelays(let accountKey):
+            NostrRelaysScreen(accountKey: accountKey)
         case .search(let accountType, let query):
             SearchScreen(accountType: accountType, initialQuery: query)
         case .composeNew:
@@ -108,6 +110,8 @@ enum Route: Hashable, Identifiable {
             DraftBoxScreen { groupId in
                 onNavigate(.composeDraft(groupId))
             }
+        case .secondaryMenu:
+            SecondaryTabsScreen(onTabSelected: { it in onNavigate(.tabItem(it)) })
         default:
             Text("Not done yet for \(self)")
         }
@@ -139,6 +143,7 @@ enum Route: Hashable, Identifiable {
     case statusShareSheet(AccountType, MicroBlogKey, String, String?, String?)
     case serviceSelect
     case accountManagement
+    case nostrRelays(MicroBlogKey)
     case localFilter
     case localHostory
     case moreMenuCustomize
@@ -164,6 +169,7 @@ enum Route: Hashable, Identifiable {
     case tabGroupConfig(MixedTimelineTabItem?)
     case rssManagement
     case draftBox
+    case secondaryMenu
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {

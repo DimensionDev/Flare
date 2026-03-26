@@ -36,9 +36,10 @@ public class AllTabsPresenter(
                         val tabs =
                             remember(user.key) {
                                 (
-                                    TimelineTabItem.defaultPrimary(user) +
+                                    TimelineTabItem.default(user.key) +
                                         TimelineTabItem.secondaryFor(
-                                            user,
+                                            user.platformType,
+                                            user.key,
                                         )
                                 ).let {
                                     if (filterIsTimeline) {

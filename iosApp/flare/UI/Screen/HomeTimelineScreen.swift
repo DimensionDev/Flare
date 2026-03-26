@@ -7,15 +7,19 @@ struct HomeTimelineScreen: View {
     let toCompose: () -> Void
     let toTabSetting: () -> Void
     let accountType: AccountType
+    let toSecondaryMenu: () -> Void
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
     @State private var selectedTabIndex = 0
     @StateObject private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
+    @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
 
-    init(accountType: AccountType, toServiceSelect: @escaping () -> Void, toCompose: @escaping () -> Void, toTabSetting: @escaping () -> Void) {
+    init(accountType: AccountType, toServiceSelect: @escaping () -> Void, toCompose: @escaping () -> Void, toTabSetting: @escaping () -> Void, toSecondaryMenu: @escaping () -> Void) {
         self.accountType = accountType
         self.toCompose = toCompose
         self.toServiceSelect = toServiceSelect
         self.toTabSetting = toTabSetting
+        self.toSecondaryMenu = toSecondaryMenu
         self._presenter = .init(wrappedValue: .init(presenter: HomeTimelineWithTabsPresenter(accountType: accountType)))
     }
 
@@ -34,50 +38,59 @@ struct HomeTimelineScreen: View {
                     }
                 })
                 .toolbar {
-                    let placement = if #available(iOS 26.0, *) {
-                        ToolbarItemPlacement.automatic
-                    } else {
-                        ToolbarItemPlacement.title
+                    ToolbarItem(placement: .topBarLeading) {
+                        StateView(state: activeAccountPresenter.state.user) { user in
+                            AvatarView(data: user.avatar)
+                        } errorContent: { _ in
+                            Image(.faGear)
+                        } loadingContent: {
+                            Image(.faGear)
+                        }.onTapGesture {
+                            toSecondaryMenu()
+                        }
                     }
-                    ToolbarItem(placement: placement) {
-                        ScrollView(.horizontal) {
-                            HStack(
-                                spacing: 8,
-                            ) {
-                                ForEach(0..<tabs.count, id: \.self) { index in
-                                    let tab = tabs[index]
-                                    Label {
-                                        TabTitle(title: tab.metaData.title)
-                                            .font(.subheadline)
-                                    } icon: {
-                                        TabIcon(icon: tab.metaData.icon, accountType: tab.account, size: 20)
-                                    }
-                                    .onTapGesture {
-                                        withAnimation(.spring) {
-                                            selectedTabIndex = index
-                                        }
-                                    }
-                                    .padding(.horizontal)
-                                    .padding(.vertical, 8)
-                                    .foregroundStyle(selectedTabIndex == index ? Color.white : .primary)
-                                    .backport
-                                    .glassEffect(selectedTabIndex == index ? .tinted(.accentColor) : .regular, in: .capsule, fallbackBackground: selectedTabIndex == index ? Color.accentColor : Color(.systemBackground))
-                                }
+                    ToolbarItem(placement: horizontalSizeClass == .regular ? .automatic : .title) {
+                        Menu {
+                            ForEach(0..<tabs.count, id: \.self) { index in
+                                let item = tabs[index]
                                 Button {
-                                    toTabSetting()
+                                    selectedTabIndex = index
                                 } label: {
+                                    Label {
+                                        TabTitle(title: item.metaData.title)
+                                    } icon: {
+                                        TabIcon(icon: item.metaData.icon, accountType: item.account)
+                                            .frame(width: 24)
+                                            .scaledToFit()
+                                    }
+                                }
+                            }
+                            Divider()
+                            Button {
+                                toTabSetting()
+                            } label: {
+                                Label {
+                                    Text("tab_settings_add_tab")
+                                } icon: {
                                     Image("fa-plus")
                                 }
-                                .backport
-                                .glassButtonStyle()
                             }
-//                            .padding(.horizontal)
-                            .padding(.vertical, 8)
+                        } label: {
+                            HStack(spacing: 0) {
+                                TabTitle(title: tab.metaData.title)
+                                Image("fa-chevron-down")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                                    .scaledToFit()
+                                    .frame(width: 8, height: 8)
+                                    .padding(8)
+                                    .background(
+                                        Circle()
+                                            .fill(Color.secondary.opacity(0.2))
+                                    )
+                                    .scaleEffect(0.66)
+                            }
                         }
-                        .scrollIndicators(.hidden)
-                    }
-                    if #available(iOS 26.0, *) {
-                        ToolbarSpacer(.fixed)
                     }
                     ToolbarItem(placement: .primaryAction) {
                         if case .error = onEnum(of: presenter.state.user) {

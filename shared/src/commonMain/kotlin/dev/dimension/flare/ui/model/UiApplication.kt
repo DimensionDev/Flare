@@ -13,6 +13,11 @@ public sealed interface UiApplication {
     public val host: String
 
     @Immutable
+    public data class Nostr internal constructor(
+        override val host: String,
+    ) : UiApplication
+
+    @Immutable
     public data class Mastodon internal constructor(
         override val host: String,
         internal val application: CreateApplicationResponse,
@@ -43,6 +48,11 @@ public sealed interface UiApplication {
     public companion object {
         internal fun DbApplication.toUi(): UiApplication =
             when (platform_type) {
+                PlatformType.Nostr ->
+                    Nostr(
+                        host = host,
+                    )
+
                 PlatformType.Mastodon ->
                     Mastodon(
                         host = host,

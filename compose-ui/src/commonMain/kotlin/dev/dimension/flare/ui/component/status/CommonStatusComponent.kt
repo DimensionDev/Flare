@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -46,42 +45,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Brands
-import compose.icons.fontawesomeicons.Regular
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.brands.Bluesky
-import compose.icons.fontawesomeicons.brands.Mastodon
-import compose.icons.fontawesomeicons.brands.Weibo
-import compose.icons.fontawesomeicons.brands.XTwitter
 import compose.icons.fontawesomeicons.regular.Bookmark
-import compose.icons.fontawesomeicons.regular.CommentDots
-import compose.icons.fontawesomeicons.regular.Heart
 import compose.icons.fontawesomeicons.solid.At
 import compose.icons.fontawesomeicons.solid.Bookmark
-import compose.icons.fontawesomeicons.solid.Check
-import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.Ellipsis
-import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Globe
-import compose.icons.fontawesomeicons.solid.Heart
 import compose.icons.fontawesomeicons.solid.Image
-import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.LockOpen
-import compose.icons.fontawesomeicons.solid.Message
-import compose.icons.fontawesomeicons.solid.Minus
-import compose.icons.fontawesomeicons.solid.Pen
-import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
-import compose.icons.fontawesomeicons.solid.ShareNodes
-import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
-import compose.icons.fontawesomeicons.solid.Thumbtack
-import compose.icons.fontawesomeicons.solid.Trash
 import compose.icons.fontawesomeicons.solid.Tv
-import compose.icons.fontawesomeicons.solid.UserPlus
-import compose.icons.fontawesomeicons.solid.UserSlash
-import compose.icons.fontawesomeicons.solid.VolumeXmark
 import dev.dimension.flare.compose.ui.Res
 import dev.dimension.flare.compose.ui.bookmark_add
 import dev.dimension.flare.compose.ui.bookmark_remove
@@ -125,7 +100,6 @@ import dev.dimension.flare.compose.ui.user_unmute
 import dev.dimension.flare.compose.ui.vote
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.model.PostActionStyle
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.DateTimeText
@@ -146,13 +120,13 @@ import dev.dimension.flare.ui.component.platform.PlatformRadioButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextButton
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
-import dev.dimension.flare.ui.icons.Misskey
+import dev.dimension.flare.ui.component.toImageVector
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
-import dev.dimension.flare.ui.model.UiIcon
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimelineV2
+import dev.dimension.flare.ui.model.brandIcon
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -235,21 +209,8 @@ public fun CommonStatusComponent(
                             )
                         }
                         if (appearanceSettings.showPlatformLogo) {
-                            val icon =
-                                when (item.platformType) {
-                                    PlatformType.Mastodon ->
-                                        FontAwesomeIcons.Brands.Mastodon
-                                    PlatformType.Misskey ->
-                                        FontAwesomeIcons.Brands.Misskey
-                                    PlatformType.Bluesky ->
-                                        FontAwesomeIcons.Brands.Bluesky
-                                    PlatformType.xQt ->
-                                        FontAwesomeIcons.Brands.XTwitter
-                                    PlatformType.VVo ->
-                                        FontAwesomeIcons.Brands.Weibo
-                                }
                             FAIcon(
-                                imageVector = icon,
+                                imageVector = item.platformType.brandIcon,
                                 contentDescription = null,
                                 modifier =
                                     Modifier
@@ -981,40 +942,6 @@ private fun ActionMenu.Item.Color.toComposeColor(): Color =
         ActionMenu.Item.Color.Red -> PlatformTheme.colorScheme.error
         ActionMenu.Item.Color.ContentColor -> PlatformContentColor.current
         ActionMenu.Item.Color.PrimaryColor -> PlatformTheme.colorScheme.retweetColor
-    }
-
-internal fun UiIcon.toImageVector(): ImageVector =
-    when (this) {
-        UiIcon.Like -> FontAwesomeIcons.Regular.Heart
-        UiIcon.Unlike -> FontAwesomeIcons.Solid.Heart
-        UiIcon.Retweet -> FontAwesomeIcons.Solid.Retweet
-        UiIcon.Unretweet -> FontAwesomeIcons.Solid.Retweet
-        UiIcon.Reply -> FontAwesomeIcons.Solid.Reply
-        UiIcon.Comment -> FontAwesomeIcons.Regular.CommentDots
-        UiIcon.Quote -> FontAwesomeIcons.Solid.Reply
-        UiIcon.Bookmark -> FontAwesomeIcons.Regular.Bookmark
-        UiIcon.Unbookmark -> FontAwesomeIcons.Solid.Bookmark
-        UiIcon.More -> FontAwesomeIcons.Solid.Ellipsis
-        UiIcon.Delete -> FontAwesomeIcons.Solid.Trash
-        UiIcon.Report -> FontAwesomeIcons.Solid.CircleInfo
-        UiIcon.React -> FontAwesomeIcons.Solid.Plus
-        UiIcon.UnReact -> FontAwesomeIcons.Solid.Minus
-        UiIcon.Share -> FontAwesomeIcons.Solid.ShareNodes
-        UiIcon.MoreVerticel -> FontAwesomeIcons.Solid.EllipsisVertical
-        UiIcon.List -> FontAwesomeIcons.Solid.List
-        UiIcon.ChatMessage -> FontAwesomeIcons.Solid.Message
-        UiIcon.Mute -> FontAwesomeIcons.Solid.VolumeXmark
-        UiIcon.UnMute -> FontAwesomeIcons.Solid.VolumeXmark
-        UiIcon.Block -> FontAwesomeIcons.Solid.UserSlash
-        UiIcon.UnBlock -> FontAwesomeIcons.Solid.UserSlash
-        UiIcon.Follow -> FontAwesomeIcons.Solid.UserPlus
-        UiIcon.Favourite -> FontAwesomeIcons.Solid.Heart
-        UiIcon.Mention -> FontAwesomeIcons.Solid.At
-        UiIcon.Poll -> FontAwesomeIcons.Solid.SquarePollHorizontal
-        UiIcon.Edit -> FontAwesomeIcons.Solid.Pen
-        UiIcon.Info -> FontAwesomeIcons.Solid.CircleInfo
-        UiIcon.Pin -> FontAwesomeIcons.Solid.Thumbtack
-        UiIcon.Check -> FontAwesomeIcons.Solid.Check
     }
 
 @Composable

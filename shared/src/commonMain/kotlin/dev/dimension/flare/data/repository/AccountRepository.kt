@@ -13,12 +13,12 @@ import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiAccount.Companion.createDataSource
 import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
@@ -42,7 +42,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 
 @Stable
-public class AccountRepository internal constructor(
+internal class AccountRepository internal constructor(
     private val appDatabase: AppDatabase,
     private val coroutineScope: CoroutineScope,
     internal val appDataStore: AppDataStore,
@@ -111,6 +111,16 @@ public class AccountRepository internal constructor(
         addAccountFlow.value = account
     }
 
+    internal fun updateCredential(
+        accountKey: MicroBlogKey,
+        credential: UiAccount.Credential,
+    ) = coroutineScope.launch {
+        appDatabase.accountDao().setCredential(
+            accountKey,
+            credential.encodeJson(),
+        )
+    }
+
     internal fun updateAccountOrder(accounts: List<MicroBlogKey>) =
         coroutineScope.launch {
             appDatabase.connect {
@@ -140,7 +150,10 @@ public class AccountRepository internal constructor(
             }
             removeAccountFlow.value = accountKey
             dataSourceCacheMutex.withLock {
-                dataSourceCache.remove(accountKey)
+                val datasource = dataSourceCache.remove(accountKey)
+                if (datasource is AutoCloseable) {
+                    datasource.close()
+                }
             }
             cacheDatabase.pagingTimelineDao().deleteByAccountType(
                 AccountType.Specific(accountKey),
@@ -253,15 +266,10 @@ internal fun accountServiceFlow(
         AccountType.Guest -> {
             val guestData = repository.appDataStore.guestDataStore.data
             guestData.map {
-                when (it.platformType) {
-                    PlatformType.Mastodon ->
-                        GuestMastodonDataSource(
-                            host = it.host,
-                            locale = Locale.language,
-                        )
-
-                    else -> throw UnsupportedOperationException()
-                }
+                it.platformType.spec.guestDataSource(
+                    host = it.host,
+                    locale = Locale.language,
+                )
             }
         }
 
@@ -274,7 +282,7 @@ internal fun accountServiceFlow(
         }
     }
 
-public fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> =
+internal fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> =
     repository
         .activeAccount
         .map { it.takeSuccess() }

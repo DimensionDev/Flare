@@ -31,7 +31,6 @@ import androidx.compose.ui.autofill.contentType
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -58,6 +57,7 @@ import dev.dimension.flare.compose.ui.eula_privacy_policy
 import dev.dimension.flare.compose.ui.login_agreement
 import dev.dimension.flare.compose.ui.login_button
 import dev.dimension.flare.compose.ui.mastodon_login_verify_message
+import dev.dimension.flare.compose.ui.nostr_login_nsec_hint
 import dev.dimension.flare.compose.ui.service_select_compatibility_warning
 import dev.dimension.flare.compose.ui.service_select_empty_message
 import dev.dimension.flare.compose.ui.service_select_instance_input_placeholder
@@ -67,7 +67,8 @@ import dev.dimension.flare.compose.ui.service_select_welcome_list_hint
 import dev.dimension.flare.compose.ui.service_select_welcome_message
 import dev.dimension.flare.compose.ui.service_select_welcome_title
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.logoUrl
+import dev.dimension.flare.model.agreementUrl
+import dev.dimension.flare.model.icon
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.placeholder
@@ -81,6 +82,7 @@ import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextField
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
+import dev.dimension.flare.ui.component.toImageVector
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
@@ -172,11 +174,10 @@ public fun ServiceSelectionScreenContent(
                     leadingIcon = {
                         state.detectedPlatformType
                             .onSuccess {
-                                NetworkImage(
-                                    it.platformType.logoUrl,
+                                FAIcon(
+                                    imageVector = it.platformType.icon.toImageVector(),
                                     contentDescription = null,
                                     modifier = Modifier.size(24.dp),
-                                    contentScale = ContentScale.Fit,
                                 )
                             }.onError {
                                 FAIcon(
@@ -220,6 +221,10 @@ public fun ServiceSelectionScreenContent(
                             val passwordFocusRequester = remember { FocusRequester() }
                             val pinCodeFocusRequester = remember { FocusRequester() }
                             when (nodeData.platformType) {
+                                PlatformType.Nostr -> {
+                                    NostrLoginContent(state)
+                                }
+
                                 PlatformType.Bluesky -> {
                                     val oauthString =
                                         stringResource(Res.string.bluesky_login_oauth_button)
@@ -603,6 +608,64 @@ public fun ServiceSelectionScreenContent(
 }
 
 @Composable
+private fun NostrLoginContent(state: SelectionPresenter.State) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        PlatformSecureTextField(
+            state = state.nostrInputState.secretKey,
+            label = {
+                PlatformText(text = stringResource(Res.string.nostr_login_nsec_hint))
+            },
+            enabled = !state.nostrLoginState.loading,
+            modifier = Modifier.width(300.dp),
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done,
+                    autoCorrectEnabled = false,
+                ),
+            onKeyboardAction = {
+                if (state.nostrInputState.canLogin) {
+                    state.nostrLoginState.login(
+                        secretKey =
+                            state.nostrInputState.secretKey.text
+                                .toString(),
+                    )
+                }
+            },
+        )
+        PlatformFilledTonalButton(
+            onClick = {
+                state.nostrLoginState.login(
+                    secretKey =
+                        state.nostrInputState.secretKey.text
+                            .toString(),
+                )
+            },
+            modifier = Modifier.width(300.dp),
+            enabled = state.nostrInputState.canLogin && !state.nostrLoginState.loading,
+        ) {
+            PlatformText(text = stringResource(Res.string.login_button))
+        }
+        state.nostrLoginState.error?.let {
+            PlatformText(
+                text = it.message ?: "Unknown error",
+                textAlign = TextAlign.Center,
+            )
+        }
+        if (state.nostrLoginState.loading) {
+            PlatformLinearProgressIndicator()
+        }
+    }
+}
+
+@Composable
 private fun ServiceSelectItem(
     instance: UiInstance?,
     onClick: () -> Unit,
@@ -645,6 +708,12 @@ private fun ServiceSelectItem(
                             Modifier
                                 .size(24.dp),
                     )
+                } else if (instance != null) {
+                    FAIcon(
+                        imageVector = instance.type.icon.toImageVector(),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                    )
                 }
                 PlatformText(
                     text = instance?.name ?: "Loading...",
@@ -677,18 +746,12 @@ private fun LoginAgreement(
     openUri: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (platformType == PlatformType.VVo) return
+    val url = platformType.agreementUrl(host) ?: return
     val linkText = stringResource(Res.string.eula_privacy_policy)
     val fullText = stringResource(Res.string.login_agreement, linkText)
     val color = PlatformTheme.colorScheme.primary
     val annotatedString =
-        remember {
-            val url =
-                when (platformType) {
-                    PlatformType.Bluesky -> "https://bsky.social/about/support/tos"
-                    PlatformType.xQt -> "https://help.x.com/en/rules-and-policies/x-rules"
-                    else -> "https://$host/about"
-                }
+        remember(platformType, host, url, linkText, fullText, color) {
             buildAnnotatedString {
                 append(fullText)
                 val startIndex = fullText.indexOf(linkText)

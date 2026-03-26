@@ -62,7 +62,7 @@ internal fun EntryProviderScope<NavKey>.misskeyEntryBuilder(
                     antennasId = args.antennaId,
                     metaData = TabMetaData(
                         title = TitleType.Text(args.title),
-                        icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+                        icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.Rss),
                     ),
                 )
             },
@@ -99,7 +99,7 @@ internal fun EntryProviderScope<NavKey>.misskeyEntryBuilder(
                     account = args.accountType,
                     metaData = TabMetaData(
                         title = TitleType.Text(args.title),
-                        icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                        icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
                     ),
                 )
             },

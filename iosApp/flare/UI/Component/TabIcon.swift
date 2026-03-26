@@ -108,38 +108,11 @@ extension TabIcon {
 }
 
 struct MaterialTabIcon: View {
-    let icon: IconType.MaterialMaterialIcon
+    let icon: UiIcon
     var body: some View {
         Image(icon.imageName)
             .resizable()
             .scaledToFit()
-    }
-}
-
-extension IconType.MaterialMaterialIcon {
-    var imageName: String {
-        switch self {
-        case .home:        "fa-house"
-        case .notification: "fa-bell"
-        case .search:       "fa-magnifying-glass"
-        case .profile:      "fa-circle-user"
-        case .settings:     "fa-gear"
-        case .local:        "fa-users"
-        case .world:        "fa-globe"
-        case .featured:     "fa-rectangle-list"
-        case .bookmark:     "fa-book-bookmark"
-        case .heart:        "fa-heart"
-        case .twitter:      "fa-x-twitter"
-        case .mastodon:     "fa-mastodon"
-        case .misskey:      "fa-misskey"
-        case .bluesky:      "fa-bluesky"
-        case .list:         "fa-list"
-        case .feeds:        "fa-square-rss"
-        case .messages:     "fa-message"
-        case .rss:          "fa-square-rss"
-        case .weibo: "fa-weibo"
-        case .channel: "fa-tv"
-        }
     }
 }
 

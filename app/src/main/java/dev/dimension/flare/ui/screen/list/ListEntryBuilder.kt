@@ -62,7 +62,7 @@ internal fun EntryProviderScope<NavKey>.listEntryBuilder(
                     listId = args.listId,
                     metaData = TabMetaData(
                         title = TitleType.Text(args.title),
-                        icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                        icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
                     ),
                 )
             },

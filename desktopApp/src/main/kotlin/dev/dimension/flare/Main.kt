@@ -22,7 +22,6 @@ import coil3.request.crossfade
 import dev.dimension.flare.common.DeeplinkHandler
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.di.KoinHelper
-import dev.dimension.flare.di.composeUiModule
 import dev.dimension.flare.di.desktopModule
 import dev.dimension.flare.ui.component.PlatformTitleBar
 import dev.dimension.flare.ui.component.PlatformWindow
@@ -70,7 +69,7 @@ fun main(args: Array<String>) {
     }
     startKoin {
         modules(
-            desktopModule + KoinHelper.modules() + composeUiModule,
+            desktopModule + KoinHelper.modules(),
         )
     }
     application {

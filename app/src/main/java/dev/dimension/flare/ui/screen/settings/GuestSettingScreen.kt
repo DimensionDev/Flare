@@ -22,9 +22,9 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleQuestion
 import dev.dimension.flare.R
-import dev.dimension.flare.model.logoUrl
+import dev.dimension.flare.model.icon
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.toImageVector
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -80,8 +80,8 @@ internal fun GuestSettingScreen(onBack: () -> Unit) {
                     state.platformType
                         .onSuccess {
                             if (it in state.supportedPlatforms) {
-                                NetworkImage(
-                                    it.logoUrl,
+                                FAIcon(
+                                    imageVector = it.icon.toImageVector(),
                                     contentDescription = null,
                                     modifier = Modifier.size(24.dp),
                                 )

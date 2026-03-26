@@ -49,7 +49,7 @@ internal fun ListScreen(accountType: AccountType) {
                                 metaData =
                                     TabMetaData(
                                         title = TitleType.Text(it.title),
-                                        icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                                        icon = IconType.Material(dev.dimension.flare.ui.model.UiIcon.List),
                                     ),
                             )
                         },

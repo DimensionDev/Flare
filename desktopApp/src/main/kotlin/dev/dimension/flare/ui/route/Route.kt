@@ -221,6 +221,10 @@ internal sealed interface Route : NavKey {
 
     data object LocalCache : ScreenRoute
 
+    data class NostrRelays(
+        val accountKey: MicroBlogKey,
+    ) : ScreenRoute
+
     data class Following(
         val accountType: AccountType,
         val userKey: MicroBlogKey,

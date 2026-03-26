@@ -1,12 +1,14 @@
 package dev.dimension.flare.model
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.ui.model.UiIcon
 import kotlinx.serialization.Serializable
 import kotlin.io.encoding.Base64
 
 @Immutable
 @Serializable
 public enum class PlatformType {
+    Nostr,
     Mastodon,
     Misskey,
     Bluesky,
@@ -17,21 +19,11 @@ public enum class PlatformType {
     VVo,
 }
 
-public val PlatformType.logoUrl: String
-    get() =
-        when (this) {
-            PlatformType.Mastodon -> "https://joinmastodon.org/logos/logo-purple.svg"
-            PlatformType.Misskey ->
-                "https://github.com/misskey-dev/misskey/blob/develop/packages" +
-                    "/backend/assets/favicon.png?raw=true"
-            PlatformType.Bluesky -> "https://blueskyweb.xyz/images/apple-touch-icon.png"
-            PlatformType.xQt ->
-                "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53" +
-                    "/X_logo_2023_original.svg/1920px-X_logo_2023_original.svg.png"
-            PlatformType.VVo ->
-                "https://upload.wikimedia.org/wikipedia/en/thumb/6/" +
-                    "6e/Sina_Weibo.svg/2560px-Sina_Weibo.svg.png"
-        }
+@Immutable
+public data class PlatformTypeMetadata(
+    val displayName: String,
+    val icon: UiIcon,
+)
 
 public val xqtOldHost: String =
     buildString {

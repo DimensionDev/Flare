@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.Composable
@@ -81,8 +81,8 @@ internal fun EditTabDialog(
             ) {
                 FlyoutContainer(
                     flyout = {
-                        LazyHorizontalGrid(
-                            rows = GridCells.FixedSize(48.dp),
+                        LazyVerticalGrid(
+                            columns = GridCells.FixedSize(48.dp),
                             modifier = Modifier.heightIn(max = 120.dp),
                         ) {
                             items(state.availableIcons) { icon ->

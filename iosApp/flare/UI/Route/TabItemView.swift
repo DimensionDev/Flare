@@ -11,7 +11,7 @@ extension TabItem {
         case .timelineTabItem(let timelineTabItem):
             switch onEnum(of: timelineTabItem) {
             case .HomeTimelineTabItem(let homeTimelineTabItem):
-                HomeTimelineScreen(accountType: homeTimelineTabItem.account, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew ) }, toTabSetting: { onNavigate(.tabSettings) } )
+                HomeTimelineScreen(accountType: homeTimelineTabItem.account, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew ) }, toTabSetting: { onNavigate(.tabSettings) }, toSecondaryMenu: { onNavigate(.secondaryMenu) })
             case .ListTimelineTabItem(let listTabItem):
                 ListTimelineScreen(tabItem: listTabItem)
                     .navigationTitle(timelineTabItem.metaData.title.text)

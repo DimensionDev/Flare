@@ -13,8 +13,8 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 internal class UserHandler(
-    val host: String,
-    val loader: UserLoader,
+    private val host: String,
+    private val loader: UserLoader,
 ) : KoinComponent {
     private val database: CacheDatabase by inject()
 

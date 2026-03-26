@@ -59,7 +59,10 @@ public class HomeTabsPresenter :
                     )
                 } else {
                     val secondary =
-                        tabsState.secondaryItems ?: TimelineTabItem.defaultSecondary(account)
+                        tabsState.secondaryItems ?: TimelineTabItem.secondaryFor(
+                            account.platformType,
+                            account.accountKey,
+                        )
                     State.HomeTabState(
                         primary =
                             TimelineTabItem.default(account.accountKey).toImmutableList(),

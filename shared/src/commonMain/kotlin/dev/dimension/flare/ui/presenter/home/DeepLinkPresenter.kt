@@ -11,13 +11,13 @@ import dev.dimension.flare.data.datasource.microblog.datasource.PostDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.DeeplinkEvent
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.route.APPSCHEMA
 import dev.dimension.flare.ui.route.DeeplinkRoute
 import io.ktor.http.URLProtocol
 import io.ktor.http.buildUrl
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
@@ -42,11 +42,7 @@ public class DeepLinkPresenter(
         accountRepository.allAccounts.map {
             it
                 .associateWith {
-                    DeepLinkMapping
-                        .generatePattern(
-                            platformType = it.platformType,
-                            host = it.accountKey.host,
-                        ).toImmutableList()
+                    it.platformType.spec.deepLinkPatterns(it.accountKey.host)
                 }.toImmutableMap()
         }
     }

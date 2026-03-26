@@ -5,12 +5,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.HomeTimelineTabItem
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.vvo
+import dev.dimension.flare.model.icon
+import dev.dimension.flare.model.spec
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.home.UserPresenter
@@ -80,14 +81,8 @@ public class HomeTimelineWithTabsPresenter(
                 val tab =
                     HomeTimelineTabItem(
                         accountKey = account.accountKey,
-                        title =
-                            when (account.platformType) {
-                                PlatformType.Mastodon -> "Mastodon"
-                                PlatformType.Misskey -> "Misskey"
-                                PlatformType.Bluesky -> "Bluesky"
-                                PlatformType.xQt -> "X"
-                                PlatformType.VVo -> vvo
-                            },
+                        title = account.platformType.spec.metadata.displayName,
+                        icon = IconType.Material(account.platformType.icon),
                     )
                 settingsRepository.updateTabSettings {
                     if (mainTabs.any { it.key == tab.key }) {

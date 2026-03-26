@@ -244,6 +244,14 @@ extension UiIcon {
 
     var imageName: String {
         switch self {
+        case .home: return "fa-house"
+        case .notification: return "fa-bell"
+        case .search: return "fa-magnifying-glass"
+        case .profile: return "fa-circle-user"
+        case .settings: return "fa-gear"
+        case .local: return "fa-users"
+        case .world: return "fa-globe"
+        case .featured: return "fa-rectangle-list"
         case .bookmark: return "fa-bookmark"
         case .unbookmark: return "fa-bookmark.fill"
         case .delete: return "fa-trash"
@@ -274,6 +282,18 @@ extension UiIcon {
         case .info: return "fa-circle-info"
         case .pin: return "fa-thumbtack"
         case .check: return "fa-check"
+        case .feeds: return "fa-square-rss"
+        case .messages: return "fa-message"
+        case .rss: return "fa-square-rss"
+        case .channel: return "fa-tv"
+        case .heart: return "fa-heart"
+        case .mastodon: return "fa-mastodon"
+        case .misskey: return "fa-misskey"
+        case .bluesky: return "fa-bluesky"
+        case .nostr: return "fa-nostr"
+        case .twitter: return "fa-x-twitter"
+        case .x: return "fa-x-twitter"
+        case .weibo: return "fa-weibo"
         }
     }
 }

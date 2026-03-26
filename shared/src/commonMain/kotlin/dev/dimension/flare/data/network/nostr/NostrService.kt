@@ -61,7 +61,6 @@ public val defaultNostrRelays: List<String> =
         "wss://nos.lol",
         "wss://relay.plebstr.com",
         "wss://nostr.bitcoiner.social",
-        "wss://relay.damus.io",
     )
 
 internal class NostrService(

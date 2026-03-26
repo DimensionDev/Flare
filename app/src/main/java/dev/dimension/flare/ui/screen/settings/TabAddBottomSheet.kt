@@ -16,9 +16,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -51,13 +50,12 @@ import dev.dimension.flare.ui.component.TabRowIndicator
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toTabItem
-import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TabAddBottomSheet(
     tabs: ImmutableList<TabItem>,
@@ -231,20 +229,17 @@ internal fun TabAddBottomSheet(
                                                         R.string.channel_title
                                                 }
                                             }.map { stringResource(id = it) }
-                                ButtonGroup(
-                                    overflowIndicator = {},
-                                    horizontalArrangement =
-                                        Arrangement.spacedBy(
-                                            4.dp,
-                                            Alignment.CenterHorizontally,
-                                        ),
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
                                     modifier = Modifier.fillMaxWidth(),
                                 ) {
                                     items.forEachIndexed { index, text ->
-                                        toggleableItem(
-                                            checked = selectedIndex == index,
-                                            onCheckedChange = { selectedIndex = index },
-                                            label = text,
+                                        FilterChip(
+                                            selected = selectedIndex == index,
+                                            onClick = { selectedIndex = index },
+                                            label = {
+                                                Text(text)
+                                            },
                                         )
                                     }
                                 }

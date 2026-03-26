@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,10 +17,9 @@ import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -74,7 +74,6 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun RssSourceEditSheet(
     onDismissRequest: () -> Unit,
@@ -329,23 +328,22 @@ internal fun RssSourceEditSheet(
         state.inputState.onSuccess { inputState ->
             val openInBrowserString = stringResource(id = R.string.rss_sources_open_in_browser)
             val openInAppString = stringResource(id = R.string.rss_sources_open_in_app)
-            ButtonGroup(
-                overflowIndicator = {},
-                modifier =
-                    Modifier
-                        .fillMaxWidth(),
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                toggleableItem(
-                    checked = state.openInBrowser,
-                    onCheckedChange = { state.setOpenInBrowser(it) },
-                    label = openInBrowserString,
-                    weight = 1f,
+                FilterChip(
+                    selected = state.openInBrowser,
+                    onClick = { state.setOpenInBrowser(true) },
+                    label = {
+                        Text(openInBrowserString)
+                    },
                 )
-                toggleableItem(
-                    checked = !state.openInBrowser,
-                    onCheckedChange = { state.setOpenInBrowser(!it) },
-                    label = openInAppString,
-                    weight = 1f,
+                FilterChip(
+                    selected = !state.openInBrowser,
+                    onClick = { state.setOpenInBrowser(false) },
+                    label = {
+                        Text(openInAppString)
+                    },
                 )
             }
             Row(

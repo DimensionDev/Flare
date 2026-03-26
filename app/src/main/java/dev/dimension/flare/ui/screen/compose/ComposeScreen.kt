@@ -33,15 +33,14 @@ import androidx.compose.foundation.text.input.insert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -164,7 +163,6 @@ private fun activeAccountPresenter() =
 
 @OptIn(
     ExperimentalMaterial3Api::class,
-    ExperimentalMaterial3ExpressiveApi::class,
 )
 @Composable
 internal fun ComposeScreen(
@@ -607,20 +605,21 @@ internal fun ComposeScreen(
                                     true to stringResource(id = R.string.compose_poll_single_choice),
                                     false to stringResource(id = R.string.compose_poll_multiple_choice),
                                 )
-                            ButtonGroup(
-                                overflowIndicator = {},
+                            Row(
                                 modifier =
                                     Modifier
                                         .weight(1f),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 items.forEach { (singleChoice, label) ->
-                                    toggleableItem(
-                                        checked = pollState.pollSingleChoice == singleChoice,
-                                        onCheckedChange = {
+                                    FilterChip(
+                                        selected = pollState.pollSingleChoice == singleChoice,
+                                        onClick = {
                                             pollState.setPollSingleChoice(singleChoice)
                                         },
-                                        label = label,
-                                        weight = 1f,
+                                        label = {
+                                            Text(label)
+                                        },
                                     )
                                 }
                             }

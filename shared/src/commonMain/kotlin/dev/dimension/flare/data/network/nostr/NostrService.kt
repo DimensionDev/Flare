@@ -247,14 +247,16 @@ internal class NostrService(
                 targetEventIds = eventGraph.keys.toList(),
             )
 
+        val renderContexts = eventGraph.buildRenderContexts()
         val profiles =
             loadProfiles(
-                pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
+                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
             )
         return events.toUiTimeline(
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
+            renderContexts = renderContexts,
         )
     }
 
@@ -301,14 +303,16 @@ internal class NostrService(
                 accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
+        val renderContexts = eventGraph.buildRenderContexts()
         val profiles =
             loadProfiles(
-                pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
+                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
             )
         return events.toUiTimeline(
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
+            renderContexts = renderContexts,
         )
     }
 
@@ -362,14 +366,16 @@ internal class NostrService(
                 accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
+        val renderContexts = eventGraph.buildRenderContexts()
         val profiles =
             loadProfiles(
-                pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
+                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
             )
         return events.toUiTimeline(
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
+            renderContexts = renderContexts,
         )
     }
 
@@ -457,15 +463,17 @@ internal class NostrService(
                 accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
+        val renderContexts = eventGraph.buildRenderContexts()
         val profiles =
             loadProfiles(
-                pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
+                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
             )
         return events.toUiNotifications(
             accountPubkey = pubKeyHex,
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
+            renderContexts = renderContexts,
         )
     }
 
@@ -480,15 +488,17 @@ internal class NostrService(
                 accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
+        val renderContexts = eventGraph.buildRenderContexts()
         val profiles =
             loadProfiles(
-                pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
+                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
             )
         return listOf(event)
             .toUiTimeline(
                 profiles = profiles,
                 eventsById = eventGraph,
                 interactionStats = interactionStats,
+                renderContexts = renderContexts,
             ).first()
     }
 
@@ -518,15 +528,17 @@ internal class NostrService(
                 accountPubkey = pubKeyHex,
                 targetEventIds = eventGraph.keys.toList(),
             )
+        val renderContexts = eventGraph.buildRenderContexts()
         val profiles =
             loadProfiles(
-                pubKeys = eventGraph.values.map { it.pubKey }.distinct(),
+                pubKeys = eventGraph.profilePubKeysForRendering(renderContexts),
             )
 
         return threadEvents.toUiTimeline(
             profiles = profiles,
             eventsById = eventGraph,
             interactionStats = interactionStats,
+            renderContexts = renderContexts,
         )
     }
 
@@ -825,6 +837,23 @@ internal class NostrService(
 
         return cachedProfiles + fetchedProfiles
     }
+
+    private fun Map<String, Event>.buildRenderContexts(): Map<String, NostrTextRenderContext> =
+        values
+            .asSequence()
+            .filterIsInstance<TextNoteEvent>()
+            .associate { it.id to buildNostrTextRenderContext(it.content, it.tags) }
+
+    private fun Map<String, Event>.profilePubKeysForRendering(renderContexts: Map<String, NostrTextRenderContext>): List<String> =
+        values
+            .flatMap { event ->
+                buildList {
+                    add(event.pubKey)
+                    if (event is TextNoteEvent) {
+                        addAll(renderContexts[event.id]?.mentionedProfilePubKeys.orEmpty())
+                    }
+                }
+            }.distinct()
 
     private suspend fun queryFirstRelay(
         filters: List<Filter>,
@@ -1129,6 +1158,7 @@ internal class NostrService(
         profiles: Map<String, UiProfile>,
         eventsById: Map<String, Event>,
         interactionStats: Map<String, InteractionStats> = emptyMap(),
+        renderContexts: Map<String, NostrTextRenderContext> = emptyMap(),
     ): List<UiTimelineV2.Post> {
         val cache = mutableMapOf<String, UiTimelineV2.Post>()
 
@@ -1153,6 +1183,7 @@ internal class NostrService(
                             eventsById = eventsById,
                             profiles = profiles,
                             interactionStats = interactionStats,
+                            renderContext = renderContexts[event.id],
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
@@ -1191,6 +1222,7 @@ internal class NostrService(
         profiles: Map<String, UiProfile>,
         eventsById: Map<String, Event>,
         interactionStats: Map<String, InteractionStats> = emptyMap(),
+        renderContexts: Map<String, NostrTextRenderContext> = emptyMap(),
     ): List<UiTimelineV2.Post> {
         val cache = mutableMapOf<String, UiTimelineV2.Post>()
 
@@ -1215,6 +1247,7 @@ internal class NostrService(
                             eventsById = eventsById,
                             profiles = profiles,
                             interactionStats = interactionStats,
+                            renderContext = renderContexts[event.id],
                             visited = nextVisited,
                             resolveEvent = ::resolve,
                         )
@@ -1259,19 +1292,21 @@ internal class NostrService(
         eventsById: Map<String, Event>,
         profiles: Map<String, UiProfile>,
         interactionStats: Map<String, InteractionStats>,
+        renderContext: NostrTextRenderContext?,
         visited: Set<String>,
         resolveEvent: (Event, Set<String>) -> UiTimelineV2.Post?,
     ): UiTimelineV2.Post {
         val statusKey = MicroBlogKey(id, NOSTR_HOST)
         val stats = interactionStats[id] ?: InteractionStats()
+        val actualRenderContext = renderContext ?: buildNostrTextRenderContext(content, tags)
         return UiTimelineV2.Post(
             message = null,
             platformType = PlatformType.Nostr,
-            images = mediaFromTags().toImmutableList(),
+            images = mediaFromTextAndTags(actualRenderContext.preprocessedText.extractedMediaUrls).toImmutableList(),
             sensitive = false,
             contentWarning = null,
             user = profile,
-            content = content.toUiPlainText(),
+            content = parseNostrRichText(actualRenderContext, accountKey = accountKey, profiles = profiles),
             actions =
                 buildList {
                     add(
@@ -1510,7 +1545,7 @@ internal class NostrService(
             .map { it.address }
             .distinctBy { it.toValue() }
 
-    private fun TextNoteEvent.mediaFromTags(): List<UiMedia> {
+    private fun TextNoteEvent.mediaFromTextAndTags(textMediaUrls: List<String> = emptyList()): List<UiMedia> {
         val mediaFromIMeta =
             tags
                 .mapNotNull(IMetaTag::parse)
@@ -1525,7 +1560,12 @@ internal class NostrService(
                 .filterNot { url -> mediaFromIMeta.any { it.url == url } }
                 .mapNotNull { url -> toUiMedia(url = url, dimensions = null, description = null) }
 
-        return (mediaFromIMeta + urlsFromR).distinctBy { it.url }
+        val urlsFromText =
+            textMediaUrls
+                .filterNot { url -> mediaFromIMeta.any { it.url == url } || urlsFromR.any { it.url == url } }
+                .mapNotNull { url -> toUiMedia(url = url, dimensions = null, description = null) }
+
+        return (mediaFromIMeta + urlsFromR + urlsFromText).distinctBy { it.url }
     }
 
     private fun toUiMedia(iMeta: IMetaTag): UiMedia? =
@@ -1726,6 +1766,7 @@ internal class NostrService(
                         eventsById = eventsById,
                         profiles = profiles,
                         interactionStats = interactionStats,
+                        renderContext = null,
                         visited = setOf(id),
                         resolveEvent = { event, visited -> resolveEvent(event, visited) },
                     )

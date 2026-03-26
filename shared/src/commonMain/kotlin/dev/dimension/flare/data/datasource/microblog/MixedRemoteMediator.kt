@@ -63,6 +63,11 @@ internal class MixedRemoteMediator(
                     timelineResult
                         .sortedByDescending {
                             it.createdAt.value.toEpochMilliseconds()
+                        }.distinctBy { item ->
+                            // A mixed timeline can receive the same logical item from multiple
+                            // sub timelines (for example home + list). Keep one copy so Compose
+                            // never receives duplicate lazy keys for the same item.
+                            item.itemKey
                         }
 
                 database.connect {

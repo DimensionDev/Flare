@@ -12597,6 +12597,12 @@
             "value" : "Блокиране на %@"
           }
         },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blokovat %@"
+          }
+        },
         "da" : {
           "stringUnit" : {
             "state" : "translated",

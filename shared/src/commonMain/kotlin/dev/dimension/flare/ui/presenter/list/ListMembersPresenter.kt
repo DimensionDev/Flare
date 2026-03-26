@@ -17,7 +17,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -35,20 +34,24 @@ public class ListMembersPresenter(
     private val accountRepository: AccountRepository by inject()
 
     @OptIn(ExperimentalCoroutinesApi::class)
+    private val membersFlow by lazy {
+        accountServiceFlow(accountType, accountRepository).flatMapLatest { service ->
+            if (service is ListDataSource) {
+                service.listMemberHandler.listMembers(listId)
+            } else {
+                PagingData.emptyFlow<UiProfile>()
+            }
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     override fun body(): ListMembersState {
         val scope = rememberCoroutineScope()
-        val flow: Flow<PagingData<UiProfile>> =
-            remember(accountType, listId) {
-                accountServiceFlow(accountType, accountRepository).flatMapLatest { service ->
-                    if (service is ListDataSource) {
-                        service.listMemberHandler.listMembers(listId)
-                    } else {
-                        PagingData.emptyFlow<UiProfile>()
-                    }
-                }
-            }
-        val memberInfo = flow.cachedIn(scope).collectAsLazyPagingItems().toPagingState()
+        val memberInfo =
+            remember {
+                membersFlow.cachedIn(scope)
+            }.collectAsLazyPagingItems().toPagingState()
 
         return object : ListMembersState {
             override val memberInfo: PagingState<UiProfile> = memberInfo

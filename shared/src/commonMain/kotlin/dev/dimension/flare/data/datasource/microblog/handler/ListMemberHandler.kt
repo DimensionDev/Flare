@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datasource.microblog.handler
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
+import androidx.paging.PagingData
 import androidx.paging.map
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -18,6 +19,8 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.UiProfile
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -33,8 +36,9 @@ internal class ListMemberHandler(
     private val memberPagingKey: String
         get() = "${pagingKey}_members"
 
-    fun listMembers(listId: String) =
-        Pager(
+    fun listMembers(listId: String): Flow<PagingData<UiProfile>> {
+        val listKey = MicroBlogKey(listId, accountKey.host)
+        return Pager(
             config = pagingConfig,
             remoteMediator =
                 createPagingRemoteMediator(
@@ -48,24 +52,25 @@ internal class ListMemberHandler(
                         )
                     },
                     onSave = { request, data ->
-                        val listKey = MicroBlogKey(listId, accountKey.host)
-                        if (request == PagingRequest.Refresh) {
-                            database.listDao().deleteMembersByListKey(listKey)
+                        database.connect {
+                            if (request == PagingRequest.Refresh) {
+                                database.listDao().deleteMembersByListKey(listKey)
+                            }
+                            database.listDao().insertAllMember(
+                                data.map { item ->
+                                    DbListMember(
+                                        listKey = listKey,
+                                        memberKey = item.key,
+                                    )
+                                },
+                            )
+                            database.upsertUsers(data.map { it.toDbUser() })
                         }
-                        database.listDao().insertAllMember(
-                            data.map { item ->
-                                DbListMember(
-                                    listKey = listKey,
-                                    memberKey = item.key,
-                                )
-                            },
-                        )
-                        database.upsertUsers(data.map { it.toDbUser() })
                     },
                 ),
             pagingSourceFactory = {
                 database.listDao().getListMembers(
-                    listKey = MicroBlogKey(listId, accountKey.host),
+                    listKey = listKey,
                 )
             },
         ).flow.map {
@@ -73,6 +78,7 @@ internal class ListMemberHandler(
                 it.user.content
             }
         }
+    }
 
     fun listMembersListFlow(listId: String) =
         database
@@ -90,20 +96,29 @@ internal class ListMemberHandler(
         userKey: MicroBlogKey,
     ) {
         val listKey = MicroBlogKey(listId, accountKey.host)
+        database.connect {
+            database.listDao().insertAllMember(
+                listOf(
+                    DbListMember(
+                        listKey = listKey,
+                        memberKey = userKey,
+                    ),
+                ),
+            )
+        }
         tryRun {
             loader.addMember(listId, userKey)
         }.onSuccess { user ->
             database.connect {
-                database.listDao().insertAllMember(
-                    listOf(
-                        DbListMember(
-                            listKey = listKey,
-                            memberKey = userKey,
-                        ),
-                    ),
-                )
                 database.upsertUsers(
                     listOf(user.toDbUser()),
+                )
+            }
+        }.onFailure {
+            database.connect {
+                database.listDao().deleteMemberFromList(
+                    listKey = listKey,
+                    memberKey = userKey,
                 )
             }
         }
@@ -114,13 +129,23 @@ internal class ListMemberHandler(
         userKey: MicroBlogKey,
     ) {
         val listKey = MicroBlogKey(listId, accountKey.host)
+        database.connect {
+            database.listDao().deleteMemberFromList(
+                listKey = listKey,
+                memberKey = userKey,
+            )
+        }
         tryRun {
             loader.removeMember(listId, userKey)
-        }.onSuccess {
+        }.onFailure {
             database.connect {
-                database.listDao().deleteMemberFromList(
-                    listKey = listKey,
-                    memberKey = userKey,
+                database.listDao().insertAllMember(
+                    listOf(
+                        DbListMember(
+                            listKey = listKey,
+                            memberKey = userKey,
+                        ),
+                    ),
                 )
             }
         }

@@ -19,4 +19,43 @@ class UiMediaFileNameTest {
             fileName,
         )
     }
+
+    @Test
+    fun handlesUrlWithQueryParams() {
+        val media = UiMedia.Image(url = "https://example.com/image.jpg?name=orig&size=large")
+
+        val fileName =
+            media.getFileName(
+                statusKey = "post123",
+                userHandle = "alice",
+            )
+
+        assertEquals("post123_alice.jpg", fileName)
+    }
+
+    @Test
+    fun handlesUrlWithoutExtensionAndAppendsFallback() {
+        val media = UiMedia.Image(url = "https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:x/bafkrei")
+
+        val fileName =
+            media.getFileName(
+                statusKey = "post123",
+                userHandle = "alice",
+            )
+
+        assertEquals("post123_alice.jpg", fileName)
+    }
+
+    @Test
+    fun handlesBlueskyFormatUrl() {
+        val media = UiMedia.Image(url = "https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:x/bafkrei...@jpeg")
+
+        val fileName =
+            media.getFileName(
+                statusKey = "post123",
+                userHandle = "alice",
+            )
+
+        assertEquals("post123_alice.jpeg", fileName)
+    }
 }

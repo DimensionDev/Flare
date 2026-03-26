@@ -52,9 +52,7 @@ import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun NostrRelaysScreen(
-    accountKey: MicroBlogKey,
-) {
+internal fun NostrRelaysScreen(accountKey: MicroBlogKey) {
     val state by producePresenter(key = "nostr_relays_$accountKey") {
         remember(accountKey) { NostrRelaysPresenter(accountKey) }.invoke()
     }

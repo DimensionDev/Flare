@@ -70,6 +70,9 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
             onBack = onBack,
             toLogin = {
                 navigate(Route.ServiceSelect.Selection)
+            },
+            toNostrRelays = {
+                navigate(Route.Settings.NostrRelays(it))
             }
         )
     }
@@ -181,6 +184,17 @@ internal fun EntryProviderScope<NavKey>.settingsSelectEntryBuilder(
         )
     ) {
         AppLoggingScreen(
+            onBack = onBack
+        )
+    }
+
+    entry<Route.Settings.NostrRelays>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) { args ->
+        NostrRelaysScreen(
+            accountKey = args.accountKey,
             onBack = onBack
         )
     }

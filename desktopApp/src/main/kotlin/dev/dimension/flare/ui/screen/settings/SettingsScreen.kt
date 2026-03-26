@@ -360,7 +360,9 @@ internal fun SettingsScreen(
                                                                     if (account.account.platformType == PlatformType.Nostr) {
                                                                         MenuFlyoutItem(
                                                                             text = {
-                                                                                Text(stringResource(Res.string.settings_nostr_relays_manage))
+                                                                                Text(
+                                                                                    stringResource(Res.string.settings_nostr_relays_manage),
+                                                                                )
                                                                             },
                                                                             onClick = {
                                                                                 toNostrRelays(user.key)
@@ -368,7 +370,10 @@ internal fun SettingsScreen(
                                                                             icon = {
                                                                                 FAIcon(
                                                                                     FontAwesomeIcons.Solid.List,
-                                                                                    contentDescription = stringResource(Res.string.settings_nostr_relays_manage),
+                                                                                    contentDescription =
+                                                                                        stringResource(
+                                                                                            Res.string.settings_nostr_relays_manage,
+                                                                                        ),
                                                                                 )
                                                                             },
                                                                         )

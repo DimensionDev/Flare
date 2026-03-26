@@ -104,6 +104,11 @@
     <string name="settings_language_description">Change the language of the app</string>
     <string name="settings_rss_management_title">RSS Management</string>
     <string name="settings_rss_management_description">Manage RSS feeds</string>
+    <string name="settings_nostr_relays_manage">Manage relays</string>
+    <string name="settings_nostr_relays_add">Add relay</string>
+    <string name="settings_nostr_relays_add_dialog_title">Add relay</string>
+    <string name="settings_nostr_relays_placeholder">Enter relay URL</string>
+    <string name="settings_nostr_relays_empty">No relays configured</string>
 
     <string name="status_loadmore_error_retry">Retry</string>
     <string name="login_expired">Login session expired</string>

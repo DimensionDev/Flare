@@ -49,13 +49,10 @@ import rust.nostr.sdk.Tag as RustTag
 
 public val defaultNostrRelays: List<String> =
     listOf(
+        "wss://nostr.mutinywallet.com",
         "wss://relay.damus.io",
         "wss://nos.lol",
-        "wss://relay.primal.net",
-        "wss://relay.snort.social",
         "wss://relay.nostr.band",
-        "wss://offchain.pub",
-        "wss://purplepag.es",
     )
 
 internal class NostrService(
@@ -117,12 +114,7 @@ internal class NostrService(
             val value = raw.removePrefix("nostr:").trim()
             return when {
                 value.startsWith("nsec1", ignoreCase = true) ->
-                    withNip19(value) { nip19 ->
-                        (nip19 as? RustNip19Enum.Secret)?.nsec?.use {
-                            RustSecretKey.Companion.parse(it.toBech32())
-                        }
-                    }
-                        ?: error("Invalid NIP-19 secret key")
+                    RustKeys.parse(raw).use { it.secretKey() }
 
                 HEX_KEY_REGEX.matches(value) -> RustSecretKey.Companion.parse(value.lowercase())
 

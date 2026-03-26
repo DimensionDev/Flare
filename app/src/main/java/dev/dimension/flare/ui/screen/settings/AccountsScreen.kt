@@ -50,11 +50,13 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Bars
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.FaceSadTear
+import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.BackButton
@@ -86,6 +88,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 internal fun AccountsScreen(
     onBack: () -> Unit,
     toLogin: () -> Unit,
+    toNostrRelays: (MicroBlogKey) -> Unit,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter {
@@ -234,6 +237,28 @@ internal fun AccountsScreen(
                                                 showMenu = false
                                             },
                                         ) {
+                                            if (account.platformType == PlatformType.Nostr) {
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Text(
+                                                            text = stringResource(id = R.string.settings_nostr_relays_manage),
+                                                        )
+                                                    },
+                                                    onClick = {
+                                                        showMenu = false
+                                                        toNostrRelays(account.accountKey)
+                                                    },
+                                                    leadingIcon = {
+                                                        FAIcon(
+                                                            imageVector = FontAwesomeIcons.Solid.List,
+                                                            contentDescription =
+                                                                stringResource(
+                                                                    id = R.string.settings_nostr_relays_manage,
+                                                                ),
+                                                        )
+                                                    },
+                                                )
+                                            }
                                             DropdownMenuItem(
                                                 text = {
                                                     Text(

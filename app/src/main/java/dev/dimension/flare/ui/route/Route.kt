@@ -134,6 +134,11 @@ internal sealed interface Route : NavKey {
         data object AppLogging : Settings
 
         @Serializable
+        data class NostrRelays(
+            val accountKey: MicroBlogKey,
+        ) : Settings
+
+        @Serializable
         data class LocalFilterEdit(
             val keyword: String?,
         ) : Settings

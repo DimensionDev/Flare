@@ -11,7 +11,6 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.stability.analyzer)
     alias(libs.plugins.nucleus)
 }
 

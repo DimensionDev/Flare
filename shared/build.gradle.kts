@@ -10,7 +10,6 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.room)
-    alias(libs.plugins.stability.analyzer)
 }
 
 kotlin {

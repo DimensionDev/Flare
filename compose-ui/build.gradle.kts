@@ -9,7 +9,6 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.skie)
-    alias(libs.plugins.stability.analyzer)
 }
 
 kotlin {

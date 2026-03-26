@@ -29,6 +29,8 @@ import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import rust.nostr.sdk.Client
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
@@ -57,7 +59,8 @@ public val defaultNostrRelays: List<String> =
 internal class NostrService(
     private val cache: NostrCache,
     private val accountKey: MicroBlogKey,
-    private val credential: UiAccount.Nostr.Credential,
+    nsec: String,
+    initialRelays: List<String> = emptyList(),
 ) : AutoCloseable {
     companion object {
         private val HEX_KEY_REGEX = Regex("^[0-9a-fA-F]{64}\$")
@@ -123,9 +126,12 @@ internal class NostrService(
     }
 
     private var connected = false
+    private val relayMutex = Mutex()
+    private val currentRelays = linkedMapOf<String, RustRelayUrl>()
+    private val initialRelays = initialRelays.normalizeRelayUrls()
 
     private val secretKey by lazy {
-        RustSecretKey.parse(credential.nsec)
+        RustSecretKey.parse(nsec)
     }
 
     private val keys by lazy {
@@ -140,33 +146,58 @@ internal class NostrService(
         pubKey.toHex()
     }
 
-    private val relays by lazy {
-        credential.relays.map {
-            RustRelayUrl.parse(it)
-        }
-    }
-
     private val client by lazy {
         Client(RustNostrSigner.keys(keys))
     }
 
     override fun close() {
         client.close()
-        relays.forEach { it.close() }
+        currentRelays.values.forEach { it.close() }
+        currentRelays.clear()
         pubKey.close()
         keys.close()
         secretKey.close()
     }
 
     suspend fun ensureConnection() {
-        if (connected) {
-            return
+        relayMutex.withLock {
+            syncRelaysLocked(initialRelays)
+            if (connected) {
+                return
+            }
+            client.connect()
+            connected = true
         }
+    }
+
+    suspend fun updateRelays(relays: List<String>) {
+        relayMutex.withLock {
+            syncRelaysLocked(relays.normalizeRelayUrls())
+        }
+    }
+
+    private suspend fun syncRelaysLocked(relays: List<String>) {
+        val targetRelays = relays.toSet()
+        val removedRelays = currentRelays.keys - targetRelays
+
+        removedRelays.forEach { relay ->
+            currentRelays.remove(relay)?.let { url ->
+                client.removeRelay(url)
+                url.close()
+            }
+        }
+
         relays.forEach { relay ->
-            client.addRelay(relay)
+            if (relay in currentRelays) {
+                return@forEach
+            }
+            val url = RustRelayUrl.parse(relay)
+            currentRelays[relay] = url
+            client.addRelay(url)
+            if (connected) {
+                client.connectRelay(url)
+            }
         }
-        client.connect()
-        connected = false
     }
 
     internal data class ImportedAccount(
@@ -174,6 +205,12 @@ internal class NostrService(
         val npub: String,
         val nsec: String,
     )
+
+    private fun List<String>.normalizeRelayUrls(): List<String> =
+        ifEmpty { defaultNostrRelays }
+            .map(String::trim)
+            .filter(String::isNotEmpty)
+            .distinct()
 
     internal suspend fun loadHomeTimeline(
         pageSize: Int,
@@ -825,7 +862,10 @@ internal class NostrService(
         }
 
     private suspend fun sendEventBuilder(builder: RustEventBuilder): String {
-        val requiredSuccessCount = minOf(PUBLISH_SUCCESS_QUORUM, relays.size)
+        val requiredSuccessCount =
+            relayMutex.withLock {
+                minOf(PUBLISH_SUCCESS_QUORUM, currentRelays.size)
+            }
         if (requiredSuccessCount == 0) {
             error("No valid relay URLs available for publishing")
         }

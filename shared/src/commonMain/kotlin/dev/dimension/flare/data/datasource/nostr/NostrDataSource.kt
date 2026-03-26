@@ -36,12 +36,10 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.time.Duration.Companion.seconds
 
 internal typealias NostrServiceManager = SwitchingServiceManager<UiAccount.Nostr.Credential, NostrService>
 
@@ -57,6 +55,9 @@ internal class NostrDataSource(
     private val accountRepository: AccountRepository by inject()
     private val ioScope: CoroutineScope by inject()
     private val nostrCache: NostrCache by inject()
+    private val credentialFlow by lazy {
+        accountRepository.credentialFlow<UiAccount.Nostr.Credential>(accountKey)
+    }
     private val loader by lazy {
         NostrLoader(
             accountKey = accountKey,
@@ -64,27 +65,36 @@ internal class NostrDataSource(
         )
     }
 
-    @OptIn(FlowPreview::class)
     private val serviceManager by lazy {
         SwitchingServiceManager(
-            accountRepository
-                .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
-                .distinctUntilChanged()
-                .debounce(30.seconds),
+            credentialFlow.distinctUntilChangedBy { it.nsec },
             ioScope,
             {
                 NostrService(
                     nostrCache,
                     accountKey,
-                    it,
+                    nsec = it.nsec,
+                    initialRelays = it.relays,
                 ).also {
                     it.ensureConnection()
                 }
             },
         )
     }
+    private val relaySyncJob by lazy {
+        ioScope.launch {
+            credentialFlow
+                .distinctUntilChangedBy { it.relays }
+                .collect { credential ->
+                    serviceManager.withService {
+                        it.updateRelays(credential.relays)
+                    }
+                }
+        }
+    }
 
     override fun close() {
+        relaySyncJob.cancel()
         serviceManager.close()
     }
 
@@ -93,6 +103,11 @@ internal class NostrDataSource(
             NotificationFilter.All,
             NotificationFilter.Mention,
         )
+
+    init {
+        relaySyncJob
+    }
+
     override val userHandler by lazy {
         UserHandler(
             host = NostrService.NOSTR_HOST,

@@ -40,6 +40,7 @@ public sealed class UiAccount {
 //            val pubkey: String,
             val nsec: String,
             val relays: List<String> = emptyList(),
+            val mediaServerUrl: String = "https://blossom.nostr.build/",
         ) : UiAccount.Credential
     }
 

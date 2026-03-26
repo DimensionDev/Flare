@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.nostr
 
+import dev.dimension.flare.common.FileType
 import dev.dimension.flare.data.datasource.microblog.ActionMenu
 import dev.dimension.flare.data.datasource.microblog.userActionsMenu
 import dev.dimension.flare.data.datasource.nostr.NostrCache
@@ -24,6 +25,9 @@ import dev.dimension.flare.ui.render.toUi
 import dev.dimension.flare.ui.render.toUiPlainText
 import dev.dimension.flare.ui.render.uiRichTextOf
 import dev.dimension.flare.ui.route.DeeplinkRoute
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -33,13 +37,12 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import rust.nostr.sdk.Client
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Instant
 import rust.nostr.sdk.Contact as RustContact
 import rust.nostr.sdk.EventBuilder as RustEventBuilder
 import rust.nostr.sdk.EventDeletionRequest as RustEventDeletionRequest
 import rust.nostr.sdk.EventId as RustEventId
 import rust.nostr.sdk.Keys as RustKeys
+import rust.nostr.sdk.Kind as RustKind
 import rust.nostr.sdk.MuteList as RustMuteList
 import rust.nostr.sdk.Nip19Enum as RustNip19Enum
 import rust.nostr.sdk.NostrSigner as RustNostrSigner
@@ -49,12 +52,16 @@ import rust.nostr.sdk.Report as RustReport
 import rust.nostr.sdk.SecretKey as RustSecretKey
 import rust.nostr.sdk.SendEventOutput as RustSendEventOutput
 import rust.nostr.sdk.Tag as RustTag
+import rust.nostr.sdk.TagKind as RustTagKind
+import rust.nostr.sdk.Timestamp as RustTimestamp
 
 public val defaultNostrRelays: List<String> =
     listOf(
         "wss://relay.damus.io",
         "wss://nos.lol",
-        "wss://relay.nostr.band",
+        "wss://relay.plebstr.com",
+        "wss://nostr.bitcoiner.social",
+        "wss://relay.damus.io",
     )
 
 internal class NostrService(
@@ -149,6 +156,15 @@ internal class NostrService(
 
     private val client by lazy {
         Client(RustNostrSigner.keys(keys))
+    }
+    private val blossomUploader by lazy {
+        NostrBlossomUploader(
+            buildAuthHeader = { sha256 ->
+                buildBlossomAuthorizationHeader(
+                    buildBlossomUploadAuthEvent(sha256 = sha256),
+                )
+            },
+        )
     }
 
     override fun close() {
@@ -632,23 +648,56 @@ internal class NostrService(
         )
     }
 
-    internal suspend fun composeNote(content: String): String = sendEventBuilder(RustEventBuilder.Companion.textNote(content))
+    internal suspend fun uploadMedia(
+        serverUrl: String,
+        name: String?,
+        bytes: ByteArray,
+        fileType: FileType,
+        altText: String?,
+    ): UploadedMedia =
+        blossomUploader.upload(
+            serverUrl = serverUrl,
+            name = name,
+            bytes = bytes,
+            fileType = fileType,
+            altText = altText,
+        )
+
+    internal suspend fun composeNote(
+        content: String,
+        media: List<UploadedMedia> = emptyList(),
+        contentWarning: String? = null,
+    ): String =
+        sendEventBuilder(
+            textNoteBuilder(
+                content = contentWithMediaUrls(content, media),
+                tags = contentWarningTag(contentWarning) + mediaTags(media),
+            ),
+        )
 
     internal suspend fun composeReply(
         statusKey: MicroBlogKey,
         content: String,
+        media: List<UploadedMedia> = emptyList(),
+        contentWarning: String? = null,
     ): String {
         val target =
             loadEvent(statusKey = statusKey)
                 ?: error("Reply target not found: $statusKey")
         return sendEventBuilder(
-            builder = textNoteBuilder(content = content, tags = buildReplyTags(target)),
+            builder =
+                textNoteBuilder(
+                    content = contentWithMediaUrls(content, media),
+                    tags = buildReplyTags(target) + contentWarningTag(contentWarning) + mediaTags(media),
+                ),
         )
     }
 
     internal suspend fun composeQuote(
         statusKey: MicroBlogKey,
         content: String,
+        media: List<UploadedMedia> = emptyList(),
+        contentWarning: String? = null,
     ): String {
         val target =
             loadEvent(statusKey = statusKey)
@@ -666,11 +715,13 @@ internal class NostrService(
         return sendEventBuilder(
             builder =
                 textNoteBuilder(
-                    content = content,
+                    content = contentWithMediaUrls(content, media),
                     tags =
                         buildList {
                             add(quoteTag)
                             add(pTag(authorPubKey))
+                            addAll(contentWarningTag(contentWarning))
+                            addAll(mediaTags(media))
                         },
                 ),
         )
@@ -976,6 +1027,47 @@ internal class NostrService(
 
     private fun pTag(pubKey: String): Array<String> = arrayOf("p", pubKey)
 
+    private fun contentWarningTag(contentWarning: String?): List<Array<String>> =
+        contentWarning
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { listOf(arrayOf("content-warning", it)) }
+            ?: emptyList()
+
+    private fun mediaTags(media: List<UploadedMedia>): List<Array<String>> =
+        media.flatMap { item ->
+            buildList {
+                add(
+                    buildList {
+                        add("imeta")
+                        add("url ${item.url}")
+                        add("m ${item.mimeType}")
+                        add("x ${item.sha256}")
+                        add("size ${item.size}")
+                        item.altText?.takeIf { it.isNotBlank() }?.let { add("alt $it") }
+                    }.toTypedArray(),
+                )
+                add(arrayOf("r", item.url))
+            }
+        }
+
+    private fun contentWithMediaUrls(
+        content: String,
+        media: List<UploadedMedia>,
+    ): String {
+        if (media.isEmpty()) {
+            return content
+        }
+        val mediaUrls = media.joinToString(separator = "\n") { it.url }
+        return buildString {
+            append(content.trimEnd())
+            if (isNotEmpty()) {
+                append("\n")
+            }
+            append(mediaUrls)
+        }
+    }
+
     private fun textNoteBuilder(
         content: String,
         tags: List<Array<String>> = emptyList(),
@@ -983,6 +1075,25 @@ internal class NostrService(
         RustEventBuilder.Companion
             .textNote(content)
             .tags(tags.map { RustTag.Companion.parse(it.toList()) })
+
+    private suspend fun buildBlossomUploadAuthEvent(sha256: String): String {
+        val expirationSeconds =
+            (Clock.System.now().toEpochMilliseconds() / 1000L).toULong() +
+                5.minutes.inWholeSeconds.toULong()
+        return client
+            .signEventBuilder(
+                RustEventBuilder(
+                    RustKind(24242u),
+                    "",
+                ).tags(
+                    listOf(
+                        RustTag.Companion.hashtag("upload"),
+                        RustTag.Companion.custom(RustTagKind.Unknown("x"), listOf(sha256)),
+                        RustTag.Companion.expiration(RustTimestamp.fromSecs(expirationSeconds)),
+                    ),
+                ),
+            ).use { it.asJson() }
+    }
 
     private fun buildReplyTags(target: Event): List<Array<String>> =
         when (target) {
@@ -1299,12 +1410,13 @@ internal class NostrService(
         val statusKey = MicroBlogKey(id, NOSTR_HOST)
         val stats = interactionStats[id] ?: InteractionStats()
         val actualRenderContext = renderContext ?: buildNostrTextRenderContext(content, tags)
+        val contentWarning = contentWarningReason()?.toUiPlainText()
         return UiTimelineV2.Post(
             message = null,
             platformType = PlatformType.Nostr,
             images = mediaFromTextAndTags(actualRenderContext.preprocessedText.extractedMediaUrls).toImmutableList(),
             sensitive = false,
-            contentWarning = null,
+            contentWarning = contentWarning,
             user = profile,
             content = parseNostrRichText(actualRenderContext, accountKey = accountKey, profiles = profiles),
             actions =
@@ -1538,6 +1650,13 @@ internal class NostrService(
     }
 
     private fun TextNoteEvent.quoteEventIds(): List<String> = tags.mapNotNull(QEventTag::parse).map { it.eventId }.distinct()
+
+    private fun TextNoteEvent.contentWarningReason(): String? =
+        tags
+            .firstOrNull { it.getOrNull(0) == "content-warning" }
+            ?.getOrNull(1)
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
 
     private fun TextNoteEvent.quoteAddressReferences(): List<Address> =
         tags

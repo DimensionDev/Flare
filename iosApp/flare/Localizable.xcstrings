@@ -1382,6 +1382,9 @@
         }
       }
     },
+    "Accounts" : {
+
+    },
     "action_retry" : {
       "localizations" : {
         "af" : {
@@ -33922,6 +33925,7 @@
       }
     },
     "local_history_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -87691,6 +87695,7 @@
       }
     },
     "settings_rss_management_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -97576,6 +97581,7 @@
       }
     },
     "View and manage saved drafts" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

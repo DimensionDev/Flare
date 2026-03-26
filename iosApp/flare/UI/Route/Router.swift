@@ -104,6 +104,7 @@ struct Router<Root: View>: View {
                 .statusMisskeyReport,
                 .editUserList,
                 .statusShareSheet,
+                .secondaryMenu,
                 .statusAddReaction:
             return true
         default:

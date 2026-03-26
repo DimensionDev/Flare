@@ -7,15 +7,19 @@ struct HomeTimelineScreen: View {
     let toCompose: () -> Void
     let toTabSetting: () -> Void
     let accountType: AccountType
+    let toSecondaryMenu: () -> Void
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.openURL) private var openURL
     @State private var selectedTabIndex = 0
     @StateObject private var presenter: KotlinPresenter<HomeTimelineWithTabsPresenterState>
+    @StateObject private var activeAccountPresenter = KotlinPresenter(presenter: ActiveAccountPresenter())
 
-    init(accountType: AccountType, toServiceSelect: @escaping () -> Void, toCompose: @escaping () -> Void, toTabSetting: @escaping () -> Void) {
+    init(accountType: AccountType, toServiceSelect: @escaping () -> Void, toCompose: @escaping () -> Void, toTabSetting: @escaping () -> Void, toSecondaryMenu: @escaping () -> Void) {
         self.accountType = accountType
         self.toCompose = toCompose
         self.toServiceSelect = toServiceSelect
         self.toTabSetting = toTabSetting
+        self.toSecondaryMenu = toSecondaryMenu
         self._presenter = .init(wrappedValue: .init(presenter: HomeTimelineWithTabsPresenter(accountType: accountType)))
     }
 
@@ -34,7 +38,18 @@ struct HomeTimelineScreen: View {
                     }
                 })
                 .toolbar {
-                    ToolbarItem(placement: .title) {
+                    ToolbarItem(placement: .topBarLeading) {
+                        StateView(state: activeAccountPresenter.state.user) { user in
+                            AvatarView(data: user.avatar)
+                        } errorContent: { _ in
+                            Image(.faGear)
+                        } loadingContent: {
+                            Image(.faGear)
+                        }.onTapGesture {
+                            toSecondaryMenu()
+                        }
+                    }
+                    ToolbarItem(placement: horizontalSizeClass == .regular ? .automatic : .title) {
                         Menu {
                             ForEach(0..<tabs.count, id: \.self) { index in
                                 let item = tabs[index]
@@ -61,17 +76,20 @@ struct HomeTimelineScreen: View {
                                 }
                             }
                         } label: {
-                            TabTitle(title: tab.metaData.title)
-                            Image("fa-chevron-down")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                                .scaledToFit()
-                                .frame(width: 8, height: 8)
-                                .padding(8)
-                                .background(
-                                    Circle()
-                                        .fill(Color.secondary.opacity(0.2))
-                                )
+                            HStack(spacing: 0) {
+                                TabTitle(title: tab.metaData.title)
+                                Image("fa-chevron-down")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                                    .scaledToFit()
+                                    .frame(width: 8, height: 8)
+                                    .padding(8)
+                                    .background(
+                                        Circle()
+                                            .fill(Color.secondary.opacity(0.2))
+                                    )
+                                    .scaleEffect(0.5)
+                            }
                         }
                     }
                     ToolbarItem(placement: .primaryAction) {

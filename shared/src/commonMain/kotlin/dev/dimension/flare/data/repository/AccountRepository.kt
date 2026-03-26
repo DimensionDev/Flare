@@ -42,7 +42,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
 
 @Stable
-public class AccountRepository internal constructor(
+internal class AccountRepository internal constructor(
     private val appDatabase: AppDatabase,
     private val coroutineScope: CoroutineScope,
     internal val appDataStore: AppDataStore,
@@ -282,7 +282,7 @@ internal fun accountServiceFlow(
         }
     }
 
-public fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> =
+internal fun activeAccountFlow(repository: AccountRepository): Flow<UiAccount?> =
     repository
         .activeAccount
         .map { it.takeSuccess() }

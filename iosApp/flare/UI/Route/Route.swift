@@ -17,7 +17,7 @@ enum Route: Hashable, Identifiable {
         clearToHome: @escaping () -> Void
     ) -> some View {
         switch self {
-        case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew) }, toTabSetting: { onNavigate(.tabSettings) })
+        case .home(let accountType): HomeTimelineScreen(accountType: accountType, toServiceSelect: { onNavigate(.serviceSelect) }, toCompose: { onNavigate(.composeNew) }, toTabSetting: { onNavigate(.tabSettings) }, toSecondaryMenu: { onNavigate(.secondaryMenu) })
         case .timeline(let item):
             switch onEnum(of: item) {
             case .ListTimelineTabItem(let listTabItem):
@@ -108,6 +108,8 @@ enum Route: Hashable, Identifiable {
             DraftBoxScreen { groupId in
                 onNavigate(.composeDraft(groupId))
             }
+        case .secondaryMenu:
+            SecondaryTabsScreen(onTabSelected: { it in onNavigate(.tabItem(it)) })
         default:
             Text("Not done yet for \(self)")
         }
@@ -164,6 +166,7 @@ enum Route: Hashable, Identifiable {
     case tabGroupConfig(MixedTimelineTabItem?)
     case rssManagement
     case draftBox
+    case secondaryMenu
 
     fileprivate static func fromCompose(_ compose: DeeplinkRoute.Compose) -> Route? {
         switch onEnum(of: compose) {

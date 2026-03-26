@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 internal typealias NostrServiceManager = SwitchingServiceManager<UiAccount.Nostr.Credential, NostrService>
 
@@ -70,7 +70,7 @@ internal class NostrDataSource(
             accountRepository
                 .credentialFlow<UiAccount.Nostr.Credential>(accountKey)
                 .distinctUntilChanged()
-                .debounce(30.minutes),
+                .debounce(30.seconds),
             ioScope,
             {
                 NostrService(

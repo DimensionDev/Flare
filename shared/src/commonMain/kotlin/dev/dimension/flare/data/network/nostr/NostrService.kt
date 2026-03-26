@@ -114,7 +114,7 @@ internal class NostrService(
             val value = raw.removePrefix("nostr:").trim()
             return when {
                 value.startsWith("nsec1", ignoreCase = true) ->
-                    RustKeys.parse(raw).use { it.secretKey() }
+                    RustKeys.parse(value).use { it.secretKey() }
 
                 HEX_KEY_REGEX.matches(value) -> RustSecretKey.Companion.parse(value.lowercase())
 

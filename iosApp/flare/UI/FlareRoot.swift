@@ -95,17 +95,6 @@ struct FlareRoot: View {
                         .badge(badge)
                     }
                 }
-//                if case .success = onEnum(of: activeAccountPresenter.state.user) {
-//                    Tab(value: "more", role: .search) {
-//                        SecondaryTabsScreen(tabs: tabs.secondary)
-//                    } label: {
-//                        Label {
-//                            Text("More")
-//                        } icon: {
-//                            Image("fa-ellipsis")
-//                        }
-//                    }
-//                }
             }
             .tabViewStyle(.sidebarAdaptable)
             .backport
@@ -215,17 +204,6 @@ struct BackportFlareRoot: View {
                         .tag(data.key)
                     }
                 }
-//                if case .success = onEnum(of: activeAccountPresenter.state.user) {
-//                    SecondaryTabsScreen(tabs: tabs.secondary)
-//                        .tabItem {
-//                            Label {
-//                                Text("More")
-//                            } icon: {
-//                                Image("fa-ellipsis")
-//                            }
-//                        }
-//                        .tag("more")
-//                }
             }
             .background(Color(.systemGroupedBackground))
         } loadingContent: {

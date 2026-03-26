@@ -80,6 +80,7 @@ import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import dev.dimension.flare.ui.screen.serviceselect.WebViewLoginScreen
 import dev.dimension.flare.ui.screen.settings.AppLoggingScreen
 import dev.dimension.flare.ui.screen.settings.LocalCacheScreen
+import dev.dimension.flare.ui.screen.settings.NostrRelaysScreen
 import dev.dimension.flare.ui.screen.settings.SettingsScreen
 import dev.dimension.flare.ui.screen.status.StatusScreen
 import dev.dimension.flare.ui.screen.status.VVOCommentScreen
@@ -594,6 +595,9 @@ internal fun WindowScope.Router(
                         toRSSManagement = {
                             navigate(Route.RssList)
                         },
+                        toNostrRelays = {
+                            navigate(Route.NostrRelays(it))
+                        },
                     )
                 }
 
@@ -868,6 +872,12 @@ internal fun WindowScope.Router(
 
                 entry<Route.LocalCache> {
                     LocalCacheScreen()
+                }
+
+                entry<Route.NostrRelays> { args ->
+                    NostrRelaysScreen(
+                        accountKey = args.accountKey,
+                    )
                 }
 
                 entry<Route.Following> { args ->

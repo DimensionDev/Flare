@@ -88,7 +88,7 @@ struct HomeTimelineScreen: View {
                                         Circle()
                                             .fill(Color.secondary.opacity(0.2))
                                     )
-                                    .scaleEffect(0.5)
+                                    .scaleEffect(0.66)
                             }
                         }
                     }

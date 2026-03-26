@@ -41,6 +41,7 @@ import compose.icons.fontawesomeicons.solid.AngleRight
 import compose.icons.fontawesomeicons.solid.Bars
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Language
+import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
@@ -68,6 +69,7 @@ import dev.dimension.flare.import_confirmation_message
 import dev.dimension.flare.import_confirmation_title
 import dev.dimension.flare.import_error
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ok
 import dev.dimension.flare.remove_account
 import dev.dimension.flare.save_completed
@@ -149,6 +151,7 @@ import dev.dimension.flare.settings_language_description
 import dev.dimension.flare.settings_language_title
 import dev.dimension.flare.settings_local_history_description
 import dev.dimension.flare.settings_local_history_title
+import dev.dimension.flare.settings_nostr_relays_manage
 import dev.dimension.flare.settings_privacy_policy
 import dev.dimension.flare.settings_rss_management_description
 import dev.dimension.flare.settings_rss_management_title
@@ -232,6 +235,7 @@ internal fun SettingsScreen(
     toLocalCache: () -> Unit,
     toAppLog: () -> Unit,
     toRSSManagement: () -> Unit,
+    toNostrRelays: (MicroBlogKey) -> Unit,
 ) {
     val window = LocalComposeWindow.current
     val state by producePresenter {
@@ -353,6 +357,22 @@ internal fun SettingsScreen(
                                                             }
                                                             MenuFlyoutContainer(
                                                                 flyout = {
+                                                                    if (account.account.platformType == PlatformType.Nostr) {
+                                                                        MenuFlyoutItem(
+                                                                            text = {
+                                                                                Text(stringResource(Res.string.settings_nostr_relays_manage))
+                                                                            },
+                                                                            onClick = {
+                                                                                toNostrRelays(user.key)
+                                                                            },
+                                                                            icon = {
+                                                                                FAIcon(
+                                                                                    FontAwesomeIcons.Solid.List,
+                                                                                    contentDescription = stringResource(Res.string.settings_nostr_relays_manage),
+                                                                                )
+                                                                            },
+                                                                        )
+                                                                    }
                                                                     MenuFlyoutItem(
                                                                         text = {
                                                                             Text(

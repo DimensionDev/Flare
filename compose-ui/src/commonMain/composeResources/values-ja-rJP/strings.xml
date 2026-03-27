@@ -344,6 +344,12 @@
     <string name="bluesky_login_oauth_hint">Bluesky OAuth が十分に安定しない可能性があります。問題が発生した場合はパスワードログインを使用してください。</string>
     <string name="login_button">ログイン</string>
     <string name="mastodon_login_verify_message">認証情報を確認するまでしばらくお待ちください。</string>
+    <string name="nostr_login_title">Nostr アカウントをインポート</string>
+    <string name="nostr_login_hint">読み取り専用アクセス用に npub または hexpubkey を貼り付けるか、書き込み可能なアカウントをインポートするために nsecを提供します。</string>
+    <string name="nostr_login_generate_button">生成してログイン</string>
+    <string name="nostr_login_npub_hint">npub または hexpubkey (nsecが設定されている場合はオプション)</string>
+    <string name="nostr_login_nsec_hint">nsecまたはhex秘密キー</string>
+    <string name="nostr_login_relays_hint">リレーURLはコンマで区切られています</string>
     <string name="service_select_instance_input_placeholder">インスタンス URL</string>
     <string name="service_select_next_button">次へ</string>
     <string name="service_select_empty_message">インスタンスが見つかりません</string>

@@ -96,6 +96,11 @@
     <string name="settings_language_description">更改应用程序的语言</string>
     <string name="settings_rss_management_title">RSS 管理</string>
     <string name="settings_rss_management_description">管理 RSS 源</string>
+    <string name="settings_nostr_relays_manage">管理继电器</string>
+    <string name="settings_nostr_relays_add">添加继电器</string>
+    <string name="settings_nostr_relays_add_dialog_title">添加继电器</string>
+    <string name="settings_nostr_relays_placeholder">输入继电器网址</string>
+    <string name="settings_nostr_relays_empty">未配置继电器</string>
     <string name="status_loadmore_error_retry">重试</string>
     <string name="login_expired">登录会话已过期</string>
     <string name="login_expired_message">点击重新登录</string>

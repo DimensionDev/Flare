@@ -99,6 +99,11 @@
     <string name="settings_language_description">Изменить язык приложения</string>
     <string name="settings_rss_management_title">Управление RSS</string>
     <string name="settings_rss_management_description">Управление RSS-каналами</string>
+    <string name="settings_nostr_relays_manage">Управление ретрансляторами</string>
+    <string name="settings_nostr_relays_add">Добавить ретранслятор</string>
+    <string name="settings_nostr_relays_add_dialog_title">Добавить ретранслятор</string>
+    <string name="settings_nostr_relays_placeholder">Введите URL ретрансляции</string>
+    <string name="settings_nostr_relays_empty">Нет настроенных ретрансляторов</string>
     <string name="status_loadmore_error_retry">Повторить</string>
     <string name="login_expired">Сессия входа истекла</string>
     <string name="login_expired_message">Нажмите, чтобы войти снова</string>

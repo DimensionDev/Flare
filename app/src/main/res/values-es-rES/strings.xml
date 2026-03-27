@@ -97,6 +97,11 @@
     <string name="settings_language_description">Cambiar el idioma de la aplicación</string>
     <string name="settings_rss_management_title">Administración de RSS</string>
     <string name="settings_rss_management_description">Administrar fuentes RSS</string>
+    <string name="settings_nostr_relays_manage">Administrar repetidores</string>
+    <string name="settings_nostr_relays_add">Añadir repetidor</string>
+    <string name="settings_nostr_relays_add_dialog_title">Añadir repetidor</string>
+    <string name="settings_nostr_relays_placeholder">Introducir URL de relé</string>
+    <string name="settings_nostr_relays_empty">No hay repetidores configurados</string>
     <string name="status_loadmore_error_retry">Reintentar</string>
     <string name="login_expired">La sesión de inicio ha expirado</string>
     <string name="login_expired_message">Haga clic para volver a iniciar sesión</string>

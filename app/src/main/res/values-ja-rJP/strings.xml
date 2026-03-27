@@ -95,6 +95,11 @@
     <string name="settings_language_description">アプリの言語を変更する</string>
     <string name="settings_rss_management_title">RSS管理</string>
     <string name="settings_rss_management_description">RSSフィードの管理</string>
+    <string name="settings_nostr_relays_manage">リレーの管理</string>
+    <string name="settings_nostr_relays_add">リレーを追加</string>
+    <string name="settings_nostr_relays_add_dialog_title">リレーを追加</string>
+    <string name="settings_nostr_relays_placeholder">リレーURLを入力してください</string>
+    <string name="settings_nostr_relays_empty">リレーが設定されていません</string>
     <string name="status_loadmore_error_retry">再試行する</string>
     <string name="login_expired">ログインセッションの有効期限が切れました</string>
     <string name="login_expired_message">クリックして再度ログインする</string>

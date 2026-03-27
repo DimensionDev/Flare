@@ -93,6 +93,11 @@
     <string name="settings_language_description">Змінити мову програми</string>
     <string name="settings_rss_management_title">Управління RSS</string>
     <string name="settings_rss_management_description">Керування RSS-каналами</string>
+    <string name="settings_nostr_relays_manage">Керувати ретрансляціями</string>
+    <string name="settings_nostr_relays_add">Додати ретранслятор</string>
+    <string name="settings_nostr_relays_add_dialog_title">Додати ретранслятор</string>
+    <string name="settings_nostr_relays_placeholder">Введіть URL ретранслятора</string>
+    <string name="settings_nostr_relays_empty">Ретранслятори не налаштовані</string>
     <string name="status_loadmore_error_retry">Повторити спробу</string>
     <string name="login_expired">Сесію входу закрито</string>
     <string name="login_expired_message">Нажміть кнопку для входу знову</string>

@@ -97,6 +97,11 @@
     <string name="settings_language_description">Endre språket til appen</string>
     <string name="settings_rss_management_title">RSS administrasjon</string>
     <string name="settings_rss_management_description">Administrer RSS-feeder</string>
+    <string name="settings_nostr_relays_manage">Behandle releer</string>
+    <string name="settings_nostr_relays_add">Legg til relé</string>
+    <string name="settings_nostr_relays_add_dialog_title">Legg til relé</string>
+    <string name="settings_nostr_relays_placeholder">Angi relé URL</string>
+    <string name="settings_nostr_relays_empty">Ingen releer konfigurert</string>
     <string name="status_loadmore_error_retry">Prøv igjen</string>
     <string name="login_expired">Innloggingsøkten har utløpt</string>
     <string name="login_expired_message">Trykk for å logge inn igjen</string>

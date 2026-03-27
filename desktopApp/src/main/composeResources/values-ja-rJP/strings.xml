@@ -312,6 +312,11 @@
     <string name="settings_storage_app_log_description">アプリのログを表示</string>
     <string name="settings_rss_management_title">RSS管理</string>
     <string name="settings_rss_management_description">RSSフィードの管理</string>
+    <string name="settings_nostr_relays_manage">リレーの管理</string>
+    <string name="settings_nostr_relays_add">リレーを追加</string>
+    <string name="settings_nostr_relays_add_dialog_title">リレーを追加</string>
+    <string name="settings_nostr_relays_placeholder">リレーURLを入力してください</string>
+    <string name="settings_nostr_relays_empty">リレーが設定されていません</string>
     <string name="draft_box_title">ドラフトボックス</string>
     <string name="draft_box_empty">下書きはまだありません</string>
     <string name="draft_box_retry">再試行する</string>

@@ -314,6 +314,11 @@
     <string name="settings_storage_app_log_description">Ver el registro de aplicaciones</string>
     <string name="settings_rss_management_title">Administración de RSS</string>
     <string name="settings_rss_management_description">Administrar fuentes RSS</string>
+    <string name="settings_nostr_relays_manage">Administrar repetidores</string>
+    <string name="settings_nostr_relays_add">Añadir repetidor</string>
+    <string name="settings_nostr_relays_add_dialog_title">Añadir repetidor</string>
+    <string name="settings_nostr_relays_placeholder">Introducir URL de relé</string>
+    <string name="settings_nostr_relays_empty">No hay repetidores configurados</string>
     <string name="draft_box_title">Caja de borrador</string>
     <string name="draft_box_empty">Aún no hay borradores</string>
     <string name="draft_box_retry">Reintentar</string>

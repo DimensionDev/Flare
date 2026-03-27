@@ -313,6 +313,11 @@
     <string name="settings_storage_app_log_description">Bekijk het app-logboek</string>
     <string name="settings_rss_management_title">RSS Management</string>
     <string name="settings_rss_management_description">RSS-feeds beheren</string>
+    <string name="settings_nostr_relays_manage">Beheer relais</string>
+    <string name="settings_nostr_relays_add">Voeg relais toe</string>
+    <string name="settings_nostr_relays_add_dialog_title">Voeg relais toe</string>
+    <string name="settings_nostr_relays_placeholder">Voer URL voor relais in</string>
+    <string name="settings_nostr_relays_empty">Geen relais geconfigureerd</string>
     <string name="draft_box_title">Concept vak</string>
     <string name="draft_box_empty">Nog geen concepten</string>
     <string name="draft_box_retry">Opnieuw</string>

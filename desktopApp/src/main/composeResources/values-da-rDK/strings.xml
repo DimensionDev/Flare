@@ -314,6 +314,11 @@
     <string name="settings_storage_app_log_description">Se app-loggen</string>
     <string name="settings_rss_management_title">RSS Management</string>
     <string name="settings_rss_management_description">Administrer RSS-feeds</string>
+    <string name="settings_nostr_relays_manage">Håndtér relæer</string>
+    <string name="settings_nostr_relays_add">Tilføj relæ</string>
+    <string name="settings_nostr_relays_add_dialog_title">Tilføj relæ</string>
+    <string name="settings_nostr_relays_placeholder">Angiv relæ-URL</string>
+    <string name="settings_nostr_relays_empty">Ingen relæer konfigureret</string>
     <string name="draft_box_title">Kladde Boks</string>
     <string name="draft_box_empty">Endnu ingen kladder</string>
     <string name="draft_box_retry">Forsøg igen</string>

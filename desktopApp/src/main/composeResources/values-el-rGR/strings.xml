@@ -314,6 +314,11 @@
     <string name="settings_storage_app_log_description">Δείτε το αρχείο καταγραφής της εφαρμογής</string>
     <string name="settings_rss_management_title">Διαχείριση RSS</string>
     <string name="settings_rss_management_description">Διαχείριση ροών RSS</string>
+    <string name="settings_nostr_relays_manage">Διαχείριση ρελέ</string>
+    <string name="settings_nostr_relays_add">Προσθήκη ρελέ</string>
+    <string name="settings_nostr_relays_add_dialog_title">Προσθήκη ρελέ</string>
+    <string name="settings_nostr_relays_placeholder">Εισάγετε URL ρελέ</string>
+    <string name="settings_nostr_relays_empty">Δεν έχουν ρυθμιστεί ρελέ</string>
     <string name="draft_box_title">Πλαίσιο Προσχεδίου</string>
     <string name="draft_box_empty">Δεν υπάρχουν ακόμη πρόχειρα</string>
     <string name="draft_box_retry">Επανάληψη</string>

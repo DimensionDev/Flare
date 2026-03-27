@@ -344,6 +344,12 @@
     <string name="bluesky_login_oauth_hint">Bluesky OAuth 可能不够稳定，如果遇到任何问题，请使用密码登录。</string>
     <string name="login_button">登录</string>
     <string name="mastodon_login_verify_message">请稍等，正在验证您的登录信息。</string>
+    <string name="nostr_login_title">导入 Nostr 帐户</string>
+    <string name="nostr_login_hint">粘贴一个 npub 或 hex pubkey 进行只读访问，或提供一个 nsec 来导入一个可写的帐户。</string>
+    <string name="nostr_login_generate_button">生成并登录</string>
+    <string name="nostr_login_npub_hint">npub 或 hex pubkey (如果设置nsec 可选)</string>
+    <string name="nostr_login_nsec_hint">nsec 或 十六进制私钥</string>
+    <string name="nostr_login_relays_hint">继电器 URL，用逗号分隔。</string>
     <string name="service_select_instance_input_placeholder">实例地址</string>
     <string name="service_select_next_button">下一步</string>
     <string name="service_select_empty_message">没有找到实例</string>

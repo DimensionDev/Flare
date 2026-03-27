@@ -344,6 +344,12 @@
     <string name="bluesky_login_oauth_hint">Bluesky OAuth может быть нестабилен, пожалуйста используйте логин с помощью пароля, если вы столкнетесь с какими-либо проблемами.</string>
     <string name="login_button">Логин</string>
     <string name="mastodon_login_verify_message">Пожалуйста, подождите, пока мы верифицируем ваши учетные данные.</string>
+    <string name="nostr_login_title">Импорт Nostr аккаунта</string>
+    <string name="nostr_login_hint">Вставьте ключ npub или hex pubkey для доступа только для чтения, или предоставьте nsec для импорта учетной записи с правом записи.</string>
+    <string name="nostr_login_generate_button">Сгенерировать и войти</string>
+    <string name="nostr_login_npub_hint">npub или hex pubkey (опционально, если nsec установлен)</string>
+    <string name="nostr_login_nsec_hint">закрытый ключ nsec или hex</string>
+    <string name="nostr_login_relays_hint">Передавать URL, разделенные запятыми</string>
     <string name="service_select_instance_input_placeholder">URL экземпляра</string>
     <string name="service_select_next_button">Следующий</string>
     <string name="service_select_empty_message">Экземпляров не найдено</string>

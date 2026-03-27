@@ -314,6 +314,11 @@
     <string name="settings_storage_app_log_description">Se app-loggen</string>
     <string name="settings_rss_management_title">RSS administrasjon</string>
     <string name="settings_rss_management_description">Administrer RSS-feeder</string>
+    <string name="settings_nostr_relays_manage">Behandle releer</string>
+    <string name="settings_nostr_relays_add">Legg til relé</string>
+    <string name="settings_nostr_relays_add_dialog_title">Legg til relé</string>
+    <string name="settings_nostr_relays_placeholder">Angi relé URL</string>
+    <string name="settings_nostr_relays_empty">Ingen releer konfigurert</string>
     <string name="draft_box_title">Utkast boks</string>
     <string name="draft_box_empty">Ingen utkast ennå</string>
     <string name="draft_box_retry">Prøv igjen</string>

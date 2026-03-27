@@ -314,6 +314,11 @@
     <string name="settings_storage_app_log_description">App-Log anzeigen</string>
     <string name="settings_rss_management_title">RSS-Verwaltung</string>
     <string name="settings_rss_management_description">RSS-Feeds verwalten</string>
+    <string name="settings_nostr_relays_manage">Relais verwalten</string>
+    <string name="settings_nostr_relays_add">Relais hinzufügen</string>
+    <string name="settings_nostr_relays_add_dialog_title">Relais hinzufügen</string>
+    <string name="settings_nostr_relays_placeholder">Relay-URL eingeben</string>
+    <string name="settings_nostr_relays_empty">Keine Relais konfiguriert</string>
     <string name="draft_box_title">Entwürfe Box</string>
     <string name="draft_box_empty">Noch keine Entwürfe</string>
     <string name="draft_box_retry">Wiederholen</string>

@@ -97,6 +97,11 @@
     <string name="settings_language_description">Skift sproget i app\'en</string>
     <string name="settings_rss_management_title">RSS Management</string>
     <string name="settings_rss_management_description">Administrer RSS-feeds</string>
+    <string name="settings_nostr_relays_manage">Håndtér relæer</string>
+    <string name="settings_nostr_relays_add">Tilføj relæ</string>
+    <string name="settings_nostr_relays_add_dialog_title">Tilføj relæ</string>
+    <string name="settings_nostr_relays_placeholder">Angiv relæ-URL</string>
+    <string name="settings_nostr_relays_empty">Ingen relæer konfigureret</string>
     <string name="status_loadmore_error_retry">Forsøg igen</string>
     <string name="login_expired">Login-sessionen er udløbet</string>
     <string name="login_expired_message">Klik for at logge ind igen</string>

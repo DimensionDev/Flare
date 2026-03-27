@@ -313,6 +313,11 @@
     <string name="settings_storage_app_log_description">查看应用日志</string>
     <string name="settings_rss_management_title">RSS 管理</string>
     <string name="settings_rss_management_description">管理 RSS 源</string>
+    <string name="settings_nostr_relays_manage">管理继电器</string>
+    <string name="settings_nostr_relays_add">添加继电器</string>
+    <string name="settings_nostr_relays_add_dialog_title">添加继电器</string>
+    <string name="settings_nostr_relays_placeholder">输入继电器网址</string>
+    <string name="settings_nostr_relays_empty">未配置继电器</string>
     <string name="draft_box_title">草稿箱</string>
     <string name="draft_box_empty">还没有草稿</string>
     <string name="draft_box_retry">重试</string>

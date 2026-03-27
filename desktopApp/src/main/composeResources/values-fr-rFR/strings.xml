@@ -310,6 +310,11 @@
     <string name="settings_storage_app_log_description">Voir le journal des applications</string>
     <string name="settings_rss_management_title">Gestion des flux RSS</string>
     <string name="settings_rss_management_description">Gérer les flux RSS</string>
+    <string name="settings_nostr_relays_manage">Gérer les relais</string>
+    <string name="settings_nostr_relays_add">Ajouter un relais</string>
+    <string name="settings_nostr_relays_add_dialog_title">Ajouter un relais</string>
+    <string name="settings_nostr_relays_placeholder">Entrez l\'URL du relais</string>
+    <string name="settings_nostr_relays_empty">Aucun relais configuré</string>
     <string name="draft_box_title">Boîte de brouillon</string>
     <string name="draft_box_empty">Aucun brouillon pour le moment</string>
     <string name="draft_box_retry">Réessayer</string>

@@ -318,6 +318,11 @@
     <string name="settings_storage_app_log_description">عرض سجل التطبيقات</string>
     <string name="settings_rss_management_title">إدارة RSS</string>
     <string name="settings_rss_management_description">إدارة تغذية RSS</string>
+    <string name="settings_nostr_relays_manage">إدارة المرحلات</string>
+    <string name="settings_nostr_relays_add">إضافة ترحيل</string>
+    <string name="settings_nostr_relays_add_dialog_title">إضافة ترحيل</string>
+    <string name="settings_nostr_relays_placeholder">أدخل عنوان URL للترحيل</string>
+    <string name="settings_nostr_relays_empty">لا ترحيل مكون</string>
     <string name="draft_box_title">مربع المسودة</string>
     <string name="draft_box_empty">لا توجد مسودات بعد</string>
     <string name="draft_box_retry">إعادة المحاولة</string>

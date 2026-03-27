@@ -16,7 +16,7 @@ import okio.BufferedSource
 public data class AppearanceSettings(
     val theme: Theme = Theme.SYSTEM,
     val dynamicTheme: Boolean = true,
-    val colorSeed: ULong = 4284960932u,
+    val colorSeed: ULong = 0x02EBD2u,
     val avatarShape: AvatarShape = AvatarShape.CIRCLE,
     @Deprecated(
         "Use postActionStyle instead",

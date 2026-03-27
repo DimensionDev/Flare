@@ -385,6 +385,7 @@
     <string name="import_confirmation_message">Questo importerà i dati dal file. I record esistenti con gli ID corrispondenti saranno sostituiti. Vuoi continuare?</string>
     <string name="changelog_current"><![CDATA[            <span>Versione %1$s:</span>
             <ul>
+                <li>Aggiunto il supporto Nostr, inclusi login, tempistica, pubblicazione, notifiche e gestione relè.</li>
                 <li>Correzioni di bug e miglioramenti delle prestazioni.</li>
             </ul>
         ]]></string>

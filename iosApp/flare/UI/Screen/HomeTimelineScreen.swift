@@ -57,9 +57,13 @@ struct HomeTimelineScreen: View {
                         Menu {
                             ForEach(0..<tabs.count, id: \.self) { index in
                                 let item = tabs[index]
-                                Button {
-                                    selectedTabIndex = index
-                                } label: {
+                                Toggle(isOn: Binding(get: {
+                                    selectedTabIndex == index
+                                }, set: { value in
+                                    if value {
+                                        selectedTabIndex = index
+                                    }
+                                })) {
                                     Label {
                                         TabTitle(title: item.metaData.title)
                                     } icon: {

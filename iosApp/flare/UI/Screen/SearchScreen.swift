@@ -13,7 +13,6 @@ struct SearchScreen: View {
     
     var body: some View {
         List {
-            accountSection
             if case .success(let usersState) = onEnum(of: searchPresenter.state.users) {
                 Section {
                     ScrollView(.horizontal) {
@@ -65,6 +64,52 @@ struct SearchScreen: View {
         }
         .background(Color(.systemGroupedBackground))
         .navigationTitle("search_title")
+        .toolbar {
+            if case .success(let data) = onEnum(of: searchPresenter.state.accounts) {
+                let accounts = data.data
+                if accounts.count > 1 {
+                    ToolbarItem(placement: .primaryAction) {
+                        Menu {
+                            ForEach(0..<accounts.count, id: \.self) { index in
+                                let account = accounts[index] as! UiProfile
+                                Toggle(isOn: Binding(get: {
+                                    searchPresenter.state.selectedAccount?.key == account.key
+                                }, set: { value in
+                                    if value {
+                                        searchPresenter.state.setAccount(profile: account)
+                                    }
+                                })) {
+                                    Label {
+                                        Text(account.handle.canonical)
+                                    } icon: {
+                                        AvatarView(data: account.avatar)
+                                    }
+                                }
+                            }
+                        } label: {
+                            if let selectedAccount = searchPresenter.state.selectedAccount {
+                                HStack {
+                                    AvatarView(data: selectedAccount.avatar)
+                                        .frame(width: 24, height: 24)
+                                    Text(selectedAccount.handle.canonical)
+                                    Image("fa-chevron-down")
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                        .scaledToFit()
+                                        .frame(width: 8, height: 8)
+                                        .padding(8)
+                                        .background(
+                                            Circle()
+                                                .fill(Color.secondary.opacity(0.2))
+                                        )
+                                        .scaleEffect(0.66)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         .searchable(text: $searchText)
         .onSubmit(of: .search) {
             searchPresenter.state.search(new: searchText)
@@ -73,47 +118,6 @@ struct SearchScreen: View {
         .onChange(of: searchText) {
             if searchText.isEmpty {
                 searchPresenter.state.search(new: "")
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private var accountSection: some View {
-        if case .success(let accounts) = onEnum(of: searchPresenter.state.accounts) {
-            if accounts.data.count > 1 {
-                Section {
-                    ScrollView(.horizontal) {
-                        LazyHStack(spacing: 8) {
-                            ForEach(0..<accounts.data.count, id: \.self) { index in
-                                let account = accounts.data[index] as! UiProfile
-                                Button(action: {
-                                    searchPresenter.state.setAccount(profile: account)
-                                }) {
-                                    HStack {
-                                        AvatarView(data: account.avatar)
-                                            .frame(width: 18, height: 18)
-                                        Text(account.handle.canonical).font(.caption)
-                                    }
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(searchPresenter.state.selectedAccount?.key == account.key ? Color.secondary.opacity(0.2) : Color.clear)
-                                    .cornerRadius(16)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 16)
-                                            .stroke(Color.secondary, lineWidth: 1)
-                                    )
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .padding(.vertical, 4)
-                    }
-                    .scrollIndicators(.hidden)
-                }
-                .listRowSeparator(.hidden)
-                .padding(.horizontal)
-                .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
-                .listRowBackground(Color.clear)
             }
         }
     }

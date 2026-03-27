@@ -37,10 +37,14 @@ struct DiscoverScreen: View {
                         Menu {
                             ForEach(0..<accounts.count, id: \.self) { index in
                                 let account = accounts[index] as! UiProfile
-                                Button(action: {
-                                    presenter.state.setAccount(profile: account)
-                                    searchPresenter.state.setAccount(profile: account)
-                                }) {
+                                Toggle(isOn: Binding(get: {
+                                    presenter.state.selectedAccount?.key == account.key
+                                }, set: { value in
+                                    if value {
+                                        presenter.state.setAccount(profile: account)
+                                        searchPresenter.state.setAccount(profile: account)
+                                    }
+                                })) {
                                     Label {
                                         Text(account.handle.canonical)
                                     } icon: {
